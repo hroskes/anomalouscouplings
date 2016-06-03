@@ -1,29 +1,51 @@
 // Configuration options
 {
-	"inputDirectory":"/home/sauvan/DATA/SPINPARITY/CJLSTStatTree/131102_WithFa2KDs/2mu2e/",
-	"outputFile":"templates/DbkgVsDcpVsD0m/signal/templatesAdapSmoothMirror.root",
+	"inputDirectory":"/work-zfs/lhc/heshy/anomalouscouplings/Summer2015_VBF/maketemplates/step4_withdiscriminants/",
+	"outputFile":"test_templatesAdapSmoothMirror.root",
 	// template definitions
 	"templates":[
 		// template 0+ no mirror
 		{
 			"name":"template0PlusAdapSmooth",
 			"files":[
-				"HZZ4lTree_powheg15jhuGenV3H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3PseHH126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph0H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph180H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph270H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph90H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph0H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph180H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph270H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph90H126_withDisc_new_noProt.root"
+                                "ggH0+_0.root",
+                                "ggH0+_1.root",
+                                "ggH0+_2.root",
+                                "ggH0+_3.root",
+                                "ggH0+_4.root",
+                                "ggH0-_0.root",
+                                "ggH0-_1.root",
+                                "ggH0-_2.root",
+                                "ggH0-_3.root",
+                                "ggHL1_0.root",
+                                "ggHL1_1.root",
+                                "ggHL1_2.root",
+                                "ggHL1_3.root",
+                                "ggHL1_4.root",
+                                "ggHa2_0.root",
+                                "ggHa2_1.root",
+                                "ggHa2_2.root",
+                                "ggHa2_3.root",
+                                "ggHa2_4.root",
+                                "ggHfL10.5_0.root",
+                                "ggHfL10.5_1.root",
+                                "ggHfL10.5_2.root",
+                                "ggHfL10.5_3.root",
+                                "ggHfL10.5_4.root",
+                                "ggHfa20.5_0.root",
+                                "ggHfa20.5_1.root",
+                                "ggHfa20.5_2.root",
+                                "ggHfa20.5_3.root",
+                                "ggHfa20.5_4.root",
+                                "ggHfa30.5_0.root",
+                                "ggHfa30.5_1.root",
+                                "ggHfa30.5_2.root",
+                                "ggHfa30.5_3.root"
 				],
 			"tree":"SelectedTree",
-			"variables":["D_g1_vs_g4_phi0_cal","D_intPdf_phi0","D_sKD"],
-			"weight":"weight1L",
+			"variables":["D_0minus_decay","D_CP_decay","D_bkg_0plus"],
+			"weight":"MC_weight_ggH_g1",
 			"selection":"ZZMass>106 && ZZMass<141",
-			"assertion":"D_g1_vs_g4_phi0_cal >= 0. && D_g1_vs_g4_phi0_cal <= 1.",
 			"binning":{
 				"type":"fixed",
 				"bins":[50,0.,1.,50,-0.5,0.5,50,0.,1.]
@@ -54,22 +76,44 @@
 		{
 			"name":"template0MinusAdapSmooth",
 			"files":[
-				"HZZ4lTree_powheg15jhuGenV3PseHH126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph0H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph180H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph270H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph90H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph0H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph180H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph270H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph90H126_withDisc_new_noProt.root"
+                                "ggH0+_0.root",
+                                "ggH0+_1.root",
+                                "ggH0+_2.root",
+                                "ggH0+_3.root",
+                                "ggH0+_4.root",
+                                "ggH0-_0.root",
+                                "ggH0-_1.root",
+                                "ggH0-_2.root",
+                                "ggH0-_3.root",
+                                "ggHL1_0.root",
+                                "ggHL1_1.root",
+                                "ggHL1_2.root",
+                                "ggHL1_3.root",
+                                "ggHL1_4.root",
+                                "ggHa2_0.root",
+                                "ggHa2_1.root",
+                                "ggHa2_2.root",
+                                "ggHa2_3.root",
+                                "ggHa2_4.root",
+                                "ggHfL10.5_0.root",
+                                "ggHfL10.5_1.root",
+                                "ggHfL10.5_2.root",
+                                "ggHfL10.5_3.root",
+                                "ggHfL10.5_4.root",
+                                "ggHfa20.5_0.root",
+                                "ggHfa20.5_1.root",
+                                "ggHfa20.5_2.root",
+                                "ggHfa20.5_3.root",
+                                "ggHfa20.5_4.root",
+                                "ggHfa30.5_0.root",
+                                "ggHfa30.5_1.root",
+                                "ggHfa30.5_2.root",
+                                "ggHfa30.5_3.root"
 				],
 			"tree":"SelectedTree",
-			"variables":["D_g1_vs_g4_phi0_cal","D_intPdf_phi0","D_sKD"],
-			"weight":"weight2L",
+			"variables":["D_0minus_decay","D_CP_decay","D_bkg_0plus"],
+			"weight":"MC_weight_ggH_g4",
 			"selection":"ZZMass>106 && ZZMass<141",
-			"assertion":"D_g1_vs_g4_phi0_cal >= 0. && D_g1_vs_g4_phi0_cal <= 1.",
 			"binning":{
 				"type":"fixed",
 				"bins":[50,0.,1.,50,-0.5,0.5,50,0.,1.]
@@ -83,7 +127,7 @@
 						[0.,0.02,0.04,0.08,0.20,0.30,0.4,0.5,0.56,0.6,0.64,0.68,0.7,0.72,0.74,0.76,0.78,0.8,0.82,0.84,0.86,0.88,0.9,0.92,0.94,0.96,0.98,1.]
 					]
 				},
-				{"type":"rescale","factor":0.967025}// 0.247423/0.25586
+				{"type":"rescale","factor":1}//0.967025}// 0.247423/0.25586
 			]
 		},
 		// template 0- 
@@ -101,22 +145,44 @@
 		{
 			"name":"templateMixAdapSmooth",
 			"files":[
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph0H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3PseHH126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph180H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph270H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf05ph90H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph0H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph180H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph270H126_withDisc_new_noProt.root",
-				"HZZ4lTree_powheg15jhuGenV3-0Mf01ph90H126_withDisc_new_noProt.root"
+                                "ggH0+_0.root",
+                                "ggH0+_1.root",
+                                "ggH0+_2.root",
+                                "ggH0+_3.root",
+                                "ggH0+_4.root",
+                                "ggH0-_0.root",
+                                "ggH0-_1.root",
+                                "ggH0-_2.root",
+                                "ggH0-_3.root",
+                                "ggHL1_0.root",
+                                "ggHL1_1.root",
+                                "ggHL1_2.root",
+                                "ggHL1_3.root",
+                                "ggHL1_4.root",
+                                "ggHa2_0.root",
+                                "ggHa2_1.root",
+                                "ggHa2_2.root",
+                                "ggHa2_3.root",
+                                "ggHa2_4.root",
+                                "ggHfL10.5_0.root",
+                                "ggHfL10.5_1.root",
+                                "ggHfL10.5_2.root",
+                                "ggHfL10.5_3.root",
+                                "ggHfL10.5_4.root",
+                                "ggHfa20.5_0.root",
+                                "ggHfa20.5_1.root",
+                                "ggHfa20.5_2.root",
+                                "ggHfa20.5_3.root",
+                                "ggHfa20.5_4.root",
+                                "ggHfa30.5_0.root",
+                                "ggHfa30.5_1.root",
+                                "ggHfa30.5_2.root",
+                                "ggHfa30.5_3.root"
 				],
 			"tree":"SelectedTree",
-			"variables":["D_g1_vs_g4_phi0_cal","D_intPdf_phi0","D_sKD"],
-			"weight":"weight3L",
+			"variables":["D_0minus_decay","D_CP_decay","D_bkg_0plus"],
+			"weight":"MC_weight_ggH_g1g4",
 			"selection":"ZZMass>106 && ZZMass<141",
-			"assertion":"D_g1_vs_g4_phi0_cal >= 0. && D_g1_vs_g4_phi0_cal <= 1.",
 			"binning":{
 				"type":"fixed",
 				"bins":[50,0.,1.,50,-0.5,0.5,50,0.,1.]
@@ -130,7 +196,7 @@
 						[0.,0.02,0.04,0.08,0.20,0.30,0.4,0.5,0.56,0.6,0.64,0.68,0.7,0.72,0.74,0.76,0.78,0.8,0.82,0.84,0.86,0.88,0.9,0.92,0.94,0.96,0.98,1.]
 						]
 				},
-				{"type":"rescale","factor":1.98299}//0.507368/0.25586
+				{"type":"rescale","factor":1}//1.98299}//0.507368/0.25586
 			]
 		},
 
