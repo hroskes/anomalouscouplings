@@ -20,6 +20,10 @@ upperlimit = {
 """
 
 for i, tosample in enumerate(samples):
+    dirname = "/afs/cern.ch/user/h/hroskes/www/TEST/weightplots/{}".format(str(tosample).replace(" ", ""))
+    import os
+    try: os.mkdir(dirname)
+    except: pass
     hstack = None
     del cache[:]
     hstack = ROOT.THStack(str(tosample).replace(" ", ""), "")
@@ -44,11 +48,15 @@ for i, tosample in enumerate(samples):
         hstack.Add(h)
         h.SetLineColor(fromsample.color())
         h.SetDirectory(0)
-        cache.append(h)
+        #cache.append(h)
         legend.AddEntry(h, str(fromsample.hypothesis), "l")
+        for ext in "png", "eps", "root", "pdf":
+            c1.SaveAs("{}/{}.{}".format(dirname, fromsample.hypothesis, ext))
+    """
     print list(hstack.GetHists())
     print [h.Scale(1/h.Integral()) for h in hstack.GetHists()]
     hstack.Draw("hist nostack")
     legend.Draw()
     for ext in "png", "eps", "root", "pdf":
         c1.SaveAs("~/www/TEST/weightplots/{}.{}".format(tosample.hypothesis, ext))
+    """
