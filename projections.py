@@ -71,7 +71,7 @@ templates = [
 
 exts = "png", "eps", "root", "pdf"
 
-f = ROOT.TFile("test_templatesAdapSmoothMirror.root")
+f = ROOT.TFile("templates_2e2mu.root")
 for i, template in enumerate(templates):
     template.GetFromFile(f)
 
