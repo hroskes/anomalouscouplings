@@ -1,0 +1,109 @@
+// Configuration options
+{
+	"inputDirectory":"/afs/cern.ch/work/u/usarica/HZZ4l-125p6-FullAnalysis/LHC_8TeV/2mu2e/",
+	"outputFile":"template/fa3Adap_new_8TeV/2e2mu_fa3Adap_new.root",
+	// template definitions
+	"templates":[
+		// template 0+ no mirror
+		{
+			"name":"template0PlusAdapSmooth",
+			"files":[
+				"HZZ4lTree_H125p6_ShuffledSignalBkg.root"
+				],
+			"tree":"SelectedTree",
+			"variables":["D_g1_vs_g4_phi0","D_g4int_phi0","D_bkg"],
+			"weight":"MC_CV_weight[0]",
+			"selection":"ZZMass>105.6 && ZZMass<140.6",
+			"assertion":"D_g1_vs_g4_phi0 >= 0. && D_g1_vs_g4_phi0 <= 1.",
+			"binning":{
+				"type":"fixed",
+				"bins":[50,0.,1.,50,-0.5,0.5,50,0.,1.]
+			},
+			"conserveSumOfWeights":true,
+			"postprocessing":[
+				{"type":"smooth", "kernel":"adaptive", "entriesperbin":50},
+				{"type":"reweight", "axes":[0,1,2]}
+			 ]
+		},
+		// template 0+ mirror
+		{
+			"name":"template0PlusAdapSmoothMirror",
+			"templatesum":[
+				{"name":"template0PlusAdapSmooth","factor":1.}
+			],
+			"postprocessing":[
+				{"type":"mirror", "axis":1},
+				{"type":"floor"}
+			]
+		},
+		// template 0- no mirror
+		{
+			"name":"template0MinusAdapSmooth",
+			"files":[
+					"HZZ4lTree_H125p6_ShuffledSignalBkg.root"
+				],
+			"tree":"SelectedTree",
+			"variables":["D_g1_vs_g4_phi0","D_g4int_phi0","D_bkg"],
+			"weight":"MC_CV_weight[2]",
+			"selection":"ZZMass>105.6 && ZZMass<140.6",
+			"assertion":"D_g1_vs_g4_phi0 >= 0. && D_g1_vs_g4_phi0 <= 1.",
+			"binning":{
+				"type":"fixed",
+				"bins":[50,0.,1.,50,-0.5,0.5,50,0.,1.]
+			},
+			"conserveSumOfWeights":true,
+			"postprocessing":[
+				{"type":"smooth", "kernel":"adaptive", "entriesperbin":50},
+				{"type":"reweight", "axes":[0,1,2]},
+				{"type":"rescale","factor":0.9991}
+			]
+		},
+		// template 0- 
+		{
+			"name":"template0MinusAdapSmoothMirror",
+			"templatesum":[
+				{"name":"template0MinusAdapSmooth","factor":1.}
+			],
+			"postprocessing":[
+				{"type":"mirror", "axis":1},
+				{"type":"floor"}
+			]
+		},
+		// template fa3=0.5 
+		{
+			"name":"templateMixAdapSmooth",
+			"files":[
+					"HZZ4lTree_H125p6_ShuffledSignalBkg.root"
+				],
+			"tree":"SelectedTree",
+      "variables":["D_g1_vs_g4_phi0","D_g4int_phi0","D_bkg"],
+			"weight":"MC_CV_weight[5]",
+      "selection":"ZZMass>105.6 && ZZMass<140.6",
+      "assertion":"D_g1_vs_g4_phi0 >= 0. && D_g1_vs_g4_phi0 <= 1.",
+			"binning":{
+				"type":"fixed",
+				"bins":[50,0.,1.,50,-0.5,0.5,50,0.,1.]
+			},
+			"conserveSumOfWeights":true,
+			"postprocessing":[
+				{"type":"smooth", "kernel":"adaptive", "entriesperbin":50},
+				{"type":"reweight", "axes":[0,1,2]},
+        {"type":"floor"},
+				{"type":"rescale","factor":1.9992}//0.279955/0.282082*2.
+			]
+		},
+
+		// template interference (use non-mirrored inputs), anti-mirror done afterwards
+		{
+			"name":"templateIntAdapSmoothMirror",
+			"templatesum":[
+				{"name":"templateMixAdapSmooth","factor":1.},
+				{"name":"template0PlusAdapSmooth","factor":-1.},
+				{"name":"template0MinusAdapSmooth","factor":-1.}
+			],
+			"postprocessing":[
+				{"type":"mirror", "antisymmetric":true, "axis":1}
+			]
+		}
+	]
+}
