@@ -58,11 +58,11 @@ class Hypothesis(MyEnum):
     enumname = "hypothesis"
     enumitems = (
                  EnumItem("0+", "SM", "scalar"),
-                 EnumItem("0-", "PS", "pseudoscalar"),
-                 EnumItem("fa30.5"),
                  EnumItem("a2", "0h+"),
-                 EnumItem("fa20.5"),
+                 EnumItem("0-", "PS", "pseudoscalar"),
                  EnumItem("L1", "Lambda1"),
+                 EnumItem("fa20.5"),
+                 EnumItem("fa30.5"),
                  EnumItem("fL10.5", "flambda10.5"),
                 )
 
