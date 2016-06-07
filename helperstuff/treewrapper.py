@@ -4,11 +4,11 @@ import constants
 
 class TreeWrapper(Iterator):
 
-    def __init__(self, tree, treesample, neventshisto, minevent=0, maxevent=None):
+    def __init__(self, tree, treesample, Counters_reweighted, minevent=0, maxevent=None):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
-        neventshisto - a histogram where the sum of weights for each sample will be recorded
+        Counters_reweighted - from the CJLST file
         """
         self.tree = tree
         self.treesample = treesample
@@ -17,8 +17,12 @@ class TreeWrapper(Iterator):
         self.isbkg = treesample.isbkg()
         self.isdata = treesample.isdata()
         self.baseweight = self.getbaseweightfunction()
-        self.neventshisto = neventshisto
         self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
+        self.nevents2L2l = [
+                            Counters_reweighted.GetBinContent(4, i) #2e2mu
+                          + Counters_reweighted.GetBinContent(8, i) #2e2tau+2mu2tau
+                              for i, sample in enumerate(treesample.reweightingsamples(), start=1)
+                           ]
         self.minevent = minevent
         if self.isdata and not config.usedata:
             self.length = 0
@@ -74,9 +78,6 @@ class TreeWrapper(Iterator):
             if self.productionmode == "ggH":
                 self.reweightingweights = t.reweightingweights
             isSelected = bool(self.MC_weight)
-
-            for i, weightfunction in enumerate(self.weightfunctions):
-                self.neventshisto.Fill(i, weightfunction())
 
             self.genFinalState = t.genFinalState
             if self.genFinalState > 2: continue
@@ -153,7 +154,7 @@ class TreeWrapper(Iterator):
 
     #TEMPORARY PATCH, no reweighting
     def MC_weight_ggH(self, index):
-        return self.MC_weight * self.reweightingweights[index]
+        return self.MC_weight * self.reweightingweights[index] * constants.SMXS2L2l / self.nevents2L2l[index]
     def MC_weight_ggH_g1(self):
         return self.MC_weight_ggH(0)
     def MC_weight_ggH_g2(self):
@@ -171,20 +172,7 @@ class TreeWrapper(Iterator):
 
     def getweightfunction(self, sample):
         if sample.productionmode == "ggH":
-            if sample.hypothesis == "0+":
-                return self.MC_weight_ggH_g1
-            elif sample.hypothesis == "0-":
-                return self.MC_weight_ggH_g4
-            elif sample.hypothesis == "fa30.5":
-                return self.MC_weight_ggH_g1g4
-            elif sample.hypothesis == "a2":
-                return self.MC_weight_ggH_g2
-            elif sample.hypothesis == "fa20.5":
-                return self.MC_weight_ggH_g1g2
-            elif sample.hypothesis == "L1":
-                return self.MC_weight_ggH_g1prime2
-            elif sample.hypothesis == "fL10.5":
-                return self.MC_weight_ggH_g1g2
+            return getattr(self, sample.weightname())
 
         if self.isbkg or self.isdata:
             return lambda: 1
@@ -224,7 +212,6 @@ class TreeWrapper(Iterator):
         "length",
         "MC_weight_ggH",
         "minevent",
-        "neventshisto",
         "next",
         "productionmode",
         "toaddtotree",

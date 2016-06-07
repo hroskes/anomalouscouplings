@@ -32,3 +32,20 @@ class Sample(MultiEnum):
             return False
         raise self.ValueError("isdata")
         
+    def weightname(self):
+        if self.productionmode == "ggH":
+            if self.hypothesis == "0+":
+                return "MC_weight_ggH_g1"
+            elif self.hypothesis == "0-":
+                return "MC_weight_ggH_g4"
+            elif self.hypothesis == "fa30.5":
+                return "MC_weight_ggH_g1g4"
+            elif self.hypothesis == "a2":
+                return "MC_weight_ggH_g2"
+            elif self.hypothesis == "fa20.5":
+                return "MC_weight_ggH_g1g2"
+            elif self.hypothesis == "L1":
+                return "MC_weight_ggH_g1prime2"
+            elif self.hypothesis == "fL10.5":
+                return "MC_weight_ggH_g1g2"
+

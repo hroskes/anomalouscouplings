@@ -11,7 +11,9 @@ def adddiscriminants(*args):
     sample = Sample(*args)
     reweightingsamples = sample.reweightingsamples()
 
-    f = sample.CJLSTfile()
+    filename = sample.CJLSTfile()
+    f = ROOT.TFile(filename)
+    Counters_reweighted = f.Get("ZZTree/Counters_reweighted")
 
     newfilename = sample.withdiscriminantsfile()
     print newfilename
@@ -19,7 +21,7 @@ def adddiscriminants(*args):
         return
 
     t = ROOT.TChain("ZZTree/candTree")
-    t.Add(f)
+    t.Add(filename)
 
     newf = ROOT.TFile.Open(newfilename, "recreate")
     newt = t.CloneTree(0)
@@ -29,9 +31,7 @@ def adddiscriminants(*args):
         discriminants[discriminant] = array('d', [0])
         newt.Branch(discriminant, discriminants[discriminant], discriminant + "/D")
 
-    h = ROOT.TH1F("nevents", "total weight for each reweighted hypothesis: " + ", ".join(str(a) for a in reweightingsamples), len(reweightingsamples), 0, len(reweightingsamples))
-
-    treewrapper = TreeWrapper(t, sample, h)
+    treewrapper = TreeWrapper(t, sample, Counters_reweighted)
     for entry in treewrapper:
         for discriminant in discriminants:
             discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
@@ -43,3 +43,5 @@ def adddiscriminants(*args):
 if __name__ == '__main__':
     for hypothesis in hypotheses:
         adddiscriminants("ggH", hypothesis)
+
+
