@@ -1,6 +1,7 @@
 import config
 from enums import hypotheses, Hypothesis, MultiEnum, ProductionMode
 import os
+import ROOT
 
 class Sample(MultiEnum):
     enums = [ProductionMode, Hypothesis]
@@ -48,4 +49,22 @@ class Sample(MultiEnum):
                 return "MC_weight_ggH_g1prime2"
             elif self.hypothesis == "fL10.5":
                 return "MC_weight_ggH_g1g2"
+        raise self.ValueError("weightname")
 
+    def color(self):
+        if self.productionmode == "ggH":
+            if self.hypothesis == "0+":
+                return 1
+            elif self.hypothesis == "0-":
+                return 2
+            elif self.hypothesis == "fa30.5":
+                return ROOT.kRed+3
+            elif self.hypothesis == "a2":
+                return ROOT.kCyan
+            elif self.hypothesis == "fa20.5":
+                return 4
+            elif self.hypothesis == "L1":
+                return 3
+            elif self.hypothesis == "fL10.5":
+                return ROOT.kGreen+3
+        raise self.ValueError("color")
