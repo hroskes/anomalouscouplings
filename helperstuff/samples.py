@@ -6,6 +6,11 @@ import ROOT
 class Sample(MultiEnum):
     enums = [ProductionMode, Hypothesis, Flavor]
 
+    def __init__(self, *args, **kwargs):
+        super(Sample, self).__init__(*args, **kwargs)
+        if self.productionmode == "ZX":
+            import helperstuff.ZX
+
     def check(self, *args):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
@@ -19,11 +24,11 @@ class Sample(MultiEnum):
                 raise ValueError("Hypothesis provided for ggZZ productionmode\n{}".format(args))
             if self.flavor is None:
                 raise ValueError("No flavor provided for ggZZ productionmode\n{}".format(args))
-        elif self.productionmode == "qqZZ":
+        elif self.productionmode == "qqZZ" or self.productionmode == "ZX":
             if self.hypothesis is not None:
-                raise ValueError("Hypothesis provided for qqZZ productionmode\n{}".format(args))
+                raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.flavor is not None:
-                raise ValueError("Flavor provided for qqZZ productionmode\n{}".format(args))
+                raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
         else:
             raise ValueError("Bad productionmode {}\n{}".format(self.productionmode, args))
 
@@ -38,6 +43,8 @@ class Sample(MultiEnum):
             return "root://lxcms03//data3/Higgs/160225/ggZZ{}/ZZ4lAnalysis.root".format(self.flavor)
         elif self.productionmode == "qqZZ":
             return "root://lxcms03//data3/Higgs/160225/ZZTo4l/ZZ4lAnalysis.root"
+        elif self.productionmode == "ZX":
+            return "root://lxcms03//data3/Higgs/160225/AllData/ZZ4lAnalysis.root"
         raise self.ValueError("CJLSTfile")
 
     def withdiscriminantsfile(self):
@@ -47,27 +54,26 @@ class Sample(MultiEnum):
     def reweightingsamples(self):
         if self.productionmode == "ggH":
             return [Sample("ggH", hypothesis) for hypothesis in hypotheses]
-        elif self.productionmode == "ggZZ":
-            return [self]
-        elif self.productionmode == "qqZZ":
+        elif self.productionmode == "ggZZ" or self.productionmode == "qqZZ" or self.productionmode == "ZX":
             return [self]
         raise self.ValueError("reweightingsamples")
 
     def isbkg(self):
         if self.productionmode == "ggH":
             return False
-        elif self.productionmode == "ggZZ":
-            return True
-        elif self.productionmode == "qqZZ":
+        elif self.productionmode == "ggZZ" or self.productionmode == "qqZZ" or self.productionmode == "ZX":
             return True
         raise self.ValueError("isbkg")
 
+    def isZX(self):
+        if self.productionmode == "ggH" or self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
+            return False
+        elif self.productionmode == "ZX":
+            return True
+        raise self.ValueError("isZX")
+
     def isdata(self):
-        if self.productionmode == "ggH":
-            return False
-        elif self.productionmode == "ggZZ":
-            return False
-        elif self.productionmode == "qqZZ":
+        if self.productionmode == "ggH" or self.productionmode == "ggZZ" or self.productionmode == "qqZZ" or self.productionmode == "ZX":
             return False
         raise self.ValueError("isdata")
         
@@ -91,7 +97,16 @@ class Sample(MultiEnum):
             return "MC_weight_ggZZ"
         elif self.productionmode == "qqZZ":
             return "MC_weight_qqZZ"
+        elif self.productionmode == "ZX":
+            return "MC_weight_ZX"
         raise self.ValueError("weightname")
+
+    def TDirectoryname(self):
+        if self.productionmode == "ggH" or self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
+            return "ZZTree"
+        if self.productionmode == "ZX":
+            return "CRZLLTree"
+        raise self.ValueError("TDirectoryname")
 
     def color(self):
         if self.productionmode == "ggH":

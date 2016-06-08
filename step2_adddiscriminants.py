@@ -13,8 +13,8 @@ def adddiscriminants(*args):
 
     filename = sample.CJLSTfile()
     f = ROOT.TFile.Open(filename)
-    Counters = f.Get("ZZTree/Counters")
-    Counters_reweighted = f.Get("ZZTree/Counters_reweighted")
+    Counters = f.Get("{}/Counters".format(sample.TDirectoryname()))
+    Counters_reweighted = f.Get("{}/Counters_reweighted".format(sample.TDirectoryname()))
     if not Counters_reweighted:
         Counters_reweighted = None
     if not Counters:
@@ -25,7 +25,7 @@ def adddiscriminants(*args):
     if os.path.exists(newfilename):
         return
 
-    t = ROOT.TChain("ZZTree/candTree")
+    t = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
     t.Add(filename)
 
     newf = ROOT.TFile.Open(newfilename, "recreate")
@@ -52,3 +52,4 @@ if __name__ == '__main__':
     for flavor in flavors:
         adddiscriminants("ggZZ", flavor)
     adddiscriminants("qqZZ")
+    adddiscriminants("ZX")

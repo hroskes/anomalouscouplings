@@ -92,6 +92,7 @@ class ProductionMode(MyEnum):
                  EnumItem("WH"),
                  EnumItem("qqZZ"),
                  EnumItem("ggZZ"),
+                 EnumItem("ZX"),
                  EnumItem("data"),
                 )
 

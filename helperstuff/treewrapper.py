@@ -1,6 +1,7 @@
 from collections import Iterator
 import config
 import constants
+import ROOT
 from samples import Sample
 
 class TreeWrapper(Iterator):
@@ -17,6 +18,7 @@ class TreeWrapper(Iterator):
         self.hypothesis = str(treesample.hypothesis)
         self.isbkg = treesample.isbkg()
         self.isdata = treesample.isdata()
+        self.isZX = treesample.isZX()
         self.baseweight = self.getbaseweightfunction()
         self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
         if Counters is not None:
@@ -80,7 +82,9 @@ class TreeWrapper(Iterator):
                 print i, "/", self.length
 
             if self.isdata:
-                self.MC_weight = t.dataMCWeight
+                self.MC_weight = 1
+            elif self.isZX:
+                self.MC_weight = 1
             else:
                 self.MC_weight = t.overallEventWeight
             if self.productionmode == "ggH":
@@ -180,6 +184,9 @@ class TreeWrapper(Iterator):
         return self.MC_weight * self.xsec / self.nevents
     def MC_weight_qqZZ(self):
         return self.MC_weight * self.xsec / self.nevents
+    def MC_weight_ZX(self):
+        self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
+        return ROOT.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ROOT.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
 
     def getweightfunction(self, sample):
         return getattr(self, sample.weightname())
@@ -232,6 +239,7 @@ class TreeWrapper(Iterator):
             Sample("ggH", "fL10.5"),
             Sample("ggZZ", "2e2mu"),  #flavor doesn't matter
             Sample("qqZZ"),
+            Sample("ZX"),
         ]
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
         allreweightingweightnames = [sample.weightname() for sample in allsamples]
