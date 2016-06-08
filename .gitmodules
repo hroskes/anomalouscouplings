@@ -1,0 +1,3 @@
+[submodule "TemplateBuilder"]
+	path = TemplateBuilder
+	url = git@github.com:jbsauvan/TemplateBuilder

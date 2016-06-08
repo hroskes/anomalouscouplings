@@ -2,6 +2,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 from helperstuff.samples import Sample
 from helperstuff.enums import Channel
 import json
+import os
 
 def jsonloads(jsonstring):
     try:
@@ -24,24 +25,24 @@ def makejson(flavor):
     flavor = Channel(flavor)
     jsondict = {
                 "inputDirectory": "step3_withdiscriminants/",
-                "outputFile": "step5_templates/.oO[flavor]Oo._fa3Adap_new.root",
+                "outputFile": "step7_templates/.oO[flavor]Oo._fa3Adap_new.root",
                 "templates": []
                }
     samplesdict = {
                    Sample("ggH", "0+"): {
                                          "templatename": "0Plus",
-                                         "weightname": "MC_weight_g1",
+                                         "weightname": "MC_weight_ggH_g1",
                                          "scalefactor": "1",
                                         },
                    Sample("ggH", "0-"): {
                                          "templatename": "0Minus",
-                                         "weightname": "MC_weight_g4",
+                                         "weightname": "MC_weight_ggH_g4",
                                          "scalefactor": "1",
                                         },
                    Sample("ggH",
                              "fa30.5"): {
                                          "templatename": "g1g4",
-                                         "weightname": "MC_weight_g1g4",
+                                         "weightname": "MC_weight_ggH_g1g4",
                                          "scalefactor": "2",
                                         },
                   }
@@ -60,7 +61,7 @@ def makejson(flavor):
                  "flavorproduct": flavorproducts[flavor],
                 }
 
-    fileslist = [sample.withdiscriminantsfile() for sample in samples]
+    fileslist = [os.path.basename(sample.withdiscriminantsfile()) for sample in samples]
 
     for sample, samplemap in samplesdict.iteritems():
         repmap = samplemap
