@@ -3,16 +3,19 @@ from helperstuff.enums import Channel
 import os
 import subprocess
 
-def buildtemplates(flavor):
+def buildtemplates(flavor, isbkg):
     flavor = Channel(flavor)
     print flavor
-    if os.path.exists(flavor.templatesfile()):
+    if os.path.exists(flavor.templatesfile(isbkg)):
         return
-    subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), "step5_json/templates_{}.json".format(flavor)])
-    if not os.path.exists(flavor.templatesfile()):
-        raise RuntimeError("Something is wrong!  {} was not created.".format(flavor.templatesfile()))
+    subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), flavor.jsonfile(isbkg)])
+    if not os.path.exists(flavor.templatesfile(isbkg)):
+        raise RuntimeError("Something is wrong!  {} was not created.".format(flavor.templatesfile(isbkg)))
 
 if __name__ == "__main__":
-    buildtemplates("2e2mu")
-    buildtemplates("4e")
-    buildtemplates("4mu")
+    buildtemplates("2e2mu", True)
+    buildtemplates("4e", True)
+    buildtemplates("4mu", True)
+    buildtemplates("2e2mu", False)
+    buildtemplates("4e", False)
+    buildtemplates("4mu", False)

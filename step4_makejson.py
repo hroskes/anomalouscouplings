@@ -11,45 +11,58 @@ def jsonloads(jsonstring):
         print jsonstring
         raise
 
-samples = [
-           Sample("ggH", "0+"),
-           Sample("ggH", "a2"),
-           Sample("ggH", "0-"),
-           Sample("ggH", "L1"),
-           Sample("ggH", "fa20.5"),
-           Sample("ggH", "fa30.5"),
-           #Sample("ggH", "fL10.5"),   #NOT L1 for now
-          ]
-
-def makejson(flavor):
+def makejson(flavor, isbkg):
     flavor = Channel(flavor)
     jsondict = {
                 "inputDirectory": "step3_withdiscriminants/",
-                "outputFile": "step7_templates/.oO[flavor]Oo._fa3Adap_new.root",
+                "outputFile": flavor.templatesfile(isbkg),
                 "templates": []
                }
-    samplesdict = {
-                   Sample("ggH", "0+"): {
-                                         "templatename": "0Plus",
-                                         "weightname": "MC_weight_ggH_g1",
-                                         "scalefactor": "1",
-                                        },
-                   Sample("ggH", "0-"): {
-                                         "templatename": "0Minus",
-                                         "weightname": "MC_weight_ggH_g4",
-                                         "scalefactor": "1",
-                                        },
-                   Sample("ggH",
-                             "fa30.5"): {
-                                         "templatename": "g1g4",
-                                         "weightname": "MC_weight_ggH_g1g4",
-                                         "scalefactor": "2",
-                                        },
+    if not isbkg:
+        samplesdict = {
+                       Sample("ggH", "0+"): {
+                                             "templatename": "0Plus",
+                                             "weightname": "MC_weight_ggH_g1",
+                                             "scalefactor": "1",
+                                            },
+                       Sample("ggH", "0-"): {
+                                             "templatename": "0Minus",
+                                             "weightname": "MC_weight_ggH_g4",
+                                             "scalefactor": "1",
+                                            },
+                       Sample("ggH",
+                                 "fa30.5"): {
+                                             "templatename": "g1g4",
+                                             "weightname": "MC_weight_ggH_g1g4",
+                                             "scalefactor": "2",
+                                            },
+                  }
+    else:
+        samplesdict = {
+                       Sample("qqZZ"):      {
+                                             "templatename": "qqZZ",
+                                             "weightname": "MC_weight_qqZZ",
+                                             "scalefactor": "1",
+                                            },
+                       Sample("ggZZ",
+                                  "2e2mu"): {
+                                             "templatename": "ggZZ",
+                                             "weightname": "MC_weight_ggZZ",
+                                             "scalefactor": "1",
+                                            },
+                       Sample("ZX"):        {
+                                             "templatename": "ZX",
+                                             "weightname": "MC_weight_ZX",
+                                             "scalefactor": "1",
+                                            },
                   }
     domirror = {
                 Sample("ggH", "0+"): True,
                 Sample("ggH", "0-"): True,
                 Sample("ggH", "fa30.5"): False,
+                Sample("ggZZ", "2e2mu"): True,
+                Sample("qqZZ"): True,
+                Sample("ZX"): True,
                }
     flavorproducts = {
                       Channel("2e2mu"): str(13*13*11*11),
@@ -61,9 +74,31 @@ def makejson(flavor):
                  "flavorproduct": flavorproducts[flavor],
                 }
 
-    fileslist = [os.path.basename(sample.withdiscriminantsfile()) for sample in samples]
-
     for sample, samplemap in samplesdict.iteritems():
+        if not isbkg:
+            sampleslist = [
+                           Sample("ggH", "0+"),
+                           Sample("ggH", "a2"),
+                           Sample("ggH", "0-"),
+                           Sample("ggH", "L1"),
+                           Sample("ggH", "fa20.5"),
+                           Sample("ggH", "fa30.5"),
+                           #Sample("ggH", "fL10.5"),   #NOT fL1 for now
+                          ]
+        elif sample.productionmode == "ggZZ":
+            sampleslist = [
+                           Sample("ggZZ", "4e"),
+                           Sample("ggZZ", "2e2mu"),
+                           Sample("ggZZ", "2e2tau"),
+                           Sample("ggZZ", "4mu"),
+                           Sample("ggZZ", "2mu2tau"),
+                           Sample("ggZZ", "4tau"),
+                          ]
+        else:
+            sampleslist = [sample]
+
+        fileslist = [os.path.basename(s.withdiscriminantsfile()) for s in sampleslist]
+
         repmap = samplemap
         repmap.update(flavormap)
 
@@ -92,11 +127,15 @@ def makejson(flavor):
     jsondict["templates"] += intjson["templates"]
 
     jsonstring = json.dumps(jsondict, sort_keys=True, indent=4, separators=(',', ': '))
-    jsonstring = replaceByMap(jsonstring, repmap)
-    with open("step5_json/templates_{}.json".format(flavor), "w") as f:
+    jsonstring = replaceByMap(jsonstring, flavormap)
+    filename = flavor.jsonfile(isbkg)
+    with open(filename.format(flavor), "w") as f:
         f.write(jsonstring)
 
 if __name__ == "__main__":
-    makejson("2e2mu")
-    makejson("4e")
-    makejson("4mu")
+    makejson("2e2mu", True)
+    makejson("4e", True)
+    makejson("4mu", True)
+    makejson("2e2mu", False)
+    makejson("4e", False)
+    makejson("4mu", False)
