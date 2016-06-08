@@ -59,6 +59,17 @@ class Channel(MyEnum):
     def templatesfile(self):
         return os.path.join(config.repositorydir, "step7_templates/{}_fa3Adap_new.root".format(self))
 
+class Flavor(MyEnum):
+    enumname = "flavor"
+    enumitems = (
+                 EnumItem("2e2mu", "2mu2e"),
+                 EnumItem("4mu"),
+                 EnumItem("4e"),
+                 EnumItem("4tau"),
+                 EnumItem("2mu2tau", "2tau2mu"),
+                 EnumItem("2e2tau", "2tau2e"),
+                )
+
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
     enumitems = (
@@ -85,6 +96,7 @@ class ProductionMode(MyEnum):
                 )
 
 channels = [Channel(item) for item in Channel.enumitems]
+flavors = [Flavor(item) for item in Flavor.enumitems]
 hypotheses = [Hypothesis(item) for item in Hypothesis.enumitems]
 productionmodes = [ProductionMode(item) for item in ProductionMode.enumitems]
 
@@ -114,7 +126,7 @@ class MultiEnum(object):
         return hash(self.items)
 
     def __str__(self):
-        return " ".join(str(item) for item in self.items)
+        return " ".join(str(item) for item in self.items if item is not None)
 
     def check(self, *args):
         for enum in self.enums:

@@ -1,5 +1,5 @@
 from array import array
-from helperstuff.enums import hypotheses
+from helperstuff.enums import flavors, hypotheses
 from helperstuff.samples import Sample
 from helperstuff.treewrapper import TreeWrapper
 import os
@@ -12,8 +12,13 @@ def adddiscriminants(*args):
     reweightingsamples = sample.reweightingsamples()
 
     filename = sample.CJLSTfile()
-    f = ROOT.TFile(filename)
+    f = ROOT.TFile.Open(filename)
+    Counters = f.Get("ZZTree/Counters")
     Counters_reweighted = f.Get("ZZTree/Counters_reweighted")
+    if not Counters_reweighted:
+        Counters_reweighted = None
+    if not Counters:
+        raise ValueError("No Counters in file "+filename)
 
     newfilename = sample.withdiscriminantsfile()
     print newfilename
@@ -26,12 +31,13 @@ def adddiscriminants(*args):
     newf = ROOT.TFile.Open(newfilename, "recreate")
     newt = t.CloneTree(0)
 
+    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted)
+
     discriminants = {}
-    for discriminant in TreeWrapper.toaddtotree:
+    for discriminant in treewrapper.toaddtotree:
         discriminants[discriminant] = array('d', [0])
         newt.Branch(discriminant, discriminants[discriminant], discriminant + "/D")
 
-    treewrapper = TreeWrapper(t, sample, Counters_reweighted)
     for entry in treewrapper:
         for discriminant in discriminants:
             discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
@@ -43,5 +49,5 @@ def adddiscriminants(*args):
 if __name__ == '__main__':
     for hypothesis in hypotheses:
         adddiscriminants("ggH", hypothesis)
-
-
+    for flavor in flavors:
+        adddiscriminants("ggZZ", flavor)

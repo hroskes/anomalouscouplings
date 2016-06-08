@@ -5,7 +5,7 @@ import subprocess
 
 def makecontrolplots(flavor):
     flavor = Channel(flavor)
-    f = ROOT.TFile(flavor.templatesfile())
+    f = ROOT.TFile.Open(flavor.templatesfile())
     d = f.controlPlots
 
     split = os.path.split(flavor.templatesfile())

@@ -1,10 +1,11 @@
 from collections import Iterator
 import config
 import constants
+from samples import Sample
 
 class TreeWrapper(Iterator):
 
-    def __init__(self, tree, treesample, Counters_reweighted, minevent=0, maxevent=None):
+    def __init__(self, tree, treesample, Counters, Counters_reweighted, minevent=0, maxevent=None):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
@@ -18,11 +19,14 @@ class TreeWrapper(Iterator):
         self.isdata = treesample.isdata()
         self.baseweight = self.getbaseweightfunction()
         self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
-        self.nevents2L2l = [
-                            Counters_reweighted.GetBinContent(4, i) #2e2mu
-                          + Counters_reweighted.GetBinContent(8, i) #2e2tau+2mu2tau
-                              for i, sample in enumerate(treesample.reweightingsamples(), start=1)
-                           ]
+        if Counters is not None:
+            self.nevents = Counters.GetBinContent(1)
+        if Counters_reweighted is not None:
+            self.nevents2L2l = [
+                                Counters_reweighted.GetBinContent(4, i) #2e2mu
+                              + Counters_reweighted.GetBinContent(8, i) #2e2tau+2mu2tau
+                                  for i, sample in enumerate(treesample.reweightingsamples(), start=1)
+                               ]
         self.minevent = minevent
         if self.isdata and not config.usedata:
             self.length = 0
@@ -30,6 +34,10 @@ class TreeWrapper(Iterator):
             self.length = tree.GetEntries() - minevent
         else:
             self.length = maxevent - minevent + 1
+
+        self.initlists()
+        tree.GetEntry(0)
+        self.xsec = tree.xsec * 1000 #pb to fb
 
         if __debug__:   #if run as python -O ("nondebug mode"), then do extra tests
             pass        #__debug__ is not really the right name in this context
@@ -79,8 +87,7 @@ class TreeWrapper(Iterator):
                 self.reweightingweights = t.reweightingweights
             isSelected = bool(self.MC_weight)
 
-            self.genFinalState = t.genFinalState
-            if self.genFinalState > 2: continue
+            self.flavor = self.flavordict[abs(t.Z1Flav*t.Z2Flav)]
 
             if __debug__:  #if run normally
                 pass
@@ -108,9 +115,9 @@ class TreeWrapper(Iterator):
 
         #express in terms of |M|^2, this will make life easier
         self.M2g1_decay   = self.p0plus_VAJHU
-        self.M2g4_decay   = self.p0minus_VAJHU / constants.CJLSTg4decay_pure[self.genFinalState]**2
+        self.M2g4_decay   = self.p0minus_VAJHU / constants.CJLSTg4decay_pure[self.flavor]**2
         self.M2g1g4_decay = self.pg1g4_VAJHU / constants.CJLSTg4decay_mix
-        self.M2g2_decay   = self.p0hplus_VAJHU / constants.CJLSTg2decay_pure[self.genFinalState]**2
+        self.M2g2_decay   = self.p0hplus_VAJHU / constants.CJLSTg2decay_pure[self.flavor]**2
         self.M2g1g2_decay = self.pg1g2_VAJHU / constants.CJLSTg2decay_mix
         self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU / constants.CJLSTg1prime2decay_pure**2
         self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU / constants.CJLSTg1prime2decay_mix
@@ -152,7 +159,6 @@ class TreeWrapper(Iterator):
 #Reweighting weights#
 #####################
 
-    #TEMPORARY PATCH, no reweighting
     def MC_weight_ggH(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXS2L2l / self.nevents2L2l[index]
     def MC_weight_ggH_g1(self):
@@ -170,56 +176,75 @@ class TreeWrapper(Iterator):
     def MC_weight_ggH_g1g1prime2(self):
         return self.MC_weight_ggH(6)
 
+    def MC_weight_ggZZ(self):
+        return self.MC_weight * self.xsec / self.nevents
+    def MC_weight_qqZZ(self):
+        return self.MC_weight * self.xsec / self.nevents
+
     def getweightfunction(self, sample):
-        if sample.productionmode == "ggH":
-            return getattr(self, sample.weightname())
-
-        if self.isbkg or self.isdata:
-            return lambda: 1
-
+        return getattr(self, sample.weightname())
         raise RuntimeError("{} does not work!".format(sample))
 
     def getbaseweightfunction(self):
         return self.getweightfunction(self.treesample)
 
-    toaddtotree = [
-        "D_bkg_0plus",
-        "D_bkg_0minus",
-        "D_jet_0plus",
-        "D_0minus_decay",
-        "D_CP_decay",
-        "D_g2_decay",
-        "D_g1g2_decay",
-        "D_g1prime2_decay",
-        "D_g1g1prime2_decay",
-        "MC_weight_ggH_g1",
-        "MC_weight_ggH_g4",
-        "MC_weight_ggH_g1g4",
-        "MC_weight_ggH_g2",
-        "MC_weight_ggH_g1g2",
-        "MC_weight_ggH_g1prime2",
-        "MC_weight_ggH_g1g1prime2",
-    ]
+    def initlists(self):
+        allsamples = [  #all samples that have weight functions defined in this class
+            Sample("ggH", "0+"),
+            Sample("ggH", "a2"),
+            Sample("ggH", "0-"),
+            Sample("ggH", "L1"),
+            Sample("ggH", "fa20.5"),
+            Sample("ggH", "fa30.5"),
+            Sample("ggH", "fL10.5"),
+            Sample("ggZZ", "2e2mu"),  #flavor doesn't matter
+        ]
 
-    exceptions = [
-        "baseweight",
-        "exceptions",
-        "getbaseweightfunction",
-        "getweightfunction",
-        "hypothesis",
-        "isbkg",
-        "isdata",
-        "length",
-        "MC_weight_ggH",
-        "minevent",
-        "next",
-        "productionmode",
-        "toaddtotree",
-        "tree",
-        "treesample",
-        "weightfunctions",
-    ]
+        self.toaddtotree = [
+            "D_bkg_0plus",
+            "D_bkg_0minus",
+            "D_jet_0plus",
+            "D_0minus_decay",
+            "D_CP_decay",
+            "D_g2_decay",
+            "D_g1g2_decay",
+            "D_g1prime2_decay",
+            "D_g1g1prime2_decay",
+        ]
 
+        self.exceptions = [
+            "baseweight",
+            "exceptions",
+            "getbaseweightfunction",
+            "getweightfunction",
+            "hypothesis",
+            "initlists",
+            "isbkg",
+            "isdata",
+            "length",
+            "MC_weight_ggH",
+            "minevent",
+            "next",
+            "productionmode",
+            "toaddtotree",
+            "tree",
+            "treesample",
+            "weightfunctions",
+            "xsec",
+        ]
+
+        reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
+        for sample in allsamples:
+            if sample.weightname() in reweightingweightnames:
+                self.toaddtotree.append(sample.weightname())
+            else:
+                self.exceptions.append(sample.weightname())
+
+        self.flavordict = {
+                           13*13*13*13: 0,
+                           11*11*11*11: 1,
+                           11*11*13*13: 2,
+                          }
 
 if __name__ == '__main__':
     if __debug__:
@@ -228,10 +253,13 @@ if __name__ == '__main__':
     class DummyTree(object):
         def GetEntries(self):
             return 0
+        def GetEntry(self, entry): pass
+        xsec = 0
     class DummySample(object):
         productionmode = "graviton fusion"
         hypothesis = "spin 3"
         def isbkg(self): return True
         def isdata(self): return False
         def reweightingsamples(self): return []
-    TreeWrapper(DummyTree(), DummySample(), None)
+        def weightname(self): return "__init__"
+    TreeWrapper(DummyTree(), DummySample(), None, None)
