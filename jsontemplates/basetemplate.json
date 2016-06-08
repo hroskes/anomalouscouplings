@@ -1,0 +1,23 @@
+{
+  "templates":[
+    {
+      "name":"template.oO[templatename]Oo.AdapSmooth",
+      "files":[],
+      "tree":"SelectedTree",
+      "variables":["D_0minus_decay","D_CP_decay","D_bkg_0plus"],
+      "weight":".oO[weightname]Oo.",
+      "selection":"ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == .oO[flavorproduct]Oo.",
+      "assertion":"D_0minus_decay >= 0. && D_0minus_decay <= 1.",
+      "binning":{
+        "type":"fixed",
+        "bins":[50,0.0,1.0,50,-0.5,0.5,50,0.0,1.0]
+      },
+      "conserveSumOfWeights":true,
+      "postprocessing":[
+        {"type":"smooth", "kernel":"adaptive", "entriesperbin":50},
+        {"type":"reweight", "axes":[0,1,2]},
+        {"type":"rescale","factor":.oO[scalefactor]Oo.}
+      ]
+    }
+  ]
+}

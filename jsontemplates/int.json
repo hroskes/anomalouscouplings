@@ -1,0 +1,15 @@
+{
+  "templates":[
+    {
+      "name":"templateIntAdapSmoothMirror",
+      "templatesum":[
+        {"name":"templateg1g4AdapSmooth","factor":1.0},
+        {"name":"template0PlusAdapSmooth","factor":-1.0},
+        {"name":"template0MinusAdapSmooth","factor":-1.0}
+      ],
+      "postprocessing":[
+        {"type":"mirror", "antisymmetric":true, "axis":1}
+      ]
+    }
+  ]
+}

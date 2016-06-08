@@ -1,0 +1,14 @@
+{
+  "templates":[
+    {
+      "name":"template.oO[templatename]Oo.AdapSmoothMirror",
+      "templatesum":[
+        {"name":"template.oO[templatename]Oo.AdapSmooth","factor":1.0}
+      ],
+      "postprocessing":[
+        {"type":"mirror", "axis":1},
+        {"type":"floor"}
+      ]
+    }
+  ]
+}
