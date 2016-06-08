@@ -118,13 +118,16 @@ def makejson(flavor, isbkg):
         else:
             basejson["templates"][0]["postprocessing"].append({"type": "floor"})
 
+        if isbkg:
+            del basejson["templates"][0]["postprocessing"][0]
 
         jsondict["templates"] += basejson["templates"]
 
-    with open("jsontemplates/int.json") as f:
-        inttemplate = f.read()
-    intjson = jsonloads(inttemplate)
-    jsondict["templates"] += intjson["templates"]
+    if not isbkg:
+        with open("jsontemplates/int.json") as f:
+            inttemplate = f.read()
+        intjson = jsonloads(inttemplate)
+        jsondict["templates"] += intjson["templates"]
 
     jsonstring = json.dumps(jsondict, sort_keys=True, indent=4, separators=(',', ': '))
     jsonstring = replaceByMap(jsonstring, flavormap)

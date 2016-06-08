@@ -3,12 +3,12 @@ import os
 import ROOT
 import subprocess
 
-def makecontrolplots(flavor):
+def makecontrolplots(flavor, isbkg):
     flavor = Channel(flavor)
-    f = ROOT.TFile.Open(flavor.templatesfile())
+    f = ROOT.TFile.Open(flavor.templatesfile(isbkg))
     d = f.controlPlots
 
-    split = os.path.split(flavor.templatesfile())
+    split = os.path.split(flavor.templatesfile(isbkg))
     saveasdir = os.path.join(split[0], "controlplots_"+split[1].replace("_fa3Adap_new.root", ""))
     try:
         os.mkdir(saveasdir)
@@ -22,6 +22,9 @@ def makecontrolplots(flavor):
         key.ReadObj().SaveAs("{}/{}.{}".format(saveasdir, key.ReadObj().GetName(), ext))
 
 if __name__ == "__main__":
-    makecontrolplots("4e")
-    makecontrolplots("4mu")
-    makecontrolplots("2e2mu")
+    makecontrolplots("4e", True)
+    makecontrolplots("4mu", True)
+    makecontrolplots("2e2mu", True)
+    makecontrolplots("4e", False)
+    makecontrolplots("4mu", False)
+    makecontrolplots("2e2mu", False)
