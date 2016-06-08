@@ -19,6 +19,11 @@ class Sample(MultiEnum):
                 raise ValueError("Hypothesis provided for ggZZ productionmode\n{}".format(args))
             if self.flavor is None:
                 raise ValueError("No flavor provided for ggZZ productionmode\n{}".format(args))
+        elif self.productionmode == "qqZZ":
+            if self.hypothesis is not None:
+                raise ValueError("Hypothesis provided for qqZZ productionmode\n{}".format(args))
+            if self.flavor is not None:
+                raise ValueError("Flavor provided for qqZZ productionmode\n{}".format(args))
         else:
             raise ValueError("Bad productionmode {}\n{}".format(self.productionmode, args))
 
@@ -31,6 +36,8 @@ class Sample(MultiEnum):
             return os.path.join(config.CJLSTmaindir, dirnames[self.hypothesis], "ZZ4lAnalysis.root")
         elif self.productionmode == "ggZZ":
             return "root://lxcms03//data3/Higgs/160225/ggZZ{}/ZZ4lAnalysis.root".format(self.flavor)
+        elif self.productionmode == "qqZZ":
+            return "root://lxcms03//data3/Higgs/160225/ZZTo4l/ZZ4lAnalysis.root"
         raise self.ValueError("CJLSTfile")
 
     def withdiscriminantsfile(self):
@@ -42,6 +49,8 @@ class Sample(MultiEnum):
             return [Sample("ggH", hypothesis) for hypothesis in hypotheses]
         elif self.productionmode == "ggZZ":
             return [self]
+        elif self.productionmode == "qqZZ":
+            return [self]
         raise self.ValueError("reweightingsamples")
 
     def isbkg(self):
@@ -49,12 +58,16 @@ class Sample(MultiEnum):
             return False
         elif self.productionmode == "ggZZ":
             return True
+        elif self.productionmode == "qqZZ":
+            return True
         raise self.ValueError("isbkg")
 
     def isdata(self):
         if self.productionmode == "ggH":
             return False
         elif self.productionmode == "ggZZ":
+            return False
+        elif self.productionmode == "qqZZ":
             return False
         raise self.ValueError("isdata")
         
@@ -76,6 +89,8 @@ class Sample(MultiEnum):
                 return "MC_weight_ggH_g1g1prime2"
         elif self.productionmode == "ggZZ":
             return "MC_weight_ggZZ"
+        elif self.productionmode == "qqZZ":
+            return "MC_weight_qqZZ"
         raise self.ValueError("weightname")
 
     def color(self):

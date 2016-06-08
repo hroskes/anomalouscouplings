@@ -189,17 +189,6 @@ class TreeWrapper(Iterator):
         return self.getweightfunction(self.treesample)
 
     def initlists(self):
-        allsamples = [  #all samples that have weight functions defined in this class
-            Sample("ggH", "0+"),
-            Sample("ggH", "a2"),
-            Sample("ggH", "0-"),
-            Sample("ggH", "L1"),
-            Sample("ggH", "fa20.5"),
-            Sample("ggH", "fa30.5"),
-            Sample("ggH", "fL10.5"),
-            Sample("ggZZ", "2e2mu"),  #flavor doesn't matter
-        ]
-
         self.toaddtotree = [
             "D_bkg_0plus",
             "D_bkg_0minus",
@@ -233,7 +222,22 @@ class TreeWrapper(Iterator):
             "xsec",
         ]
 
+        allsamples = [    #all samples that have weight functions defined in this class
+            Sample("ggH", "0+"),
+            Sample("ggH", "a2"),
+            Sample("ggH", "0-"),
+            Sample("ggH", "L1"),
+            Sample("ggH", "fa20.5"),
+            Sample("ggH", "fa30.5"),
+            Sample("ggH", "fL10.5"),
+            Sample("ggZZ", "2e2mu"),  #flavor doesn't matter
+            Sample("qqZZ"),
+        ]
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
+        allreweightingweightnames = [sample.weightname() for sample in allsamples]
+        for name in reweightingweightnames:
+            if name not in allreweightingweightnames:
+                raise ValueError("{} not in allreweightingweightnames!".format(name))
         for sample in allsamples:
             if sample.weightname() in reweightingweightnames:
                 self.toaddtotree.append(sample.weightname())

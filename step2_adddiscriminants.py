@@ -51,3 +51,4 @@ if __name__ == '__main__':
         adddiscriminants("ggH", hypothesis)
     for flavor in flavors:
         adddiscriminants("ggZZ", flavor)
+    adddiscriminants("qqZZ")
