@@ -24,7 +24,7 @@ class Sample(MultiEnum):
                 raise ValueError("Hypothesis provided for ggZZ productionmode\n{}".format(args))
             if self.flavor is None:
                 raise ValueError("No flavor provided for ggZZ productionmode\n{}".format(args))
-        elif self.productionmode == "qqZZ" or self.productionmode == "ZX":
+        elif self.productionmode == "qqZZ" or self.productionmode == "ZX" or self.productionmode == "data":
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.flavor is not None:
@@ -43,7 +43,7 @@ class Sample(MultiEnum):
             return "root://lxcms03//data3/Higgs/160225/ggZZ{}/ZZ4lAnalysis.root".format(self.flavor)
         elif self.productionmode == "qqZZ":
             return "root://lxcms03//data3/Higgs/160225/ZZTo4l/ZZ4lAnalysis.root"
-        elif self.productionmode == "ZX":
+        elif self.productionmode == "ZX" or self.productionmode == "data":
             return "root://lxcms03//data3/Higgs/160225/AllData/ZZ4lAnalysis.root"
         raise self.ValueError("CJLSTfile")
 
@@ -56,17 +56,19 @@ class Sample(MultiEnum):
             return [Sample("ggH", hypothesis) for hypothesis in hypotheses]
         elif self.productionmode == "ggZZ" or self.productionmode == "qqZZ" or self.productionmode == "ZX":
             return [self]
+        elif self.productionmode == "data":
+            return []
         raise self.ValueError("reweightingsamples")
 
     def isbkg(self):
-        if self.productionmode == "ggH":
+        if self.productionmode == "ggH" or self.productionmode == "data":
             return False
         elif self.productionmode == "ggZZ" or self.productionmode == "qqZZ" or self.productionmode == "ZX":
             return True
         raise self.ValueError("isbkg")
 
     def isZX(self):
-        if self.productionmode == "ggH" or self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
+        if self.productionmode == "ggH" or self.productionmode == "ggZZ" or self.productionmode == "qqZZ" or self.productionmode == "data":
             return False
         elif self.productionmode == "ZX":
             return True
@@ -75,6 +77,8 @@ class Sample(MultiEnum):
     def isdata(self):
         if self.productionmode == "ggH" or self.productionmode == "ggZZ" or self.productionmode == "qqZZ" or self.productionmode == "ZX":
             return False
+        elif self.productionmode == "data":
+            return True
         raise self.ValueError("isdata")
         
     def weightname(self):
@@ -102,7 +106,7 @@ class Sample(MultiEnum):
         raise self.ValueError("weightname")
 
     def TDirectoryname(self):
-        if self.productionmode == "ggH" or self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
+        if self.productionmode == "ggH" or self.productionmode == "ggZZ" or self.productionmode == "qqZZ" or self.productionmode == "data":
             return "ZZTree"
         if self.productionmode == "ZX":
             return "CRZLLTree"

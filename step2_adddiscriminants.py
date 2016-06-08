@@ -53,3 +53,4 @@ if __name__ == '__main__':
         adddiscriminants("ggZZ", flavor)
     adddiscriminants("qqZZ")
     adddiscriminants("ZX")
+    adddiscriminants("data")

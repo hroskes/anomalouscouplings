@@ -19,7 +19,8 @@ class TreeWrapper(Iterator):
         self.isbkg = treesample.isbkg()
         self.isdata = treesample.isdata()
         self.isZX = treesample.isZX()
-        self.baseweight = self.getbaseweightfunction()
+        if not self.isdata:
+            self.baseweight = self.getbaseweightfunction()
         self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
         if Counters is not None:
             self.nevents = Counters.GetBinContent(1)

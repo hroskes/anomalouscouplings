@@ -1,6 +1,8 @@
 from helperstuff import config
 from helperstuff.enums import Channel
+from helperstuff.samples import Sample
 import os
+import shutil
 import subprocess
 
 def buildtemplates(flavor, isbkg):
@@ -19,3 +21,5 @@ if __name__ == "__main__":
     buildtemplates("2e2mu", False)
     buildtemplates("4e", False)
     buildtemplates("4mu", False)
+    #and copy data
+    shutil.copy(Sample("data").withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))
