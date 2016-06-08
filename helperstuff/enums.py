@@ -1,3 +1,6 @@
+import config
+import os
+
 class EnumItem(object):
     def __init__(self, name, *other):
         self.name = name
@@ -53,6 +56,8 @@ class Channel(MyEnum):
                  EnumItem("4mu"),
                  EnumItem("4e"),
                 )
+    def templatesfile(self):
+        return os.path.join(config.repositorydir, "step7_templates/{}_fa3Adap_new.root".format(self))
 
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
