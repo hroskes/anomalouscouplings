@@ -182,9 +182,9 @@ class TreeWrapper(Iterator):
         return self.MC_weight_ggH(6)
 
     def MC_weight_ggZZ(self):
-        return self.MC_weight * self.xsec / self.nevents
+        return self.MC_weight * self.xsec * self.tree.KFactorggZZ / self.nevents
     def MC_weight_qqZZ(self):
-        return self.MC_weight * self.xsec / self.nevents
+        return self.MC_weight * self.xsec * self.tree.KFactorEWKqqZZ * self.tree.KFactorQCDqqZZ_M / self.nevents
     def MC_weight_ZX(self):
         self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
         return ROOT.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ROOT.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])

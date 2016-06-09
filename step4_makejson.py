@@ -23,18 +23,18 @@ def makejson(flavor, isbkg):
                        Sample("ggH", "0+"): {
                                              "templatename": "0Plus",
                                              "weightname": "MC_weight_ggH_g1",
-                                             "scalefactor": "1",
+                                             "scalefactor": str(1./6),
                                             },
                        Sample("ggH", "0-"): {
                                              "templatename": "0Minus",
                                              "weightname": "MC_weight_ggH_g4",
-                                             "scalefactor": "1",
+                                             "scalefactor": str(1./6),
                                             },
                        Sample("ggH",
                                  "fa30.5"): {
                                              "templatename": "g1g4",
                                              "weightname": "MC_weight_ggH_g1g4",
-                                             "scalefactor": "2",
+                                             "scalefactor": str(2./6),
                                             },
                   }
     else:

@@ -1,30 +1,20 @@
 import collections
-from helperstuff.enums import hypotheses
+from helperstuff.enums import hypotheses, flavors
 from helperstuff.samples import Sample
 from math import sqrt
 import os
 import ROOT
 
-samples = [Sample("ggH", hypothesis) for hypothesis in hypotheses]
+samples = [Sample("qqZZ")]
 
-sumofweights = collections.Counter()
-sumw2 = collections.Counter()
+sum = collections.Counter()
 
-for fromsample in samples:
-  t = ROOT.TChain("candTree")
-  t.Add(fromsample.withdiscriminantsfile())
+for sample in samples:
+  f = ROOT.TFile(sample.withdiscriminantsfile())
+  t = f.candTree
+  for event in t:
+    if t.ZZMass > 70:
+      sum[sample,t.Z1Flav*t.Z2Flav] += getattr(t, sample.weightname())
 
-  length = t.GetEntries()
-  for i, entry in enumerate(t, start=1):
-    for tosample in samples:
-      wt = getattr(t, tosample.weightname())
-      sumofweights[fromsample,tosample] += wt
-      sumw2[fromsample,tosample] += wt**2
-    if i%10000 == 0 or i == length:
-      print i, "/", length
-
-fmt = "{:30} "*(len(samples)+2)
-print fmt.format("", "rwt from", *samples)
-print fmt.format("rwt to", *[""]*(len(samples)+1))
-for tosample in samples:
-  print fmt.format(tosample, "", *("{:.2e} +/- {:.2e}".format(sumofweights[fromsample,tosample], sqrt(sumw2[fromsample,tosample])) for fromsample in samples))
+for (k1, k2), v in sum.iteritems():
+  print k1, k2, v
