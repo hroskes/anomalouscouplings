@@ -27,7 +27,7 @@ def printrates(flavor, mode):
     ZX = f.templateZXAdapSmoothMirror.Integral() * (
          #no idea about the absolute
          #rescale to Moriond
-             (0.408547+0.311745+0.0106453+0.716686+0.0199815)  #email from Simon, "Inputs for the cards", Feb 9 at 4:56$
+             (0.408547+0.311745+0.0106453+0.716686+0.0199815)  #email from Simon, "Inputs for the cards", Feb 9 at 4:56AM
               / sum(tfiles[c.templatesfile(True)].templateZXAdapSmoothMirror.Integral() for c in channels)
          # * ratio of luminosities
              * luminosity / 2.8
