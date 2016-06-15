@@ -58,8 +58,11 @@ class Channel(MyEnum):
                 )
     def jsonfile(self, isbkg):
         return os.path.join(config.repositorydir, "step5_json/templates_{}{}.json".format(self, "_bkg" if isbkg else ""))
-    def templatesfile(self, isbkg):
-        return os.path.join(config.repositorydir, "step7_templates/{}{}_fa3Adap_new.root".format(self, "_bkg" if isbkg else ""))
+    def templatesfile(self, isbkg, run1=False):
+        if not run1:
+            return os.path.join(config.repositorydir, "step7_templates/{}{}_fa3Adap_new.root".format(self, "_bkg" if isbkg else ""))
+        else:
+            return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self, "_bkg" if isbkg else "")
 
 class Flavor(MyEnum):
     enumname = "flavor"

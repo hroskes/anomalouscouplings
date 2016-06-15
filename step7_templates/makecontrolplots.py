@@ -9,9 +9,9 @@ def makecontrolplots(flavor, isbkg):
     d = f.controlPlots
 
     split = os.path.split(flavor.templatesfile(isbkg))
-    saveasdir = os.path.join(split[0], "controlplots_"+split[1].replace("_fa3Adap_new.root", ""))
+    saveasdir = os.path.join("/afs/cern.ch/user/h/hroskes/www/anomalouscouplings/templateprojections/", "controlplots_"+split[1].replace("_fa3Adap_new.root", ""))
     try:
-        os.mkdir(saveasdir)
+        os.makedirs(saveasdir)
     except OSError:
         pass
 
