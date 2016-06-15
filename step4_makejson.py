@@ -119,7 +119,11 @@ def makejson(flavor, isbkg):
             basejson["templates"][0]["postprocessing"].append({"type": "floor"})
 
         if isbkg:
-            del basejson["templates"][0]["postprocessing"][0]
+            if sample == Sample("ZX"):
+                basejson["templates"][0]["postprocessing"][0]["entriesperbin"] = 5
+            else:
+                basejson["templates"][0]["postprocessing"][0]["entriesperbin"] = 20
+            #del basejson["templates"][0]["postprocessing"][0]
 
         jsondict["templates"] += basejson["templates"]
 

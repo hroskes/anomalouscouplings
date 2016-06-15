@@ -1,11 +1,9 @@
 import collections
 import helperstuff.style
-from helperstuff.enums import Channel
+from helperstuff.enums import channels
 from printrates import tfiles
 import ROOT
 import subprocess
-
-channel = Channel("4e")
 
 def GetAxis(self, i):
     if i == 0:
@@ -46,7 +44,7 @@ class Template(object):
         self.h = None
         self.projections = {}
 
-    def GetFromFile(self):
+    def GetFromFile(self, channel):
         if self.infile:
             self.h = getattr(tfiles[channel.templatesfile(self.isbkg)], self.name)
 
@@ -66,44 +64,49 @@ class Template(object):
     def Scale(self, *args, **kwargs):
         return self.h.Scale(*args, **kwargs)
 
-templates = [
-             Template("template0PlusAdapSmoothMirror", "0^{+}", 1, True, False),
-             Template("template0MinusAdapSmoothMirror", "0^{-}", ROOT.kCyan, True, False),
-             Template("templateIntAdapSmoothMirror", "", 0, True, False),
-             Template("templateMix", "f_{a3}=0.5", 3, False, False),
-             Template("templateMixMinus", "f_{a3}=-0.5", 4, False, False),
-             Template("templateqqZZAdapSmoothMirror", "qq#rightarrowZZ", 6, True, True),
-             Template("templateggZZAdapSmoothMirror", "gg#rightarrowZZ", ROOT.kOrange+6, True, True),
-             Template("templateZXAdapSmoothMirror", "Z+X", 2, True, True),
-            ]
-
 exts = "png", "eps", "root", "pdf"
 
-for i, template in enumerate(templates):
-    template.GetFromFile()
+def projections(channel):
+    templates = [
+                 Template("template0PlusAdapSmoothMirror", "0^{+}", 1, True, False),
+                 Template("template0MinusAdapSmoothMirror", "0^{-}", ROOT.kCyan, True, False),
+                 Template("templateIntAdapSmoothMirror", "", 0, True, False),
+                 Template("templateMix", "f_{a3}=0.5", 3, False, False),
+                 Template("templateMixMinus", "f_{a3}=-0.5", 4, False, False),
+                 Template("templateqqZZAdapSmoothMirror", "qq#rightarrowZZ", 6, True, True),
+                 Template("templateggZZAdapSmoothMirror", "gg#rightarrowZZ", ROOT.kOrange+6, True, True),
+                 Template("templateZXAdapSmoothMirror", "Z+X", 2, True, True),
+                ]
 
-templates[3].h = templates[0].h.Clone()
-templates[3].h.Add(templates[1].h)
-templates[3].h.Add(templates[2].h)
-templates[3].Scale(.5)
+    for i, template in enumerate(templates):
+        template.GetFromFile(channel)
 
-templates[4].h = templates[0].h.Clone()
-templates[4].h.Add(templates[1].h)
-templates[4].h.Add(templates[2].h, -1)
-templates[4].Scale(.5)
+    templates[3].h = templates[0].h.Clone()
+    templates[3].h.Add(templates[1].h)
+    templates[3].h.Add(templates[2].h)
+    templates[3].Scale(.5)
 
-c1 = ROOT.TCanvas()
-for axis in axes:
-    hstack = ROOT.THStack(axis.name, axis.title)
-    legend = ROOT.TLegend(.75, .65, .9, .9)
-    legend.SetBorderSize(0)
-    legend.SetFillStyle(0)
-    for template in templates:
-        if not template.color: continue
-        hstack.Add(template.Projection(axis.index))
-        template.AddToLegend(legend)
-    hstack.Draw("nostack hist")
-    hstack.GetXaxis().SetTitle(axis.title)
-    legend.Draw()
-    for ext in exts:
-        c1.SaveAs("~/www/TEST/{}.{}".format(axis.name, ext))
+    templates[4].h = templates[0].h.Clone()
+    templates[4].h.Add(templates[1].h)
+    templates[4].h.Add(templates[2].h, -1)
+    templates[4].Scale(.5)
+
+    c1 = ROOT.TCanvas()
+    for axis in axes:
+        hstack = ROOT.THStack(axis.name, axis.title)
+        legend = ROOT.TLegend(.75, .65, .9, .9)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
+        for template in templates:
+            if not template.color: continue
+            hstack.Add(template.Projection(axis.index))
+            template.AddToLegend(legend)
+        hstack.Draw("nostack hist")
+        hstack.GetXaxis().SetTitle(axis.title)
+        legend.Draw()
+        for ext in exts:
+            c1.SaveAs("~/www/anomalouscouplings/templateprojections/{}/{}.{}".format(channel, axis.name, ext))
+
+if __name__ == "__main__":
+  for channel in channels:
+    projections(channel)
