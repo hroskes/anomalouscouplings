@@ -1,4 +1,5 @@
 import collections
+from helperstuff import config
 import helperstuff.style
 from helperstuff.enums import Channel, channels
 from helperstuff.filemanager import tfiles
@@ -148,7 +149,7 @@ def projections(channel, run1=False, areanormalize=False):
         hstack.Draw("nostack hist")
         hstack.GetXaxis().SetTitle(axis.title)
         legend.Draw()
-        dir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings/templateprojections/"
+        dir = os.path.join(config.plotsbasedir, "templateprojections")
         if areanormalize:
             dir = os.path.join(dir, "areanormalized")
         if run1:

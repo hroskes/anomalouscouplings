@@ -1,3 +1,4 @@
+from helperstuff import config
 from helperstuff.enums import Channel
 import os
 import ROOT
@@ -9,7 +10,7 @@ def makecontrolplots(flavor, isbkg):
     d = f.controlPlots
 
     split = os.path.split(flavor.templatesfile(isbkg))
-    saveasdir = os.path.join("/afs/cern.ch/user/h/hroskes/www/anomalouscouplings/templateprojections/", "controlplots_"+split[1].replace("_fa3Adap_new.root", ""))
+    saveasdir = os.path.join(config.plotsbasedir, "templateprojections", "controlplots_"+split[1].replace("_fa3Adap_new.root", ""))
     try:
         os.makedirs(saveasdir)
     except OSError:

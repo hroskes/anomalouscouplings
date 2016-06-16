@@ -1,7 +1,9 @@
+from helperstuff import config
 from helperstuff.enums import hypotheses
-import ROOT
 from helperstuff.samples import Sample
-import style
+import os
+import ROOT
+import helperstuff.style
 ROOT.gStyle.SetCanvasDefW(678)
 ROOT.gStyle.SetPadRightMargin(0.115)
 
@@ -20,9 +22,8 @@ upperlimit = {
 """
 
 for i, tosample in enumerate(samples):
-    dirname = "/afs/cern.ch/user/h/hroskes/www/TEST/weightplots/{}".format(str(tosample).replace(" ", ""))
-    import os
-    try: os.mkdir(dirname)
+    dirname = os.path.join(config.plotsbasedir, "weightplots/{}".format(str(tosample).replace(" ", "")))
+    try: os.makedirs(dirname)
     except: pass
     hstack = None
     del cache[:]

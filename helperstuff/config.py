@@ -13,6 +13,7 @@ if "lxplus" in socket.gethostname() and getpass.getuser() == "hroskes":
                          "fa30.5": "0Mf05ph0_v2",
                          "fL10.5": "0L1f05ph0_v2",
                         }
+    plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings/"
 
 else:
     raise ValueError("Who/where are you?")
