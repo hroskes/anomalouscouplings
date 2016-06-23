@@ -136,6 +136,14 @@ class TreeWrapper(Iterator):
 
     def D_bkg_0plus(self):
         return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+    def D_bkg_0plus_ResUp(self):
+        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+    def D_bkg_0plus_ResDown(self):
+        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+    def D_bkg_0plus_ScaleUp(self):
+        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+    def D_bkg_0plus_ScaleDown(self):
+        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
     def D_bkg_0minus(self):
         return self.p0minus_VAJHU*self.p0plus_m4l / (self.p0minus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
 
@@ -199,6 +207,10 @@ class TreeWrapper(Iterator):
     def initlists(self):
         self.toaddtotree = [
             "D_bkg_0plus",
+            "D_bkg_0plus_ResUp",
+            "D_bkg_0plus_ResDown",
+            "D_bkg_0plus_ScaleUp",
+            "D_bkg_0plus_ScaleDown",
             "D_bkg_0minus",
             "D_jet_0plus",
             "D_0minus_decay",
@@ -212,12 +224,14 @@ class TreeWrapper(Iterator):
         self.exceptions = [
             "baseweight",
             "exceptions",
+            "flavordict",
             "getbaseweightfunction",
             "getweightfunction",
             "hypothesis",
             "initlists",
             "isbkg",
             "isdata",
+            "isZX",
             "length",
             "MC_weight_ggH",
             "minevent",
@@ -271,8 +285,9 @@ if __name__ == '__main__':
     class DummySample(object):
         productionmode = "graviton fusion"
         hypothesis = "spin 3"
-        def isbkg(self): return True
+        def isbkg(self): return False
         def isdata(self): return False
+        def isZX(self): return False
         def reweightingsamples(self): return []
         def weightname(self): return "__init__"
     TreeWrapper(DummyTree(), DummySample(), None, None)

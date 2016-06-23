@@ -9,7 +9,7 @@ class Sample(MultiEnum):
     def __init__(self, *args, **kwargs):
         super(Sample, self).__init__(*args, **kwargs)
         if self.productionmode == "ZX":
-            import helperstuff.ZX
+            import ZX
 
     def check(self, *args):
         if self.productionmode is None:
