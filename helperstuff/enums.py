@@ -56,13 +56,15 @@ class Channel(MyEnum):
                  EnumItem("4mu"),
                  EnumItem("4e"),
                 )
-    def jsonfile(self, isbkg):
-        return os.path.join(config.repositorydir, "step5_json/templates_{}{}.json".format(self, "_bkg" if isbkg else ""))
-    def templatesfile(self, isbkg, run1=False):
+    def jsonfile(self, systematic, isbkg):
+        assert (not isbkg or systematic == "")
+        return os.path.join(config.repositorydir, "step5_json/templates_{}{}.json".format(self, "_bkg" if isbkg else systematic.appendname()))
+    def templatesfile(self, systematic, isbkg, run1=False):
+        assert (not isbkg or systematic == "")
         if not run1:
-            return os.path.join(config.repositorydir, "step7_templates/{}{}_fa3Adap_new.root".format(self, "_bkg" if isbkg else ""))
+            return os.path.join(config.repositorydir, "step7_templates/{}{}_fa3Adap_new.root".format(self, "_bkg" if isbkg else systematic.appendname()))
         else:
-            return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self, "_bkg" if isbkg else "")
+            return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self, "_bkg" if isbkg else systematic.appendname())
 
 class Flavor(MyEnum):
     enumname = "flavor"
@@ -101,7 +103,20 @@ class ProductionMode(MyEnum):
                  EnumItem("data"),
                 )
 
+class Systematic(MyEnum):
+    enumitems = (
+                 EnumItem(""),
+                 EnumItem("ResUp"),
+                 EnumItem("ResDown"),
+                 EnumItem("ScaleUp"),
+                 EnumItem("ScaleDown"),
+                )
+    def appendname(self):
+        if self == "": return ""
+        return "_" + str(self)
+
 channels = [Channel(item) for item in Channel.enumitems]
+systematics = [Systematic(item) for item in Systematic.enumitems]
 flavors = [Flavor(item) for item in Flavor.enumitems]
 hypotheses = [Hypothesis(item) for item in Hypothesis.enumitems]
 productionmodes = [ProductionMode(item) for item in ProductionMode.enumitems]

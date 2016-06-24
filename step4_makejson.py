@@ -1,6 +1,6 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff.samples import Sample
-from helperstuff.enums import Channel
+from helperstuff.enums import Channel, channels, Systematic, systematics
 import json
 import os
 
@@ -11,12 +11,13 @@ def jsonloads(jsonstring):
         print jsonstring
         raise
 
-def makejson(flavor, isbkg):
+def makejson(flavor, systematic, isbkg):
     flavor = Channel(flavor)
+    systematic = Systematic(systematic)
     jsondict = {
                 "inputDirectory": "step3_withdiscriminants/",
-                "outputFile": flavor.templatesfile(isbkg),
-                "templates": []
+                "outputFile": flavor.templatesfile(systematic, isbkg),
+                "templates": [],
                }
     if not isbkg:
         samplesdict = {
@@ -69,10 +70,12 @@ def makejson(flavor, isbkg):
                       Channel("4e"): str(11*11*11*11),
                       Channel("4mu"): str(13*13*13*13),
                      }
-    flavormap = {
-                 "flavor": str(flavor),
-                 "flavorproduct": flavorproducts[flavor],
-                }
+    generalmap = {
+                  "flavor": str(flavor),
+                  "flavorproduct": flavorproducts[flavor],
+                  "systematic": systematic.appendname(),
+                 }
+
 
     for sample, samplemap in samplesdict.iteritems():
         if not isbkg:
@@ -100,7 +103,7 @@ def makejson(flavor, isbkg):
         fileslist = [os.path.basename(s.withdiscriminantsfile()) for s in sampleslist]
 
         repmap = samplemap
-        repmap.update(flavormap)
+        repmap.update(generalmap)
 
         with open("jsontemplates/basetemplate.json") as f:
             basetemplate = f.read()
@@ -134,15 +137,13 @@ def makejson(flavor, isbkg):
         jsondict["templates"] += intjson["templates"]
 
     jsonstring = json.dumps(jsondict, sort_keys=True, indent=4, separators=(',', ': '))
-    jsonstring = replaceByMap(jsonstring, flavormap)
-    filename = flavor.jsonfile(isbkg)
+    jsonstring = replaceByMap(jsonstring, generalmap)
+    filename = flavor.jsonfile(systematic, isbkg)
     with open(filename.format(flavor), "w") as f:
         f.write(jsonstring)
 
 if __name__ == "__main__":
-    makejson("2e2mu", True)
-    makejson("4e", True)
-    makejson("4mu", True)
-    makejson("2e2mu", False)
-    makejson("4e", False)
-    makejson("4mu", False)
+    for channel in channels:
+        for systematic in systematics:
+            makejson(channel, systematic, False)
+        makejson(channel, "", True)

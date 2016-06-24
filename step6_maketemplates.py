@@ -1,25 +1,24 @@
 from helperstuff import config
-from helperstuff.enums import Channel
+from helperstuff.enums import Channel, channels, Systematic, systematics
 from helperstuff.samples import Sample
 import os
 import shutil
 import subprocess
 
-def buildtemplates(flavor, isbkg):
+def buildtemplates(flavor, systematic, isbkg):
     flavor = Channel(flavor)
+    systematic = Systematic(systematic)
     print flavor
-    if os.path.exists(flavor.templatesfile(isbkg)):
+    if os.path.exists(flavor.templatesfile(systematic, isbkg)):
         return
-    subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), flavor.jsonfile(isbkg)])
-    if not os.path.exists(flavor.templatesfile(isbkg)):
-        raise RuntimeError("Something is wrong!  {} was not created.".format(flavor.templatesfile(isbkg)))
+    subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), flavor.jsonfile(systematic, isbkg)])
+    if not os.path.exists(flavor.templatesfile(systematic, isbkg)):
+        raise RuntimeError("Something is wrong!  {} was not created.".format(flavor.templatesfile(systematic, isbkg)))
 
 if __name__ == "__main__":
-    buildtemplates("2e2mu", True)
-    buildtemplates("4e", True)
-    buildtemplates("4mu", True)
-    buildtemplates("2e2mu", False)
-    buildtemplates("4e", False)
-    buildtemplates("4mu", False)
+    for channel in channels:
+        for systematic in systematics:
+            buildtemplates(channel, systematic, False)
+        buildtemplates(channel, "", True)
     #and copy data
     shutil.copy(Sample("data").withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))

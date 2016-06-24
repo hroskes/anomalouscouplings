@@ -39,12 +39,18 @@ class Sample(MultiEnum):
         if self.productionmode == "ggH":
             dirnames = {Hypothesis(k): v for k, v in config.CJLSTdirnames_ggH.iteritems()}
             return os.path.join(config.CJLSTmaindir, dirnames[self.hypothesis], "ZZ4lAnalysis.root")
-        elif self.productionmode == "ggZZ":
+####################################################################################################
+#Temporary while 80X samples are not there yet
+#remove this section once the samples are there
+        elif self.productionmode == "ggZZ" and self.flavor in ["2e2mu", "2e2tau"]:
             return "root://lxcms03//data3/Higgs/160225/ggZZ{}/ZZ4lAnalysis.root".format(self.flavor)
+#####################################################################################################
+        elif self.productionmode == "ggZZ":
+            return "root://lxcms03//data3/Higgs/160624/ggZZ{}/ZZ4lAnalysis.root".format(self.flavor)
         elif self.productionmode == "qqZZ":
-            return "root://lxcms03//data3/Higgs/160225/ZZTo4l/ZZ4lAnalysis.root"
+            return "root://lxcms03//data3/Higgs/160624/ZZTo4l/ZZ4lAnalysis.root"
         elif self.productionmode == "ZX" or self.productionmode == "data":
-            return "root://lxcms03//data3/Higgs/160225/AllData/ZZ4lAnalysis.root"
+            return "root://lxcms03//data3/Higgs/160624/AllData/ZZ4lAnalysis.root"
         raise self.ValueError("CJLSTfile")
 
     def withdiscriminantsfile(self):
