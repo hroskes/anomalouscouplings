@@ -1,16 +1,16 @@
 from helperstuff import config
-from helperstuff.enums import Channel
+from helperstuff.enums import channels, systematics, TemplatesFile
 import os
 import ROOT
 import subprocess
 
-def makecontrolplots(flavor, isbkg):
-    flavor = Channel(flavor)
-    f = ROOT.TFile.Open(flavor.templatesfile(isbkg))
+def makecontrolplots(*args):
+    templatesfile = TemplatesFile(*args)
+    f = ROOT.TFile.Open(templatesfile.templatesfile())
     d = f.controlPlots
 
-    split = os.path.split(flavor.templatesfile(isbkg))
-    saveasdir = os.path.join(config.plotsbasedir, "templateprojections", "controlplots_"+split[1].replace("_fa3Adap_new.root", ""))
+    split = os.path.split(templatesfile.templatesfile())
+    saveasdir = os.path.join(config.plotsbasedir, "templateprojections", "controlplots", split[1].replace("_fa3Adap_new.root", ""))
     try:
         os.makedirs(saveasdir)
     except OSError:
@@ -23,9 +23,7 @@ def makecontrolplots(flavor, isbkg):
         key.ReadObj().SaveAs("{}/{}.{}".format(saveasdir, key.ReadObj().GetName(), ext))
 
 if __name__ == "__main__":
-    makecontrolplots("4e", True)
-    makecontrolplots("4mu", True)
-    makecontrolplots("2e2mu", True)
-    makecontrolplots("4e", False)
-    makecontrolplots("4mu", False)
-    makecontrolplots("2e2mu", False)
+    for channel in channels:
+        for systematic in systematics:
+            makecontrolplots(channel, "signal", systematic)
+        makecontrolplots(channel, "bkg")

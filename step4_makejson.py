@@ -1,6 +1,6 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff.samples import Sample
-from helperstuff.enums import Channel, channels, Systematic, systematics
+from helperstuff.enums import Channel, channels, systematics, TemplatesFile
 import json
 import os
 
@@ -11,15 +11,14 @@ def jsonloads(jsonstring):
         print jsonstring
         raise
 
-def makejson(flavor, systematic, isbkg):
-    flavor = Channel(flavor)
-    systematic = Systematic(systematic)
+def makejson(*args):
+    templatesfile = TemplatesFile(*args)
     jsondict = {
                 "inputDirectory": "step3_withdiscriminants/",
-                "outputFile": flavor.templatesfile(systematic, isbkg),
+                "outputFile": templatesfile.templatesfile(),
                 "templates": [],
                }
-    if not isbkg:
+    if templatesfile.signalorbkg == "sig":
         samplesdict = {
                        Sample("ggH", "0+"): {
                                              "templatename": "0Plus",
@@ -71,14 +70,14 @@ def makejson(flavor, systematic, isbkg):
                       Channel("4mu"): str(13*13*13*13),
                      }
     generalmap = {
-                  "flavor": str(flavor),
-                  "flavorproduct": flavorproducts[flavor],
-                  "systematic": systematic.appendname(),
+                  "flavor": str(templatesfile.channel),
+                  "flavorproduct": flavorproducts[templatesfile.channel],
+                  "systematic": templatesfile.systematic.appendname(),
                  }
 
 
     for sample, samplemap in samplesdict.iteritems():
-        if not isbkg:
+        if templatesfile.signalorbkg == "sig":
             sampleslist = [
                            Sample("ggH", "0+"),
                            Sample("ggH", "a2"),
@@ -121,7 +120,7 @@ def makejson(flavor, systematic, isbkg):
         else:
             basejson["templates"][0]["postprocessing"].append({"type": "floor"})
 
-        if isbkg:
+        if templatesfile.signalorbkg == "bkg":
             if sample == Sample("ZX"):
                 basejson["templates"][0]["postprocessing"][0]["entriesperbin"] = 5
             else:
@@ -130,7 +129,7 @@ def makejson(flavor, systematic, isbkg):
 
         jsondict["templates"] += basejson["templates"]
 
-    if not isbkg:
+    if templatesfile.signalorbkg == "sig":
         with open("jsontemplates/int.json") as f:
             inttemplate = f.read()
         intjson = jsonloads(inttemplate)
@@ -138,12 +137,12 @@ def makejson(flavor, systematic, isbkg):
 
     jsonstring = json.dumps(jsondict, sort_keys=True, indent=4, separators=(',', ': '))
     jsonstring = replaceByMap(jsonstring, generalmap)
-    filename = flavor.jsonfile(systematic, isbkg)
-    with open(filename.format(flavor), "w") as f:
+    filename = templatesfile.jsonfile()
+    with open(filename, "w") as f:
         f.write(jsonstring)
 
 if __name__ == "__main__":
     for channel in channels:
         for systematic in systematics:
-            makejson(channel, systematic, False)
-        makejson(channel, "", True)
+            makejson(channel, systematic, "signal")
+        makejson(channel, "bkg")

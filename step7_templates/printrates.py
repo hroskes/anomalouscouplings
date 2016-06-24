@@ -1,23 +1,23 @@
 import collections
-from helperstuff.enums import Channel, channels, Systematic
+from helperstuff.enums import Channel, channels, TemplatesFile
 from helperstuff.filemanager import tfiles
 import ROOT
-import sys
 
 luminosity = 10
+mode = 2
 
-def printrates(flavor, mode):
+def printrates(flavor):
     flavor = Channel(flavor)
-    f = tfiles[flavor.templatesfile(Systematic(""), False)]
+    f = tfiles[TemplatesFile(flavor, "signal").templatesfile()]
     ggH = f.template0PlusAdapSmoothMirror.Integral()*luminosity
-    f = tfiles[flavor.templatesfile(Systematic(""), True)]
+    f = tfiles[TemplatesFile(flavor, "bkg").templatesfile()]
     qqZZ = f.templateqqZZAdapSmoothMirror.Integral()*luminosity
     ggZZ = f.templateggZZAdapSmoothMirror.Integral()*luminosity
     ZX = f.templateZXAdapSmoothMirror.Integral() * (
          #no idea about the absolute
          #rescale to Moriond
              (0.408547+0.311745+0.0106453+0.716686+0.0199815)  #email from Simon, "Inputs for the cards", Feb 9 at 4:56AM
-              / sum(tfiles[c.templatesfile("", True)].templateZXAdapSmoothMirror.Integral() for c in channels)
+              / sum(tfiles[TemplatesFile(c, "bkg").templatesfile()].templateZXAdapSmoothMirror.Integral() for c in channels)
          # * ratio of luminosities
              * luminosity / 2.8
          )
@@ -36,5 +36,5 @@ if __name__ == "__main__":
     for flavor in "2e2mu", "4e", "4mu":
         print flavor
         print
-        printrates(flavor, int(sys.argv[1]))
+        printrates(flavor)
         print

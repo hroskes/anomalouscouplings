@@ -56,15 +56,6 @@ class Channel(MyEnum):
                  EnumItem("4mu"),
                  EnumItem("4e"),
                 )
-    def jsonfile(self, systematic, isbkg):
-        assert (not isbkg or systematic == "")
-        return os.path.join(config.repositorydir, "step5_json/templates_{}{}.json".format(self, "_bkg" if isbkg else systematic.appendname()))
-    def templatesfile(self, systematic, isbkg, run1=False):
-        assert (not isbkg or systematic == "")
-        if not run1:
-            return os.path.join(config.repositorydir, "step7_templates/{}{}_fa3Adap_new.root".format(self, "_bkg" if isbkg else systematic.appendname()))
-        else:
-            return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self, "_bkg" if isbkg else systematic.appendname())
 
 class Flavor(MyEnum):
     enumname = "flavor"
@@ -104,6 +95,7 @@ class ProductionMode(MyEnum):
                 )
 
 class Systematic(MyEnum):
+    enumname = "systematic"
     enumitems = (
                  EnumItem(""),
                  EnumItem("ResUp"),
@@ -114,6 +106,13 @@ class Systematic(MyEnum):
     def appendname(self):
         if self == "": return ""
         return "_" + str(self)
+
+class SignalOrBkg(MyEnum):
+    enumname = "signalorbkg"
+    enumitems = (
+                 EnumItem("signal", "sig"),
+                 EnumItem("background", "bkg"),
+                )
 
 channels = [Channel(item) for item in Channel.enumitems]
 systematics = [Systematic(item) for item in Systematic.enumitems]
@@ -153,3 +152,24 @@ class MultiEnum(object):
         for enum in self.enums:
             if getattr(self, enum.enumname) is None:
                 raise ValueError("No option provided for {}\n{}".format(enum.enumname, args))
+
+
+
+class TemplatesFile(MultiEnum):
+    enums = [Channel, Systematic, SignalOrBkg]
+
+    def check(self, *args):
+        if self.systematic is None:
+            self.systematic = Systematic("")
+        if self.signalorbkg == "bkg" and self.systematic != "":
+            raise ValueError("No systematics yet for bkg!\n{}".format(args))
+        super(TemplatesFile, self).check(*args)
+
+    def jsonfile(self):
+        return os.path.join(config.repositorydir, "step5_json/templates_{}{}.json".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname()))
+
+    def templatesfile(self, run1=False):
+        if not run1:
+            return os.path.join(config.repositorydir, "step7_templates/{}{}_fa3Adap_new.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname()))
+        else:
+            return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())

@@ -1,7 +1,7 @@
 import collections
 from helperstuff import config
 import helperstuff.style
-from helperstuff.enums import Channel, channels
+from helperstuff.enums import Channel, channels, TemplatesFile
 from helperstuff.filemanager import tfiles
 import os
 import ROOT
@@ -49,9 +49,16 @@ class Template(object):
         self.h = None
         self.projections = {}
 
-    def GetFromFile(self, channel, run1=False):
+    def GetFromFile(self, *args, **kwargs):
+        run1 = False
+        if "run1" in kwargs:
+            run1 = kwargs["run1"]
+            del kwargs["run1"]
+        for k, v in kwargs.iteritems(): raise TypeError("Unknown kwarg {}={}".format(k, v))
+
+        templatesfile = TemplatesFile("bkg" if self.isbkg else "sig", *args)
         if self.infile:
-            self.h = getattr(tfiles[channel.templatesfile(self.isbkg, run1=run1)], self.name if not run1 else self.run1name)
+            self.h = getattr(tfiles[templatesfile.templatesfile(run1=run1)], self.name if not run1 else self.run1name)
 
     def Projection(self, i):
         if i not in self.projections:
@@ -74,7 +81,7 @@ class Template(object):
 
 exts = "png", "eps", "root", "pdf"
 
-def projections(channel, run1=False, areanormalize=False):
+def projections(channel, run1=False, areanormalize=False, systematic = ""):
     channel = Channel(channel)
     templates = [
                  Template("template0PlusAdapSmoothMirror", "0^{+}", 1, True, False),
@@ -88,7 +95,7 @@ def projections(channel, run1=False, areanormalize=False):
                 ]
 
     for i, template in enumerate(templates):
-        template.GetFromFile(channel, run1=run1)
+        template.GetFromFile(channel, systematic, run1=run1)
 
     if run1:
         integralSM = templates[0].Integral()

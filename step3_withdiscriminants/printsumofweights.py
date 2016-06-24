@@ -5,14 +5,16 @@ from math import sqrt
 import os
 import ROOT
 
-samples = [Sample("qqZZ"), Sample("ggH", "0+")]
+samples = [Sample("ggZZ", "4e")]
 
 flavordict = {13**4: Channel("4mu"), 11**4: Channel("4e"), 11**2*13**2: Channel("2e2mu")}
 
 sum = collections.Counter()
 
 for sample in samples:
-  f = ROOT.TFile(sample.withdiscriminantsfile())
+  f = ROOT.TFile(sample.withdiscriminantsfile()
+                 .replace("withdiscriminants", "withdiscriminants/bkp")
+                )
   t = f.candTree
   for event in t:
     if 105 < t.ZZMass < 140:
