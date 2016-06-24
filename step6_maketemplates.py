@@ -4,6 +4,16 @@ from helperstuff.samples import Sample
 import os
 import shutil
 import subprocess
+from time import sleep
+
+cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
+if cmssw[0] == 8:
+    raise ValueError("TemplateBuilder does not seem to work in CMSSW_8_X; the templates end up filled with NaNs.  Try CMSSW_7_4_X, I have tested that it works there.")
+if cmssw[0] == 7 and cmssw[1] == 6:
+    print "I haven't tested TemplateBuilder in CMSSW_7_6_X.  It definitely works in 7_4_X, but in 8_X the templates end up filled with NaNs.  Proceed at your own risk."
+    print "Continuing in 10 seconds..."
+    sleep(10)
+
 
 def buildtemplates(flavor, systematic, isbkg):
     flavor = Channel(flavor)
