@@ -1,6 +1,6 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff.samples import Sample
-from helperstuff.enums import Channel, channels, systematics, TemplatesFile
+from helperstuff.enums import Channel, channels, treesystematics, TemplatesFile
 import json
 import os
 
@@ -143,6 +143,6 @@ def makejson(*args):
 
 if __name__ == "__main__":
     for channel in channels:
-        for systematic in systematics:
+        for systematic in treesystematics:
             makejson(channel, systematic, "signal")
         makejson(channel, "bkg")

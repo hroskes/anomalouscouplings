@@ -102,6 +102,8 @@ class Systematic(MyEnum):
                  EnumItem("ResDown"),
                  EnumItem("ScaleUp"),
                  EnumItem("ScaleDown"),
+                 EnumItem("ScaleResUp", "ResScaleUp"),
+                 EnumItem("ScaleResDown", "ResScaleDown"),
                 )
     def appendname(self):
         if self == "": return ""
@@ -116,6 +118,7 @@ class SignalOrBkg(MyEnum):
 
 channels = [Channel(item) for item in Channel.enumitems]
 systematics = [Systematic(item) for item in Systematic.enumitems]
+treesystematics = [Systematic(item) for item in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown")]
 flavors = [Flavor(item) for item in Flavor.enumitems]
 hypotheses = [Hypothesis(item) for item in Hypothesis.enumitems]
 productionmodes = [ProductionMode(item) for item in ProductionMode.enumitems]

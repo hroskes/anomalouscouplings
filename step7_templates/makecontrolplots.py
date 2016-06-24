@@ -1,5 +1,5 @@
 from helperstuff import config
-from helperstuff.enums import channels, systematics, TemplatesFile
+from helperstuff.enums import channels, treesystematics, TemplatesFile
 import os
 import ROOT
 import subprocess
@@ -24,6 +24,6 @@ def makecontrolplots(*args):
 
 if __name__ == "__main__":
     for channel in channels:
-        for systematic in systematics:
+        for systematic in treesystematics:
             makecontrolplots(channel, "signal", systematic)
         makecontrolplots(channel, "bkg")

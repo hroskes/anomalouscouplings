@@ -1,5 +1,5 @@
 from helperstuff import config
-from helperstuff.enums import channels, systematics, TemplatesFile
+from helperstuff.enums import channels, treesystematics, TemplatesFile
 from helperstuff.samples import Sample
 import os
 import shutil
@@ -26,7 +26,7 @@ def buildtemplates(*args):
 
 if __name__ == "__main__":
     for channel in channels:
-        for systematic in systematics:
+        for systematic in treesystematics:
             buildtemplates(channel, systematic, "signal")
         buildtemplates(channel, "", "bkg")
     #and copy data
