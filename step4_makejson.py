@@ -134,11 +134,6 @@ def makejson(*args):
             inttemplate = f.read()
         intjson = jsonloads(inttemplate)
         jsondict["templates"] += intjson["templates"]
-    if templatesfile.signalorbkg == "bkg":
-        with open("jsontemplates/ZXsystematics.json") as f:
-            ZXsystemplate = f.read()
-        ZXsysjson = jsonloads(ZXsystemplate)
-        jsondict["templates"] += ZXsysjson["templates"]
 
     jsonstring = json.dumps(jsondict, sort_keys=True, indent=4, separators=(',', ': '))
     jsonstring = replaceByMap(jsonstring, generalmap)

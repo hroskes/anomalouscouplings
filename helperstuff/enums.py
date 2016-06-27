@@ -111,10 +111,19 @@ class Systematic(MyEnum):
                  EnumItem("ScaleDown"),
                  EnumItem("ScaleResUp", "ResScaleUp"),
                  EnumItem("ScaleResDown", "ResScaleDown"),
+                 EnumItem("ZXUp"),
+                 EnumItem("ZXDown"),
                 )
     def appendname(self):
         if self == "": return ""
         return "_" + str(self)
+    def appliesto(self, signalorbkg):
+        if signalorbkg == "signal":
+            return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
+        elif signalorbkg == "bkg":
+            return self in ("", "ZXUp", "ZXDown")
+        assert False
+
 
 class SignalOrBkg(MyEnum):
     enumname = "signalorbkg"
@@ -171,8 +180,8 @@ class TemplatesFile(MultiEnum):
     def check(self, *args):
         if self.systematic is None:
             self.systematic = Systematic("")
-        if self.signalorbkg == "bkg" and self.systematic != "":
-            raise ValueError("No systematics yet for bkg!\n{}".format(args))
+        if not self.systematic.appliesto(self.signalorbkg):
+            raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
         super(TemplatesFile, self).check(*args)
 
     def jsonfile(self):
@@ -180,6 +189,6 @@ class TemplatesFile(MultiEnum):
 
     def templatesfile(self, run1=False):
         if not run1:
-            return os.path.join(config.repositorydir, "step7_templates/{}{}_fa3Adap_new.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname()))
+            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_fa3Adap_new.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname()))
         else:
             return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())

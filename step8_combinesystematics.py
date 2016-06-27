@@ -1,8 +1,11 @@
+"""
+combine ScaleUp, ResUp --> ScaleResUp
+ZX systematics templates from qqZZ
+"""
+
 from helperstuff.enums import channels, TemplatesFile
 from helperstuff.filemanager import tfiles
 import ROOT
-
-"""combine ScaleUp, ResUp --> ScaleResUp"""
 
 def combinesystematics(flavor):
     nominal = TemplatesFile(flavor, "signal")
@@ -10,9 +13,12 @@ def combinesystematics(flavor):
     ScaleUp = TemplatesFile(flavor, "signal", "ScaleUp")
     ScaleResUp = TemplatesFile(flavor, "signal", "ScaleResUp")
     ScaleResDown = TemplatesFile(flavor, "signal", "ScaleResDown")
+    bkg = TemplatesFile(flavor, "bkg")
+    ZXUp = TemplatesFile(flavor, "bkg", "ZXUp")
+    ZXDown = TemplatesFile(flavor, "bkg", "ZXDown")
 
-    infiles = {templatesfile: tfiles[templatesfile.templatesfile()] for templatesfile in (nominal, ScaleUp, ResUp)}
-    outfiles = {templatesfile: ROOT.TFile(templatesfile.templatesfile(), "RECREATE") for templatesfile in (ScaleResUp, ScaleResDown)}
+    infiles = {templatesfile: tfiles[templatesfile.templatesfile()] for templatesfile in (nominal, ScaleUp, ResUp, bkg)}
+    outfiles = {templatesfile: ROOT.TFile(templatesfile.templatesfile(), "RECREATE") for templatesfile in (ScaleResUp, ScaleResDown, ZXUp, ZXDown)}
 
     objects = [key.ReadObj() for key in infiles[nominal].GetListOfKeys()]
     hists = [h for h in objects if h.GetName() != "controlPlots"]
@@ -40,7 +46,18 @@ def combinesystematics(flavor):
 
         store += [hup, hdn]
 
-        print flavor, h.GetName(), infiles[ResUp].Get(name).Integral() + infiles[ScaleUp].Get(name).Integral() - h.Integral() - hup.Integral()
+    ZXtemplate = infiles[bkg].templateZXAdapSmoothMirror
+    qqZZtemplate = infiles[bkg].templateqqZZAdapSmoothMirror
+    ZXUptemplate = qqZZtemplate.Clone(ZXtemplate.GetName())
+    ZXUptemplate.Scale(ZXtemplate.Integral() / ZXUptemplate.Integral())
+    ZXUptemplate.SetDirectory(outfiles[ZXUp])
+
+    ZXDowntemplate = ZXtemplate.Clone()
+    ZXDowntemplate.SetDirectory(outfiles[ZXDown])
+    ZXDowntemplate.Scale(2)
+    ZXDowntemplate.Add(ZXUptemplate, -1)
+
+    print flavor, ZXtemplate.Integral(), ZXUptemplate.Integral(), ZXDowntemplate.Integral()
 
     for f in outfiles.values():
         f.Write()
