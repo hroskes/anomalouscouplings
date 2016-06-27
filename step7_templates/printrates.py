@@ -1,6 +1,7 @@
 import collections
 from helperstuff.enums import Channel, channels, TemplatesFile
 from helperstuff.filemanager import tfiles
+from helperstuff.samples import Sample
 import ROOT
 
 luminosity = 10
@@ -10,6 +11,19 @@ def printrates(flavor):
     flavor = Channel(flavor)
     f = tfiles[TemplatesFile(flavor, "signal").templatesfile()]
     ggH = f.template0PlusAdapSmoothMirror.Integral()*luminosity
+    #other signal samples
+    for productionmode in "VBF", "WplusH", "WminusH", "ZH", "ttH":
+        sample = Sample(productionmode, "0+")
+        f = tfiles[sample.withdiscriminantsfile()]
+        t = f.candTree
+        ZZFlav = flavor.ZZFlav()
+        additionalxsec = 0
+        for event in t:
+            if 105 < t.ZZMass < 140 and t.Z1Flav*t.Z2Flav == ZZFlav:
+                additionalxsec += getattr(t, sample.weightname())
+        ggH += additionalxsec * luminosity
+
+
     f = tfiles[TemplatesFile(flavor, "bkg").templatesfile()]
     qqZZ = f.templateqqZZAdapSmoothMirror.Integral()*luminosity
     ggZZ = f.templateggZZAdapSmoothMirror.Integral()*luminosity

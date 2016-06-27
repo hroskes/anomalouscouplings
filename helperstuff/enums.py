@@ -56,6 +56,11 @@ class Channel(MyEnum):
                  EnumItem("4mu"),
                  EnumItem("4e"),
                 )
+    def ZZFlav(self):
+        if self == "2e2mu": return 13*13*11*11
+        if self == "4e":    return 11*11*11*11
+        if self == "4mu":   return 13*13*13*13
+        assert False
 
 class Flavor(MyEnum):
     enumname = "flavor"
