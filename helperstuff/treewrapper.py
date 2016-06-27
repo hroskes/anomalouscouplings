@@ -22,6 +22,7 @@ class TreeWrapper(Iterator):
         if not self.isdata:
             self.baseweight = self.getbaseweightfunction()
         self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
+        self.nevents = self.nevents2L2l = None
         if Counters is not None:
             self.nevents = Counters.GetBinContent(1)
         if Counters_reweighted is not None:
@@ -39,32 +40,10 @@ class TreeWrapper(Iterator):
             self.length = maxevent - minevent + 1
 
         self.initlists()
+        if treesample.onlyweights(): self.onlyweights()
         tree.GetEntry(0)
         self.xsec = tree.xsec * 1000 #pb to fb
-
-        if __debug__:   #if run as python -O ("nondebug mode"), then do extra tests
-            pass        #__debug__ is not really the right name in this context
-        else:           #if __debug__ is optimized out (even with an else), if not __debug__ is not
-            #some cross checking in case of stupid mistakes
-            #if a function is added below but not added to toaddtotree
-            #all member variables, unless they have __, should be added to either toaddtotree or exceptions
-            notanywhere, inboth, nonexistent = [], [], []
-            for key in set(list(type(self).__dict__) + list(self.__dict__) + self.toaddtotree + self.exceptions):
-                if key.startswith("__"): continue
-                if key.startswith("_abc"): continue
-                if key not in self.exceptions and key not in self.toaddtotree and (key in self.__dict__ or key in type(self).__dict__):
-                    notanywhere.append(key)
-                if key in self.toaddtotree and key in self.exceptions:
-                    inboth.append(key)
-                if key not in type(self).__dict__ and key not in self.__dict__:
-                    nonexistent.append(key)
-            error = ""
-            if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(notanywhere) + "\n"
-            if inboth: error += "the following items are in both toaddtotree and exceptions! " + ", ".join(inboth) + "\n"
-            if nonexistent: error += "the following items are in toaddtotree or exceptions, but don't exist! " + ", ".join(nonexistent) + "\n"
-            if error:
-                raise SyntaxError(error)
-            print "You are good to go!"
+        self.checkfunctions()
 
     def __iter__(self):
         self.__i = 0                               #at the beginning of next self.__i and self.__treeentry are
@@ -93,11 +72,6 @@ class TreeWrapper(Iterator):
             isSelected = bool(self.MC_weight)
 
             self.flavor = self.flavordict[abs(t.Z1Flav*t.Z2Flav)]
-
-            if __debug__:  #if run normally
-                pass
-            else:          #if run with -O, use all events
-                break
 
             if isSelected:
                 break
@@ -197,6 +171,10 @@ class TreeWrapper(Iterator):
         self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
         return ROOT.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ROOT.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
 
+    def MC_weight_plain(self):
+        return self.MC_weight * self.xsec / self.nevents
+    MC_weight_VBF = MC_weight_ZH = MC_weight_WH = MC_weight_ttH = MC_weight_plain
+
     def getweightfunction(self, sample):
         return getattr(self, sample.weightname())
         raise RuntimeError("{} does not work!".format(sample))
@@ -223,6 +201,7 @@ class TreeWrapper(Iterator):
 
         self.exceptions = [
             "baseweight",
+            "checkfunctions",
             "exceptions",
             "flavordict",
             "getbaseweightfunction",
@@ -234,8 +213,12 @@ class TreeWrapper(Iterator):
             "isZX",
             "length",
             "MC_weight_ggH",
+            "MC_weight_plain",
             "minevent",
+            "nevents",
+            "nevents2L2l",
             "next",
+            "onlyweights",
             "productionmode",
             "toaddtotree",
             "tree",
@@ -252,6 +235,11 @@ class TreeWrapper(Iterator):
             Sample("ggH", "fa20.5"),
             Sample("ggH", "fa30.5"),
             Sample("ggH", "fL10.5"),
+            Sample("VBF", "0+"),
+            Sample("ZH", "0+"),
+            Sample("WplusH", "0+"),
+            Sample("WminusH", "0+"),
+            Sample("ttH", "0+"),
             Sample("ggZZ", "2e2mu"),  #flavor doesn't matter
             Sample("qqZZ"),
             Sample("ZX"),
@@ -273,10 +261,44 @@ class TreeWrapper(Iterator):
                            11*11*13*13: 2,
                           }
 
-if __name__ == '__main__':
-    if __debug__:
-        raise RuntimeError("Please run with python -O treewrapper.py")
+    def onlyweights(self):
+        """Call this to only add the weights and ZZMass to the new tree"""
+        #only want the weight, and ZZMass for the range
+        reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
+        for name in self.toaddtotree[:]:
+            if name not in reweightingweightnames:
+                self.exceptions.append(name)
+                self.toaddtotree.remove(name)
+        self.tree.SetBranchStatus("*", 0)
+        self.tree.SetBranchStatus("ZZMass", 1)
+        self.tree.SetBranchStatus("Z*Flav", 1)
+        for variable in self.treesample.weightingredients():
+            self.tree.SetBranchStatus(variable, 1)
 
+    def checkfunctions(self):
+
+        #some cross checking in case of stupid mistakes
+        #if a function is added in the class but not added to toaddtotree
+        #all member variables, unless they have __, should be added to either toaddtotree or exceptions
+        notanywhere, inboth, nonexistent = [], [], []
+        for key in set(list(type(self).__dict__) + list(self.__dict__) + self.toaddtotree + self.exceptions):
+            if key.startswith("__"): continue
+            if key.startswith("_abc"): continue
+            if key not in self.exceptions and key not in self.toaddtotree and (key in self.__dict__ or key in type(self).__dict__):
+                notanywhere.append(key)
+            if key in self.toaddtotree and key in self.exceptions:
+                inboth.append(key)
+            if key not in type(self).__dict__ and key not in self.__dict__:
+                nonexistent.append(key)
+        error = ""
+        if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(notanywhere) + "\n"
+        if inboth: error += "the following items are in both toaddtotree and exceptions! " + ", ".join(inboth) + "\n"
+        if nonexistent: error += "the following items are in toaddtotree or exceptions, but don't exist! " + ", ".join(nonexistent) + "\n"
+        if error:
+            raise SyntaxError(error)
+
+
+if __name__ == '__main__':
     class DummyTree(object):
         def GetEntries(self):
             return 0
@@ -288,6 +310,8 @@ if __name__ == '__main__':
         def isbkg(self): return False
         def isdata(self): return False
         def isZX(self): return False
+        def onlyweights(self): return False
         def reweightingsamples(self): return []
         def weightname(self): return "__init__"
     TreeWrapper(DummyTree(), DummySample(), None, None)
+    print "You are good to go!"

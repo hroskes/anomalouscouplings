@@ -28,10 +28,10 @@ def adddiscriminants(*args):
     t = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
     t.Add(filename)
 
+    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted)
+
     newf = ROOT.TFile.Open(newfilename, "recreate")
     newt = t.CloneTree(0)
-
-    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted)
 
     discriminants = {}
     for discriminant in treewrapper.toaddtotree:
@@ -54,3 +54,8 @@ if __name__ == '__main__':
     adddiscriminants("qqZZ")
     adddiscriminants("ZX")
     adddiscriminants("data")
+    adddiscriminants("VBF", "0+")
+    adddiscriminants("ZH", "0+")
+    adddiscriminants("WplusH", "0+")
+    adddiscriminants("WminusH", "0+")
+    adddiscriminants("ttH", "0+")
