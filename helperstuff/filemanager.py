@@ -1,4 +1,5 @@
 import collections
+import contextlib
 import ROOT
 
 class keydefaultdict(collections.defaultdict):
@@ -12,3 +13,13 @@ class keydefaultdict(collections.defaultdict):
             ret = self[key] = self.default_factory(key)
             return ret
 tfiles = keydefaultdict(ROOT.TFile.Open)
+
+@contextlib.contextmanager
+def cd(newdir):
+    """http://stackoverflow.com/a/24176022/5228524"""
+    prevdir = os.getcwd()
+    os.chdir(os.path.expanduser(newdir))
+    try:
+        yield
+    finally:
+        os.chdir(prevdir)
