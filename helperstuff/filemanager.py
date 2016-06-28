@@ -1,5 +1,6 @@
 import collections
 import contextlib
+import os
 import ROOT
 
 class keydefaultdict(collections.defaultdict):

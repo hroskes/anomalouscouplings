@@ -1,3 +1,4 @@
+from helperstuff import filemanager
 import os
 import shutil
 import subprocess
@@ -27,8 +28,10 @@ else:
         os.environ["SCRAM_ARCH"] = "slc6_amd64_gcc493"
         subprocess.check_call(["scram", "p", "CMSSW", "CMSSW_7_6_5"])
     finally:
-        shutil.move("CMSSW_7_6_5/src", os.path.join(tmpdir, "src"))
-        shutil.move("CMSSW_7_6_5/.gitignore", os.path.join(tmpdir, ".gitignore"))
+        if os.path.exists("CMSSW_7_6_5/src"):
+            os.rmdir("CMSSW_7_6_5/src")
+        shutil.move(os.path.join(tmpdir, "src"), "CMSSW_7_6_5/src")
+        shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_7_6_5/.gitignore")
 
     with filemanager.cd("CMSSW_7_6_5/src"):
         subprocess.check_call(["scram", "b"])
