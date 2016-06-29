@@ -1,4 +1,5 @@
 import config
+from filemanager import tfiles
 import os
 
 class EnumItem(object):
@@ -209,24 +210,70 @@ hypotheses = [Hypothesis(item) for item in Hypothesis.enumitems]
 productionmodes = [ProductionMode(item) for item in ProductionMode.enumitems]
 analyses = [Analysis(item) for item in Analysis.enumitems]
 
+class MetaclassForMultiEnums(type):
+    def __new__(cls, clsname, bases, dct):
+        enums = dct["enums"]
+        dct["needenums"] = needenums = enums[:]
+        while True:
+            for enum in needenums[:]:
+                if issubclass(enum, MultiEnum):
+                    #replace it with its subenums
+                    needenums.remove(enum)
+                    needenums += [a for a in enum.enums if a not in needenums]
+                    #break out of for in order to continue in the while, to allow for more deeply nested MultiEnums
+                    break
+                elif issubclass(enum, MyEnum):
+                    if enum not in needenums:
+                        needenums.append(enum)
+                else:
+                    raise TypeError("{} is not a MyEnum or a MultiEnum! (in class {})".format(enum, clsname))
+            else:
+                break
+        return super(MetaclassForMultiEnums, cls).__new__(cls, clsname, bases, dct)
+
 class MultiEnum(object):
-    multienums = []
+    __metaclass__ = MetaclassForMultiEnums
+    enums = []
     def __init__(self, *args):
         for enum in self.enums:
             setattr(self, enum.enumname, None)
-        for arg in args:
-            for enum in self.enums:
-                try:
-                    setattr(self, enum.enumname, enum(arg))
+        enumsdict = {enum: None for enum in self.needenums}
+
+        argscopy = list(args)
+        while True:
+            for i, arg in enumerate(argscopy[:]):
+                if isinstance(arg, MultiEnum):
+                    argscopy[i:i+1] = [getattr(arg, enum.enumname) for enum in arg.enums]
                     break
+            else:
+                break
+
+        for enum in self.needenums:
+            for i, arg in enumerate(argscopy[:]):
+                try:
+                    tmp = enum(arg)
                 except ValueError:
                     pass
-            else:
-                raise ValueError("{} is not a valid choice for any of: {}".format(arg, ", ".join(e.__name__ for e in self.enums)))
-        for multienum in self.multienums:
-            setattr(self, multienum.multienumname, multienum(*(getattr(self, enum.enumname) for enum in self.enums if enum in multienum.enums)))
+                else:
+                    if enumsdict[enum] is not None: raise TypeError("Multiple arguments provided that fit {} ({} and {})".format(enum, enumsdict[enum], arg))
+                    enumsdict[enum] = tmp
+                    del argscopy[i]
+                    break
+        if argscopy:
+            raise ValueError("Extra arguments {}\n{}".format(argscopy, args))
+
+        self.applysynonyms(enumsdict)
+
+        for enum in self.enums:
+            if issubclass(enum, MyEnum):
+                setattr(self, enum.enumname, enumsdict[enum])
+            if issubclass(enum, MultiEnum):
+                setattr(self, enum.enumname, enum(*(v for k, v in enumsdict.iteritems() if k in enum.needenums and v is not None)))
 
         self.check(*args)
+        for enum in self.enums:
+            if isinstance(enum, MultiEnum):
+                enum.check(*args)
         self.items = tuple(getattr(self, enum.enumname) for enum in self.enums)
 
     def __eq__(self, other):
@@ -239,6 +286,9 @@ class MultiEnum(object):
     def __str__(self):
         return " ".join(str(item) for item in self.items if item is not None)
 
+    def applysynonyms(self, enumsdict):
+        pass
+
     def check(self, *args):
         for enum in self.enums:
             if getattr(self, enum.enumname) is None:
@@ -247,6 +297,7 @@ class MultiEnum(object):
 
 
 class TemplatesFile(MultiEnum):
+    enumname = "templatesfile"
     enums = [Channel, Systematic, SignalOrBkg, Analysis]
 
     def check(self, *args):
@@ -265,3 +316,72 @@ class TemplatesFile(MultiEnum):
         else:
             assert self.analysis == "fa3"
             return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())
+
+class Template(MultiEnum):
+    enums = [TemplatesFile, ProductionMode, Hypothesis]
+
+    def applysynonyms(self, enumsdict):
+        if enumsdict[SignalOrBkg] is None:
+            if enumsdict[ProductionMode] == "ggH":
+                enumsdict[SignalOrBkg] = "signal"
+            if enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "ZX"):
+                enumsdict[SignalOrBkg] = "bkg"
+
+    def check(self, *args):
+        from samples import Sample
+        if self.productionmode is None:
+            raise ValueError("No option provided for productionmode\n{}".format(args))
+        elif self.productionmode == "ggH":
+            if self.hypothesis is None:
+                raise ValueError("No hypothesis provided for ggH productionmode\n{}".format(args))
+            if Sample(self.productionmode, self.hypothesis) not in self.templatesfile.analysis.signalsamples():
+                raise ValueError("Hypothesis {} is not used in analysis {}!\n{}".format(self.hypothesis, self.templatesfile.analysis, args))
+            if self.templatesfile.signalorbkg == "bkg":
+                raise ValueError("ggH is not bkg!\n{}".format(args))
+        elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
+            if self.hypothesis is not None:
+                raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.templatesfile.signalorbkg == "sig":
+                raise ValueError("{} is not signal!\n{}".format(self.hypothesis, args))
+        else:
+            raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
+
+    def templatefile(self, run1=False):
+        return self.templatesfile.templatesfile(run1)
+
+    def templatename(self):
+        if self.productionmode == "ggH":
+            if self.hypothesis == "0+":
+                name = "template0PlusAdapSmooth"
+            elif self.hypothesis == "0-":
+                name = "template0MinusAdapSmooth"
+            elif self.hypothesis == "a2":
+                name = "template0HPlusAdapSmooth"
+            elif self.hypothesis in ["fa20.5", "fa30.5"]:
+                name = "templateIntAdapSmooth"
+            else:
+                assert False
+        elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
+            name = "template{}AdapSmooth".format(self.productionmode)
+        else:
+            assert False
+
+        if self.templatesfile.analysis == "fa3":
+            name += "Mirror"
+        elif self.templatesfile.analysis in ("fa2", ):
+            pass
+        else:
+            assert False
+
+        return name
+
+    def gettemplate(self):
+        f = tfiles[self.templatefile()]
+        try:
+            return getattr(f, self.templatename())
+        except AttributeError:
+            raise IOError("No template {} in {}".format(self.templatename(), self.templatefile()))
+
+if __name__ == "__main__":
+    print Template("ggH", "4mu", "fa30.5", "fa3").gettemplate().Integral()
+    print Template("ggH", "4mu", "fa20.5", "fa2").gettemplate().Integral()
