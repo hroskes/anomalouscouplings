@@ -1,4 +1,5 @@
 import config
+import constants
 from filemanager import tfiles
 import os
 
@@ -118,6 +119,8 @@ class Systematic(MyEnum):
     def appendname(self):
         if self == "": return ""
         return "_" + str(self)
+    def D_bkg_0plus(self):
+        return "D_bkg_0plus"+self.appendname()
     def appliesto(self, signalorbkg):
         if signalorbkg == "signal":
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
@@ -174,33 +177,13 @@ class Analysis(MyEnum):
     def signalsamples(self):
         from samples import Sample
         if self == "fa3":
-            return (Sample("ggH", "0+"), Sample("ggH", "0-"), Sample("ggH", "fa30.5"))
+            return [Sample("ggH", "0+"), Sample("ggH", "0-"), Sample("ggH", "fa30.5")]
         elif self == "fa2":
-            return (Sample("ggH", "0+"), Sample("ggH", "a2"), Sample("ggH", "fa20.5"))
+            return [Sample("ggH", "0+"), Sample("ggH", "a2"), Sample("ggH", "fa20.5")]
         elif self == "fL1":
-            return (Sample("ggH", "0+"), Sample("ggH", "L1"), Sample("ggH", "fL10.5"))
+            return [Sample("ggH", "0+"), Sample("ggH", "L1"), Sample("ggH", "fL10.5")]
         else:
             assert False
-    def domirror(self):
-        if self == "fa3": return True
-        if self in ["fa2", "fL1"]: return False
-        assert False
-    def mixtemplatename(self):
-        if self == "fa3":
-            return "g1g4"
-        if self == "fa2":
-            return "g1g2"
-        if self == "fL1":
-            return "g1g1prime2"
-        assert False
-    def puretemplatenames(self):
-        if self == "fa3":
-            return "0Plus", "0Minus"
-        if self == "fa2":
-            return "0Plus", "0HPlus"
-        if self == "fL1":
-            return "0Plus", "0L1"
-        assert False
 
 channels = [Channel(item) for item in Channel.enumitems]
 systematics = [Systematic(item) for item in Systematic.enumitems]
@@ -317,6 +300,12 @@ class TemplatesFile(MultiEnum):
             assert self.analysis == "fa3"
             return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())
 
+    def templates(self):
+        if self.signalorbkg == "signal":
+            return [Template(self, sample.productionmode, sample.hypothesis) for sample in self.analysis.signalsamples()]
+        elif self.signalorbkg == "bkg":
+            return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ", "ZX")]
+
 class Template(MultiEnum):
     enums = [TemplatesFile, ProductionMode, Hypothesis]
 
@@ -349,7 +338,7 @@ class Template(MultiEnum):
     def templatefile(self, run1=False):
         return self.templatesfile.templatesfile(run1)
 
-    def templatename(self):
+    def templatename(self, final=True):
         if self.productionmode == "ggH":
             if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
@@ -357,8 +346,11 @@ class Template(MultiEnum):
                 name = "template0MinusAdapSmooth"
             elif self.hypothesis == "a2":
                 name = "template0HPlusAdapSmooth"
-            elif self.hypothesis in ["fa20.5", "fa30.5"]:
-                name = "templateIntAdapSmooth"
+            elif self.hypothesis in ("fa20.5", "fa30.5"):
+                if final:
+                    name = "templateIntAdapSmooth"
+                else:
+                    name = "templateMixAdapSmooth"
             else:
                 assert False
         elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
@@ -366,12 +358,8 @@ class Template(MultiEnum):
         else:
             assert False
 
-        if self.templatesfile.analysis == "fa3":
+        if self.templatesfile.analysis == "fa3" and final:
             name += "Mirror"
-        elif self.templatesfile.analysis in ("fa2", ):
-            pass
-        else:
-            assert False
 
         return name
 
@@ -381,6 +369,149 @@ class Template(MultiEnum):
             return getattr(f, self.templatename())
         except AttributeError:
             raise IOError("No template {} in {}".format(self.templatename(), self.templatefile()))
+
+    def weightname(self):
+        from samples import Sample
+        if self.productionmode == "ggZZ":
+            return Sample(self.productionmode, "2e2mu").weightname()
+        if self.hypothesis is not None:
+            return Sample(self.productionmode, self.hypothesis).weightname()
+        return Sample(self.productionmode).weightname()
+
+    def reweightfrom(self):
+        from samples import Sample
+        if self.productionmode == "ggH":
+            if self.templatesfile.analysis in ("fa2", "fa3"):
+                return [
+                        Sample("ggH", "0+"),
+                        Sample("ggH", "a2"),
+                        Sample("ggH", "0-"),
+                        Sample("ggH", "L1"),
+                        Sample("ggH", "fa20.5"),
+                        Sample("ggH", "fa30.5"),
+                        #Sample("ggH", "fL10.5"),   #NOT fL1 for now
+                       ]
+        if self.productionmode in ("qqZZ", "ZX"):
+            return [Sample(self.productionmode)]
+        if self.productionmode == "ggZZ":
+            return [Sample(self.productionmode, flavor) for flavor in flavors]
+        assert False
+
+    def scalefactor(self):
+        if self.templatesfile.signalorbkg == "bkg": return 1
+        if self.hypothesis in ("0+", "0-", "a2", "L1"):
+            result = 1.0
+        elif self.hypothesis == "fa30.5":
+            result = constants.JHUXS2L2la1a3 / constants.JHUXS2L2la1
+        elif self.hypothesis == "fa20.5":
+            result = constants.JHUXS2L2la1a2 / constants.JHUXS2L2la1
+        elif self.hypothesis == "fL10.5":
+            result = constants.JHUXS2L2la1L1 / constants.JHUXS2L2la1
+        else:
+            assert False
+        result /= len(self.reweightfrom())
+        return result
+
+    def domirror(self, final=True):
+        return self.templatesfile.analysis == "fa3" and not (not final and self.hypothesis == "fa30.5")
+
+    def discriminants(self):
+        return [
+                self.templatesfile.analysis.purediscriminant(),
+                self.templatesfile.analysis.mixdiscriminant(),
+                self.templatesfile.systematic.D_bkg_0plus(),
+               ]
+    def binning(self):
+        if self.templatesfile.analysis == "fa2":
+            result = [25, 0, 1, 25, 0, 1, 25, 0, 1]
+        elif self.templatesfile.analysis == "fa3":
+            result = [25, 0, 1, 25, -0.5, 0.5, 25, 0, 1]
+        else:
+            assert False
+        for i in 1, 2, 4, 5, 7, 8:
+            result[i] = float(result[i])
+        return result
+
+    def puretemplatestosubtract(self):
+        if self.templatesfile.analysis == "fa2" and self.hypothesis == "fa20.5":
+            return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "a2"))
+        if self.templatesfile.analysis == "fa3" and self.hypothesis == "fa30.5":
+            return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "0-"))
+        assert False
+
+    def smoothentriesperbin(self):
+        if self.productionmode == "ZX":
+            return 5
+        elif self.templatesfile.signalorbkg == "bkg":
+            return 20
+        else:
+            return 50
+
+    def getjson(self):
+        jsn = {
+               "templates": [
+                 {
+                   "name": self.templatename(final=False),
+                   "files": [os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()],
+                   "tree": "candTree",
+                   "variables": self.discriminants(),
+                   "weight": self.weightname(),
+                   "selection": "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.templatesfile.channel.ZZFlav()),
+                   "assertion": "D_0minus_decay >= 0. && D_0minus_decay <= 1.",
+                   "binning": {
+                     "type": "fixed",
+                     "bins": self.binning(),
+                   },
+                   "conserveSumOfWeights": True,
+                   "postprocessing": [
+                     {"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin()},
+                     {"type": "reweight", "axes": [0,1,2]},
+                     {"type": "rescale","factor": self.scalefactor()},
+                   ],
+                   "filloverflows": True,
+                  },
+                ],
+              }
+
+        if self.domirror(final=False):
+            mirrorjsn = {
+                          "templates":[
+                            {
+                              "name":self.templatename(final=True),
+                              "templatesum":[
+                                {"name":self.templatename(final=False),"factor":1.0},
+                              ],
+                              "postprocessing":[
+                                {"type":"mirror", "axis":1},
+                                {"type":"floor"},
+                              ],
+                            },
+                          ],
+                        }
+            jsn["templates"] += mirrorjsn["templates"]
+        else:
+            jsn["templates"][0]["postprocessing"].append({"type": "floor"})
+
+        if self.hypothesis in ["fa30.5", "fa20.5", "fL10.5"]:
+            intjsn = {
+                       "templates":[
+                         {
+                           "name": self.templatename(final=True),
+                           "templatesum":[
+                             {"name":self.templatename(final=False),"factor":1.0},
+                           ] + [
+                             {"name":t.templatename(final=False),"factor":-1.0} for t in self.puretemplatestosubtract()
+                           ],
+                           "postprocessing":[
+                           ],
+                         },
+                       ],
+                     }
+            if self.domirror(final=True):
+                intjsn["templates"][0]["postprocessing"].append({"type":"mirror", "antisymmetric":True, "axis":1})
+            jsn["templates"] += intjsn["templates"]
+
+        return jsn
 
 if __name__ == "__main__":
     print Template("ggH", "4mu", "fa30.5", "fa3").gettemplate().Integral()
