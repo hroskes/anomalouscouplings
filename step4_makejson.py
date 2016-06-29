@@ -113,6 +113,11 @@ def makejson(*args):
                   "systematic": templatesfile.systematic.appendname(),
                   "purediscriminant": templatesfile.analysis.purediscriminant(),
                   "mixdiscriminant": templatesfile.analysis.mixdiscriminant(),
+                  "mixdiscriminantmin": str(templatesfile.analysis.mixdiscriminantmin()),
+                  "mixdiscriminantmax": str(templatesfile.analysis.mixdiscriminantmax()),
+                  "mixtemplatename": templatesfile.analysis.mixtemplatename(),
+                  "pure1templatename": templatesfile.analysis.puretemplatenames()[0],
+                  "pure2templatename": templatesfile.analysis.puretemplatenames()[1],
                  }
 
 
@@ -165,6 +170,9 @@ def makejson(*args):
         with open("jsontemplates/int.json") as f:
             inttemplate = f.read()
         intjson = jsonloads(inttemplate)
+        if analysis.domirror():
+            intjson["templates"][0]["postprocessing"].append({"type":"mirror", "antisymmetric":True, "axis":1})
+            intjson["templates"][0]["name"] += "Mirror"
         jsondict["templates"] += intjson["templates"]
 
     jsonstring = json.dumps(jsondict, sort_keys=True, indent=4, separators=(',', ': '))
@@ -174,8 +182,8 @@ def makejson(*args):
         f.write(jsonstring)
 
 if __name__ == "__main__":
-    for channel in channels:
-        for analysis in analyses:
+    for analysis in analyses:
+        for channel in channels:
             for systematic in treesystematics:
                 print channel, analysis, systematic
                 makejson(channel, systematic, "signal", analysis)

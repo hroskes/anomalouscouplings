@@ -10,14 +10,15 @@
       "assertion":"D_0minus_decay >= 0. && D_0minus_decay <= 1.",
       "binning":{
         "type":"fixed",
-        "bins":[25,0.0,1.0,25,-0.5,0.5,25,0.0,1.0]
+        "bins":[25,0.0,1.0,25,.oO[mixdiscriminantmin]Oo.,.oO[mixdiscriminantmax]Oo.,25,0.0,1.0]
       },
       "conserveSumOfWeights":true,
       "postprocessing":[
         {"type":"smooth", "kernel":"adaptive", "entriesperbin":50},
         {"type":"reweight", "axes":[0,1,2]},
         {"type":"rescale","factor":.oO[scalefactor]Oo.}
-      ]
+      ],
+      "filloverflows": true
     }
   ]
 }

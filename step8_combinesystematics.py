@@ -3,7 +3,7 @@ combine ScaleUp, ResUp --> ScaleResUp
 ZX systematics templates from qqZZ
 """
 
-from helperstuff.enums import channels, TemplatesFile
+from helperstuff.enums import analyses, channels, TemplatesFile
 from helperstuff.filemanager import tfiles
 import ROOT
 
@@ -46,8 +46,12 @@ def combinesystematics(flavor, analysis):
 
         store += [hup, hdn]
 
-    ZXtemplate = infiles[bkg].templateZXAdapSmoothMirror
-    qqZZtemplate = infiles[bkg].templateqqZZAdapSmoothMirror
+    if analysis.domirror():
+        ZXtemplate = infiles[bkg].templateZXAdapSmoothMirror
+        qqZZtemplate = infiles[bkg].templateqqZZAdapSmoothMirror
+    else:
+        ZXtemplate = infiles[bkg].templateZXAdapSmooth
+        qqZZtemplate = infiles[bkg].templateqqZZAdapSmooth
     ZXUptemplate = qqZZtemplate.Clone(ZXtemplate.GetName())
     ZXUptemplate.Scale(ZXtemplate.Integral() / ZXUptemplate.Integral())
     ZXUptemplate.SetDirectory(outfiles[ZXUp])
@@ -64,5 +68,6 @@ def combinesystematics(flavor, analysis):
         f.Close()
 
 if __name__ == "__main__":
-    for channel in channels:
-        combinesystematics(channel)
+    for analysis in analyses:
+        for channel in channels:
+            combinesystematics(channel, analysis)

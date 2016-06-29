@@ -156,6 +156,20 @@ class Analysis(MyEnum):
             return "D_g1g1prime2_decay"
         else:
             assert False
+    def mixdiscriminantmin(self):
+        if self == "fa3":
+            return -.5
+        elif self == "fa2":
+            return 0.
+        else:
+            assert False
+    def mixdiscriminantmax(self):
+        if self == "fa3":
+            return .5
+        elif self == "fa2":
+            return 1.
+        else:
+            assert False
     def signalsamples(self):
         from samples import Sample
         if self == "fa3":
@@ -169,6 +183,22 @@ class Analysis(MyEnum):
     def domirror(self):
         if self == "fa3": return True
         if self in ["fa2", "fL1"]: return False
+        assert False
+    def mixtemplatename(self):
+        if self == "fa3":
+            return "g1g4"
+        if self == "fa2":
+            return "g1g2"
+        if self == "fL1":
+            return "g1g1prime2"
+        assert False
+    def puretemplatenames(self):
+        if self == "fa3":
+            return "0Plus", "0Minus"
+        if self == "fa2":
+            return "0Plus", "0HPlus"
+        if self == "fL1":
+            return "0Plus", "0L1"
         assert False
 
 channels = [Channel(item) for item in Channel.enumitems]

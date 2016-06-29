@@ -1,7 +1,7 @@
 import collections
 from helperstuff import config
 import helperstuff.style
-from helperstuff.enums import Channel, channels, TemplatesFile
+from helperstuff.enums import analyses, Channel, channels, TemplatesFile
 from helperstuff.filemanager import tfiles
 import os
 import ROOT
@@ -31,8 +31,8 @@ del Projection
 
 Axis = collections.namedtuple("Axis", "name title index")
 axes = [
-        Axis("D0minus", "D_{0^{-}}", 0),
-        Axis("DCP", "D_{CP}", 1),
+        None,
+        None,
         Axis("Dbkg", "D_{bkg}", 2),
        ]
 
@@ -58,7 +58,10 @@ class Template(object):
 
         templatesfile = TemplatesFile("bkg" if self.isbkg else "sig", *args)
         if self.infile:
-            self.h = getattr(tfiles[templatesfile.templatesfile(run1=run1)], self.name if not run1 else self.run1name)
+            try:
+                self.h = getattr(tfiles[templatesfile.templatesfile(run1=run1)], self.name if not run1 else self.run1name)
+            except AttributeError:
+                raise ValueError("File {} does not contain {}!".format(templatesfile.templatesfile(run1=run1), self.name if not run1 else self.run1name))
 
     def Projection(self, i):
         if i not in self.projections:
@@ -85,14 +88,38 @@ def projections(channel, analysis, run1=False, areanormalize=False, systematic =
     channel = Channel(channel)
     templates = [
                  Template("template0PlusAdapSmoothMirror", "0^{+}", 1, True, False),
-                 Template("template0MinusAdapSmoothMirror", "0^{-}", ROOT.kCyan, True, False),
+                 None,
                  Template("templateIntAdapSmoothMirror", "", 0, True, False),
-                 Template("templateMix", "f_{a3}=0.5", 3, False, False),
-                 Template("templateMixMinus", "f_{a3}=-0.5", 4, False, False),
+                 None,
+                 None,
                  Template("templateqqZZAdapSmoothMirror", "qq#rightarrowZZ", 6, True, True, run1name="template_qqZZ"),
                  Template("templateggZZAdapSmoothMirror", "gg#rightarrowZZ", ROOT.kOrange+6, True, True, run1name="template_ggZZ"),
                  Template("templateZXAdapSmoothMirror", "Z+X", 2, True, True, run1name="template_ZX"),
                 ]
+    if analysis == "fa3":
+        axes[0] = Axis("D0minus", "D_{0^{-}}", 0)
+        axes[1] = Axis("DCP", "D_{CP}", 1)
+        templates[1] = Template("template0MinusAdapSmoothMirror", "0^{-}", ROOT.kCyan, True, False)
+        templates[3] = Template("templateMix", "f_{a3}=0.5", 3, False, False)
+        templates[4] = Template("templateMixMinus", "f_{a3}=-0.5", 4, False, False)
+    elif analysis == "fa2":
+        axes[0] = Axis("D_a2", "D_{a_{2}}", 0)
+        axes[1] = Axis("D_a1a2", "D_{a_{1}a_{2}}", 1)
+        templates[1] = Template("template0HPlusAdapSmooth", "0^{+}_{h}", ROOT.kCyan, True, False)
+        templates[3] = Template("templateMix", "f_{a2}=0.5", 3, False, False)
+        templates[4] = Template("templateMixMinus", "f_{a2}=-0.5", 4, False, False)
+        for template in templates:
+            template.name = template.name.replace("Mirror", "")
+    elif analysis == "fL1":
+        axes[0] = Axis("D_a2", "D_{#Lambda_{1}}", 0)
+        axes[1] = Axis("D_a1a2", "D_{a_{1}#Lambda_{1}}", 1)
+        templates[1] = Template("template0HPlusAdapSmooth", "#Lambda1", ROOT.kCyan, True, False)
+        templates[3] = Template("templateMix", "f_{#Lambda1}=0.5", 3, False, False)
+        templates[4] = Template("templateMixMinus", "f_{#Lambda1}=-0.5", 4, False, False)
+        for template in templates:
+            template.name = template.name.replace("Mirror", "")
+    else:
+        assert False
 
     for i, template in enumerate(templates):
         template.GetFromFile(channel, systematic, analysis, run1=run1)
@@ -165,6 +192,10 @@ def projections(channel, analysis, run1=False, areanormalize=False, systematic =
             os.makedirs(os.path.join(dir, str(channel)))
         except OSError:
             pass
+        try:
+            os.makedirs(os.path.join(dir, "{}/{}".format(analysis, channel)))
+        except OSError:
+            pass
         for ext in exts:
             c1.SaveAs(os.path.join(dir, "{}/{}/{}.{}".format(analysis, channel, axis.name, ext)))
 
@@ -172,6 +203,7 @@ if __name__ == "__main__":
   for channel in channels:
     for analysis in analyses:
       projections(channel, analysis, run1=False, areanormalize=False)
-      projections(channel, analysis, run1=True, areanormalize=False)
       projections(channel, analysis, run1=False, areanormalize=True)
-      projections(channel, analysis, run1=True, areanormalize=True)
+      if analysis == "fa3":
+        projections(channel, analysis, run1=True, areanormalize=False)
+        projections(channel, analysis, run1=True, areanormalize=True)
