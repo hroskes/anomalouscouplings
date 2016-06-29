@@ -81,7 +81,7 @@ class Template(object):
 
 exts = "png", "eps", "root", "pdf"
 
-def projections(channel, run1=False, areanormalize=False, systematic = ""):
+def projections(channel, analysis, run1=False, areanormalize=False, systematic = ""):
     channel = Channel(channel)
     templates = [
                  Template("template0PlusAdapSmoothMirror", "0^{+}", 1, True, False),
@@ -95,7 +95,7 @@ def projections(channel, run1=False, areanormalize=False, systematic = ""):
                 ]
 
     for i, template in enumerate(templates):
-        template.GetFromFile(channel, systematic, run1=run1)
+        template.GetFromFile(channel, systematic, analysis, run1=run1)
 
     if run1:
         integralSM = templates[0].Integral()
@@ -166,11 +166,12 @@ def projections(channel, run1=False, areanormalize=False, systematic = ""):
         except OSError:
             pass
         for ext in exts:
-            c1.SaveAs(os.path.join(dir, "{}/{}.{}".format(channel, axis.name, ext)))
+            c1.SaveAs(os.path.join(dir, "{}/{}/{}.{}".format(analysis, channel, axis.name, ext)))
 
 if __name__ == "__main__":
   for channel in channels:
-    projections(channel, run1=False, areanormalize=False)
-    projections(channel, run1=True, areanormalize=False)
-    projections(channel, run1=False, areanormalize=True)
-    projections(channel, run1=True, areanormalize=True)
+    for analysis in analyses:
+      projections(channel, analysis, run1=False, areanormalize=False)
+      projections(channel, analysis, run1=True, areanormalize=False)
+      projections(channel, analysis, run1=False, areanormalize=True)
+      projections(channel, analysis, run1=True, areanormalize=True)

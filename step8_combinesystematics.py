@@ -7,15 +7,15 @@ from helperstuff.enums import channels, TemplatesFile
 from helperstuff.filemanager import tfiles
 import ROOT
 
-def combinesystematics(flavor):
-    nominal = TemplatesFile(flavor, "signal")
-    ResUp = TemplatesFile(flavor, "signal", "ResUp")
-    ScaleUp = TemplatesFile(flavor, "signal", "ScaleUp")
-    ScaleResUp = TemplatesFile(flavor, "signal", "ScaleResUp")
-    ScaleResDown = TemplatesFile(flavor, "signal", "ScaleResDown")
-    bkg = TemplatesFile(flavor, "bkg")
-    ZXUp = TemplatesFile(flavor, "bkg", "ZXUp")
-    ZXDown = TemplatesFile(flavor, "bkg", "ZXDown")
+def combinesystematics(flavor, analysis):
+    nominal = TemplatesFile(flavor, "signal", analysis)
+    ResUp = TemplatesFile(flavor, "signal", "ResUp", analysis)
+    ScaleUp = TemplatesFile(flavor, "signal", "ScaleUp", analysis)
+    ScaleResUp = TemplatesFile(flavor, "signal", "ScaleResUp", analysis)
+    ScaleResDown = TemplatesFile(flavor, "signal", "ScaleResDown", analysis)
+    bkg = TemplatesFile(flavor, "bkg", analysis)
+    ZXUp = TemplatesFile(flavor, "bkg", "ZXUp", analysis)
+    ZXDown = TemplatesFile(flavor, "bkg", "ZXDown", analysis)
 
     infiles = {templatesfile: tfiles[templatesfile.templatesfile()] for templatesfile in (nominal, ScaleUp, ResUp, bkg)}
     outfiles = {templatesfile: ROOT.TFile(templatesfile.templatesfile(), "RECREATE") for templatesfile in (ScaleResUp, ScaleResDown, ZXUp, ZXDown)}

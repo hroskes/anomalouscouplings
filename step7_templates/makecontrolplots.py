@@ -25,5 +25,6 @@ def makecontrolplots(*args):
 if __name__ == "__main__":
     for channel in channels:
         for systematic in treesystematics:
-            makecontrolplots(channel, "signal", systematic)
-        makecontrolplots(channel, "bkg")
+            for analysis in analyses:
+                makecontrolplots(channel, "signal", systematic, analysis)
+            makecontrolplots(channel, "bkg", analysis)

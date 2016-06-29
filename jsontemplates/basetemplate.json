@@ -4,7 +4,7 @@
       "name":"template.oO[templatename]Oo.AdapSmooth",
       "files":[],
       "tree":"candTree",
-      "variables":["D_0minus_decay","D_CP_decay","D_bkg_0plus.oO[systematic]Oo."],
+      "variables":[".oO[purediscriminant]Oo.",".oO[mixdiscriminant]Oo.","D_bkg_0plus.oO[systematic]Oo."],
       "weight":".oO[weightname]Oo.",
       "selection":"ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == .oO[flavorproduct]Oo.",
       "assertion":"D_0minus_decay >= 0. && D_0minus_decay <= 1.",

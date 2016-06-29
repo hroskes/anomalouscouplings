@@ -27,7 +27,8 @@ def buildtemplates(*args):
 if __name__ == "__main__":
     for channel in channels:
         for systematic in treesystematics:
-            buildtemplates(channel, systematic, "signal")
-        buildtemplates(channel, "", "bkg")
+            for analysis in analyses:
+                buildtemplates(channel, systematic, "signal", analysis)
+            buildtemplates(channel, "", "bkg", analysis)
     #and copy data
     shutil.copy(Sample("data").withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))

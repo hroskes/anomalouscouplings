@@ -1,6 +1,7 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
+from helperstuff import constants
 from helperstuff.samples import Sample
-from helperstuff.enums import Channel, channels, treesystematics, TemplatesFile
+from helperstuff.enums import analyses, Channel, channels, treesystematics, TemplatesFile
 import json
 import os
 
@@ -11,6 +12,19 @@ def jsonloads(jsonstring):
         print jsonstring
         raise
 
+def signalsampleslist(analysis):
+    if analysis == "fa2" or analysis == "fa3":
+        return [
+                Sample("ggH", "0+"),
+                Sample("ggH", "a2"),
+                Sample("ggH", "0-"),
+                Sample("ggH", "L1"),
+                Sample("ggH", "fa20.5"),
+                Sample("ggH", "fa30.5"),
+                #Sample("ggH", "fL10.5"),   #NOT fL1 for now
+               ]
+
+
 def makejson(*args):
     templatesfile = TemplatesFile(*args)
     jsondict = {
@@ -19,24 +33,48 @@ def makejson(*args):
                 "templates": [],
                }
     if templatesfile.signalorbkg == "sig":
+        nsamples = len(signalsampleslist(templatesfile.analysis))
         samplesdict = {
                        Sample("ggH", "0+"): {
                                              "templatename": "0Plus",
                                              "weightname": "MC_weight_ggH_g1",
-                                             "scalefactor": str(1./6),
+                                             "scalefactor": str(1./nsamples),
                                             },
                        Sample("ggH", "0-"): {
                                              "templatename": "0Minus",
                                              "weightname": "MC_weight_ggH_g4",
-                                             "scalefactor": str(1./6),
+                                             "scalefactor": str(1./nsamples),
                                             },
                        Sample("ggH",
                                  "fa30.5"): {
                                              "templatename": "g1g4",
                                              "weightname": "MC_weight_ggH_g1g4",
-                                             "scalefactor": str(2./6),
+                                             "scalefactor": str(constants.JHUXS2L2la1a3 / constants.JHUXS2L2la1 /nsamples),
+                                            },
+                       Sample("ggH", "a2"): {
+                                             "templatename": "0HPlus",
+                                             "weightname": "MC_weight_ggH_g2",
+                                             "scalefactor": str(1./nsamples),
+                                            },
+                       Sample("ggH",
+                                 "fa20.5"): {
+                                             "templatename": "g1g2",
+                                             "weightname": "MC_weight_ggH_g1g2",
+                                             "scalefactor": str(constants.JHUXS2L2la1a2 / constants.JHUXS2L2la1 /nsamples),
+                                            },
+                       Sample("ggH", "L1"): {
+                                             "templatename": "0L1",
+                                             "weightname": "MC_weight_ggH_g1prime2",
+                                             "scalefactor": str(1./nsamples),
+                                            },
+                       Sample("ggH",
+                                 "fL10.5"): {
+                                             "templatename": "g1g1prime2",
+                                             "weightname": "MC_weight_ggH_g1g1prime2",
+                                             "scalefactor": str(constants.JHUXS2L2la1L1 / constants.JHUXS2L2la1 /nsamples),
                                             },
                   }
+        samplesdict = {k: v for k, v in samplesdict.iteritems() if k in templatesfile.analysis.signalsamples()}
     else:
         samplesdict = {
                        Sample("qqZZ"):      {
@@ -73,20 +111,14 @@ def makejson(*args):
                   "flavor": str(templatesfile.channel),
                   "flavorproduct": flavorproducts[templatesfile.channel],
                   "systematic": templatesfile.systematic.appendname(),
+                  "purediscriminant": templatesfile.analysis.purediscriminant(),
+                  "mixdiscriminant": templatesfile.analysis.mixdiscriminant(),
                  }
 
 
     for sample, samplemap in samplesdict.iteritems():
         if templatesfile.signalorbkg == "sig":
-            sampleslist = [
-                           Sample("ggH", "0+"),
-                           Sample("ggH", "a2"),
-                           Sample("ggH", "0-"),
-                           Sample("ggH", "L1"),
-                           Sample("ggH", "fa20.5"),
-                           Sample("ggH", "fa30.5"),
-                           #Sample("ggH", "fL10.5"),   #NOT fL1 for now
-                          ]
+            sampleslist = signalsampleslist(templatesfile.analysis)
         elif sample.productionmode == "ggZZ":
             sampleslist = [
                            Sample("ggZZ", "4e"),
@@ -110,7 +142,7 @@ def makejson(*args):
         basejson = jsonloads(basetemplate)
         basejson["templates"][0]["files"] = fileslist
 
-        if domirror[sample]:
+        if analysis.domirror() and domirror[sample]:
             with open("jsontemplates/mirror.json") as f:
                 mirrortemplate = f.read()
             mirrortemplate = replaceByMap(mirrortemplate, repmap)
@@ -143,6 +175,8 @@ def makejson(*args):
 
 if __name__ == "__main__":
     for channel in channels:
-        for systematic in treesystematics:
-            makejson(channel, systematic, "signal")
-        makejson(channel, "bkg")
+        for analysis in analyses:
+            for systematic in treesystematics:
+                print channel, analysis, systematic
+                makejson(channel, systematic, "signal", analysis)
+            makejson(channel, "bkg", analysis)

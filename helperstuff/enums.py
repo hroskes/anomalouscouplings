@@ -132,15 +132,55 @@ class SignalOrBkg(MyEnum):
                  EnumItem("background", "bkg"),
                 )
 
+class Analysis(MyEnum):
+    enumname = "analysis"
+    enumitems = (
+                 EnumItem("fa3"),
+                 EnumItem("fa2"),
+                )
+    def purediscriminant(self):
+        if self == "fa3":
+            return "D_0minus_decay"
+        elif self == "fa2":
+            return "D_g2_decay"
+        elif self == "fL1":
+            return "D_g1prime2_decay"
+        else:
+            assert False
+    def mixdiscriminant(self):
+        if self == "fa3":
+            return "D_CP_decay"
+        elif self == "fa2":
+            return "D_g1g2_decay"
+        elif self == "fL1":
+            return "D_g1g1prime2_decay"
+        else:
+            assert False
+    def signalsamples(self):
+        from samples import Sample
+        if self == "fa3":
+            return (Sample("ggH", "0+"), Sample("ggH", "0-"), Sample("ggH", "fa30.5"))
+        elif self == "fa2":
+            return (Sample("ggH", "0+"), Sample("ggH", "a2"), Sample("ggH", "fa20.5"))
+        elif self == "fL1":
+            return (Sample("ggH", "0+"), Sample("ggH", "L1"), Sample("ggH", "fL10.5"))
+        else:
+            assert False
+    def domirror(self):
+        if self == "fa3": return True
+        if self in ["fa2", "fL1"]: return False
+        assert False
+
 channels = [Channel(item) for item in Channel.enumitems]
 systematics = [Systematic(item) for item in Systematic.enumitems]
 treesystematics = [Systematic(item) for item in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown")]
 flavors = [Flavor(item) for item in Flavor.enumitems]
 hypotheses = [Hypothesis(item) for item in Hypothesis.enumitems]
 productionmodes = [ProductionMode(item) for item in ProductionMode.enumitems]
-
+analyses = [Analysis(item) for item in Analysis.enumitems]
 
 class MultiEnum(object):
+    multienums = []
     def __init__(self, *args):
         for enum in self.enums:
             setattr(self, enum.enumname, None)
@@ -153,6 +193,8 @@ class MultiEnum(object):
                     pass
             else:
                 raise ValueError("{} is not a valid choice for any of: {}".format(arg, ", ".join(e.__name__ for e in self.enums)))
+        for multienum in self.multienums:
+            setattr(self, multienum.multienumname, multienum(*(getattr(self, enum.enumname) for enum in self.enums if enum in multienum.enums)))
 
         self.check(*args)
         self.items = tuple(getattr(self, enum.enumname) for enum in self.enums)
@@ -175,7 +217,7 @@ class MultiEnum(object):
 
 
 class TemplatesFile(MultiEnum):
-    enums = [Channel, Systematic, SignalOrBkg]
+    enums = [Channel, Systematic, SignalOrBkg, Analysis]
 
     def check(self, *args):
         if self.systematic is None:
@@ -185,10 +227,11 @@ class TemplatesFile(MultiEnum):
         super(TemplatesFile, self).check(*args)
 
     def jsonfile(self):
-        return os.path.join(config.repositorydir, "step5_json/templates_{}{}.json".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname()))
+        return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname()))
 
     def templatesfile(self, run1=False):
         if not run1:
-            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_fa3Adap_new.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname()))
+            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_{}Adap_new.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname(), self.analysis))
         else:
+            assert self.analysis == "fa3"
             return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())
