@@ -19,3 +19,4 @@ else:
     raise ValueError("Who/where are you?")
 
 usedata = False
+luminosity = 10
