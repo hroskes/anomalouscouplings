@@ -173,14 +173,14 @@ class Analysis(MyEnum):
             if self == "fa2":
                 return "D_g1g2_decay"
             if self == "fL1":
-                return "D_g1g1prime2_decay"
+                return "D_g2_decay"
         else:
             if self == "fa3":
                 return "D_{CP}"
             if self == "fa2":
                 return "D_{a1a2}"
             if self == "fL1":
-                return "D_{a1#Lambda1}"
+                return "D_{a2}"
         assert False
     def mixdiscriminantmin(self):
         if self == "fa3":
@@ -373,7 +373,7 @@ class Template(MultiEnum):
             elif self.hypothesis == "a2":
                 name = "template0HPlusAdapSmooth"
             elif self.hypothesis == "L1":
-                name = "template0HPlusAdapSmooth"
+                name = "template0L1AdapSmooth"
             elif self.hypothesis in ("fa20.5", "fa30.5", "fL10.5"):
                 if final:
                     name = "templateIntAdapSmooth"
