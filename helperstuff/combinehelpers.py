@@ -34,3 +34,10 @@ def getrates(flavor, analysis):
 
     result =  "rate {} {} {} {}".format(ggH, qqZZ, ggZZ, ZX)
     return result
+
+def gettemplate(*args):
+    return Template(*args).gettemplate()
+
+def getdatatree(channel):
+    channel = Channel(channel)
+    return tfiles[Sample("data").withdiscriminantsfile()].candTree

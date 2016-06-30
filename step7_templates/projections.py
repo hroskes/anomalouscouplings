@@ -116,10 +116,6 @@ def projections(channel, analysis, areanormalize=False, systematic = ""):
         if areanormalize:
             dir = os.path.join(dir, "areanormalized")
         try:
-            os.makedirs(os.path.join(dir, str(channel)))
-        except OSError:
-            pass
-        try:
             os.makedirs(os.path.join(dir, "{}/{}".format(analysis, channel)))
         except OSError:
             pass

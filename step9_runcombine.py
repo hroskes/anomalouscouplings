@@ -2,7 +2,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 from helperstuff import config
 from helperstuff import filemanager
 from helperstuff.combinehelpers import getrates
-from helperstuff.enums import channels
+from helperstuff.enums import Analysis, channels
 from helperstuff.plotlimits import plotlimits
 import os
 import pipes
@@ -11,7 +11,7 @@ import sys
 
 makeworkspacestemplate = """
 eval $(scram ru -sh) &&
-python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo.
+python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo.
 """
 
 runcombinetemplate = """
@@ -21,9 +21,12 @@ text2workspace.py -m 125 hzz4l_4l_8TeV.txt -P HiggsAnalysis.CombinedLimit.SpinZe
 combine -M MultiDimFit fixedMu_8TeV.root --algo=grid --points 100 -m 125 -n $1_8TeV -t -1 --setPhysicsModelParameters CMS_zz4l_fg4=0.0 --expectSignal=1 -V -v 3
 """
 
-def runcombine(foldername):
+def runcombine(analysis, foldername):
+    analysis = Analysis(analysis)
+    foldername = "{}_{}".format(analysis, foldername)
     repmap = {
               "foldername": pipes.quote(foldername),
+              "analysis": str(analysis),
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         subprocess.check_call(replaceByMap(makeworkspacestemplate, repmap), shell=True)
@@ -36,7 +39,7 @@ def runcombine(foldername):
                     contents = f.read()
                 for line in contents.split("\n"):
                     if line.startswith("rate"):
-                        contents = contents.replace(line, "#"+line+"\n"+getrates(channel))
+                        contents = contents.replace(line, "#"+line+"\n"+getrates(channel, "fa2"))
                         break
                 with open("hzz4l_{}S_8TeV.txt".format(channel), "w") as f:
                      f.write(contents)
@@ -49,8 +52,6 @@ def runcombine(foldername):
             plotlimits("higgsCombine_8TeV.MultiDimFit.mH125.root", "CMS_zz4l_fg4", os.path.join(saveasdir, "limit"))
 
 if __name__ == "__main__":
-    try:
-        foldername = sys.argv[1]
-    except IndexError:
-        foldername = "test"
-    runcombine(foldername)
+    analysis = Analysis(sys.argv[1])
+    foldername = sys.argv[2]
+    runcombine(analysis, foldername)

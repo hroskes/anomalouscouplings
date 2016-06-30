@@ -206,8 +206,8 @@ class Analysis(MyEnum):
             return [Sample("ggH", "0+"), Sample("ggH", "L1"), Sample("ggH", "fL10.5")]
         else:
             assert False
-    def signaltemplates(self, channel):
-        return [Template(sample, self, channel) for sample in self.signalsamples()]
+    def signaltemplates(self, channel, systematic=None):
+        return [Template(sample, self, channel, systematic) for sample in self.signalsamples()]
 
 channels = [Channel(item) for item in Channel.enumitems]
 systematics = [Systematic(item) for item in Systematic.enumitems]
@@ -484,7 +484,7 @@ class Template(MultiEnum):
         elif self.templatesfile.analysis == "fa3":
             result = [25, 0, 1, 25, -0.5, 0.5, 25, 0, 1]
         elif self.templatesfile.analysis == "fL1":
-            result = [25, 0, 1, 25, -0.5, 1, 25, 0, 1]
+            result = [25, 0, 1, 25, 0, 1, 25, 0, 1]
         else:
             assert False
         for i in 1, 2, 4, 5, 7, 8:
