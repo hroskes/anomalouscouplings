@@ -1,7 +1,7 @@
 import collections
 from helperstuff import config
 import helperstuff.style
-from helperstuff.enums import analyses, Channel, channels, TemplatesFile
+from helperstuff.enums import analyses, Analysis, Channel, channels, Template, TemplatesFile
 from helperstuff.filemanager import tfiles
 import os
 import ROOT
@@ -36,33 +36,7 @@ axes = [
         Axis("Dbkg", "D_{bkg}", 2),
        ]
 
-class Template(object):
-    def __init__(self, name, title, color, infile, isbkg, run1name=None):
-        self.name = name
-        self.run1name = run1name
-        if run1name is None:
-            self.run1name = name
-        self.title = title
-        self.color = color
-        self.infile = infile
-        self.isbkg = isbkg
-        self.h = None
-        self.projections = {}
-
-    def GetFromFile(self, *args, **kwargs):
-        run1 = False
-        if "run1" in kwargs:
-            run1 = kwargs["run1"]
-            del kwargs["run1"]
-        for k, v in kwargs.iteritems(): raise TypeError("Unknown kwarg {}={}".format(k, v))
-
-        templatesfile = TemplatesFile("bkg" if self.isbkg else "sig", *args)
-        if self.infile:
-            try:
-                self.h = getattr(tfiles[templatesfile.templatesfile(run1=run1)], self.name if not run1 else self.run1name)
-            except AttributeError:
-                raise ValueError("File {} does not contain {}!".format(templatesfile.templatesfile(run1=run1), self.name if not run1 else self.run1name))
-
+class TemplateForProjection(object):
     def Projection(self, i):
         if i not in self.projections:
             result = self.h.Projection(i)
@@ -81,92 +55,47 @@ class Template(object):
 
     def Integral(self, *args, **kwargs):
         return self.h.Integral(*args, **kwargs)
+    
+class TemplateFromFile(TemplateForProjection):
+    def __init__(self, color, *args):
+        self.template = Template(*args)
+        self.title = self.template.title()
+        self.color = color
+        self.h = self.template.gettemplate()
+        self.projections = {}
+
+class TemplateSum(TemplateForProjection):
+    def __init__(self, title, color, *templatesandfactors):
+        self.projections = {}
+        self.title = title
+        self.color = color
+        self.h = None
+        for template, factor in templatesandfactors:
+            if self.h is None:
+                self.h = template.h.Clone()
+                self.h.Scale(factor)
+            else:
+                self.h.Add(template.h, factor)
 
 exts = "png", "eps", "root", "pdf"
 
-def projections(channel, analysis, run1=False, areanormalize=False, systematic = ""):
+def projections(channel, analysis, areanormalize=False, systematic = ""):
     channel = Channel(channel)
+    analysis = Analysis(analysis)
     templates = [
-                 Template("template0PlusAdapSmoothMirror", "0^{+}", 1, True, False),
-                 None,
-                 Template("templateIntAdapSmoothMirror", "", 0, True, False),
-                 None,
-                 None,
-                 Template("templateqqZZAdapSmoothMirror", "qq#rightarrowZZ", 6, True, True, run1name="template_qqZZ"),
-                 Template("templateggZZAdapSmoothMirror", "gg#rightarrowZZ", ROOT.kOrange+6, True, True, run1name="template_ggZZ"),
-                 Template("templateZXAdapSmoothMirror", "Z+X", 2, True, True, run1name="template_ZX"),
+                 TemplateFromFile(1, analysis.signaltemplates(channel)[0]),
+                 TemplateFromFile(ROOT.kCyan, analysis.signaltemplates(channel)[1]),
+                 TemplateFromFile(0, analysis.signaltemplates(channel)[2]),
                 ]
-    if analysis == "fa3":
-        axes[0] = Axis("D0minus", "D_{0^{-}}", 0)
-        axes[1] = Axis("DCP", "D_{CP}", 1)
-        templates[1] = Template("template0MinusAdapSmoothMirror", "0^{-}", ROOT.kCyan, True, False)
-        templates[3] = Template("templateMix", "f_{a3}=0.5", 3, False, False)
-        templates[4] = Template("templateMixMinus", "f_{a3}=-0.5", 4, False, False)
-    elif analysis == "fa2":
-        axes[0] = Axis("D_a2", "D_{a_{2}}", 0)
-        axes[1] = Axis("D_a1a2", "D_{a_{1}a_{2}}", 1)
-        templates[1] = Template("template0HPlusAdapSmooth", "0^{+}_{h}", ROOT.kCyan, True, False)
-        templates[3] = Template("templateMix", "f_{a2}=0.5", 3, False, False)
-        templates[4] = Template("templateMixMinus", "f_{a2}=-0.5", 4, False, False)
-        for template in templates:
-            template.name = template.name.replace("Mirror", "")
-    elif analysis == "fL1":
-        axes[0] = Axis("D_a2", "D_{#Lambda_{1}}", 0)
-        axes[1] = Axis("D_a1a2", "D_{a_{1}#Lambda_{1}}", 1)
-        templates[1] = Template("template0HPlusAdapSmooth", "#Lambda1", ROOT.kCyan, True, False)
-        templates[3] = Template("templateMix", "f_{#Lambda1}=0.5", 3, False, False)
-        templates[4] = Template("templateMixMinus", "f_{#Lambda1}=-0.5", 4, False, False)
-        for template in templates:
-            template.name = template.name.replace("Mirror", "")
-    else:
-        assert False
-
-    for i, template in enumerate(templates):
-        template.GetFromFile(channel, systematic, analysis, run1=run1)
-
-    if run1:
-        integralSM = templates[0].Integral()
-        yields = {
-                  Channel("2e2mu"): 7.9085,
-                  Channel("4e"): 3.1441,
-                  Channel("4mu"): 6.0802,
-                 }
-        for template in templates[0:3]:
-            template.Scale(yields[channel] / integralSM)
-
-        #qqZZ
-        yields = {
-                  Channel("2e2mu"): 8.8585,
-                  Channel("4e"): 2.9364,
-                  Channel("4mu"): 7.6478,
-                 }
-        templates[5].Scale(yields[channel])
-
-        #ggZZ
-        yields = {
-                  Channel("2e2mu"): 0.5005,
-                  Channel("4e"): 0.2041,
-                  Channel("4mu"): 0.4131,
-                 }
-        templates[6].Scale(yields[channel])
-
-        #Z+X
-        yields = {
-                  Channel("2e2mu"): 4.2929,
-                  Channel("4e"): 2.7676,
-                  Channel("4mu"): 1.1878,
-                 }
-        templates[7].Scale(yields[channel])
-
-    templates[3].h = templates[0].h.Clone()
-    templates[3].h.Add(templates[1].h)
-    templates[3].h.Add(templates[2].h)
-    templates[3].Scale(.5)
-
-    templates[4].h = templates[0].h.Clone()
-    templates[4].h.Add(templates[1].h)
-    templates[4].h.Add(templates[2].h, -1)
-    templates[4].Scale(.5)
+    templates+= [
+                 TemplateSum("ggH {}=0.5".format(analysis.title()), 3, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
+                 TemplateSum("ggH {}=-0.5".format(analysis.title()), 4, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
+                 TemplateFromFile(6, analysis, channel, "qqZZ"),
+                 TemplateFromFile(ROOT.kOrange+6, analysis, channel, "ggZZ"),
+                 TemplateFromFile(2, analysis, channel, "ZX"),
+                ]
+    axes[0] = Axis(analysis.purediscriminant(), analysis.purediscriminant(title=True), 0)
+    axes[1] = Axis(analysis.mixdiscriminant(), analysis.mixdiscriminant(title=True), 1)
 
     c1 = ROOT.TCanvas()
     for axis in axes:
@@ -186,8 +115,6 @@ def projections(channel, analysis, run1=False, areanormalize=False, systematic =
         dir = os.path.join(config.plotsbasedir, "templateprojections")
         if areanormalize:
             dir = os.path.join(dir, "areanormalized")
-        if run1:
-            dir = os.path.join(dir, "run1")
         try:
             os.makedirs(os.path.join(dir, str(channel)))
         except OSError:
@@ -202,8 +129,5 @@ def projections(channel, analysis, run1=False, areanormalize=False, systematic =
 if __name__ == "__main__":
   for channel in channels:
     for analysis in analyses:
-      projections(channel, analysis, run1=False, areanormalize=False)
-      projections(channel, analysis, run1=False, areanormalize=True)
-      if analysis == "fa3":
-        projections(channel, analysis, run1=True, areanormalize=False)
-        projections(channel, analysis, run1=True, areanormalize=True)
+      projections(channel, analysis, areanormalize=False)
+      projections(channel, analysis, areanormalize=True)

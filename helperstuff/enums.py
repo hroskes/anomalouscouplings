@@ -141,25 +141,47 @@ class Analysis(MyEnum):
     enumitems = (
                  EnumItem("fa3"),
                  EnumItem("fa2"),
+                 EnumItem("fL1"),
                 )
-    def purediscriminant(self):
+    def title(self):
         if self == "fa3":
-            return "D_0minus_decay"
-        elif self == "fa2":
-            return "D_g2_decay"
-        elif self == "fL1":
-            return "D_g1prime2_decay"
+            return "f_{a3}"
+        if self == "fa2":
+            return "f_{a2}"
+        if self == "fL1":
+            return "f_{#Lambda1}"
+    def purediscriminant(self, title=False):
+        if not title:
+            if self == "fa3":
+                return "D_0minus_decay"
+            if self == "fa2":
+                return "D_g2_decay"
+            if self == "fL1":
+                return "D_g1prime2_decay"
         else:
-            assert False
-    def mixdiscriminant(self):
-        if self == "fa3":
-            return "D_CP_decay"
-        elif self == "fa2":
-            return "D_g1g2_decay"
-        elif self == "fL1":
-            return "D_g1g1prime2_decay"
+            if self == "fa3":
+                return "D_{0-}"
+            if self == "fa2":
+                return "D_{a2}"
+            if self == "fL1":
+                return "D_{#Lambda1}"
+        assert False
+    def mixdiscriminant(self, title=False):
+        if not title:
+            if self == "fa3":
+                return "D_CP_decay"
+            if self == "fa2":
+                return "D_g1g2_decay"
+            if self == "fL1":
+                return "D_g1g1prime2_decay"
         else:
-            assert False
+            if self == "fa3":
+                return "D_{CP}"
+            if self == "fa2":
+                return "D_{a1a2}"
+            if self == "fL1":
+                return "D_{a1#Lambda1}"
+        assert False
     def mixdiscriminantmin(self):
         if self == "fa3":
             return -.5
@@ -184,6 +206,8 @@ class Analysis(MyEnum):
             return [Sample("ggH", "0+"), Sample("ggH", "L1"), Sample("ggH", "fL10.5")]
         else:
             assert False
+    def signaltemplates(self, channel):
+        return [Template(sample, self, channel) for sample in self.signalsamples()]
 
 channels = [Channel(item) for item in Channel.enumitems]
 systematics = [Systematic(item) for item in Systematic.enumitems]
@@ -230,6 +254,8 @@ class MultiEnum(object):
                     break
             else:
                 break
+        while None in argscopy:
+            argscopy.remove(None)
 
         for enum in self.needenums:
             for i, arg in enumerate(argscopy[:]):
@@ -346,7 +372,9 @@ class Template(MultiEnum):
                 name = "template0MinusAdapSmooth"
             elif self.hypothesis == "a2":
                 name = "template0HPlusAdapSmooth"
-            elif self.hypothesis in ("fa20.5", "fa30.5"):
+            elif self.hypothesis == "L1":
+                name = "template0HPlusAdapSmooth"
+            elif self.hypothesis in ("fa20.5", "fa30.5", "fL10.5"):
                 if final:
                     name = "templateIntAdapSmooth"
                 else:
@@ -362,6 +390,14 @@ class Template(MultiEnum):
             name += "Mirror"
 
         return name
+
+    def title(self):
+        if self.productionmode == "ggH":
+            return "{} {}".format(self.productionmode, self.hypothesis)
+        if self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
+            return str(self.productionmode).replace("ZZ", "#rightarrowZZ")
+        if self.productionmode == "ZX":
+            return "Z+X"
 
     def gettemplate(self):
         f = tfiles[self.templatefile()]
@@ -391,6 +427,27 @@ class Template(MultiEnum):
                         Sample("ggH", "fa30.5"),
                         #Sample("ggH", "fL10.5"),   #NOT fL1 for now
                        ]
+            if self.templatesfile.analysis == "fL1":
+                if self.hypothesis in ("0+", "L1"):
+                    return [
+                            Sample("ggH", "0+"),
+                            Sample("ggH", "a2"),
+                            Sample("ggH", "0-"),
+                            Sample("ggH", "L1"),
+                            Sample("ggH", "fa20.5"),
+                            Sample("ggH", "fa30.5"),
+                            #Sample("ggH", "fL10.5"),   #NOT fL1 for now
+                           ]
+                elif self.hypothesis == "fL10.5":
+                    return [
+                            #Sample("ggH", "0+"),
+                            Sample("ggH", "a2"),
+                            #Sample("ggH", "0-"),
+                            Sample("ggH", "L1"),
+                            Sample("ggH", "fa20.5"),
+                            Sample("ggH", "fa30.5"),
+                            Sample("ggH", "fL10.5"),
+                           ]
         if self.productionmode in ("qqZZ", "ZX"):
             return [Sample(self.productionmode)]
         if self.productionmode == "ggZZ":
@@ -426,6 +483,8 @@ class Template(MultiEnum):
             result = [25, 0, 1, 25, 0, 1, 25, 0, 1]
         elif self.templatesfile.analysis == "fa3":
             result = [25, 0, 1, 25, -0.5, 0.5, 25, 0, 1]
+        elif self.templatesfile.analysis == "fL1":
+            result = [25, 0, 1, 25, -0.5, 1, 25, 0, 1]
         else:
             assert False
         for i in 1, 2, 4, 5, 7, 8:
@@ -437,6 +496,8 @@ class Template(MultiEnum):
             return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "a2"))
         if self.templatesfile.analysis == "fa3" and self.hypothesis == "fa30.5":
             return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "0-"))
+        if self.templatesfile.analysis == "fL1" and self.hypothesis == "fL10.5":
+            return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "L1"))
         assert False
 
     def smoothentriesperbin(self):
