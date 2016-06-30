@@ -29,7 +29,8 @@ def runcombine(analysis, foldername):
               "analysis": str(analysis),
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
-        subprocess.check_call(replaceByMap(makeworkspacestemplate, repmap), shell=True)
+        if not os.path.exists("cards_{}".format(foldername)):
+            subprocess.check_call(replaceByMap(makeworkspacestemplate, repmap), shell=True)
         with open("cards_{}/.gitignore".format(foldername), "w") as f:
             f.write("*")
         with filemanager.cd("cards_{}/HCG/125".format(foldername)):
@@ -43,13 +44,14 @@ def runcombine(analysis, foldername):
                         break
                 with open("hzz4l_{}S_8TeV.txt".format(channel), "w") as f:
                      f.write(contents)
-            subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
+            if not os.path.exists("higgsCombine_8TeV.MultiDimFit.mH125.root"):
+                subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
             saveasdir = os.path.join(config.plotsbasedir, "limits", foldername)
             try:
                 os.makedirs(saveasdir)
             except OSError:
                 pass
-            plotlimits("higgsCombine_8TeV.MultiDimFit.mH125.root", "CMS_zz4l_fg4", os.path.join(saveasdir, "limit"))
+            plotlimits("higgsCombine_8TeV.MultiDimFit.mH125.root", "CMS_zz4l_fg4", os.path.join(saveasdir, "limit"), analysis.title())
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])

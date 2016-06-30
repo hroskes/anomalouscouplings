@@ -4,15 +4,15 @@ import ROOT
 import style
 import sys
 
-def plotlimits(treename, branchname, outputfilename):
-    f = ROOT.TFile("higgsCombine_8TeV.MultiDimFit.mH125.root")
+def plotlimits(filename, branchname, outputfilename, xaxislabel):
+    f = ROOT.TFile(filename)
     assert f
     t = f.Get("limit")
     assert t
 
     NLL = ExtendedCounter() 
 
-    for i in range(1, t.GetEntries()-1):
+    for i in range(1, t.GetEntries()):
         t.GetEntry(i)
         fa3 = getattr(t, branchname)
         deltaNLL = t.deltaNLL
@@ -22,7 +22,7 @@ def plotlimits(treename, branchname, outputfilename):
     c1 = ROOT.TCanvas()
     g = NLL.TGraph()
     g.Draw("AC")
-    g.GetXaxis().SetTitle("f_{a3}")
+    g.GetXaxis().SetTitle(xaxislabel)
     g.GetXaxis().SetRangeUser(-1, 1)
     g.GetYaxis().SetTitle("-2#Deltaln L")
     drawlines()
