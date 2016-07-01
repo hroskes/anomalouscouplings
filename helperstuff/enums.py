@@ -522,7 +522,23 @@ class Template(MultiEnum):
         else:
             return 50
 
+    def reweightaxes(self):
+        if self.productionmode == "ZX" and self.templatesfile.channel == "4mu":
+            return []
+        if self.productionmode == "ZX" and self.templatesfile.channel == "2e2mu" and self.templatesfile.analysis == "fL1":
+            return [0, 2]
+        if self.productionmode == "ZX" and self.templatesfile.channel == "2e2mu" and self.templatesfile.analysis in ["fa2", "fa3"]:
+            return [1, 2]
+        if self.productionmode == "ggZZ" and self.templatesfile.channel == "2e2mu" and self.templatesfile.analysis == "fa3":
+            return [1, 2]
+        if self.productionmode == "ZX" and self.templatesfile.channel == "4e" and self.templatesfile.analysis == "fa3":
+            return [0, 2]
+        if self.productionmode == "qqZZ" and self.templatesfile.channel == "4mu" and self.templatesfile.analysis == "fa3":
+            return [1, 2]
+        return [0, 1, 2]
+
     def getjson(self):
+        print self.reweightaxes()
         jsn = {
                "templates": [
                  {
@@ -540,7 +556,7 @@ class Template(MultiEnum):
                    "conserveSumOfWeights": True,
                    "postprocessing": [
                      {"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin()},
-                     {"type": "reweight", "axes": [0,1,2]},
+                     {"type": "reweight", "axes": self.reweightaxes()},
                      {"type": "rescale","factor": self.scalefactor()},
                    ],
                    "filloverflows": True,
