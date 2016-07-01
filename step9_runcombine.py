@@ -50,7 +50,7 @@ def runcombine(analysis, foldername, **kwargs):
                         contents = f.read()
                     for line in contents.split("\n"):
                         if line.startswith("rate"):
-                            contents = contents.replace(line, "#"+line+"\n"+getrates(channel, "fa2"))
+                            contents = contents.replace(line, "#"+line+"\n"+getrates(channel))
                             break
                     with open("hzz4l_{}S_8TeV.txt".format(channel), "w") as f:
                         f.write(contents)

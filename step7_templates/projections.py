@@ -1,8 +1,9 @@
 import collections
-from helperstuff import config
-import helperstuff.style
-from helperstuff.enums import analyses, Analysis, Channel, channels, Template, TemplatesFile
+from helperstuff import config, constants
+from helperstuff.combinehelpers import getrate
+from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Systematic, Template, TemplatesFile
 from helperstuff.filemanager import tfiles
+import helperstuff.style
 import os
 import ROOT
 import subprocess
@@ -55,17 +56,33 @@ class TemplateForProjection(object):
 
     def Integral(self, *args, **kwargs):
         return self.h.Integral(*args, **kwargs)
+
+class Normalization(MyEnum):
+    enumname = "normalization"
+    enumitems = [
+                 EnumItem(""),
+                 EnumItem("nointegratedinterference"),
+                 EnumItem("areanormalize"),
+                ]
+normalizations = [Normalization(normalization) for normalization in Normalization.enumitems]
     
-class TemplateFromFile(TemplateForProjection):
+class TemplateFromFile(TemplateForProjection, MultiEnum):
+    enums = [Template, Normalization]
     def __init__(self, color, *args):
-        self.template = Template(*args)
+        super(TemplateFromFile, self).__init__(*args)
         self.title = self.template.title()
         self.color = color
         self.h = self.template.gettemplate()
         self.projections = {}
+        if normalization == "areanormalize":
+            self.Scale(1 / self.Integral())
+    def check(self, *args):
+        if self.normalization is None:
+            self.normalization = Normalization("")
+        super(TemplateFromFile, self).check(*args)
 
 class TemplateSum(TemplateForProjection):
-    def __init__(self, title, color, *templatesandfactors):
+    def __init__(self, title, color, mixturesign, *templatesandfactors):
         self.projections = {}
         self.title = title
         self.color = color
@@ -76,45 +93,54 @@ class TemplateSum(TemplateForProjection):
                 self.h.Scale(factor)
             else:
                 self.h.Add(template.h, factor)
+        analyses = set(t[0].template.templatesfile.analysis for t in templatesandfactors)
+        assert len(analyses) == 1
+        analyses = list(analyses)[0]
+        assert abs(mixturesign) == 1
+        if normalization != "nointegratedinterference":
+            mixturesign = 0
+        else:
+            self.Scale(constants.JHUXS2L2la1 / (2*constants.JHUXS2L2la1 + mixturesign*analysis.interfxsec()))
 
 exts = "png", "eps", "root", "pdf"
 
-def projections(channel, analysis, areanormalize=False, systematic = ""):
+def projections(channel, analysis, normalization = "", systematic = ""):
     channel = Channel(channel)
     analysis = Analysis(analysis)
+    normalization = Normalization(normalization)
+    systematic = Systematic(systematic)
     templates = [
-                 TemplateFromFile(1, analysis.signaltemplates(channel)[0]),
-                 TemplateFromFile(ROOT.kCyan, analysis.signaltemplates(channel)[1]),
-                 TemplateFromFile(0, analysis.signaltemplates(channel)[2]),
+                 TemplateFromFile(1, normalization, analysis.signaltemplates(channel, systematic)[0]),
+                 TemplateFromFile(ROOT.kCyan, normalization, analysis.signaltemplates(channel, systematic)[1]),
+                 TemplateFromFile(0, normalization, analysis.signaltemplates(channel, systematic)[2]),
                 ]
     templates+= [
-                 TemplateSum("ggH {}=0.5".format(analysis.title()), 3, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
-                 TemplateSum("ggH {}=-0.5".format(analysis.title()), 4, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
-                 TemplateFromFile(6, analysis, channel, "qqZZ"),
-                 TemplateFromFile(ROOT.kOrange+6, analysis, channel, "ggZZ"),
-                 TemplateFromFile(2, analysis, channel, "ZX"),
+                 TemplateSum("ggH {}=0.5".format(analysis.title()), 3, 1, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
+                 TemplateSum("ggH {}=-0.5".format(analysis.title()), 4, -1, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
+                 TemplateFromFile(6, normalization, analysis, channel, "qqZZ", systematic),
+                 TemplateFromFile(ROOT.kOrange+6, normalization, analysis, channel, "ggZZ", systematic),
+                 TemplateFromFile(2, normalization, analysis, channel, "ZX", systematic),
                 ]
     axes[0] = Axis(analysis.purediscriminant(), analysis.purediscriminant(title=True), 0)
     axes[1] = Axis(analysis.mixdiscriminant(), analysis.mixdiscriminant(title=True), 1)
 
     c1 = ROOT.TCanvas()
+    legend = ROOT.TLegend(.75, .65, .9, .9)
+    legend.SetBorderSize(0)
+    legend.SetFillStyle(0)
+    for template in templates:
+        if template.color:
+            template.AddToLegend(legend)
+
     for axis in axes:
         hstack = ROOT.THStack(axis.name, axis.title)
-        legend = ROOT.TLegend(.75, .65, .9, .9)
-        legend.SetBorderSize(0)
-        legend.SetFillStyle(0)
         for template in templates:
-            if not template.color: continue
-            if areanormalize:
-                template.Scale(1 / template.Integral())
-            hstack.Add(template.Projection(axis.index))
-            template.AddToLegend(legend)
+            if template.color:
+                hstack.Add(template.Projection(axis.index))
         hstack.Draw("nostack hist")
         hstack.GetXaxis().SetTitle(axis.title)
         legend.Draw()
-        dir = os.path.join(config.plotsbasedir, "templateprojections")
-        if areanormalize:
-            dir = os.path.join(dir, "areanormalized")
+        dir = os.path.join(config.plotsbasedir, "templateprojections", str(normalization))
         try:
             os.makedirs(os.path.join(dir, "{}/{}".format(analysis, channel)))
         except OSError:
@@ -125,5 +151,6 @@ def projections(channel, analysis, areanormalize=False, systematic = ""):
 if __name__ == "__main__":
   for channel in channels:
     for analysis in analyses:
-      projections(channel, analysis, areanormalize=False)
-      projections(channel, analysis, areanormalize=True)
+      for normalization in normalizations:
+        projections(channel, analysis, normalization)
+        projections(channel, analysis, normalization)

@@ -27,7 +27,7 @@ class MyEnum(object):
         if isinstance(value, (type(self), EnumItem)):
             value = str(value)
         for item in self.enumitems:
-            if value in item.names:
+            if value in item.names and not isinstance(value, MyEnum):
                 self.item = item
                 break
         else:
@@ -38,6 +38,8 @@ class MyEnum(object):
         return str(self.item)
 
     def __eq__(self, other):
+        if isinstance(other, MyEnum) and not isinstance(other, type(self)) and not isinstance(self, type(other)):
+            return False
         try:
             other = type(self)(other)
             return self.item == other.item
@@ -211,6 +213,14 @@ class Analysis(MyEnum):
             assert False
     def signaltemplates(self, channel, systematic=None):
         return [Template(sample, self, channel, systematic) for sample in self.signalsamples()]
+    def interfxsec(self):
+        if self == "fa3":
+            return constants.JHUXS2L2la1a3 - 2*constants.JHUXS2L2la1
+        elif self == "fa2":
+            return constants.JHUXS2L2la1a2 - 2*constants.JHUXS2L2la1
+        elif self == "fL1":
+            return constants.JHUXS2L2la1L1 - 2*constants.JHUXS2L2la1
+        assert False
 
 channels = [Channel(item) for item in Channel.enumitems]
 systematics = [Systematic(item) for item in Systematic.enumitems]
@@ -337,6 +347,7 @@ class TemplatesFile(MultiEnum):
 
 class Template(MultiEnum):
     enums = [TemplatesFile, ProductionMode, Hypothesis]
+    enumname = "template"
 
     def applysynonyms(self, enumsdict):
         if enumsdict[SignalOrBkg] is None:
@@ -576,7 +587,3 @@ class Template(MultiEnum):
             jsn["templates"] += intjsn["templates"]
 
         return jsn
-
-if __name__ == "__main__":
-    print Template("ggH", "4mu", "fa30.5", "fa3").gettemplate().Integral()
-    print Template("ggH", "4mu", "fa20.5", "fa2").gettemplate().Integral()
