@@ -32,6 +32,13 @@ def getrates(flavor, analysis):
              * config.luminosity / 2.8
          )
 
+    ######################
+    #       PATCH        #
+    ######################
+    if flavor == "4e":    qqZZ, ggZZ, ZX = 3.26, 0.40, 1.38
+    if flavor == "4mu":   qqZZ, ggZZ, ZX = 7.17, 0.77, 1.13
+    if flavor == "2e2mu": qqZZ, ggZZ, ZX = 8.77, 0.66, 2.73
+
     result =  "rate {} {} {} {}".format(ggH, qqZZ, ggZZ, ZX)
     return result
 
