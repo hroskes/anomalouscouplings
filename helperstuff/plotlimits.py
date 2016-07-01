@@ -18,6 +18,8 @@ def plotlimits(filename, branchname, outputfilename, xaxislabel):
         deltaNLL = t.deltaNLL
         print fa3
         NLL[fa3] = 2*deltaNLL
+    if 1 not in NLL and -1 in NLL:
+        NLL[1] = NLL[-1]
 
     c1 = ROOT.TCanvas()
     g = NLL.TGraph()
