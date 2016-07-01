@@ -35,9 +35,11 @@ def getrates(flavor, analysis):
     ######################
     #       PATCH        #
     ######################
-    if flavor == "4e":    qqZZ, ggZZ, ZX = 3.26, 0.40, 1.38
-    if flavor == "4mu":   qqZZ, ggZZ, ZX = 7.17, 0.77, 1.13
-    if flavor == "2e2mu": qqZZ, ggZZ, ZX = 8.77, 0.66, 2.73
+    #qqZZ and ggZZ are from 76X MC
+    #7X from https://indico.cern.ch/event/515361/contributions/2223587/attachments/1302276/1944656/20160701_hzz4l_zxSS_v1.pdf
+    if flavor == "4e":    qqZZ, ggZZ, ZX = 3.26, 0.40, 2.196
+    if flavor == "4mu":   qqZZ, ggZZ, ZX = 7.17, 0.77, 3.003
+    if flavor == "2e2mu": qqZZ, ggZZ, ZX = 8.77, 0.66, 3.116
 
     result =  "rate {} {} {} {}".format(ggH, qqZZ, ggZZ, ZX)
     return result
