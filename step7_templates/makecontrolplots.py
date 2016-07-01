@@ -1,4 +1,4 @@
-from helperstuff import config
+from helperstuff import config, style  #style needed to remove the statbox and title and adjust the axis label size
 from helperstuff.enums import analyses, channels, treesystematics, TemplatesFile
 import os
 import ROOT
@@ -18,9 +18,22 @@ def makecontrolplots(*args):
 
     exts = "png", "eps", "root", "pdf"
 
+    axistitles = [templatesfile.analysis.purediscriminant(True), templatesfile.analysis.mixdiscriminant(True), templatesfile.systematic.D_bkg_0plus(True)]
+
     for key in d.GetListOfKeys():
+      c = key.ReadObj()
+      if not isinstance(c, ROOT.TCanvas):
+        raise TypeError("Unknown object {} in {}/controlPlots".format(key.GetName(), templatesfile.templatesfile()))
+      c.GetListOfPrimitives()[1].SetLineColor(2)  #put the line back to red, importing style breaks this for some reason
+      axisnumber = int(c.GetName().split("_")[-2].replace("projAxis", ""))
+      hstack = ROOT.THStack()
+      hstack.Add(c.GetListOfPrimitives()[0], "P E X0")
+      hstack.Add(c.GetListOfPrimitives()[1], "hist")
+      c1 = ROOT.TCanvas(c.GetName(), c.GetTitle())
+      hstack.Draw("nostack")
+      hstack.GetXaxis().SetTitle(axistitles[axisnumber])
       for ext in exts:
-        key.ReadObj().SaveAs("{}/{}.{}".format(saveasdir, key.ReadObj().GetName(), ext))
+        c1.SaveAs("{}/{}.{}".format(saveasdir, key.ReadObj().GetName(), ext))
 
 if __name__ == "__main__":
     for channel in channels:

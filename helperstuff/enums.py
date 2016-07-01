@@ -119,8 +119,11 @@ class Systematic(MyEnum):
     def appendname(self):
         if self == "": return ""
         return "_" + str(self)
-    def D_bkg_0plus(self):
-        return "D_bkg_0plus"+self.appendname()
+    def D_bkg_0plus(self, title=False):
+        if not title:
+            return "D_bkg_0plus"+self.appendname()
+        else:
+            return "D_{bkg}^{"+self.appendname()+"}"
     def appliesto(self, signalorbkg):
         if signalorbkg == "signal":
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
