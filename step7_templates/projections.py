@@ -117,7 +117,7 @@ def projections(channel, analysis, normalization = "", systematic = ""):
                  TemplateFromFile(0, normalization, analysis.signaltemplates(channel, systematic)[2]),
                 ]
     templates+= [
-                 TemplateSum("ggH {}=0.5".format(analysis.title()), 3, 1, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
+                 TemplateSum("ggH {}=0.5".format(analysis.title()), ROOT.kGreen+3, 1, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
                  TemplateSum("ggH {}=-0.5".format(analysis.title()), 4, -1, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
                  TemplateFromFile(6, normalization, analysis, channel, "qqZZ", systematic),
                  TemplateFromFile(ROOT.kOrange+6, normalization, analysis, channel, "ggZZ", systematic),

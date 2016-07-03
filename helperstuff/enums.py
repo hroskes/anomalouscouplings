@@ -167,7 +167,7 @@ class Analysis(MyEnum):
             if self == "fa3":
                 return "D_{0-}"
             if self == "fa2":
-                return "D_{a2}"
+                return "D_{0h+}"
             if self == "fL1":
                 return "D_{#Lambda1}"
         assert False
@@ -183,9 +183,9 @@ class Analysis(MyEnum):
             if self == "fa3":
                 return "D_{CP}"
             if self == "fa2":
-                return "D_{a1a2}"
+                return "D_{int}"
             if self == "fL1":
-                return "D_{a2}"
+                return "D_{0h+}"
         assert False
     def mixdiscriminantmin(self):
         if self == "fa3":
