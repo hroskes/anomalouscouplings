@@ -61,7 +61,7 @@ class Normalization(MyEnum):
     enumname = "normalization"
     enumitems = [
                  EnumItem(""),
-                 EnumItem("nointegratedinterference"),
+                 EnumItem("rescalemixtures"),
                  EnumItem("areanormalize"),
                 ]
 normalizations = [Normalization(normalization) for normalization in Normalization.enumitems]
@@ -72,10 +72,13 @@ class TemplateFromFile(TemplateForProjection, MultiEnum):
         super(TemplateFromFile, self).__init__(*args)
         self.title = self.template.title()
         self.color = color
-        self.h = self.template.gettemplate()
+        self.h = self.template.gettemplate().Clone()
         self.projections = {}
-        if normalization == "areanormalize":
-            self.Scale(1 / self.Integral())
+        if self.template.productionmode == "ggH":
+            scalefactor = getrate("2e2mu", self.template.productionmode) / Template(self.template.templatesfile.analysis, "2e2mu", self.template.productionmode, "0+").gettemplate().Integral()
+        else:
+            scalefactor = getrate(self.template.templatesfile.channel, self.template.productionmode) / self.Integral()
+        self.Scale(scalefactor)
     def check(self, *args):
         if self.normalization is None:
             self.normalization = Normalization("")
@@ -97,10 +100,9 @@ class TemplateSum(TemplateForProjection):
         assert len(analyses) == 1
         analyses = list(analyses)[0]
         assert abs(mixturesign) == 1
-        if normalization != "nointegratedinterference":
+        if normalization != "rescalemixtures":
             mixturesign = 0
-        else:
-            self.Scale(constants.JHUXS2L2la1 / (2*constants.JHUXS2L2la1 + mixturesign*analysis.interfxsec()))
+        self.Scale(constants.JHUXS2L2la1 / (2*constants.JHUXS2L2la1 + mixturesign*analysis.interfxsec()))
 
 exts = "png", "eps", "root", "pdf"
 
@@ -130,6 +132,8 @@ def projections(channel, analysis, normalization = "", systematic = ""):
     legend.SetFillStyle(0)
     for template in templates:
         if template.color:
+            if normalization == "areanormalize":
+                template.Scale(1/template.Integral())
             template.AddToLegend(legend)
 
     for axis in axes:
@@ -152,5 +156,5 @@ if __name__ == "__main__":
   for channel in channels:
     for analysis in analyses:
       for normalization in normalizations:
-        projections(channel, analysis, normalization)
+#        if channel != "2e2mu" or analysis != "fa3" or normalization != "areanormalize": continue
         projections(channel, analysis, normalization)
