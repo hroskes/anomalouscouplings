@@ -52,10 +52,10 @@ class Systematic(object):
         if self.name == "pdf_qqbar": return MoriondSystematic("pdf_qq")
         if self.name == "pdf_hzz4l_accept": return None
         if self.name == "QCDscale_ggH": return MoriondSystematic("QCDscale_ggH")
-        if self.name == "QCDscale_qqH": return MoriondSystematic("QCDscale_qqH", ["qqH", "qqZZ", "ggZZ", "zjets"])
-        if self.name == "QCDscale_VH": return MoriondSystematic("QCDscale_VH", ["ZH", "qqZZ", "ggZZ", "zjets"])
-        if self.name == "QCDscale_ttH": return MoriondSystematic("QCDscale_ttH", ["ttH", "qqZZ", "ggZZ", "zjets"])
-        if self.name == "QCDscale_ggVV": return MoriondSystematic("QCDscale_ggVV", )
+        if self.name == "QCDscale_qqH": return MoriondSystematic("QCDscale_qqH")  #these evaluate to all dashes
+        if self.name == "QCDscale_VH": return MoriondSystematic("QCDscale_VH")    #need to figure out how to add them
+        if self.name == "QCDscale_ttH": return MoriondSystematic("QCDscale_ttH")  #to QCDscale_ggH properly
+        if self.name == "QCDscale_ggVV": return MoriondSystematic("QCDscale_ggVV")
         if self.name == "QCDscale_VV": return MoriondSystematic("QCDscale_VV")
         if self.name == "BRhiggs_hzz4l": return MoriondSystematic("BRhiggs_hzz4l")
         if self.name == "CMS_eff_m": return MoriondSystematic("CMS_eff_m")
