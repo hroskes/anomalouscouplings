@@ -4,6 +4,7 @@ from helperstuff import filemanager
 from helperstuff.combinehelpers import getrates
 from helperstuff.enums import Analysis, Channel, channels
 from helperstuff.plotlimits import plotlimits
+from helperstuff.replacesystematics import replacesystematics
 import os
 import pipes
 import subprocess
@@ -48,6 +49,7 @@ def runcombine(analysis, foldername, **kwargs):
                 if channel in usechannels:
                     with open("hzz4l_{}S_8TeV.txt".format(channel)) as f:
                         contents = f.read()
+                        if "\n#rate" in contents: continue #already did this
                     for line in contents.split("\n"):
                         if line.startswith("rate"):
                             contents = contents.replace(line, "#"+line+"\n"+getrates(channel))
@@ -58,6 +60,8 @@ def runcombine(analysis, foldername, **kwargs):
                     os.remove("hzz4l_{}S_8TeV.txt".format(channel))
                     os.remove("hzz4l_{}S_8TeV.input.root".format(channel))
             if not os.path.exists("higgsCombine_8TeV.MultiDimFit.mH125.root"):
+                for channel in usechannels:
+                    replacesystematics(channel)
                 subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
             saveasdir = os.path.join(config.plotsbasedir, "limits", foldername)
             try:

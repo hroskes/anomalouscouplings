@@ -65,6 +65,8 @@ class Channel(MyEnum):
         if self == "4e":    return 11*11*11*11
         if self == "4mu":   return 13*13*13*13
         assert False
+    def moriondcardfile(self):
+        return os.path.join(config.repositorydir, "helperstuff/moriondcards/hzz4lcard_{}_0.txt".format(self))
 
 class Flavor(MyEnum):
     enumname = "flavor"
