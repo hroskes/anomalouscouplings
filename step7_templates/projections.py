@@ -1,7 +1,7 @@
 import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate
-from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Systematic, Template, TemplatesFile
+from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Systematic, Template
 from helperstuff.filemanager import tfiles
 import helperstuff.style
 import os
@@ -74,10 +74,10 @@ class TemplateFromFile(TemplateForProjection, MultiEnum):
         self.color = color
         self.h = self.template.gettemplate().Clone()
         self.projections = {}
-        if self.template.productionmode == "ggH":
-            scalefactor = getrate("2e2mu", self.template.productionmode) / Template(self.template.templatesfile.analysis, "2e2mu", self.template.productionmode, "0+").gettemplate().Integral()
+        if self.productionmode == "ggH":
+            scalefactor = getrate("2e2mu", self.productionmode) / Template(self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
         else:
-            scalefactor = getrate(self.template.templatesfile.channel, self.template.productionmode) / self.Integral()
+            scalefactor = getrate(self.channel, self.productionmode) / self.Integral()
         self.Scale(scalefactor)
     def check(self, *args):
         if self.normalization is None:
@@ -96,7 +96,7 @@ class TemplateSum(TemplateForProjection):
                 self.h.Scale(factor)
             else:
                 self.h.Add(template.h, factor)
-        analyses = set(t[0].template.templatesfile.analysis for t in templatesandfactors)
+        analyses = set(t[0].analysis for t in templatesandfactors)
         assert len(analyses) == 1
         analyses = list(analyses)[0]
         assert abs(mixturesign) == 1

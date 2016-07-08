@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import config
 import constants
 from filemanager import tfiles
@@ -236,6 +237,7 @@ class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):
         enums = dct["enums"]
         dct["needenums"] = needenums = enums[:]
+        dct["subenums"] = subenums = OrderedDict()
         while True:
             for enum in needenums[:]:
                 if issubclass(enum, MultiEnum):
@@ -243,6 +245,7 @@ class MetaclassForMultiEnums(type):
                     needenums.remove(enum)
                     needenums += [a for a in enum.enums if a not in needenums]
                     #break out of for in order to continue in the while, to allow for more deeply nested MultiEnums
+                    subenums[enum] = enum.enums
                     break
                 elif issubclass(enum, MyEnum):
                     if enum not in needenums:
@@ -251,6 +254,8 @@ class MetaclassForMultiEnums(type):
                     raise TypeError("{} is not a MyEnum or a MultiEnum! (in class {})".format(enum, clsname))
             else:
                 break
+        for _ in "enums", "needenums":
+            dct[_] = tuple(dct[_])
         return super(MetaclassForMultiEnums, cls).__new__(cls, clsname, bases, dct)
 
 class MultiEnum(object):
@@ -294,6 +299,10 @@ class MultiEnum(object):
             if issubclass(enum, MultiEnum):
                 setattr(self, enum.enumname, enum(*(v for k, v in enumsdict.iteritems() if k in enum.needenums and v is not None)))
 
+        for subenum, subsubenums in self.subenums.iteritems():
+            for subsubenum in subsubenums:
+                setattr(self, subsubenum.enumname, getattr(getattr(self, subenum.enumname), subsubenum.enumname))
+
         self.check(*args)
         for enum in self.enums:
             if isinstance(enum, MultiEnum):
@@ -327,9 +336,9 @@ class TemplatesFile(MultiEnum):
     def check(self, *args):
         if self.systematic is None:
             self.systematic = Systematic("")
+        super(TemplatesFile, self).check(*args)
         if not self.systematic.appliesto(self.signalorbkg):
             raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
-        super(TemplatesFile, self).check(*args)
 
     def jsonfile(self):
         return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname()))
@@ -355,8 +364,10 @@ class Template(MultiEnum):
         if enumsdict[SignalOrBkg] is None:
             if enumsdict[ProductionMode] == "ggH":
                 enumsdict[SignalOrBkg] = "signal"
-            if enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "ZX"):
+            elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "ZX"):
                 enumsdict[SignalOrBkg] = "bkg"
+            else:
+                assert False
 
     def check(self, *args):
         from samples import Sample
@@ -364,16 +375,16 @@ class Template(MultiEnum):
             raise ValueError("No option provided for productionmode\n{}".format(args))
         elif self.productionmode == "ggH":
             if self.hypothesis is None:
-                raise ValueError("No hypothesis provided for ggH productionmode\n{}".format(args))
-            if Sample(self.productionmode, self.hypothesis) not in self.templatesfile.analysis.signalsamples():
-                raise ValueError("Hypothesis {} is not used in analysis {}!\n{}".format(self.hypothesis, self.templatesfile.analysis, args))
-            if self.templatesfile.signalorbkg == "bkg":
-                raise ValueError("ggH is not bkg!\n{}".format(args))
+                raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
+            if Sample(self.productionmode, self.hypothesis) not in self.analysis.signalsamples():
+                raise ValueError("Hypothesis {} is not used in analysis {}!\n{}".format(self.hypothesis, self.analysis, args))
+            if self.signalorbkg != "signal":
+                raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.signalorbkg, args))
         elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.templatesfile.signalorbkg == "sig":
-                raise ValueError("{} is not signal!\n{}".format(self.hypothesis, args))
+            if self.signalorbkg != "bkg":
+                raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.signalorbkg, args))
         else:
             raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
 
@@ -402,7 +413,7 @@ class Template(MultiEnum):
         else:
             assert False
 
-        if self.templatesfile.analysis == "fa3" and final:
+        if self.analysis == "fa3" and final:
             name += "Mirror"
 
         return name
@@ -433,7 +444,7 @@ class Template(MultiEnum):
     def reweightfrom(self):
         from samples import Sample
         if self.productionmode == "ggH":
-            if self.templatesfile.analysis in ("fa2", "fa3"):
+            if self.analysis in ("fa2", "fa3"):
                 return [
                         Sample("ggH", "0+"),
                         Sample("ggH", "a2"),
@@ -443,7 +454,7 @@ class Template(MultiEnum):
                         Sample("ggH", "fa30.5"),
                         #Sample("ggH", "fL10.5"),   #NOT fL1 for now
                        ]
-            if self.templatesfile.analysis == "fL1":
+            if self.analysis == "fL1":
                 if self.hypothesis in ("0+", "L1"):
                     return [
                             Sample("ggH", "0+"),
@@ -471,7 +482,7 @@ class Template(MultiEnum):
         assert False
 
     def scalefactor(self):
-        if self.templatesfile.signalorbkg == "bkg": return 1
+        if self.signalorbkg == "bkg": return 1
         if self.hypothesis in ("0+", "0-", "a2", "L1"):
             result = 1.0
         elif self.hypothesis == "fa30.5":
@@ -486,20 +497,20 @@ class Template(MultiEnum):
         return result
 
     def domirror(self, final=True):
-        return self.templatesfile.analysis == "fa3" and not (not final and self.hypothesis == "fa30.5")
+        return self.analysis == "fa3" and not (not final and self.hypothesis == "fa30.5")
 
     def discriminants(self):
         return [
-                self.templatesfile.analysis.purediscriminant(),
-                self.templatesfile.analysis.mixdiscriminant(),
-                self.templatesfile.systematic.D_bkg_0plus(),
+                self.analysis.purediscriminant(),
+                self.analysis.mixdiscriminant(),
+                self.systematic.D_bkg_0plus(),
                ]
     def binning(self):
-        if self.templatesfile.analysis == "fa2":
+        if self.analysis == "fa2":
             result = [25, 0, 1, 25, 0, 1, 25, 0, 1]
-        elif self.templatesfile.analysis == "fa3":
+        elif self.analysis == "fa3":
             result = [25, 0, 1, 25, -0.5, 0.5, 25, 0, 1]
-        elif self.templatesfile.analysis == "fL1":
+        elif self.analysis == "fL1":
             result = [25, 0, 1, 25, 0, 1, 25, 0, 1]
         else:
             assert False
@@ -508,39 +519,38 @@ class Template(MultiEnum):
         return result
 
     def puretemplatestosubtract(self):
-        if self.templatesfile.analysis == "fa2" and self.hypothesis == "fa20.5":
+        if self.analysis == "fa2" and self.hypothesis == "fa20.5":
             return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "a2"))
-        if self.templatesfile.analysis == "fa3" and self.hypothesis == "fa30.5":
+        if self.analysis == "fa3" and self.hypothesis == "fa30.5":
             return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "0-"))
-        if self.templatesfile.analysis == "fL1" and self.hypothesis == "fL10.5":
+        if self.analysis == "fL1" and self.hypothesis == "fL10.5":
             return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "L1"))
         assert False
 
     def smoothentriesperbin(self):
         if self.productionmode == "ZX":
             return 5
-        elif self.templatesfile.signalorbkg == "bkg":
+        elif self.signalorbkg == "bkg":
             return 20
         else:
             return 50
 
     def reweightaxes(self):
-        if self.productionmode == "ZX" and self.templatesfile.channel == "4mu":
+        if self.productionmode == "ZX" and self.channel == "4mu":
             return []
-        if self.productionmode == "ZX" and self.templatesfile.channel == "2e2mu" and self.templatesfile.analysis == "fL1":
+        if self.productionmode == "ZX" and self.channel == "2e2mu" and self.analysis == "fL1":
             return [0, 2]
-        if self.productionmode == "ZX" and self.templatesfile.channel == "2e2mu" and self.templatesfile.analysis in ["fa2", "fa3"]:
+        if self.productionmode == "ZX" and self.channel == "2e2mu" and self.analysis in ["fa2", "fa3"]:
             return [1, 2]
-        if self.productionmode == "ggZZ" and self.templatesfile.channel == "2e2mu" and self.templatesfile.analysis == "fa3":
+        if self.productionmode == "ggZZ" and self.channel == "2e2mu" and self.analysis == "fa3":
             return [1, 2]
-        if self.productionmode == "ZX" and self.templatesfile.channel == "4e" and self.templatesfile.analysis == "fa3":
+        if self.productionmode == "ZX" and self.channel == "4e" and self.analysis == "fa3":
             return [0, 2]
-        if self.productionmode == "qqZZ" and self.templatesfile.channel == "4mu" and self.templatesfile.analysis == "fa3":
+        if self.productionmode == "qqZZ" and self.channel == "4mu" and self.analysis == "fa3":
             return [1, 2]
         return [0, 1, 2]
 
     def getjson(self):
-        print self.reweightaxes()
         jsn = {
                "templates": [
                  {
@@ -549,7 +559,7 @@ class Template(MultiEnum):
                    "tree": "candTree",
                    "variables": self.discriminants(),
                    "weight": self.weightname(),
-                   "selection": "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.templatesfile.channel.ZZFlav()),
+                   "selection": "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.channel.ZZFlav()),
                    "assertion": "D_0minus_decay >= 0. && D_0minus_decay <= 1.",
                    "binning": {
                      "type": "fixed",
