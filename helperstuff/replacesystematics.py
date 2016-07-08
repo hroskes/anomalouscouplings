@@ -71,7 +71,7 @@ def replacesystematics(channel):
         contents = f.read()
     sections = contents.split("------------\n")
     systematicssection = sections[-1]
-    print systematicssection; raw_input()
+    #print systematicssection; raw_input()
     systematicslines = systematicssection.split("\n")
     systematics = [Systematic(line) for line in systematicslines]
 
