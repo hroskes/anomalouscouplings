@@ -1,4 +1,4 @@
-from collections import Iterator
+from collections import Counter, Iterator
 import config
 import constants
 import ROOT
@@ -258,6 +258,7 @@ class TreeWrapper(Iterator):
             if name not in allreweightingweightnames:
                 raise ValueError("{} not in allreweightingweightnames!".format(name))
         for sample in allsamples:
+            if sample.weightname() in self.toaddtotree or sample.weightname() in self.exceptions: continue
             if sample.weightname() in reweightingweightnames:
                 self.toaddtotree.append(sample.weightname())
             else:
@@ -288,7 +289,7 @@ class TreeWrapper(Iterator):
         #some cross checking in case of stupid mistakes
         #if a function is added in the class but not added to toaddtotree
         #all member variables, unless they have __, should be added to either toaddtotree or exceptions
-        notanywhere, inboth, nonexistent = [], [], []
+        notanywhere, inboth, nonexistent, multipletimes = [], [], [], []
         for key in set(list(type(self).__dict__) + list(self.__dict__) + self.toaddtotree + self.exceptions):
             if key.startswith("__"): continue
             if key.startswith("_abc"): continue
@@ -298,10 +299,13 @@ class TreeWrapper(Iterator):
                 inboth.append(key)
             if key not in type(self).__dict__ and key not in self.__dict__:
                 nonexistent.append(key)
+        for key, occurences in Counter(self.toaddtotree + self.exceptions).iteritems():
+            if occurences >= 2 and key not in inboth or occurences >= 3: multipletimes.append(key)
         error = ""
         if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(notanywhere) + "\n"
         if inboth: error += "the following items are in both toaddtotree and exceptions! " + ", ".join(inboth) + "\n"
         if nonexistent: error += "the following items are in toaddtotree or exceptions, but don't exist! " + ", ".join(nonexistent) + "\n"
+        if multipletimes: error += "the following items appear multiple times in toaddtotree or exceptions! " + ", ".join(multipletimes) + "\n"
         if error:
             raise SyntaxError(error)
 
