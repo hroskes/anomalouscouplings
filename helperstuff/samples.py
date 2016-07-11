@@ -1,13 +1,14 @@
 import config
-from enums import Flavor, hypotheses, Hypothesis, MultiEnum, ProductionMode
+from enums import Flavor, hypotheses, Hypothesis, MultiEnum, ProductionMode, Release
 import os
 import ROOT
 
-class Sample(MultiEnum):
+class ReweightingSample(MultiEnum):
+    enumname = "reweightingsample"
     enums = [ProductionMode, Hypothesis, Flavor]
 
     def __init__(self, *args, **kwargs):
-        super(Sample, self).__init__(*args, **kwargs)
+        super(ReweightingSample, self).__init__(*args, **kwargs)
         if self.productionmode == "ZX":
             import ZX
 
@@ -42,38 +43,9 @@ class Sample(MultiEnum):
     def ValueError(self, functionname):
         return ValueError("invalid sample {} in function {}".format(self, functionname))
 
-    def CJLSTfile(self):
-        if self.productionmode == "ggH":
-            dirnames = {Hypothesis(k): v for k, v in config.CJLSTdirnames_ggH.iteritems()}
-            return os.path.join(config.CJLSTmaindir, dirnames[self.hypothesis], "ZZ4lAnalysis.root")
-####################################################################################################
-#Temporary while 80X samples are not there yet
-#remove this section once the samples are there
-        elif self.productionmode == "ggZZ" and self.flavor in ["2e2mu", "2e2tau"]:
-            return "root://lxcms03//data3/Higgs/160225/ggZZ{}/ZZ4lAnalysis.root".format(self.flavor)
-        elif self.productionmode in ("WplusH", "WminusH"):
-            return "root://lxcms03//data3/Higgs/160225/{}125/ZZ4lAnalysis.root".format(self.productionmode)
-#####################################################################################################
-        elif self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
-            name = str(self.productionmode)
-            if self.productionmode == "VBF":
-                name += "H"
-            return "root://lxcms03//data3/Higgs/160624/{}125/ZZ4lAnalysis.root".format(name)
-        elif self.productionmode == "ggZZ":
-            return "root://lxcms03//data3/Higgs/160624/ggZZ{}/ZZ4lAnalysis.root".format(self.flavor)
-        elif self.productionmode == "qqZZ":
-            return "root://lxcms03//data3/Higgs/160624/ZZTo4l/ZZ4lAnalysis.root"
-        elif self.productionmode == "ZX" or self.productionmode == "data":
-            return "root://lxcms03//data3/Higgs/160624/AllData/ZZ4lAnalysis.root"
-        raise self.ValueError("CJLSTfile")
-
-    def withdiscriminantsfile(self):
-        return os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
-        raise self.ValueError("withdiscriminantsfile")
-
     def reweightingsamples(self):
         if self.productionmode == "ggH":
-            return [Sample("ggH", hypothesis) for hypothesis in hypotheses]
+            return [ReweightingSample("ggH", hypothesis) for hypothesis in hypotheses]
         elif self.productionmode in ("ggZZ", "qqZZ", "ZX", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
             return [self]
         elif self.productionmode == "data":
@@ -173,3 +145,72 @@ class Sample(MultiEnum):
            the weight"""
         if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
             return "overallEventWeight", "xsec"
+        raise self.ValueError("weightingredients")
+
+class Sample(ReweightingSample):
+    enums = [ReweightingSample, Release]
+
+    def check(self, *args):
+        if self.release is None:
+            raise ValueError("No option provided for release\n{}".format(args))
+        super(Sample, self).check(*args)
+
+    def CJLSTmaindir(self):
+        if self.productionmode == "ggH" and self.release == "76X":
+            return config.CJLSTmaindir_76Xanomalous
+        return self.release.CJLSTdir()
+
+    def CJLSTdirname(self):
+        if self.productionmode == "ggH" and self.release == "76X":
+            if self.hypothesis == "0+": return "0PM_v2"
+            if self.hypothesis == "a2": return "0PH_v2"
+            if self.hypothesis == "0-": return "0M_v1"
+            if self.hypothesis == "L1": return "0L1_v2"
+            if self.hypothesis == "fa20.5": return "0PHf05ph0_v2"
+            if self.hypothesis == "fa30.5": return "0Mf05ph0_v2"
+            if self.hypothesis == "fL10.5": return "0L1f05ph0_v2"
+        if self.productionmode == "ggH" and self.release == "80X":
+            if self.hypothesis == "0+": return "0PM"
+            if self.hypothesis == "a2": return "0PH"
+            if self.hypothesis == "0-": return "0M"
+            if self.hypothesis == "L1": return "0L1"
+            if self.hypothesis == "fa20.5": return "0PHf05ph0"
+            if self.hypothesis == "fa30.5": return "0Mf05ph0"
+            if self.hypothesis == "fL10.5": return "0L1f05ph0"
+        if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
+            name = str(self.productionmode)
+            if self.productionmode == "VBF":
+                name += "H"
+            return name
+        if self.productionmode == "ggZZ":
+            return "ggZZ{}".format(self.flavor)
+        if self.productionmode == "qqZZ":
+            return "ZZTo4l"
+        if self.productionmode == "ZX" or self.productionmode == "data":
+            return "AllData"
+        raise self.ValueError("CJLSTdirname")
+
+    def CJLSTfile(self):
+        return os.path.join(self.CJLSTmaindir(), self.CJLSTdirname(), "ZZ4lAnalysis.root")
+        if self.productionmode == "ggH":
+            dirnames = {Hypothesis(k): v for k, v in config.CJLSTdirnames_ggH.iteritems()}
+            if self.release == "76X":
+                return os.path.join(config.CJLSTmaindir_76Xanomalous, dirnames[self.hypothesis], "ZZ4lAnalysis.root")
+            else:
+                return os.path.join(self.release.CJLSTdir(), dirnames[self.hypothesis], "ZZ4lAnalysis.root")
+        elif self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
+            name = str(self.productionmode)
+            if self.productionmode == "VBF":
+                name += "H"
+            return os.path.join(self.release.CJLSTdir(), name+"125", "ZZ4lAnalysis.root")
+        elif self.productionmode == "ggZZ":
+            return os.path.join(self.release.CJLSTdir(), "ggZZ{}".format(self.flavor), "ZZ4lAnalysis.root")
+        elif self.productionmode == "qqZZ":
+            return os.path.join(self.release.CJLSTdir(), "ZZTo4l", "ZZ4lAnalysis.root")
+        elif self.productionmode == "ZX" or self.productionmode == "data":
+            return os.path.join(self.release.CJLSTdir(), "AllData", "ZZ4lAnalysis.root")
+        raise self.ValueError("CJLSTfile")
+
+    def withdiscriminantsfile(self):
+        return os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
+        raise self.ValueError("withdiscriminantsfile")

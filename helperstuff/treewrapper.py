@@ -2,11 +2,11 @@ from collections import Iterator
 import config
 import constants
 import ROOT
-from samples import Sample
+from samples import ReweightingSample
 
 class TreeWrapper(Iterator):
 
-    def __init__(self, tree, treesample, Counters, Counters_reweighted, minevent=0, maxevent=None):
+    def __init__(self, tree, treesample, Counters, Counters_reweighted, minevent=0, maxevent=None, isdummy=False):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
@@ -19,6 +19,7 @@ class TreeWrapper(Iterator):
         self.isbkg = treesample.isbkg()
         self.isdata = treesample.isdata()
         self.isZX = treesample.isZX()
+        self.isdummy = isdummy
         self.baseweight = None
         if not self.isdata:
             self.baseweight = self.getbaseweightfunction()
@@ -33,7 +34,7 @@ class TreeWrapper(Iterator):
                                   for i, sample in enumerate(treesample.reweightingsamples(), start=1)
                                ]
         self.minevent = minevent
-        if self.isdata and not config.usedata:
+        if self.isdata and not config.usedata or self.isdummy:
             self.length = 0
         elif maxevent is None or maxevent >= tree.GetEntries():
             self.length = tree.GetEntries() - minevent
@@ -84,6 +85,11 @@ class TreeWrapper(Iterator):
         self.p0plus_m4l = t.p0plus_m4l
         self.bkg_VAMCFM = t.bkg_VAMCFM
         self.bkg_m4l = t.bkg_m4l
+        for a in "p0plus", "bkg":
+            for b in "Scale", "Res":
+                for c in "Up", "Down":
+                    attr = "{}_m4l_{}{}".format(a, b, c)
+                    setattr(self, attr, getattr(t, attr))
 
         self.p0hplus_VAJHU = t.p0hplus_VAJHU
         self.pg1g2_VAJHU = t.pg1g2_VAJHU
@@ -112,13 +118,13 @@ class TreeWrapper(Iterator):
     def D_bkg_0plus(self):
         return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
     def D_bkg_0plus_ResUp(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+        return self.p0plus_VAJHU*self.p0plus_m4l_ResUp / (self.p0plus_VAJHU*self.p0plus_m4l_ResUp  + self.bkg_VAMCFM*self.bkg_m4l_ResUp)
     def D_bkg_0plus_ResDown(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+        return self.p0plus_VAJHU*self.p0plus_m4l_ResDown / (self.p0plus_VAJHU*self.p0plus_m4l_ResDown  + self.bkg_VAMCFM*self.bkg_m4l_ResDown)
     def D_bkg_0plus_ScaleUp(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+        return self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp  + self.bkg_VAMCFM*self.bkg_m4l_ScaleUp)
     def D_bkg_0plus_ScaleDown(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+        return self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown  + self.bkg_VAMCFM*self.bkg_m4l_ScaleDown)
     def D_bkg_0minus(self):
         return self.p0minus_VAJHU*self.p0plus_m4l / (self.p0minus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
 
@@ -211,6 +217,7 @@ class TreeWrapper(Iterator):
             "initlists",
             "isbkg",
             "isdata",
+            "isdummy",
             "isZX",
             "length",
             "MC_weight_ggH",
@@ -229,21 +236,21 @@ class TreeWrapper(Iterator):
         ]
 
         allsamples = [    #all samples that have weight functions defined in this class
-            Sample("ggH", "0+"),
-            Sample("ggH", "a2"),
-            Sample("ggH", "0-"),
-            Sample("ggH", "L1"),
-            Sample("ggH", "fa20.5"),
-            Sample("ggH", "fa30.5"),
-            Sample("ggH", "fL10.5"),
-            Sample("VBF", "0+"),
-            Sample("ZH", "0+"),
-            Sample("WplusH", "0+"),
-            Sample("WminusH", "0+"),
-            Sample("ttH", "0+"),
-            Sample("ggZZ", "2e2mu"),  #flavor doesn't matter
-            Sample("qqZZ"),
-            Sample("ZX"),
+            ReweightingSample("ggH", "0+"),
+            ReweightingSample("ggH", "a2"),
+            ReweightingSample("ggH", "0-"),
+            ReweightingSample("ggH", "L1"),
+            ReweightingSample("ggH", "fa20.5"),
+            ReweightingSample("ggH", "fa30.5"),
+            ReweightingSample("ggH", "fL10.5"),
+            ReweightingSample("VBF", "0+"),
+            ReweightingSample("ZH", "0+"),
+            ReweightingSample("WplusH", "0+"),
+            ReweightingSample("WminusH", "0+"),
+            ReweightingSample("ttH", "0+"),
+            ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
+            ReweightingSample("qqZZ"),
+            ReweightingSample("ZX"),
         ]
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
         allreweightingweightnames = [sample.weightname() for sample in allsamples]

@@ -1,10 +1,14 @@
 from array import array
-from helperstuff.enums import flavors, hypotheses
+from helperstuff import xrd
+from helperstuff.enums import flavors, hypotheses, releases
 from helperstuff.samples import Sample
 from helperstuff.treewrapper import TreeWrapper
 import os
 import ROOT
 import sys
+
+definitelyexists = Sample("ggH", "0+", "76X")
+assert xrd.exists(definitelyexists.CJLSTfile())
 
 def adddiscriminants(*args):
 
@@ -12,6 +16,17 @@ def adddiscriminants(*args):
     reweightingsamples = sample.reweightingsamples()
 
     filename = sample.CJLSTfile()
+    newfilename = sample.withdiscriminantsfile()
+    print newfilename
+    if os.path.exists(newfilename):
+        return
+
+    isdummy = False
+    if not xrd.exists(filename):
+        isdummy = True
+        #give it a tree so that it can get the format, but not fill any entries
+        filename = definitelyexists.CJLSTfile()
+
     f = ROOT.TFile.Open(filename)
     Counters = f.Get("{}/Counters".format(sample.TDirectoryname()))
     Counters_reweighted = f.Get("{}/Counters_reweighted".format(sample.TDirectoryname()))
@@ -20,15 +35,13 @@ def adddiscriminants(*args):
     if not Counters:
         raise ValueError("No Counters in file "+filename)
 
-    newfilename = sample.withdiscriminantsfile()
-    print newfilename
-    if os.path.exists(newfilename):
-        return
-
     t = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
     t.Add(filename)
 
-    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted)
+    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted, isdummy=isdummy)
+
+    if os.path.exists(newfilename):
+        return
 
     newf = ROOT.TFile.Open(newfilename, "recreate")
     newt = t.CloneTree(0)
@@ -47,15 +60,16 @@ def adddiscriminants(*args):
     newf.Close()
 
 if __name__ == '__main__':
-    for hypothesis in hypotheses:
-        adddiscriminants("ggH", hypothesis)
-    for flavor in flavors:
-        adddiscriminants("ggZZ", flavor)
-    adddiscriminants("qqZZ")
-    adddiscriminants("ZX")
-    adddiscriminants("data")
-    adddiscriminants("VBF", "0+")
-    adddiscriminants("ZH", "0+")
-    adddiscriminants("WplusH", "0+")
-    adddiscriminants("WminusH", "0+")
-    adddiscriminants("ttH", "0+")
+    for release in releases:
+        for hypothesis in hypotheses:
+            adddiscriminants("ggH", hypothesis, release)
+        for flavor in flavors:
+            adddiscriminants("ggZZ", flavor, release)
+        adddiscriminants("qqZZ", release)
+        adddiscriminants("ZX", release)
+        adddiscriminants("data", release)
+        adddiscriminants("VBF", "0+", release)
+        adddiscriminants("ZH", "0+", release)
+        adddiscriminants("WplusH", "0+", release)
+        adddiscriminants("WminusH", "0+", release)
+        adddiscriminants("ttH", "0+", release)
