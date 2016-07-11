@@ -1,7 +1,7 @@
 import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate
-from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Systematic, Template
+from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Release, releases, Systematic, Template
 from helperstuff.filemanager import tfiles
 import helperstuff.style
 import os
@@ -75,7 +75,7 @@ class TemplateFromFile(TemplateForProjection, MultiEnum):
         self.h = self.template.gettemplate().Clone()
         self.projections = {}
         if self.productionmode == "ggH":
-            scalefactor = getrate("2e2mu", self.productionmode) / Template(self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
+            scalefactor = getrate("2e2mu", self.productionmode) / Template(self.release, self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
         else:
             scalefactor = getrate(self.channel, self.productionmode) / self.Integral()
         self.Scale(scalefactor)
@@ -106,25 +106,32 @@ class TemplateSum(TemplateForProjection):
 
 exts = "png", "eps", "root", "pdf"
 
-def projections(channel, analysis, normalization = "", systematic = ""):
-    channel = Channel(channel)
-    analysis = Analysis(analysis)
-    normalization = Normalization(normalization)
-    systematic = Systematic(systematic)
+
+class Projections(MultiEnum):
+  enums = [Channel, Analysis, Normalization, Systematic, Release]
+  enumname = "projections"
+  def check(self, *args):
+    if self.normalization is None:
+      self.normalization = Normalization("")
+    if self.systematic is None:
+      self.systematic = Systematic("")
+    super(Projections, self).check(*args)
+
+  def projections(self):
     templates = [
-                 TemplateFromFile(1, normalization, analysis.signaltemplates(channel, systematic)[0]),
-                 TemplateFromFile(ROOT.kCyan, normalization, analysis.signaltemplates(channel, systematic)[1]),
-                 TemplateFromFile(0, normalization, analysis.signaltemplates(channel, systematic)[2]),
+                 TemplateFromFile(1, self.normalization, self.analysis.signaltemplates(self.release, self.channel, self.systematic)[0]),
+                 TemplateFromFile(ROOT.kCyan, self.normalization, self.analysis.signaltemplates(self.release, self.channel, self.systematic)[1]),
+                 TemplateFromFile(0, self.normalization, self.analysis.signaltemplates(self.release, self.channel, self.systematic)[2]),
                 ]
     templates+= [
-                 TemplateSum("ggH {}=0.5".format(analysis.title()), ROOT.kGreen+3, 1, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
-                 TemplateSum("ggH {}=-0.5".format(analysis.title()), 4, -1, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
-                 TemplateFromFile(6, normalization, analysis, channel, "qqZZ", systematic),
-                 TemplateFromFile(ROOT.kOrange+6, normalization, analysis, channel, "ggZZ", systematic),
-                 TemplateFromFile(2, normalization, analysis, channel, "ZX", systematic),
+                 TemplateSum("ggH {}=0.5".format(self.analysis.title()), ROOT.kGreen+3, 1, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
+                 TemplateSum("ggH {}=-0.5".format(self.analysis.title()), 4, -1, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
+                 TemplateFromFile(6, self.normalization, self.analysis, self.channel, "qqZZ", self.systematic, self.release),
+                 TemplateFromFile(ROOT.kOrange+6, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.release),
+                 TemplateFromFile(2, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.release),
                 ]
-    axes[0] = Axis(analysis.purediscriminant(), analysis.purediscriminant(title=True), 0)
-    axes[1] = Axis(analysis.mixdiscriminant(), analysis.mixdiscriminant(title=True), 1)
+    axes[0] = Axis(self.analysis.purediscriminant(), self.analysis.purediscriminant(title=True), 0)
+    axes[1] = Axis(self.analysis.mixdiscriminant(), self.analysis.mixdiscriminant(title=True), 1)
 
     c1 = ROOT.TCanvas()
     legend = ROOT.TLegend(.75, .65, .9, .9)
@@ -132,7 +139,7 @@ def projections(channel, analysis, normalization = "", systematic = ""):
     legend.SetFillStyle(0)
     for template in templates:
         if template.color:
-            if normalization == "areanormalize":
+            if self.normalization == "areanormalize":
                 template.Scale(1/template.Integral())
             template.AddToLegend(legend)
 
@@ -144,17 +151,21 @@ def projections(channel, analysis, normalization = "", systematic = ""):
         hstack.Draw("nostack hist")
         hstack.GetXaxis().SetTitle(axis.title)
         legend.Draw()
-        dir = os.path.join(config.plotsbasedir, "templateprojections", str(normalization))
+        dir = os.path.join(config.plotsbasedir, "templateprojections", str(self.normalization), "{}_{}/{}".format(self.analysis, self.release, self.channel))
         try:
-            os.makedirs(os.path.join(dir, "{}/{}".format(analysis, channel)))
+            os.makedirs(dir)
         except OSError:
             pass
         for ext in exts:
-            c1.SaveAs(os.path.join(dir, "{}/{}/{}.{}".format(analysis, channel, axis.name, ext)))
+            c1.SaveAs(os.path.join(dir, "{}.{}".format(axis.name, ext)))
+
+def projections(*args):
+    Projections(*args).projections()
 
 if __name__ == "__main__":
-  for channel in channels:
-    for analysis in analyses:
-      for normalization in normalizations:
-#        if channel != "2e2mu" or analysis != "fa3" or normalization != "areanormalize": continue
-        projections(channel, analysis, normalization)
+  for release in releases:
+    for channel in channels:
+      for analysis in analyses:
+        for normalization in normalizations:
+#          if channel != "2e2mu" or analysis != "fa3" or normalization != "areanormalize": continue
+          projections(channel, analysis, normalization, release)

@@ -1,8 +1,8 @@
 import collections
-from helperstuff import config
-from helperstuff.enums import Channel, MultiEnum, ProductionMode, Template
-from helperstuff.filemanager import tfiles
-from helperstuff.samples import Sample
+from . import config
+from .enums import Channel, MultiEnum, ProductionMode, Template
+from .filemanager import tfiles
+from .samples import Sample
 import ROOT
 
 
@@ -23,9 +23,9 @@ class __Rate(MultiEnum):
             if self.channel == "2e2mu": return 3.116
 
         if self.productionmode == "ggH":
-            result = Template("fa3", self, "0+").gettemplate().Integral()*config.luminosity
+            result = Template("fa3", self, "0+", config.releaseforsignalrates).gettemplate().Integral()*config.luminosity
             for productionmode in "VBF", "WplusH", "WminusH", "ZH", "ttH":
-                sample = Sample(productionmode, "0+")
+                sample = Sample(productionmode, "0+", config.releaseforsignalrates)
                 f = tfiles[sample.withdiscriminantsfile()]
                 t = f.candTree
                 ZZFlav = self.channel.ZZFlav()
@@ -36,7 +36,8 @@ class __Rate(MultiEnum):
                 result += additionalxsec * config.luminosity
             return result
 
-        return Template("fa3", self).gettemplate().Integral()*config.luminosity
+        assert False
+        return Template("fa3", self, config.releaseforsignalrates).gettemplate().Integral()*config.luminosity
 
     def __float__(self):
         return self.getrate()

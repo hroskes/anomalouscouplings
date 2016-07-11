@@ -1,5 +1,5 @@
 from helperstuff import config, style  #style needed to remove the statbox and title and adjust the axis label size
-from helperstuff.enums import analyses, channels, treesystematics, TemplatesFile
+from helperstuff.enums import analyses, channels, releases, treesystematics, TemplatesFile
 import os
 import ROOT
 import subprocess
@@ -10,7 +10,7 @@ def makecontrolplots(*args):
     d = f.controlPlots
 
     split = os.path.split(templatesfile.templatesfile())
-    saveasdir = os.path.join(config.plotsbasedir, "templateprojections", "controlplots", split[1].replace("_new.root", ""))
+    saveasdir = os.path.join(config.plotsbasedir, "templateprojections", "controlplots", split[1].replace(".root", ""))
     try:
         os.makedirs(saveasdir)
     except OSError:
@@ -36,8 +36,9 @@ def makecontrolplots(*args):
         c1.SaveAs("{}/{}.{}".format(saveasdir, key.ReadObj().GetName(), ext))
 
 if __name__ == "__main__":
-    for channel in channels:
-        for analysis in analyses:
-            for systematic in treesystematics:
-                makecontrolplots(channel, "signal", systematic, analysis)
-            makecontrolplots(channel, "bkg", analysis)
+    for release in releases:
+        for channel in channels:
+            for analysis in analyses:
+                for systematic in treesystematics:
+                    makecontrolplots(channel, "signal", systematic, analysis, release)
+                makecontrolplots(channel, "bkg", analysis, release)

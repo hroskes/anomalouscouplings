@@ -205,17 +205,17 @@ class Analysis(MyEnum):
         else:
             assert False
     def signalsamples(self):
-        from samples import Sample
+        from samples import ReweightingSample
         if self == "fa3":
-            return [Sample("ggH", "0+"), Sample("ggH", "0-"), Sample("ggH", "fa30.5")]
+            return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "0-"), ReweightingSample("ggH", "fa30.5")]
         elif self == "fa2":
-            return [Sample("ggH", "0+"), Sample("ggH", "a2"), Sample("ggH", "fa20.5")]
+            return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "a2"), ReweightingSample("ggH", "fa20.5")]
         elif self == "fL1":
-            return [Sample("ggH", "0+"), Sample("ggH", "L1"), Sample("ggH", "fL10.5")]
+            return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
         else:
             assert False
-    def signaltemplates(self, channel, systematic=None):
-        return [Template(sample, self, channel, systematic) for sample in self.signalsamples()]
+    def signaltemplates(self, channel, release, systematic=None):
+        return [Template(sample, self, channel, release, systematic) for sample in self.signalsamples()]
     def interfxsec(self):
         if self == "fa3":
             return constants.JHUXS2L2la1a3 - 2*constants.JHUXS2L2la1
@@ -345,7 +345,7 @@ class MultiEnum(object):
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, Systematic, SignalOrBkg, Analysis]
+    enums = [Channel, Systematic, SignalOrBkg, Analysis, Release]
 
     def check(self, *args):
         if self.systematic is None:
@@ -355,18 +355,22 @@ class TemplatesFile(MultiEnum):
             raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
 
     def jsonfile(self):
-        return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname()))
+        return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}_{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname(), self.release))
 
     def templatesfile(self, run1=False):
         if not run1:
-            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_{}Adap_new.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname(), self.analysis))
+            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_{}Adap_{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname(), self.analysis, self.release))
         else:
             assert self.analysis == "fa3"
             return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())
 
+    def signalsamples(self):
+        from samples import Sample
+        return [Sample(reweightingsample, self.release) for reweightingsample in self.analysis.signalsamples()]
+
     def templates(self):
         if self.signalorbkg == "signal":
-            return [Template(self, sample.productionmode, sample.hypothesis) for sample in self.analysis.signalsamples()]
+            return [Template(self, sample.productionmode, sample.hypothesis) for sample in self.signalsamples()]
         elif self.signalorbkg == "bkg":
             return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ", "ZX")]
 
@@ -384,13 +388,13 @@ class Template(MultiEnum):
                 assert False
 
     def check(self, *args):
-        from samples import Sample
+        from samples import ReweightingSample
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
         elif self.productionmode == "ggH":
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if Sample(self.productionmode, self.hypothesis) not in self.analysis.signalsamples():
+            if ReweightingSample(self.productionmode, self.hypothesis) not in self.analysis.signalsamples():
                 raise ValueError("Hypothesis {} is not used in analysis {}!\n{}".format(self.hypothesis, self.analysis, args))
             if self.signalorbkg != "signal":
                 raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.signalorbkg, args))
@@ -448,52 +452,54 @@ class Template(MultiEnum):
             raise IOError("No template {} in {}".format(self.templatename(), self.templatefile()))
 
     def weightname(self):
-        from samples import Sample
+        from samples import ReweightingSample
         if self.productionmode == "ggZZ":
-            return Sample(self.productionmode, "2e2mu").weightname()
+            return ReweightingSample(self.productionmode, "2e2mu").weightname()
         if self.hypothesis is not None:
-            return Sample(self.productionmode, self.hypothesis).weightname()
-        return Sample(self.productionmode).weightname()
+            return ReweightingSample(self.productionmode, self.hypothesis).weightname()
+        return ReweightingSample(self.productionmode).weightname()
 
     def reweightfrom(self):
         from samples import Sample
         if self.productionmode == "ggH":
             if self.analysis in ("fa2", "fa3"):
-                return [
-                        Sample("ggH", "0+"),
-                        Sample("ggH", "a2"),
-                        Sample("ggH", "0-"),
-                        Sample("ggH", "L1"),
-                        Sample("ggH", "fa20.5"),
-                        Sample("ggH", "fa30.5"),
-                        #Sample("ggH", "fL10.5"),   #NOT fL1 for now
+                result=[
+                        Sample(self.release, "ggH", "0+"),
+                        Sample(self.release, "ggH", "a2"),
+                        Sample(self.release, "ggH", "0-"),
+                        Sample(self.release, "ggH", "L1"),
+                        Sample(self.release, "ggH", "fa20.5"),
+                        Sample(self.release, "ggH", "fa30.5"),
+                        #Sample(self.release, "ggH", "fL10.5"),   #NOT fL1 for now
                        ]
             if self.analysis == "fL1":
                 if self.hypothesis in ("0+", "L1"):
-                    return [
-                            Sample("ggH", "0+"),
-                            Sample("ggH", "a2"),
-                            Sample("ggH", "0-"),
-                            Sample("ggH", "L1"),
-                            Sample("ggH", "fa20.5"),
-                            Sample("ggH", "fa30.5"),
-                            #Sample("ggH", "fL10.5"),   #NOT fL1 for now
+                    result=[
+                            Sample(self.release, "ggH", "0+"),
+                            Sample(self.release, "ggH", "a2"),
+                            Sample(self.release, "ggH", "0-"),
+                            Sample(self.release, "ggH", "L1"),
+                            Sample(self.release, "ggH", "fa20.5"),
+                            Sample(self.release, "ggH", "fa30.5"),
+                            #Sample(self.release, "ggH", "fL10.5"),   #NOT fL1 for now
                            ]
                 elif self.hypothesis == "fL10.5":
-                    return [
-                            #Sample("ggH", "0+"),
-                            Sample("ggH", "a2"),
-                            #Sample("ggH", "0-"),
-                            Sample("ggH", "L1"),
-                            Sample("ggH", "fa20.5"),
-                            Sample("ggH", "fa30.5"),
-                            Sample("ggH", "fL10.5"),
+                    result=[
+                            #Sample(self.release, "ggH", "0+"),
+                            Sample(self.release, "ggH", "a2"),
+                            #Sample(self.release, "ggH", "0-"),
+                            Sample(self.release, "ggH", "L1"),
+                            Sample(self.release, "ggH", "fa20.5"),
+                            Sample(self.release, "ggH", "fa30.5"),
+                            Sample(self.release, "ggH", "fL10.5"),
                            ]
         if self.productionmode in ("qqZZ", "ZX"):
-            return [Sample(self.productionmode)]
+            result = [Sample(self.release, self.productionmode)]
         if self.productionmode == "ggZZ":
-            return [Sample(self.productionmode, flavor) for flavor in flavors]
-        assert False
+            result = [Sample(self.release, self.productionmode, flavor) for flavor in flavors]
+        result = [sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0]
+        assert result
+        return result
 
     def scalefactor(self):
         if self.signalorbkg == "bkg": return 1

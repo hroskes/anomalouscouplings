@@ -1,5 +1,5 @@
 from helperstuff import config
-from helperstuff.enums import analyses, channels, treesystematics, TemplatesFile
+from helperstuff.enums import analyses, channels, releases, treesystematics, TemplatesFile
 from helperstuff.samples import Sample
 import os
 import shutil
@@ -13,7 +13,7 @@ if cmssw[0] == 8:
 
 def buildtemplates(*args):
     templatesfile = TemplatesFile(*args)
-    print templatesfile.analysis, templatesfile.channel, templatesfile.signalorbkg, templatesfile.systematic
+    print templatesfile.analysis, templatesfile.channel, templatesfile.signalorbkg, templatesfile.systematic, templatesfile.release
     if os.path.exists(templatesfile.templatesfile()):
         return
     subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
@@ -21,10 +21,11 @@ def buildtemplates(*args):
         raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))
 
 if __name__ == "__main__":
-    for analysis in analyses:
-        for channel in channels:
-            for systematic in treesystematics:
-                buildtemplates(channel, systematic, "signal", analysis)
-            buildtemplates(channel, "", "bkg", analysis)
-    #and copy data
-    shutil.copy(Sample("data").withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))
+    for release in releases:
+        for analysis in analyses:
+            for channel in channels:
+                for systematic in treesystematics:
+                    buildtemplates(channel, systematic, "signal", analysis, release)
+                buildtemplates(channel, "bkg", analysis, release)
+        #and copy data
+        shutil.copy(Sample("data", release).withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))
