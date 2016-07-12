@@ -548,19 +548,48 @@ class Template(MultiEnum):
         assert False
 
     def smoothentriesperbin(self):
-        if self.analysis == "fL1" and self.channel == "2e2mu":
-            if self.productionmode == "ZX":
-                return 20
-            if self.productionmode == "ggZZ":
-                return 100
-            if self.productionmode == "qqZZ":
-                return 70
+        if self.analysis == "fL1":
+            if self.channel in ["2e2mu", "4e"]:
+                if self.productionmode == "ZX":
+                    return 20
+                if self.productionmode == "ggZZ":
+                    return 100
+                if self.productionmode == "qqZZ":
+                    return 70
+            if self.channel == "4mu":
+                if self.productionmode == "ZX":
+                    return 9
+                if self.productionmode == "ggZZ":
+                    return 100
+                if self.productionmode == "qqZZ":
+                    return 70
+        if self.analysis == "fa2":
+            if self.channel == "2e2mu":
+                if self.productionmode == "ZX":
+                    return 20
+                if self.productionmode == "ggZZ":
+                    return 100
+                if self.productionmode == "qqZZ":
+                    return 70
+            if self.channel == "4e":
+                if self.productionmode == "ZX":
+                    return 6   #too much and the peak in axis 1 at .9 goes away, less (or reweight) and the bump at .4 comes back
+                if self.productionmode == "ggZZ":
+                    return 100
+                if self.productionmode == "qqZZ":
+                    return 15  #similar to Z+X
+            if self.channel == "4mu":
+                if self.productionmode == "ZX":
+                    return 9
+                if self.productionmode == "ggZZ":
+                    return 100
+                if self.productionmode == "qqZZ":
+                    return 100
         if self.productionmode == "ZX":
             return 5
         elif self.signalorbkg == "bkg":
             return 20
-        else:
-            return 50
+        return 50
 
     def reweightaxes(self):
         if self.productionmode == "ZX" and self.channel == "4mu":
@@ -573,9 +602,13 @@ class Template(MultiEnum):
             return [1, 2]
         if self.productionmode == "ggZZ" and self.channel == "2e2mu" and self.analysis == "fa3":
             return [1, 2]
-        if self.productionmode == "ZX" and self.channel == "4e" and self.analysis == "fa3":
+        if self.productionmode == "ZX" and self.channel == "4e" and self.analysis in ["fa3", "fL1"]:
             return [0, 2]
-        if self.productionmode == "qqZZ" and self.channel == "4mu" and self.analysis == "fa3":
+        if self.productionmode == "ZX" and self.channel == "4e" and self.analysis == "fa2":
+            return []
+        if self.productionmode == "qqZZ" and self.channel == "4e" and self.analysis == "fa2":
+            return [0, 2]
+        if self.productionmode == "qqZZ" and self.channel == "4mu" and self.analysis in ["fa3", "fa2"]:
             return [1, 2]
         return [0, 1, 2]
 
