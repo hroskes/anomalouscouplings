@@ -128,7 +128,7 @@ class Systematic(MyEnum):
         if not title:
             return "D_bkg_0plus"+self.appendname()
         else:
-            return "D_{bkg}^{"+self.appendname()+"}"
+            return "D_{bkg}^{"+self.appendname().replace("_", "")+"}"
     def appliesto(self, signalorbkg):
         if signalorbkg == "signal":
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
@@ -548,6 +548,13 @@ class Template(MultiEnum):
         assert False
 
     def smoothentriesperbin(self):
+        if self.analysis == "fL1" and self.channel == "2e2mu":
+            if self.productionmode == "ZX":
+                return 20
+            if self.productionmode == "ggZZ":
+                return 100
+            if self.productionmode == "qqZZ":
+                return 70
         if self.productionmode == "ZX":
             return 5
         elif self.signalorbkg == "bkg":
@@ -558,6 +565,8 @@ class Template(MultiEnum):
     def reweightaxes(self):
         if self.productionmode == "ZX" and self.channel == "4mu":
             return []
+        if self.productionmode == "ggZZ" and self.channel == "2e2mu" and self.analysis == "fL1":
+            return [0, 2]
         if self.productionmode == "ZX" and self.channel == "2e2mu" and self.analysis == "fL1":
             return [0, 2]
         if self.productionmode == "ZX" and self.channel == "2e2mu" and self.analysis in ["fa2", "fa3"]:
