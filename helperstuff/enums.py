@@ -582,9 +582,33 @@ class Template(MultiEnum):
                 if self.productionmode == "ZX":
                     return 9
                 if self.productionmode == "ggZZ":
-                    return 100
+                    return 150
                 if self.productionmode == "qqZZ":
                     return 100
+        if self.analysis == "fa3":
+            if self.channel == "2e2mu":
+                if self.productionmode == "ZX":
+                    return 20
+                if self.productionmode == "ggZZ":
+                    return 500
+                if self.productionmode == "qqZZ":
+                    return 60
+            """
+            if self.channel == "4e":
+                if self.productionmode == "ZX":
+                    return 5
+                if self.productionmode == "ggZZ":
+                    return 50
+                if self.productionmode == "qqZZ":
+                    return 20
+            if self.channel == "4mu":
+                if self.productionmode == "ZX":
+                    return 5
+                if self.productionmode == "ggZZ":
+                    return 50
+                if self.productionmode == "qqZZ":
+                    return 20
+            """
         if self.productionmode == "ZX":
             return 5
         elif self.signalorbkg == "bkg":
@@ -600,6 +624,8 @@ class Template(MultiEnum):
             return [0, 2]
         if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa2":
             return [2]
+        if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa3":
+            return [1, 2]
         if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fL1":
             return [0, 2]
         if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fa3":
