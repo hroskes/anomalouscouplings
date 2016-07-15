@@ -21,11 +21,12 @@ def buildtemplates(*args):
         raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))
 
 if __name__ == "__main__":
-    for production in productions:
-        for analysis in analyses:
-            for channel in channels:
-                for systematic in treesystematics:
+    for systematic in treesystematics:
+        for channel in channels:
+            for production in productions:
+                for analysis in analyses:
                     buildtemplates(channel, systematic, "signal", analysis, production)
-                buildtemplates(channel, "bkg", analysis, production)
+                    if systematic == "":
+                        buildtemplates(channel, "bkg", analysis, production)
         #and copy data
         shutil.copy(Sample("data", production).withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))
