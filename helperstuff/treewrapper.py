@@ -45,7 +45,10 @@ class TreeWrapper(Iterator):
         self.initlists()
         if treesample.onlyweights(): self.onlyweights()
         tree.GetEntry(0)
-        self.xsec = tree.xsec * 1000 #pb to fb
+        if self.isdata or self.isZX:
+            self.xsec = 0
+        else:
+            self.xsec = tree.xsec * 1000 #pb to fb
         self.checkfunctions()
 
     def __iter__(self):
@@ -109,6 +112,7 @@ class TreeWrapper(Iterator):
 
             self.M2g1_VBF = t.pvbf_VAJHU_highestPTJets
             self.M2g2_HJJ = t.phjj_VAJHU_highestPTJets
+
         else:
             self.M2g1_decay   = self.p0plus_VAJHU
             self.M2g4_decay   = self.p0minus_VAJHU / constants.CJLSTg4decay_pure[self.flavor]**2
@@ -184,9 +188,17 @@ class TreeWrapper(Iterator):
         return self.MC_weight_ggH(6)
 
     def MC_weight_ggZZ(self):
-        return self.MC_weight * self.xsec * self.tree.KFactorggZZ / self.nevents
+        if self.useMELAv2:
+            KFactor = self.tree.KFactor_QCD_ggZZ_Nominal
+        else:
+            KFactor = self.tree.KFactorggZZ
+        return self.MC_weight * self.xsec * KFactor / self.nevents
     def MC_weight_qqZZ(self):
-        return self.MC_weight * self.xsec * self.tree.KFactorEWKqqZZ * self.tree.KFactorQCDqqZZ_M / self.nevents
+        if self.useMELAv2:
+            KFactor = self.tree.KFactor_EW_qqZZ * self.tree.KFactor_QCD_qqZZ_M
+        else:
+            KFactor = self.tree.KFactorEWKqqZZ * self.tree.KFactorQCDqqZZ_M
+        return self.MC_weight * self.xsec * KFactor / self.nevents
     def MC_weight_ZX(self):
         self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
         return ROOT.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ROOT.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
