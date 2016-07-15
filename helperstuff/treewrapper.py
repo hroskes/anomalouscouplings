@@ -19,6 +19,7 @@ class TreeWrapper(Iterator):
         self.isbkg = treesample.isbkg()
         self.isdata = treesample.isdata()
         self.isZX = treesample.isZX()
+        self.useMELAv2 = treesample.useMELAv2
         self.isdummy = isdummy
         self.baseweight = None
         if not self.isdata:
@@ -96,19 +97,31 @@ class TreeWrapper(Iterator):
         self.p0_g1prime2_VAJHU = t.p0_g1prime2_VAJHU
         self.pg1g1prime2_VAJHU = t.pg1g1prime2_VAJHU
 
-        self.vbf_p0plus_VAJHU = t.pvbf_VAJHU_new
-        self.hjj_p0plus_VAJHU = t.phjj_VAJHU_new
-
         #express in terms of |M|^2, this will make life easier
-        self.M2g1_decay   = self.p0plus_VAJHU
-        self.M2g4_decay   = self.p0minus_VAJHU / constants.CJLSTg4decay_pure[self.flavor]**2
-        self.M2g1g4_decay = self.pg1g4_VAJHU / constants.CJLSTg4decay_mix
-        self.M2g2_decay   = self.p0hplus_VAJHU / constants.CJLSTg2decay_pure[self.flavor]**2
-        self.M2g1g2_decay = self.pg1g2_VAJHU / constants.CJLSTg2decay_mix
-        self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU / constants.CJLSTg1prime2decay_pure**2
-        self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU / constants.CJLSTg1prime2decay_mix
+        if self.useMELAv2:
+            self.M2g1_decay   = self.p0plus_VAJHU
+            self.M2g4_decay   = self.p0minus_VAJHU
+            self.M2g1g4_decay = self.pg1g4_VAJHU
+            self.M2g2_decay   = self.p0hplus_VAJHU
+            self.M2g1g2_decay = self.pg1g2_VAJHU
+            self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU
+            self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU
 
-        self.notdijet = self.vbf_p0plus_VAJHU == 0 or self.hjj_p0plus_VAJHU == 0
+            self.M2g1_VBF = t.pvbf_VAJHU_highestPTJets
+            self.M2g2_HJJ = t.phjj_VAJHU_highestPTJets
+        else:
+            self.M2g1_decay   = self.p0plus_VAJHU
+            self.M2g4_decay   = self.p0minus_VAJHU / constants.CJLSTg4decay_pure[self.flavor]**2
+            self.M2g1g4_decay = self.pg1g4_VAJHU / constants.CJLSTg4decay_mix
+            self.M2g2_decay   = self.p0hplus_VAJHU / constants.CJLSTg2decay_pure[self.flavor]**2
+            self.M2g1g2_decay = self.pg1g2_VAJHU / constants.CJLSTg2decay_mix
+            self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU / constants.CJLSTg1prime2decay_pure**2
+            self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU / constants.CJLSTg1prime2decay_mix
+
+            self.M2g1_VBF = t.pvbf_VAJHU_new
+            self.M2g2_HJJ = t.phjj_VAJHU_new / constants.cconstantHJJ
+
+        self.notdijet = self.M2g1_VBF == 0 or self.M2g2_HJJ == 0
         return self
 
 ##########################
@@ -130,7 +143,7 @@ class TreeWrapper(Iterator):
 
     def D_jet_0plus(self):
         if self.notdijet: return -999
-        return self.vbf_p0plus_VAJHU / (self.vbf_p0plus_VAJHU + self.hjj_p0plus_VAJHU)
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_HJJ*constants.cconstantHJJ)
 
 ###################################
 #anomalous couplings discriminants#
@@ -231,6 +244,7 @@ class TreeWrapper(Iterator):
             "toaddtotree",
             "tree",
             "treesample",
+            "useMELAv2",
             "weightfunctions",
             "xsec",
         ]

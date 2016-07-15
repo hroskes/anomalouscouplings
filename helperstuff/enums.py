@@ -230,12 +230,32 @@ class Release(MyEnum):
     enumitems = (
                  EnumItem("76X"),
                  EnumItem("80X"),
+                 EnumItem("160714"),
                 )
     def CJLSTdir(self):
         if self == "76X":
             return "root://lxcms03//data3/Higgs/160225/"
         if self == "80X":
             return "root://lxcms03//data3/Higgs/160624/"
+        if self == "160714":
+            return "root://lxcms03//data3/Higgs/160714/"
+        assert False
+    def CJLSTdir_anomalous(self):
+        if self == "76X":
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_7_6_3_patch2/src/ZZAnalysis/AnalysisStep/test/prod/AnomalousCouplingsReweighting/PT13TeV"
+        if self == "160714":
+            return "/afs/cern.ch/work/h/hroskes/public/CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/anomalous/PT13TeV"
+        return self.CJLSTdir()
+    def CJLSTdir_data(self):
+        if self == "160714":
+            return "root://lxcms03//data3/Higgs/160712/"
+        return self.CJLSTdir()
+    @property
+    def useMELAv2(self):
+        if self in ("76X", "80X"):
+            return False
+        if self == "160714":
+            return True
         assert False
 
 channels = [Channel(item) for item in Channel.enumitems]

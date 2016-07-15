@@ -156,8 +156,10 @@ class Sample(ReweightingSample):
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
-        if self.productionmode == "ggH" and self.release == "76X":
-            return config.CJLSTmaindir_76Xanomalous
+        if self.productionmode == "ggH":
+            return self.release.CJLSTdir_anomalous()
+        if self.productionmode in ("data", "ZX"):
+            return self.release.CJLSTdir_data()
         return self.release.CJLSTdir()
 
     def CJLSTdirname(self):
@@ -177,6 +179,14 @@ class Sample(ReweightingSample):
             if self.hypothesis == "fa20.5": return "0PHf05ph0"
             if self.hypothesis == "fa30.5": return "0Mf05ph0"
             if self.hypothesis == "fL10.5": return "0L1f05ph0"
+        if self.productionmode == "ggH" and self.release == "160714":
+            if self.hypothesis == "0+": return "ggH0PM_M125"
+            if self.hypothesis == "a2": return "ggH0PH_M125"
+            if self.hypothesis == "0-": return "ggH0M_M125"
+            if self.hypothesis == "L1": return "ggH0L1_M125"
+            if self.hypothesis == "fa20.5": return "ggH0PHf05ph0_M125"
+            if self.hypothesis == "fa30.5": return "ggH0Mf05ph0_M125"
+            if self.hypothesis == "fL10.5": return "ggH0L1f05ph0_M125"
         if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
             name = str(self.productionmode)
             if self.productionmode == "VBF":
@@ -184,6 +194,8 @@ class Sample(ReweightingSample):
             name += "125"
             return name
         if self.productionmode == "ggZZ":
+            if self.release == "160714" and self.flavor in ("4e", "4mu", "4tau", "2mu2tau"):
+                return "ggTo{}_Contin_MCFM701".format(self.flavor)
             return "ggZZ{}".format(self.flavor)
         if self.productionmode == "qqZZ":
             return "ZZTo4l"
@@ -197,3 +209,7 @@ class Sample(ReweightingSample):
     def withdiscriminantsfile(self):
         return os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
         raise self.ValueError("withdiscriminantsfile")
+
+    @property
+    def useMELAv2(self):
+        return self.release.useMELAv2

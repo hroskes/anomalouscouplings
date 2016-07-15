@@ -12,4 +12,6 @@ for filename in os.listdir("."):
   except AttributeError:
       delete.append(filename)
 
-print "rm", " ".join(delete)
+print "rm \t\t\t\\"
+for a in delete:
+    print a, "\t\t\t\\"
