@@ -1,10 +1,10 @@
 import os
 import ROOT
 ZXfolder = os.path.dirname(__file__)
-ReducibleBackgroundFile = os.path.join(folder, "ReducibleBackgroundAA_2015.C")
+ReducibleBackgroundFile = os.path.join(ZXfolder, "ReducibleBackgroundAA_2015.C")
 ROOT.gROOT.LoadMacro(ReducibleBackgroundFile+"+")
 
-def setup(release):
-    release = int(release)
+def setup(production):
+    release = int(production.release)
     assert release in (76, 80)
-    ROOT.setup(release, folder)
+    ROOT.setup(release, ZXfolder)

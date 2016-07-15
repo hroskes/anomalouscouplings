@@ -214,8 +214,8 @@ class Analysis(MyEnum):
             return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
         else:
             assert False
-    def signaltemplates(self, channel, release, systematic=None):
-        return [Template(sample, self, channel, release, systematic) for sample in self.signalsamples()]
+    def signaltemplates(self, channel, production, systematic=None):
+        return [Template(sample, self, channel, production, systematic) for sample in self.signalsamples()]
     def interfxsec(self):
         if self == "fa3":
             return constants.JHUXS2L2la1a3 - 2*constants.JHUXS2L2la1
@@ -225,39 +225,53 @@ class Analysis(MyEnum):
             return constants.JHUXS2L2la1L1 - 2*constants.JHUXS2L2la1
         assert False
 
-class Release(MyEnum):
-    enumname = "release"
+class Production(MyEnum):
+    enumname = "production"
     enumitems = (
-                 EnumItem("76X"),
-                 EnumItem("80X"),
+                 EnumItem("160225"),
+                 EnumItem("160624"),
                  EnumItem("160714"),
                 )
     def CJLSTdir(self):
-        if self == "76X":
+        if self == "160225":
             return "root://lxcms03//data3/Higgs/160225/"
-        if self == "80X":
+        if self == "160624":
             return "root://lxcms03//data3/Higgs/160624/"
         if self == "160714":
             return "root://lxcms03//data3/Higgs/160714/"
         assert False
     def CJLSTdir_anomalous(self):
-        if self == "76X":
+        if self == "160225":
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_7_6_3_patch2/src/ZZAnalysis/AnalysisStep/test/prod/AnomalousCouplingsReweighting/PT13TeV"
         if self == "160714":
             return "/afs/cern.ch/work/h/hroskes/public/CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/anomalous/PT13TeV"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
         if self == "160714":
-            return "root://lxcms03//data3/Higgs/160712/"
+            return "root://lxcms03//data3/Higgs/160716/"
         return self.CJLSTdir()
     @property
     def useMELAv2(self):
-        if self in ("76X", "80X"):
+        if self in ("160225", "160624"):
             return False
         if self == "160714":
             return True
         assert False
+    @property
+    def release(self):
+        if self == "160225":
+            return self.Release("76X")
+        elif self in ("160624", "160714"):
+            return self.Release("80X")
 
+    #put this in here to avoid me getting really confused
+    class Release(MyEnum):
+        enumitems = (
+                     EnumItem("76X"),
+                     EnumItem("80X"),
+                    )
+        def __int__(self):
+            return int(str(self).replace("X", ""))
 channels = [Channel(item) for item in Channel.enumitems]
 systematics = [Systematic(item) for item in Systematic.enumitems]
 treesystematics = [Systematic(item) for item in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown")]
@@ -265,7 +279,7 @@ flavors = [Flavor(item) for item in Flavor.enumitems]
 hypotheses = [Hypothesis(item) for item in Hypothesis.enumitems]
 productionmodes = [ProductionMode(item) for item in ProductionMode.enumitems]
 analyses = [Analysis(item) for item in Analysis.enumitems]
-releases = [Release(item) for item in Release.enumitems]
+productions = [Production(item) for item in Production.enumitems]
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):
@@ -365,7 +379,7 @@ class MultiEnum(object):
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, Systematic, SignalOrBkg, Analysis, Release]
+    enums = [Channel, Systematic, SignalOrBkg, Analysis, Production]
 
     def check(self, *args):
         if self.systematic is None:
@@ -375,18 +389,18 @@ class TemplatesFile(MultiEnum):
             raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
 
     def jsonfile(self):
-        return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}_{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname(), self.release))
+        return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}_{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname(), self.production))
 
     def templatesfile(self, run1=False):
         if not run1:
-            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_{}Adap_{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname(), self.analysis, self.release))
+            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_{}Adap_{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname(), self.analysis, self.production))
         else:
             assert self.analysis == "fa3"
             return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())
 
     def signalsamples(self):
         from samples import Sample
-        return [Sample(reweightingsample, self.release) for reweightingsample in self.analysis.signalsamples()]
+        return [Sample(reweightingsample, self.production) for reweightingsample in self.analysis.signalsamples()]
 
     def templates(self):
         if self.signalorbkg == "signal":
@@ -484,39 +498,39 @@ class Template(MultiEnum):
         if self.productionmode == "ggH":
             if self.analysis in ("fa2", "fa3"):
                 result=[
-                        Sample(self.release, "ggH", "0+"),
-                        Sample(self.release, "ggH", "a2"),
-                        Sample(self.release, "ggH", "0-"),
-                        Sample(self.release, "ggH", "L1"),
-                        Sample(self.release, "ggH", "fa20.5"),
-                        Sample(self.release, "ggH", "fa30.5"),
-                        #Sample(self.release, "ggH", "fL10.5"),   #NOT fL1 for now
+                        Sample(self.production, "ggH", "0+"),
+                        Sample(self.production, "ggH", "a2"),
+                        Sample(self.production, "ggH", "0-"),
+                        Sample(self.production, "ggH", "L1"),
+                        Sample(self.production, "ggH", "fa20.5"),
+                        Sample(self.production, "ggH", "fa30.5"),
+                        #Sample(self.production, "ggH", "fL10.5"),   #NOT fL1 for now
                        ]
             if self.analysis == "fL1":
                 if self.hypothesis in ("0+", "L1"):
                     result=[
-                            Sample(self.release, "ggH", "0+"),
-                            Sample(self.release, "ggH", "a2"),
-                            Sample(self.release, "ggH", "0-"),
-                            Sample(self.release, "ggH", "L1"),
-                            Sample(self.release, "ggH", "fa20.5"),
-                            Sample(self.release, "ggH", "fa30.5"),
-                            #Sample(self.release, "ggH", "fL10.5"),   #NOT fL1 for now
+                            Sample(self.production, "ggH", "0+"),
+                            Sample(self.production, "ggH", "a2"),
+                            Sample(self.production, "ggH", "0-"),
+                            Sample(self.production, "ggH", "L1"),
+                            Sample(self.production, "ggH", "fa20.5"),
+                            Sample(self.production, "ggH", "fa30.5"),
+                            #Sample(self.production, "ggH", "fL10.5"),   #NOT fL1 for now
                            ]
                 elif self.hypothesis == "fL10.5":
                     result=[
-                            #Sample(self.release, "ggH", "0+"),
-                            Sample(self.release, "ggH", "a2"),
-                            #Sample(self.release, "ggH", "0-"),
-                            Sample(self.release, "ggH", "L1"),
-                            Sample(self.release, "ggH", "fa20.5"),
-                            Sample(self.release, "ggH", "fa30.5"),
-                            Sample(self.release, "ggH", "fL10.5"),
+                            #Sample(self.production, "ggH", "0+"),
+                            Sample(self.production, "ggH", "a2"),
+                            #Sample(self.production, "ggH", "0-"),
+                            Sample(self.production, "ggH", "L1"),
+                            Sample(self.production, "ggH", "fa20.5"),
+                            Sample(self.production, "ggH", "fa30.5"),
+                            Sample(self.production, "ggH", "fL10.5"),
                            ]
         if self.productionmode in ("qqZZ", "ZX"):
-            result = [Sample(self.release, self.productionmode)]
+            result = [Sample(self.production, self.productionmode)]
         if self.productionmode == "ggZZ":
-            result = [Sample(self.release, self.productionmode, flavor) for flavor in flavors]
+            result = [Sample(self.production, self.productionmode, flavor) for flavor in flavors]
         result = [sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0]
         assert result
         return result

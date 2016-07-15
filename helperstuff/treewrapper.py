@@ -21,19 +21,22 @@ class TreeWrapper(Iterator):
         self.isZX = treesample.isZX()
         self.useMELAv2 = treesample.useMELAv2
         self.isdummy = isdummy
+
         self.baseweight = None
         if not self.isdata:
             self.baseweight = self.getbaseweightfunction()
         self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
+
         self.nevents = self.nevents2L2l = None
         if Counters is not None:
-            self.nevents = Counters.GetBinContent(1)
+            self.nevents = Counters.GetBinContent(40)
         if Counters_reweighted is not None:
             self.nevents2L2l = [
                                 Counters_reweighted.GetBinContent(4, i) #2e2mu
                               + Counters_reweighted.GetBinContent(8, i) #2e2tau+2mu2tau
                                   for i, sample in enumerate(treesample.reweightingsamples(), start=1)
                                ]
+
         self.minevent = minevent
         if self.isdata and not config.usedata or self.isdummy:
             self.length = 0
@@ -42,13 +45,19 @@ class TreeWrapper(Iterator):
         else:
             self.length = maxevent - minevent + 1
 
+        if self.isZX:
+            import ZX
+            ZX.setup(treesample.production)
+
         self.initlists()
         if treesample.onlyweights(): self.onlyweights()
+
         tree.GetEntry(0)
         if self.isdata or self.isZX:
             self.xsec = 0
         else:
             self.xsec = tree.xsec * 1000 #pb to fb
+
         self.checkfunctions()
 
     def __iter__(self):

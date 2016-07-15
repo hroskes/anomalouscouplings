@@ -1,13 +1,13 @@
 from array import array
 from helperstuff import xrd
-from helperstuff.enums import flavors, hypotheses, releases
+from helperstuff.enums import flavors, hypotheses, productions
 from helperstuff.samples import Sample
 from helperstuff.treewrapper import TreeWrapper
 import os
 import ROOT
 import sys
 
-definitelyexists = Sample("ggH", "0+", "76X")
+definitelyexists = Sample("ggH", "0+", "160225")
 assert xrd.exists(definitelyexists.CJLSTfile())
 
 def adddiscriminants(*args):
@@ -60,16 +60,16 @@ def adddiscriminants(*args):
     newf.Close()
 
 if __name__ == '__main__':
-    for release in releases:
+    for production in productions:
         for hypothesis in hypotheses:
-            adddiscriminants("ggH", hypothesis, release)
+            adddiscriminants("ggH", hypothesis, production)
         for flavor in flavors:
-            adddiscriminants("ggZZ", flavor, release)
-        adddiscriminants("qqZZ", release)
-        adddiscriminants("ZX", release)
-        adddiscriminants("data", release)
-        adddiscriminants("VBF", "0+", release)
-        adddiscriminants("ZH", "0+", release)
-        adddiscriminants("WplusH", "0+", release)
-        adddiscriminants("WminusH", "0+", release)
-        adddiscriminants("ttH", "0+", release)
+            adddiscriminants("ggZZ", flavor, production)
+        adddiscriminants("qqZZ", production)
+        adddiscriminants("ZX", production)
+        adddiscriminants("data", production)
+        adddiscriminants("VBF", "0+", production)
+        adddiscriminants("ZH", "0+", production)
+        adddiscriminants("WplusH", "0+", production)
+        adddiscriminants("WminusH", "0+", production)
+        adddiscriminants("ttH", "0+", production)

@@ -1,16 +1,11 @@
 import config
-from enums import Flavor, hypotheses, Hypothesis, MultiEnum, ProductionMode, Release
+from enums import Flavor, hypotheses, Hypothesis, MultiEnum, ProductionMode, Production
 import os
 import ROOT
 
 class ReweightingSample(MultiEnum):
     enumname = "reweightingsample"
     enums = [ProductionMode, Hypothesis, Flavor]
-
-    def __init__(self, *args, **kwargs):
-        super(ReweightingSample, self).__init__(*args, **kwargs)
-        if self.productionmode == "ZX":
-            import ZX
 
     def check(self, *args):
         if self.productionmode is None:
@@ -148,22 +143,22 @@ class ReweightingSample(MultiEnum):
         raise self.ValueError("weightingredients")
 
 class Sample(ReweightingSample):
-    enums = [ReweightingSample, Release]
+    enums = [ReweightingSample, Production]
 
     def check(self, *args):
-        if self.release is None:
-            raise ValueError("No option provided for release\n{}".format(args))
+        if self.production is None:
+            raise ValueError("No option provided for production\n{}".format(args))
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
         if self.productionmode == "ggH":
-            return self.release.CJLSTdir_anomalous()
+            return self.production.CJLSTdir_anomalous()
         if self.productionmode in ("data", "ZX"):
-            return self.release.CJLSTdir_data()
-        return self.release.CJLSTdir()
+            return self.production.CJLSTdir_data()
+        return self.production.CJLSTdir()
 
     def CJLSTdirname(self):
-        if self.productionmode == "ggH" and self.release == "76X":
+        if self.productionmode == "ggH" and self.production == "160225":
             if self.hypothesis == "0+": return "0PM_v2"
             if self.hypothesis == "a2": return "0PH_v2"
             if self.hypothesis == "0-": return "0M_v1"
@@ -171,7 +166,7 @@ class Sample(ReweightingSample):
             if self.hypothesis == "fa20.5": return "0PHf05ph0_v2"
             if self.hypothesis == "fa30.5": return "0Mf05ph0_v2"
             if self.hypothesis == "fL10.5": return "0L1f05ph0_v2"
-        if self.productionmode == "ggH" and self.release == "80X":
+        if self.productionmode == "ggH" and self.production == "160624":
             if self.hypothesis == "0+": return "0PM"
             if self.hypothesis == "a2": return "0PH"
             if self.hypothesis == "0-": return "0M"
@@ -179,7 +174,7 @@ class Sample(ReweightingSample):
             if self.hypothesis == "fa20.5": return "0PHf05ph0"
             if self.hypothesis == "fa30.5": return "0Mf05ph0"
             if self.hypothesis == "fL10.5": return "0L1f05ph0"
-        if self.productionmode == "ggH" and self.release == "160714":
+        if self.productionmode == "ggH" and self.production == "160714":
             if self.hypothesis == "0+": return "ggH0PM_M125"
             if self.hypothesis == "a2": return "ggH0PH_M125"
             if self.hypothesis == "0-": return "ggH0M_M125"
@@ -194,7 +189,7 @@ class Sample(ReweightingSample):
             name += "125"
             return name
         if self.productionmode == "ggZZ":
-            if self.release == "160714" and self.flavor in ("4e", "4mu", "4tau", "2mu2tau"):
+            if self.production == "160714" and self.flavor in ("4e", "4mu", "4tau", "2mu2tau"):
                 return "ggTo{}_Contin_MCFM701".format(self.flavor)
             return "ggZZ{}".format(self.flavor)
         if self.productionmode == "qqZZ":
@@ -212,4 +207,4 @@ class Sample(ReweightingSample):
 
     @property
     def useMELAv2(self):
-        return self.release.useMELAv2
+        return self.production.useMELAv2

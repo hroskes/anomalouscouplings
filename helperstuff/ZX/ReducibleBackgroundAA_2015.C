@@ -33,7 +33,9 @@ void setup(int release, TString dir) {
   didsetup = release;
   delete fFakeRates;
   delete fFakeRates2;
-  if (release == 76) {
+  if (release == 76
+       || release == 80  //temporary patch !!
+     ) {
     fFakeRates = TFile::Open(dir+"/fakeRates_20151202.root");
     fFakeRates2 = 0;
     h1D_FRmu_EB = (TH1F*)fFakeRates->Get("NoWZ_h1D_FRmu_EB");
@@ -42,11 +44,11 @@ void setup(int release, TString dir) {
     h1D_FRel_EE = (TH1F*)fFakeRates->Get("NoWZ_h1D_FRel_EE");
   } else if (release == 80) {
     fFakeRates = TFile::Open(dir+"/computedfakerate_Z2e_80XB.root");
+    h1D_FRel_EB = (TH1F*)fFakeRates->Get("Corr_EB");
+    h1D_FRel_EE = (TH1F*)fFakeRates->Get("Corr_EE");
     fFakeRates2 = TFile::Open(dir+"/computedfakerate_Z2mu_80XB.root");
-    h1D_FRel_EB = (TH1F*)fFakeRates->get("Corr_EB");
-    h1D_FRel_EE = (TH1F*)fFakeRates->get("Corr_EE");
-    h1D_FRmu_EB = (TH1F*)fFakeRates2->get("Corr_EB");
-    h1D_FRmu_EE = (TH1F*)fFakeRates2->get("Corr_EE");
+    h1D_FRmu_EB = (TH1F*)fFakeRates2->Get("Corr_EB");
+    h1D_FRmu_EE = (TH1F*)fFakeRates2->Get("Corr_EE");
   } else {
     assert(false);
   }
@@ -56,6 +58,7 @@ Float_t fakeRate13TeV(Float_t LepPt, Float_t LepEta, Int_t LepID) {
   assert(didsetup > 0);
   Float_t myLepPt = LepPt>=80. ? 79. : LepPt;
   Int_t   myLepID = abs(LepID);
+  assert(h1D_FRel_EB && h1D_FRel_EE && h1D_FRmu_EB && h1D_FRmu_EE);
   if(myLepID==11){
     if(fabs(LepEta)<1.449)
       return h1D_FRel_EB->GetBinContent(h1D_FRel_EB->GetXaxis()->FindBin(myLepPt));

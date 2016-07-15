@@ -1,6 +1,6 @@
 from helperstuff import constants
 from helperstuff.samples import Sample
-from helperstuff.enums import analyses, Channel, channels, releases, treesystematics, TemplatesFile
+from helperstuff.enums import analyses, Channel, channels, productions, treesystematics, TemplatesFile
 import json
 import os
 
@@ -28,10 +28,10 @@ def makejson(*args):
         f.write(jsonstring)
 
 if __name__ == "__main__":
-    for release in releases:
+    for production in productions:
         for analysis in analyses:
             for channel in channels:
                 for systematic in treesystematics:
                     print channel, analysis, systematic
-                    makejson(channel, systematic, "signal", analysis, release)
-                makejson(channel, "bkg", analysis, release)
+                    makejson(channel, systematic, "signal", analysis, production)
+                makejson(channel, "bkg", analysis, production)

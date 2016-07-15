@@ -23,9 +23,9 @@ class __Rate(MultiEnum):
             if self.channel == "2e2mu": return 3.116
 
         if self.productionmode == "ggH":
-            result = Template("fa3", self, "0+", config.releaseforsignalrates).gettemplate().Integral()*config.luminosity
+            result = Template("fa3", self, "0+", config.productionforsignalrates).gettemplate().Integral()*config.luminosity
             for productionmode in "VBF", "WplusH", "WminusH", "ZH", "ttH":
-                sample = Sample(productionmode, "0+", config.releaseforsignalrates)
+                sample = Sample(productionmode, "0+", config.productionforsignalrates)
                 f = tfiles[sample.withdiscriminantsfile()]
                 t = f.candTree
                 ZZFlav = self.channel.ZZFlav()
@@ -37,7 +37,7 @@ class __Rate(MultiEnum):
             return result
 
         assert False
-        return Template("fa3", self, config.releaseforsignalrates).gettemplate().Integral()*config.luminosity
+        return Template("fa3", self, config.productionforsignalrates).gettemplate().Integral()*config.luminosity
 
     def __float__(self):
         return self.getrate()
