@@ -265,6 +265,7 @@ class TreeWrapper(Iterator):
         """
         if not self.useMELAv2:
             return 1
+        return 4
         from math import exp, pow
         par = (
                -0.565,

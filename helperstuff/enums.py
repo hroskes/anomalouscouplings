@@ -424,7 +424,7 @@ class TemplatesFile(MultiEnum):
         else:
             assert False
 
-        if not self.unblind:
+        if self.signalorbkg == "DATA" and self.blind:
             result += "_blind"
         result += ".json"
         return result
@@ -445,7 +445,7 @@ class TemplatesFile(MultiEnum):
         else:
             assert False
 
-        if self.signalorbkg == "DATA" and not self.unblind:
+        if self.signalorbkg == "DATA" and self.blind:
             result += "_blind"
         result += ".root"
         return result
@@ -463,8 +463,9 @@ class TemplatesFile(MultiEnum):
             return [Template(self, "data")]
 
     @property
-    def unblind(self):
-        return self.blindstatus == "unblind"
+    def blind(self):
+        if self.signalorbkg != "DATA": assert False
+        return self.blindstatus == "blind"
 
 templatesfiles = []
 def tmp():
@@ -841,12 +842,13 @@ class Template(MultiEnum):
         return jsn
 
     @property
-    def unblind(self):
-        return self.templatesfile.unblind
+    def blind(self):
+        if self.signalorbkg != "DATA": assert False
+        return self.templatesfile.blind
 
     @property
     def selection(self):
         result = "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.channel.ZZFlav())
-        if not self.unblind:
+        if self.signalorbkg == "DATA" and self.blind:
             result += " && " + config.blindcut.format(scope="")
         return result
