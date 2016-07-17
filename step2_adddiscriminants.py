@@ -53,7 +53,7 @@ def adddiscriminants(*args):
 
     for entry in treewrapper:
         for discriminant in discriminants:
-            discriminants[discriminant][0] = getattr(treewrapper, discriminant)
+            discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
         newt.Fill()
 
     newf.Write()

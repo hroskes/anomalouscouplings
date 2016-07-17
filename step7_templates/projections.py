@@ -1,7 +1,7 @@
 import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate
-from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Production, productions, Systematic, Template
+from helperstuff.enums import analyses, Analysis, BlindStatus, blindstatuses, Channel, channels, EnumItem, MultiEnum, MyEnum, Production, productions, Systematic, Template
 from helperstuff.filemanager import tfiles
 import helperstuff.style
 import os
@@ -60,7 +60,7 @@ class TemplateForProjection(object):
 class Normalization(MyEnum):
     enumname = "normalization"
     enumitems = [
-                 EnumItem(""),
+                 EnumItem("defaultnormalization"),
                  EnumItem("rescalemixtures"),
                  EnumItem("areanormalize"),
                 ]
@@ -81,7 +81,7 @@ class TemplateFromFile(TemplateForProjection, MultiEnum):
         self.Scale(scalefactor)
     def check(self, *args):
         if self.normalization is None:
-            self.normalization = Normalization("")
+            self.normalization = Normalization("defaultnormalization")
         super(TemplateFromFile, self).check(*args)
 
 class TemplateSum(TemplateForProjection):
@@ -108,27 +108,27 @@ exts = "png", "eps", "root", "pdf"
 
 
 class Projections(MultiEnum):
-  enums = [Channel, Analysis, Normalization, Systematic, Production]
+  enums = [Channel, Analysis, Normalization, Systematic, Production, BlindStatus]
   enumname = "projections"
   def check(self, *args):
     if self.normalization is None:
-      self.normalization = Normalization("")
+      self.normalization = Normalization("defaultnormalization")
     if self.systematic is None:
       self.systematic = Systematic("")
     super(Projections, self).check(*args)
 
   def projections(self):
     templates = [
-                 TemplateFromFile(1, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[0]),
-                 TemplateFromFile(ROOT.kCyan, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[1]),
-                 TemplateFromFile(0, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[2]),
+                 TemplateFromFile(1, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic, self.blindstatus)[0]),
+                 TemplateFromFile(ROOT.kCyan, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic, self.blindstatus)[1]),
+                 TemplateFromFile(0, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic, self.blindstatus)[2]),
                 ]
     templates+= [
                  TemplateSum("ggH {}=0.5".format(self.analysis.title()), ROOT.kGreen+3, 1, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
                  TemplateSum("ggH {}=-0.5".format(self.analysis.title()), 4, -1, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
-                 TemplateFromFile(6, self.normalization, self.analysis, self.channel, "qqZZ", self.systematic, self.production),
-                 TemplateFromFile(ROOT.kOrange+6, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.production),
-                 TemplateFromFile(2, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.production),
+                 TemplateFromFile(6, self.normalization, self.analysis, self.channel, "qqZZ", self.systematic, self.production, self.blindstatus),
+                 TemplateFromFile(ROOT.kOrange+6, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.production, self.blindstatus),
+                 TemplateFromFile(2, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.production, self.blindstatus),
                 ]
     axes[0] = Axis(self.analysis.purediscriminant(), self.analysis.purediscriminant(title=True), 0)
     axes[1] = Axis(self.analysis.mixdiscriminant(), self.analysis.mixdiscriminant(title=True), 1)
@@ -151,7 +151,7 @@ class Projections(MultiEnum):
         hstack.Draw("nostack hist")
         hstack.GetXaxis().SetTitle(axis.title)
         legend.Draw()
-        dir = os.path.join(config.plotsbasedir, "templateprojections", str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))
+        dir = os.path.join(config.plotsbasedir, "templateprojections", "blind" if self.blindstatus == "blind" else "fullrange_nodata", str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))
         try:
             os.makedirs(dir)
         except OSError:
@@ -167,5 +167,6 @@ if __name__ == "__main__":
     for channel in channels:
       for analysis in analyses:
         for normalization in normalizations:
-#          if channel != "2e2mu" or analysis != "fa3" or normalization != "areanormalize": continue
-          projections(channel, analysis, normalization, production)
+          for blindstatus in blindstatuses:
+#            if channel != "2e2mu" or analysis != "fa3" or normalization != "areanormalize": continue
+            projections(channel, analysis, normalization, production, blindstatus)

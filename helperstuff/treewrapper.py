@@ -23,6 +23,8 @@ class TreeWrapper(Iterator):
         self.isdummy = isdummy
         if self.isdata:
             self.unblind = treesample.unblind
+        else:
+            self.unblind = True
 
         self.baseweight = None
         if not self.isdata:
@@ -98,7 +100,7 @@ class TreeWrapper(Iterator):
         self.p0minus_VAJHU = t.p0minus_VAJHU
         self.pg1g4_VAJHU = t.pg1g4_VAJHU
         self.p0plus_m4l = t.p0plus_m4l
-        self.bkg_VAMCFM = t.bkg_VAMCFM
+        self.bkg_VAMCFM = t.bkg_VAMCFM * self.cconstantfordbkg(t.ZZMass)
         self.bkg_m4l = t.bkg_m4l
         for a in "p0plus", "bkg":
             for b in "Scale", "Res":
@@ -146,26 +148,19 @@ class TreeWrapper(Iterator):
 #background discriminants#
 ##########################
 
-    @property
     def D_bkg_0plus(self):
         return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
-    @property
     def D_bkg_0plus_ResUp(self):
         return self.p0plus_VAJHU*self.p0plus_m4l_ResUp / (self.p0plus_VAJHU*self.p0plus_m4l_ResUp  + self.bkg_VAMCFM*self.bkg_m4l_ResUp)
-    @property
     def D_bkg_0plus_ResDown(self):
         return self.p0plus_VAJHU*self.p0plus_m4l_ResDown / (self.p0plus_VAJHU*self.p0plus_m4l_ResDown  + self.bkg_VAMCFM*self.bkg_m4l_ResDown)
-    @property
     def D_bkg_0plus_ScaleUp(self):
         return self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp  + self.bkg_VAMCFM*self.bkg_m4l_ScaleUp)
-    @property
     def D_bkg_0plus_ScaleDown(self):
         return self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown  + self.bkg_VAMCFM*self.bkg_m4l_ScaleDown)
-    @property
     def D_bkg_0minus(self):
         return self.p0minus_VAJHU*self.p0plus_m4l / (self.p0minus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
 
-    @property
     def D_jet_0plus(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_HJJ*constants.cconstantHJJ)
@@ -174,22 +169,16 @@ class TreeWrapper(Iterator):
 #anomalous couplings discriminants#
 ###################################
 
-    @property
     def D_0minus_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g4_decay*constants.g4decay**2)
-    @property
     def D_CP_decay(self):
         return self.M2g1g4_decay*constants.g4decay / (self.M2g1_decay + self.M2g4_decay*constants.g4decay**2)
-    @property
     def D_g2_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g2_decay*constants.g2decay**2)
-    @property
     def D_g1g2_decay(self):
         return self.M2g1g2_decay*constants.g2decay / (self.M2g1_decay + self.M2g2_decay*constants.g2decay**2)
-    @property
     def D_g1prime2_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
-    @property
     def D_g1g1prime2_decay(self):
         return self.M2g1g1prime2_decay*constants.g1prime2decay_reco / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
 
@@ -199,48 +188,37 @@ class TreeWrapper(Iterator):
 
     def MC_weight_ggH(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXS2L2l / self.nevents2L2l[index]
-    @property
     def MC_weight_ggH_g1(self):
         return self.MC_weight_ggH(0)
-    @property
     def MC_weight_ggH_g2(self):
         return self.MC_weight_ggH(1)
-    @property
     def MC_weight_ggH_g4(self):
         return self.MC_weight_ggH(2)
-    @property
     def MC_weight_ggH_g1prime2(self):
         return self.MC_weight_ggH(3)
-    @property
     def MC_weight_ggH_g1g2(self):
         return self.MC_weight_ggH(4)
-    @property
     def MC_weight_ggH_g1g4(self):
         return self.MC_weight_ggH(5)
-    @property
     def MC_weight_ggH_g1g1prime2(self):
         return self.MC_weight_ggH(6)
 
-    @property
     def MC_weight_ggZZ(self):
         if self.useMELAv2:
             KFactor = self.tree.KFactor_QCD_ggZZ_Nominal
         else:
             KFactor = self.tree.KFactorggZZ
         return self.MC_weight * self.xsec * KFactor / self.nevents
-    @property
     def MC_weight_qqZZ(self):
         if self.useMELAv2:
             KFactor = self.tree.KFactor_EW_qqZZ * self.tree.KFactor_QCD_qqZZ_M
         else:
             KFactor = self.tree.KFactorEWKqqZZ * self.tree.KFactorQCDqqZZ_M
         return self.MC_weight * self.xsec * KFactor / self.nevents
-    @property
     def MC_weight_ZX(self):
         self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
         return ROOT.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ROOT.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
 
-    @property
     def MC_weight_plain(self):
         return self.MC_weight * self.xsec / self.nevents
     MC_weight_VBF = MC_weight_ZH = MC_weight_WH = MC_weight_ttH = MC_weight_plain
@@ -251,6 +229,63 @@ class TreeWrapper(Iterator):
 
     def getbaseweightfunction(self):
         return self.getweightfunction(self.treesample)
+
+    def cconstantfordbkg(self, ZZMass):
+        """
+        from Ulascan skype
+        float getDbkgkinConstant(float ZZMass){
+          float par[11]={
+            -0.565,
+            70.,
+            5.90,
+            -0.235,
+            130.1,
+            13.25,
+            -0.33,
+            191.04,
+            16.05,
+            0.775,
+            187.47
+          };
+          float kappa =
+            par[9]
+            +par[0]*exp(-pow(((ZZMass-par[1])/par[2]), 2))
+            +par[3]*exp(-pow(((ZZMass-par[4])/par[5]), 2))
+            +par[6]*(
+            exp(-pow(((ZZMass-par[7])/par[8]), 2))*(ZZMass<par[7])
+            + exp(-pow(((ZZMass-par[7])/par[10]), 2))*(ZZMass>=par[7])
+            );
+          float constant = kappa/(1.-kappa);
+          return constant;
+        }
+        """
+        if not self.useMELAv2:
+            return 1
+        from math import exp, pow
+        par = (
+               -0.565,
+               70.,
+               5.90,
+               -0.235,
+               130.1,
+               13.25,
+               -0.33,
+               191.04,
+               16.05,
+               0.775,
+               187.47,
+              )
+        kappa = (
+                 par[9]
+                 +par[0]*exp(-pow(((ZZMass-par[1])/par[2]), 2))
+                 +par[3]*exp(-pow(((ZZMass-par[4])/par[5]), 2))
+                 +par[6]*(
+                          exp(-pow(((ZZMass-par[7])/par[8]), 2))*(ZZMass<par[7])
+                           + exp(-pow(((ZZMass-par[7])/par[10]), 2))*(ZZMass>=par[7])
+                         )
+                )
+        constant = kappa/(1-kappa)
+        return kappa
 
     def initlists(self):
         self.toaddtotree = [
@@ -271,6 +306,7 @@ class TreeWrapper(Iterator):
 
         self.exceptions = [
             "baseweight",
+            "cconstantfordbkg",
             "checkfunctions",
             "exceptions",
             "flavordict",

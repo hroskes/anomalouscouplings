@@ -221,8 +221,8 @@ class Analysis(MyEnum):
             return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
         else:
             assert False
-    def signaltemplates(self, channel, production, systematic=None):
-        return [Template(sample, self, channel, production, systematic) for sample in self.signalsamples()]
+    def signaltemplates(self, *args):
+        return [Template(sample, self, *args) for sample in self.signalsamples()]
     def interfxsec(self):
         if self == "fa3":
             return constants.JHUXS2L2la1a3 - 2*constants.JHUXS2L2la1

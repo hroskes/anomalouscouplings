@@ -24,4 +24,5 @@ if __name__ == "__main__":
     for templatesfile in templatesfiles:
         buildtemplates(templatesfile)
         #and copy data
-        shutil.copy(Sample("data", templatesfile.production, templatesfile.blindstatus).withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))
+        if templatesfile.signalorbkg == "DATA":
+            shutil.copy(Sample("data", templatesfile.production, templatesfile.blindstatus).withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))
