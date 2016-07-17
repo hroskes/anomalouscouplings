@@ -8,6 +8,6 @@ if "lxplus" in socket.gethostname() and getpass.getuser() == "hroskes":
 else:
     raise ValueError("Who/where are you?")
 
-usedata = False
+unblinddata = False
 luminosity = 10
-blindcut = "D_bkg_0plus < 0.5"
+blindcut = "{scope}D_bkg_0plus < 0.5"

@@ -53,7 +53,7 @@ def adddiscriminants(*args):
 
     for entry in treewrapper:
         for discriminant in discriminants:
-            discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
+            discriminants[discriminant][0] = getattr(treewrapper, discriminant)
         newt.Fill()
 
     newf.Write()
@@ -67,9 +67,10 @@ if __name__ == '__main__':
             adddiscriminants("ggZZ", flavor, production)
         adddiscriminants("qqZZ", production)
         adddiscriminants("ZX", production)
-        adddiscriminants("data", production)
         adddiscriminants("VBF", "0+", production)
         adddiscriminants("ZH", "0+", production)
         adddiscriminants("WplusH", "0+", production)
         adddiscriminants("WminusH", "0+", production)
         adddiscriminants("ttH", "0+", production)
+        adddiscriminants("data", production, "unblind")
+        adddiscriminants("data", production, "blind")

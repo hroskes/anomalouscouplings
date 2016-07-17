@@ -1,5 +1,5 @@
 import config
-from enums import Flavor, hypotheses, Hypothesis, MultiEnum, ProductionMode, Production
+from enums import BlindStatus, Flavor, hypotheses, Hypothesis, MultiEnum, ProductionMode, Production
 import os
 import ROOT
 
@@ -143,11 +143,15 @@ class ReweightingSample(MultiEnum):
         raise self.ValueError("weightingredients")
 
 class Sample(ReweightingSample):
-    enums = [ReweightingSample, Production]
+    enums = [ReweightingSample, Production, BlindStatus]
 
     def check(self, *args):
         if self.production is None:
             raise ValueError("No option provided for production\n{}".format(args))
+        if self.blindstatus is None and self.productionmode == "data":
+            raise ValueError("No blindstatus provided for data sample!\n{}".format(args))
+        if self.blindstatus is not None and self.productionmode != "data":
+            raise ValueError("blindstatus provided for MC sample!\n{}".format(args))
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
@@ -202,9 +206,16 @@ class Sample(ReweightingSample):
         return os.path.join(self.CJLSTmaindir(), self.CJLSTdirname(), "ZZ4lAnalysis.root")
 
     def withdiscriminantsfile(self):
-        return os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
+        result = os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
+        return result
         raise self.ValueError("withdiscriminantsfile")
 
     @property
     def useMELAv2(self):
         return self.production.useMELAv2
+
+    @property
+    def unblind(self):
+        if self.productionmode == "data":
+            return self.blindstatus == "unblind"
+        raise self.ValueError("unblind")

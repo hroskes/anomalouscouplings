@@ -777,5 +777,5 @@ class Template(MultiEnum):
     def selection(self):
         result = "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.channel.ZZFlav())
         if not self.unblind:
-            result += " && " + config.blindcut
+            result += " && " + config.blindcut.format(scope="")
         return result
