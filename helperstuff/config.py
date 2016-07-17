@@ -9,5 +9,5 @@ else:
 
 unblinddata = False
 luminosity = 7.65
-blindcut = "{scope}D_bkg_0plus < 0.5"
+blindcut = lambda self: self.D_bkg_0plus() < 0.5
 productionforsignalrates = "160714"

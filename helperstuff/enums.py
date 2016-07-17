@@ -849,6 +849,4 @@ class Template(MultiEnum):
     @property
     def selection(self):
         result = "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.channel.ZZFlav())
-        if self.signalorbkg == "DATA" and self.blind:
-            result += " && " + config.blindcut.format(scope="")
         return result

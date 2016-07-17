@@ -14,6 +14,7 @@ def niceplots(*args):
 
     for discriminant, title in ("Dbkg", "D_{bkg}"), (analysis.purediscriminant(), analysis.purediscriminant(True)), (analysis.mixdiscriminant(), analysis.mixdiscriminant(True)):
         f = ROOT.TFile(os.path.join(previousplots, discriminant+".root"))
+        f.ls()
         c = f.c1
         lst = c.GetListOfPrimitives()[1].GetHists()
  

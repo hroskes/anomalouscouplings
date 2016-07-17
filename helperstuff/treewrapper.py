@@ -265,7 +265,6 @@ class TreeWrapper(Iterator):
         """
         if not self.useMELAv2:
             return 1
-        return 4
         from math import exp, pow
         par = (
                -0.565,
@@ -416,7 +415,7 @@ class TreeWrapper(Iterator):
         if error:
             raise SyntaxError(error)
 
-    passesblindcut = eval("lambda self: "+config.blindcut.format(scope="self."))
+    passesblindcut = config.blindcut
 
 if __name__ == '__main__':
     class DummyTree(object):
