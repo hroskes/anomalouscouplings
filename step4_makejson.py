@@ -1,6 +1,6 @@
 from helperstuff import constants
 from helperstuff.samples import Sample
-from helperstuff.enums import analyses, Channel, channels, productions, treesystematics, TemplatesFile
+from helperstuff.enums import analyses, blindstatuses, channels, productions, treesystematics, TemplatesFile
 import json
 import os
 
@@ -13,6 +13,7 @@ def jsonloads(jsonstring):
 
 def makejson(*args):
     templatesfile = TemplatesFile(*args)
+    print templatesfile
     jsondict = {
                 "inputDirectory": "step3_withdiscriminants/",
                 "outputFile": templatesfile.templatesfile(),
@@ -28,10 +29,10 @@ def makejson(*args):
         f.write(jsonstring)
 
 if __name__ == "__main__":
-    for production in productions:
-        for analysis in analyses:
-            for channel in channels:
-                for systematic in treesystematics:
-                    print channel, analysis, systematic
-                    makejson(channel, systematic, "signal", analysis, production)
-                makejson(channel, "bkg", analysis, production)
+    for blindstatus in blindstatuses:
+        for production in productions:
+            for analysis in analyses:
+                for channel in channels:
+                    for systematic in treesystematics:
+                        makejson(channel, systematic, "signal", analysis, production, blindstatus)
+                    makejson(channel, "bkg", analysis, production, blindstatus)

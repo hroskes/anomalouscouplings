@@ -54,6 +54,10 @@ class MyEnum(object):
     def __hash__(self):
         return hash(self.item)
 
+    @classmethod
+    def items(cls, condition=lambda item: True):
+        return [cls(item) for item in cls.enumitems if condition(cls(item))]
+
 class Channel(MyEnum):
     enumname = "channel"
     enumitems = (
@@ -272,14 +276,23 @@ class Production(MyEnum):
                     )
         def __int__(self):
             return int(str(self).replace("X", ""))
-channels = [Channel(item) for item in Channel.enumitems]
-systematics = [Systematic(item) for item in Systematic.enumitems]
+
+class BlindStatus(MyEnum):
+    enumname = "blindstatus"
+    enumitems = (
+                 EnumItem("unblind"),
+                 EnumItem("blind"),
+                )
+
+channels = Channel.items()
+systematics = Systematic.items()
 treesystematics = [Systematic(item) for item in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown")]
-flavors = [Flavor(item) for item in Flavor.enumitems]
-hypotheses = [Hypothesis(item) for item in Hypothesis.enumitems]
-productionmodes = [ProductionMode(item) for item in ProductionMode.enumitems]
-analyses = [Analysis(item) for item in Analysis.enumitems]
-productions = [Production(item) for item in Production.enumitems]
+flavors = Flavor.items()
+hypotheses = Hypothesis.items()
+productionmodes = ProductionMode.items()
+analyses = Analysis.items()
+productions = Production.items(lambda x: x != "160624")
+blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):
@@ -379,21 +392,23 @@ class MultiEnum(object):
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, Systematic, SignalOrBkg, Analysis, Production]
+    enums = [Channel, Systematic, SignalOrBkg, Analysis, Production, BlindStatus]
 
     def check(self, *args):
         if self.systematic is None:
             self.systematic = Systematic("")
+        if self.blindstatus is None:
+            self.blindstatus = BlindStatus("unblind")
         super(TemplatesFile, self).check(*args)
         if not self.systematic.appliesto(self.signalorbkg):
             raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
 
     def jsonfile(self):
-        return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}_{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname(), self.production))
+        return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}_{}{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname(), self.production, "" if self.unblind else "_blind"))
 
     def templatesfile(self, run1=False):
         if not run1:
-            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_{}Adap_{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname(), self.analysis, self.production))
+            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_{}Adap_{}{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname(), self.analysis, self.production, "" if self.unblind else "_blind"))
         else:
             assert self.analysis == "fa3"
             return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())
@@ -407,6 +422,10 @@ class TemplatesFile(MultiEnum):
             return [Template(self, sample.productionmode, sample.hypothesis) for sample in self.signalsamples()]
         elif self.signalorbkg == "bkg":
             return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ", "ZX")]
+
+    @property
+    def unblind(self):
+        return self.blindstatus == "unblind"
 
 class Template(MultiEnum):
     enums = [TemplatesFile, ProductionMode, Hypothesis]
@@ -693,7 +712,7 @@ class Template(MultiEnum):
                    "tree": "candTree",
                    "variables": self.discriminants(),
                    "weight": self.weightname(),
-                   "selection": "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.channel.ZZFlav()),
+                   "selection": self.selection,
                    "assertion": "D_0minus_decay >= 0. && D_0minus_decay <= 1.",
                    "binning": {
                      "type": "fixed",
@@ -749,3 +768,14 @@ class Template(MultiEnum):
             jsn["templates"] += intjsn["templates"]
 
         return jsn
+
+    @property
+    def unblind(self):
+        return self.templatesfile.unblind
+
+    @property
+    def selection(self):
+        result = "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.channel.ZZFlav())
+        if not self.unblind:
+            result += " && " + config.blindcut
+        return result

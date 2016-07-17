@@ -10,3 +10,4 @@ else:
 
 usedata = False
 luminosity = 10
+blindcut = "D_bkg_0plus < 0.5"
