@@ -1,8 +1,12 @@
 from collections import Counter, Iterator
 import config
 import constants
+import resource
 import ROOT
 from samples import ReweightingSample
+import sys
+resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
+sys.setrecursionlimit(10000)
 
 class TreeWrapper(Iterator):
 
@@ -285,7 +289,7 @@ class TreeWrapper(Iterator):
                          )
                 )
         constant = kappa/(1-kappa)
-        return kappa
+        return constant
 
     def initlists(self):
         self.toaddtotree = [

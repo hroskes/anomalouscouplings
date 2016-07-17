@@ -30,4 +30,5 @@ def makejson(*args):
 
 if __name__ == "__main__":
     for templatesfile in templatesfiles:
+        if templatesfile.signalorbkg == "DATA": continue
         makejson(templatesfile)

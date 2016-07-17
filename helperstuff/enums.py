@@ -294,7 +294,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-productions = Production.items(lambda x: x != "160624")
+productions = Production.items(lambda x: x == "160714")
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):
@@ -386,9 +386,13 @@ class MultiEnum(object):
     def applysynonyms(self, enumsdict):
         pass
 
-    def check(self, *args):
+    def check(self, *args, **kwargs):
+        dontcheck = ()
+        for kw, kwarg in kwargs.iteritems():
+            if kw == "dontcheck":
+                dontcheck = tuple(kwarg)
         for enum in self.enums:
-            if getattr(self, enum.enumname) is None:
+            if enum not in dontcheck and getattr(self, enum.enumname) is None:
                 raise ValueError("No option provided for {}\n{}".format(enum.enumname, args))
 
 
@@ -400,9 +404,11 @@ class TemplatesFile(MultiEnum):
     def check(self, *args):
         if self.systematic is None:
             self.systematic = Systematic("")
-        if self.blindstatus is None:
-            self.blindstatus = BlindStatus("unblind")
-        super(TemplatesFile, self).check(*args)
+        if self.blindstatus is None and self.signalorbkg == "DATA":
+            raise ValueError("No option provided for blind!\n{}".format(args))
+        if self.blindstatus is not None and self.signalorbkg != "DATA":
+            raise ValueError("Can't blind MC!\n{}".format(args))
+        super(TemplatesFile, self).check(*args, dontcheck=[BlindStatus])
         if not self.systematic.appliesto(self.signalorbkg):
             raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
 
@@ -439,7 +445,7 @@ class TemplatesFile(MultiEnum):
         else:
             assert False
 
-        if not self.unblind:
+        if self.signalorbkg == "DATA" and not self.unblind:
             result += "_blind"
         result += ".root"
         return result
@@ -462,14 +468,14 @@ class TemplatesFile(MultiEnum):
 
 templatesfiles = []
 def tmp():
-    for blindstatus in blindstatuses:
-        for systematic in treesystematics:
-            for channel in channels:
-                for production in productions:
-                    for analysis in analyses:
-                        templatesfiles.append(TemplatesFile(channel, systematic, "signal", analysis, production, blindstatus))
-                        if systematic == "":
-                            templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production, blindstatus))
+    for systematic in treesystematics:
+        for channel in channels:
+            for production in productions:
+                for analysis in analyses:
+                    templatesfiles.append(TemplatesFile(channel, systematic, "signal", analysis, production))
+                    if systematic == "":
+                        templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production))
+                    for blindstatus in blindstatuses:
                         if systematic == "" and (blindstatus == "blind" or config.unblinddata):
                             templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus))
 tmp()

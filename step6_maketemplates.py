@@ -22,6 +22,7 @@ def buildtemplates(*args):
 
 if __name__ == "__main__":
     for templatesfile in templatesfiles:
+        if templatesfile.signalorbkg == "DATA": continue
         buildtemplates(templatesfile)
         #and copy data
         if templatesfile.signalorbkg == "DATA":
