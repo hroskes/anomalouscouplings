@@ -1,6 +1,6 @@
 from helperstuff import constants
 from helperstuff.samples import Sample
-from helperstuff.enums import analyses, blindstatuses, channels, productions, treesystematics, TemplatesFile
+from helperstuff.enums import TemplatesFile, templatesfiles
 import json
 import os
 
@@ -29,10 +29,5 @@ def makejson(*args):
         f.write(jsonstring)
 
 if __name__ == "__main__":
-    for blindstatus in blindstatuses:
-        for production in productions:
-            for analysis in analyses:
-                for channel in channels:
-                    for systematic in treesystematics:
-                        makejson(channel, systematic, "signal", analysis, production, blindstatus)
-                    makejson(channel, "bkg", analysis, production, blindstatus)
+    for templatesfile in templatesfiles:
+        makejson(templatesfile)

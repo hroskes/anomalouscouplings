@@ -10,17 +10,17 @@ class __Rate(MultiEnum):
     enums = (ProductionMode, Channel)
     def getrate(self):
         if self.productionmode == "ggZZ":
-            if self.channel == "4e":    return 0.40
-            if self.channel == "4mu":   return 0.77
-            if self.channel == "2e2mu": return 0.66
+            if self.channel == "4e":    return 0.40 * config.luminosity/10
+            if self.channel == "4mu":   return 0.77 * config.luminosity/10
+            if self.channel == "2e2mu": return 0.66 * config.luminosity/10
         if self.productionmode == "qqZZ":
-            if self.channel == "4e":    return 3.26
-            if self.channel == "4mu":   return 7.17
-            if self.channel == "2e2mu": return 8.77
+            if self.channel == "4e":    return 3.26 * config.luminosity/10
+            if self.channel == "4mu":   return 7.17 * config.luminosity/10
+            if self.channel == "2e2mu": return 8.77 * config.luminosity/10
         if self.productionmode == "ZX":
-            if self.channel == "4e":    return 2.196
-            if self.channel == "4mu":   return 3.003
-            if self.channel == "2e2mu": return 3.116
+            if self.channel == "4e":    return 2.196 * config.luminosity/10
+            if self.channel == "4mu":   return 3.003 * config.luminosity/10
+            if self.channel == "2e2mu": return 3.116 * config.luminosity/10
 
         if self.productionmode == "ggH":
             result = Template("fa3", self, "0+", config.productionforsignalrates).gettemplate().Integral()*config.luminosity

@@ -138,6 +138,8 @@ class Systematic(MyEnum):
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
         elif signalorbkg == "bkg":
             return self in ("", "ZXUp", "ZXDown")
+        elif signalorbkg == "DATA":
+            return self in ("", )
         assert False
 
 
@@ -146,6 +148,7 @@ class SignalOrBkg(MyEnum):
     enumitems = (
                  EnumItem("signal", "sig"),
                  EnumItem("background", "bkg"),
+                 EnumItem("DATA"),
                 )
 
 class Analysis(MyEnum):
@@ -404,14 +407,42 @@ class TemplatesFile(MultiEnum):
             raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
 
     def jsonfile(self):
-        return os.path.join(config.repositorydir, "step5_json/templates_{}_{}{}_{}{}.json".format(self.analysis, self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname(), self.production, "" if self.unblind else "_blind"))
+        folder = os.path.join(config.repositorydir, "step5_json")
+
+        if self.signalorbkg == "bkg":
+            result = os.path.join(folder, "templates_{}_{}_bkg_{}".format(self.analysis, self.channel, self.production))
+        elif self.signalorbkg == "DATA":
+            result = os.path.join(folder, "datatemplates_{}_{}_{}".format(self.analysis, self.channel, self.production))
+        elif self.signalorbkg == "signal":
+            result = os.path.join(folder, "templates_{}_{}{}_{}".format(self.analysis, self.channel, self.systematic.appendname(), self.production))
+        else:
+            assert False
+
+        if not self.unblind:
+            result += "_blind"
+        result += ".json"
+        return result
 
     def templatesfile(self, run1=False):
-        if not run1:
-            return os.path.join(config.repositorydir, "step7_templates/{}{}{}_{}Adap_{}{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else "", self.systematic.appendname(), self.analysis, self.production, "" if self.unblind else "_blind"))
-        else:
+        if run1:
             assert self.analysis == "fa3"
             return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())
+
+        folder = os.path.join(config.repositorydir, "step7_templates")
+
+        if self.signalorbkg == "bkg":
+            result = os.path.join(folder, "{}_bkg{}_{}Adap_{}".format(self.channel, self.systematic.appendname(), self.analysis, self.production))
+        elif self.signalorbkg == "DATA":
+            result = os.path.join(folder, "data_{}_{}_{}".format(self.channel, self.analysis, self.production))
+        elif self.signalorbkg == "signal":
+            result = os.path.join(folder, "{}{}_{}Adap_{}".format(self.channel, self.systematic.appendname(), self.analysis, self.production))
+        else:
+            assert False
+
+        if not self.unblind:
+            result += "_blind"
+        result += ".root"
+        return result
 
     def signalsamples(self):
         from samples import Sample
@@ -422,10 +453,27 @@ class TemplatesFile(MultiEnum):
             return [Template(self, sample.productionmode, sample.hypothesis) for sample in self.signalsamples()]
         elif self.signalorbkg == "bkg":
             return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ", "ZX")]
+        elif self.signalorbkg == "DATA":
+            return [Template(self, "data")]
 
     @property
     def unblind(self):
         return self.blindstatus == "unblind"
+
+templatesfiles = []
+def tmp():
+    for blindstatus in blindstatuses:
+        for systematic in treesystematics:
+            for channel in channels:
+                for production in productions:
+                    for analysis in analyses:
+                        templatesfiles.append(TemplatesFile(channel, systematic, "signal", analysis, production, blindstatus))
+                        if systematic == "":
+                            templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production, blindstatus))
+                        if systematic == "" and (blindstatus == "blind" or config.unblinddata):
+                            templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus))
+tmp()
+del tmp
 
 class Template(MultiEnum):
     enums = [TemplatesFile, ProductionMode, Hypothesis]
@@ -437,6 +485,8 @@ class Template(MultiEnum):
                 enumsdict[SignalOrBkg] = "signal"
             elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "ZX"):
                 enumsdict[SignalOrBkg] = "bkg"
+            elif enumsdict[ProductionMode] == "data":
+                enumsdict[SignalOrBkg] = "DATA"
             else:
                 assert False
 
@@ -455,6 +505,11 @@ class Template(MultiEnum):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.signalorbkg != "bkg":
+                raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.signalorbkg, args))
+        elif self.productionmode == "data":
+            if self.hypothesis is not None:
+                raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.signalorbkg != "DATA":
                 raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.signalorbkg, args))
         else:
             raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
@@ -481,6 +536,8 @@ class Template(MultiEnum):
                 assert False
         elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
             name = "template{}AdapSmooth".format(self.productionmode)
+        elif self.productionmode == "data":
+            name = "datatemplate"
         else:
             assert False
 
@@ -510,6 +567,8 @@ class Template(MultiEnum):
             return ReweightingSample(self.productionmode, "2e2mu").weightname()
         if self.hypothesis is not None:
             return ReweightingSample(self.productionmode, self.hypothesis).weightname()
+        if self.productionmode == "data":
+            return None
         return ReweightingSample(self.productionmode).weightname()
 
     def reweightfrom(self):
@@ -550,12 +609,14 @@ class Template(MultiEnum):
             result = [Sample(self.production, self.productionmode)]
         if self.productionmode == "ggZZ":
             result = [Sample(self.production, self.productionmode, flavor) for flavor in flavors]
+        if self.productionmode == "data":
+            result = [Sample(self.production, self.productionmode, self.blindstatus)]
         result = [sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0]
         assert result
         return result
 
     def scalefactor(self):
-        if self.signalorbkg == "bkg": return 1
+        if self.signalorbkg in ("bkg", "DATA"): return 1
         if self.hypothesis in ("0+", "0-", "a2", "L1"):
             result = 1.0
         elif self.hypothesis == "fa30.5":
@@ -570,7 +631,7 @@ class Template(MultiEnum):
         return result
 
     def domirror(self, final=True):
-        return self.analysis == "fa3" and not (not final and self.hypothesis == "fa30.5")
+        return self.analysis == "fa3" and not (not final and self.hypothesis == "fa30.5") and self.productionmode != "data"
 
     def discriminants(self):
         return [
@@ -766,6 +827,10 @@ class Template(MultiEnum):
             if self.domirror(final=True):
                 intjsn["templates"][0]["postprocessing"].append({"type":"mirror", "antisymmetric":True, "axis":1})
             jsn["templates"] += intjsn["templates"]
+
+        if self.productionmode == "data":
+            del jsn["templates"][0]["postprocessing"]
+            del jsn["templates"][0]["weight"]
 
         return jsn
 

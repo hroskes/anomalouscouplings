@@ -1,5 +1,5 @@
 from helperstuff import config
-from helperstuff.enums import analyses, blindstatuses, channels, productions, treesystematics, TemplatesFile
+from helperstuff.enums import templatesfiles, TemplatesFile
 from helperstuff.samples import Sample
 import os
 import shutil
@@ -21,13 +21,7 @@ def buildtemplates(*args):
         raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))
 
 if __name__ == "__main__":
-    for blindstatus in blindstatuses:
-        for systematic in treesystematics:
-            for channel in channels:
-                for production in productions:
-                    for analysis in analyses:
-                        buildtemplates(channel, systematic, "signal", analysis, production)
-                        if systematic == "":
-                            buildtemplates(channel, "bkg", analysis, production)
-            #and copy data
-            shutil.copy(Sample("data", production).withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))
+    for templatesfile in templatesfiles:
+        buildtemplates(templatesfile)
+        #and copy data
+        shutil.copy(Sample("data", templatesfile.production, templatesfile.blindstatus).withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))

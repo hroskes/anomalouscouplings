@@ -9,5 +9,5 @@ else:
     raise ValueError("Who/where are you?")
 
 unblinddata = False
-luminosity = 10
+luminosity = 7.65
 blindcut = "{scope}D_bkg_0plus < 0.5"
