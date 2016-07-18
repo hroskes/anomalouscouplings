@@ -1,6 +1,6 @@
 from helperstuff import config
 from helperstuff import stylefunctions as style
-from helperstuff.enums import Analysis, analyses, Channel, channels, MultiEnum, Production
+from helperstuff.enums import Analysis, analyses, Channel, channels, EnumItem, MultiEnum, MyEnum, Production
 import os
 import ROOT
 

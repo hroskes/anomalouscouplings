@@ -65,20 +65,28 @@ class Normalization(MyEnum):
                  EnumItem("rescalemixtures"),
                  EnumItem("areanormalize"),
                 ]
-normalizations = [Normalization(normalization) for normalization in Normalization.enumitems]
+normalizations = Normalization.items()
+
+class EnrichStatus(MyEnum):
+    enumname = "enrich"
+    enumitems = [
+                 EnumItem("enrich"),
+                 EnumItem("noenrich"),
+                 EnumItem("impoverish"),
+                ]
+enrichstatuses = EnirchStatus.items()
     
 class TemplateFromFile(TemplateForProjection, MultiEnum):
-    enums = [Template, Normalization]
-    def __init__(self, color, blindstatus, *args):  #have to do blindstatus separately, because Template has its own blindstatus :(
+    enums = [Template, Normalization, EnrichStatus]
+    def __init__(self, color, *args):
         super(TemplateFromFile, self).__init__(*args)
-        self.blindstatus = BlindStatus(blindstatus)
         self.title = self.template.title()
         self.color = color
         self.h = self.template.gettemplate().Clone()
-        if self.blindstatus == "blind":
-            for x, y, z in itertools.product(range(1, self.h.GetNbinsX()+1), range(1, self.h.GetNbinsY()+1), range(1, self.h.GetNbinsZ()+1)):
-                if self.h.GetZaxis().GetBinLowEdge(z) >= .5:
-                    self.h.SetBinContent(x, y, z, 0)
+        for x, y, z in itertools.product(range(1, self.h.GetNbinsX()+1), range(1, self.h.GetNbinsY()+1), range(1, self.h.GetNbinsZ()+1)):
+            if (self.enrichstatus == "impoverish" and self.h.GetZaxis().GetBinLowEdge(z) >= .5 \
+             or self.enrichstatus == "enrich"     and self.h.GetZaxis().GetBinLowEdge(z) < .5):
+                self.h.SetBinContent(x, y, z, 0)
         self.projections = {}
         if self.productionmode == "ggH":
             scalefactor = getrate("2e2mu", self.productionmode) / Template(self.production, self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
@@ -123,7 +131,7 @@ exts = "png", "eps", "root", "pdf"
 
 
 class Projections(MultiEnum):
-  enums = [Channel, Analysis, Normalization, Systematic, Production, BlindStatus]
+  enums = [Channel, Analysis, Normalization, Systematic, Production, EnrichStatus]
   enumname = "projections"
   def check(self, *args):
     if self.normalization is None:
@@ -134,20 +142,20 @@ class Projections(MultiEnum):
 
   def projections(self):
     templates = [
-                 TemplateFromFile(1, self.blindstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[0]),
-                 TemplateFromFile(ROOT.kCyan, self.blindstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[1]),
-                 TemplateFromFile(0, self.blindstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[2]),
+                 TemplateFromFile(1, self.enrichstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[0]),
+                 TemplateFromFile(ROOT.kCyan, self.enrichstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[1]),
+                 TemplateFromFile(0, self.enrichstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[2]),
                 ]
     templates+= [
                  TemplateSum("ggH {}=0.5".format(self.analysis.title()), ROOT.kGreen+3, 1, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
                  TemplateSum("ggH {}=-0.5".format(self.analysis.title()), 4, -1, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
-                 TemplateFromFile(6, self.blindstatus, self.normalization, self.analysis, self.channel, "qqZZ", self.systematic, self.production),
-                 TemplateFromFile(ROOT.kOrange+6, self.blindstatus, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.production),
-                 TemplateFromFile(2, self.blindstatus, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.production),
+                 TemplateFromFile(6, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ", self.systematic, self.production),
+                 TemplateFromFile(ROOT.kOrange+6, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.production),
+                 TemplateFromFile(2, self.enrichstatus, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.production),
                 ]
-    if self.blindstatus == "blind" or config.unblinddata:
+    if self.enrichstatus == "impoverish" or config.unblinddata:
         templates += [
-                      TemplateFromFile(1, self.blindstatus, self.normalization, self.analysis, self.channel, "data", self.production, self.blindstatus) #blindstatus is here twice
+                      TemplateFromFile(1, self.enrichstatus, self.normalization, self.analysis, self.channel, "data", self.production, "unblind" if config.unblinddata else "blind")
                      ]
     axes[0] = Axis(self.analysis.purediscriminant(), self.analysis.purediscriminant(title=True), 0)
     axes[1] = Axis(self.analysis.mixdiscriminant(), self.analysis.mixdiscriminant(title=True), 1)
@@ -170,7 +178,13 @@ class Projections(MultiEnum):
         hstack.Draw("nostack")
         hstack.GetXaxis().SetTitle(axis.title)
         legend.Draw()
-        dir = os.path.join(config.plotsbasedir, "templateprojections", "blind" if self.blindstatus == "blind" else "fullrange", str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))
+        if self.enrichstatus == "impoverish":
+            blinddir = "blind"
+        elif self.enrichstatus == "noenrich":
+            blinddir = "fullrange"
+        elif self.enrichstatus == "enrich":
+            blinddir = "enrich"
+        dir = os.path.join(config.plotsbasedir, "templateprojections", blinddir, str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))
         try:
             os.makedirs(dir)
         except OSError:
@@ -183,10 +197,9 @@ def projections(*args):
 
 if __name__ == "__main__":
   for production in productions:
-    print production
     for channel in channels:
       for analysis in analyses:
         for normalization in normalizations:
-          for blindstatus in blindstatuses:
+          for enrichstatus in enrichstatuses:
 #            if channel != "2e2mu" or analysis != "fa3" or normalization != "areanormalize": continue
-            projections(channel, analysis, normalization, production, blindstatus)
+            projections(channel, analysis, normalization, production, enrichstatus)

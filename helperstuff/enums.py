@@ -289,7 +289,7 @@ class BlindStatus(MyEnum):
 
 channels = Channel.items()
 systematics = Systematic.items()
-treesystematics = [Systematic(item) for item in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown")]
+treesystematics = Systematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
@@ -651,11 +651,11 @@ class Template(MultiEnum):
                ]
     def binning(self):
         if self.analysis == "fa2":
-            result = [25, 0, 1, 25, 0, 1, 25, 0, 1]
+            result = [26, 0, 1, 26, 0, 1, 26, 0, 1]
         elif self.analysis == "fa3":
-            result = [25, 0, 1, 25, -0.5, 0.5, 25, 0, 1]
+            result = [26, 0, 1, 26, -0.5, 0.5, 26, 0, 1]
         elif self.analysis == "fL1":
-            result = [25, 0, 1, 25, 0, 1, 25, 0, 1]
+            result = [26, 0, 1, 26, 0, 1, 26, 0, 1]
         else:
             assert False
         for i in 1, 2, 4, 5, 7, 8:
