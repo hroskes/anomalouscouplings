@@ -548,7 +548,7 @@ class Template(MultiEnum):
         else:
             assert False
 
-        if self.analysis == "fa3" and final:
+        if self.analysis == "fa3" and final and self.productionmode != "data":
             name += "Mirror"
 
         return name
@@ -560,6 +560,9 @@ class Template(MultiEnum):
             return str(self.productionmode).replace("ZZ", "#rightarrowZZ")
         if self.productionmode == "ZX":
             return "Z+X"
+        if self.productionmode == "data":
+            return "data"
+        assert False
 
     def gettemplate(self):
         f = tfiles[self.templatefile()]

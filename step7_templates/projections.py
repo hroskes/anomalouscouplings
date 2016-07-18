@@ -82,8 +82,16 @@ class TemplateFromFile(TemplateForProjection, MultiEnum):
         self.projections = {}
         if self.productionmode == "ggH":
             scalefactor = getrate("2e2mu", self.productionmode) / Template(self.production, self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
+        elif self.productionmode == "data":
+            scalefactor = 1
         else:
             scalefactor = getrate(self.channel, self.productionmode) / self.Integral()
+        if self.productionmode == "data":
+            self.hstackoption = "P"
+            self.h.SetMarkerColor(self.color)
+            self.h.SetMarkerStyle(20)
+        else:
+            self.hstackoption = "hist"
         self.Scale(scalefactor)
     def check(self, *args):
         if self.normalization is None:
@@ -109,6 +117,7 @@ class TemplateSum(TemplateForProjection):
         if normalization != "rescalemixtures":
             mixturesign = 0
         self.Scale(constants.JHUXS2L2la1 / (2*constants.JHUXS2L2la1 + mixturesign*analysis.interfxsec()))
+        self.hstackoption = "hist"
 
 exts = "png", "eps", "root", "pdf"
 
@@ -136,6 +145,10 @@ class Projections(MultiEnum):
                  TemplateFromFile(ROOT.kOrange+6, self.blindstatus, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.production),
                  TemplateFromFile(2, self.blindstatus, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.production),
                 ]
+    if self.blindstatus == "blind" or config.unblinddata:
+        templates += [
+                      TemplateFromFile(1, self.blindstatus, self.normalization, self.analysis, self.channel, "data", self.production, self.blindstatus) #blindstatus is here twice
+                     ]
     axes[0] = Axis(self.analysis.purediscriminant(), self.analysis.purediscriminant(title=True), 0)
     axes[1] = Axis(self.analysis.mixdiscriminant(), self.analysis.mixdiscriminant(title=True), 1)
 
@@ -153,8 +166,8 @@ class Projections(MultiEnum):
         hstack = ROOT.THStack(axis.name, axis.title)
         for template in templates:
             if template.color:
-                hstack.Add(template.Projection(axis.index))
-        hstack.Draw("nostack hist")
+                hstack.Add(template.Projection(axis.index), template.hstackoption)
+        hstack.Draw("nostack")
         hstack.GetXaxis().SetTitle(axis.title)
         legend.Draw()
         dir = os.path.join(config.plotsbasedir, "templateprojections", "blind" if self.blindstatus == "blind" else "fullrange", str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))

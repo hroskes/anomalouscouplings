@@ -71,7 +71,6 @@ def replacesystematics(channel):
         contents = f.read()
     sections = contents.split("------------\n")
     systematicssection = sections[-1]
-    #print systematicssection; raw_input()
     systematicslines = systematicssection.split("\n")
     systematics = [Systematic(line) for line in systematicslines]
 
@@ -83,7 +82,6 @@ def replacesystematics(channel):
         systematicslines[i] = moriond.readline(systematic.name, moriondsystematics)
 
     sections[-1] = systematicssection = "\n".join(systematicslines)
-    print systematicssection; raw_input()
     contents = "------------\n".join(sections)
     with open(cardfilename, "w") as f:
         f.write(contents)

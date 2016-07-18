@@ -10,11 +10,10 @@ def niceplots(*args):
     info = NicePlots(*args)
     analysis, channel, production = info.analysis, info.channel, info.production
     dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", str(analysis), str(channel))
-    previousplots = os.path.join(config.plotsbasedir, "templateprojections", "rescalemixtures", "{}_{}".format(analysis, production), str(channel))
+    previousplots = os.path.join(config.plotsbasedir, "templateprojections", "blind", "rescalemixtures", "{}_{}".format(analysis, production), str(channel))
 
     for discriminant, title in ("Dbkg", "D_{bkg}"), (analysis.purediscriminant(), analysis.purediscriminant(True)), (analysis.mixdiscriminant(), analysis.mixdiscriminant(True)):
         f = ROOT.TFile(os.path.join(previousplots, discriminant+".root"))
-        f.ls()
         c = f.c1
         lst = c.GetListOfPrimitives()[1].GetHists()
  
@@ -48,13 +47,22 @@ def niceplots(*args):
         mix.SetLineWidth(3)
         mix.Add(ZZ)  #which already has ZX
 
+        data = lst[7]
+        data.SetLineColor(1)
+        data.SetMarkerColor(1)
+        data.SetLineStyle(3)
+        data.SetLineWidth(3)
+        data.SetMarkerStyle(20)
+
         hstack = ROOT.THStack(discriminant, "")
         l = ROOT.TLegend(.2, .5, .4, .95)
         l.SetBorderSize(0)
         l.SetFillStyle(0)
 
         for h in ZZ, ZX, SM, BSM, mix:
-            hstack.Add(h)
+            hstack.Add(h, "hist")
+        hstack.Add(data, "P")
+        l.AddEntry(data, "data", "lp")
         l.AddEntry(SM, "SM", "l"),
         l.AddEntry(BSM, analysis.title()+"=1", "l"),
         l.AddEntry(mix, analysis.title()+"=0.5", "l"),
@@ -62,7 +70,7 @@ def niceplots(*args):
         l.AddEntry(ZX, "Z+X", "f"),
 
         c = ROOT.TCanvas()
-        hstack.Draw("nostack hist")
+        hstack.Draw("nostack")
         l.Draw()
 
         hstack.GetXaxis().SetTitle(title)

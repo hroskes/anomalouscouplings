@@ -56,8 +56,9 @@ def getrates(flavor):
     return result
 
 def gettemplate(*args):
-    return Template(*args).gettemplate()
+    return Template(config.productionforcombine, *args).gettemplate()
 
 def getdatatree(channel):
     channel = Channel(channel)
-    return tfiles[Sample("data").withdiscriminantsfile()].candTree
+    return tfiles[Sample("data", config.productionforcombine, "unblind").withdiscriminantsfile()].candTree
+    #unblind is empty if we don't actually unblind
