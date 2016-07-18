@@ -7,7 +7,7 @@ if "lxplus" in socket.gethostname() and getpass.getuser() == "hroskes":
 else:
     raise ValueError("Who/where are you?")
 
-unblinddata = False
+unblinddata = True
 luminosity = 7.65
 blindcut = lambda self: self.D_bkg_0plus() < 0.5
 productionforsignalrates = "160714"

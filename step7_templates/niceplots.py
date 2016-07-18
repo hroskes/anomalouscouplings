@@ -21,7 +21,12 @@ def niceplots(*args):
     info = NicePlots(*args)
     analysis, production = info.analysis, info.production
     dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", str(analysis))
-    previousplots = {channel: os.path.join(config.plotsbasedir, "templateprojections", "blind", "rescalemixtures", "{}_{}".format(analysis, production), str(channel)) for channel in channels}
+
+    if config.unblinddata:
+        blinddir = "fullrange"
+    else:
+        blinddir = "blind"
+    previousplots = {channel: os.path.join(config.plotsbasedir, "templateprojections", blinddir, "rescalemixtures", "{}_{}".format(analysis, production), str(channel)) for channel in channels}
 
     for discriminant, title in ("Dbkg", "D_{bkg}"), (analysis.purediscriminant(), analysis.purediscriminant(True)), (analysis.mixdiscriminant(), analysis.mixdiscriminant(True)):
 
