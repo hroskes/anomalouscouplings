@@ -2,6 +2,7 @@ from helperstuff import config
 from helperstuff import stylefunctions as style
 from helperstuff.enums import Analysis, analyses, Channel, channels, EnumItem, MultiEnum, MyEnum, Production
 import os
+from projections import EnrichStatus, enrichstatuses
 import ROOT
 
 class HistWrapper(object):
@@ -17,16 +18,12 @@ class HistWrapper(object):
 
 def niceplots(*args):
     class NicePlots(MultiEnum):
-        enums = (Analysis, Production)
+        enums = (Analysis, Production, EnrichStatus)
     info = NicePlots(*args)
-    analysis, production = info.analysis, info.production
-    dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", str(analysis))
+    analysis, production, enrichstatus = info.analysis, info.production, info.enrichstatus
+    dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", enrichstatus.dirname(), str(analysis))
 
-    if config.unblinddata:
-        blinddir = "fullrange"
-    else:
-        blinddir = "blind"
-    previousplots = {channel: os.path.join(config.plotsbasedir, "templateprojections", blinddir, "rescalemixtures", "{}_{}".format(analysis, production), str(channel)) for channel in channels}
+    previousplots = {channel: os.path.join(config.plotsbasedir, "templateprojections", enrichstatus.dirname(), "rescalemixtures", "{}_{}".format(analysis, production), str(channel)) for channel in channels}
 
     for discriminant, title in ("Dbkg", "D_{bkg}"), (analysis.purediscriminant(), analysis.purediscriminant(True)), (analysis.mixdiscriminant(), analysis.mixdiscriminant(True)):
 
@@ -112,6 +109,8 @@ def niceplots(*args):
 
         style.applycanvasstyle(c)
         style.applyaxesstyle(hstack)
+        style.cuttext(enrichstatus.cuttext())
+        style.CMS("Preliminary", config.luminosity)
 
         hstack.GetXaxis().SetTitle(title)
         hstack.GetYaxis().SetTitle(
@@ -129,4 +128,5 @@ def niceplots(*args):
 
 if __name__ == "__main__":
     for analysis in analyses:
-        niceplots(analysis, "160714")
+        for enrichstatus in enrichstatuses:
+            niceplots(analysis, "160714", enrichstatus)

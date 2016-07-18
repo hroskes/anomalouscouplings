@@ -1,7 +1,7 @@
 import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate
-from helperstuff.enums import analyses, Analysis, BlindStatus, blindstatuses, Channel, channels, EnumItem, MultiEnum, MyEnum, Production, productions, Systematic, Template
+from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Production, productions, Systematic, Template
 from helperstuff.filemanager import tfiles
 import helperstuff.style
 import itertools
@@ -68,13 +68,23 @@ class Normalization(MyEnum):
 normalizations = Normalization.items()
 
 class EnrichStatus(MyEnum):
-    enumname = "enrich"
+    enumname = "enrichstatus"
     enumitems = [
                  EnumItem("enrich"),
                  EnumItem("noenrich"),
                  EnumItem("impoverish"),
                 ]
-enrichstatuses = EnirchStatus.items()
+    def cuttext(self):
+        if self == "enrich": return "D_{bkg}>0.5"
+        if self == "noenrich": return ""
+        if self == "impoverish": return "D_{bkg}<0.5"
+        assert False
+    def dirname(self):
+        if self == "enrich": return "enrich"
+        if self == "noenrich": return "fullrange"
+        if self == "impoverish": return "blind"
+        assert False
+enrichstatuses = EnrichStatus.items()
     
 class TemplateFromFile(TemplateForProjection, MultiEnum):
     enums = [Template, Normalization, EnrichStatus]
@@ -107,7 +117,7 @@ class TemplateFromFile(TemplateForProjection, MultiEnum):
         super(TemplateFromFile, self).check(*args)
 
 class TemplateSum(TemplateForProjection):
-    def __init__(self, title, color, mixturesign, *templatesandfactors):
+    def __init__(self, title, color, SMintegral, *templatesandfactors):
         self.projections = {}
         self.title = title
         self.color = color
@@ -121,10 +131,10 @@ class TemplateSum(TemplateForProjection):
         analyses = set(t[0].analysis for t in templatesandfactors)
         assert len(analyses) == 1
         analyses = list(analyses)[0]
-        assert abs(mixturesign) == 1
-        if normalization != "rescalemixtures":
-            mixturesign = 0
-        self.Scale(constants.JHUXS2L2la1 / (2*constants.JHUXS2L2la1 + mixturesign*analysis.interfxsec()))
+        if normalization == "rescalemixtures":
+            self.Scale(SMintegral / self.Integral())
+        else:
+            self.Scale(.5)
         self.hstackoption = "hist"
 
 exts = "png", "eps", "root", "pdf"
@@ -147,8 +157,8 @@ class Projections(MultiEnum):
                  TemplateFromFile(0, self.enrichstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[2]),
                 ]
     templates+= [
-                 TemplateSum("ggH {}=0.5".format(self.analysis.title()), ROOT.kGreen+3, 1, (templates[0], 1), (templates[1], 1), (templates[2], 1)),
-                 TemplateSum("ggH {}=-0.5".format(self.analysis.title()), 4, -1, (templates[0], 1), (templates[1], 1), (templates[2], -1)),
+                 TemplateSum("ggH {}=0.5".format(self.analysis.title()), ROOT.kGreen+3, templates[0].Integral(), (templates[0], 1), (templates[1], 1), (templates[2], 1)),
+                 TemplateSum("ggH {}=-0.5".format(self.analysis.title()), 4, templates[0].Integral(), (templates[0], 1), (templates[1], 1), (templates[2], -1)),
                  TemplateFromFile(6, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ", self.systematic, self.production),
                  TemplateFromFile(ROOT.kOrange+6, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.production),
                  TemplateFromFile(2, self.enrichstatus, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.production),
@@ -178,13 +188,7 @@ class Projections(MultiEnum):
         hstack.Draw("nostack")
         hstack.GetXaxis().SetTitle(axis.title)
         legend.Draw()
-        if self.enrichstatus == "impoverish":
-            blinddir = "blind"
-        elif self.enrichstatus == "noenrich":
-            blinddir = "fullrange"
-        elif self.enrichstatus == "enrich":
-            blinddir = "enrich"
-        dir = os.path.join(config.plotsbasedir, "templateprojections", blinddir, str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))
+        dir = os.path.join(config.plotsbasedir, "templateprojections", enrichstatus.dirname(), str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))
         try:
             os.makedirs(dir)
         except OSError:

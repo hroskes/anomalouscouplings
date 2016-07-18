@@ -183,8 +183,9 @@ def applyaxesstyle(h):
 
 tokeep = {}
 def cuttext(text):
+    if not text: return
     if (cuttext, text) not in tokeep:
-        pt = tokeep[cuttext,text] = TPaveText(0.71,0.84,0.92,0.92,"brNDC")
+        pt = tokeep[cuttext,text] = ROOT.TPaveText(0.71,0.84,0.92,0.92,"brNDC")
         pt.SetBorderSize(0)
         pt.SetTextAlign(12)
         pt.SetTextSize(0.04)
@@ -193,6 +194,19 @@ def cuttext(text):
         pt.AddText(0.01,0.01,text)
     tokeep[cuttext,text].Draw()
 
-def CMS():
-    if CMS not in tokeep:
-         pass
+def CMS(extratext, lumi):
+    if (CMS, extratext, lumi) not in tokeep:
+        pt = tokeep[CMS,extratext,lumi] = ROOT.TPaveText(0.15,0.93,0.85,1,"brNDC")
+        pt.SetBorderSize(0)
+        pt.SetFillStyle(0)
+        pt.SetTextAlign(12)
+        pt.SetTextFont(42)
+        pt.SetTextSize(0.045)
+        text = pt.AddText(0.025,0.45,"#font[61]{CMS}")
+        text.SetTextSize(0.044)
+        if extratext:
+            text = pt.AddText(0.165, 0.42, "#font[52]{"+extratext+"}")
+            text.SetTextSize(0.0315)
+        text = pt.AddText(0.537,0.45,"#font[42]{"+str(lumi)+" fb^{-1} (13 TeV)}")
+        text.SetTextSize(0.0315)
+    tokeep[CMS,extratext,lumi].Draw()
