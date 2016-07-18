@@ -1,3 +1,4 @@
+import cconstantpm4l
 from collections import Counter, Iterator
 import config
 import constants
@@ -105,12 +106,15 @@ class TreeWrapper(Iterator):
         self.pg1g4_VAJHU = t.pg1g4_VAJHU
         self.p0plus_m4l = t.p0plus_m4l
         self.bkg_VAMCFM = t.bkg_VAMCFM * self.cconstantfordbkg(t.ZZMass)
-        self.bkg_m4l = t.bkg_m4l
-        for a in "p0plus", "bkg":
-            for b in "Scale", "Res":
-                for c in "Up", "Down":
-                    attr = "{}_m4l_{}{}".format(a, b, c)
-                    setattr(self, attr, getattr(t, attr))
+
+        cconstantforpm4l = cconstantpm4l.cconstant(self.flavor)
+        self.bkg_m4l = t.bkg_m4l * cconstantforpm4l
+        for a in "Scale", "Res":
+            for b in "Up", "Down":
+                attr = "p0plus_m4l_{}{}".format(a, b)
+                setattr(self, attr, getattr(t, attr))
+                attr = "bkg_m4l_{}{}".format(a, b)
+                setattr(self, attr, getattr(t, attr) * cconstantforpm4l)
 
         self.p0hplus_VAJHU = t.p0hplus_VAJHU
         self.pg1g2_VAJHU = t.pg1g2_VAJHU
