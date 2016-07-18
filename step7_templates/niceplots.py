@@ -43,11 +43,11 @@ def niceplots(*args):
         ZX, ZZ, SM, BSM, mix, data = ZX.h, ZZ.h, SM.h, BSM.h, mix.h, data.h
 
         ZX.SetLineColor(1)
-        ZX.SetFillColor(ROOT.kGreen+2)
+        ZX.SetFillColor(ROOT.TColor.GetColor("#669966"))
         ZX.SetLineWidth(3)
 
         ZZ.SetLineColor(1)
-        ZZ.SetFillColor(7)
+        ZZ.SetFillColor(ROOT.kAzure-9)
         ZZ.SetLineWidth(3)
         ZZ.Add(ZX)
 
