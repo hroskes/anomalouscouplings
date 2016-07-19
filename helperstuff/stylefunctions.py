@@ -196,7 +196,8 @@ def cuttext(text):
 
 def CMS(extratext, lumi):
     if (CMS, extratext, lumi) not in tokeep:
-        pt = tokeep[CMS,extratext,lumi] = ROOT.TPaveText(0.15,0.93,0.85,1,"brNDC")
+        x1, y1, x2, y2 = 0.15, 0.93, 0.85, 1
+        pt = tokeep[CMS,extratext,lumi] = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
         pt.SetBorderSize(0)
         pt.SetFillStyle(0)
         pt.SetTextAlign(12)
@@ -207,6 +208,33 @@ def CMS(extratext, lumi):
         if extratext:
             text = pt.AddText(0.165, 0.42, "#font[52]{"+extratext+"}")
             text.SetTextSize(0.0315)
-        text = pt.AddText(0.537,0.45,"#font[42]{"+str(lumi)+" fb^{-1} (13 TeV)}")
+
+        lumitext = "#font[42]{"+str(lumi)+" fb^{-1} (13 TeV)}"
+
+        #run1lumitext = "#font[42]{19.7 fb^{-1} (8 TeV) + 5.1 fb^{-1} (7 TeV)}"
+        #run1xlumi = 0.537
+        #run1widthlumi = 1 - 0.537
+        #from array import array
+        #wrun1, w, dummy = array('I', [0]), array('I', [0]), array('I', [0])  #arrays of unsigned int (aka pointers)
+
+        #from helperstuff.textwidth import GetTextWidth
+        #assert ROOT.gPad
+
+        #text = pt.AddText(run1xlumi,0.45,run1lumitext)
+        #text.SetTextSize(0.0315)
+
+        #wrun1 = ROOT.GetTextWidth(text)
+        #text.SetText(run1xlumi, 0.45, lumitext)
+        #w = ROOT.GetTextWidth(text)
+
+        #widthlumi = run1widthlumi * w / wrun1
+        #widthlumi  = .18 #???
+        #xlumi = 1 - widthlumi
+        #text.SetText(xlumi, 0.45, lumitext)
+
+        widthlumi  = .18 #???
+        xlumi = 1 - widthlumi
+        text = pt.AddText(xlumi,0.45,lumitext)
         text.SetTextSize(0.0315)
+
     tokeep[CMS,extratext,lumi].Draw()
