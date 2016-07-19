@@ -26,29 +26,25 @@ TH1F* h1D_FRel_EB = 0;
 TH1F* h1D_FRel_EE = 0;
 int didsetup = -1;
 TFile *fFakeRates = 0;
-TFile *fFakeRates2 = 0;
 
 void setup(int release, TString dir) {
   if (didsetup == release) return;
   didsetup = release;
   delete fFakeRates;
-  delete fFakeRates2;
   if (release == 76
        || release == 80  //temporary patch !!
      ) {
     fFakeRates = TFile::Open(dir+"/fakeRates_20151202.root");
-    fFakeRates2 = 0;
     h1D_FRmu_EB = (TH1F*)fFakeRates->Get("NoWZ_h1D_FRmu_EB");
     h1D_FRmu_EE = (TH1F*)fFakeRates->Get("NoWZ_h1D_FRmu_EE");
     h1D_FRel_EB = (TH1F*)fFakeRates->Get("NoWZ_h1D_FRel_EB");
     h1D_FRel_EE = (TH1F*)fFakeRates->Get("NoWZ_h1D_FRel_EE");
   } else if (release == 80) {
-    fFakeRates = TFile::Open(dir+"/computedfakerate_Z2e_80XB.root");
-    h1D_FRel_EB = (TH1F*)fFakeRates->Get("Corr_EB");
-    h1D_FRel_EE = (TH1F*)fFakeRates->Get("Corr_EE");
-    fFakeRates2 = TFile::Open(dir+"/computedfakerate_Z2mu_80XB.root");
-    h1D_FRmu_EB = (TH1F*)fFakeRates2->Get("Corr_EB");
-    h1D_FRmu_EE = (TH1F*)fFakeRates2->Get("Corr_EE");
+    fFakeRates = TFile::Open(dir+"/FakeRate_SS_2016B_hists.root");
+    h1D_FRel_EB = (TH1F*)fFakeRates->Get("FR_SS_electron_EB");
+    h1D_FRel_EE = (TH1F*)fFakeRates->Get("FR_SS_electron_EE");
+    h1D_FRmu_EB = (TH1F*)fFakeRates->Get("FR_SS_muon_EB");
+    h1D_FRmu_EE = (TH1F*)fFakeRates->Get("FR_SS_muon_EE");
   } else {
     assert(false);
   }

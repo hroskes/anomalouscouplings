@@ -8,3 +8,6 @@ def setup(production):
     release = int(production.release)
     assert release in (76, 80)
     ROOT.setup(release, ZXfolder)
+
+import convertTGraphstoTH1Fs
+convertTGraphstoTH1Fs.convertTGraphstoTH1Fs(os.path.join(ZXfolder, "FakeRate_SS_2016B.root"))

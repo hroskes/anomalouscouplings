@@ -6,8 +6,11 @@ import resource
 import ROOT
 from samples import ReweightingSample
 import sys
+import ZX
+
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
 sys.setrecursionlimit(10000)
+from ROOT import CRZLLss  #has to be after ZX
 
 class TreeWrapper(Iterator):
 
@@ -55,7 +58,6 @@ class TreeWrapper(Iterator):
             self.length = maxevent - minevent + 1
 
         if self.isZX:
-            import ZX
             ZX.setup(treesample.production)
 
         self.initlists()
@@ -89,7 +91,11 @@ class TreeWrapper(Iterator):
             if self.isdata:
                 self.MC_weight = 1
             elif self.isZX:
-                self.MC_weight = 1
+                CRflag = t.CRflag
+                if CRflag and test_bit(CRflag, CRZLLss):
+                    self.MC_weight = 1
+                else:
+                    self.MC_weight = 0
             else:
                 self.MC_weight = t.overallEventWeight
             if self.productionmode == "ggH":
