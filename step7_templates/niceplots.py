@@ -114,7 +114,7 @@ def niceplots(*args):
 
         hstack.GetXaxis().SetTitle(title)
         hstack.GetYaxis().SetTitle(
-                                   "number of events / {}".format(
+                                   "number of events / {:.3f}".format(
                                                                   (hstack.GetXaxis().GetXmax() - hstack.GetXaxis().GetXmin()) / hstack.GetXaxis().GetNbins()
                                                                  )
                                   )
