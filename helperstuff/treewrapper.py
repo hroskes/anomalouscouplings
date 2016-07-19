@@ -1,4 +1,4 @@
-import cconstantpm4l
+import cconstants
 from collections import Counter, Iterator
 import config
 import constants
@@ -67,6 +67,7 @@ class TreeWrapper(Iterator):
         else:
             self.xsec = tree.xsec * 1000 #pb to fb
 
+        self.cconstantforDbkg = self.cconstantforD2jet = None
         self.checkfunctions()
 
     def __iter__(self):
@@ -95,7 +96,7 @@ class TreeWrapper(Iterator):
                 self.reweightingweights = t.reweightingweights
             isSelected = bool(self.MC_weight)
 
-            self.flavor = self.flavordict[abs(t.Z1Flav*t.Z2Flav)]
+            self.flavor = abs(t.Z1Flav*t.Z2Flav)
 
             if isSelected:
                 break
@@ -105,16 +106,25 @@ class TreeWrapper(Iterator):
         self.p0minus_VAJHU = t.p0minus_VAJHU
         self.pg1g4_VAJHU = t.pg1g4_VAJHU
         self.p0plus_m4l = t.p0plus_m4l
-        self.bkg_VAMCFM = t.bkg_VAMCFM * self.cconstantfordbkg(t.ZZMass)
+        self.bkg_VAMCFM = t.bkg_VAMCFM
 
-        cconstantforpm4l = cconstantpm4l.cconstant(self.flavor)
-        self.bkg_m4l = t.bkg_m4l * cconstantforpm4l
+        self.ZZMass = t.ZZMass
+
+        #self.cconstantforDbkgkin = cconstants.getDbkgkinConstant(self.flavor, self.ZZMass)
+        if self.useMELAv2:
+            self.cconstantforDbkg = cconstants.getDbkgConstant(self.flavor, self.ZZMass)
+            self.cconstantforD2jet = cconstants.getDVBF2jetsConstant(self.ZZMass)
+        else:
+            self.cconstantforDbkg = 1
+            self.cconstantforD2jet = 1
+
+        self.bkg_m4l = t.bkg_m4l
         for a in "Scale", "Res":
             for b in "Up", "Down":
                 attr = "p0plus_m4l_{}{}".format(a, b)
                 setattr(self, attr, getattr(t, attr))
                 attr = "bkg_m4l_{}{}".format(a, b)
-                setattr(self, attr, getattr(t, attr) * cconstantforpm4l)
+                setattr(self, attr, getattr(t, attr))
 
         self.p0hplus_VAJHU = t.p0hplus_VAJHU
         self.pg1g2_VAJHU = t.pg1g2_VAJHU
@@ -144,7 +154,7 @@ class TreeWrapper(Iterator):
             self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU / constants.CJLSTg1prime2decay_mix
 
             self.M2g1_VBF = t.pvbf_VAJHU_new
-            self.M2g2_HJJ = t.phjj_VAJHU_new / constants.cconstantHJJ
+            self.M2g2_HJJ = t.phjj_VAJHU_new
 
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
@@ -157,21 +167,21 @@ class TreeWrapper(Iterator):
 ##########################
 
     def D_bkg_0plus(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l*self.cconstantforDbkg)
     def D_bkg_0plus_ResUp(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l_ResUp / (self.p0plus_VAJHU*self.p0plus_m4l_ResUp  + self.bkg_VAMCFM*self.bkg_m4l_ResUp)
+        return self.p0plus_VAJHU*self.p0plus_m4l_ResUp / (self.p0plus_VAJHU*self.p0plus_m4l_ResUp  + self.bkg_VAMCFM*self.bkg_m4l_ResUp*self.cconstantforDbkg)
     def D_bkg_0plus_ResDown(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l_ResDown / (self.p0plus_VAJHU*self.p0plus_m4l_ResDown  + self.bkg_VAMCFM*self.bkg_m4l_ResDown)
+        return self.p0plus_VAJHU*self.p0plus_m4l_ResDown / (self.p0plus_VAJHU*self.p0plus_m4l_ResDown  + self.bkg_VAMCFM*self.bkg_m4l_ResDown*self.cconstantforDbkg)
     def D_bkg_0plus_ScaleUp(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp  + self.bkg_VAMCFM*self.bkg_m4l_ScaleUp)
+        return self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp  + self.bkg_VAMCFM*self.bkg_m4l_ScaleUp*self.cconstantforDbkg)
     def D_bkg_0plus_ScaleDown(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown  + self.bkg_VAMCFM*self.bkg_m4l_ScaleDown)
+        return self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown  + self.bkg_VAMCFM*self.bkg_m4l_ScaleDown*self.cconstantforDbkg)
     def D_bkg_0minus(self):
-        return self.p0minus_VAJHU*self.p0plus_m4l / (self.p0minus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l)
+        return self.p0minus_VAJHU*self.p0plus_m4l / (self.p0minus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l*self.cconstantforDbkg)
 
-    def D_jet_0plus(self):
+    def D_2jet_0plus(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_HJJ*constants.cconstantHJJ)
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_HJJ*self.cconstantforD2jet)
 
 ###################################
 #anomalous couplings discriminants#
@@ -238,63 +248,6 @@ class TreeWrapper(Iterator):
     def getbaseweightfunction(self):
         return self.getweightfunction(self.treesample)
 
-    def cconstantfordbkg(self, ZZMass):
-        """
-        from Ulascan skype
-        float getDbkgkinConstant(float ZZMass){
-          float par[11]={
-            -0.565,
-            70.,
-            5.90,
-            -0.235,
-            130.1,
-            13.25,
-            -0.33,
-            191.04,
-            16.05,
-            0.775,
-            187.47
-          };
-          float kappa =
-            par[9]
-            +par[0]*exp(-pow(((ZZMass-par[1])/par[2]), 2))
-            +par[3]*exp(-pow(((ZZMass-par[4])/par[5]), 2))
-            +par[6]*(
-            exp(-pow(((ZZMass-par[7])/par[8]), 2))*(ZZMass<par[7])
-            + exp(-pow(((ZZMass-par[7])/par[10]), 2))*(ZZMass>=par[7])
-            );
-          float constant = kappa/(1.-kappa);
-          return constant;
-        }
-        """
-        if not self.useMELAv2:
-            return 1
-        from math import exp, pow
-        par = (
-               -0.565,
-               70.,
-               5.90,
-               -0.235,
-               130.1,
-               13.25,
-               -0.33,
-               191.04,
-               16.05,
-               0.775,
-               187.47,
-              )
-        kappa = (
-                 par[9]
-                 +par[0]*exp(-pow(((ZZMass-par[1])/par[2]), 2))
-                 +par[3]*exp(-pow(((ZZMass-par[4])/par[5]), 2))
-                 +par[6]*(
-                          exp(-pow(((ZZMass-par[7])/par[8]), 2))*(ZZMass<par[7])
-                           + exp(-pow(((ZZMass-par[7])/par[10]), 2))*(ZZMass>=par[7])
-                         )
-                )
-        constant = kappa/(1-kappa)
-        return constant
-
     def initlists(self):
         self.toaddtotree = [
             "D_bkg_0plus",
@@ -303,7 +256,7 @@ class TreeWrapper(Iterator):
             "D_bkg_0plus_ScaleUp",
             "D_bkg_0plus_ScaleDown",
             "D_bkg_0minus",
-            "D_jet_0plus",
+            "D_2jet_0plus",
             "D_0minus_decay",
             "D_CP_decay",
             "D_g2_decay",
@@ -314,10 +267,10 @@ class TreeWrapper(Iterator):
 
         self.exceptions = [
             "baseweight",
-            "cconstantfordbkg",
+            "cconstantforDbkg",
+            "cconstantforD2jet",
             "checkfunctions",
             "exceptions",
-            "flavordict",
             "getbaseweightfunction",
             "getweightfunction",
             "hypothesis",
@@ -374,12 +327,6 @@ class TreeWrapper(Iterator):
             else:
                 self.exceptions.append(sample.weightname())
 
-        self.flavordict = {
-                           13*13*13*13: 0,
-                           11*11*11*11: 1,
-                           11*11*13*13: 2,
-                          }
-
     def onlyweights(self):
         """Call this to only add the weights and ZZMass to the new tree"""
         #only want the weight, and ZZMass for the range
@@ -430,6 +377,7 @@ if __name__ == '__main__':
     class DummySample(object):
         productionmode = "graviton fusion"
         hypothesis = "spin 3"
+        useMELAv2 = True
         def isbkg(self): return False
         def isdata(self): return False
         def isZX(self): return False
