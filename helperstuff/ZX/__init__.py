@@ -11,3 +11,5 @@ def setup(production):
 
 import convertTGraphstoTH1Fs
 convertTGraphstoTH1Fs.convertTGraphstoTH1Fs(os.path.join(ZXfolder, "FakeRate_SS_2016B.root"))
+
+from ROOT import CRZLLss, fakeRate13TeV, test_bit

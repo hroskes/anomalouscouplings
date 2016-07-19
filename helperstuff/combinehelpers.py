@@ -28,7 +28,7 @@ class __Rate(MultiEnum):
                 sample = Sample(productionmode, "0+", config.productionforsignalrates)
                 f = tfiles[sample.withdiscriminantsfile()]
                 t = f.candTree
-                ZZFlav = self.channel.ZZFlav()
+                ZZFlav = self.channel.ZZFlav
                 additionalxsec = 0
                 for event in t:
                     if 105 < t.ZZMass < 140 and t.Z1Flav*t.Z2Flav == ZZFlav:

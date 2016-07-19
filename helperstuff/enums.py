@@ -65,6 +65,7 @@ class Channel(MyEnum):
                  EnumItem("4mu"),
                  EnumItem("4e"),
                 )
+    @property
     def ZZFlav(self):
         if self == "2e2mu": return 13*13*11*11
         if self == "4e":    return 11*11*11*11
@@ -851,5 +852,11 @@ class Template(MultiEnum):
 
     @property
     def selection(self):
-        result = "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.channel.ZZFlav())
+        result = "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.ZZFlav)
+        return result
+
+    @property
+    def ZZFlav(self):
+        result = self.channel.ZZFlav
+        if self.productionmode == "ZX": result *= -1
         return result

@@ -3,14 +3,12 @@ from collections import Counter, Iterator
 import config
 import constants
 import resource
-import ROOT
 from samples import ReweightingSample
 import sys
 import ZX
 
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
 sys.setrecursionlimit(10000)
-from ROOT import CRZLLss  #has to be after ZX
 
 class TreeWrapper(Iterator):
 
@@ -92,7 +90,7 @@ class TreeWrapper(Iterator):
                 self.MC_weight = 1
             elif self.isZX:
                 CRflag = t.CRflag
-                if CRflag and test_bit(CRflag, CRZLLss):
+                if CRflag and ZX.test_bit(CRflag, ZX.CRZLLss):
                     self.MC_weight = 1
                 else:
                     self.MC_weight = 0
@@ -241,7 +239,7 @@ class TreeWrapper(Iterator):
         return self.MC_weight * self.xsec * KFactor / self.nevents
     def MC_weight_ZX(self):
         self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
-        return ROOT.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ROOT.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
+        return ZX.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ZX.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
 
     def MC_weight_plain(self):
         return self.MC_weight * self.xsec / self.nevents
