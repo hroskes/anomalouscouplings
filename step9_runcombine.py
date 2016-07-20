@@ -52,7 +52,7 @@ def runcombine(analysis, foldername, **kwargs):
                         if "\n#rate" in contents: continue #already did this
                     for line in contents.split("\n"):
                         if line.startswith("rate"):
-                            contents = contents.replace(line, "#"+line+"\n"+getrates(channel))
+                            contents = contents.replace(line, "#"+line+"\n"+getrates(channel, "forexpectedscan"))
                             break
                     with open("hzz4l_{}S_8TeV.txt".format(channel), "w") as f:
                         f.write(contents)

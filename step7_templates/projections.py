@@ -94,11 +94,11 @@ class TemplateFromFile(TemplateForProjection, MultiEnum):
         self.color = color
         self.h = self.template.gettemplate().Clone()
         if self.productionmode == "ggH":
-            scalefactor = getrate("2e2mu", self.productionmode) / Template(self.production, self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
+            scalefactor = getrate("2e2mu", self.productionmode, "fordata", self.production) / Template(self.production, self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
         elif self.productionmode == "data":
             scalefactor = 1
         else:
-            scalefactor = getrate(self.channel, self.productionmode) / self.Integral()
+            scalefactor = getrate(self.channel, self.productionmode, "fordata", self.production) / self.Integral()
         for x, y, z in itertools.product(range(1, self.h.GetNbinsX()+1), range(1, self.h.GetNbinsY()+1), range(1, self.h.GetNbinsZ()+1)):
             if (self.enrichstatus == "impoverish" and self.h.GetZaxis().GetBinLowEdge(z) >= .5 \
              or self.enrichstatus == "enrich"     and self.h.GetZaxis().GetBinLowEdge(z) < .5):

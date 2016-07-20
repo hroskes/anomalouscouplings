@@ -271,6 +271,13 @@ class Production(MyEnum):
             return self.Release("76X")
         elif self in ("160624", "160714"):
             return self.Release("80X")
+        assert False
+    @property
+    def dataluminosity(self):
+        if self == "160714": return 7.65
+        assert False
+    def __int__(self):
+        return int(str(self))
 
     #put this in here to avoid me getting really confused
     class Release(MyEnum):

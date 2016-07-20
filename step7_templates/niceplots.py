@@ -1,5 +1,6 @@
 from helperstuff import config
 from helperstuff import stylefunctions as style
+from helperstuff.combinehelpers import Luminosity
 from helperstuff.enums import Analysis, analyses, Channel, channels, EnumItem, MultiEnum, MyEnum, Production
 import os
 from projections import EnrichStatus, enrichstatuses
@@ -110,7 +111,7 @@ def niceplots(*args):
         style.applycanvasstyle(c)
         style.applyaxesstyle(hstack)
         style.cuttext(enrichstatus.cuttext())
-        style.CMS("Preliminary", config.luminosity)
+        style.CMS("Preliminary", float(Luminosity("fordata", production)))
 
         hstack.GetXaxis().SetTitle(title)
         hstack.GetYaxis().SetTitle(
