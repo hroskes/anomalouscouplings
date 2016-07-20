@@ -55,4 +55,6 @@ class ExtendedCounter(collections.Counter):
         values = keysvalues[1]
         x = array.array("d", keys)
         y = array.array("d", values)
-        return ROOT.TGraph(len(self), x, y)
+        g = ROOT.TGraph(len(self), x, y)
+        g.SetTitle("")
+        return g

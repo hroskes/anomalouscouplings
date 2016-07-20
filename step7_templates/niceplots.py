@@ -28,7 +28,7 @@ def niceplots(*args):
 
     for discriminant, title in ("Dbkg", "D_{bkg}"), (analysis.purediscriminant(), analysis.purediscriminant(True)), (analysis.mixdiscriminant(), analysis.mixdiscriminant(True)):
 
-        ZX, ZZ, SM, BSM, mix, data = HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper()
+        ZX, ZZ, SM, BSM, mix, mixminus, data = HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper()
 
         for channel in channels:
             f = ROOT.TFile(os.path.join(previousplots[channel], discriminant+".root"))
@@ -41,9 +41,10 @@ def niceplots(*args):
             SM += lst[0]
             BSM += lst[1]
             mix += lst[2]
+            mixminus += lst[3]
             data += lst[7]
 
-        ZX, ZZ, SM, BSM, mix, data = ZX.h, ZZ.h, SM.h, BSM.h, mix.h, data.h
+        ZX, ZZ, SM, BSM, mix, mixminus, data = ZX.h, ZZ.h, SM.h, BSM.h, mix.h, mixminus.h, data.h
 
         ZX.SetLineColor(1)
         ZX.SetFillColor(ROOT.TColor.GetColor("#669966"))
@@ -70,6 +71,11 @@ def niceplots(*args):
         mix.SetLineWidth(2)
         mix.Add(ZZ)  #which already has ZX
 
+        mixminus.SetLineColor(ROOT.kOrange+10)
+        mixminus.SetLineStyle(2)
+        mixminus.SetLineWidth(2)
+        mixminus.Add(ZZ)  #which already has ZX
+
         data = style.asymmerrorsfromhistogram(data, showemptyerrors=True)
         data.SetLineColor(1)
         data.SetMarkerColor(1)
@@ -84,8 +90,10 @@ def niceplots(*args):
         l.SetFillStyle(0)
 
         hstack.Add(SM, "hist")
-        if discriminant == analysis.mixdiscriminant():
+        if discriminant == analysis.mixdiscriminant() and analysis == "fa3" or discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fL1":
             hstack.Add(mix, "hist")
+        elif discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fa2":
+            hstack.Add(mixminus, "hist")
         else:
             hstack.Add(BSM, "hist")
         hstack.Add(ZZ, "hist")
@@ -93,8 +101,10 @@ def niceplots(*args):
 
         l.AddEntry(data, "data", "ep")
         l.AddEntry(SM, "SM", "l")
-        if discriminant == analysis.mixdiscriminant():
+        if discriminant == analysis.mixdiscriminant() and analysis == "fa3" or discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fL1":
             l.AddEntry(mix, analysis.title()+"=0.5", "l")
+        elif discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fa2":
+            l.AddEntry(mixminus, analysis.title()+"=-0.5", "l")
         else:
             l.AddEntry(BSM, analysis.title()+"=1", "l")
         l.AddEntry(ZZ, "q#bar{q}/gg#rightarrowZZ", "f")
