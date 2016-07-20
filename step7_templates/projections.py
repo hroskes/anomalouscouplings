@@ -188,13 +188,17 @@ class Projections(MultiEnum):
         hstack.Draw("nostack")
         hstack.GetXaxis().SetTitle(axis.title)
         legend.Draw()
-        dir = os.path.join(config.plotsbasedir, "templateprojections", enrichstatus.dirname(), str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))
         try:
-            os.makedirs(dir)
+            os.makedirs(self.saveasdir)
         except OSError:
             pass
         for ext in exts:
-            c1.SaveAs(os.path.join(dir, "{}.{}".format(axis.name, ext)))
+            c1.SaveAs(os.path.join(self.saveasdir, "{}.{}".format(axis.name, ext)))
+
+  @property
+  def saveasdir(self):
+      return os.path.join(config.plotsbasedir, "templateprojections", self.enrichstatus.dirname(), str(self.normalization), "{}_{}/{}".format(self.analysis, self.production, self.channel))
+
 
 def projections(*args):
     Projections(*args).projections()
