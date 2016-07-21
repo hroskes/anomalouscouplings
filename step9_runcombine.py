@@ -19,16 +19,23 @@ runcombinetemplate = """
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l_8TeV.txt &&
 text2workspace.py -m 125 hzz4l_4l_8TeV.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating -o fixedMu_8TeV.root -v 7 &&
-combine -M MultiDimFit fixedMu_8TeV.root --algo=grid --points 100 -m 125 -n $1_8TeV -t -1 --setPhysicsModelParameters CMS_zz4l_fg4=0.0 --expectSignal=1 -V -v 3
+combine -M MultiDimFit fixedMu_8TeV.root --algo=grid --points 100 -m 125 -n $1_exp -t -1 --setPhysicsModelParameters CMS_zz4l_fg4=0.0 --expectSignal=1 -V -v 3
 """
+observationcombineline = """
+combine -M MultiDimFit fixedMu_8TeV.root --algo=grid --points 100 -m 125 -n $1_obs       --setPhysicsModelParameters CMS_zz4l_fg4=0.0                  -V -v 3
+"""
+
 
 def runcombine(analysis, foldername, **kwargs):
     usechannels = channels
+    observation = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
+        elif kw == "observation":
+            observation = bool(int(kwarg))
         else:
-            raise ValueError("Unknown kwarg: {}".format(kw))
+            raise TypeError("Unknown kwarg: {}".format(kw))
 
 
     analysis = Analysis(analysis)
@@ -52,7 +59,11 @@ def runcombine(analysis, foldername, **kwargs):
                         if "\n#rate" in contents: continue #already did this
                     for line in contents.split("\n"):
                         if line.startswith("rate"):
-                            contents = contents.replace(line, "#"+line+"\n"+getrates(channel, "forexpectedscan"))
+                            if observation:
+                                rates = getrates(channel, "fordata", config.productionforcombine)
+                            else:
+                                rates = getrates(channel, "forexpectedscan")
+                            contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
                     with open("hzz4l_{}S_8TeV.txt".format(channel), "w") as f:
                         f.write(contents)
@@ -62,13 +73,17 @@ def runcombine(analysis, foldername, **kwargs):
             if not os.path.exists("higgsCombine_8TeV.MultiDimFit.mH125.root"):
                 for channel in usechannels:
                     replacesystematics(channel)
-                subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
+                runcombine = runcombinetemplate
+                if observation:
+                    runcombine += "&&" + observationcombineline
+                runcombine = runcombine.replace("\n", " ")
+                subprocess.check_call(replaceByMap(runcombine, repmap), shell=True)
             saveasdir = os.path.join(config.plotsbasedir, "limits", foldername)
             try:
                 os.makedirs(saveasdir)
             except OSError:
                 pass
-            plotlimits("higgsCombine_8TeV.MultiDimFit.mH125.root", "CMS_zz4l_fg4", os.path.join(saveasdir, "limit"), analysis.title())
+            plotlimits("higgsCombine_exp.MultiDimFit.mH125.root", "CMS_zz4l_fg4", os.path.join(saveasdir, "limit"), analysis.title())
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])

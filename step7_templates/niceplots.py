@@ -141,4 +141,4 @@ def niceplots(*args):
 if __name__ == "__main__":
     for analysis in analyses:
         for enrichstatus in enrichstatuses:
-            niceplots(analysis, "160714", enrichstatus)
+            niceplots(analysis, config.productionforcombine, enrichstatus)
