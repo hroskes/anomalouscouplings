@@ -155,7 +155,7 @@ def applycanvasstyle(c):
     c.SetFrameFillStyle(0)
     c.SetFrameBorderMode(0)
 
-def applylegendstyle(l):
+def applylegendstyle(l2D):
     l2D.SetBorderSize(0)
     l2D.SetTextFont(42)
     l2D.SetTextSize(0.04)

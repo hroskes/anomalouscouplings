@@ -85,9 +85,10 @@ def niceplots(*args):
         data.SetMarkerSize(1.2)
 
         hstack = ROOT.THStack(discriminant, "")
-        l = ROOT.TLegend(.2, .5, .4, .95)
-        l.SetBorderSize(0)
-        l.SetFillStyle(0)
+        l = ROOT.TLegend(0.23,0.57,0.61,0.90)
+        #l.SetBorderSize(0)
+        #l.SetFillStyle(0)
+        style.applylegendstyle(l)
 
         hstack.Add(SM, "hist")
         if discriminant == analysis.mixdiscriminant() and analysis == "fa3" or discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fL1":
@@ -99,7 +100,7 @@ def niceplots(*args):
         hstack.Add(ZZ, "hist")
         hstack.Add(ZX, "hist")
 
-        l.AddEntry(data, "data", "ep")
+        l.AddEntry(data, "Observed", "ep")
         l.AddEntry(SM, "SM", "l")
         if discriminant == analysis.mixdiscriminant() and analysis == "fa3" or discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fL1":
             l.AddEntry(mix, analysis.title()+"=0.5", "l")
@@ -107,7 +108,7 @@ def niceplots(*args):
             l.AddEntry(mixminus, analysis.title()+"=-0.5", "l")
         else:
             l.AddEntry(BSM, analysis.title()+"=1", "l")
-        l.AddEntry(ZZ, "q#bar{q}/gg#rightarrowZZ", "f")
+        l.AddEntry(ZZ, "ZZ", "f")
         l.AddEntry(ZX, "Z+X", "f")
 
         ymax = style.ymax((hstack, "nostack"), (data, "P"))
@@ -125,9 +126,9 @@ def niceplots(*args):
 
         hstack.GetXaxis().SetTitle(title)
         hstack.GetYaxis().SetTitle(
-                                   "number of events / {:.3f}".format(
-                                                                  (hstack.GetXaxis().GetXmax() - hstack.GetXaxis().GetXmin()) / hstack.GetXaxis().GetNbins()
-                                                                 )
+                                   "Events / {:.3f}".format(
+                                                            (hstack.GetXaxis().GetXmax() - hstack.GetXaxis().GetXmin()) / hstack.GetXaxis().GetNbins()
+                                                           )
                                   )
 
         try:
