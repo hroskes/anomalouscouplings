@@ -43,6 +43,12 @@ bool setup(int production, TString dir) {
     h1D_FRel_EE = (TH1F*)fFakeRates->Get("FR_SS_electron_EE");
     h1D_FRmu_EB = (TH1F*)fFakeRates->Get("FR_SS_muon_EB");
     h1D_FRmu_EE = (TH1F*)fFakeRates->Get("FR_SS_muon_EE");
+  } else if (production == 160720) {
+    fFakeRates = TFile::Open(dir+"/FakeRate_SS_2016D_hists.root");
+    h1D_FRel_EB = (TH1F*)fFakeRates->Get("FR_SS_electron_EB");
+    h1D_FRel_EE = (TH1F*)fFakeRates->Get("FR_SS_electron_EE");
+    h1D_FRmu_EB = (TH1F*)fFakeRates->Get("FR_SS_muon_EB");
+    h1D_FRmu_EE = (TH1F*)fFakeRates->Get("FR_SS_muon_EE");
   } else {
     return false;
   }

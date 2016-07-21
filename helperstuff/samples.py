@@ -178,7 +178,7 @@ class Sample(ReweightingSample):
             if self.hypothesis == "fa20.5": return "0PHf05ph0"
             if self.hypothesis == "fa30.5": return "0Mf05ph0"
             if self.hypothesis == "fL10.5": return "0L1f05ph0"
-        if self.productionmode == "ggH" and self.production == "160714":
+        if self.productionmode == "ggH" and self.production in ("160714", "160720"):
             if self.hypothesis == "0+": return "ggH0PM_M125"
             if self.hypothesis == "a2": return "ggH0PH_M125"
             if self.hypothesis == "0-": return "ggH0M_M125"
@@ -193,9 +193,10 @@ class Sample(ReweightingSample):
             name += "125"
             return name
         if self.productionmode == "ggZZ":
-            if self.production == "160714" and self.flavor in ("4e", "4mu", "4tau", "2mu2tau"):
+            if self.production == "160714" and self.flavor in ("4e", "4mu", "4tau", "2mu2tau") or self.production == "160720":
                 return "ggTo{}_Contin_MCFM701".format(self.flavor)
-            return "ggZZ{}".format(self.flavor)
+            elif self.production in ("160225", "160624", "160714"):
+                return "ggZZ{}".format(self.flavor)
         if self.productionmode == "qqZZ":
             return "ZZTo4l"
         if self.productionmode == "ZX" or self.productionmode == "data":

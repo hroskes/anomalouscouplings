@@ -32,7 +32,7 @@ class MyEnum(object):
                 self.item = item
                 break
         else:
-            raise ValueError("%s is not a member of enum "%value + type(self).__name__ + "!  Valid choices:\n"
+            raise ValueError("{} is not a member of enum {}!  Valid choices:\n".format(value, type(self).__name__)
                                + "\n".join(" aka ".join(str(name) for name in item.names) for item in self.enumitems))
 
     def __str__(self):
@@ -239,6 +239,7 @@ class Production(MyEnum):
                  EnumItem("160225"),
                  EnumItem("160624"),
                  EnumItem("160714"),
+                 EnumItem("160720"),
                 )
     def CJLSTdir(self):
         if self == "160225":
@@ -247,12 +248,16 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160624/"
         if self == "160714":
             return "root://lxcms03//data3/Higgs/160714/"
+        if self == "160720":
+            return "root://lxcms03//data3/Higgs/160720/"
         assert False
     def CJLSTdir_anomalous(self):
         if self == "160225":
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_7_6_3_patch2/src/ZZAnalysis/AnalysisStep/test/prod/AnomalousCouplingsReweighting/PT13TeV"
         if self == "160714":
             return "/afs/cern.ch/work/h/hroskes/public/CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/anomalous/PT13TeV"
+        if self == "160720":
+            return "root://lxcms03//data3/Higgs/160718/"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
         if self == "160714":
@@ -262,19 +267,20 @@ class Production(MyEnum):
     def useMELAv2(self):
         if self in ("160225", "160624"):
             return False
-        if self == "160714":
+        if self in ("160714", "160720"):
             return True
         assert False
     @property
     def release(self):
         if self == "160225":
             return self.Release("76X")
-        elif self in ("160624", "160714"):
+        elif self in ("160624", "160714", "160720"):
             return self.Release("80X")
         assert False
     @property
     def dataluminosity(self):
         if self == "160714": return 7.65
+        if self == "160720": return 9.2
         assert False
     def __int__(self):
         return int(str(self))
@@ -302,7 +308,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-productions = Production.items(lambda x: x == "160714")
+productions = Production.items(lambda x: x in ("160714", "160720"))
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):
