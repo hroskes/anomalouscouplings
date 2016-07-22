@@ -308,7 +308,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-productions = Production.items(lambda x: x in ("160714", "160720"))
+productions = Production.items(lambda x: x in ("160720",))
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):

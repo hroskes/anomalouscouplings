@@ -1,11 +1,25 @@
 from collections import namedtuple
 from helperstuff import config
-from helperstuff.enums import Analysis
+from helperstuff.enums import Analysis, EnumItem, MyEnum
 import os
 import ROOT
 import sys
 
 Point = namedtuple("Point", "x y")
+
+class PrintFormat(MyEnum):
+    enumitems = (
+                 EnumItem("latex"),
+                 EnumItem("powerpoint", "ppt"),
+                )
+
+    @property
+    def printformat(self):
+        if self == "latex":
+            return "${min:.2f}^{{{pluscl:+.2f}}}_{{{minuscl:+.2f}}}$ $ {95%}$"
+        if self == "ppt":
+            return "{min:.2f}^({pluscl:+.2f})_({minuscl:+.2f}) {95%}"
+        assert False
 
 def findwhereyequals(y, p1, p2):
     m = (p2.y-p1.y) / (p2.x - p1.x)
@@ -16,9 +30,12 @@ def printlimits(analysis, foldername, **kwargs):
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
     plotname = "limit"
+    printformat = PrintFormat("latex")
     for kw, kwarg in kwargs.iteritems():
         if kw == "plotname":
             plotname = kwarg
+        elif kw == "printformat":
+            printformat = PrintFormat(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
     filename = os.path.join(config.plotsbasedir, "limits", foldername, plotname+".root")
@@ -75,7 +92,7 @@ def printlimits(analysis, foldername, **kwargs):
 
         print label
         print
-        print "${min:.2f}^{{{pluscl:+.2f}}}_{{{minuscl:+.2f}}}$ $ {95%}$".format(**repmap)
+        print printformat.printformat.format(**repmap)
         print
         print
 
