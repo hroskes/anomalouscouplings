@@ -1,9 +1,9 @@
 from helperstuff import config
-from helperstuff.enums import templatesfiles, TemplatesFile
+from helperstuff.enums import DataTree, datatrees, TemplatesFile, templatesfiles
 from helperstuff.samples import Sample
 import os
-import shutil
 import subprocess
+import ROOT
 from time import sleep
 
 cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
@@ -23,9 +23,24 @@ def buildtemplates(*args):
     if not os.path.exists(templatesfile.templatesfile()):
         raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))
 
+def copydata(*args):
+    datatree = DataTree(*args)
+    f = ROOT.TFile(datatree.originaltreefile)
+    t = f.candTree
+    newfilename = datatree.treefile
+    if os.path.exists(newfilename): f.Close(); return
+    newf = ROOT.TFile(newfilename, "recreate")
+    newt = t.CloneTree(0)
+    for entry in t:
+        if abs(t.Z1Flav * t.Z2Flav) == datatree.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblindscans:
+            newt.Fill()
+    newf.Write()
+    f.Close()
+    newf.Close()
+
 if __name__ == "__main__":
     for templatesfile in templatesfiles:
         buildtemplates(templatesfile)
         #and copy data
-        if templatesfile.signalorbkg == "DATA":
-            shutil.copy(Sample("data", templatesfile.production, templatesfile.blindstatus).withdiscriminantsfile(), os.path.join(config.repositorydir, "step7_templates/"))
+    for datatree in datatrees:
+        copydata(datatree)

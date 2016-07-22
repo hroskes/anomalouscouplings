@@ -36,7 +36,7 @@ def check_call_test(*args, **kwargs):
 
 def runcombine(analysis, foldername, **kwargs):
     usechannels = channels
-    expectvalues = [0]
+    expectvalues = [0.0]
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -99,6 +99,7 @@ def runcombine(analysis, foldername, **kwargs):
 
             if config.unblindscans:
                 repmap_obs = repmap.copy()
+                repmap_obs["expectfai"] = "0.0"  #starting point
                 repmap_obs["append"] = ".oO[observedappend]Oo."
                 if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
                     subprocess.check_call(replaceByMap(observationcombinetemplate, repmap_obs), shell=True)

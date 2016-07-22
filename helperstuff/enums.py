@@ -409,8 +409,6 @@ class MultiEnum(object):
             if enum not in dontcheck and getattr(self, enum.enumname) is None:
                 raise ValueError("No option provided for {}\n{}".format(enum.enumname, args))
 
-
-
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
     enums = [Channel, Systematic, SignalOrBkg, Analysis, Production, BlindStatus]
@@ -865,7 +863,7 @@ class Template(MultiEnum):
 
     @property
     def selection(self):
-        result = "ZZMass>105 && ZZMass<140 && Z1Flav*Z2Flav == {}".format(self.ZZFlav)
+        result = "ZZMass>{} && ZZMass<{} && Z1Flav*Z2Flav == {}".format(config.m4lmin, config.m4lmax, self.ZZFlav)
         return result
 
     @property
@@ -873,3 +871,18 @@ class Template(MultiEnum):
         result = self.channel.ZZFlav
         if self.productionmode == "ZX": result *= -1
         return result
+
+class DataTree(MultiEnum):
+    enums = [Channel, Production]
+    @property
+    def originaltreefile(self):
+        from samples import Sample
+        return Sample("data", self.production, "unblind").withdiscriminantsfile()
+    @property
+    def treefile(self):
+        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}.root".format(self.production, self.channel))
+
+datatrees = []
+for channel in channels:
+    for production in productions:
+        datatrees.append(DataTree(channel, production))

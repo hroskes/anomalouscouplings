@@ -16,7 +16,7 @@ for sample in samples:
   t = f.candTree
   length = t.GetEntries()
   for i, event in enumerate(t, start=1):
-    if 105 < t.ZZMass < 140:
+    if config.m4lmin < t.ZZMass < config.m4lmax:
       for reweightsample in sample.reweightingsamples():
         sum[sample,reweightsample,flavordict[t.Z1Flav*t.Z2Flav]] += getattr(t, reweightsample.weightname())
     if i % 10000 == 0:

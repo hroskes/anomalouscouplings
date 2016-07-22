@@ -1,6 +1,6 @@
 import collections
 from . import config
-from .enums import EnumItem, Channel, MultiEnum, MyEnum, Production, ProductionMode, Template
+from .enums import EnumItem, Channel, DataTree, MultiEnum, MyEnum, Production, ProductionMode, Template
 from .filemanager import tfiles
 from .samples import Sample
 import ROOT
@@ -35,9 +35,9 @@ class __Rate(MultiEnum):
             if self.channel == "4mu":   return 7.17 * float(self.luminosity)/10
             if self.channel == "2e2mu": return 8.77 * float(self.luminosity)/10
         if self.productionmode == "ZX":
-            if self.channel == "4e":    return 1.36 * float(self.luminosity)/7.6
-            if self.channel == "4mu":   return 1.64 * float(self.luminosity)/7.6
-            if self.channel == "2e2mu": return 2.81 * float(self.luminosity)/7.6
+            if self.channel == "4e":    return 1.36 * float(self.luminosity)/7.65
+            if self.channel == "4mu":   return 1.64 * float(self.luminosity)/7.65
+            if self.channel == "2e2mu": return 2.81 * float(self.luminosity)/7.65
 
         if self.productionmode == "ggH":
             result = Template("fa3", self.productionmode, self.channel, "0+", config.productionforcombine).gettemplate().Integral()*float(self.luminosity)
@@ -48,7 +48,7 @@ class __Rate(MultiEnum):
                 ZZFlav = self.channel.ZZFlav
                 additionalxsec = 0
                 for event in t:
-                    if 105 < t.ZZMass < 140 and t.Z1Flav*t.Z2Flav == ZZFlav:
+                    if config.m4lmin < t.ZZMass < config.m4lmax and t.Z1Flav*t.Z2Flav == ZZFlav:
                         additionalxsec += getattr(t, sample.weightname())
                 result += additionalxsec * float(self.luminosity)
             return result
@@ -77,8 +77,8 @@ def gettemplate(*args):
 
 def getdatatree(channel):
     channel = Channel(channel)
-    return tfiles[Sample("data", config.productionforcombine, "unblind").withdiscriminantsfile()].candTree
-    #unblind is empty if we don't actually unblind
+    return tfiles[DataTree(channel, config.productionforcombine).treefile].candTree
+    #it's empty if we don't actually unblind
 
 def discriminantnames(*args):
     return Template("ggH", "0+", "2e2mu", config.productionforcombine, *args).discriminants()
