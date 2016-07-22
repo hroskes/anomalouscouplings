@@ -15,14 +15,18 @@ eval $(scram ru -sh) &&
 python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo.
 """
 
-runcombinetemplate = """
+createworkspacetemplate = """
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l_8TeV.txt &&
-text2workspace.py -m 125 hzz4l_4l_8TeV.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating -o fixedMu_8TeV.root -v 7 &&
-combine -M MultiDimFit fixedMu_8TeV.root --algo=grid --points 100 -m 125 -n $1_exp -t -1 --setPhysicsModelParameters CMS_zz4l_fg4=0.0 --expectSignal=1 -V -v 3
+text2workspace.py -m 125 hzz4l_4l_8TeV.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
 """
-observationcombineline = """
-combine -M MultiDimFit fixedMu_8TeV.root --algo=grid --points 100 -m 125 -n $1_obs       --setPhysicsModelParameters CMS_zz4l_fg4=0.0                  -V -v 3
+runcombinetemplate = """
+eval $(scram ru -sh) &&
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_exp -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fg4=0.0 --expectSignal=1 -V -v 3 |& tee log.exp
+"""
+observationcombinetemplate = """
+eval $(scram ru -sh) &&
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_obs       --setPhysicsModelParameters r=1,CMS_zz4l_fg4=0.0                  -V -v 3 |& tee log.obs
 """
 
 
@@ -43,7 +47,10 @@ def runcombine(analysis, foldername, **kwargs):
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
-              "cardstocombine": " ".join("hzz4l_{}S_8TeV.txt".format(channel) for channel in usechannels)
+              "cardstocombine": " ".join("hzz4l_{}S_8TeV.txt".format(channel) for channel in usechannels),
+              "workspacefile": "floatMu.root",
+              "expectedfilename": "higgsCombine_exp.MultiDimFit.mH125.root",
+              "observedfilename": "higgsCombine_obs.MultiDimFit.mH125.root",
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         if not os.path.exists("cards_{}".format(foldername)):
@@ -70,20 +77,23 @@ def runcombine(analysis, foldername, **kwargs):
                 else:
                     os.remove("hzz4l_{}S_8TeV.txt".format(channel))
                     os.remove("hzz4l_{}S_8TeV.input.root".format(channel))
-            if not os.path.exists("higgsCombine_8TeV.MultiDimFit.mH125.root"):
+            if not os.path.exists(repmap["workspacefile"]):
                 for channel in usechannels:
                     replacesystematics(channel)
-                runcombine = runcombinetemplate
-                if observation:
-                    runcombine += "&&" + observationcombineline
-                runcombine = runcombine.replace("\n", " ")
-                subprocess.check_call(replaceByMap(runcombine, repmap), shell=True)
+                subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
+            if not os.path.exists(repmap["expectedfilename"]):
+                subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
+            if observation and not os.path.exists(repmap["observedfilename"]):
+                subprocess.check_call(replaceByMap(observationcombinetemplate, repmap), shell=True)
             saveasdir = os.path.join(config.plotsbasedir, "limits", foldername)
             try:
                 os.makedirs(saveasdir)
             except OSError:
                 pass
-            plotlimits("higgsCombine_exp.MultiDimFit.mH125.root", "CMS_zz4l_fg4", os.path.join(saveasdir, "limit"), analysis.title())
+            kwargs = {}
+            if observation:
+                kwargs.update(observedfilename = repmap["observedfilename"], production = config.productionforcombine)
+            plotlimits(repmap["expectedfilename"], "CMS_zz4l_fg4", os.path.join(saveasdir, "limit"), analysis.title(), **kwargs)
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])

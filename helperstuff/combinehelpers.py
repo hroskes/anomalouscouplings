@@ -79,3 +79,6 @@ def getdatatree(channel):
     channel = Channel(channel)
     return tfiles[Sample("data", config.productionforcombine, "unblind").withdiscriminantsfile()].candTree
     #unblind is empty if we don't actually unblind
+
+def discriminantnames(*args):
+    return Template("ggH", "0+", "2e2mu", config.productionforcombine, *args).discriminants()

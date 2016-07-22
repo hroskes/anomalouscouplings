@@ -5,33 +5,53 @@ import ROOT
 import stylefunctions as style
 import sys
 
-def plotlimits(filename, branchname, outputfilename, xaxislabel):
-    f = ROOT.TFile(filename)
-    assert f
-    t = f.Get("limit")
-    assert t
+def plotlimits(expectedfilename, branchname, outputfilename, xaxislabel, observedfilename=None, production=None):
+    filenames = [expectedfilename]
+    if observedfilename is not None:
+        filenames.append(observedfilename)
+        if production is None:
+            raise ValueError("No production provided!")
 
-    NLL = ExtendedCounter() 
+    if production is None:
+        luminosity = Luminosity("forexpectedscan")
+    else:
+        luminosity = Luminosity("fordata", production)
 
-    for i in range(1, t.GetEntries()):
-        t.GetEntry(i)
-        fa3 = getattr(t, branchname)
-        deltaNLL = t.deltaNLL
-        print fa3
-        NLL[fa3] = 2*deltaNLL
-    if 1 not in NLL and -1 in NLL:
-        NLL[1] = NLL[-1]
+    mg = ROOT.TMultiGraph()
 
-    c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
-    g = NLL.TGraph()
-    g.Draw("AC")
-    g.GetXaxis().SetTitle(xaxislabel)
-    g.GetXaxis().SetRangeUser(-1, 1)
-    g.GetYaxis().SetTitle("-2#Deltaln L")
+    for filename in filenames:
+        f = ROOT.TFile(filename)
+        assert f
+        t = f.Get("limit")
+        assert t
+
+        NLL = ExtendedCounter()
+
+        for i in range(1, t.GetEntries()):
+            t.GetEntry(i)
+            fa3 = getattr(t, branchname)
+            deltaNLL = t.deltaNLL
+            print fa3
+            NLL[fa3] = 2*deltaNLL
+        if 1 not in NLL and -1 in NLL:
+            NLL[1] = NLL[-1]
+
+        c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+        g = NLL.TGraph()
+        mg.Add(g)
+
+        if filename == expectedfilename:
+            g.SetLineStyle(2)
+        g.SetLineWidth(2)
+
+    mg.Draw("AC")
+    mg.GetXaxis().SetTitle(xaxislabel)
+    mg.GetXaxis().SetRangeUser(-1, 1)
+    mg.GetYaxis().SetTitle("-2#Deltaln L")
 
     style.applycanvasstyle(c1)
-    style.applyaxesstyle(g)
-    style.CMS("Preliminary", float(Luminosity("forexpectedscan")))
+    style.applyaxesstyle(mg)
+    style.CMS("Preliminary", float(luminosity))
 
     drawlines()
     for ext in "png eps root pdf".split():
