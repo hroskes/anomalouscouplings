@@ -37,6 +37,8 @@ def check_call_test(*args, **kwargs):
 def runcombine(analysis, foldername, **kwargs):
     usechannels = channels
     expectvalues = [0.0]
+    plotname = "limit"
+    legendposition = (.2, .7, .6, .9)
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -45,6 +47,14 @@ def runcombine(analysis, foldername, **kwargs):
                 expectvalues = [float(fai) for fai in kwarg.split(",")]
             except ValueError:
                 raise ValueError("expectvalues has to contain floats separated by commas!")
+        elif kw == "plotname":
+            plotname = kwarg
+        elif kw == "legendposition":
+            try:
+                legendposition = [float(a) for a in kwarg.split(",")]
+                if len(legendposition) != 4: raise ValueError
+            except ValueError:
+                raise ValueError("legendposition has to contain 4 floats separated by commas!")
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -112,7 +122,7 @@ def runcombine(analysis, foldername, **kwargs):
             plotscans = expectvalues
             if config.unblindscans:
                 plotscans.append("obs")
-            plotlimits(os.path.join(saveasdir, "limit"), analysis.title(), *plotscans, production=config.productionforcombine)
+            plotlimits(os.path.join(saveasdir, plotname), analysis.title(), *plotscans, production=config.productionforcombine, legendposition=legendposition)
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])

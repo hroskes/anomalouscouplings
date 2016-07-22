@@ -13,9 +13,12 @@ Scan = namedtuple("Scan", "name title color style")
 
 def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
     production = None
+    legendposition = (.2, .7, .6, .9)
     for kw, kwarg in kwargs.iteritems():
         if kw == "production":
             production = kwarg
+        elif kw == "legendposition":
+            legendposition = kwarg
         else:
             assert False
 
@@ -40,7 +43,7 @@ def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
         luminosity = Luminosity("fordata", production)
 
     mg = ROOT.TMultiGraph()
-    l = ROOT.TLegend(.6, .7, .9, .9)
+    l = ROOT.TLegend(*legendposition)
     l.SetFillStyle(0)
     l.SetBorderSize(0)
 
