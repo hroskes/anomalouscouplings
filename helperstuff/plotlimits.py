@@ -23,7 +23,7 @@ def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
     uptocolor = 1
     for arg in args:
         if arg == "obs":
-            scans.append(Scan("obs", "Observed", 1, 2))
+            scans.append(Scan("obs", "Observed", 1, 1))
             if production is None:
                 raise ValueError("No production provided!")
         else:
@@ -31,7 +31,7 @@ def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
                 arg = float(arg)
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
-            scans.append(Scan("exp_{}".format(arg), "Expected, {}={}".format(xaxislabel, arg), uptocolor, 1))
+            scans.append(Scan("exp_{}".format(arg), "Expected, {}={}".format(xaxislabel, arg), uptocolor, 2))
             uptocolor += 1
 
     if production is None:
