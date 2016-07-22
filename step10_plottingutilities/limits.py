@@ -30,25 +30,54 @@ def printlimits(analysis, foldername, **kwargs):
     thresholds = [1, 3.84]
 
     for entry in legend.GetListOfPrimitives():
+        minimum = Point(float("nan"), float("infinity"))
         g, label = entry.GetObject(), entry.GetLabel()
         points = [Point(x, y) for x, y, n in zip(g.GetX(), g.GetY(), range(g.GetN()))]
         isabove = {threshold: points[0].y > threshold for threshold in thresholds}
-        results = {threshold: ["[-1,"] if not isabove[threshold] else [] for threshold in thresholds}
+        results = {threshold: [[-1]] if not isabove[threshold] else [] for threshold in thresholds}
         for point in points:
             for threshold in thresholds:
                 if isabove[threshold] and point.y < threshold:
-                    results[threshold].append("[{:.2f},".format(findwhereyequals(threshold, point, lastpoint)))
+                    results[threshold].append([findwhereyequals(threshold, point, lastpoint)])
                     isabove[threshold]=False
                 if not isabove[threshold] and point.y > threshold:
-                    results[threshold][-1] += "{:.2f}]".format(findwhereyequals(threshold, point, lastpoint))
+                    results[threshold][-1].append(findwhereyequals(threshold, point, lastpoint))
                     isabove[threshold]=True
+
+            if point.y < minimum.y: minimum = point
+
             lastpoint = point
 
-        if not isabove[threshold]:
-            results[threshold][-1] += "1]"
-
         for threshold in thresholds:
-            print label, threshold, " U ".join(results[threshold])
+            if not isabove[threshold]:
+                results[threshold][-1].append(1)
+
+        repmap = {}
+
+        repmap["min"] = minimum.x
+        if len(results[1.0]) == 1:
+            repmap["pluscl"] = results[1.0][0][1] - minimum.x
+            repmap["minuscl"] = results[1.0][0][0] - minimum.x
+        else:
+            if len(results[1.0]) == 2 and -results[1.0][0][0] == results[1.0][1][1] == 1:
+                if minimum.x < results[1.0][0][1]:
+                    repmap["pluscl"] = results[1.0][0][1] - minimum.x
+                    repmap["minuscl"] = results[1.0][1][0] - minimum.x - 2
+                elif minimum.x > results[1.0][1][0]:
+                    repmap["pluscl"] = results[1.0][0][1] - minimum.x + 2
+                    repmap["minuscl"] = results[1.0][1][0] - minimum.x
+                else:
+                    assert False
+            else:
+                raise ValueError("Need something more complicated for 68% CL!")
+
+        repmap["95%"] = " \cup ".join("[{:.2f},{:.2f}]".format(range[0],range[1]) for range in results[3.84])
+
+        print label
+        print
+        print "${min:.2f}^{{{pluscl:+.2f}}}_{{{minuscl:+.2f}}}$ $ {95%}$".format(**repmap)
+        print
+        print
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])
