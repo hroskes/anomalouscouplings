@@ -1,14 +1,17 @@
 I hope everything here should be usable by everyone with no bugs, at least for the data and MC from 160720.
 
-Step 2 can only be run on lxplus, unless you want to edit helperstuff/samples.py and change directory names to point to the CJLST trees.  The rest of the steps can probably be run somewhere else if you copy the step3 directory there.
+Step 2 can only be run on lxplus, unless you want to edit `helperstuff/samples.py` and change directory names to point to the CJLST trees.  The rest of the steps can probably be run somewhere else if you copy the step3 directory there.
 
 To checkout:
-git clone --recursive git@github.com:hroskes/anomalouscouplings
-#recursive is necessary, if you didn't do it, then after it's checked out run:
-git submodule update --init --recursive
+
+`git clone --recursive git@github.com:hroskes/anomalouscouplings`
+
+recursive is necessary, if you didn't do it, then after it's checked out run:
+
+`git submodule update --init --recursive`
 
 
-Then edit helperstuff/config.py with the directory where the repository is stored and the directory to store plots.
+Then edit `helperstuff/config.py` with the directory where the repository is stored and the directory to store plots.
 
 Then run:
 
@@ -29,9 +32,9 @@ python step9_runcombine.py analysis foldername
     It will only run scans that haven't been run yet with the same analysis and foldername, so running this after adjusting just the legend position is really quick.
 ```
 
-To make plots, use all the python scripts in step10_plottingutilities.  Most of them take no arguments.  projections.py takes a while, and makecontrolplots.py takes a really long time.  niceplots.py is quick, but can only be run after projections.py.  printrates is pretty fast, it just prints the yields and number of observed events.
+To make plots, use all the python scripts in step10_plottingutilities.  Most of them take no arguments.  `projections.py` takes a while, and `makecontrolplots.py` takes a really long time.  `niceplots.py` is quick, but can only be run after `projections.py`.  `printrates.py` is pretty fast, it just prints the yields and number of observed events.
 
-limits.py prints the 68% and 95% CL limits.  It has to be given the same arguments as step9_runcombine.py.
+`limits.py` prints the 68% and 95% CL limits.  It has to be given the same arguments as `step9_runcombine.py`.
 
 ```
 python limits.py analysis foldername
