@@ -163,9 +163,9 @@ class Projections(MultiEnum):
                  TemplateFromFile(ROOT.kOrange+6, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.production),
                  TemplateFromFile(2, self.enrichstatus, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.production),
                 ]
-    if self.enrichstatus == "impoverish" or config.unblinddata:
+    if self.enrichstatus == "impoverish" or config.unblinddistributions:
         templates += [
-                      TemplateFromFile(1, self.enrichstatus, self.normalization, self.analysis, self.channel, "data", self.production, "unblind" if config.unblinddata else "blind")
+                      TemplateFromFile(1, self.enrichstatus, self.normalization, self.analysis, self.channel, "data", self.production, "unblind" if config.unblinddistributions else "blind")
                      ]
     axes[0] = Axis(self.analysis.purediscriminant(), self.analysis.purediscriminant(title=True), 0)
     axes[1] = Axis(self.analysis.mixdiscriminant(), self.analysis.mixdiscriminant(title=True), 1)

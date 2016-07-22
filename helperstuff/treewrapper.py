@@ -48,7 +48,7 @@ class TreeWrapper(Iterator):
                                ]
 
         self.minevent = minevent
-        if self.isdata and self.unblind and not config.unblinddata or self.isdummy:
+        if self.isdata and self.unblind and not config.unblinddistributions or self.isdummy:
             self.length = 0
         elif maxevent is None or maxevent >= tree.GetEntries():
             self.length = tree.GetEntries() - minevent

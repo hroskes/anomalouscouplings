@@ -7,7 +7,8 @@ if "lxplus" in socket.gethostname() and getpass.getuser() == "hroskes":
 else:
     raise ValueError("Who/where are you?")
 
-unblinddata = True
+unblinddistributions = True
+unblindscans = True
 expectedscanluminosity = 10
 blindcut = lambda self: self.D_bkg_0plus() < 0.5
 productionforcombine = "160720"

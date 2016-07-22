@@ -1,16 +1,38 @@
 import array
+from collections import namedtuple
 from combinehelpers import Luminosity
 from extendedcounter import ExtendedCounter
 import ROOT
 import stylefunctions as style
 import sys
 
-def plotlimits(expectedfilename, branchname, outputfilename, xaxislabel, observedfilename=None, production=None):
-    filenames = [expectedfilename]
-    if observedfilename is not None:
-        filenames.append(observedfilename)
-        if production is None:
-            raise ValueError("No production provided!")
+filenametemplate = "higgsCombine_{}.MultiDimFit.mH125.root"
+branchname = "CMS_zz4l_fg4"
+
+Scan = namedtuple("Scan", "name title color style")
+
+def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
+    production = None
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "production":
+            production = kwarg
+        else:
+            assert False
+
+    scans = []
+    uptocolor = 1
+    for arg in args:
+        if arg == "obs":
+            scans.append(Scan("obs", "Observed", 1, 2))
+            if production is None:
+                raise ValueError("No production provided!")
+        else:
+            try:
+                arg = float(arg)
+            except ValueError:
+                raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
+            scans.append(Scan("exp_{}".format(arg), "Expected, {}={}".format(xaxislabel, arg), uptocolor, 1))
+            uptocolor += 1
 
     if production is None:
         luminosity = Luminosity("forexpectedscan")
@@ -18,9 +40,12 @@ def plotlimits(expectedfilename, branchname, outputfilename, xaxislabel, observe
         luminosity = Luminosity("fordata", production)
 
     mg = ROOT.TMultiGraph()
+    l = ROOT.TLegend(.6, .7, .9, .9)
+    l.SetFillStyle(0)
+    l.SetBorderSize(0)
 
-    for filename in filenames:
-        f = ROOT.TFile(filename)
+    for scan in scans:
+        f = ROOT.TFile(filenametemplate.format(scan.name))
         assert f
         t = f.Get("limit")
         assert t
@@ -40,14 +65,17 @@ def plotlimits(expectedfilename, branchname, outputfilename, xaxislabel, observe
         g = NLL.TGraph()
         mg.Add(g)
 
-        if filename == expectedfilename:
-            g.SetLineStyle(2)
+        g.SetLineColor(scan.color)
+        g.SetLineStyle(scan.style)
         g.SetLineWidth(2)
+
+        l.AddEntry(g, scan.title, "l")
 
     mg.Draw("AC")
     mg.GetXaxis().SetTitle(xaxislabel)
     mg.GetXaxis().SetRangeUser(-1, 1)
     mg.GetYaxis().SetTitle("-2#Deltaln L")
+    l.Draw()
 
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)

@@ -491,7 +491,7 @@ def tmp():
                     if systematic == "":
                         templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production))
                     for blindstatus in blindstatuses:
-                        if systematic == "" and (blindstatus == "blind" or config.unblinddata):
+                        if systematic == "" and (blindstatus == "blind" or config.unblinddistributions):
                             templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus))
 tmp()
 del tmp
