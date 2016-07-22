@@ -22,11 +22,11 @@ text2workspace.py -m 125 hzz4l_4l_8TeV.txt -P HiggsAnalysis.CombinedLimit.SpinZe
 """
 runcombinetemplate = """
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo. -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fg4=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 |& tee log_.oO[expectfai]Oo..exp
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo. -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fg4=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 --saveNLL |& tee log_.oO[expectfai]Oo..exp
 """
 observationcombinetemplate = """
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo.       --setPhysicsModelParameters r=1,CMS_zz4l_fg4=.oO[expectfai]Oo.                  -V -v 3 |& tee log.obs
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo.       --setPhysicsModelParameters r=1,CMS_zz4l_fg4=.oO[expectfai]Oo.                  -V -v 3 --saveNLL |& tee log.obs
 """
 
 def check_call_test(*args, **kwargs):
@@ -77,7 +77,7 @@ def runcombine(analysis, foldername, **kwargs):
                             if config.unblindscans:
                                 rates = getrates(channel, "fordata", config.productionforcombine)
                             else:
-                                rates = getrates(channel, "forexpectedscan")
+                                rates = getrates(channel, "forexpectedscan", config.productionforcombine)
                             contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
                     with open("hzz4l_{}S_8TeV.txt".format(channel), "w") as f:
