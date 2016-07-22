@@ -6,10 +6,11 @@ import tempfile
 
 print """Hi!
 step 1 is the CJLST trees, they should already exist.
-Please set their location and their individual directory names in config.py, if you haven't already.
-Also set this repositories main location.
+Please set this repository's location and the directory to store plots in helperstuff/config.py
 Checking to see if you've done it already..."""
 import helperstuff.config
+if os.path.realpath(os.getcwd()) != os.path.realpath(helperstuff.config.repositorydir):
+    raise OSError("You have a setup at {}, but you're not there!".format(os.path.realpath(helperstuff.config.repositorydir)))
 print """Yes, config is set up!
 """
 
