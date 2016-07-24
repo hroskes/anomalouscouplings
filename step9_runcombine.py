@@ -39,6 +39,7 @@ def runcombine(analysis, foldername, **kwargs):
     expectvalues = [0.0]
     plotname = "limit"
     legendposition = (.2, .7, .6, .9)
+    CLtextposition = "left"
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -49,6 +50,8 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("expectvalues has to contain floats separated by commas!")
         elif kw == "plotname":
             plotname = kwarg
+        elif kw == "CLtextposition":
+            CLtextposition = kwarg
         elif kw == "legendposition":
             try:
                 legendposition = [float(a) for a in kwarg.split(",")]
@@ -119,12 +122,13 @@ def runcombine(analysis, foldername, **kwargs):
                 os.makedirs(saveasdir)
             except OSError:
                 pass
-            plotscans = expectvalues
+            plotscans = []
             if config.unblindscans:
                 plotscans.append("obs")
+            plotscans += expectvalues
             for ext in "png eps root pdf".split():
                 plotname = plotname.replace("."+ext, "")
-            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, production=config.productionforcombine, legendposition=legendposition)
+            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, production=config.productionforcombine, legendposition=legendposition, CLtextposition=CLtextposition)
             with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
                 f.write(" ".join(["python"]+sys.argv))
 

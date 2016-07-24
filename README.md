@@ -29,7 +29,8 @@ python step9_runcombine.py analysis foldername
         expectvalues: expectation scans for these values of fai, separated by commas, default is just 0
         legendposition: 4 numbers separated by commas to pass to the constructor of the TLegend.  Default: .2,.7,.6,.9
         channels: which channels to use for the scan, default is 2e2mu,4e,4mu (all of them)
-    It will only run scans that haven't been run yet with the same analysis and foldername, so running this after adjusting just the legend position is really quick.
+        CLtextposition: x position along the 68% and 95% CL lines to put their labels.  Either left, right, or a float.  Default: left (equivalent to -1)
+    It will only run scans that haven't been run yet with the same analysis and foldername, so running this after adjusting just the legend or CL text position is really quick.  The command used also gets saved as a .txt file with the same name as the plot so that it can be easily adjusted.
 ```
 
 To make plots, use all the python scripts in step10_plottingutilities.  Most of them take no arguments.  `projections.py` takes a while, and `makecontrolplots.py` takes a really long time.  `niceplots.py` is quick, but can only be run after `projections.py`.  `printrates.py` is pretty fast, it just prints the yields and number of observed events.

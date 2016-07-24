@@ -1,7 +1,7 @@
 import array
 from collections import namedtuple
 from combinehelpers import Luminosity
-from enums import Analysis
+from enums import Analysis, EnumItem, MyEnum
 from extendedcounter import ExtendedCounter
 import ROOT
 import stylefunctions as style
@@ -21,6 +21,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             production = kwarg
         elif kw == "legendposition":
             legendposition = kwarg
+        elif kw == "CLtextposition":
+            CLtextposition = kwarg
         else:
             assert False
 
@@ -89,33 +91,82 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     style.applyaxesstyle(mg)
     style.CMS("Preliminary", float(luminosity))
 
-    drawlines()
+    drawlines(CLtextposition)
     for ext in "png eps root pdf".split():
         outputfilename = outputfilename.replace("."+ext, "")
     for ext in "png eps root pdf".split():
         c1.SaveAs("{}.{}".format(outputfilename, ext))
 
-def drawlines():
+#https://root.cern.ch/phpBB3/viewtopic.php?t=10159
+def GetNDC(x, y):
+    ROOT.gPad.Update()#this is necessary!
+    xndc = (x - ROOT.gPad.GetX1())/(ROOT.gPad.GetX2()-ROOT.gPad.GetX1())
+    yndc = (y - ROOT.gPad.GetY1())/(ROOT.gPad.GetY2()-ROOT.gPad.GetY1())
+    return xndc, yndc
+
+cache = []
+
+class XPos(MyEnum):
+    enumitems = (
+                 EnumItem("right"),
+                 EnumItem("left"),
+                 EnumItem("custom"),
+                )
+    def __init__(self, value):
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            super(XPos, self).__init__(value)
+        else:
+            super(XPos, self).__init__("custom")
+            self.custompos = value
+    def TPaveText(self, ypos):
+        xsize = .1
+        ysize = .03
+        yshift = 0
+        if self == "right":
+            x2, y1 = GetNDC(1, ypos)
+            x1 = x2 - xsize
+        elif self == "left":
+            x1, y1 = GetNDC(-1, ypos)
+            x2 = x1 + xsize
+        elif self == "custom":
+            x1, y1 = GetNDC(self.custompos, ypos)
+            x2 = x1 + xsize
+        else:
+            assert False
+
+        y1 += yshift  #make some room between the text and the line
+        y2 = y1 + ysize
+
+        return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
+
+def drawlines(xpostext="left"):
+    xpostext = XPos(xpostext)
+
     line68 = ROOT.TLine()
     line68.SetLineStyle(9)
     line68.DrawLine(-1,1,1,1)
+    cache.append(line68)
     line95 = ROOT.TLine()
     line95.SetLineStyle(9)
-    line95.SetLineColor(4)
     line95.DrawLine(-1,3.84,1,3.84)
+    cache.append(line95)
 
-    oneSig = ROOT.TPaveText(0.18,0.16,0.28,0.19,"NDC")
+    oneSig = xpostext.TPaveText(1)
     oneSig.SetFillColor(0)
     oneSig.SetFillStyle(0)
     oneSig.SetTextFont(42)
     oneSig.SetBorderSize(0)
-    oneSig.AddText("68\% CL")
+    oneSig.AddText("68% CL")
     oneSig.Draw()
+    cache.append(oneSig)
 
-    twoSig = ROOT.TPaveText(0.18,0.24,0.28,0.27,"NDC")
+    twoSig = xpostext.TPaveText(3.84)
     twoSig.SetFillColor(0)
     twoSig.SetFillStyle(0)
     twoSig.SetTextFont(42)
     twoSig.SetBorderSize(0)
-    twoSig.AddText("95\% CL")
+    twoSig.AddText("95% CL")
     twoSig.Draw()
+    cache.append(twoSig)
