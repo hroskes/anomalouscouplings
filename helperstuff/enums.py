@@ -177,6 +177,9 @@ class Analysis(MyEnum):
         if self == "fL1":
             return "#phi_{#Lambda1}"
         assert False
+    @property
+    def phi_lower(self):
+        return self.phi.replace("{", "{#lower[-0.25]{").replace("}", "}}")
     def purediscriminant(self, title=False):
         if not title:
             if self == "fa3":
@@ -319,7 +322,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-productions = Production.items(lambda x: x in ("160720",))
+productions = Production.items(lambda x: x in ("160225", "160720"))
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):

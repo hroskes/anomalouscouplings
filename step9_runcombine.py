@@ -130,9 +130,16 @@ def runcombine(analysis, foldername, **kwargs):
                 plotname = plotname.replace("."+ext, "")
             plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, production=config.productionforcombine, legendposition=legendposition, CLtextposition=CLtextposition)
             with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
-                f.write(" ".join(["python"]+sys.argv))
+                f.write(" ".join(["python"]+sys.argv) + "\n")
 
-if __name__ == "__main__":
+if __name__ == "__main__" and sys.argv[1:] == ["replot"]:
+    import glob
+    for txtfile in glob.iglob(os.path.join(config.plotsbasedir, "limits", "*", "*.txt")):
+        with open(txtfile) as f:
+            contents = f.read().split()
+            if contents[0] == "python" and contents[1] == "step9_runcombine.py":
+                subprocess.check_call(contents)
+elif __name__ == "__main__":
     analysis = Analysis(sys.argv[1])
     foldername = sys.argv[2]
     kwargs = {}
