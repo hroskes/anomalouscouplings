@@ -103,11 +103,11 @@ def niceplots(*args):
         l.AddEntry(data, "Observed", "ep")
         l.AddEntry(SM, "SM", "l")
         if discriminant == analysis.mixdiscriminant() and analysis == "fa3" or discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fL1":
-            l.AddEntry(mix, analysis.title()+"=0.5", "l")
+            l.AddEntry(mix, analysis.title+"=0.5", "l")
         elif discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fa2":
-            l.AddEntry(mixminus, analysis.title()+"=-0.5", "l")
+            l.AddEntry(mixminus, analysis.title+"=-0.5", "l")
         else:
-            l.AddEntry(BSM, analysis.title()+"=1", "l")
+            l.AddEntry(BSM, analysis.title+"=1", "l")
         l.AddEntry(ZZ, "ZZ", "f")
         l.AddEntry(ZX, "Z+X", "f")
 

@@ -159,6 +159,7 @@ class Analysis(MyEnum):
                  EnumItem("fa2"),
                  EnumItem("fL1"),
                 )
+    @property
     def title(self):
         if self == "fa3":
             return "f_{a3}"
@@ -166,6 +167,16 @@ class Analysis(MyEnum):
             return "f_{a2}"
         if self == "fL1":
             return "f_{#Lambda1}"
+        assert False
+    @property
+    def phi(self):
+        if self == "fa3":
+            return "#phi_{a3}"
+        if self == "fa2":
+            return "#phi_{a2}"
+        if self == "fL1":
+            return "#phi_{#Lambda1}"
+        assert False
     def purediscriminant(self, title=False):
         if not title:
             if self == "fa3":

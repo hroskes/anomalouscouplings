@@ -122,7 +122,11 @@ def runcombine(analysis, foldername, **kwargs):
             plotscans = expectvalues
             if config.unblindscans:
                 plotscans.append("obs")
-            plotlimits(os.path.join(saveasdir, plotname), analysis.title(), *plotscans, production=config.productionforcombine, legendposition=legendposition)
+            for ext in "png eps root pdf".split():
+                plotname = plotname.replace("."+ext, "")
+            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, production=config.productionforcombine, legendposition=legendposition)
+            with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
+                f.write(" ".join(["python"]+sys.argv))
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])

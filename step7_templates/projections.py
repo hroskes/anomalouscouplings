@@ -157,8 +157,8 @@ class Projections(MultiEnum):
                  TemplateFromFile(0, self.enrichstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[2]),
                 ]
     templates+= [
-                 TemplateSum("ggH {}=0.5".format(self.analysis.title()), ROOT.kGreen+3, templates[0].Integral(), (templates[0], 1), (templates[1], 1), (templates[2], 1)),
-                 TemplateSum("ggH {}=-0.5".format(self.analysis.title()), 4, templates[0].Integral(), (templates[0], 1), (templates[1], 1), (templates[2], -1)),
+                 TemplateSum("ggH {}=0.5".format(self.analysis.title), ROOT.kGreen+3, templates[0].Integral(), (templates[0], 1), (templates[1], 1), (templates[2], 1)),
+                 TemplateSum("ggH {}=-0.5".format(self.analysis.title), 4, templates[0].Integral(), (templates[0], 1), (templates[1], 1), (templates[2], -1)),
                  TemplateFromFile(6, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ", self.systematic, self.production),
                  TemplateFromFile(ROOT.kOrange+6, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ", self.systematic, self.production),
                  TemplateFromFile(2, self.enrichstatus, self.normalization, self.analysis, self.channel, "ZX", self.systematic, self.production),

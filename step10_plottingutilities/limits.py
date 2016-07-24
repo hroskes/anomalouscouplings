@@ -35,7 +35,7 @@ def printlimits(analysis, foldername, **kwargs):
         if kw == "plotname":
             plotname = kwarg
             for ext in "png eps root pdf".split():
-                plotname = plotname.replace(ext, "")
+                plotname = plotname.replace("."+ext, "")
         elif kw == "printformat":
             printformat = PrintFormat(kwarg)
         else:

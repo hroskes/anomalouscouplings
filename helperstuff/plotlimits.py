@@ -1,6 +1,7 @@
 import array
 from collections import namedtuple
 from combinehelpers import Luminosity
+from enums import Analysis
 from extendedcounter import ExtendedCounter
 import ROOT
 import stylefunctions as style
@@ -11,7 +12,8 @@ branchname = "CMS_zz4l_fg4"
 
 Scan = namedtuple("Scan", "name title color style")
 
-def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
+def plotlimits(outputfilename, analysis, *args, **kwargs):
+    analysis = Analysis(analysis)
     production = None
     legendposition = (.2, .7, .6, .9)
     for kw, kwarg in kwargs.iteritems():
@@ -26,7 +28,7 @@ def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
     uptocolor = 1
     for arg in args:
         if arg == "obs":
-            scans.append(Scan("obs", "Observed", 1, 1))
+            scans.append(Scan("obs", "Observed, {}=0 or #pi".format(analysis.phi), 1, 1))
             if production is None:
                 raise ValueError("No production provided!")
         else:
@@ -34,7 +36,10 @@ def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
                 arg = float(arg)
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
-            scans.append(Scan("exp_{}".format(arg), "Expected, {}={}".format(xaxislabel, arg), uptocolor, 2))
+            if arg == 0:
+                scans.append(Scan("exp_{}".format(arg), "Expected, {}=0 or #pi".format(analysis.phi), uptocolor, 2))
+            else:
+                scans.append(Scan("exp_{}".format(arg), "Expected, {}={}, {}=0 or #pi".format(analysis.title, arg, analysis.phi), uptocolor, 2))
             uptocolor += 1
 
     if production is None:
@@ -75,7 +80,7 @@ def plotlimits(outputfilename, xaxislabel, *args, **kwargs):
         l.AddEntry(g, scan.title, "l")
 
     mg.Draw("AC")
-    mg.GetXaxis().SetTitle(xaxislabel)
+    mg.GetXaxis().SetTitle("{} cos {}".format(analysis.title, analysis.phi))
     mg.GetXaxis().SetRangeUser(-1, 1)
     mg.GetYaxis().SetTitle("-2#Deltaln L")
     l.Draw()
