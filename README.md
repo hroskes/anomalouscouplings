@@ -33,7 +33,7 @@ python step9_runcombine.py analysis foldername
 ```
 Running step9 will only run scans that haven't been run yet with the same analysis and foldername, so running after adjusting just the legend or CL text position is really quick.  The command used also gets saved as a .txt file with the same name as the plot so that it can be easily adjusted.  To remake all the plots using the same options after adjusting the plotting script, you can run
 ```
-python step9_runcombine.py replot
+python step10_plottingutilities/replotlimits.py
 ```
 
 To make plots, use all the python scripts in step10_plottingutilities.  Most of them take no arguments.  `projections.py` takes a while, and `makecontrolplots.py` takes a really long time.  `niceplots.py` is quick, but can only be run after `projections.py`.  `printrates.py` is pretty fast, it just prints the yields and number of observed events.
