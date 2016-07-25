@@ -65,6 +65,9 @@ def runcombine(analysis, foldername, **kwargs):
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
+    years = [p.year for p in productions]
+    if len(set(years)) != len(years):
+        raise ValueError("Some of your productions are from the same year!")
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
