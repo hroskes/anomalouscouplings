@@ -44,7 +44,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                 scans.append(Scan("exp_{}".format(arg), "Expected, {}={}, {}=0 or #pi".format(analysis.title, arg, analysis.phi), uptocolor, 2))
             uptocolor += 1
 
-    if production is None:
+    if productions is None:
         luminosity = float(Luminosity("forexpectedscan"))
     else:
         luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
@@ -62,8 +62,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
         NLL = ExtendedCounter()
 
-        for i in range(1, t.GetEntries()):
-            t.GetEntry(i)
+        for entry in t:
             fa3 = getattr(t, branchname)
             deltaNLL = t.deltaNLL
             print fa3
