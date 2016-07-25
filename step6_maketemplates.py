@@ -15,7 +15,7 @@ def touch(filename):
 
 def buildtemplates(*args):
     templatesfile = TemplatesFile(*args)
-    print templatesfile.analysis, templatesfile.channel, templatesfile.signalorbkg, templatesfile.systematic, templatesfile.production
+    print templatesfile
     if os.path.exists(templatesfile.templatesfile()):
         return
     touch(templatesfile.templatesfile())

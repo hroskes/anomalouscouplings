@@ -2,9 +2,10 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 from helperstuff import config
 from helperstuff import filemanager
 from helperstuff.combinehelpers import getrates
-from helperstuff.enums import Analysis, Channel, channels
+from helperstuff.enums import Analysis, Channel, channels, Production
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
+from itertools import product
 import os
 import pipes
 import subprocess
@@ -12,13 +13,13 @@ import sys
 
 makeworkspacestemplate = """
 eval $(scram ru -sh) &&
-python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo.
+python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo.
 """
 
 createworkspacetemplate = """
 eval $(scram ru -sh) &&
-combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l_8TeV.txt &&
-text2workspace.py -m 125 hzz4l_4l_8TeV.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
+combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l.txt &&
+text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
 """
 runcombinetemplate = """
 eval $(scram ru -sh) &&
@@ -67,40 +68,44 @@ def runcombine(analysis, foldername, **kwargs):
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
-              "cardstocombine": " ".join("hzz4l_{}S_8TeV.txt".format(channel) for channel in usechannels),
+              "cardstocombine": " ".join("hzz4l_{}S_{}.txt".format(channel, production.year) for channel, production in product(usechannels, config.productionsforcombine)),
               "workspacefile": "floatMu.root",
               "filename": "higgsCombine_.oO[append]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "observedappend": "obs",
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
-        if not os.path.exists("cards_{}".format(foldername)):
-            subprocess.check_call(replaceByMap(makeworkspacestemplate, repmap), shell=True)
+        for production in config.productionsforcombine:
+            production = Production(production)
+            if not all(os.path.exists("cards_{}/HCG/125/hzz4l_{}S_{}.input.root".format(foldername, channel, production.year)) for channel in channels):
+                makeworkspacesmap = repmap.copy()
+                makeworkspacesmap["production"] = str(production)
+                subprocess.check_call(replaceByMap(makeworkspacestemplate, makeworkspacesmap), shell=True)
         with open("cards_{}/.gitignore".format(foldername), "w") as f:
             f.write("*")
         with filemanager.cd("cards_{}/HCG/125".format(foldername)):
             #replace rates
-            for channel in channels:
+            for channel, production in product(channels, config.productionsforcombine):
                 if channel in usechannels:
-                    with open("hzz4l_{}S_8TeV.txt".format(channel)) as f:
+                    with open("hzz4l_{}S_{}.txt".format(channel, production.year)) as f:
                         contents = f.read()
                         if "\n#rate" in contents: continue #already did this
                     for line in contents.split("\n"):
                         if line.startswith("rate"):
                             if config.unblindscans:
-                                rates = getrates(channel, "fordata", config.productionforcombine)
+                                rates = getrates(channel, "fordata", production)
                             else:
-                                rates = getrates(channel, "forexpectedscan", config.productionforcombine)
+                                rates = getrates(channel, "forexpectedscan", production)
                             contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
-                    with open("hzz4l_{}S_8TeV.txt".format(channel), "w") as f:
+                    with open("hzz4l_{}S_{}.txt".format(channel, production.year), "w") as f:
                         f.write(contents)
                 else:
-                    os.remove("hzz4l_{}S_8TeV.txt".format(channel))
-                    os.remove("hzz4l_{}S_8TeV.input.root".format(channel))
+                    os.remove("hzz4l_{}S_{}.txt".format(channel, production.year))
+                    os.remove("hzz4l_{}S_{}.input.root".format(channel, production.year))
             if not os.path.exists(repmap["workspacefile"]):
-                for channel in usechannels:
-                    replacesystematics(channel)
+                for channel, production in product(usechannels, config.productionsforcombine):
+                    replacesystematics(channel, production)
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
             for expectfai in expectvalues:
@@ -128,7 +133,7 @@ def runcombine(analysis, foldername, **kwargs):
             plotscans += expectvalues
             for ext in "png eps root pdf".split():
                 plotname = plotname.replace("."+ext, "")
-            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, production=config.productionforcombine, legendposition=legendposition, CLtextposition=CLtextposition)
+            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=config.productionsforcombine, legendposition=legendposition, CLtextposition=CLtextposition)
             with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
                 f.write(" ".join(["python"]+sys.argv) + "\n")
 

@@ -293,11 +293,18 @@ class Production(MyEnum):
         assert False
     @property
     def dataluminosity(self):
+        if self == "160225": return 2.8
         if self == "160714": return 7.65
         if self == "160720": return 9.2
         assert False
     def __int__(self):
         return int(str(self))
+    @property
+    def year(self):
+        if self == "160225":
+            return 2015
+        if self in ("160624", "160714", "160720"):
+            return 2016
 
     #put this in here to avoid me getting really confused
     class Release(MyEnum):
@@ -670,11 +677,11 @@ class Template(MultiEnum):
         return self.analysis == "fa3" and not (not final and self.hypothesis == "fa30.5") and self.productionmode != "data"
 
     def discriminants(self):
-        return [
+        return (
                 self.analysis.purediscriminant(),
                 self.analysis.mixdiscriminant(),
                 self.systematic.D_bkg_0plus(),
-               ]
+               )
     def binning(self):
         if self.analysis == "fa2":
             result = [26, 0, 1, 26, 0, 1, 26, 0, 1]
@@ -900,3 +907,5 @@ datatrees = []
 for channel in channels:
     for production in productions:
         datatrees.append(DataTree(channel, production))
+
+config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)

@@ -1,4 +1,4 @@
-from enums import Channel, channels
+from enums import Channel, channels, Production
 
 class MoriondSystematics(object):
     def __init__(self, channel):
@@ -64,9 +64,10 @@ class Systematic(object):
             if self.name == "CMS_hzz{}_Zjets".format(channel): return MoriondSystematic("CMS_zz{}_zjets".format(channel))
         raise ValueError("Unknown systematic name {}!".format(self.name))
 
-def replacesystematics(channel):
-    channel = channel
-    cardfilename = "hzz4l_{}S_8TeV.txt".format(channel)
+def replacesystematics(channel, production):
+    channel = Channel(channel)
+    production = Production(production)
+    cardfilename = "hzz4l_{}S_{}.txt".format(channel, production.year)
     with open(cardfilename) as f:
         contents = f.read()
     sections = contents.split("------------\n")

@@ -47,8 +47,6 @@ def combinesystematics(flavor, analysis, production):
     ZXDowntemplate.Scale(2)
     ZXDowntemplate.Add(ZXUptemplate, -1)
 
-    print flavor, ZXtemplate.Integral(), ZXUptemplate.Integral(), ZXDowntemplate.Integral()
-
     for f in outfiles.values():
         f.Write()
         f.Close()
@@ -57,4 +55,5 @@ if __name__ == "__main__":
     for production in productions:
         for analysis in analyses:
             for channel in channels:
+                print production, analysis, channel
                 combinesystematics(channel, analysis, production)

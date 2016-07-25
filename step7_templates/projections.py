@@ -151,6 +151,7 @@ class Projections(MultiEnum):
     super(Projections, self).check(*args)
 
   def projections(self):
+    print self
     templates = [
                  TemplateFromFile(1, self.enrichstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[0]),
                  TemplateFromFile(ROOT.kCyan, self.enrichstatus, self.normalization, self.analysis.signaltemplates(self.production, self.channel, self.systematic)[1]),
@@ -177,7 +178,10 @@ class Projections(MultiEnum):
     for template in templates:
         if template.color:
             if self.normalization == "areanormalize":
-                template.Scale(1/template.Integral())
+                try:
+                    template.Scale(1/template.Integral())
+                except ZeroDivisionError:
+                    pass
             template.AddToLegend(legend)
 
     for axis in axes:

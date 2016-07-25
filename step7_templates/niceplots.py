@@ -2,6 +2,7 @@ from helperstuff import config
 from helperstuff import stylefunctions as style
 from helperstuff.combinehelpers import Luminosity
 from helperstuff.enums import Analysis, analyses, Channel, channels, EnumItem, MultiEnum, MyEnum, Production
+from itertools import product
 import os
 from projections import EnrichStatus, enrichstatuses
 import ROOT
@@ -17,21 +18,21 @@ class HistWrapper(object):
             self.h.Add(other)
         return self
 
-def niceplots(*args):
+def niceplots(productions, *args):
     class NicePlots(MultiEnum):
-        enums = (Analysis, Production, EnrichStatus)
+        enums = (Analysis, EnrichStatus)
     info = NicePlots(*args)
-    analysis, production, enrichstatus = info.analysis, info.production, info.enrichstatus
+    analysis, enrichstatus = info.analysis, info.enrichstatus
     dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", enrichstatus.dirname(), str(analysis))
 
-    previousplots = {channel: os.path.join(config.plotsbasedir, "templateprojections", enrichstatus.dirname(), "rescalemixtures", "{}_{}".format(analysis, production), str(channel)) for channel in channels}
+    previousplots = {(channel, production): os.path.join(config.plotsbasedir, "templateprojections", enrichstatus.dirname(), "rescalemixtures", "{}_{}".format(analysis, production), str(channel)) for channel, production in product(channels, productions)}
 
     for discriminant, title in ("Dbkg", "D_{bkg}"), (analysis.purediscriminant(), analysis.purediscriminant(True)), (analysis.mixdiscriminant(), analysis.mixdiscriminant(True)):
 
         ZX, ZZ, SM, BSM, mix, mixminus, data = HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper()
 
-        for channel in channels:
-            f = ROOT.TFile(os.path.join(previousplots[channel], discriminant+".root"))
+        for channel, production in product(channels, productions):
+            f = ROOT.TFile(os.path.join(previousplots[channel, production], discriminant+".root"))
             c = f.c1
             lst = c.GetListOfPrimitives()[1].GetHists()
 
@@ -122,7 +123,7 @@ def niceplots(*args):
         style.applycanvasstyle(c)
         style.applyaxesstyle(hstack)
         style.cuttext(enrichstatus.cuttext())
-        style.CMS("Preliminary", float(Luminosity("fordata", production)))
+        style.CMS("Preliminary", sum(float(Luminosity("fordata", production)) for production in productions))
 
         hstack.GetXaxis().SetTitle(title)
         hstack.GetYaxis().SetTitle(
@@ -141,4 +142,4 @@ def niceplots(*args):
 if __name__ == "__main__":
     for analysis in analyses:
         for enrichstatus in enrichstatuses:
-            niceplots(analysis, config.productionforcombine, enrichstatus)
+            niceplots(config.productionsforcombine, analysis, enrichstatus)

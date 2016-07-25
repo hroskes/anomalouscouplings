@@ -26,15 +26,19 @@ class Luminosity(MultiEnum):
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production]
     def getrate(self):
-        if self.productionmode == "ZX":
+        if self.productionmode == "ZX" and self.production == "160720":
             if self.channel == "4e":    return 1.36 * float(self.luminosity)/7.65
             if self.channel == "4mu":   return 1.64 * float(self.luminosity)/7.65
             if self.channel == "2e2mu": return 2.81 * float(self.luminosity)/7.65
+        if self.productionmode == "ZX" and self.production == "160225": #email from Simon, Feb 9 at 4:56 PM, "inputs for the cards"
+            if self.channel == "4e":    return (0.311745 + 0.0106453) * float(self.luminosity)/2.8
+            if self.channel == "4mu":   return 0.408547 * float(self.luminosity)/2.8
+            if self.channel == "2e2mu": return (0.716686 + 0.0199815) * float(self.luminosity)/2.8
 
         if self.productionmode == "ggH":
-            result = Template("fa3", self.productionmode, self.channel, "0+", config.productionforcombine).gettemplate().Integral()*float(self.luminosity)
+            result = Template("fa3", self.productionmode, self.channel, "0+", self.production).gettemplate().Integral()*float(self.luminosity)
             for productionmode in "VBF", "WplusH", "WminusH", "ZH", "ttH":
-                sample = Sample(productionmode, "0+", config.productionforcombine)
+                sample = Sample(productionmode, "0+", self.production)
                 f = tfiles[sample.withdiscriminantsfile()]
                 t = f.candTree
                 ZZFlav = self.channel.ZZFlav
@@ -45,7 +49,7 @@ class __Rate(MultiEnum):
                 result += additionalxsec * float(self.luminosity)
             return result
 
-        result = Template("fa3", self.productionmode, self.channel, config.productionforcombine).gettemplate().Integral()*float(self.luminosity)
+        result = Template("fa3", self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
         return result
 
     def __float__(self):
@@ -65,12 +69,16 @@ def getrates(*args):
     return result
 
 def gettemplate(*args):
-    return Template(config.productionforcombine, *args).gettemplate()
+    return Template(*args).gettemplate()
 
-def getdatatree(channel):
-    channel = Channel(channel)
-    return tfiles[DataTree(channel, config.productionforcombine).treefile].candTree
+def getdatatree(*args):
+    return tfiles[DataTree(*args).treefile].candTree
     #it's empty if we don't actually unblind
 
 def discriminantnames(*args):
-    return Template("ggH", "0+", "2e2mu", config.productionforcombine, *args).discriminants()
+    theset = set()
+    for production in config.productionsforcombine:
+        result = Template("ggH", "0+", "2e2mu", production, *args).discriminants()
+        theset.add(result)
+    assert len(theset) == 1  #sanity check
+    return result
