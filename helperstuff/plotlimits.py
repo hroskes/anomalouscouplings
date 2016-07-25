@@ -14,11 +14,11 @@ Scan = namedtuple("Scan", "name title color style")
 
 def plotlimits(outputfilename, analysis, *args, **kwargs):
     analysis = Analysis(analysis)
-    production = None
+    productions = None
     legendposition = (.2, .7, .6, .9)
     for kw, kwarg in kwargs.iteritems():
-        if kw == "production":
-            production = kwarg
+        if kw == "productions":
+            productions = kwarg
         elif kw == "legendposition":
             legendposition = kwarg
         elif kw == "CLtextposition":
@@ -31,8 +31,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     for arg in args:
         if arg == "obs":
             scans.append(Scan("obs", "Observed, {}=0 or #pi".format(analysis.phi), 1, 1))
-            if production is None:
-                raise ValueError("No production provided!")
+            if productions is None:
+                raise ValueError("No productions provided!")
         else:
             try:
                 arg = float(arg)
@@ -45,9 +45,9 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             uptocolor += 1
 
     if production is None:
-        luminosity = Luminosity("forexpectedscan")
+        luminosity = float(Luminosity("forexpectedscan"))
     else:
-        luminosity = Luminosity("fordata", production)
+        luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
 
     mg = ROOT.TMultiGraph()
     l = ROOT.TLegend(*legendposition)
@@ -89,7 +89,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)
-    style.CMS("Preliminary", float(luminosity))
+    style.CMS("Preliminary", luminosity)
 
     drawlines(CLtextposition)
     for ext in "png eps root pdf".split():
