@@ -8,6 +8,7 @@ from helperstuff.replacesystematics import replacesystematics
 from itertools import product
 import os
 import pipes
+import ROOT
 import subprocess
 import sys
 
@@ -47,7 +48,7 @@ def runcombine(analysis, foldername, **kwargs):
             usechannels = [Channel(c) for c in kwarg.split(",")]
         elif kw == "expectvalues":
             try:
-                expectvalues = [float(fai) for fai in kwarg.split(",")]
+                expectvalues = [fai if fai=="minimum" else float(fai) for fai in kwarg.split(",")]
             except ValueError:
                 raise ValueError("expectvalues has to contain floats separated by commas!")
         elif kw == "plotname":
@@ -114,19 +115,25 @@ def runcombine(analysis, foldername, **kwargs):
                     replacesystematics(channel, production)
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
-            for expectfai in expectvalues:
-                repmap_exp = repmap.copy()
-                repmap_exp["expectfai"] = str(expectfai)
-                repmap_exp["append"] = ".oO[expectedappend]Oo."
-                if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
-                    subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
-
             if config.unblindscans:
                 repmap_obs = repmap.copy()
                 repmap_obs["expectfai"] = "0.0"  #starting point
                 repmap_obs["append"] = ".oO[observedappend]Oo."
                 if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
                     subprocess.check_call(replaceByMap(observationcombinetemplate, repmap_obs), shell=True)
+                f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
+                f.limit.GetEntry(0)
+                minimum = f.limit.CMS_zz4l_fg4
+                del f
+
+            for expectfai in expectvalues:
+                repmap_exp = repmap.copy()
+                if expectfai == "minimum":
+                    expectfai = minimum
+                repmap_exp["expectfai"] = str(expectfai)
+                repmap_exp["append"] = ".oO[expectedappend]Oo."
+                if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
+                    subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
 
             saveasdir = os.path.join(config.plotsbasedir, "limits", foldername)
             try:
@@ -136,7 +143,10 @@ def runcombine(analysis, foldername, **kwargs):
             plotscans = []
             if config.unblindscans:
                 plotscans.append("obs")
-            plotscans += expectvalues
+            for expectfai in expectvalues:
+                if expectfai == "minimum":
+                    expectfai = minimum
+                plotscans.append(expectfai)
             for ext in "png eps root pdf".split():
                 plotname = plotname.replace("."+ext, "")
             plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition)

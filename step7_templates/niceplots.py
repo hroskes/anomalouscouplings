@@ -18,12 +18,18 @@ class HistWrapper(object):
             self.h.Add(other)
         return self
 
-def niceplots(productions, *args):
+def niceplots(productions, *args, **kwargs):
+    extradir = ""
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "extradir":
+            extradir = kwarg
+        else:
+            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
     class NicePlots(MultiEnum):
         enums = (Analysis, EnrichStatus)
     info = NicePlots(*args)
     analysis, enrichstatus = info.analysis, info.enrichstatus
-    dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", enrichstatus.dirname(), str(analysis))
+    dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", extradir, enrichstatus.dirname(), str(analysis))
 
     previousplots = {(channel, production): os.path.join(config.plotsbasedir, "templateprojections", enrichstatus.dirname(), "rescalemixtures", "{}_{}".format(analysis, production), str(channel)) for channel, production in product(channels, productions)}
 
@@ -142,4 +148,7 @@ def niceplots(productions, *args):
 if __name__ == "__main__":
     for analysis in analyses:
         for enrichstatus in enrichstatuses:
-            niceplots(config.productionsforcombine, analysis, enrichstatus)
+            niceplots(["160225"], analysis, enrichstatus, extradir="2015")
+            niceplots(["160720"], analysis, enrichstatus, extradir="2016")
+            niceplots(["160720"], analysis, enrichstatus, extradir="")
+            niceplots(config.productionsforcombine, analysis, enrichstatus, extradir="2015+2016")

@@ -26,10 +26,11 @@ python step9_runcombine.py analysis foldername
     foldername: gets appended to the analysis to form the folder name where the datacards are stored (-a for make_prop) and the folder where the plots are stored in plotsdir/limits (plotsdir specified in config)
     optional arguments, specified by name=value:
         plotname: default=limit, saves it as plotname.{png,eps,root,pdf}
-        expectvalues: expectation scans for these values of fai, separated by commas, default is just 0
+        expectvalues: expectation scans for these values of fai, separated by commas, default is just 0.  If minimum is one of the values, also run a scan at the observed minimum
         legendposition: 4 numbers separated by commas to pass to the constructor of the TLegend.  Default: .2,.7,.6,.9
         channels: which channels to use for the scan, default is 2e2mu,4e,4mu (all of them)
         CLtextposition: x position along the 68% and 95% CL lines to put their labels.  Either left, right, or a float.  Default: left (equivalent to -1)
+        productions: which productions to use for the scan, default is productionsforcombine in config.py
 ```
 Running step9 will only run scans that haven't been run yet with the same analysis and foldername, so running after adjusting just the legend or CL text position is really quick.  The command used also gets saved as a .txt file with the same name as the plot so that it can be easily adjusted.  To remake all the plots using the same options after adjusting the plotting script, you can run
 ```
