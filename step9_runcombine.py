@@ -41,6 +41,7 @@ def runcombine(analysis, foldername, **kwargs):
     plotname = "limit"
     legendposition = (.2, .7, .6, .9)
     CLtextposition = "left"
+    productions = config.productionsforcombine
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -59,6 +60,8 @@ def runcombine(analysis, foldername, **kwargs):
                 if len(legendposition) != 4: raise ValueError
             except ValueError:
                 raise ValueError("legendposition has to contain 4 floats separated by commas!")
+        elif kw == "productions":
+            productions = [Production(p) for p in kwarg.split(",")]
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -68,14 +71,14 @@ def runcombine(analysis, foldername, **kwargs):
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
-              "cardstocombine": " ".join("hzz4l_{}S_{}.txt".format(channel, production.year) for channel, production in product(usechannels, config.productionsforcombine)),
+              "cardstocombine": " ".join("hzz4l_{}S_{}.txt".format(channel, production.year) for channel, production in product(usechannels, productions)),
               "workspacefile": "floatMu.root",
               "filename": "higgsCombine_.oO[append]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "observedappend": "obs",
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
-        for production in config.productionsforcombine:
+        for production in productions:
             production = Production(production)
             if not all(os.path.exists("cards_{}/HCG/125/hzz4l_{}S_{}.input.root".format(foldername, channel, production.year)) for channel in channels):
                 makeworkspacesmap = repmap.copy()
@@ -85,7 +88,7 @@ def runcombine(analysis, foldername, **kwargs):
             f.write("*")
         with filemanager.cd("cards_{}/HCG/125".format(foldername)):
             #replace rates
-            for channel, production in product(channels, config.productionsforcombine):
+            for channel, production in product(channels, productions):
                 if channel in usechannels:
                     with open("hzz4l_{}S_{}.txt".format(channel, production.year)) as f:
                         contents = f.read()
@@ -104,7 +107,7 @@ def runcombine(analysis, foldername, **kwargs):
                     os.remove("hzz4l_{}S_{}.txt".format(channel, production.year))
                     os.remove("hzz4l_{}S_{}.input.root".format(channel, production.year))
             if not os.path.exists(repmap["workspacefile"]):
-                for channel, production in product(usechannels, config.productionsforcombine):
+                for channel, production in product(usechannels, productions):
                     replacesystematics(channel, production)
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
@@ -133,7 +136,7 @@ def runcombine(analysis, foldername, **kwargs):
             plotscans += expectvalues
             for ext in "png eps root pdf".split():
                 plotname = plotname.replace("."+ext, "")
-            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=config.productionsforcombine, legendposition=legendposition, CLtextposition=CLtextposition)
+            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition)
             with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
                 f.write(" ".join(["python"]+sys.argv) + "\n")
 
