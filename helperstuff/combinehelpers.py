@@ -62,10 +62,14 @@ def getrate(*args):
         __cache[rate] = float(rate)
     return __cache[rate]
 
-def getrates(*args):
+def getrates(*args, **kwargs):
+    fmt = "rate {} {} {} {}"
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "format":
+            fmt = kwarg
     ggH, qqZZ, ggZZ, ZX = getrate("ggH", *args), getrate("qqZZ", *args), getrate("ggZZ", *args), getrate("ZX", *args)
 
-    result =  "rate {} {} {} {}".format(ggH, qqZZ, ggZZ, ZX)
+    result =  fmt.format(ggH, qqZZ, ggZZ, ZX)
     return result
 
 def gettemplate(*args):
