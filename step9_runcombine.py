@@ -122,8 +122,11 @@ def runcombine(analysis, foldername, **kwargs):
                 if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
                     subprocess.check_call(replaceByMap(observationcombinetemplate, repmap_obs), shell=True)
                 f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
-                f.limit.GetEntry(0)
-                minimum = f.limit.CMS_zz4l_fg4
+                minimum = (float("nan"), float("inf"))
+                for entry in f.limit:
+                    if f.limit.deltaNLL < minimum[1]:
+                        minimum = (f.limit.CMS_zz4l_fg4, f.limit.deltaNLL)
+                minimum = minimum[0]
                 del f
 
             for expectfai in expectvalues:

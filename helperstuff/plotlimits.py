@@ -41,7 +41,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             if arg == 0:
                 scans.append(Scan("exp_{}".format(arg), "Expected, {}=0 or #pi".format(analysis.phi), uptocolor, 2))
             else:
-                scans.append(Scan("exp_{}".format(arg), "Expected, {}={}, {}=0 or #pi".format(analysis.title, arg, analysis.phi), uptocolor, 2))
+                scans.append(Scan("exp_{}".format(arg), "Expected, {}={:.2f}, {}=0 or #pi".format(analysis.title, arg, analysis.phi), uptocolor, 2))
             uptocolor += 1
 
     if productions is None:
@@ -65,7 +65,6 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         for entry in t:
             fa3 = getattr(t, branchname)
             deltaNLL = t.deltaNLL
-            print fa3
             NLL[fa3] = 2*deltaNLL
         if 1 not in NLL and -1 in NLL:
             NLL[1] = NLL[-1]
@@ -137,6 +136,14 @@ class XPos(MyEnum):
 
         y1 += yshift  #make some room between the text and the line
         y2 = y1 + ysize
+
+        ymax = 1-ROOT.gPad.GetTopMargin()
+        if y1 < ymax < y2:
+            y1 -= (y2-ymax)
+            y2 -= (y2-ymax)
+        if y1 > ymax:
+            y1 += 100  #so it doesn't get in the CMS header
+            y2 += 100
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
