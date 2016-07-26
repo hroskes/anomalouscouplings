@@ -337,6 +337,7 @@ hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
 productions = Production.items(lambda x: x in ("160225", "160725"))
+config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):
@@ -902,6 +903,7 @@ class Template(MultiEnum):
 
 class DataTree(MultiEnum):
     enums = [Channel, Production]
+    enumname = "datatree"
     @property
     def originaltreefile(self):
         from samples import Sample
@@ -909,10 +911,43 @@ class DataTree(MultiEnum):
     @property
     def treefile(self):
         return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}.root".format(self.production, self.channel))
+    def passescut(self, t):
+        return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblindscans
 
 datatrees = []
 for channel in channels:
     for production in productions:
         datatrees.append(DataTree(channel, production))
 
-config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
+
+
+class SubtractProduction(MyEnum):
+    enumname = "subtractproduction"
+    enumitems = (
+                 EnumItem("subtract160720"),
+                )
+    subtracttree = None
+    def passescut(self, t):
+        if self.subtracttree is None:
+            from samples import Sample
+            self.subtracttree = tfiles[Sample("data", "unblind", str(self).replace("subtract", "")).withdiscriminantsfile()].candTree
+        run, event, lumi = t.RunNumber, t.EventNumber, t.LumiNumber
+        for t2 in self.subtracttree:
+            if (run, event, lumi) == (t2.RunNumber, t2.EventNumber, t2.LumiNumber):
+                return False
+        return True
+
+class SubtractDataTree(DataTree, MultiEnum):
+    enums = DataTree.enums + (SubtractProduction,)
+
+    @property
+    def treefile(self):
+        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}.root".format(self.production, self.channel, self.subtractproduction))
+    def check(self, *args, **kwargs):
+        return super(SubtractDataTree, self).check(*args, **kwargs)
+    def passescut(self, t):
+        return super(SubtractDataTree, self).passescut(t) and self.subtractproduction.passescut(t)
+
+for channel in channels:
+    if "160725" in productions:
+        datatrees.append(SubtractDataTree("160725", "subtract160720", channel))

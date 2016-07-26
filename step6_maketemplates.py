@@ -24,7 +24,11 @@ def buildtemplates(*args):
         raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))
 
 def copydata(*args):
-    datatree = DataTree(*args)
+    if len(args) == 1 and isinstance(args[0], DataTree):
+        datatree = args[0]
+    else:
+        datatree = DataTree(*args)
+    print datatree
     f = ROOT.TFile(datatree.originaltreefile)
     t = f.candTree
     newfilename = datatree.treefile
@@ -32,8 +36,9 @@ def copydata(*args):
     newf = ROOT.TFile(newfilename, "recreate")
     newt = t.CloneTree(0)
     for entry in t:
-        if abs(t.Z1Flav * t.Z2Flav) == datatree.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblindscans:
+        if datatree.passescut(t):
             newt.Fill()
+    print newt.GetEntries()
     newf.Write()
     f.Close()
     newf.Close()

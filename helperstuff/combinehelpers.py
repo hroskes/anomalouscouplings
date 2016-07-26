@@ -85,6 +85,9 @@ def getdatatree(*args):
     return tfiles[DataTree(*args).treefile].candTree
     #it's empty if we don't actually unblind
 
+def getsubtractdatatree(*args):
+    return tfiles[SubtractDataTree(*args).treefile].candTree
+
 def discriminantnames(*args):
     theset = set()
     for production in config.productionsforcombine:
