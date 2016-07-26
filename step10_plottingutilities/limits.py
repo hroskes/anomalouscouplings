@@ -73,6 +73,9 @@ def printlimits(analysis, foldername, **kwargs):
 
         repmap = {}
 
+        print label
+        print
+
         repmap["min"] = minimum.x
         if len(results[1.0]) == 1:
             repmap["pluscl"] = results[1.0][0][1] - minimum.x
@@ -88,12 +91,16 @@ def printlimits(analysis, foldername, **kwargs):
                 else:
                     assert False
             else:
-                raise ValueError("Need something more complicated for 68% CL!")
+                print "Need something more complicated for 68% CL!"
+                print "ranges: ", " \cup ".join("[{:.2f},{:.2f}]".format(range_[0],range_[1]) for range_ in results[1])
+                for range_ in results[1.0]:
+                    if range_[0] < minimum.x < range_[1]:
+                        break
+                repmap["pluscl"] = range_[1] - minimum.x
+                repmap["minuscl"] = range_[0] - minimum.x
 
-        repmap["95%"] = " \cup ".join("[{:.2f},{:.2f}]".format(range[0],range[1]) for range in results[3.84])
+        repmap["95%"] = " \cup ".join("[{:.2f},{:.2f}]".format(range_[0],range_[1]) for range_ in results[3.84])
 
-        print label
-        print
         print printformat.printformat.format(**repmap)
         print
         print

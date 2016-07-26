@@ -254,6 +254,7 @@ class Production(MyEnum):
                  EnumItem("160624"),
                  EnumItem("160714"),
                  EnumItem("160720"),
+                 EnumItem("160725"),
                 )
     def CJLSTdir(self):
         if self == "160225":
@@ -264,6 +265,8 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160714/"
         if self == "160720":
             return "root://lxcms03//data3/Higgs/160720/"
+        if self == "160725":
+            return "root://lxcms03//data3/Higgs/160725/"
         assert False
     def CJLSTdir_anomalous(self):
         if self == "160225":
@@ -281,14 +284,14 @@ class Production(MyEnum):
     def useMELAv2(self):
         if self in ("160225", "160624"):
             return False
-        if self in ("160714", "160720"):
+        if self in ("160714", "160720", "160725"):
             return True
         assert False
     @property
     def release(self):
         if self == "160225":
             return self.Release("76X")
-        elif self in ("160624", "160714", "160720"):
+        elif self in ("160624", "160714", "160720", "160725"):
             return self.Release("80X")
         assert False
     @property
@@ -329,7 +332,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-productions = Production.items(lambda x: x in ("160225", "160720"))
+productions = Production.items(lambda x: x in ("160225", "160720", "160725"))
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):
