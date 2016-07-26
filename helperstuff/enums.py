@@ -309,8 +309,9 @@ class Production(MyEnum):
     def year(self):
         if self == "160225":
             return 2015
-        if self in ("160624", "160714", "160720"):
+        if self in ("160624", "160714", "160720", "160725"):
             return 2016
+        assert False
 
     #put this in here to avoid me getting really confused
     class Release(MyEnum):
