@@ -9,3 +9,6 @@
 	path = CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination
 	url = git@github.com:hroskes/HiggsAnalysis-HZZ4l_Combination
 	branch = master
+[submodule "helperstuff/Datacards13TeV_ICHEP2016"]
+	path = helperstuff/Datacards13TeV_ICHEP2016
+	url = ssh://git@gitlab.cern.ch:7999/HZZ4l/Datacards13TeV.git
