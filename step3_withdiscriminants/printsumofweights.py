@@ -1,11 +1,12 @@
 import collections
+from helperstuff import config
 from helperstuff.enums import hypotheses, flavors, Channel
 from helperstuff.samples import Sample
 from math import sqrt
 import os
 import ROOT
 
-samples = [Sample("ggH", "fa30.5")]
+samples = [Sample("ggH", "0+", "160725")]
 
 flavordict = {13**4: Channel("4mu"), 11**4: Channel("4e"), 11**2*13**2: Channel("2e2mu")}
 
@@ -17,8 +18,8 @@ for sample in samples:
   length = t.GetEntries()
   for i, event in enumerate(t, start=1):
     if config.m4lmin < t.ZZMass < config.m4lmax:
-      for reweightsample in sample.reweightingsamples():
-        sum[sample,reweightsample,flavordict[t.Z1Flav*t.Z2Flav]] += getattr(t, reweightsample.weightname())
+      for reweightsample in samples:#sample.reweightingsamples():
+        sum[sample,reweightsample,flavordict[t.Z1Flav*t.Z2Flav]] += getattr(t, reweightsample.weightname()) * sample.production.dataluminosity
     if i % 10000 == 0:
       print i, "/", length
 

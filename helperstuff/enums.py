@@ -254,7 +254,7 @@ class Production(MyEnum):
                  EnumItem("160624"),
                  EnumItem("160714"),
                  EnumItem("160720"),
-                 EnumItem("160725"),
+                 EnumItem("160725", "160726"),
                 )
     def CJLSTdir(self):
         if self == "160225":
@@ -266,7 +266,7 @@ class Production(MyEnum):
         if self == "160720":
             return "root://lxcms03//data3/Higgs/160720/"
         if self == "160725":
-            return "root://lxcms03//data3/Higgs/160725/"
+            return "root://lxcms03//data3/Higgs/160726/"
         assert False
     def CJLSTdir_anomalous(self):
         if self == "160225":
@@ -279,6 +279,8 @@ class Production(MyEnum):
     def CJLSTdir_data(self):
         if self == "160714":
             return "root://lxcms03//data3/Higgs/160716/"
+        if self == "160725":
+            return "root://lxcms03//data3/Higgs/160725/"
         return self.CJLSTdir()
     @property
     def useMELAv2(self):
@@ -299,6 +301,7 @@ class Production(MyEnum):
         if self == "160225": return 2.8
         if self == "160714": return 7.65
         if self == "160720": return 9.2
+        if self == "160725": return 12.9
         assert False
     def __int__(self):
         return int(str(self))
@@ -332,7 +335,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-productions = Production.items(lambda x: x in ("160225", "160720", "160725"))
+productions = Production.items(lambda x: x in ("160225", "160725"))
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):
@@ -687,11 +690,11 @@ class Template(MultiEnum):
                )
     def binning(self):
         if self.analysis == "fa2":
-            result = [26, 0, 1, 26, 0, 1, 26, 0, 1]
+            result = [50, 0, 1, 50, 0, 1, 50, 0, 1]
         elif self.analysis == "fa3":
-            result = [26, 0, 1, 26, -0.5, 0.5, 26, 0, 1]
+            result = [50, 0, 1, 50, -0.5, 0.5, 50, 0, 1]
         elif self.analysis == "fL1":
-            result = [26, 0, 1, 26, 0, 1, 26, 0, 1]
+            result = [50, 0, 1, 50, 0, 1, 50, 0, 1]
         else:
             assert False
         for i in 1, 2, 4, 5, 7, 8:

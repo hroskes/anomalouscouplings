@@ -148,7 +148,10 @@ def niceplots(productions, *args, **kwargs):
 if __name__ == "__main__":
     for analysis in analyses:
         for enrichstatus in enrichstatuses:
-            niceplots(["160225"], analysis, enrichstatus, extradir="2015")
-            niceplots(["160720"], analysis, enrichstatus, extradir="2016")
-            niceplots(["160720"], analysis, enrichstatus, extradir="")
+            p2015 = [p for p in config.productionsforcombine if p.year == 2015]
+            p2016 = [p for p in config.productionsforcombine if p.year == 2016]
+            assert len(p2015) == len(p2016) == 1
+            niceplots(p2015, analysis, enrichstatus, extradir="2015")
+            niceplots(p2016, analysis, enrichstatus, extradir="2016")
+            niceplots(p2016, analysis, enrichstatus, extradir="")
             niceplots(config.productionsforcombine, analysis, enrichstatus, extradir="2015+2016")
