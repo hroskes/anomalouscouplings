@@ -84,7 +84,7 @@ def runcombine(analysis, foldername, **kwargs):
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         for production in productions:
             production = Production(production)
-            if not all(os.path.exists("cards_{}/HCG/125/hzz4l_{}S_{}.input.root".format(foldername, channel, production.year)) for channel in channels):
+            if not all(os.path.exists("cards_{}/HCG/125/hzz4l_{}S_{}.input.root".format(foldername, channel, production.year)) for channel in usechannels):
                 makeworkspacesmap = repmap.copy()
                 makeworkspacesmap["production"] = str(production)
                 subprocess.check_call(replaceByMap(makeworkspacestemplate, makeworkspacesmap), shell=True)
@@ -108,8 +108,9 @@ def runcombine(analysis, foldername, **kwargs):
                     with open("hzz4l_{}S_{}.txt".format(channel, production.year), "w") as f:
                         f.write(contents)
                 else:
-                    os.remove("hzz4l_{}S_{}.txt".format(channel, production.year))
-                    os.remove("hzz4l_{}S_{}.input.root".format(channel, production.year))
+                    if os.path.exists("hzz4l_{}S_{}.txt".format(channel, production.year)):
+                        os.remove("hzz4l_{}S_{}.txt".format(channel, production.year))
+                        os.remove("hzz4l_{}S_{}.input.root".format(channel, production.year))
             if not os.path.exists(repmap["workspacefile"]):
                 for channel, production in product(usechannels, productions):
                     replacesystematics(channel, production)

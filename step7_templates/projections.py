@@ -213,5 +213,7 @@ if __name__ == "__main__":
       for analysis in analyses:
         for normalization in normalizations:
           for enrichstatus in enrichstatuses:
+#            if normalization != "rescalemixtures": continue   #uncomment this to get the niceplots fast
 #            if channel != "2e2mu" or analysis != "fa3" or normalization != "areanormalize": continue
+            print production, channel, analysis, normalization, enrichstatus
             projections(channel, analysis, normalization, production, enrichstatus)

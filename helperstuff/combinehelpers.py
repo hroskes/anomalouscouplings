@@ -26,7 +26,11 @@ class Luminosity(MultiEnum):
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production]
     def getrate(self):
-        if self.productionmode == "ZX" and self.production == "160720":
+#        if self.productionmode == "ZX" and self.production == "160725":
+#            if self.channel == "4e":    return ??? * float(self.luminosity)/12.9
+#            if self.channel == "4mu":   return ??? * float(self.luminosity)/12.9
+#            if self.channel == "2e2mu": return ??? * float(self.luminosity)/12.9
+        if self.productionmode == "ZX" and self.production in ("160720", "160725"):
             if self.channel == "4e":    return 1.36 * float(self.luminosity)/7.65
             if self.channel == "4mu":   return 1.64 * float(self.luminosity)/7.65
             if self.channel == "2e2mu": return 2.81 * float(self.luminosity)/7.65
@@ -34,6 +38,8 @@ class __Rate(MultiEnum):
             if self.channel == "4e":    return (0.311745 + 0.0106453) * float(self.luminosity)/2.8
             if self.channel == "4mu":   return 0.408547 * float(self.luminosity)/2.8
             if self.channel == "2e2mu": return (0.716686 + 0.0199815) * float(self.luminosity)/2.8
+        if self.productionmode == "ZX":
+            assert False
 
         if self.productionmode == "ggH":
             result = Template("fa3", self.productionmode, self.channel, "0+", self.production).gettemplate().Integral()*float(self.luminosity)
