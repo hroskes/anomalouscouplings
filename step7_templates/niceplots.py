@@ -92,7 +92,10 @@ def niceplots(productions, *args, **kwargs):
         data.SetMarkerSize(1.2)
 
         hstack = ROOT.THStack(discriminant, "")
-        l = ROOT.TLegend(0.23,0.57,0.61,0.90)
+        if discriminant == "Dbkg":
+            l = ROOT.TLegend(0.23,0.57,0.61,0.90)
+        else:
+            l = ROOT.TLegend(0.20,0.57,0.58,0.90)
         #l.SetBorderSize(0)
         #l.SetFillStyle(0)
         style.applylegendstyle(l)
@@ -110,12 +113,12 @@ def niceplots(productions, *args, **kwargs):
         l.AddEntry(data, "Observed", "ep")
         l.AddEntry(SM, "SM", "l")
         if discriminant == analysis.mixdiscriminant() and analysis == "fa3" or discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fL1":
-            l.AddEntry(mix, analysis.title+" = #plus0.5", "l")
+            l.AddEntry(mix, analysis.title+" = #plus 0.5", "l")
         elif discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fa2":
-            l.AddEntry(mixminus, analysis.title+" = #minus0.5", "l")
+            l.AddEntry(mixminus, analysis.title+" = #minus 0.5", "l")
         else:
             l.AddEntry(BSM, analysis.title+" = 1", "l")
-        l.AddEntry(ZZ, "ZZ", "f")
+        l.AddEntry(ZZ, "ZZ/Z#gamma*", "f")
         l.AddEntry(ZX, "Z+X", "f")
 
         ymax = style.ymax((hstack, "nostack"), (data, "P"))
@@ -126,6 +129,8 @@ def niceplots(productions, *args, **kwargs):
         data.Draw("P")
         l.Draw()
 
+        if discriminant == "D_CP_decay": hstack.GetXaxis().SetRangeUser(-.4, .4)
+
         style.applycanvasstyle(c)
         style.applyaxesstyle(hstack)
         style.cuttext(enrichstatus.cuttext())
@@ -133,7 +138,7 @@ def niceplots(productions, *args, **kwargs):
 
         hstack.GetXaxis().SetTitle(title)
         hstack.GetYaxis().SetTitle(
-                                   "Events / {:.3f}".format(
+                                   "Events / {:.2f}".format(
                                                             (hstack.GetXaxis().GetXmax() - hstack.GetXaxis().GetXmin()) / hstack.GetXaxis().GetNbins()
                                                            )
                                   )

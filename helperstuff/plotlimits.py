@@ -30,7 +30,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     uptocolor = 1
     for arg in args:
         if arg == "obs":
-            scans.append(Scan("obs", "Observed, {}=0 or #pi".format(analysis.phi), 1, 1))
+            scans.append(Scan("obs", "Observed, {} = 0 or #pi".format(analysis.phi), 1, 1))
             if productions is None:
                 raise ValueError("No productions provided!")
         else:
@@ -39,9 +39,9 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
             if arg == 0:
-                scans.append(Scan("exp_{}".format(arg), "Expected, {}=0 or #pi".format(analysis.phi), uptocolor, 2))
+                scans.append(Scan("exp_{}".format(arg), "Expected, {} = 0 or #pi".format(analysis.phi), uptocolor, 2))
             else:
-                scans.append(Scan("exp_{}".format(arg), "Expected, {}={:.2f}, {}=0 or #pi".format(analysis.title, arg, analysis.phi), uptocolor, 2))
+                scans.append(Scan("exp_{}".format(arg), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title, arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
     if productions is None:

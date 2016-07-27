@@ -75,9 +75,9 @@ class EnrichStatus(MyEnum):
                  EnumItem("impoverish"),
                 ]
     def cuttext(self):
-        if self == "enrich": return "D_{bkg}>0.5"
+        if self == "enrich": return "D_{bkg} > 0.5"
         if self == "noenrich": return ""
-        if self == "impoverish": return "D_{bkg}<0.5"
+        if self == "impoverish": return "D_{bkg} < 0.5"
         assert False
     def dirname(self):
         if self == "enrich": return "enrich"
