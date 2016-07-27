@@ -789,6 +789,8 @@ class Template(MultiEnum):
             return [0, 2]
         if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa2":
             return [2]
+        if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fL1":
+            return [0, 2]
         if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa3":
             return [1, 2]
         if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fL1":

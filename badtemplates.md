@@ -10,7 +10,7 @@
 ###bkg
 * (fa3 is ok)
 * (fa2 is ok)
-* https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/2e2mu_bkg_fL1Adap_160225/control_templateqqZZAdapSmooth_projAxis1_afterNormalization.pdf
+* (fL1 is ok)
 
 4e
 ---
