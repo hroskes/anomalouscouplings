@@ -805,7 +805,7 @@ class Template(MultiEnum):
             return [1, 2]
         if self.channel == "4e"    and self.productionmode == "qqZZ" and self.analysis == "fa2":
             if self.production == "160225":
-                return []
+                return [2]
             return [0, 2]
         if self.channel == "4e"    and self.productionmode == "qqZZ" and self.analysis == "fa3":
             return [1, 2]
