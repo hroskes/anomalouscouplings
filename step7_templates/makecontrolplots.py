@@ -40,5 +40,9 @@ if __name__ == "__main__":
         for channel in channels:
             for analysis in analyses:
                 for systematic in treesystematics:
+#                    if production != "160225" or channel != "2e2mu" or analysis != "fL1" or systematic != "": continue
+#                    continue
                     makecontrolplots(channel, "signal", systematic, analysis, production)
+#                continue
+#                if production != "160225" or channel != "2e2mu" or analysis != "fL1": continue
                 makecontrolplots(channel, "bkg", analysis, production)
