@@ -8,7 +8,7 @@
 * (fL1 is ok)
 
 ###bkg
-* https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/2e2mu_bkg_fa3Adap_160225/control_templateZXAdapSmoothMirror_projAxis1_afterMirror.pdf
+* (fa3 is ok)
 * (fa2 is ok)
 * https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/2e2mu_bkg_fL1Adap_160225/control_templateqqZZAdapSmooth_projAxis1_afterNormalization.pdf
 
