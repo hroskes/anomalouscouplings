@@ -8,6 +8,6 @@ if __name__ == "__main__":
     with cd(config.repositorydir):
         for txtfile in glob.iglob(os.path.join(config.plotsbasedir, "limits", "*", "*.txt")):
             with open(txtfile) as f:
-                contents = f.read().split()
+                contents = f.readline().split()
                 if contents[0] == "python" and contents[1] == "step9_runcombine.py":
                     subprocess.check_call(contents)

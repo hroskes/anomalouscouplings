@@ -14,6 +14,8 @@ if os.path.realpath(os.getcwd()) != os.path.realpath(helperstuff.config.reposito
 print """Yes, config is set up!
 """
 
+print "Initiating git submodules..."
+subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
 if set(os.listdir("CMSSW_7_6_5")) != set(["src", ".gitignore"]):
     print """CMSSW_7_6_5 area already set up."""
@@ -38,3 +40,7 @@ else:
         subprocess.check_call(["scram", "b"])
 
     print """CMSSW area is set up"""
+
+print "Compiling TemplateBuilder"
+
+subprocess.check_call("cd CMSSW_7_6_5 && eval $(scram ru -sh) && cd ../TemplateBuilder && make", shell=True)

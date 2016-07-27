@@ -155,7 +155,13 @@ def runcombine(analysis, foldername, **kwargs):
                 plotname = plotname.replace("."+ext, "")
             plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition)
             with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
-                f.write(" ".join(["python"]+sys.argv) + "\n")
+                f.write(" ".join(["python"]+sys.argv))
+                f.write("\n\n\n")
+                f.write("python limits.py ")
+                for arg in sys.argv[1:]:
+                    if "=" in arg and "plotname" not in arg: continue
+                    f.write(arg+" ")
+                f.write("\n")
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])
