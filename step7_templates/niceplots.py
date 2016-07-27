@@ -83,7 +83,7 @@ def niceplots(productions, *args, **kwargs):
         mixminus.SetLineWidth(2)
         mixminus.Add(ZZ)  #which already has ZX
 
-        data = style.asymmerrorsfromhistogram(data, showemptyerrors=True)
+        data = style.asymmerrorsfromhistogram(data, showemptyerrors=False)
         data.SetLineColor(1)
         data.SetMarkerColor(1)
         data.SetLineStyle(1)
