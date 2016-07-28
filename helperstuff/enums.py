@@ -762,7 +762,7 @@ class Template(MultiEnum):
                     return 60
             if self.channel == "4e":
                 if self.productionmode == "ZX":
-                    return 4
+                    return 10
                 if self.productionmode == "ggZZ":
                     return 100
                 if self.productionmode == "qqZZ":
@@ -812,7 +812,7 @@ class Template(MultiEnum):
         if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fL1":
             return [0, 2]
         if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fa3":
-            return [0, 1]
+            return [1]
         if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fa2":
             return []
         if self.channel == "4mu"   and self.productionmode == "qqZZ" and self.analysis in ["fa3", "fa2"]:
