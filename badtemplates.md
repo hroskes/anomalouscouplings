@@ -41,3 +41,4 @@
 ---
 ###bkg
 * https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/4e_bkg_fa2Adap_160725/control_templateqqZZAdapSmooth_projAxis0_afterFloor.pdf
+* https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/4e_bkg_fa3Adap_160725/control_templateZXAdapSmooth_projAxis0_afterReweight.pdf
