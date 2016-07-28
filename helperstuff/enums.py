@@ -342,7 +342,18 @@ blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):
-        enums = dct["enums"]
+        try:
+            enums = dct["enums"]
+        except KeyError:
+            for base in bases:
+                try:
+                    enums = base.enums
+                    break
+                except AttributeError:
+                    pass
+            else:
+                raise TypeError("MultiEnum class {} does not define enums!".format(clsname))
+            dct["enums"] = enums
         dct["needenums"] = needenums = enums[:]
         dct["subenums"] = subenums = OrderedDict()
         while True:
