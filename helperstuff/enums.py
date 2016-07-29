@@ -738,7 +738,7 @@ class Template(MultiEnum):
                 if self.productionmode == "ggZZ":
                     return 100
                 if self.productionmode == "qqZZ":
-                    return 70
+                    return 100
         if self.analysis == "fa2":
             if self.channel == "2e2mu":
                 if self.productionmode == "ZX":
