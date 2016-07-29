@@ -1,9 +1,11 @@
 import collections
-from . import config
-from .enums import EnumItem, Channel, DataTree, MultiEnum, MyEnum, Production, ProductionMode, Template
-from .filemanager import tfiles
-from .samples import Sample
+import config
+from enums import EnumItem, Channel, DataTree, MultiEnum, MyEnum, Production, ProductionMode, Template
+from filemanager import tfiles
+import os
 import ROOT
+from samples import Sample
+import yaml
 
 class LuminosityType(MyEnum):
     enumname = "luminositytype"
@@ -26,11 +28,12 @@ class Luminosity(MultiEnum):
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production]
     def getrate(self):
-#        if self.productionmode == "ZX" and self.production == "160725":
-#            if self.channel == "4e":    return ??? * float(self.luminosity)/12.9
-#            if self.channel == "4mu":   return ??? * float(self.luminosity)/12.9
-#            if self.channel == "2e2mu": return ??? * float(self.luminosity)/12.9
-        if self.productionmode == "ZX" and self.production in ("160720", "160725"):
+        return self.yamlrate()
+        if self.productionmode == "ZX" and self.production in ("160725", "160729"):
+            if self.channel == "4e":    return 2.39 * float(self.luminosity)/12.9
+            if self.channel == "4mu":   return 3.66 * float(self.luminosity)/12.9
+            if self.channel == "2e2mu": return 6.29 * float(self.luminosity)/12.9
+        if self.productionmode == "ZX" and self.production == "160720":
             if self.channel == "4e":    return 1.36 * float(self.luminosity)/7.65
             if self.channel == "4mu":   return 1.64 * float(self.luminosity)/7.65
             if self.channel == "2e2mu": return 2.81 * float(self.luminosity)/7.65
@@ -57,6 +60,39 @@ class __Rate(MultiEnum):
 
         result = Template("fa3", self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
         return result
+
+    def yamlrate(self):
+        if self.production.year == 2016:
+            filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_ICHEP2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
+            tags = ["UnTagged", "VBF1jTagged", "VBF2jTagged", "VHLeptTagged", "VHHadrTagged", "ttHTagged"]
+        elif self.production.year == 2015:
+            filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
+            tags = ["UnTagged", "VBFTagged"]
+        with open(filename) as f:
+            y = yaml.load(f)
+        with open(filename) as f:
+            for line in f:
+                if "fb-1" in line:
+                    lumi = float(line.split("=")[1].split("fb-1")[0])
+                    break
+            else:
+                raise IOError("No luminosity in {}".format(filename))
+        if self.productionmode == "ggH":
+            productionmodes = ["ggH", "qqH", "WH", "ZH", "ttH"]
+        elif self.productionmode == "ZX":
+            productionmodes = ["zjets"]
+        else:
+            productionmodes = [str(self.productionmode)]
+        rate = 0
+
+        for tag in tags:
+            for p in productionmodes:
+                try:
+                    rate += float(y[tag][p]) * float(self.luminosity) / lumi
+                except ValueError:
+                    rate += eval(y[tag][p].replace("@0", "125")) * float(self.luminosity) / lumi
+
+        return rate
 
     def __float__(self):
         return self.getrate()
