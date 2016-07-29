@@ -1,12 +1,14 @@
 from helperstuff import config
 from helperstuff.combinehelpers import getrates
-from helperstuff.enums import Analysis
+from helperstuff.enums import DataTree
+from helperstuff.filemanager import tfiles
 import os
 from projections import Projections
 import ROOT
 import sys
 
 if __name__ == "__main__":
+    totalexp = totalobs = 0
     for production in config.productionsforcombine:
         print production
         for flavor in "2e2mu", "4e", "4mu":
@@ -16,7 +18,14 @@ if __name__ == "__main__":
             print "{:.2f} {:.2f} {:.2f} {:.2f}".format(*(float(_) for _ in rates.split()[1:]))
             print "Total bkg: {:.2f}".format(sum(float(_) for _ in rates.split()[2:]))
             print "Total expected: {:.2f}".format(sum(float(_) for _ in rates.split()[1:]))
-            f = ROOT.TFile(os.path.join(Projections("fa3", flavor, "noenrich", production).saveasdir, Analysis("fa3").purediscriminant()+".root"))
-            print "Observed:", f.c1.GetListOfPrimitives()[1].GetHists()[-1].Integral()
+            totalexp += sum(float(_) for _ in rates.split()[1:])
+            print "Observed:", tfiles[DataTree(production, flavor).treefile].candTree.GetEntries()
+            totalobs += tfiles[DataTree(production, flavor).treefile].candTree.GetEntries()
             print
         print
+
+    print
+    print
+    print "Total:"
+    print "Expected:", totalexp
+    print "Observed:", totalobs
