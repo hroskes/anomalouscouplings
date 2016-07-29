@@ -21,13 +21,13 @@
 * <sub>https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/4e_bkg_fL1Adap_160225/control_templateZXAdapSmooth_projAxis2_afterNormalization.pdf</sub>
 
 ###signal
-* looks good
+* (looks good)
 
 4mu
 ----
 ###bkg
-* https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/4mu_bkg_fa2Adap_160225/control_templateqqZZAdapSmooth_projAxis1_afterNormalization.pdf
-* https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/4mu_bkg_fa3Adap_160225/control_templateqqZZAdapSmoothMirror_projAxis0_afterMirror.pdf
+* <sub>https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/4mu_bkg_fa2Adap_160225/control_templateqqZZAdapSmooth_projAxis1_afterNormalization.pdf</sub>
+* (fa3 looks good)
 * (fL1 looks good)
 
 ###signal
@@ -54,7 +54,7 @@
 * <sub>https://hroskes.web.cern.ch/hroskes/anomalouscouplings/templateprojections/controlplots/4e_bkg_fL1Adap_160725/</sub>
 
 ###signal
-* looks good
+* (looks good)
 
 4mu
 ----
