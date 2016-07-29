@@ -44,3 +44,10 @@ else:
 print "Compiling TemplateBuilder"
 
 subprocess.check_call("cd CMSSW_7_6_5 && eval $(scram ru -sh) && cd ../TemplateBuilder && make", shell=True)
+gitignore = """
+obj/*
+buildTemplate.exe
+.gitignore
+"""
+with open("TemplateBuilder/.gitignore", "w") as f:
+    f.write(gitignore)
