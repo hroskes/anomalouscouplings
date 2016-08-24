@@ -23,6 +23,7 @@ def adddiscriminants(*args):
 
     isdummy = False
     if not xrd.exists(filename):
+        print filename
         isdummy = True
         #give it a tree so that it can get the format, but not fill any entries
         filename = definitelyexists.CJLSTfile()

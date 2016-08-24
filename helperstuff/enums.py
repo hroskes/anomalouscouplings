@@ -255,6 +255,7 @@ class Production(MyEnum):
                  EnumItem("160714"),
                  EnumItem("160720"),
                  EnumItem("160725", "160726"),
+                 EnumItem("160729"),
                 )
     def CJLSTdir(self):
         if self == "160225":
@@ -265,7 +266,7 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160714/"
         if self == "160720":
             return "root://lxcms03//data3/Higgs/160720/"
-        if self == "160725":
+        if self == "160725" or self == "160729":
             return "root://lxcms03//data3/Higgs/160726/"
         assert False
     def CJLSTdir_anomalous(self):
@@ -281,19 +282,21 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160716/"
         if self == "160725":
             return "root://lxcms03//data3/Higgs/160725/"
+        if self == "160729":
+            return "root://lxcms03//data3/Higgs/160729_complete/"
         return self.CJLSTdir()
     @property
     def useMELAv2(self):
         if self in ("160225", "160624"):
             return False
-        if self in ("160714", "160720", "160725"):
+        if self in ("160714", "160720", "160725", "160729"):
             return True
         assert False
     @property
     def release(self):
         if self == "160225":
             return self.Release("76X")
-        elif self in ("160624", "160714", "160720", "160725"):
+        elif self in ("160624", "160714", "160720", "160725", "160729"):
             return self.Release("80X")
         assert False
     @property
@@ -301,7 +304,7 @@ class Production(MyEnum):
         if self == "160225": return 2.8
         if self == "160714": return 7.65
         if self == "160720": return 9.2
-        if self == "160725": return 12.9
+        if self in ("160725", "160729"): return 12.9
         assert False
     def __int__(self):
         return int(str(self))
@@ -309,7 +312,7 @@ class Production(MyEnum):
     def year(self):
         if self == "160225":
             return 2015
-        if self in ("160624", "160714", "160720", "160725"):
+        if self in ("160624", "160714", "160720", "160725", "160729"):
             return 2016
         assert False
 
@@ -336,7 +339,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-productions = Production.items(lambda x: x in ("160225", "160725"))
+productions = Production.items(lambda x: x in ("160225", "160729"))
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 
@@ -969,5 +972,5 @@ class SubtractDataTree(DataTree, MultiEnum):
         return super(SubtractDataTree, self).passescut(t) and self.subtractproduction.passescut(t)
 
 for channel in channels:
-    if "160725" in productions:
-        datatrees.append(SubtractDataTree("160725", "subtract160720", channel))
+    if "160729" in productions:
+        datatrees.append(SubtractDataTree("160729", "subtract160720", channel))
