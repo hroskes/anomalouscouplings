@@ -1,4 +1,4 @@
-import cConstants
+import CJLSTscripts
 from collections import Counter, Iterator
 import config
 import constants
@@ -114,10 +114,10 @@ class TreeWrapper(Iterator):
 
         self.ZZMass = t.ZZMass
 
-        #self.cconstantforDbkgkin = cConstants.getDbkgkinConstant(self.flavor, self.ZZMass)
+        #self.cconstantforDbkgkin = CJLSTscripts.getDbkgkinConstant(self.flavor, self.ZZMass)
         if self.useMELAv2:
-            self.cconstantforDbkg = cConstants.getDbkgConstant(self.flavor, self.ZZMass)
-            self.cconstantforD2jet = cConstants.getDVBF2jetsConstant(self.ZZMass)
+            self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.flavor, self.ZZMass)
+            self.cconstantforD2jet = CJLSTscripts.getDVBF2jetsConstant(self.ZZMass)
         else:
             self.cconstantforDbkg = 1
             self.cconstantforD2jet = 1

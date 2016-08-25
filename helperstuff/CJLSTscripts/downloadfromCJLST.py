@@ -34,13 +34,7 @@ def download(locationinZZAnalysis):
                 include = line.split("#include ")[1].strip()[1:-1]
                 if "ZZAnalysis" in include:
                     if "interface" in include:
-                        header = include.split("/")[-1].split(".h")[0]
-                        if header == filename.split(".")[0]:
-                            newinclude = header+".h"
-                        else:
-                            folder = os.path.join("..", header)
-                            if os.path.exists(folder):
-                                newinclude = os.path.join(folder, header+".h")
+                        newinclude = include.split("/")[-1]
                     try:
                         line = line.replace(include, newinclude).replace("<", '"').replace(">", '"')
                         del newinclude
