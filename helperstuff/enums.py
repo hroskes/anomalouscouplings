@@ -92,9 +92,15 @@ class Hypothesis(MyEnum):
                  EnumItem("a2", "0h+"),
                  EnumItem("0-", "PS", "pseudoscalar"),
                  EnumItem("L1", "Lambda1"),
-                 EnumItem("fa20.5"),
-                 EnumItem("fa30.5"),
-                 EnumItem("fL10.5", "flambda10.5"),
+                 EnumItem("fa20.5", "fa2dec0.5"),
+                 EnumItem("fa30.5", "fa3dec0.5"),
+                 EnumItem("fL10.5", "fL1dec0.5"),
+                 EnumItem("fa2prod0.5"),
+                 EnumItem("fa3prod0.5"),
+                 EnumItem("fL1prod0.5"),
+                 EnumItem("fa2proddec-0.5"),
+                 EnumItem("fa3proddec-0.5"),
+                 EnumItem("fL1proddec-0.5"),
                 )
 
 class ProductionMode(MyEnum):
@@ -257,6 +263,8 @@ class Production(MyEnum):
                  EnumItem("160725", "160726"),
                  EnumItem("160729"),
                 )
+    def __cmp__(self, other):
+        return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
         if self == "160225":
             return "root://lxcms03//data3/Higgs/160225/"
@@ -270,11 +278,9 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160726/"
         assert False
     def CJLSTdir_anomalous(self):
-        if self == "160225":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_7_6_3_patch2/src/ZZAnalysis/AnalysisStep/test/prod/AnomalousCouplingsReweighting/PT13TeV"
-        if self == "160714":
-            return "/afs/cern.ch/work/h/hroskes/public/CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/anomalous/PT13TeV"
-        if self == "160720":
+        if self < "160624":
+            return type(self)("160624").CJLSTdir_anomalous()
+        if "160624" < self <= "160720":
             return "root://lxcms03//data3/Higgs/160718/"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
@@ -285,13 +291,16 @@ class Production(MyEnum):
         if self == "160729":
             return "root://lxcms03//data3/Higgs/160729_complete/"
         return self.CJLSTdir()
+    def CJLSTdir_anomalous_VBF(self):
+        assert config.analysistype == "prod+dec"
+        if self <= "160729":
+            return "/afs/cern.ch/work/h/hroskes/public/CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/anomalous/PT13TeV"
+        return self.CJLSTdir()
     @property
     def useMELAv2(self):
         if self in ("160225", "160624"):
             return False
-        if self in ("160714", "160720", "160725", "160729"):
-            return True
-        assert False
+        return True
     @property
     def release(self):
         if self == "160225":
@@ -332,15 +341,27 @@ class BlindStatus(MyEnum):
                  EnumItem("blind"),
                 )
 
+class AnalysisType(MyEnum):
+    enumname = "analysistype"
+    enumitems = (
+                 EnumItem("ICHEP16"),
+                 EnumItem("prod+dec"),
+                )
+
 channels = Channel.items()
 systematics = Systematic.items()
 treesystematics = Systematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
+decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
+prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
+proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"))
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-productions = Production.items(lambda x: x in ("160225", "160729"))
+#productions = Production.items(lambda x: x in ("160225", "160729"))
+productions = Production.items(lambda x: x in ["160729"])
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
+config.analysistype = AnalysisType(config.analysistype)
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):

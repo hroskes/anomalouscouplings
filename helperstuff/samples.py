@@ -1,5 +1,5 @@
 import config
-from enums import BlindStatus, Flavor, hypotheses, Hypothesis, MultiEnum, ProductionMode, Production
+from enums import BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, Hypothesis, MultiEnum, ProductionMode, Production
 import os
 import ROOT
 
@@ -10,11 +10,13 @@ class ReweightingSample(MultiEnum):
     def check(self, *args):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
-        elif self.productionmode == "ggH":
+        elif self.productionmode == "ggH" or (self.productionmode == "VBF" and config.analysistype == "prod+dec"):
             if self.hypothesis is None:
-                raise ValueError("No hypothesis provided for ggH productionmode\n{}".format(args))
+                raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.productionmode == "ggH" and self.hypothesis not in decayonlyhypotheses:
+                raise ValueError("{} hypothesis can't be {}\n{}".format(self.productionmode, self.hypothesis, args))
             if self.flavor is not None:
-                raise ValueError("Flavor provided for ggH productionmode\n{}".format(args))
+                raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
         elif self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
@@ -40,7 +42,9 @@ class ReweightingSample(MultiEnum):
 
     def reweightingsamples(self):
         if self.productionmode == "ggH":
-            return [ReweightingSample("ggH", hypothesis) for hypothesis in hypotheses]
+            return [ReweightingSample("ggH", hypothesis) for hypothesis in decayonlyhypotheses]
+        elif self.productionmode == "VBF" and config.analysistype == "prod+dec":
+            return [ReweightingSample("VBF", hypothesis) for hypothesis in proddechypotheses]
         elif self.productionmode in ("ggZZ", "qqZZ", "ZX", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
             return [self]
         elif self.productionmode == "data":
@@ -72,18 +76,45 @@ class ReweightingSample(MultiEnum):
         if self.productionmode == "ggH":
             if self.hypothesis == "0+":
                 return "MC_weight_ggH_g1"
-            elif self.hypothesis == "0-":
-                return "MC_weight_ggH_g4"
-            elif self.hypothesis == "fa30.5":
-                return "MC_weight_ggH_g1g4"
             elif self.hypothesis == "a2":
                 return "MC_weight_ggH_g2"
-            elif self.hypothesis == "fa20.5":
-                return "MC_weight_ggH_g1g2"
+            elif self.hypothesis == "0-":
+                return "MC_weight_ggH_g4"
             elif self.hypothesis == "L1":
                 return "MC_weight_ggH_g1prime2"
+            elif self.hypothesis == "fa20.5":
+                return "MC_weight_ggH_g1g2"
+            elif self.hypothesis == "fa30.5":
+                return "MC_weight_ggH_g1g4"
             elif self.hypothesis == "fL10.5":
                 return "MC_weight_ggH_g1g1prime2"
+        elif self.productionmode == "VBF" and config.analysistype == "prod+dec":
+            if self.hypothesis == "0+":
+                return "MC_weight_VBF_g1"
+            elif self.hypothesis == "a2":
+                return "MC_weight_VBF_g2"
+            elif self.hypothesis == "0-":
+                return "MC_weight_VBF_g4"
+            elif self.hypothesis == "L1":
+                return "MC_weight_VBF_g1prime2"
+            elif self.hypothesis == "fa2dec0.5":
+                return "MC_weight_VBF_g1g2_dec"
+            elif self.hypothesis == "fa3dec0.5":
+                return "MC_weight_VBF_g1g4_dec"
+            elif self.hypothesis == "fL1dec0.5":
+                return "MC_weight_VBF_g1g1prime2_dec"
+            elif self.hypothesis == "fa2prod0.5":
+                return "MC_weight_VBF_g1g2_prod"
+            elif self.hypothesis == "fa3prod0.5":
+                return "MC_weight_VBF_g1g4_prod"
+            elif self.hypothesis == "fL1prod0.5":
+                return "MC_weight_VBF_g1g1prime2_prod"
+            elif self.hypothesis == "fa2proddec-0.5":
+                return "MC_weight_VBF_g1g2_proddec_pi"
+            elif self.hypothesis == "fa3proddec-0.5":
+                return "MC_weight_VBF_g1g4_proddec_pi"
+            elif self.hypothesis == "fL1proddec-0.5":
+                return "MC_weight_VBF_g1g1prime2_proddec_pi"
         elif self.productionmode == "VBF":
             return "MC_weight_VBF"
         elif self.productionmode == "ZH":
@@ -128,10 +159,12 @@ class ReweightingSample(MultiEnum):
     def onlyweights(self):
         """True if this sample is not needed for making templates,
            and only the weight and ZZMass should be recorded in the tree"""
-        if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
-            return True
         if self.productionmode in ("ggH", "ggZZ", "qqZZ", "ZX", "data"):
             return False
+        if self.productionmode == "VBF" and config.analysistype == "prod+dec":
+            return False
+        if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
+            return True
         raise self.ValueError("onlyweights")
 
     def weightingredients(self):
@@ -152,25 +185,21 @@ class Sample(ReweightingSample):
             raise ValueError("No blindstatus provided for data sample!\n{}".format(args))
         if self.blindstatus is not None and self.productionmode != "data":
             raise ValueError("blindstatus provided for MC sample!\n{}".format(args))
+        if self.productionmode == "VBF" and self.hypothesis not in prodonlyhypotheses:
+            raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
         if self.productionmode == "ggH":
             return self.production.CJLSTdir_anomalous()
+        if self.productionmode == "VBF" and config.analysistype == "prod+dec":
+            return self.production.CJLSTdir_anomalous_VBF()
         if self.productionmode in ("data", "ZX"):
             return self.production.CJLSTdir_data()
         return self.production.CJLSTdir()
 
     def CJLSTdirname(self):
-        if self.productionmode == "ggH" and self.production == "160225":
-            if self.hypothesis == "0+": return "0PM_v2"
-            if self.hypothesis == "a2": return "0PH_v2"
-            if self.hypothesis == "0-": return "0M_v1"
-            if self.hypothesis == "L1": return "0L1_v2"
-            if self.hypothesis == "fa20.5": return "0PHf05ph0_v2"
-            if self.hypothesis == "fa30.5": return "0Mf05ph0_v2"
-            if self.hypothesis == "fL10.5": return "0L1f05ph0_v2"
-        if self.productionmode == "ggH" and self.production == "160624":
+        if self.productionmode == "ggH" and self.production <= "160624":
             if self.hypothesis == "0+": return "0PM"
             if self.hypothesis == "a2": return "0PH"
             if self.hypothesis == "0-": return "0M"
@@ -178,15 +207,17 @@ class Sample(ReweightingSample):
             if self.hypothesis == "fa20.5": return "0PHf05ph0"
             if self.hypothesis == "fa30.5": return "0Mf05ph0"
             if self.hypothesis == "fL10.5": return "0L1f05ph0"
-        if self.productionmode == "ggH" and self.production in ("160714", "160720", "160725", "160729"):
-            if self.hypothesis == "0+": return "ggH0PM_M125"
-            if self.hypothesis == "a2": return "ggH0PH_M125"
-            if self.hypothesis == "0-": return "ggH0M_M125"
-            if self.hypothesis == "L1": return "ggH0L1_M125"
-            if self.hypothesis == "fa20.5": return "ggH0PHf05ph0_M125"
-            if self.hypothesis == "fa30.5": return "ggH0Mf05ph0_M125"
-            if self.hypothesis == "fL10.5": return "ggH0L1f05ph0_M125"
-        if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
+        if ((self.productionmode == "ggH" or self.productionmode == "VBF" and config.analysistype == "prod+dec") 
+             and self.production in ("160714", "160720", "160725", "160729")):
+            s = {"ggH": "ggH", "VBF": "VBFH"}[str(self.productionmode)]
+            if self.hypothesis == "0+": return "{}0PM_M125".format(s)
+            if self.hypothesis == "a2": return "{}0PH_M125".format(s)
+            if self.hypothesis == "0-": return "{}0M_M125".format(s)
+            if self.hypothesis == "L1": return "{}0L1_M125".format(s)
+            if self.hypothesis in ("fa20.5", "fa2prod0.5"): return "{}0PHf05ph0_M125".format(s)
+            if self.hypothesis in ("fa30.5", "fa3prod0.5"): return "{}0Mf05ph0_M125".format(s)
+            if self.hypothesis in ("fL10.5", "fL1prod0.5"): return "{}0L1f05ph0_M125".format(s)
+        elif self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
             name = str(self.productionmode)
             if self.productionmode == "VBF":
                 name += "H"

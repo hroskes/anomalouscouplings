@@ -208,8 +208,12 @@ class TreeWrapper(Iterator):
 #Reweighting weights#
 #####################
 
+    def MC_weight_plain(self):
+        return self.MC_weight * self.xsec / self.nevents
+    MC_weight_ZH = MC_weight_WH = MC_weight_ttH = MC_weight_plain
+
     def MC_weight_ggH(self, index):
-        return self.MC_weight * self.reweightingweights[index] * constants.SMXS2L2l / self.nevents2L2l[index]
+        return self.MC_weight * self.reweightingweights[index] * constants.SMXSggH2L2l / self.nevents2L2l[index]
     def MC_weight_ggH_g1(self):
         return self.MC_weight_ggH(0)
     def MC_weight_ggH_g2(self):
@@ -224,6 +228,38 @@ class TreeWrapper(Iterator):
         return self.MC_weight_ggH(5)
     def MC_weight_ggH_g1g1prime2(self):
         return self.MC_weight_ggH(6)
+
+    if config.analysistype == "prod+dec":
+        def MC_weight_VBF(self, index):
+            return self.MC_weight * self.reweightingweights[index] * constants.SMXSVBF2L2l / self.nevents2L2l[index]
+        def MC_weight_VBF_g1(self):
+            return self.MC_weight_VBF(0)
+        def MC_weight_VBF_g2(self):
+            return self.MC_weight_VBF(1)
+        def MC_weight_VBF_g4(self):
+            return self.MC_weight_VBF(2)
+        def MC_weight_VBF_g1prime2(self):
+            return self.MC_weight_VBF(3)
+        def MC_weight_VBF_g1g2_dec(self):
+            return self.MC_weight_VBF(4)
+        def MC_weight_VBF_g1g4_dec(self):
+            return self.MC_weight_VBF(5)
+        def MC_weight_VBF_g1g1prime2_dec(self):
+            return self.MC_weight_VBF(6)
+        def MC_weight_VBF_g1g2_prod(self):
+            return self.MC_weight_VBF(7)
+        def MC_weight_VBF_g1g4_prod(self):
+            return self.MC_weight_VBF(8)
+        def MC_weight_VBF_g1g1prime2_prod(self):
+            return self.MC_weight_VBF(9)
+        def MC_weight_VBF_g1g2_proddec_pi(self):
+            return self.MC_weight_VBF(10)
+        def MC_weight_VBF_g1g4_proddec_pi(self):
+            return self.MC_weight_VBF(11)
+        def MC_weight_VBF_g1g1prime2_proddec_pi(self):
+            return self.MC_weight_VBF(12)
+    else:
+        MC_weight_VBF = MC_weight_plain
 
     def MC_weight_ggZZ(self):
         if self.useMELAv2:
@@ -240,10 +276,6 @@ class TreeWrapper(Iterator):
     def MC_weight_ZX(self):
         self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
         return ZX.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ZX.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
-
-    def MC_weight_plain(self):
-        return self.MC_weight * self.xsec / self.nevents
-    MC_weight_VBF = MC_weight_ZH = MC_weight_WH = MC_weight_ttH = MC_weight_plain
 
     def getweightfunction(self, sample):
         return getattr(self, sample.weightname())
@@ -319,6 +351,24 @@ class TreeWrapper(Iterator):
             ReweightingSample("qqZZ"),
             ReweightingSample("ZX"),
         ]
+        if config.analysistype == "prod+dec":
+            allsamples += [
+                #0+ is already there
+                ReweightingSample("VBF", "a2"),
+                ReweightingSample("VBF", "0-"),
+                ReweightingSample("VBF", "L1"),
+                ReweightingSample("VBF", "fa2dec0.5"),
+                ReweightingSample("VBF", "fa3dec0.5"),
+                ReweightingSample("VBF", "fL1dec0.5"),
+                ReweightingSample("VBF", "fa2prod0.5"),
+                ReweightingSample("VBF", "fa3prod0.5"),
+                ReweightingSample("VBF", "fL1prod0.5"),
+                ReweightingSample("VBF", "fa2proddec-0.5"),
+                ReweightingSample("VBF", "fa3proddec-0.5"),
+                ReweightingSample("VBF", "fL1proddec-0.5"),
+            ]
+            self.exceptions.append("MC_weight_VBF")
+
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
         allreweightingweightnames = [sample.weightname() for sample in allsamples]
         for name in reweightingweightnames:

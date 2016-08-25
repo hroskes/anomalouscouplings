@@ -1,6 +1,7 @@
 from array import array
+from helperstuff import config
 from helperstuff import xrd
-from helperstuff.enums import flavors, hypotheses, productions
+from helperstuff.enums import flavors, decayonlyhypotheses, prodonlyhypotheses, productions
 from helperstuff.samples import Sample
 from helperstuff.treewrapper import TreeWrapper
 import os
@@ -62,13 +63,17 @@ def adddiscriminants(*args):
 
 if __name__ == '__main__':
     for production in productions:
-        for hypothesis in hypotheses:
+        for hypothesis in decayonlyhypotheses:
             adddiscriminants("ggH", hypothesis, production)
+        if config.analysistype == "prod+dec":
+            for hypothesis in prodonlyhypotheses:
+                adddiscriminants("VBF", hypothesis, production)
         for flavor in flavors:
             adddiscriminants("ggZZ", flavor, production)
         adddiscriminants("qqZZ", production)
         adddiscriminants("ZX", production)
-        adddiscriminants("VBF", "0+", production)
+        if config.analysistype == "ICHEP16":
+            adddiscriminants("VBF", "0+", production)
         adddiscriminants("ZH", "0+", production)
         adddiscriminants("WplusH", "0+", production)
         adddiscriminants("WminusH", "0+", production)
