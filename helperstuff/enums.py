@@ -280,7 +280,9 @@ class Production(MyEnum):
     def CJLSTdir_anomalous(self):
         if self < "160624":
             return type(self)("160624").CJLSTdir_anomalous()
-        if "160624" < self <= "160720":
+        if self == "160714":
+            return "/afs/cern.ch/work/h/hroskes/public/CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/anomalous/PT13TeV"
+        if self == "160720":
             return "root://lxcms03//data3/Higgs/160718/"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
@@ -294,7 +296,7 @@ class Production(MyEnum):
     def CJLSTdir_anomalous_VBF(self):
         assert config.analysistype == "prod+dec"
         if self <= "160729":
-            return "/afs/cern.ch/work/h/hroskes/public/CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/anomalous/PT13TeV"
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous/PT13TeV"
         return self.CJLSTdir()
     @property
     def useMELAv2(self):

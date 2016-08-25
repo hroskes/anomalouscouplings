@@ -20,7 +20,11 @@ SMXSggH = (44.14       #'YR4 SM 13TeV'!B24   (ggH cross section, m=125)
              *1000)    #                     (pb to fb)
 SMBR2L2l = (5.897E-05  #'YR4 SM BR'!CO25     (2e2mu BR, m=125)
              *3)       #                     (include 2e2tau, 2mu2tau)
+SMXSVBF = (3.782E+00   #'YR4 SM 13TeV'!B24   (VBF cross section, m=125)
+             *1000)    #                     (pb to fb)
 SMXSggH2L2l = SMXSggH * SMBR2L2l
+SMXSVBF2L2l = SMXSVBF * SMBR2L2l
+
 
 JHUXS2L2la1   = 7.1517173;      JHUXS2L2la1err   = 0.23044650E-03
 JHUXS2L2la2   = 2.5849908;      JHUXS2L2la2err   = 0.77294379E-04

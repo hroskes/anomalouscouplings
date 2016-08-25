@@ -85,6 +85,7 @@ class TreeWrapper(Iterator):
                 raise StopIteration
             if i % 10000 == 0 or i == self.length:
                 print i, "/", self.length
+                raise StopIteration
 
             if self.isdata:
                 self.MC_weight = 1
@@ -96,7 +97,7 @@ class TreeWrapper(Iterator):
                     self.MC_weight = 0
             else:
                 self.MC_weight = t.overallEventWeight
-            if self.productionmode == "ggH":
+            if self.productionmode == "ggH" or self.productionmode == "VBF" and config.analysistype == "prod+dec":
                 self.reweightingweights = t.reweightingweights
             isSelected = bool(self.MC_weight)
 

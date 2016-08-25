@@ -9,6 +9,7 @@ import ROOT
 import sys
 
 definitelyexists = Sample("ggH", "0+", "160225")
+print definitelyexists.CJLSTfile()
 assert xrd.exists(definitelyexists.CJLSTfile())
 
 def adddiscriminants(*args):
