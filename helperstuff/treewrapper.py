@@ -12,7 +12,7 @@ sys.setrecursionlimit(10000)
 
 class TreeWrapper(Iterator):
 
-    def __init__(self, tree, treesample, Counters, Counters_reweighted, minevent=0, maxevent=None, isdummy=False):
+    def __init__(self, tree, treesample, Counters, Counters_reweighted, couplings, minevent=0, maxevent=None, isdummy=False):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
@@ -32,9 +32,6 @@ class TreeWrapper(Iterator):
         else:
             self.unblind = True
 
-        self.baseweight = None
-        if not self.isdata:
-            self.baseweight = self.getbaseweightfunction()
         self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
 
         self.nevents = self.nevents2L2l = None
@@ -68,7 +65,7 @@ class TreeWrapper(Iterator):
             self.xsec = tree.xsec * 1000 #pb to fb
 
         self.cconstantforDbkg = self.cconstantforD2jet = None
-        self.checkfunctions()
+        self.checkfunctions(couplings)
 
     def __iter__(self):
         self.__i = 0                               #at the beginning of next self.__i and self.__treeentry are
@@ -85,7 +82,7 @@ class TreeWrapper(Iterator):
                 raise StopIteration
             if i % 10000 == 0 or i == self.length:
                 print i, "/", self.length
-                raise StopIteration
+                #raise StopIteration
 
             if self.isdata:
                 self.MC_weight = 1
@@ -282,8 +279,8 @@ class TreeWrapper(Iterator):
         return getattr(self, sample.weightname())
         raise RuntimeError("{} does not work!".format(sample))
 
-    def getbaseweightfunction(self):
-        return self.getweightfunction(self.treesample)
+    def getmainweightfunction(self):
+        return getattr(self, "MC_weight_{}".format(self.productionmode))
 
     def initlists(self):
         self.toaddtotree = [
@@ -303,13 +300,12 @@ class TreeWrapper(Iterator):
         ]
 
         self.exceptions = [
-            "baseweight",
             "cconstantforDbkg",
             "cconstantforD2jet",
             "checkfunctions",
             "exceptions",
-            "getbaseweightfunction",
             "getweightfunction",
+            "getmainweightfunction",
             "hypothesis",
             "initlists",
             "isbkg",
@@ -396,7 +392,7 @@ class TreeWrapper(Iterator):
         for variable in self.treesample.weightingredients():
             self.tree.SetBranchStatus(variable, 1)
 
-    def checkfunctions(self):
+    def checkfunctions(self, couplings=None):
 
         #some cross checking in case of stupid mistakes
         #if a function is added in the class but not added to toaddtotree
@@ -420,6 +416,30 @@ class TreeWrapper(Iterator):
         if multipletimes: error += "the following items appear multiple times in toaddtotree or exceptions! " + ", ".join(multipletimes) + "\n"
         if error:
             raise SyntaxError(error)
+
+        #cross checking that the order of weights is defined right
+        if self.treesample.productionmode == "ggH" or (config.analysistype == "prod+dec" and self.treesample.productionmode == "VBF"):
+            if couplings is None:
+                raise SyntaxError("No couplings tree for {}".format(self.treesample))
+
+            for entry in self:
+                if self.getmainweightfunction()(0) != 0:
+                    break
+            else:
+                raise SyntaxError("All weights are 0?!")
+
+            if len(self.treesample.reweightingsamples()) != len(self.weightfunctions):
+                raise SyntaxError("Something is very very wrong.  {} {}".format(len(self.treesample.reweightingsamples), len(self.weightfunctions)))
+
+            couplings.GetEntry(0)
+            for i, (sample, function) in enumerate(zip(self.treesample.reweightingsamples(), self.weightfunctions)):
+                if self.getweightfunction(sample)() != self.getmainweightfunction()(i):
+                    raise SyntaxError("{}() == {}, but {}({}) == {}!\nCheck the order of reweightingsamples or the weight functions!".format(self.getweightfunction(sample).__name__, self.getweightfunction(sample)(), self.getmainweightfunction().__name__, i, self.getmainweightfunction()(i)))
+                print couplings.ghz1Re[i], couplings.ghz2Re[i], couplings.ghz4Re[i], couplings.ghz1_prime2Re[i], sample.g1, sample.g2, sample.g4, sample.g1prime2
+                if sample.productionmode != "ggH" or self.treesample.production > "160729":
+                    if not (couplings.spin[i] == 0 and couplings.ghz1Re[i] == sample.g1 and couplings.ghz2Re[i] == sample.g2 and couplings.ghz4Re[i] == sample.g4 and couplings.ghz1_prime2Re[i] == sample.g1prime2):
+                        raise SyntaxError("Order of reweightingsamples or the weight functions seems wrong!  Check entry {} in couplings with respect to {}.".format(i, sample))
+
 
     passesblindcut = config.blindcut
 

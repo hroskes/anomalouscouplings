@@ -33,15 +33,18 @@ def adddiscriminants(*args):
     f = ROOT.TFile.Open(filename)
     Counters = f.Get("{}/Counters".format(sample.TDirectoryname()))
     Counters_reweighted = f.Get("{}/Counters_reweighted".format(sample.TDirectoryname()))
-    if not Counters_reweighted:
-        Counters_reweighted = None
+    couplings = f.Get("{}/couplings".format(sample.TDirectoryname()))
     if not Counters:
         raise ValueError("No Counters in file "+filename)
+    if not Counters_reweighted:
+        Counters_reweighted = None
+    if not couplings:
+        couplings = None
 
     t = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
     t.Add(filename)
 
-    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted, isdummy=isdummy)
+    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted, couplings=couplings, isdummy=isdummy)
 
     if os.path.exists(newfilename):
         return
