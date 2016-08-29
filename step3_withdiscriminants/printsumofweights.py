@@ -1,12 +1,12 @@
 import collections
 from helperstuff import config
-from helperstuff.enums import hypotheses, flavors, Channel, Production
+from helperstuff.enums import prodonlyhypotheses, flavors, Channel, Production
 from helperstuff.samples import ReweightingSample, Sample
 from math import sqrt
 import os
 import ROOT
 
-samples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "0-"), ReweightingSample("VBF", "fa3prod0.5")]
+samples = [ReweightingSample("VBF", h) for h in prodonlyhypotheses]
 production = Production("160729")
 
 flavordict = {13**4: Channel("4mu"), 11**4: Channel("4e"), 11**2*13**2: Channel("2e2mu")}
@@ -22,6 +22,9 @@ class OrderedCounter(collections.Counter, collections.OrderedDict):
          return self.__class__, (OrderedDict(self),)
 
 sum = OrderedCounter()
+for reweightsample in samples:
+  for sample in samples:
+    sum[sample,reweightsample] = 0  #to lock in the order
 
 for sample in samples:
   f = ROOT.TFile(Sample(sample, production).withdiscriminantsfile())
@@ -36,4 +39,4 @@ for sample in samples:
       print i, "/", length
 
 for (k1, k2), v in sum.iteritems():
-  print k1, "-->", k2, v
+  print "{:<20} --> {:<20} {}".format(k1, k2, v)

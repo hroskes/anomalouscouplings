@@ -15,7 +15,7 @@ for color, hypothesis in enumerate(prodonlyhypotheses, start=1):
     t = ROOT.TChain("candTree", "candTree")
     t.Add(Sample("VBF", hypothesis, "160729").withdiscriminantsfile())
     hname = "h{}".format(hypothesis)
-    t.Draw("D_CP_decay>>{}(100,-.5,.5)".format(hname), "MC_weight_VBF_g1", "hist")
+    t.Draw("D_0minus_decay>>{}(100,-.5,.5)".format(hname), "MC_weight_VBF_g1", "hist")
     h = getattr(ROOT, hname)
     hstack.Add(h)
     cache.append(h)

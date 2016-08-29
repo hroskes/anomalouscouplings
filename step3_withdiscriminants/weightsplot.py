@@ -1,13 +1,14 @@
 from helperstuff import config
-from helperstuff.enums import hypotheses
-from helperstuff.samples import Sample
+from helperstuff.enums import proddechypotheses, prodonlyhypotheses
+from helperstuff.samples import ReweightingSample, Sample
 import os
 import ROOT
 import helperstuff.style
 ROOT.gStyle.SetCanvasDefW(678)
 ROOT.gStyle.SetPadRightMargin(0.115)
 
-samples = [Sample("ggH", hypothesis) for hypothesis in hypotheses]
+fromsamples = [Sample("VBF", hypothesis, "160729") for hypothesis in prodonlyhypotheses]
+tosamples = [ReweightingSample("VBF", hypothesis) for hypothesis in proddechypotheses]
 cache = []
 """
 upperlimit = {
@@ -21,7 +22,7 @@ upperlimit = {
              }
 """
 
-for i, tosample in enumerate(samples):
+for i, tosample in enumerate(tosamples):
     dirname = os.path.join(config.plotsbasedir, "weightplots/{}".format(str(tosample).replace(" ", "")))
     try: os.makedirs(dirname)
     except: pass
@@ -31,12 +32,13 @@ for i, tosample in enumerate(samples):
     legend = ROOT.TLegend(.6, .6, .9, .9)
     legend.SetFillStyle(0)
     legend.SetBorderSize(0)
-    for fromsample in samples:
+    for fromsample in fromsamples:
         t = ROOT.TChain("candTree")
         t.Add(fromsample.withdiscriminantsfile())
 
         c1 = ROOT.TCanvas()
         c1.SetLogy()
+        c1.SetLogx(False)
         hname = (str(fromsample)+str(tosample)).replace(" ", "")
 
         weightname = "reweightingweights[{}]".format(i)
@@ -47,12 +49,15 @@ for i, tosample in enumerate(samples):
         h = getattr(ROOT, hname)
         #if fromsample.hypothesis == "L1": continue
         hstack.Add(h)
-        h.SetLineColor(fromsample.color())
+        #h.SetLineColor(fromsample.color())
         h.SetDirectory(0)
         #cache.append(h)
         legend.AddEntry(h, str(fromsample.hypothesis), "l")
         for ext in "png", "eps", "root", "pdf":
             c1.SaveAs("{}/{}.{}".format(dirname, fromsample.hypothesis, ext))
+        c1.SetLogx(True)
+        for ext in "png", "eps", "root", "pdf":
+            c1.SaveAs("{}/{}_log.{}".format(dirname, fromsample.hypothesis, ext))
     """
     print list(hstack.GetHists())
     print [h.Scale(1/h.Integral()) for h in hstack.GetHists()]
