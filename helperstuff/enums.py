@@ -296,7 +296,7 @@ class Production(MyEnum):
     def CJLSTdir_anomalous_VBF(self):
         assert config.analysistype == "prod+dec"
         if self <= "160729":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous/PT13TeV"
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_cutoffs/PT13TeV"
         return self.CJLSTdir()
     @property
     def useMELAv2(self):
@@ -693,6 +693,72 @@ class Template(MultiEnum):
                             Sample(self.production, "ggH", "fa30.5"),
                             Sample(self.production, "ggH", "fL10.5"),
                            ]
+        if self.productionmode == "VBF" and config.analysistype == "prod+decay":
+            if self.hypothesis == "0+":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0+", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
+                       ]
+            if self.hypothesis == "a2":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #0- and L1 are borderline
+                       ]
+            if self.hypothesis == "0-":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
+                       ]
+            if self.hypothesis == "L1":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("L1", "fL1prod0.5")   #????? what happened?
+                       ]
+            if self.hypothesis == "fa2dec0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #0+, 0-, and L1 are borderline
+                       ]
+            if self.hypothesis == "fa3dec0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #what happened to 0+?
+                       ]
+            if self.hypothesis == "fL1dec0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("fL1prod0.5",)
+                       ]
+            if self.hypothesis == "fa2prod0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
+                       ]
+            if self.hypothesis == "fa3prod0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")  #0+ and a2 are borderline
+                       ]
+            if self.hypothesis == "fL1prod0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #????
+                       ]
+            if self.hypothesis == "fa2proddec-0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
+                       ]
+            if self.hypothesis == "fa3proddec-0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
+                       ]
+            if self.hypothesis == "fL1proddec-0.5":
+                return [
+                        Sample(self.production, "VBF", hypothesis)
+                            for hypothesis in ("a2", "fa3prod0.5", "fL1prod0.5") #????
+                       ]
         if self.productionmode in ("qqZZ", "ZX"):
             result = [Sample(self.production, self.productionmode)]
         if self.productionmode == "ggZZ":
