@@ -296,7 +296,7 @@ class Production(MyEnum):
     def CJLSTdir_anomalous_VBF(self):
         assert config.analysistype == "prod+dec"
         if self <= "160729":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_cutoffs/PT13TeV"
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_prodMEs/PT13TeV"
         return self.CJLSTdir()
     @property
     def useMELAv2(self):

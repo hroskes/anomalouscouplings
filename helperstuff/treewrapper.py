@@ -135,16 +135,28 @@ class TreeWrapper(Iterator):
 
         #express in terms of |M|^2, this will make life easier
         if self.useMELAv2:
-            self.M2g1_decay   = self.p0plus_VAJHU
-            self.M2g4_decay   = self.p0minus_VAJHU
-            self.M2g1g4_decay = self.pg1g4_VAJHU
-            self.M2g2_decay   = self.p0hplus_VAJHU
-            self.M2g1g2_decay = self.pg1g2_VAJHU
+            self.M2g1_decay         = self.p0plus_VAJHU
+            self.M2g4_decay         = self.p0minus_VAJHU
+            self.M2g1g4_decay       = self.pg1g4_VAJHU
+            self.M2g2_decay         = self.p0hplus_VAJHU
+            self.M2g1g2_decay       = self.pg1g2_VAJHU
             self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU
             self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU
 
-            self.M2g1_VBF = t.pvbf_VAJHU_highestPTJets
+            self.M2g1_VBF   = t.pvbf_VAJHU_highestPTJets
+
+            if config.analysistype == "prod+dec" and self.productionmode == "VBF":
+                self.M2g4_VBF         = t.pvbf_0minus_VAJHU_highestPTJets
+                self.M2g1g4_VBF       = t.pvbf_g1g4_VAJHU_highestPTJets
+                self.M2g2_VBF         = t.pvbf_0hplus_VAJHU_highestPTJets
+                self.M2g1g2_VBF       = t.pvbf_g1g2_VAJHU_highestPTJets
+                self.M2g1prime2_VBF   = t.pvbf_0_g1prime2_VAJHU_highestPTJets
+                self.M2g1g1prime2_VBF = t.pvbf_g1g1prime2_VAJHU_highestPTJets
+
             self.M2g2_HJJ = t.phjj_VAJHU_highestPTJets
+
+            #if config.analysistype == "prod+dec" and self.productionmode == "VBF":
+            #    self.M2g4_HJJ = t.phjj_0minus_VAJHU_highestPTJets
 
         else:
             self.M2g1_decay   = self.p0plus_VAJHU
@@ -161,7 +173,7 @@ class TreeWrapper(Iterator):
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
 
-        self.notdijet = self.M2g1_VBF == 0 or self.M2g2_HJJ == 0
+        self.notdijet = self.M2g1_VBF <= 0 or self.M2g2_HJJ <= 0
         return self
 
 ##########################
@@ -201,6 +213,297 @@ class TreeWrapper(Iterator):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
     def D_g1g1prime2_decay(self):
         return self.M2g1g1prime2_decay*constants.g1prime2decay_reco / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+
+#######################################
+#VBF anomalous couplings discriminants#
+#######################################
+
+    def D_0minus_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
+    def D_CP_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1g4_VBF*constants.g4VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
+    def D_g2_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
+    def D_g1g2_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1g2_VBF*constants.g2VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
+    def D_g1prime2_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
+    def D_g1g1prime2_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
+
+############################################
+#VBFdecay anomalous couplings discriminants#
+############################################
+
+    def D_0minus_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4_VBF*self.M2g4_decay*(constants.g4VBF*constants.g4decay)**2)
+    def D_g2_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2_VBF*self.M2g2_decay * (constants.g2VBF*constants.g2decay)**2)
+    def D_g1prime2_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g1prime2_VBF*self.M2g1prime2_decay * (constants.g1prime2VBF_reco*constants.g1prime2decay_reco)**2)
+
+######################################
+#VBFdecay g1^x gi^(4-x) discriminants#
+######################################
+
+    ####
+    #g4#
+    ####
+
+    def D_g14_g40_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g1_VBF*self.M2g1_decay
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g4VBF**2*self.M2g4_VBF * constants.g4decay**2*self.M2g4_decay)
+               )
+    def D_g13_g41_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_VBF*constants.g4VBF * self.M2g1_decay)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g4VBF**2*self.M2g4_VBF * constants.g4decay**2*self.M2g4_decay)
+               )
+    def D_g12_g42_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g4_decay*constants.g4decay**2 + self.M2g4_VBF*constants.g4VBF**2 * self.M2g1_decay
+                   + self.M2g1g4_VBF*constants.g4VBF * self.M2g1g4_decay*constants.g4decay)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g4VBF**2*self.M2g4_VBF * constants.g4decay**2*self.M2g4_decay)
+               )
+    def D_g11_g43_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g4_VBF*constants.g4VBF**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_VBF*constants.g4VBF * self.M2g4_decay*constants.g4decay**2)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g4VBF**2*self.M2g4_VBF * constants.g4decay**2*self.M2g4_decay)
+               )
+    def D_g10_g44_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g4_VBF*constants.g4VBF**2 * self.M2g4_decay*constants.g4decay**2
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g4VBF**2*self.M2g4_VBF * constants.g4decay**2*self.M2g4_decay)
+               )
+
+    ####
+    #g2#
+    ####
+
+    def D_g14_g20_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g1_VBF*self.M2g1_decay
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g2VBF**2*self.M2g2_VBF * constants.g2decay**2*self.M2g2_decay)
+               )
+    def D_g13_g21_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_VBF*constants.g2VBF * self.M2g1_decay)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g2VBF**2*self.M2g2_VBF * constants.g2decay**2*self.M2g2_decay)
+               )
+    def D_g12_g22_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g2_decay*constants.g2decay**2 + self.M2g2_VBF*constants.g2VBF**2 * self.M2g1_decay
+                   + self.M2g1g2_VBF*constants.g2VBF * self.M2g1g2_decay*constants.g2decay)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g2VBF**2*self.M2g2_VBF * constants.g2decay**2*self.M2g2_decay)
+               )
+    def D_g11_g23_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g2_VBF*constants.g2VBF**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_VBF*constants.g2VBF * self.M2g2_decay*constants.g2decay**2)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g2VBF**2*self.M2g2_VBF * constants.g2decay**2*self.M2g2_decay)
+               )
+    def D_g10_g24_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g2_VBF*constants.g2VBF**2 * self.M2g2_decay*constants.g2decay**2
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g2VBF**2*self.M2g2_VBF * constants.g2decay**2*self.M2g2_decay)
+               )
+
+    ##########
+    #g1prime2#
+    ##########
+
+    def D_g14_g1prime20_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g1_VBF*self.M2g1_decay
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+               )
+    def D_g13_g1prime21_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco * self.M2g1_decay)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+               )
+    def D_g12_g1prime22_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 * self.M2g1_decay
+                   + self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+               )
+    def D_g11_g1prime23_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+               )
+    def D_g10_g1prime24_VBFdecay(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                 /
+                (self.M2g1_VBF * self.M2g1_decay + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+               )
+
+############################################
+#VBFdecay g1^x gi^(4-x) discriminants prime#
+############################################
+
+    ####
+    #g4#
+    ####
+
+    def D_g14_g40_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g1_VBF*self.M2g1_decay
+                 /
+                ((self.M2g1_VBF + constants.g4VBF**2*self.M2g4_VBF) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+               )
+    def D_g13_g41_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_VBF*constants.g4VBF * self.M2g1_decay)
+                 /
+                ((self.M2g1_VBF + constants.g4VBF**2*self.M2g4_VBF) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+               )
+    def D_g12_g42_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g4_decay*constants.g4decay**2 + self.M2g4_VBF*constants.g4VBF**2 * self.M2g1_decay
+                   + self.M2g1g4_VBF*constants.g4VBF * self.M2g1g4_decay*constants.g4decay)
+                 /
+                ((self.M2g1_VBF + constants.g4VBF**2*self.M2g4_VBF) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+               )
+    def D_g11_g43_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g4_VBF*constants.g4VBF**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_VBF*constants.g4VBF * self.M2g4_decay*constants.g4decay**2)
+                 /
+                ((self.M2g1_VBF + constants.g4VBF**2*self.M2g4_VBF) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+               )
+    def D_g10_g44_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g4_VBF*constants.g4VBF**2 * self.M2g4_decay*constants.g4decay**2
+                 /
+                ((self.M2g1_VBF + constants.g4VBF**2*self.M2g4_VBF) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+               )
+
+    ####
+    #g2#
+    ####
+
+    def D_g14_g20_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g1_VBF*self.M2g1_decay
+                 /
+                ((self.M2g1_VBF + constants.g2VBF**2*self.M2g2_VBF) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+               )
+    def D_g13_g21_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_VBF*constants.g2VBF * self.M2g1_decay)
+                 /
+                ((self.M2g1_VBF + constants.g2VBF**2*self.M2g2_VBF) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+               )
+    def D_g12_g22_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g2_decay*constants.g2decay**2 + self.M2g2_VBF*constants.g2VBF**2 * self.M2g1_decay
+                   + self.M2g1g2_VBF*constants.g2VBF * self.M2g1g2_decay*constants.g2decay)
+                 /
+                ((self.M2g1_VBF + constants.g2VBF**2*self.M2g2_VBF) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+               )
+    def D_g11_g23_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g2_VBF*constants.g2VBF**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_VBF*constants.g2VBF * self.M2g2_decay*constants.g2decay**2)
+                 /
+                ((self.M2g1_VBF + constants.g2VBF**2*self.M2g2_VBF) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+               )
+    def D_g10_g24_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g2_VBF*constants.g2VBF**2 * self.M2g2_decay*constants.g2decay**2
+                 /
+                ((self.M2g1_VBF + constants.g2VBF**2*self.M2g2_VBF) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+               )
+
+    ##########
+    #g1prime2#
+    ##########
+
+    def D_g14_g1prime20_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g1_VBF*self.M2g1_decay
+                 /
+                ((self.M2g1_VBF + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+               )
+    def D_g13_g1prime21_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco * self.M2g1_decay)
+                 /
+                ((self.M2g1_VBF + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+               )
+    def D_g12_g1prime22_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1_VBF * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 * self.M2g1_decay
+                   + self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
+                 /
+                ((self.M2g1_VBF + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+               )
+    def D_g11_g1prime23_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                (self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+                 /
+                ((self.M2g1_VBF + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+               )
+    def D_g10_g1prime24_VBFdecay_prime(self):
+        if self.notdijet: return -999
+        return (
+                self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                 /
+                ((self.M2g1_VBF + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+               )
 
 #####################
 #Reweighting weights#
@@ -299,6 +602,23 @@ class TreeWrapper(Iterator):
             "D_g1g1prime2_decay",
         ]
 
+        proddiscriminants = [
+            "D_0minus_VBF",
+            "D_CP_VBF",
+            "D_g2_VBF",
+            "D_g1g2_VBF",
+            "D_g1prime2_VBF",
+            "D_g1g1prime2_VBF",
+            "D_0minus_VBFdecay",
+            "D_g2_VBFdecay",
+            "D_g1prime2_VBFdecay",
+        ] + [
+            "D_g1{}_{}{}_VBFdecay{}".format(i, gj, 4-i, prime)
+                for prime in ("", "_prime")
+                for gj in ("g4", "g2", "g1prime2")
+                for i in range(5)
+        ]
+
         self.exceptions = [
             "cconstantforDbkg",
             "cconstantforD2jet",
@@ -330,6 +650,11 @@ class TreeWrapper(Iterator):
             "weightfunctions",
             "xsec",
         ]
+
+        if config.analysistype == "prod+dec" and self.productionmode == "VBF":
+            self.toaddtotree += proddiscriminants
+        else:
+            self.exceptions += proddiscriminants
 
         allsamples = [    #all samples that have weight functions defined in this class
             ReweightingSample("ggH", "0+"),
