@@ -143,7 +143,7 @@ class TreeWrapper(Iterator):
             self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU
             self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU
 
-            self.M2g1_VBF   = t.pvbf_VAJHU_highestPTJets
+            self.pvbf_VAJHU_highestPTJets = self.M2g1_VBF = t.pvbf_VAJHU_highestPTJets
 
             if config.analysistype == "prod+dec" and self.productionmode == "VBF":
                 self.M2g4_VBF         = t.pvbf_0minus_VAJHU_highestPTJets
@@ -153,10 +153,22 @@ class TreeWrapper(Iterator):
                 self.M2g1prime2_VBF   = t.pvbf_0_g1prime2_VAJHU_highestPTJets
                 self.M2g1g1prime2_VBF = t.pvbf_g1g1prime2_VAJHU_highestPTJets
 
-            self.M2g2_HJJ = t.phjj_VAJHU_highestPTJets
+            self.phjj_VAJHU_highestPTJets = self.M2g2_HJJ = t.phjj_VAJHU_highestPTJets
 
             #if config.analysistype == "prod+dec" and self.productionmode == "VBF":
             #    self.M2g4_HJJ = t.phjj_0minus_VAJHU_highestPTJets
+
+            #category variables
+            self.nExtraLep = t.nExtraLep
+            self.nExtraZ = t.nExtraZ
+            self.nCleanedJetsPt30 = t.nCleanedJetsPt30
+            self.nCleanedJetsPt30BTagged = t.nCleanedJetsPt30BTagged
+            self.jetQGLikelihood = t.JetQGLikelihood.data()
+            self.phj_VAJHU = t.phj_VAJHU
+            self.pAux_vbf_VAJHU = t.pAux_vbf_VAJHU
+            self.pwh_hadronic_VAJHU = t.pwh_hadronic_VAJHU
+            self.pzh_hadronic_VAJHU = t.pzh_hadronic_VAJHU
+            self.jetPhi = t.JetPhi.data()
 
         else:
             self.M2g1_decay   = self.p0plus_VAJHU
@@ -196,6 +208,9 @@ class TreeWrapper(Iterator):
     def D_2jet_0plus(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_HJJ*self.cconstantforD2jet)
+    def D_2jet_0minus(self):
+        if self.notdijet: return -999
+        return self.M2g4_VBF / (self.M2g4_VBF + self.M2g2_HJJ*self.cconstantforD2jet)
 
 ###################################
 #anomalous couplings discriminants#
@@ -504,7 +519,27 @@ class TreeWrapper(Iterator):
                  /
                 ((self.M2g1_VBF + constants.g1prime2VBF_reco**2*self.M2g1prime2_VBF) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
+##########
+#Category#
+##########
 
+    def category(self):
+        return CJLSTscripts.categoryIchep16(
+                                            self.nExtraLep,
+                                            self.nExtraZ,
+                                            self.nCleanedJetsPt30,
+                                            self.nCleanedJetsPt30BTagged,
+                                            self.jetQGLikelihood,
+                                            self.phjj_VAJHU_highestPTJets,
+                                            self.phj_VAJHU,
+                                            self.pvbf_VAJHU_highestPTJets,
+                                            self.pAux_vbf_VAJHU,
+                                            self.pwh_hadronic_VAJHU,
+                                            self.pzh_hadronic_VAJHU,
+                                            self.jetPhi,
+                                            self.ZZMass,
+                                            config.useQGTagging
+                                           )
 #####################
 #Reweighting weights#
 #####################
@@ -619,6 +654,10 @@ class TreeWrapper(Iterator):
                 for i in range(5)
         ]
 
+        self.toaddtotree_int = [
+            "category",
+        ]
+
         self.exceptions = [
             "cconstantforDbkg",
             "cconstantforD2jet",
@@ -643,6 +682,7 @@ class TreeWrapper(Iterator):
             "passesblindcut",
             "productionmode",
             "toaddtotree",
+            "toaddtotree_int",
             "tree",
             "treesample",
             "unblind",
@@ -653,8 +693,11 @@ class TreeWrapper(Iterator):
 
         if config.analysistype == "prod+dec" and self.productionmode == "VBF":
             self.toaddtotree += proddiscriminants
+            self.toaddtotree.insert(self.toaddtotree.index("D_2jet_0plus")+1, "D_2jet_0minus")
         else:
             self.exceptions += proddiscriminants
+            self.exceptions.append("D_2jet_0minus")
+            del self.toaddtotree_int[:]
 
         allsamples = [    #all samples that have weight functions defined in this class
             ReweightingSample("ggH", "0+"),
@@ -723,16 +766,16 @@ class TreeWrapper(Iterator):
         #if a function is added in the class but not added to toaddtotree
         #all member variables, unless they have __, should be added to either toaddtotree or exceptions
         notanywhere, inboth, nonexistent, multipletimes = [], [], [], []
-        for key in set(list(type(self).__dict__) + list(self.__dict__) + self.toaddtotree + self.exceptions):
+        for key in set(list(type(self).__dict__) + list(self.__dict__) + self.toaddtotree+self.toaddtotree_int + self.exceptions):
             if key.startswith("__"): continue
             if key.startswith("_abc"): continue
-            if key not in self.exceptions and key not in self.toaddtotree and (key in self.__dict__ or key in type(self).__dict__):
+            if key not in self.exceptions and key not in self.toaddtotree+self.toaddtotree_int and (key in self.__dict__ or key in type(self).__dict__):
                 notanywhere.append(key)
-            if key in self.toaddtotree and key in self.exceptions:
+            if key in self.toaddtotree+self.toaddtotree_int and key in self.exceptions:
                 inboth.append(key)
             if key not in type(self).__dict__ and key not in self.__dict__:
                 nonexistent.append(key)
-        for key, occurences in Counter(self.toaddtotree + self.exceptions).iteritems():
+        for key, occurences in Counter(self.toaddtotree+self.toaddtotree_int + self.exceptions).iteritems():
             if occurences >= 2 and key not in inboth or occurences >= 3: multipletimes.append(key)
         error = ""
         if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(notanywhere) + "\n"

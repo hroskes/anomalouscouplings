@@ -17,4 +17,4 @@ with filemanager.cd(CJLSTscriptsfolder):
 for script in scripts:
     ROOT.gROOT.LoadMacro(os.path.join(CJLSTscriptsfolder, script+".cc+"))
 
-from ROOT import categoryIchep16, getDVBF2jetsConstant, getDVBF1jetConstant, getDbkgkinConstant, getDbkgConstant
+from ROOT import categoryIchep16, getDVBF2jetsConstant, getDVBF1jetConstant, getDbkgkinConstant, getDbkgConstant, UntaggedIchep16, VBF1jTaggedIchep16, VBF2jTaggedIchep16, VHLeptTaggedIchep16, VHHadrTaggedIchep16, ttHTaggedIchep16
