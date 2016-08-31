@@ -72,15 +72,12 @@ if __name__ == '__main__':
     for production in productions:
         for hypothesis in decayonlyhypotheses:
             adddiscriminants("ggH", hypothesis, production)
-        if config.analysistype == "prod+dec":
-            for hypothesis in prodonlyhypotheses:
-                adddiscriminants("VBF", hypothesis, production)
+        for hypothesis in prodonlyhypotheses:
+            adddiscriminants("VBF", hypothesis, production)
         for flavor in flavors:
             adddiscriminants("ggZZ", flavor, production)
         adddiscriminants("qqZZ", production)
         adddiscriminants("ZX", production)
-        if config.analysistype == "ICHEP16":
-            adddiscriminants("VBF", "0+", production)
         adddiscriminants("ZH", "0+", production)
         adddiscriminants("WplusH", "0+", production)
         adddiscriminants("WminusH", "0+", production)

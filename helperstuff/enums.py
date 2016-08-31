@@ -294,7 +294,6 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160729_complete/"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
-        assert config.analysistype == "prod+dec"
         if self <= "160729":
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_prodMEs/PT13TeV"
         return self.CJLSTdir()
@@ -346,7 +345,7 @@ class BlindStatus(MyEnum):
 class AnalysisType(MyEnum):
     enumname = "analysistype"
     enumitems = (
-                 EnumItem("ICHEP16"),
+                 EnumItem("decayonly"),
                  EnumItem("prod+dec"),
                 )
 
@@ -363,7 +362,6 @@ analyses = Analysis.items()
 #productions = Production.items(lambda x: x in ("160225", "160729"))
 productions = Production.items(lambda x: x in ["160729"])
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
-config.analysistype = AnalysisType(config.analysistype)
 blindstatuses = BlindStatus.items()
 
 class MetaclassForMultiEnums(type):
@@ -477,7 +475,7 @@ class MultiEnum(object):
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, Systematic, SignalOrBkg, Analysis, Production, BlindStatus, WhichDiscriminants]
+    enums = [Channel, Systematic, SignalOrBkg, Analysis, Production, BlindStatus, AnalysisType, WhichDiscriminants]
 
     def check(self, *args):
         if self.systematic is None:
@@ -489,11 +487,11 @@ class TemplatesFile(MultiEnum):
         if self.blindstatus is not None and self.signalorbkg != "DATA":
             raise ValueError("Can't blind MC!\n{}".format(args))
 
-        if self.whichdiscriminants is not None and config.analysistype == "ICHEP16":
-            raise ValueError("Don't provide whichdiscriminants for ICHEP16")
+        if self.whichdiscriminants is not None and self.analysistype == "decayonly":
+            raise ValueError("Don't provide whichdiscriminants for decayonly")
 
         dontcheck = [BlindStatus]
-        if config.analysistype == "prod+dec":
+        if self.analysistype == "prod+dec":
             dontcheck.append(WhichDiscriminants)
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
@@ -703,7 +701,7 @@ class Template(MultiEnum):
                             Sample(self.production, "ggH", "fa30.5"),
                             Sample(self.production, "ggH", "fL10.5"),
                            ]
-        if self.productionmode == "VBF" and config.analysistype == "prod+decay":
+        if self.productionmode == "VBF" and self.analysistype == "prod+decay":
             if self.hypothesis == "0+":
                 return [
                         Sample(self.production, "VBF", hypothesis)
@@ -732,7 +730,7 @@ class Template(MultiEnum):
             if self.hypothesis == "fa3dec0.5":
                 return [
                         Sample(self.production, "VBF", hypothesis)
-                            for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #what happened to 0+?
+                            for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fL1dec0.5":
                 return [

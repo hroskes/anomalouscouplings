@@ -94,7 +94,7 @@ class TreeWrapper(Iterator):
                     self.MC_weight = 0
             else:
                 self.MC_weight = t.overallEventWeight
-            if self.productionmode == "ggH" or self.productionmode == "VBF" and config.analysistype == "prod+dec":
+            if self.productionmode == "ggH" or self.productionmode == "VBF":
                 self.reweightingweights = t.reweightingweights
             isSelected = bool(self.MC_weight)
 
@@ -145,18 +145,15 @@ class TreeWrapper(Iterator):
 
             self.pvbf_VAJHU_highestPTJets = self.M2g1_VBF = t.pvbf_VAJHU_highestPTJets
 
-            if config.analysistype == "prod+dec" and self.productionmode == "VBF":
-                self.M2g4_VBF         = t.pvbf_0minus_VAJHU_highestPTJets
-                self.M2g1g4_VBF       = t.pvbf_g1g4_VAJHU_highestPTJets
-                self.M2g2_VBF         = t.pvbf_0hplus_VAJHU_highestPTJets
-                self.M2g1g2_VBF       = t.pvbf_g1g2_VAJHU_highestPTJets
-                self.M2g1prime2_VBF   = t.pvbf_0_g1prime2_VAJHU_highestPTJets
-                self.M2g1g1prime2_VBF = t.pvbf_g1g1prime2_VAJHU_highestPTJets
+            self.M2g4_VBF         = t.pvbf_0minus_VAJHU_highestPTJets
+            self.M2g1g4_VBF       = t.pvbf_g1g4_VAJHU_highestPTJets
+            self.M2g2_VBF         = t.pvbf_0hplus_VAJHU_highestPTJets
+            self.M2g1g2_VBF       = t.pvbf_g1g2_VAJHU_highestPTJets
+            self.M2g1prime2_VBF   = t.pvbf_0_g1prime2_VAJHU_highestPTJets
+            self.M2g1g1prime2_VBF = t.pvbf_g1g1prime2_VAJHU_highestPTJets
 
             self.phjj_VAJHU_highestPTJets = self.M2g2_HJJ = t.phjj_VAJHU_highestPTJets
-
-            #if config.analysistype == "prod+dec" and self.productionmode == "VBF":
-            #    self.M2g4_HJJ = t.phjj_0minus_VAJHU_highestPTJets
+            self.M2g4_HJJ = t.phjj_0minus_VAJHU_highestPTJets
 
             #category variables
             self.nExtraLep = t.nExtraLep
@@ -565,37 +562,34 @@ class TreeWrapper(Iterator):
     def MC_weight_ggH_g1g1prime2(self):
         return self.MC_weight_ggH(6)
 
-    if config.analysistype == "prod+dec":
-        def MC_weight_VBF(self, index):
-            return self.MC_weight * self.reweightingweights[index] * constants.SMXSVBF2L2l / self.nevents2L2l[index]
-        def MC_weight_VBF_g1(self):
-            return self.MC_weight_VBF(0)
-        def MC_weight_VBF_g2(self):
-            return self.MC_weight_VBF(1)
-        def MC_weight_VBF_g4(self):
-            return self.MC_weight_VBF(2)
-        def MC_weight_VBF_g1prime2(self):
-            return self.MC_weight_VBF(3)
-        def MC_weight_VBF_g1g2_dec(self):
-            return self.MC_weight_VBF(4)
-        def MC_weight_VBF_g1g4_dec(self):
-            return self.MC_weight_VBF(5)
-        def MC_weight_VBF_g1g1prime2_dec(self):
-            return self.MC_weight_VBF(6)
-        def MC_weight_VBF_g1g2_prod(self):
-            return self.MC_weight_VBF(7)
-        def MC_weight_VBF_g1g4_prod(self):
-            return self.MC_weight_VBF(8)
-        def MC_weight_VBF_g1g1prime2_prod(self):
-            return self.MC_weight_VBF(9)
-        def MC_weight_VBF_g1g2_proddec_pi(self):
-            return self.MC_weight_VBF(10)
-        def MC_weight_VBF_g1g4_proddec_pi(self):
-            return self.MC_weight_VBF(11)
-        def MC_weight_VBF_g1g1prime2_proddec_pi(self):
-            return self.MC_weight_VBF(12)
-    else:
-        MC_weight_VBF = MC_weight_plain
+    def MC_weight_VBF(self, index):
+        return self.MC_weight * self.reweightingweights[index] * constants.SMXSVBF2L2l / self.nevents2L2l[index]
+    def MC_weight_VBF_g1(self):
+        return self.MC_weight_VBF(0)
+    def MC_weight_VBF_g2(self):
+        return self.MC_weight_VBF(1)
+    def MC_weight_VBF_g4(self):
+        return self.MC_weight_VBF(2)
+    def MC_weight_VBF_g1prime2(self):
+        return self.MC_weight_VBF(3)
+    def MC_weight_VBF_g1g2_dec(self):
+        return self.MC_weight_VBF(4)
+    def MC_weight_VBF_g1g4_dec(self):
+        return self.MC_weight_VBF(5)
+    def MC_weight_VBF_g1g1prime2_dec(self):
+        return self.MC_weight_VBF(6)
+    def MC_weight_VBF_g1g2_prod(self):
+        return self.MC_weight_VBF(7)
+    def MC_weight_VBF_g1g4_prod(self):
+        return self.MC_weight_VBF(8)
+    def MC_weight_VBF_g1g1prime2_prod(self):
+        return self.MC_weight_VBF(9)
+    def MC_weight_VBF_g1g2_proddec_pi(self):
+        return self.MC_weight_VBF(10)
+    def MC_weight_VBF_g1g4_proddec_pi(self):
+        return self.MC_weight_VBF(11)
+    def MC_weight_VBF_g1g1prime2_proddec_pi(self):
+        return self.MC_weight_VBF(12)
 
     def MC_weight_ggZZ(self):
         if self.useMELAv2:
@@ -629,15 +623,13 @@ class TreeWrapper(Iterator):
             "D_bkg_0plus_ScaleDown",
             "D_bkg_0minus",
             "D_2jet_0plus",
+            "D_2jet_0minus",
             "D_0minus_decay",
             "D_CP_decay",
             "D_g2_decay",
             "D_g1g2_decay",
             "D_g1prime2_decay",
             "D_g1g1prime2_decay",
-        ]
-
-        proddiscriminants = [
             "D_0minus_VBF",
             "D_CP_VBF",
             "D_g2_VBF",
@@ -674,6 +666,7 @@ class TreeWrapper(Iterator):
             "length",
             "MC_weight_ggH",
             "MC_weight_plain",
+            "MC_weight_VBF",
             "minevent",
             "nevents",
             "nevents2L2l",
@@ -691,14 +684,6 @@ class TreeWrapper(Iterator):
             "xsec",
         ]
 
-        if config.analysistype == "prod+dec" and self.productionmode == "VBF":
-            self.toaddtotree += proddiscriminants
-            self.toaddtotree.insert(self.toaddtotree.index("D_2jet_0plus")+1, "D_2jet_0minus")
-        else:
-            self.exceptions += proddiscriminants
-            self.exceptions.append("D_2jet_0minus")
-            del self.toaddtotree_int[:]
-
         allsamples = [    #all samples that have weight functions defined in this class
             ReweightingSample("ggH", "0+"),
             ReweightingSample("ggH", "a2"),
@@ -715,24 +700,18 @@ class TreeWrapper(Iterator):
             ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
             ReweightingSample("qqZZ"),
             ReweightingSample("ZX"),
-        ]
-        if config.analysistype == "prod+dec":
-            allsamples += [
-                #0+ is already there
-                ReweightingSample("VBF", "a2"),
-                ReweightingSample("VBF", "0-"),
-                ReweightingSample("VBF", "L1"),
-                ReweightingSample("VBF", "fa2dec0.5"),
-                ReweightingSample("VBF", "fa3dec0.5"),
-                ReweightingSample("VBF", "fL1dec0.5"),
-                ReweightingSample("VBF", "fa2prod0.5"),
-                ReweightingSample("VBF", "fa3prod0.5"),
-                ReweightingSample("VBF", "fL1prod0.5"),
-                ReweightingSample("VBF", "fa2proddec-0.5"),
-                ReweightingSample("VBF", "fa3proddec-0.5"),
-                ReweightingSample("VBF", "fL1proddec-0.5"),
-            ]
-            self.exceptions.append("MC_weight_VBF")
+            ReweightingSample("VBF", "a2"),
+            ReweightingSample("VBF", "0-"),
+            ReweightingSample("VBF", "L1"),
+            ReweightingSample("VBF", "fa2dec0.5"),
+            ReweightingSample("VBF", "fa3dec0.5"),
+            ReweightingSample("VBF", "fL1dec0.5"),
+            ReweightingSample("VBF", "fa2prod0.5"),
+            ReweightingSample("VBF", "fa3prod0.5"),
+            ReweightingSample("VBF", "fL1prod0.5"),
+            ReweightingSample("VBF", "fa2proddec-0.5"),
+            ReweightingSample("VBF", "fa3proddec-0.5"),
+            ReweightingSample("VBF", "fL1proddec-0.5"),
 
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
         allreweightingweightnames = [sample.weightname() for sample in allsamples]
@@ -786,7 +765,7 @@ class TreeWrapper(Iterator):
             raise SyntaxError(error)
 
         #cross checking that the order of weights is defined right
-        if self.treesample.productionmode == "ggH" or (config.analysistype == "prod+dec" and self.treesample.productionmode == "VBF"):
+        if self.treesample.productionmode == "ggH" or self.treesample.productionmode == "VBF":
             if couplings is None:
                 raise SyntaxError("No couplings tree for {}".format(self.treesample))
 
@@ -804,9 +783,10 @@ class TreeWrapper(Iterator):
                 if self.getweightfunction(sample)() != self.getmainweightfunction()(i):
                     raise SyntaxError("{}() == {}, but {}({}) == {}!\nCheck the order of reweightingsamples or the weight functions!".format(self.getweightfunction(sample).__name__, self.getweightfunction(sample)(), self.getmainweightfunction().__name__, i, self.getmainweightfunction()(i)))
                 print couplings.ghz1Re[i], couplings.ghz2Re[i], couplings.ghz4Re[i], couplings.ghz1_prime2Re[i], sample.g1, sample.g2, sample.g4, sample.g1prime2
-                if sample.productionmode != "ggH" or self.treesample.production > "160729":
-                    if not (couplings.spin[i] == 0 and couplings.ghz1Re[i] == sample.g1 and couplings.ghz2Re[i] == sample.g2 and couplings.ghz4Re[i] == sample.g4 and couplings.ghz1_prime2Re[i] == sample.g1prime2):
-                        raise SyntaxError("Order of reweightingsamples or the weight functions seems wrong!  Check entry {} in couplings with respect to {}.".format(i, sample))
+                if sample.productionmode != "ggH" and self.treesample.production <= "160729":
+                    continue
+                if not (couplings.spin[i] == 0 and couplings.ghz1Re[i] == sample.g1 and couplings.ghz2Re[i] == sample.g2 and couplings.ghz4Re[i] == sample.g4 and couplings.ghz1_prime2Re[i] == sample.g1prime2):
+                    raise SyntaxError("Order of reweightingsamples or the weight functions seems wrong!  Check entry {} in couplings with respect to {}.".format(i, sample))
 
 
     passesblindcut = config.blindcut
