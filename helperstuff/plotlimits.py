@@ -8,7 +8,7 @@ import stylefunctions as style
 import sys
 
 filenametemplate = "higgsCombine_{}.MultiDimFit.mH125.root"
-branchname = "CMS_zz4l_fg4"
+branchname = "CMS_zz4l_fai1"
 
 Scan = namedtuple("Scan", "name title color style")
 

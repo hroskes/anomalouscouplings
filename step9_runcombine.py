@@ -20,15 +20,15 @@ python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[ana
 createworkspacetemplate = """
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l.txt &&
-text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
+text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
 """
 runcombinetemplate = """
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo. -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fg4=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 --saveNLL |& tee log_.oO[expectfai]Oo..exp
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo. -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 --saveNLL |& tee log_.oO[expectfai]Oo..exp
 """
 observationcombinetemplate = """
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo.       --setPhysicsModelParameters r=1,CMS_zz4l_fg4=.oO[expectfai]Oo.                  -V -v 3 --saveNLL |& tee log.obs
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo.       --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo.                  -V -v 3 --saveNLL |& tee log.obs
 """
 
 def check_call_test(*args, **kwargs):
@@ -50,7 +50,10 @@ def runcombine(analysis, foldername, **kwargs):
             try:
                 expectvalues = [fai if fai=="minimum" else float(fai) for fai in kwarg.split(",")]
             except ValueError:
-                raise ValueError("expectvalues has to contain floats separated by commas!")
+                if kwarg == "":
+                    expectvalues = []
+                else:
+                    raise ValueError("expectvalues has to contain floats separated by commas!")
         elif kw == "plotname":
             plotname = kwarg
         elif kw == "CLtextposition":
@@ -126,7 +129,7 @@ def runcombine(analysis, foldername, **kwargs):
                 minimum = (float("nan"), float("inf"))
                 for entry in f.limit:
                     if f.limit.deltaNLL < minimum[1]:
-                        minimum = (f.limit.CMS_zz4l_fg4, f.limit.deltaNLL)
+                        minimum = (f.limit.CMS_zz4l_fai1, f.limit.deltaNLL)
                 minimum = minimum[0]
                 del f
 
