@@ -477,16 +477,26 @@ class MultiEnum(object):
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, Systematic, SignalOrBkg, Analysis, Production, BlindStatus]
+    enums = [Channel, Systematic, SignalOrBkg, Analysis, Production, BlindStatus, WhichDiscriminants]
 
     def check(self, *args):
         if self.systematic is None:
             self.systematic = Systematic("")
+
         if self.blindstatus is None and self.signalorbkg == "DATA":
             raise ValueError("No option provided for blind!\n{}".format(args))
+
         if self.blindstatus is not None and self.signalorbkg != "DATA":
             raise ValueError("Can't blind MC!\n{}".format(args))
-        super(TemplatesFile, self).check(*args, dontcheck=[BlindStatus])
+
+        if self.whichdiscriminants is not None and config.analysistype == "ICHEP16":
+            raise ValueError("Don't provide whichdiscriminants for ICHEP16")
+
+        dontcheck = [BlindStatus]
+        if config.analysistype == "prod+dec":
+            dontcheck.append(WhichDiscriminants)
+        super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
+
         if not self.systematic.appliesto(self.signalorbkg):
             raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
 
