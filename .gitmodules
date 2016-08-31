@@ -5,7 +5,7 @@
 [submodule "CMSSW_7_6_5/src/HiggsAnalysis/CombinedLimit"]
 	path = CMSSW_7_6_5/src/HiggsAnalysis/CombinedLimit
 	url = git@github.com:hroskes/HiggsAnalysis-CombinedLimit
-	branch = merge-meng
+	branch = HiggsJCPWidthLifetime
 [submodule "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination"]
 	path = CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination
 	url = git@github.com:hroskes/HiggsAnalysis-HZZ4l_Combination
