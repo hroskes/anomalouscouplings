@@ -1,3 +1,4 @@
+from array import array
 import CJLSTscripts
 from collections import Counter, Iterator
 import config
@@ -9,6 +10,9 @@ import ZX
 
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
 sys.setrecursionlimit(10000)
+
+#to pass to the category code when there are no jets
+dummyfloatstar = array('f', [0])
 
 class TreeWrapper(Iterator):
 
@@ -45,7 +49,11 @@ class TreeWrapper(Iterator):
                                ]
 
         self.minevent = minevent
-        if self.isdata and self.unblind and not config.unblinddistributions or self.isdummy:
+        if (
+               self.isdata and (self.unblind and not config.unblinddistributions or not config.usedata)
+            or self.isZX and not config.usedata
+            or self.isdummy
+           ):
             self.length = 0
         elif maxevent is None or maxevent >= tree.GetEntries():
             self.length = tree.GetEntries() - minevent
@@ -166,6 +174,9 @@ class TreeWrapper(Iterator):
             self.pwh_hadronic_VAJHU = t.pwh_hadronic_VAJHU
             self.pzh_hadronic_VAJHU = t.pzh_hadronic_VAJHU
             self.jetPhi = t.JetPhi.data()
+
+            if self.nCleanedJetsPt30 == 0:
+                self.jetQGLikelihood = self.jetPhi = dummyfloatstar
 
         else:
             self.M2g1_decay   = self.p0plus_VAJHU
@@ -535,7 +546,7 @@ class TreeWrapper(Iterator):
                                             self.pzh_hadronic_VAJHU,
                                             self.jetPhi,
                                             self.ZZMass,
-                                            config.useQGTagging
+                                            config.useQGTagging,
                                            )
 #####################
 #Reweighting weights#

@@ -15,3 +15,4 @@ for filename in os.listdir("."):
 print "rm \t\t\t\\"
 for a in delete:
     print a, "\t\t\t\\"
+print

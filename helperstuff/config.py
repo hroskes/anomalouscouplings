@@ -10,10 +10,13 @@ elif "login-node" in socket.gethostname() and getpass.getuser() == "jroskes1@jhu
 else:
     raise ValueError("Who/where are you?")
 
+usedata = False
 unblinddistributions = False
 unblindscans = False
 applyshapesystematics = False
 useQGTagging = False
+
+assert unblindscans >= unblinddistributions >= usedata
 
 expectedscanluminosity = 10
 
