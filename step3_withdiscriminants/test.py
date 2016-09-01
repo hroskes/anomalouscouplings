@@ -16,8 +16,10 @@ for color, hypothesis in enumerate(prodonlyhypotheses, start=1):
     t = ROOT.TChain("candTree", "candTree")
     t.Add(Sample("VBF", hypothesis, "160729").withdiscriminantsfile())
     hname = "h{}".format(hypothesis)
-    weight = "MC_weight_VBF_g1g2_prod"
-    t.Draw("D_g1g2_VBF>>{}(50,-1,1)".format(hname), weight, "hist")
+#    weight = "MC_weight_VBF_g1"
+    weight = "D_g1prime2_VBF>-900"
+    t.Draw("D_g1prime2_VBF:D_g1g1prime2_VBF>>{}(1000,-1,0,1000,0,1)".format(hname), weight, "SCAT")
+#    t.Draw("D_g1prime2_VBF:D_g1g1prime2_VBF>>{}".format(hname), weight, "SCAT")
 #    t.Draw("D_CP_decay>>{}(50,-.5,.5)".format(hname), weight, "hist")
 #    t.Draw("D_CP_VBF>>{}(50,-1,1)".format(hname), weight+"*(D_2jet_0plus>-1)", "hist")
     h = getattr(ROOT, hname)
@@ -25,6 +27,7 @@ for color, hypothesis in enumerate(prodonlyhypotheses, start=1):
     cache.append(h)
     legend.AddEntry(h, str(hypothesis), "l")
     h.SetLineColor(color)
+    h.SetMarkerStyle(1)
     print hypothesis, h.Integral()
     try:
         os.makedirs(os.path.join(config.plotsbasedir, "TEST"))

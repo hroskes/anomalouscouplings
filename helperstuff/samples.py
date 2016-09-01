@@ -232,6 +232,58 @@ class ReweightingSample(MultiEnum):
                 return -sqrt(constants.g1prime2VBF_gen*constants.g1prime2decay_gen)
         raise self.ValueError("g1prime2")
 
+    @property
+    def JHUxsec(self):
+        """
+        The pure anomalous xsecs are set equal to SM
+        """
+        if self.productionmode == "ggH":
+            if self.hypothesis in ["0+", "a2", "0-", "L1"]:
+                return constants.JHUXSggH2L2la1
+            else:
+                return (
+                          constants.JHUXSggH2L2la1*self.g1**2
+                        + constants.JHUXSggH2L2la2*self.g2**2
+                        + constants.JHUXSggH2L2la3*self.g4**2
+                        + constants.JHUXSggH2L2lL1*self.g1prime2**2
+                        + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                        + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                        + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                       )
+
+        if self.productionmode == "VBF":
+            if self.hypothesis in ["0+", "a2", "0-", "L1"]:
+                return constants.JHUXSVBFa1 * constants.JHUXSggH2L2la1
+            else:
+                return (
+                          constants.JHUXSVBFa1 * self.g1**2
+                        + constants.JHUXSVBFa2 * self.g2**2
+                        + constants.JHUXSVBFa3 * self.g4**2
+                        + constants.JHUXSVBFL1 * self.g1prime2**2
+                        + constants.JHUXSVBFa1a2 * self.g1*self.g2 / constants.g2VBF
+                        + constants.JHUXSVBFa1a3 * self.g1*self.g4 / constants.g4VBF
+                        + constants.JHUXSVBFa1L1 * self.g1*self.g1prime2 / constants.g1prime2VBF_gen
+                       ) * (
+                          constants.JHUXSggH2L2la1 * self.g1**2
+                        + constants.JHUXSggH2L2la2 * self.g2**2
+                        + constants.JHUXSggH2L2la3 * self.g4**2
+                        + constants.JHUXSggH2L2lL1 * self.g1prime2**2
+                        + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                        + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                        + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                       )
+        raise self.ValueError("JHUxsec")
+
+    @property
+    def xsec(self):
+        if self.productionmode == "VBF":
+            if self.hypothesis == "SM": return constants.SMXSVBF2L2l
+            return constants.SMXSVBF2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+        if self.productionmode == "ggH":
+            if self.hypothesis == "SM": return constants.SMXSggH2L2l
+            return constants.SMXSggH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+        raise self.ValueError("xsec")
+
 class Sample(ReweightingSample):
     enums = [ReweightingSample, Production, BlindStatus]
 

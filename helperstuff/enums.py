@@ -2,6 +2,7 @@ from collections import OrderedDict
 import config
 import constants
 from filemanager import tfiles
+from itertools import product
 import os
 
 class EnumItem(object):
@@ -136,24 +137,23 @@ class Systematic(MyEnum):
         if self == "": return ""
         return "_" + str(self)
     def D_bkg_0plus(self, title=False):
-        if not title:
-            return "D_bkg_0plus"+self.appendname()
-        else:
-            return "D_{bkg}^{"+self.appendname().replace("_", "")+"}"
-    def appliesto(self, signalorbkg):
-        if signalorbkg == "signal":
+        from discriminants import discriminant
+        return discriminant("D_bkg_0plus"+self.appendname())
+    def appliesto(self, templategroup):
+        if templategroup in ("ggh", "vbf"):
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
-        elif signalorbkg == "bkg":
+        elif templategroup == "bkg":
             return self in ("", "ZXUp", "ZXDown")
-        elif signalorbkg == "DATA":
+        elif templategroup == "DATA":
             return self in ("", )
         assert False
 
 
-class SignalOrBkg(MyEnum):
-    enumname = "signalorbkg"
+class TemplateGroup(MyEnum):
+    enumname = "templategroup"
     enumitems = (
-                 EnumItem("signal", "sig"),
+                 EnumItem("ggh"),
+                 EnumItem("vbf"),
                  EnumItem("background", "bkg"),
                  EnumItem("DATA"),
                 )
@@ -218,39 +218,15 @@ class Analysis(MyEnum):
             if self == "fL1":
                 return "D_{0h+}"
         assert False
-    def mixdiscriminantmin(self):
-        if self == "fa3":
-            return -.5
-        elif self == "fa2":
-            return 0.
-        else:
-            assert False
-    def mixdiscriminantmax(self):
-        if self == "fa3":
-            return .5
-        elif self == "fa2":
-            return 1.
-        else:
-            assert False
-    def signalsamples(self):
-        from samples import ReweightingSample
-        if self == "fa3":
-            return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "0-"), ReweightingSample("ggH", "fa30.5")]
-        elif self == "fa2":
-            return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "a2"), ReweightingSample("ggH", "fa20.5")]
-        elif self == "fL1":
-            return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
-        else:
-            assert False
     def signaltemplates(self, *args):
         return [Template(sample, self, *args) for sample in self.signalsamples()]
     def interfxsec(self):
         if self == "fa3":
-            return constants.JHUXS2L2la1a3 - 2*constants.JHUXS2L2la1
+            return constants.JHUXSggH2L2la1a3
         elif self == "fa2":
-            return constants.JHUXS2L2la1a2 - 2*constants.JHUXS2L2la1
+            return constants.JHUXSggH2L2la1a2
         elif self == "fL1":
-            return constants.JHUXS2L2la1L1 - 2*constants.JHUXS2L2la1
+            return constants.JHUXSggH2L2la1L1
         assert False
 
 class Production(MyEnum):
@@ -349,6 +325,40 @@ class AnalysisType(MyEnum):
                  EnumItem("prod+dec"),
                 )
 
+class Category(MyEnum):
+    """
+    For now just 2 categories, VBF2j and dump everything else into untagged
+    """
+    enumname = "category"
+    enumitems = (
+                 EnumItem("UntaggedIchep16", "VBF1jTaggedIchep16", "VHLeptTaggedIchep16", "VHHadrTaggedIchep16", "ttHTaggedIchep16"),
+                 EnumItem("VBF2jTaggedIchep16"),
+                )
+    @property
+    def idnumbers(self):
+        """
+        returns a list of ints corresponding to the C++ enums corresponding to this category
+        (defined in Category.h)
+        """
+        import CJLSTscripts
+        return [getattr(CJLSTscripts, name) for name in self.item.names]
+
+class WhichProdDiscriminants(MyEnum):
+    """
+    D_bkg and D_(0minus/0hplus/L1)_VBFdecay, but which third one?
+    """
+    enumname = "whichproddiscriminants"
+    enumitems = (
+                 EnumItem("D_int_decay"),
+                 EnumItem("D_int_VBF"),
+                 EnumItem("g11gi3"),
+                 EnumItem("g12gi2"),
+                 EnumItem("g13gi1"),
+                 EnumItem("g11gi3_prime"),
+                 EnumItem("g12gi2_prime"),
+                 EnumItem("g13gi1_prime"),
+                )
+
 channels = Channel.items()
 systematics = Systematic.items()
 treesystematics = Systematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
@@ -363,6 +373,8 @@ analyses = Analysis.items()
 productions = Production.items(lambda x: x in ["160729"])
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
+categories = Category.items()
+whichproddiscriminants = WhichProdDiscriminants.items()
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):
@@ -475,83 +487,165 @@ class MultiEnum(object):
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, Systematic, SignalOrBkg, Analysis, Production, BlindStatus, AnalysisType, WhichDiscriminants]
+    enums = [Channel, Systematic, TemplateGroup, Analysis, Production, BlindStatus, AnalysisType, WhichProdDiscriminants, Category]
 
     def check(self, *args):
+        dontcheck = []
+
         if self.systematic is None:
             self.systematic = Systematic("")
 
-        if self.blindstatus is None and self.signalorbkg == "DATA":
-            raise ValueError("No option provided for blind!\n{}".format(args))
+        if self.category is None:
+            self.category = Category("UntaggedIchep16")
 
-        if self.blindstatus is not None and self.signalorbkg != "DATA":
-            raise ValueError("Can't blind MC!\n{}".format(args))
+        if self.templategroup != "DATA":
+            if self.blindstatus is not None:
+                raise ValueError("Can't blind MC!\n{}".format(args))
+            dontcheck.append(BlindStatus)
 
-        if self.whichdiscriminants is not None and self.analysistype == "decayonly":
-            raise ValueError("Don't provide whichdiscriminants for decayonly")
+        if self.analysistype == "decayonly":
+            if self.whichproddiscriminants is not None:
+                raise ValueError("Don't provide whichproddiscriminants for decayonly\n{}".format(args))
+            if self.category != "UntaggedIchep16":
+                raise ValueError("Only one category for decayonly analysis\n{}".format(args))
+            dontcheck.append(WhichProdDiscriminants)
 
-        dontcheck = [BlindStatus]
-        if self.analysistype == "prod+dec":
-            dontcheck.append(WhichDiscriminants)
+        if self.category == "UntaggedIchep16":
+            if self.whichproddiscriminants is not None:
+                raise ValueError("Don't provide whichproddiscriminants for untagged category\n{}".format(args))
+            dontcheck.append(WhichProdDiscriminants)
+
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
-        if not self.systematic.appliesto(self.signalorbkg):
-            raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.signalorbkg, args))
+        if not self.systematic.appliesto(self.templategroup):
+            raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.templategroup, args))
 
     def jsonfile(self):
         folder = os.path.join(config.repositorydir, "step5_json")
 
-        if self.signalorbkg == "bkg":
-            result = os.path.join(folder, "templates_{}_{}_bkg_{}".format(self.analysis, self.channel, self.production))
-        elif self.signalorbkg == "DATA":
-            result = os.path.join(folder, "datatemplates_{}_{}_{}".format(self.analysis, self.channel, self.production))
-        elif self.signalorbkg == "signal":
-            result = os.path.join(folder, "templates_{}_{}{}_{}".format(self.analysis, self.channel, self.systematic.appendname(), self.production))
-        else:
-            assert False
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
 
-        if self.signalorbkg == "DATA" and self.blind:
-            result += "_blind"
-        result += ".json"
+        nameparts = [str(x) for x in nameparts if x]
+        result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".json")
+
         return result
 
-    def templatesfile(self, run1=False):
-        if run1:
-            assert self.analysis == "fa3"
-            return "/afs/cern.ch/work/x/xiaomeng/public/forChris/{}_fa3Adap_new{}.root".format(self.channel, "_bkg" if self.signalorbkg == "bkg" else self.systematic.appendname())
-
+    def templatesfile(self):
         folder = os.path.join(config.repositorydir, "step7_templates")
 
-        if self.signalorbkg == "bkg":
-            result = os.path.join(folder, "{}_bkg{}_{}Adap_{}".format(self.channel, self.systematic.appendname(), self.analysis, self.production))
-        elif self.signalorbkg == "DATA":
-            result = os.path.join(folder, "data_{}_{}_{}".format(self.channel, self.analysis, self.production))
-        elif self.signalorbkg == "signal":
-            result = os.path.join(folder, "{}{}_{}Adap_{}".format(self.channel, self.systematic.appendname(), self.analysis, self.production))
-        else:
-            assert False
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
 
-        if self.signalorbkg == "DATA" and self.blind:
-            result += "_blind"
-        result += ".root"
+        nameparts = [str(x) for x in nameparts]
+        result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
+
         return result
 
     def signalsamples(self):
-        from samples import Sample
-        return [Sample(reweightingsample, self.production) for reweightingsample in self.analysis.signalsamples()]
+        from samples import ReweightingSample
+
+        if self.templategroup == "ggh":
+            if self.analysis == "fa3":
+                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "0-"), ReweightingSample("ggH", "fa30.5")]
+            if self.analysis == "fa2":
+                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "a2"), ReweightingSample("ggH", "fa20.5")]
+            if self.analysis == "fL1":
+                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
+
+        elif self.templategroup == "vbf":
+            if self.analysis == "fa3":
+                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "0-"), ReweightingSample("VBF", "fa3prod0.5"), ReweightingSample("VBF", "fa3dec0.5"), ReweightingSample("VBF", "fa3proddec-0.5")]
+            if self.analysis == "fa2":
+                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod0.5"), ReweightingSample("VBF", "fa2dec0.5"), ReweightingSample("VBF", "fa2proddec-0.5")]
+            if self.analysis == "fL1":
+                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1"), ReweightingSample("VBF", "fL1prod0.5"), ReweightingSample("VBF", "fL1dec0.5"), ReweightingSample("VBF", "fL1proddec-0.5")]
+
+        return reweightingsamples
 
     def templates(self):
-        if self.signalorbkg == "signal":
-            return [Template(self, sample.productionmode, sample.hypothesis) for sample in self.signalsamples()]
-        elif self.signalorbkg == "bkg":
+        if self.templategroup in ["ggh", "vbf"]:
+            return [Template(self, sample) for sample in self.signalsamples()]
+        elif self.templategroup == "bkg":
             return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ", "ZX")]
-        elif self.signalorbkg == "DATA":
+        elif self.templategroup == "DATA":
             return [Template(self, "data")]
 
     @property
+    def bkgdiscriminant(self):
+        return self.systematic.D_bkg_0plus()
+
+    @property
+    def purediscriminant(self):
+        from discriminants import discriminant
+
+        if self.category == "UntaggedIchep16":
+            if self.analysis == "fa3":
+                return discriminant("D_0minus_decay")
+            if self.analysis == "fa2":
+                return discriminant("D_g2_decay")
+            if self.analysis == "fL1":
+                return discriminant("D_g1prime2_decay")
+        
+        if self.category == "VBF2jTaggedIchep16":
+            if self.analysis == "fa3":
+                return discriminant("D_0minus_VBFdecay")
+            if self.analysis == "fa2":
+                return discriminant("D_g2_VBFdecay")
+            if self.analysis == "fL1":
+                return discriminant("D_g1prime2_VBFdecay")
+        
+
+    @property
+    def mixdiscriminant(self):
+        from discriminants import discriminant
+
+        if self.category == "UntaggedIchep16" or (self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_int_decay"):
+            if self.analysis == "fa3":
+                return discriminant("D_CP_decay")
+            if self.analysis == "fa2":
+                return discriminant("D_g1g2_decay")
+            if self.analysis == "fL1":
+                return discriminant("D_g2_decay")
+        
+        if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_int_VBF":
+            if self.analysis == "fa3":
+                return discriminant("D_CP_VBF")
+            if self.analysis == "fa2":
+                return discriminant("D_g1g2_VBF")
+            if self.analysis == "fL1":
+                return discriminant("D_g2_VBF")
+
+        for i, prime in product(range(1, 4), ("", "_prime")):
+            if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "g1{}gi{}{}".format(i, 4-i, prime):
+                if self.analysis == "fa3":
+                    return discriminant("D_g1{}_g4{}_VBFdecay{}".format(i, 4-i, prime))
+                if self.analysis == "fa2":
+                    return discriminant("D_g1{}_g2{}_VBFdecay{}".format(i, 4-i, prime))
+                if self.analysis == "fL1":
+                    return discriminant("D_g1{}_g1prime2{}_VBFdecay{}".format(i, 4-i, prime))
+
+        assert False
+
+    @property
+    def discriminants(self):
+        return [self.purediscriminant, self.mixdiscriminant, self.bkgdiscriminant]
+
+    @property
     def blind(self):
-        if self.signalorbkg != "DATA": assert False
+        assert self.templategroup == "DATA"
         return self.blindstatus == "blind"
+
+    @property
+    def blindnamepart(self):
+        if self.templategroup != "DATA": return ""
+        if self.blind: return "blind"
+        return ""
+
+    @property
+    def categorynamepart(self):
+        if self.category == "UntaggedIchep16":
+            return ""
+        if self.category == "VBF2jTaggedIchep16":
+            return "VBFtag"
 
 templatesfiles = []
 def tmp():
@@ -559,12 +653,20 @@ def tmp():
         for channel in channels:
             for production in productions:
                 for analysis in analyses:
-                    templatesfiles.append(TemplatesFile(channel, systematic, "signal", analysis, production))
-                    if systematic == "":
-                        templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production))
-                    for blindstatus in blindstatuses:
-                        if systematic == "" and (blindstatus == "blind" or config.unblinddistributions):
-                            templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus))
+                    for category in categories:
+                        for w in whichproddiscriminants:
+                            if category == "UntaggedIchep16":
+                                if w == whichproddiscriminants[0]:
+                                    w = None
+                                else:
+                                    continue
+                            templatesfiles.append(TemplatesFile(channel, systematic, "ggh", analysis, production, category, "prod+dec", w))
+                            templatesfiles.append(TemplatesFile(channel, systematic, "vbf", analysis, production, category, "prod+dec", w))
+                            if systematic == "":
+                                templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production, category, "prod+dec", w))
+                            for blindstatus in blindstatuses:
+                                if systematic == "" and (blindstatus == "blind" or config.unblinddistributions):
+                                    templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus, category, "prod+dec", w))
 tmp()
 del tmp
 
@@ -573,13 +675,15 @@ class Template(MultiEnum):
     enumname = "template"
 
     def applysynonyms(self, enumsdict):
-        if enumsdict[SignalOrBkg] is None:
+        if enumsdict[TemplateGroup] is None:
             if enumsdict[ProductionMode] == "ggH":
-                enumsdict[SignalOrBkg] = "signal"
+                enumsdict[TemplateGroup] = "ggh"
+            elif enumsdict[ProductionMode] == "VBF":
+                enumsdict[TemplateGroup] = "vbf"
             elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "ZX"):
-                enumsdict[SignalOrBkg] = "bkg"
+                enumsdict[TemplateGroup] = "bkg"
             elif enumsdict[ProductionMode] == "data":
-                enumsdict[SignalOrBkg] = "DATA"
+                enumsdict[TemplateGroup] = "DATA"
             else:
                 assert False
 
@@ -587,23 +691,23 @@ class Template(MultiEnum):
         from samples import ReweightingSample
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
-        elif self.productionmode == "ggH":
+        elif self.productionmode in ("ggH", "VBF"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if ReweightingSample(self.productionmode, self.hypothesis) not in self.analysis.signalsamples():
-                raise ValueError("Hypothesis {} is not used in analysis {}!\n{}".format(self.hypothesis, self.analysis, args))
-            if self.signalorbkg != "signal":
-                raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.signalorbkg, args))
+            if ReweightingSample(self.productionmode, self.hypothesis) not in self.templatesfile.signalsamples():
+                raise ValueError("{} {} is not used to make templates for {} {}!\n{}".format(self.productionmode, self.hypothesis, self.templategroup, self.analysis, args))
+            if self.templategroup != str(self.productionmode).lower():
+                raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.templategroup, args))
         elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.signalorbkg != "bkg":
-                raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.signalorbkg, args))
+            if self.templategroup != "bkg":
+                raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.templategroup, args))
         elif self.productionmode == "data":
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.signalorbkg != "DATA":
-                raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.signalorbkg, args))
+            if self.templategroup != "DATA":
+                raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.templategroup, args))
         else:
             raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
 
@@ -625,14 +729,27 @@ class Template(MultiEnum):
                     name = "templateIntAdapSmooth"
                 else:
                     name = "templateMixAdapSmooth"
-            else:
-                assert False
+        elif self.productionmode == "VBF":
+            if self.hypothesis == "0+":
+                name = "template0PlusAdapSmooth"
+            elif self.hypothesis == "0-":
+                name = "template0MinusAdapSmooth"
+            elif self.hypothesis == "a2":
+                name = "template0HPlusAdapSmooth"
+            elif self.hypothesis == "L1":
+                name = "template0L1AdapSmooth"
+            elif self.hypothesis in ("fa2dec0.5", "fa3dec0.5", "fL1dec0.5"):
+                name = "templateMixDecayAdapSmooth"
+            elif self.hypothesis in ("fa2prod0.5", "fa3prod0.5", "fL1prod0.5"):
+                name = "templateMixProdAdapSmooth"
+            elif self.hypothesis in ("fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"):
+                name = "templateMixProdDecPiAdapSmooth"
         elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
             name = "template{}AdapSmooth".format(self.productionmode)
         elif self.productionmode == "data":
             name = "datatemplate"
-        else:
-            assert False
+
+        name
 
         if self.analysis == "fa3" and final and self.productionmode != "data":
             name += "Mirror"
@@ -701,7 +818,7 @@ class Template(MultiEnum):
                             Sample(self.production, "ggH", "fa30.5"),
                             Sample(self.production, "ggH", "fL10.5"),
                            ]
-        if self.productionmode == "VBF" and self.analysistype == "prod+decay":
+        if self.productionmode == "VBF" and self.analysistype == "prod+dec":
             if self.hypothesis == "0+":
                 return [
                         Sample(self.production, "VBF", hypothesis)
@@ -777,162 +894,151 @@ class Template(MultiEnum):
         assert result
         return result
 
+    @property
     def scalefactor(self):
-        if self.signalorbkg in ("bkg", "DATA"): return 1
-        if self.hypothesis in ("0+", "0-", "a2", "L1"):
-            result = 1.0
-        elif self.hypothesis == "fa30.5":
-            result = constants.JHUXS2L2la1a3 / constants.JHUXS2L2la1
-        elif self.hypothesis == "fa20.5":
-            result = constants.JHUXS2L2la1a2 / constants.JHUXS2L2la1
-        elif self.hypothesis == "fL10.5":
-            result = constants.JHUXS2L2la1L1 / constants.JHUXS2L2la1
-        else:
-            assert False
+        from samples import ReweightingSample
+        if self.templategroup in ("bkg", "DATA"): return 1
+        if self.productionmode in ("VBF", "ggH"):
+            result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
         result /= len(self.reweightfrom())
         return result
 
     def domirror(self, final=True):
-        return self.analysis == "fa3" and not (not final and self.hypothesis == "fa30.5") and self.productionmode != "data"
+        return self.analysis == "fa3" and not (not final and self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5")) and self.productionmode != "data"
 
+    @property
     def discriminants(self):
-        return (
-                self.analysis.purediscriminant(),
-                self.analysis.mixdiscriminant(),
-                self.systematic.D_bkg_0plus(),
-               )
+        return self.templatesfile.discriminants
+
+    @property
     def binning(self):
-        if self.analysis == "fa2":
-            result = [50, 0, 1, 50, 0, 1, 50, 0, 1]
-        elif self.analysis == "fa3":
-            result = [50, 0, 1, 50, -0.5, 0.5, 50, 0, 1]
-        elif self.analysis == "fL1":
-            result = [50, 0, 1, 50, 0, 1, 50, 0, 1]
-        else:
-            assert False
+        result = sum(([d.bins, d.min, d.max] for d in self.discriminants), [])
         for i in 1, 2, 4, 5, 7, 8:
             result[i] = float(result[i])
         return result
 
     def puretemplatestosubtract(self):
-        if self.analysis == "fa2" and self.hypothesis == "fa20.5":
-            return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "a2"))
-        if self.analysis == "fa3" and self.hypothesis == "fa30.5":
-            return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "0-"))
-        if self.analysis == "fL1" and self.hypothesis == "fL10.5":
-            return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "L1"))
+        if self.templategroup == "ggh":
+            if self.analysis == "fa2" and self.hypothesis == "fa20.5":
+                return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "a2"))
+            if self.analysis == "fa3" and self.hypothesis == "fa30.5":
+                return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "0-"))
+            if self.analysis == "fL1" and self.hypothesis == "fL10.5":
+                return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "L1"))
         assert False
 
     def smoothentriesperbin(self):
-        if self.analysis == "fL1":
-            if self.channel in ["2e2mu", "4e"]:
-                if self.productionmode == "ZX":
-                    return 20
-                if self.productionmode == "ggZZ":
-                    return 100
-                if self.productionmode == "qqZZ":
-                    return 70
-            if self.channel == "4mu":
-                if self.productionmode == "ZX":
-                    return 9
-                if self.productionmode == "ggZZ":
-                    return 100
-                if self.productionmode == "qqZZ":
-                    return 100
-        if self.analysis == "fa2":
-            if self.channel == "2e2mu":
-                if self.productionmode == "ZX":
-                    return 45
-                if self.productionmode == "ggZZ":
-                    return 20
-                if self.productionmode == "qqZZ":
-                    return 30
-            if self.channel == "4e":
-                if self.productionmode == "ZX":
-                    return 6   #too much and the peak in axis 1 at .9 goes away, less (or reweight) and the bump at .4 comes back
-                if self.productionmode == "ggZZ":
-                    return 100
-                if self.productionmode == "qqZZ":
-                    if self.production == "160225":
-                        return 25
-                    return 15  #similar to Z+X
-            if self.channel == "4mu":
-                if self.productionmode == "ZX":
-                    return 9
-                if self.productionmode == "ggZZ":
-                    return 150
-                if self.productionmode == "qqZZ":
-                    if self.production == "160225":
+        if self.analysistype == "decayonly":
+            if self.analysis == "fL1":
+                if self.channel in ["2e2mu", "4e"]:
+                    if self.productionmode == "ZX":
+                        return 20
+                    if self.productionmode == "ggZZ":
+                        return 100
+                    if self.productionmode == "qqZZ":
+                        return 70
+                if self.channel == "4mu":
+                    if self.productionmode == "ZX":
+                        return 9
+                    if self.productionmode == "ggZZ":
+                        return 100
+                    if self.productionmode == "qqZZ":
+                        return 100
+            if self.analysis == "fa2":
+                if self.channel == "2e2mu":
+                    if self.productionmode == "ZX":
+                        return 45
+                    if self.productionmode == "ggZZ":
+                        return 20
+                    if self.productionmode == "qqZZ":
+                        return 30
+                if self.channel == "4e":
+                    if self.productionmode == "ZX":
+                        return 6   #too much and the peak in axis 1 at .9 goes away, less (or reweight) and the bump at .4 comes back
+                    if self.productionmode == "ggZZ":
+                        return 100
+                    if self.productionmode == "qqZZ":
+                        if self.production == "160225":
+                            return 25
+                        return 15  #similar to Z+X
+                if self.channel == "4mu":
+                    if self.productionmode == "ZX":
+                        return 9
+                    if self.productionmode == "ggZZ":
+                        return 150
+                    if self.productionmode == "qqZZ":
+                        if self.production == "160225":
+                            return 50
+                        return 100
+            if self.analysis == "fa3":
+                if self.channel == "2e2mu":
+                    if self.productionmode == "ZX":
+                        return 20
+                    if self.productionmode == "ggZZ":
+                        return 500
+                    if self.productionmode == "qqZZ":
+                        return 60
+                if self.channel == "4e":
+                    if self.productionmode == "ZX":
+                        return 10
+                    if self.productionmode == "ggZZ":
+                        return 100
+                    if self.productionmode == "qqZZ":
                         return 50
-                    return 100
-        if self.analysis == "fa3":
-            if self.channel == "2e2mu":
-                if self.productionmode == "ZX":
-                    return 20
-                if self.productionmode == "ggZZ":
-                    return 500
-                if self.productionmode == "qqZZ":
-                    return 60
-            if self.channel == "4e":
-                if self.productionmode == "ZX":
-                    return 10
-                if self.productionmode == "ggZZ":
-                    return 100
-                if self.productionmode == "qqZZ":
-                    return 50
-            if self.channel == "4mu":
-                if self.productionmode == "ZX":
-                    return 10
-                if self.productionmode == "ggZZ":
-                    return 100
-                if self.productionmode == "qqZZ":
-                    return 100
-        if self.productionmode == "ZX":
-            return 5
-        elif self.signalorbkg == "bkg":
-            return 20
+                if self.channel == "4mu":
+                    if self.productionmode == "ZX":
+                        return 10
+                    if self.productionmode == "ggZZ":
+                        return 100
+                    if self.productionmode == "qqZZ":
+                        return 100
+            if self.productionmode == "ZX":
+                return 5
+            elif self.templategroup == "bkg":
+                return 20
         return 50
 
     def reweightaxes(self):
-        if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fa3":
-            return [1, 2]
-        if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fa2":
-            return [1, 2]
-        if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fL1":
-            return [0, 2]
-        if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa2":
-            return [2]
-        if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fL1":
-            return [0, 2]
-        if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa3":
-            return [1, 2]
-        if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fL1":
-            return [0, 2]
-        if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fa3":
-            return [2]
-        if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fa2":
-            return [2]
-        if self.channel == "4e"    and self.productionmode == "ggZZ" and self.analysis == "fa3":
-            return [1, 2]
-        if self.channel == "4e"    and self.productionmode == "qqZZ" and self.analysis == "fa2":
-            if self.production == "160225":
-                return [2]
-            return [0, 2]
-        if self.channel == "4e"    and self.productionmode == "qqZZ" and self.analysis == "fa3":
-            return [1, 2]
-        if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fL1":
-            return [0, 2]
-        if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fa3":
-            return [1]
-        if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fa2":
-            return []
-        if self.channel == "4mu"   and self.productionmode == "qqZZ" and self.analysis in ["fa3", "fa2"]:
-            return [1, 2]
-        if self.channel == "4mu"   and self.productionmode == "qqZZ" and self.analysis == "fL1":
-            if self.production != "160225":
+        if self.analysistype == "decayonly":
+            if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fa3":
+                return [1, 2]
+            if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fa2":
+                return [1, 2]
+            if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fL1":
                 return [0, 2]
-        if self.channel == "4mu"   and self.productionmode == "ZX":
-            return []
+            if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa2":
+                return [2]
+            if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fL1":
+                return [0, 2]
+            if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa3":
+                return [1, 2]
+            if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fL1":
+                return [0, 2]
+            if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fa3":
+                return [2]
+            if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fa2":
+                return [2]
+            if self.channel == "4e"    and self.productionmode == "ggZZ" and self.analysis == "fa3":
+                return [1, 2]
+            if self.channel == "4e"    and self.productionmode == "qqZZ" and self.analysis == "fa2":
+                if self.production == "160225":
+                    return [2]
+                return [0, 2]
+            if self.channel == "4e"    and self.productionmode == "qqZZ" and self.analysis == "fa3":
+                return [1, 2]
+            if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fL1":
+                return [0, 2]
+            if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fa3":
+                return [1]
+            if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fa2":
+                return []
+            if self.channel == "4mu"   and self.productionmode == "qqZZ" and self.analysis in ["fa3", "fa2"]:
+                return [1, 2]
+            if self.channel == "4mu"   and self.productionmode == "qqZZ" and self.analysis == "fL1":
+                if self.production != "160225":
+                    return [0, 2]
+            if self.channel == "4mu"   and self.productionmode == "ZX":
+                return []
         return [0, 1, 2]
 
     def getjson(self):
@@ -942,19 +1048,19 @@ class Template(MultiEnum):
                    "name": self.templatename(final=False),
                    "files": [os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()],
                    "tree": "candTree",
-                   "variables": self.discriminants(),
+                   "variables": [d.name for d in self.discriminants],
                    "weight": self.weightname(),
                    "selection": self.selection,
                    "assertion": "D_0minus_decay >= 0. && D_0minus_decay <= 1.",
                    "binning": {
                      "type": "fixed",
-                     "bins": self.binning(),
+                     "bins": self.binning,
                    },
                    "conserveSumOfWeights": True,
                    "postprocessing": [
                      {"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin()},
                      {"type": "reweight", "axes": self.reweightaxes()},
-                     {"type": "rescale","factor": self.scalefactor()},
+                     {"type": "rescale","factor": self.scalefactor},
                    ],
                    "filloverflows": True,
                   },
@@ -980,7 +1086,7 @@ class Template(MultiEnum):
         else:
             jsn["templates"][0]["postprocessing"].append({"type": "floor"})
 
-        if self.hypothesis in ["fa30.5", "fa20.5", "fL10.5"]:
+        if self.hypothesis in ["fa30.5", "fa20.5", "fL10.5"] and self.templategroup == "ggh":
             intjsn = {
                        "templates":[
                          {
@@ -1007,7 +1113,7 @@ class Template(MultiEnum):
 
     @property
     def blind(self):
-        if self.signalorbkg != "DATA": assert False
+        if self.templategroup != "DATA": assert False
         return self.templatesfile.blind
 
     @property

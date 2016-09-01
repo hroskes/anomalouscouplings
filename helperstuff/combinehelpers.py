@@ -127,7 +127,7 @@ def getsubtractdatatree(*args):
 def discriminantnames(*args):
     theset = set()
     for production in config.productionsforcombine:
-        result = Template("ggH", "0+", "2e2mu", production, *args).discriminants()
+        result = tuple(d.name for d in Template("ggH", "0+", "2e2mu", production, *args).discriminants)
         theset.add(result)
     assert len(theset) == 1  #sanity check
     return result
