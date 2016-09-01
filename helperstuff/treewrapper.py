@@ -712,6 +712,7 @@ class TreeWrapper(Iterator):
             ReweightingSample("VBF", "fa2proddec-0.5"),
             ReweightingSample("VBF", "fa3proddec-0.5"),
             ReweightingSample("VBF", "fL1proddec-0.5"),
+        ]
 
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
         allreweightingweightnames = [sample.weightname() for sample in allsamples]

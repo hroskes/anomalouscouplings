@@ -238,6 +238,7 @@ class Production(MyEnum):
                  EnumItem("160720"),
                  EnumItem("160725", "160726"),
                  EnumItem("160729"),
+                 EnumItem("160901"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -252,6 +253,8 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160720/"
         if self == "160725" or self == "160729":
             return "root://lxcms03//data3/Higgs/160726/"
+        if self == "160901":
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_prodMEs_fix/AAAOK"
         assert False
     def CJLSTdir_anomalous(self):
         if self < "160624":
@@ -373,7 +376,7 @@ proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
 #productions = Production.items(lambda x: x in ("160225", "160729"))
-productions = Production.items(lambda x: x in ["160729"])
+productions = Production.items(lambda x: x in ["160901"])
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 categories = Category.items()
@@ -536,7 +539,7 @@ class TemplatesFile(MultiEnum):
     def templatesfile(self):
         folder = os.path.join(config.repositorydir, "step7_templates")
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
 
         nameparts = [str(x) for x in nameparts]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
