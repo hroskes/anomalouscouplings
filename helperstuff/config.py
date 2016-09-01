@@ -12,8 +12,13 @@ else:
 
 unblinddistributions = False
 unblindscans = False
+applyshapesystematics = False
 useQGTagging = False
+
 expectedscanluminosity = 10
+
 m4lmin, m4lmax = 105, 140
+
 blindcut = lambda self: self.D_bkg_0plus() < 0.5
+
 productionsforcombine = ["160729"]

@@ -360,8 +360,11 @@ class WhichProdDiscriminants(MyEnum):
                 )
 
 channels = Channel.items()
-systematics = Systematic.items()
-treesystematics = Systematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
+if config.applyshapesystematics:
+    systematics = Systematic.items()
+    treesystematics = Systematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
+else:
+    systematics = treesystematics = Systematic.items(lambda x: x == "")
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
@@ -523,7 +526,7 @@ class TemplatesFile(MultiEnum):
     def jsonfile(self):
         folder = os.path.join(config.repositorydir, "step5_json")
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".json")
