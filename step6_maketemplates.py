@@ -2,8 +2,8 @@ from helperstuff import config
 from helperstuff.samples import Sample
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
 import os
-import subprocess
 import ROOT
+import subprocess
 from time import sleep
 
 cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]

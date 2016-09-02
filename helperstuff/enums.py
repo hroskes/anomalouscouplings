@@ -402,7 +402,8 @@ productions = Production.items(lambda x: x in ["160901"])
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 categories = Category.items()
-whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_VBF")
+#whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_VBF")
+whichproddiscriminants = WhichProdDiscriminants.items()
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):
