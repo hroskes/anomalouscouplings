@@ -380,7 +380,7 @@ productions = Production.items(lambda x: x in ["160901"])
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 categories = Category.items()
-whichproddiscriminants = WhichProdDiscriminants.items()
+whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_VBF")
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):
@@ -571,9 +571,13 @@ class TemplatesFile(MultiEnum):
         if self.templategroup in ["ggh", "vbf"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
-            return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ", "ZX")]
+            if config.usedata:
+                return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ", "ZX")]
+            else:
+                return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ")]
         elif self.templategroup == "DATA":
             return [Template(self, "data")]
+        assert False
 
     @property
     def bkgdiscriminant(self):
@@ -671,7 +675,7 @@ def tmp():
                             if systematic == "":
                                 templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production, category, "prod+dec", w))
                             for blindstatus in blindstatuses:
-                                if systematic == "" and (blindstatus == "blind" or config.unblinddistributions):
+                                if systematic == "" and (blindstatus == "blind" or config.unblinddistributions) and config.usedata:
                                     templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus, category, "prod+dec", w))
 tmp()
 del tmp
@@ -1064,8 +1068,8 @@ class Template(MultiEnum):
                    },
                    "conserveSumOfWeights": True,
                    "postprocessing": [
-                     {"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin()},
-                     {"type": "reweight", "axes": self.reweightaxes()},
+#                     {"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin()},
+#                     {"type": "reweight", "axes": self.reweightaxes()},
                      {"type": "rescale","factor": self.scalefactor},
                    ],
                    "filloverflows": True,
