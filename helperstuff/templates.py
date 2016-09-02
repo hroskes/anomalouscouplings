@@ -57,7 +57,7 @@ class TemplatesFile(MultiEnum):
 
         nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
 
-        nameparts = [str(x) for x in nameparts]
+        nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
 
         return result
