@@ -20,9 +20,8 @@ def makejson(*args):
                 "templates": [],
                }
 
-    for template in templatesfile.templates():
+    for template in templatesfile.templates() + templatesfile.inttemplates():
         jsondict["templates"] += template.getjson()["templates"]
-    jsondict["templates"] += templatesfile.getintjson["templates"]
 
     jsonstring = json.dumps(jsondict, sort_keys=True, indent=4, separators=(',', ': '))
     filename = templatesfile.jsonfile()

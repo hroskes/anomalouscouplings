@@ -1,7 +1,9 @@
+import abc
 import config
 from enums import Analysis, analyses, AnalysisType, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MyEnum, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
 from filemanager import tfiles
 from itertools import product
+import numpy
 import os
 from samples import ReweightingSample, Sample
 
@@ -91,6 +93,15 @@ class TemplatesFile(MultiEnum):
             return [Template(self, "data")]
         assert False
 
+    def inttemplates(self):
+        if self.templategroup == "ggh":
+            return [IntTemplate(self, "ggH", "g11gi1")]
+        elif self.templategroup == "vbf":
+            return [IntTemplate(self, "VBF", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
+        elif self.templategroup in ("bkg", "DATA"):
+            return []
+        assert False
+
     @property
     def bkgdiscriminant(self):
         return self.systematic.D_bkg_0plus()
@@ -106,7 +117,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_g2_decay")
             if self.analysis == "fL1":
                 return discriminant("D_g1prime2_decay")
-        
+
         if self.category == "VBF2jTaggedIchep16":
             if self.analysis == "fa3":
                 return discriminant("D_0minus_VBFdecay")
@@ -114,7 +125,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_g2_VBFdecay")
             if self.analysis == "fL1":
                 return discriminant("D_g1prime2_VBFdecay")
-        
+
 
     @property
     def mixdiscriminant(self):
@@ -127,7 +138,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_g1g2_decay")
             if self.analysis == "fL1":
                 return discriminant("D_g2_decay")
-        
+
         if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_int_VBF":
             if self.analysis == "fa3":
                 return discriminant("D_CP_VBF")
@@ -171,50 +182,41 @@ class TemplatesFile(MultiEnum):
         assert False
 
     @property
-    def inttemplatename(self):
-        if self.templategroup == "ggh":
-            result = "templateIntAdapSmooth"
-            if any(template.domirror() for template in self.templates()):
-                result += "Mirror"
-            return result
-        assert False
+    def invertedmatrix(self):
+        assert self.templategroup == "vbf"
 
-    @property
-    def getintjson(self):
-        if self.templategroup in ("bkg", "DATA"):
-            return {"templates":[]}
+        if not hasattr(self, "__invertedmatrix"):
 
-        if self.templategroup == "ggh":
-            puretemplates = [template for template in self.templates() if template.hypothesis.ispure]
-            mixtemplates = [template for template in self.templates() if not template.hypothesis.ispure]
-            assert len(puretemplates) == 2 and len(mixtemplates) == 1
-            mixtemplate = mixtemplates[0]
-            intjsn = {
-                       "templates":[
-                         {
-                           "name": self.inttemplatename,
-                           "templatesum":[
-                             {"name":mixtemplate.templatename(final=False),"factor":1.0},
-                           ] + [
-                             {"name":t.templatename(final=False),"factor":-1.0} for t in puretemplates
-                           ],
-                           "postprocessing":[
-                           ],
-                         },
-                       ],
-                     }
-            domirrors = set([t.domirror() for t in puretemplates])
-            assert len(domirrors) == 1
-            domirror = domirrors.pop()
-            if domirror:
-                intjsn["templates"][0]["postprocessing"].append({"type":"mirror", "antisymmetric":True, "axis":1})
-            return intjsn
+            ganomalous = self.analysis.couplingname
+            matrix = numpy.matrix(
+                                  [
+                                   [
+                                    template.sample.g1**(4-i) * getattr(template.sample, ganomalous)**i
+                                        for i in range(5)
+                                   ]
+                                       for template in self.templates()
+                                  ]
+                                 )
+            """
+            matrix looks something like this:
+            1,    0,      0,        0,      0
+            0,    0,      0,        0,      g4^4
+            g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
+            g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
+            g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
 
-        if self.templategroup == "vbf":
-            #temporary
-            return {"templates":[]}
+            invert the matrix, then multiply by the vector of templates.  This should give back
+               templates for each respective term (g1^4g4^0, g1^3g4^1, ...)
+            In the PDF, the templates need to be multiplied by (g1^i)(g4^(4-i))
+            """
+            self.__invertedmatrix = invertedmatrix = matrix.I
+            #make sure the two pure templates can be used as is
+            #these assertions should be equivalent to asserting that SMtemplate.g1 == anomaloustemplate.ganomalous == 1
+            # and that the two pure samples are in the right places on the list
+            assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
+            assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
 
-        assert False
+        return self.__invertedmatrix
 
 templatesfiles = []
 def tmp():
@@ -239,7 +241,47 @@ def tmp():
 tmp()
 del tmp
 
-class Template(MultiEnum):
+class TemplateBase(object):
+    __metaclass__ = abc.ABCMeta
+    def templatefile(self):
+        return self.templatesfile.templatesfile()
+
+    @abc.abstractmethod
+    def templatename(self):
+        pass
+
+    def gettemplate(self):
+        f = tfiles[self.templatefile()]
+        try:
+            return getattr(f, self.templatename())
+        except AttributeError:
+            raise IOError("No template {} in {}".format(self.templatename(), self.templatefile()))
+
+    @property
+    def discriminants(self):
+        return self.templatesfile.discriminants
+
+    @property
+    def binning(self):
+        result = sum(([d.bins, d.min, d.max] for d in self.discriminants), [])
+        for i in 1, 2, 4, 5, 7, 8:
+            result[i] = float(result[i])
+        return result
+
+    @abc.abstractmethod
+    def getjson(self):
+        pass
+
+class MultiEnumABCMeta(MultiEnum.__metaclass__, TemplateBase.__metaclass__):
+    """
+    needed to resolve conflict
+    http://code.activestate.com/recipes/204197-solving-the-metaclass-conflict/
+    except don't need all their fancy stuff
+    the only function in MetaClassForMultiEnums is __new__ and it calls super
+    """
+
+class Template(TemplateBase, MultiEnum):
+    __metaclass__ = MultiEnumABCMeta
     enums = [TemplatesFile, ProductionMode, Hypothesis]
     enumname = "template"
 
@@ -278,9 +320,6 @@ class Template(MultiEnum):
                 raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.templategroup, args))
         else:
             raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
-
-    def templatefile(self, run1=False):
-        return self.templatesfile.templatesfile(run1)
 
     def templatename(self, final=True):
         if self.productionmode == "ggH":
@@ -331,13 +370,6 @@ class Template(MultiEnum):
         if self.productionmode == "data":
             return "data"
         assert False
-
-    def gettemplate(self):
-        f = tfiles[self.templatefile()]
-        try:
-            return getattr(f, self.templatename())
-        except AttributeError:
-            raise IOError("No template {} in {}".format(self.templatename(), self.templatefile()))
 
     def weightname(self):
         if self.productionmode == "ggZZ":
@@ -467,27 +499,6 @@ class Template(MultiEnum):
 
     def domirror(self):
         return self.analysis == "fa3" and self.hypothesis not in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5") and self.productionmode != "data"
-
-    @property
-    def discriminants(self):
-        return self.templatesfile.discriminants
-
-    @property
-    def binning(self):
-        result = sum(([d.bins, d.min, d.max] for d in self.discriminants), [])
-        for i in 1, 2, 4, 5, 7, 8:
-            result[i] = float(result[i])
-        return result
-
-    def puretemplatestosubtract(self):
-        if self.templategroup == "ggh":
-            if self.analysis == "fa2" and self.hypothesis == "fa20.5":
-                return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "a2"))
-            if self.analysis == "fa3" and self.hypothesis == "fa30.5":
-                return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "0-"))
-            if self.analysis == "fL1" and self.hypothesis == "fL10.5":
-                return (Template(self.templatesfile, "ggH", "0+"), Template(self.templatesfile, "ggH", "L1"))
-        assert False
 
     def smoothentriesperbin(self):
         if self.analysistype == "decayonly":
@@ -669,6 +680,101 @@ class Template(MultiEnum):
         result = self.channel.ZZFlav
         if self.productionmode == "ZX": result *= -1
         return result
+
+    @property
+    def sample(self):
+        return ReweightingSample(self.hypothesis, self.productionmode)
+
+class IntTemplate(TemplateBase, MultiEnum):
+    __metaclass__ = MultiEnumABCMeta
+    class InterferenceType(MyEnum):
+        enumname = "interferencetype"
+        enumitems = (
+                     EnumItem("g11gi1"),
+                     EnumItem("g11gi3"),
+                     EnumItem("g12gi2"),
+                     EnumItem("g13gi1"),
+                    )
+    enums = [TemplatesFile, ProductionMode, InterferenceType]
+
+    def check(self, *args):
+        if self.productionmode == "ggH":
+            if self.interferencetype != "g11gi1":
+                raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
+        elif self.productionmode == "VBF":
+            if self.interferencetype not in ("g11gi3", "g12gi2", "g13gi1"):
+                raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
+        else:
+            raise ValueError("Invalid productionmode {}!\n{}".format(self.productionmode, args))
+        super(IntTemplate, self).check(*args)
+
+    def templatename(self):
+        if self.productionmode == "ggH":
+            if self.interferencetype == "g11gi1":
+                result = "templateIntAdapSmooth"
+        if self.productionmode == "VBF":
+            if self.interferencetype == "g11gi3":
+                result = "templateg11{}3AdapSmooth".format(self.analysis.couplingname)
+            if self.interferencetype == "g12gi2":
+                result = "templateg12{}2AdapSmooth".format(self.analysis.couplingname)
+            if self.interferencetype == "g13gi1":
+                result = "templateg13{}1AdapSmooth".format(self.analysis.couplingname)
+        if self.domirror:
+            result += "Mirror"
+        return result
+
+    @property
+    def domirror(self):
+        if self.analysis != "fa3": return False
+        if self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
+            return True
+        elif self.interferencetype == "g12gi2":
+            return False
+        assert False
+
+    def getjson(self):
+        if self.interferencetype == "g11gi1":
+            puretemplates = [Template(self.templatesfile, self.productionmode, h) for h in self.analysis.purehypotheses]
+            mixtemplate = Template(self.templatesfile, self.productionmode, self.analysis.mixdecayhypothesis)
+            intjsn = {
+                       "templates":[
+                         {
+                           "name": self.templatename(),
+                           "templatesum":[
+                             {"name":mixtemplate.templatename(final=False),"factor":1.0},
+                           ] + [
+                             {"name":t.templatename(final=False),"factor":-1.0} for t in puretemplates
+                           ],
+                           "postprocessing":[],
+                         },
+                       ],
+                     }
+
+        if self.interferencetype in ("g11gi3", "g12gi2", "g13gi1"):
+            g1exp, giexp = (int(i) for i in str(self.interferencetype).replace("g1", "").replace("gi", ""))
+            invertedmatrix = self.templatesfile.invertedmatrix
+            vectoroftemplates = self.templatesfile.templates()  #ok technically it's a list not a vector
+            rowofinvertedmatrix = giexp  #first row is labeled 0
+            templatesum = []
+            for j, template in enumerate(vectoroftemplates):
+                templatesum.append({
+                                    "name": template.templatename(final=False),
+                                    "factor": invertedmatrix[rowofinvertedmatrix,j],
+                                   })
+            intjsn = {
+                       "templates":[
+                         {
+                           "name": self.templatename(),
+                           "templatesum":templatesum,
+                           "postprocessing":[],
+                         },
+                       ],
+                     }
+
+        if self.domirror:
+            intjsn["templates"][0]["postprocessing"].append({"type":"mirror", "antisymmetric":True, "axis":1})
+        return intjsn
+
 
 class DataTree(MultiEnum):
     enums = [Channel, Production]

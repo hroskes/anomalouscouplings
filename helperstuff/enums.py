@@ -229,6 +229,27 @@ class Analysis(MyEnum):
         elif self == "fL1":
             return constants.JHUXSggH2L2la1L1
         assert False
+    @property
+    def couplingname(self):
+        if self == "fa3": return "g4"
+        if self == "fa2": return "g2"
+        if self == "fL1": return "g1prime2"
+    @property
+    def purehypotheses(self):
+        if self == "fa3":
+            return "0+", "0-"
+        if self == "fa2":
+            return "0+", "a2"
+        if self == "fL1":
+            return "0+", "L1"
+    @property
+    def mixdecayhypothesis(self):
+        if self == "fa3":
+            return "fa3dec0.5"
+        if self == "fa2":
+            return "fa2dec0.5"
+        if self == "fL1":
+            return "fL1dec0.5"
 
 class Production(MyEnum):
     enumname = "production"
