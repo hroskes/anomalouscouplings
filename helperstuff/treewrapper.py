@@ -741,13 +741,31 @@ class TreeWrapper(Iterator):
         """Call this to only add the weights and ZZMass to the new tree"""
         #only want the weight, and ZZMass for the range
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
-        for name in self.toaddtotree[:]:
-            if name not in reweightingweightnames:
-                self.exceptions.append(name)
-                self.toaddtotree.remove(name)
+
+        categoryingredients = [
+            "nExtraLep",
+            "nExtraZ",
+            "nCleanedJetsPt30",
+            "nCleanedJetsPt30BTagged",
+            "JetQGLikelihood",
+            "phj_VAJHU",
+            "pAux_vbf_VAJHU",
+            "pwh_hadronic_VAJHU",
+            "pzh_hadronic_VAJHU",
+            "JetPhi",
+        ]
+
+        for lst in (self.toaddtotree, self.toaddtotree_int):
+            for name in self.toaddtotree[:]:
+                if name not in reweightingweightnames + ["category"]:
+                    self.exceptions.append(name)
+                    self.toaddtotree.remove(name)
+        self.tree.GetEntry(0)  #to initialize the vectors to something other than (vector<float>*)0 which gives a segfault in python
         self.tree.SetBranchStatus("*", 0)
         self.tree.SetBranchStatus("ZZMass", 1)
         self.tree.SetBranchStatus("Z*Flav", 1)
+        for variable in categoryingredients:
+            self.tree.SetBranchStatus(variable, 1)
         for variable in self.treesample.weightingredients():
             self.tree.SetBranchStatus(variable, 1)
 
