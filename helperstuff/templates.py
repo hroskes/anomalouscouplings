@@ -673,6 +673,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def selection(self):
         result = "ZZMass>{} && ZZMass<{} && Z1Flav*Z2Flav == {}".format(config.m4lmin, config.m4lmax, self.ZZFlav)
+        result += " && (" + " || ".join("category == {}".format(c) for c in self.category.idnumbers) + ")"
         return result
 
     @property
