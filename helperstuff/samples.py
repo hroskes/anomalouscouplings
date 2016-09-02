@@ -186,50 +186,62 @@ class ReweightingSample(MultiEnum):
 
     @property
     def g2(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
-            if self.hypothesis in ["0+", "0-", "L1"] + ["{}{}0.5".format(a, b) for a in ("fa3", "fL1") for b in ("dec", "prod", "proddec-")]:
-                return 0
-            if self.hypothesis == "a2":
-                return 1
-            if self.hypothesis == "fa2dec0.5":
+        if self.hypothesis in ["0+", "0-", "L1"] + ["{}{}0.5".format(a, b) for a in ("fa3", "fL1") for b in ("dec", "prod", "proddec-")]:
+            return 0
+        if self.hypothesis == "a2":
+            if self.productionmode == "ggH":
                 return constants.g2decay
+            else:
+                return 1
+        if self.hypothesis == "fa2dec0.5":
+            return constants.g2decay
+
         if self.productionmode == "VBF":
             if self.hypothesis == "fa2prod0.5":
                 return constants.g2VBF
             if self.hypothesis == "fa2proddec-0.5":
                 return -sqrt(constants.g2VBF*constants.g2decay)
+
         raise self.ValueError("g2")
 
     @property
     def g4(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
-            if self.hypothesis in ["0+", "a2", "L1"] + ["{}{}0.5".format(a, b) for a in ("fa2", "fL1") for b in ("dec", "prod", "proddec-")]:
-                return 0
-            if self.hypothesis == "0-":
-                return 1
-            if self.hypothesis == "fa3dec0.5":
+        if self.hypothesis in ["0+", "a2", "L1"] + ["{}{}0.5".format(a, b) for a in ("fa2", "fL1") for b in ("dec", "prod", "proddec-")]:
+            return 0
+        if self.hypothesis == "0-":
+            if self.productionmode == "ggH":
                 return constants.g4decay
+            else:
+                return 1
+        if self.hypothesis == "fa3dec0.5":
+            return constants.g4decay
+
         if self.productionmode == "VBF":
             if self.hypothesis == "fa3prod0.5":
                 return constants.g4VBF
             if self.hypothesis == "fa3proddec-0.5":
                 return -sqrt(constants.g4VBF*constants.g4decay)
+
         raise self.ValueError("g4")
 
     @property
     def g1prime2(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
-            if self.hypothesis in ["0+", "a2", "0-"] + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]:
-                return 0
-            if self.hypothesis == "L1":
-                return 1
-            if self.hypothesis == "fL1dec0.5":
+        if self.hypothesis in ["0+", "a2", "0-"] + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]:
+            return 0
+        if self.hypothesis == "L1":
+            if self.productionmode == "ggH":
                 return constants.g1prime2decay_gen
+            else:
+                return 1
+        if self.hypothesis == "fL1dec0.5":
+            return constants.g1prime2decay_gen
+
         if self.productionmode == "VBF":
             if self.hypothesis == "fL1prod0.5":
                 return constants.g1prime2VBF_gen
             if self.hypothesis == "fL1proddec-0.5":
                 return -sqrt(constants.g1prime2VBF_gen*constants.g1prime2decay_gen)
+
         raise self.ValueError("g1prime2")
 
     @property

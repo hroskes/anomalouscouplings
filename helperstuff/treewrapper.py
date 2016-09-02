@@ -815,7 +815,14 @@ class TreeWrapper(Iterator):
                 print couplings.ghz1Re[i], couplings.ghz2Re[i], couplings.ghz4Re[i], couplings.ghz1_prime2Re[i], sample.g1, sample.g2, sample.g4, sample.g1prime2
                 if sample.productionmode != "ggH" and self.treesample.production <= "160729":
                     continue
-                if not (couplings.spin[i] == 0 and couplings.ghz1Re[i] == sample.g1 and couplings.ghz2Re[i] == sample.g2 and couplings.ghz4Re[i] == sample.g4 and couplings.ghz1_prime2Re[i] == sample.g1prime2):
+
+                #to set gi=1 for the pure samples to compare to the couplings tree
+                #should just check ratios, but that's annoying when most of them are 0
+                gs = g1, g2, g4, g1prime2 = sample.g1, sample.g2, sample.g4, sample.g1prime2
+                if count(g for g in gs if g!=0) == 1:
+                    gs = g1, g2, g4, g1prime2 = [1 if g else 0 for g in gs]
+
+                if not (couplings.spin[i] == 0 and couplings.ghz1Re[i] == g1 and couplings.ghz2Re[i] == g2 and couplings.ghz4Re[i] == g4 and couplings.ghz1_prime2Re[i] == g1prime2):
                     raise SyntaxError("Order of reweightingsamples or the weight functions seems wrong!  Check entry {} in couplings with respect to {}.".format(i, sample))
 
 
