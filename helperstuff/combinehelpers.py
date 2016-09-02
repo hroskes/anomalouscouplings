@@ -1,10 +1,11 @@
 import collections
 import config
-from enums import EnumItem, Channel, DataTree, MultiEnum, MyEnum, Production, ProductionMode, Template
+from enums import EnumItem, Channel, MultiEnum, MyEnum, Production, ProductionMode
 from filemanager import tfiles
 import os
 import ROOT
 from samples import Sample
+from templates import DataTree, Template
 import yaml
 
 class LuminosityType(MyEnum):

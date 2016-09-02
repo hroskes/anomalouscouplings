@@ -1,6 +1,6 @@
 from helperstuff import constants
 from helperstuff.samples import Sample
-from helperstuff.enums import TemplatesFile, templatesfiles
+from helperstuff.templates import TemplatesFile, templatesfiles
 import json
 import os
 
@@ -22,6 +22,7 @@ def makejson(*args):
 
     for template in templatesfile.templates():
         jsondict["templates"] += template.getjson()["templates"]
+    jsondict["templates"] += templatesfile.getintjson["templates"]
 
     jsonstring = json.dumps(jsondict, sort_keys=True, indent=4, separators=(',', ': '))
     filename = templatesfile.jsonfile()

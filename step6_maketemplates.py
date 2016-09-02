@@ -1,6 +1,6 @@
 from helperstuff import config
-from helperstuff.enums import DataTree, datatrees, TemplatesFile, templatesfiles
 from helperstuff.samples import Sample
+from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
 import os
 import subprocess
 import ROOT

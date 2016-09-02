@@ -3,8 +3,9 @@ combine ScaleUp, ResUp --> ScaleResUp
 ZX systematics templates from qqZZ
 """
 
-from helperstuff.enums import analyses, channels, productions, Template, TemplatesFile
+from helperstuff.enums import analyses, channels, productions
 from helperstuff.filemanager import tfiles
+from helperstuff.templates import Template, TemplatesFile
 import ROOT
 
 def combinesystematics(flavor, analysis, production):

@@ -1,9 +1,10 @@
 import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate
-from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Production, productions, Systematic, Template
+from helperstuff.enums import analyses, Analysis, Channel, channels, EnumItem, MultiEnum, MyEnum, Production, productions, Systematic
 from helperstuff.filemanager import tfiles
 import helperstuff.style
+from helperstuff.template import Template
 import itertools
 import os
 import ROOT

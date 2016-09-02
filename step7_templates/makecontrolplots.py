@@ -1,5 +1,6 @@
 from helperstuff import config, style  #style needed to remove the statbox and title and adjust the axis label size
-from helperstuff.enums import analyses, channels, productions, treesystematics, TemplatesFile
+from helperstuff.enums import analyses, channels, productions, treesystematics
+from helperstuff.templates import TemplatesFile
 import os
 import ROOT
 import subprocess
