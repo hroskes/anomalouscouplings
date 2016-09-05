@@ -1,11 +1,11 @@
 import collections
 import config
-from enums import EnumItem, Channel, MultiEnum, MyEnum, Production, ProductionMode
+from enums import Analysis, EnumItem, Channel, MultiEnum, MyEnum, Production, ProductionMode
 from filemanager import tfiles
 import os
 import ROOT
-from samples import Sample
-from templates import DataTree, Template
+from samples import ReweightingSample, Sample
+from templates import DataTree, IntTemplate, Template
 import yaml
 
 class LuminosityType(MyEnum):
@@ -29,7 +29,8 @@ class Luminosity(MultiEnum):
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production]
     def getrate(self):
-        return self.yamlrate()
+        if self.productionmode != "VBF bkg":
+            return self.yamlrate()
         if self.productionmode == "ZX" and self.production in ("160725", "160729"):
             if self.channel == "4e":    return 2.39 * float(self.luminosity)/12.9
             if self.channel == "4mu":   return 3.66 * float(self.luminosity)/12.9
@@ -110,13 +111,19 @@ def getrates(*args, **kwargs):
     for kw, kwarg in kwargs.iteritems():
         if kw == "format":
             fmt = kwarg
-    ggH, qqZZ, ggZZ, ZX = getrate("ggH", *args), getrate("qqZZ", *args), getrate("ggZZ", *args), getrate("ZX", *args)
+    ggH, qqZZ, ggZZ, VBFbkg, ZX = getrate("ggH", *args), getrate("qqZZ", *args), getrate("ggZZ", *args), getrate("VBF bkg", *args), getrate("ZX", *args)
 
     result =  fmt.format(ggH, qqZZ, ggZZ, ZX)
     return result
 
 def gettemplate(*args):
-    return Template(*args).gettemplate()
+    try:
+        try:
+            return Template("prod+dec", *args).gettemplate()
+        except ValueError as e1:
+            return IntTemplate("prod+dec", *args).gettemplate()
+    except ValueError as e2:
+        raise ValueError("Can't gettemplate using args:\n{}\n\nTrying to make a regular template:\n{}\n\nTrying to make an interference template:\n{}".format(args, e1.message, e2.message))
 
 def getdatatree(*args):
     return tfiles[DataTree(*args).treefile].candTree
@@ -128,7 +135,21 @@ def getsubtractdatatree(*args):
 def discriminantnames(*args):
     theset = set()
     for production in config.productionsforcombine:
-        result = tuple(d.name for d in Template("ggH", "0+", "2e2mu", production, *args).discriminants)
+        result = tuple(d.name for d in Template("ggH", "0+", "2e2mu", "prod+dec", production, *args).discriminants)
         theset.add(result)
     assert len(theset) == 1  #sanity check
     return result
+
+class SigmaIOverSigma1(MultiEnum):
+    enums = (Analysis, ProductionMode)
+    def check(self, *args):
+        if self.productionmode == "ggH":
+            raise ValueError("need separate implementation for ggH, gi is defined differently for the pure sample\n{}".format(args))
+    @property
+    def result(self):
+        sigmai = ReweightingSample(self.analysis.purehypotheses[1], self.productionmode).xsec
+        sigma1 = ReweightingSample("SM", self.productionmode).xsec
+        return sigmai/sigma1
+
+def sigmaioversigma1(*args):
+    return SigmaIOverSigma1(*args).result

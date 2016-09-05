@@ -614,6 +614,7 @@ class TreeWrapper(Iterator):
         else:
             KFactor = self.tree.KFactorEWKqqZZ * self.tree.KFactorQCDqqZZ_M
         return self.MC_weight * self.xsec * KFactor / self.nevents
+    MC_weight_VBFbkg = MC_weight_plain
     def MC_weight_ZX(self):
         self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
         return ZX.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ZX.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
@@ -710,6 +711,7 @@ class TreeWrapper(Iterator):
             ReweightingSample("ttH", "0+"),
             ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
             ReweightingSample("qqZZ"),
+            ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
             ReweightingSample("ZX"),
             ReweightingSample("VBF", "a2"),
             ReweightingSample("VBF", "0-"),

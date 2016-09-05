@@ -83,6 +83,9 @@ class Flavor(MyEnum):
                  EnumItem("2mu2tau", "2tau2mu"),
                  EnumItem("2e2tau", "2tau2e"),
                 )
+    @property
+    def hastaus(self):
+        return self in ("2e2tau", "2mu2tau", "4tau")
 
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
@@ -117,6 +120,7 @@ class ProductionMode(MyEnum):
                  EnumItem("ttH"),
                  EnumItem("qqZZ"),
                  EnumItem("ggZZ"),
+                 EnumItem("VBFbkg", "VBF bkg"),
                  EnumItem("ZX"),
                  EnumItem("data"),
                 )
@@ -219,8 +223,6 @@ class Analysis(MyEnum):
             if self == "fL1":
                 return "D_{0h+}"
         assert False
-    def signaltemplates(self, *args):
-        return [Template(sample, self, *args) for sample in self.signalsamples()]
     def interfxsec(self):
         if self == "fa3":
             return constants.JHUXSggH2L2la1a3
@@ -323,7 +325,7 @@ class Production(MyEnum):
     def year(self):
         if self == "160225":
             return 2015
-        if self in ("160624", "160714", "160720", "160725", "160729"):
+        if "160624" <= self <= "160901":
             return 2016
         assert False
 
@@ -368,6 +370,17 @@ class Category(MyEnum):
         import CJLSTscripts
         return [getattr(CJLSTscripts, name) for name in self.item.names]
 
+    def __contains__(self, other):
+        return other in self.idnumbers
+
+    @property
+    def make_prop_model(self):
+        if self == "UntaggedIchep16":
+            return "1D"
+        if self == "VBF2jTaggedIchep16":
+            return "VBFHZZ4l"
+        assert False
+
 class WhichProdDiscriminants(MyEnum):
     """
     D_bkg and D_(0minus/0hplus/L1)_VBFdecay, but which third one?
@@ -376,12 +389,12 @@ class WhichProdDiscriminants(MyEnum):
     enumitems = (
                  EnumItem("D_int_decay"),
                  EnumItem("D_int_VBF"),
-                 EnumItem("g11gi3"),
-                 EnumItem("g12gi2"),
-                 EnumItem("g13gi1"),
-                 EnumItem("g11gi3_prime"),
-                 EnumItem("g12gi2_prime"),
-                 EnumItem("g13gi1_prime"),
+                 EnumItem("D_g11gi3"),
+                 EnumItem("D_g12gi2"),
+                 EnumItem("D_g13gi1"),
+                 EnumItem("D_g11gi3_prime"),
+                 EnumItem("D_g12gi2_prime"),
+                 EnumItem("D_g13gi1_prime"),
                 )
 
 channels = Channel.items()

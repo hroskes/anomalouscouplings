@@ -2,7 +2,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 from helperstuff import config
 from helperstuff import filemanager
 from helperstuff.combinehelpers import getrates
-from helperstuff.enums import Analysis, Channel, channels, Production
+from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
 from itertools import product
@@ -14,7 +14,7 @@ import sys
 
 makeworkspacestemplate = """
 eval $(scram ru -sh) &&
-python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo.
+python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo. -C .oO[category]Oo. -m .oO[model]Oo.
 """
 
 createworkspacetemplate = """
@@ -38,6 +38,7 @@ def check_call_test(*args, **kwargs):
 
 def runcombine(analysis, foldername, **kwargs):
     usechannels = channels
+    usecategories = categories
     expectvalues = [0.0]
     plotname = "limit"
     legendposition = (.2, .7, .6, .9)
@@ -46,6 +47,8 @@ def runcombine(analysis, foldername, **kwargs):
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
+        elif kw == "categories":
+            usecategories = [Category(c) for c in kwarg.split(",")]
         elif kw == "expectvalues":
             try:
                 expectvalues = [fai if fai=="minimum" else float(fai) for fai in kwarg.split(",")]
@@ -78,26 +81,29 @@ def runcombine(analysis, foldername, **kwargs):
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
-              "cardstocombine": " ".join("hzz4l_{}S_{}.txt".format(channel, production.year) for channel, production in product(usechannels, productions)),
+              "cardstocombine": " ".join("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year) for channel, category, production in product(usechannels, usecategories, productions)),
               "workspacefile": "floatMu.root",
               "filename": "higgsCombine_.oO[append]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "observedappend": "obs",
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
-        for production in productions:
+        for production, category in product(productions, categories):
             production = Production(production)
-            if not all(os.path.exists("cards_{}/HCG/125/hzz4l_{}S_{}.input.root".format(foldername, channel, production.year)) for channel in usechannels):
+            category = Category(category)
+            if not all(os.path.exists("cards_{}/HCG/125/hzz4l_{}S_{}_{}.input.root".format(foldername, channel, category, production.year)) for channel in usechannels):
                 makeworkspacesmap = repmap.copy()
                 makeworkspacesmap["production"] = str(production)
+                makeworkspacesmap["category"] = str(category)
+                makeworkspacesmap["model"] = str(category.make_prop_model)
                 subprocess.check_call(replaceByMap(makeworkspacestemplate, makeworkspacesmap), shell=True)
         with open("cards_{}/.gitignore".format(foldername), "w") as f:
             f.write("*")
         with filemanager.cd("cards_{}/HCG/125".format(foldername)):
             #replace rates
-            for channel, production in product(channels, productions):
-                if channel in usechannels:
-                    with open("hzz4l_{}S_{}.txt".format(channel, production.year)) as f:
+            for channel, category, production in product(channels, categories, productions):
+                if channel in usechannels and category in usecategories:
+                    with open("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year)) as f:
                         contents = f.read()
                         if "\n#rate" in contents: continue #already did this
                     for line in contents.split("\n"):
@@ -108,7 +114,7 @@ def runcombine(analysis, foldername, **kwargs):
                                 rates = getrates(channel, "forexpectedscan", production)
                             contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
-                    with open("hzz4l_{}S_{}.txt".format(channel, production.year), "w") as f:
+                    with open("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year), "w") as f:
                         f.write(contents)
                 else:
                     if os.path.exists("hzz4l_{}S_{}.txt".format(channel, production.year)):

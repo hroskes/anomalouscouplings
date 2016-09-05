@@ -3,12 +3,16 @@ combine ScaleUp, ResUp --> ScaleResUp
 ZX systematics templates from qqZZ
 """
 
+from helperstuff import config
 from helperstuff.enums import analyses, channels, productions
 from helperstuff.filemanager import tfiles
 from helperstuff.templates import Template, TemplatesFile
 import ROOT
 
 def combinesystematics(flavor, analysis, production):
+    if not config.applyshapesystematics:
+        return #nothing to do
+
     ScaleResUp = TemplatesFile(flavor, "signal", "ScaleResUp", analysis, production)
     ScaleResDown = TemplatesFile(flavor, "signal", "ScaleResDown", analysis, production)
     ZXUp = TemplatesFile(flavor, "bkg", "ZXUp", analysis, production)

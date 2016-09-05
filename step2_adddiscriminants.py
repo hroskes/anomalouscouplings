@@ -76,6 +76,8 @@ if __name__ == '__main__':
             adddiscriminants("VBF", hypothesis, production)
         for flavor in flavors:
             adddiscriminants("ggZZ", flavor, production)
+            if not flavor.hastaus:
+                adddiscriminants("VBF bkg", flavor, production)
         adddiscriminants("qqZZ", production)
         adddiscriminants("ZX", production)
         adddiscriminants("ZH", "0+", production)

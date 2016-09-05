@@ -55,7 +55,7 @@ class TemplatesFile(MultiEnum):
     def templatesfile(self):
         folder = os.path.join(config.repositorydir, "step7_templates")
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic if config.applyshapesystematics else "", self.production, self.blindnamepart]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
@@ -85,10 +85,12 @@ class TemplatesFile(MultiEnum):
         if self.templategroup in ["ggh", "vbf"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
+            result = ["qqZZ", "ggZZ"]
             if config.usedata:
-                return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ", "ZX")]
-            else:
-                return [Template(self, productionmode) for productionmode in ("qqZZ", "ggZZ")]
+                result.append("ZX")
+            if self.analysistype == "prod+dec":
+                result.append("VBF bkg")
+            return [Template(self, productionmode) for productionmode in result]
         elif self.templategroup == "DATA":
             return [Template(self, "data")]
         assert False
@@ -243,6 +245,22 @@ del tmp
 
 class TemplateBase(object):
     __metaclass__ = abc.ABCMeta
+
+    def applysynonyms(self, enumsdict):
+        if enumsdict[TemplateGroup] is None:
+            if enumsdict[ProductionMode] == "ggH":
+                enumsdict[TemplateGroup] = "ggh"
+            elif enumsdict[ProductionMode] == "VBF":
+                enumsdict[TemplateGroup] = "vbf"
+            elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "VBF bkg", "ZX"):
+                enumsdict[TemplateGroup] = "bkg"
+            elif enumsdict[ProductionMode] == "data":
+                enumsdict[TemplateGroup] = "DATA"
+            elif enumsdict[ProductionMode] is None:
+                pass
+            else:
+                assert False
+
     def templatefile(self):
         return self.templatesfile.templatesfile()
 
@@ -285,19 +303,6 @@ class Template(TemplateBase, MultiEnum):
     enums = [TemplatesFile, ProductionMode, Hypothesis]
     enumname = "template"
 
-    def applysynonyms(self, enumsdict):
-        if enumsdict[TemplateGroup] is None:
-            if enumsdict[ProductionMode] == "ggH":
-                enumsdict[TemplateGroup] = "ggh"
-            elif enumsdict[ProductionMode] == "VBF":
-                enumsdict[TemplateGroup] = "vbf"
-            elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "ZX"):
-                enumsdict[TemplateGroup] = "bkg"
-            elif enumsdict[ProductionMode] == "data":
-                enumsdict[TemplateGroup] = "DATA"
-            else:
-                assert False
-
     def check(self, *args):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
@@ -308,7 +313,7 @@ class Template(TemplateBase, MultiEnum):
                 raise ValueError("{} {} is not used to make templates for {} {}!\n{}".format(self.productionmode, self.hypothesis, self.templategroup, self.analysis, args))
             if self.templategroup != str(self.productionmode).lower():
                 raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.templategroup, args))
-        elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
+        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.templategroup != "bkg":
@@ -320,6 +325,9 @@ class Template(TemplateBase, MultiEnum):
                 raise ValueError("{} is not {}!\n{}".format(self.hypothesis, self.templategroup, args))
         else:
             raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
+
+        if self.analysistype == "decayonly" and self.productionmode == "VBF bkg":
+            raise ValueError("No {} for {} analysis\n{}".format(self.productionmode, self.analysistype, args))
 
     def templatename(self, final=True):
         if self.productionmode == "ggH":
@@ -348,7 +356,9 @@ class Template(TemplateBase, MultiEnum):
                 name = "templateMixProdAdapSmooth"
             elif self.hypothesis in ("fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"):
                 name = "templateMixProdDecPiAdapSmooth"
-        elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
+        elif self.productionmode == "ZX" and not config.usedata:
+            name = "templateqqZZAdapSmooth"
+        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             name = "template{}AdapSmooth".format(self.productionmode)
         elif self.productionmode == "data":
             name = "datatemplate"
@@ -367,12 +377,14 @@ class Template(TemplateBase, MultiEnum):
             return str(self.productionmode).replace("ZZ", "#rightarrowZZ")
         if self.productionmode == "ZX":
             return "Z+X"
+        if self.productionmode == "VBF bkg":
+            return "VBF bkg"
         if self.productionmode == "data":
             return "data"
         assert False
 
     def weightname(self):
-        if self.productionmode == "ggZZ":
+        if self.productionmode in ("ggZZ", "VBF bkg"):
             return ReweightingSample(self.productionmode, "2e2mu").weightname()
         if self.hypothesis is not None:
             return ReweightingSample(self.productionmode, self.hypothesis).weightname()
@@ -483,6 +495,8 @@ class Template(TemplateBase, MultiEnum):
             result = [Sample(self.production, self.productionmode)]
         if self.productionmode == "ggZZ":
             result = [Sample(self.production, self.productionmode, flavor) for flavor in flavors]
+        if self.productionmode == "VBF bkg":
+            result = [Sample(self.production, self.productionmode, flavor) for flavor in flavors if not flavor.hastaus]
         if self.productionmode == "data":
             result = [Sample(self.production, self.productionmode, self.blindstatus)]
         result = [sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0]
@@ -778,21 +792,22 @@ class IntTemplate(TemplateBase, MultiEnum):
 
 
 class DataTree(MultiEnum):
-    enums = [Channel, Production]
+    enums = [Channel, Production, Category]
     enumname = "datatree"
     @property
     def originaltreefile(self):
         return Sample("data", self.production, "unblind").withdiscriminantsfile()
     @property
     def treefile(self):
-        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}.root".format(self.production, self.channel))
+        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}.root".format(self.production, self.channel, self.category))
     def passescut(self, t):
-        return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblindscans
+        return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblindscans and t.category in self.category
 
 datatrees = []
 for channel in channels:
     for production in productions:
-        datatrees.append(DataTree(channel, production))
+        for category in categories:
+            datatrees.append(DataTree(channel, production, category))
 
 
 
@@ -816,7 +831,7 @@ class SubtractDataTree(DataTree, MultiEnum):
 
     @property
     def treefile(self):
-        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}.root".format(self.production, self.channel, self.subtractproduction))
+        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.subtractproduction))
     def check(self, *args, **kwargs):
         return super(SubtractDataTree, self).check(*args, **kwargs)
     def passescut(self, t):

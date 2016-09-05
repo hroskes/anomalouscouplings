@@ -26,12 +26,14 @@ class ReweightingSample(MultiEnum):
                 raise ValueError("Bad hypothesis {} provided for {} productionmode\n{}".format(self.hypothesis, self.productionmode, args))
             if self.flavor is not None:
                 raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
-        elif self.productionmode == "ggZZ":
+        elif self.productionmode in ("ggZZ", "VBF bkg"):
             if self.hypothesis is not None:
-                raise ValueError("Hypothesis provided for ggZZ productionmode\n{}".format(args))
+                raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.flavor is None:
-                raise ValueError("No flavor provided for ggZZ productionmode\n{}".format(args))
-        elif self.productionmode == "qqZZ" or self.productionmode == "ZX" or self.productionmode == "data":
+                raise ValueError("No flavor provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.productionmode == "VBF bkg" and self.flavor.hastaus:
+                raise ValueError("No {} samples with taus\n{}".format(self.productionmode, args))
+        elif self.productionmode in ("qqZZ", "ZX", "data"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.flavor is not None:
@@ -47,7 +49,7 @@ class ReweightingSample(MultiEnum):
             return [ReweightingSample("ggH", hypothesis) for hypothesis in decayonlyhypotheses]
         elif self.productionmode == "VBF":
             return [ReweightingSample("VBF", hypothesis) for hypothesis in proddechypotheses]
-        elif self.productionmode in ("ggZZ", "qqZZ", "ZX", "ZH", "WplusH", "WminusH", "ttH"):
+        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ZH", "WplusH", "WminusH", "ttH"):
             return [self]
         elif self.productionmode == "data":
             return []
@@ -56,19 +58,19 @@ class ReweightingSample(MultiEnum):
     def isbkg(self):
         if self.productionmode in ("ggH", "data", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
             return False
-        elif self.productionmode in ("ggZZ", "qqZZ", "ZX"):
+        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
         raise self.ValueError("isbkg")
 
     def isZX(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "data", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
             return False
         elif self.productionmode == "ZX":
             return True
         raise self.ValueError("isZX")
 
     def isdata(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "ZX", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
             return False
         elif self.productionmode == "data":
             return True
@@ -127,12 +129,14 @@ class ReweightingSample(MultiEnum):
             return "MC_weight_ggZZ"
         elif self.productionmode == "qqZZ":
             return "MC_weight_qqZZ"
+        elif self.productionmode == "VBF bkg":
+            return "MC_weight_VBFbkg"
         elif self.productionmode == "ZX":
             return "MC_weight_ZX"
         raise self.ValueError("weightname")
 
     def TDirectoryname(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "data", "VBF", "ZH", "WplusH", "WminusH", "ttH") or self.productionmode == "ZX" and not config.usedata:
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WplusH", "WminusH", "ttH") or self.productionmode == "ZX" and not config.usedata:
             return "ZZTree"
         if self.productionmode == "ZX":
             return "CRZLLTree"
@@ -159,7 +163,7 @@ class ReweightingSample(MultiEnum):
     def onlyweights(self):
         """True if this sample is not needed for making templates,
            and only the weight and ZZMass should be recorded in the tree"""
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "ZX", "data"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "data"):
             return False
         if self.productionmode == "VBF":
             return False
@@ -340,6 +344,8 @@ class Sample(ReweightingSample):
                 return "ggTo{}_Contin_MCFM701".format(self.flavor)
             elif self.production <= "160714":
                 return "ggZZ{}".format(self.flavor)
+        if self.productionmode == "VBF bkg":
+            return "VBFTo{}JJ_Contin_phantom128".format(self.flavor)
         if self.productionmode == "qqZZ":
             return "ZZTo4l"
         if self.productionmode == "ZX" or self.productionmode == "data":
