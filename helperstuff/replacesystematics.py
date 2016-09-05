@@ -1,5 +1,5 @@
 import config
-from enums import Channel, channels, EnumItem, MultiEnum, MyEnum, Production
+from enums import Category, Channel, channels, EnumItem, MultiEnum, MyEnum, Production
 import os
 import yaml
 
@@ -142,10 +142,11 @@ class ICHEPSystematics(ReadSystematics_BaseClass):
         uselist = [name, s["type"]] + [str(s[p]) if p in s else "-" for p in useprocesses]
         return " ".join(uselist)
 
-def replacesystematics(channel, production):
+def replacesystematics(channel, production, category):
     channel = Channel(channel)
     production = Production(production)
-    cardfilename = "hzz4l_{}S_{}.txt".format(channel, production.year)
+    category = Category(category)
+    cardfilename = "hzz4l_{}S_{}_{}.txt".format(channel, category, production.year)
     with open(cardfilename) as f:
         contents = f.read()
     sections = contents.split("------------\n")

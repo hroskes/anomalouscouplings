@@ -2,7 +2,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 from helperstuff import config
 from helperstuff import filemanager
 from helperstuff.combinehelpers import getrates
-from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production
+from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, WhichProdDiscriminants
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
 from itertools import product
@@ -14,7 +14,7 @@ import sys
 
 makeworkspacestemplate = """
 eval $(scram ru -sh) &&
-python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo. -C .oO[category]Oo. -m .oO[model]Oo.
+python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo. -C .oO[category]Oo. -m .oO[model]Oo. -W .oO[whichproddiscriminants]Oo.
 """
 
 createworkspacetemplate = """
@@ -44,6 +44,7 @@ def runcombine(analysis, foldername, **kwargs):
     legendposition = (.2, .7, .6, .9)
     CLtextposition = "left"
     productions = config.productionsforcombine
+    whichproddiscriminants = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -69,18 +70,25 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("legendposition has to contain 4 floats separated by commas!")
         elif kw == "productions":
             productions = [Production(p) for p in kwarg.split(",")]
+        elif kw == "whichproddiscriminants":
+            whichproddiscriminants = WhichProdDiscriminants(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
+
+    if whichproddiscriminants is None:
+        raise TypeError("Need to provide whichproddiscriminants kwarg.")
 
     years = [p.year for p in productions]
     if len(set(years)) != len(years):
         raise ValueError("Some of your productions are from the same year!")
 
     analysis = Analysis(analysis)
-    foldername = "{}_{}".format(analysis, foldername)
+    foldername = "{}_{}_{}".format(analysis, foldername, whichproddiscriminants)
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
+              "whichproddiscriminants": str(whichproddiscriminants),
+              "model": "VBFHZZ4l",
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year) for channel, category, production in product(usechannels, usecategories, productions)),
               "workspacefile": "floatMu.root",
               "filename": "higgsCombine_.oO[append]Oo..MultiDimFit.mH125.root",
@@ -95,7 +103,6 @@ def runcombine(analysis, foldername, **kwargs):
                 makeworkspacesmap = repmap.copy()
                 makeworkspacesmap["production"] = str(production)
                 makeworkspacesmap["category"] = str(category)
-                makeworkspacesmap["model"] = str(category.make_prop_model)
                 subprocess.check_call(replaceByMap(makeworkspacestemplate, makeworkspacesmap), shell=True)
         with open("cards_{}/.gitignore".format(foldername), "w") as f:
             f.write("*")
@@ -109,9 +116,9 @@ def runcombine(analysis, foldername, **kwargs):
                     for line in contents.split("\n"):
                         if line.startswith("rate"):
                             if config.unblindscans:
-                                rates = getrates(channel, "fordata", production)
+                                rates = getrates(channel, "fordata", production, category)
                             else:
-                                rates = getrates(channel, "forexpectedscan", production)
+                                rates = getrates(channel, "forexpectedscan", production, category)
                             contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
                     with open("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year), "w") as f:
@@ -121,8 +128,8 @@ def runcombine(analysis, foldername, **kwargs):
                         os.remove("hzz4l_{}S_{}.txt".format(channel, production.year))
                         os.remove("hzz4l_{}S_{}.input.root".format(channel, production.year))
             if not os.path.exists(repmap["workspacefile"]):
-                for channel, production in product(usechannels, productions):
-                    replacesystematics(channel, production)
+                for channel, production, category in product(usechannels, productions, usecategories):
+                    replacesystematics(channel, production, category)
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
             if config.unblindscans:

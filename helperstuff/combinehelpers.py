@@ -1,6 +1,6 @@
 import collections
 import config
-from enums import Analysis, EnumItem, Channel, MultiEnum, MyEnum, Production, ProductionMode
+from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode
 from filemanager import tfiles
 import os
 import ROOT
@@ -27,8 +27,23 @@ class Luminosity(MultiEnum):
         if self.luminositytype == "fordata": return float(self.production.dataluminosity)
 
 class __Rate(MultiEnum):
-    enums = [ProductionMode, Channel, Luminosity, Production]
+    enums = [ProductionMode, Channel, Luminosity, Production, Category]
+
     def getrate(self):
+        if self.productionmode in ["ggH", "VBF"]:
+            hypothesis = "0+"
+        else:
+            hypothesis = None
+
+        categorysum = 0
+        for category in categories:
+            categorysum += Template("fa3", "prod+dec", "D_int_decay" if category == "VBF2jTaggedIchep16" else None, hypothesis, category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+
+        myintegral = Template("fa3", "prod+dec", "D_int_decay" if self.category == "VBF2jTaggedIchep16" else None, hypothesis, self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+
+        return self.totalrate() * myintegral/categorysum
+
+    def totalrate(self):
         if self.productionmode != "VBF bkg":
             return self.yamlrate()
         if self.productionmode == "ZX" and self.production in ("160725", "160729"):
@@ -60,7 +75,9 @@ class __Rate(MultiEnum):
                 result += additionalxsec * float(self.luminosity)
             return result
 
-        result = Template("fa3", self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+        result = 0
+        for category in categories:
+            result += Template("fa3", "prod+dec", "D_int_decay" if category == "VBF2jTaggedIchep16" else None, category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
         return result
 
     def yamlrate(self):
