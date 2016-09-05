@@ -30,7 +30,7 @@ class ReadSystematics_BaseClass(MultiEnum):
 
     def getline(self, oldline):
         if not oldline.strip(): return oldline
-        useprocesses = ["ggH", "qqZZ", "ggZZ", "zjets"]
+        useprocesses = ["ggH", "qqH", "qqZZ", "ggZZ", "qqZZ", "zjets"]
 
         oldname = oldline.split()[0]
         systype = oldline.split()[1]

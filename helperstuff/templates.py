@@ -150,7 +150,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_g2_VBF")
 
         for i, prime in product(range(1, 4), ("", "_prime")):
-            if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "g1{}gi{}{}".format(i, 4-i, prime):
+            if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_g1{}gi{}{}".format(i, 4-i, prime):
                 if self.analysis == "fa3":
                     return discriminant("D_g1{}_g4{}_VBFdecay{}".format(i, 4-i, prime))
                 if self.analysis == "fa2":

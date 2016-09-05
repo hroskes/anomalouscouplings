@@ -30,63 +30,24 @@ class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production, Category]
 
     def getrate(self):
-        if self.productionmode in ["ggH", "VBF"]:
-            hypothesis = "0+"
-        else:
-            hypothesis = None
-
-        categorysum = 0
-        for category in categories:
-            categorysum += Template("fa3", "prod+dec", "D_int_decay" if category == "VBF2jTaggedIchep16" else None, hypothesis, category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
-
-        myintegral = Template("fa3", "prod+dec", "D_int_decay" if self.category == "VBF2jTaggedIchep16" else None, hypothesis, self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
-
-        return self.totalrate() * myintegral/categorysum
-
-    def totalrate(self):
         if self.productionmode != "VBF bkg":
             return self.yamlrate()
-        if self.productionmode == "ZX" and self.production in ("160725", "160729"):
-            if self.channel == "4e":    return 2.39 * float(self.luminosity)/12.9
-            if self.channel == "4mu":   return 3.66 * float(self.luminosity)/12.9
-            if self.channel == "2e2mu": return 6.29 * float(self.luminosity)/12.9
-        if self.productionmode == "ZX" and self.production == "160720":
-            if self.channel == "4e":    return 1.36 * float(self.luminosity)/7.65
-            if self.channel == "4mu":   return 1.64 * float(self.luminosity)/7.65
-            if self.channel == "2e2mu": return 2.81 * float(self.luminosity)/7.65
-        if self.productionmode == "ZX" and self.production == "160225": #email from Simon, Feb 9 at 4:56 PM, "inputs for the cards"
-            if self.channel == "4e":    return (0.311745 + 0.0106453) * float(self.luminosity)/2.8
-            if self.channel == "4mu":   return 0.408547 * float(self.luminosity)/2.8
-            if self.channel == "2e2mu": return (0.716686 + 0.0199815) * float(self.luminosity)/2.8
-        if self.productionmode == "ZX":
-            assert False
 
-        if self.productionmode == "ggH":
-            result = Template("fa3", self.productionmode, self.channel, "0+", self.production).gettemplate().Integral()*float(self.luminosity)
-            for productionmode in "VBF", "WplusH", "WminusH", "ZH", "ttH":
-                sample = Sample(productionmode, "0+", self.production)
-                f = tfiles[sample.withdiscriminantsfile()]
-                t = f.candTree
-                ZZFlav = self.channel.ZZFlav
-                additionalxsec = 0
-                for event in t:
-                    if config.m4lmin < t.ZZMass < config.m4lmax and t.Z1Flav*t.Z2Flav == ZZFlav:
-                        additionalxsec += getattr(t, sample.weightname())
-                result += additionalxsec * float(self.luminosity)
-            return result
-
-        result = 0
-        for category in categories:
-            result += Template("fa3", "prod+dec", "D_int_decay" if category == "VBF2jTaggedIchep16" else None, category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
-        return result
+        return Template("fa3", "prod+dec", "D_int_decay" if self.category == "VBF2jTaggedIchep16" else None, self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
 
     def yamlrate(self):
         if self.production.year == 2016:
             filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_ICHEP2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
-            tags = ["UnTagged", "VBF1jTagged", "VBF2jTagged", "VHLeptTagged", "VHHadrTagged", "ttHTagged"]
+            if self.category == "VBF2jTaggedIchep16":
+                tags = ["VBF2jTagged"]
+            else:
+                tags = ["UnTagged", "VBF1jTagged", "VHLeptTagged", "VHHadrTagged", "ttHTagged"]
         elif self.production.year == 2015:
             filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
-            tags = ["UnTagged", "VBFTagged"]
+            if self.category == "VBF2jTaggedIchep16":
+                tags = ["VBFTagged"]
+            else:
+                tags = ["UnTagged"]
         with open(filename) as f:
             y = yaml.load(f)
         with open(filename) as f:
@@ -97,7 +58,9 @@ class __Rate(MultiEnum):
             else:
                 raise IOError("No luminosity in {}".format(filename))
         if self.productionmode == "ggH":
-            productionmodes = ["ggH", "qqH", "WH", "ZH", "ttH"]
+            productionmodes = ["ggH", "WH", "ZH", "ttH"]
+        elif self.productionmode == "VBF":
+            productionmodes = ["qqH"]
         elif self.productionmode == "ZX":
             productionmodes = ["zjets"]
         else:
@@ -124,13 +87,13 @@ def getrate(*args):
     return __cache[rate]
 
 def getrates(*args, **kwargs):
-    fmt = "rate {} {} {} {}"
+    fmt = "rate {} {} {} {} {} {}"
     for kw, kwarg in kwargs.iteritems():
         if kw == "format":
             fmt = kwarg
-    ggH, qqZZ, ggZZ, VBFbkg, ZX = getrate("ggH", *args), getrate("qqZZ", *args), getrate("ggZZ", *args), getrate("VBF bkg", *args), getrate("ZX", *args)
+    ggH, VBF, qqZZ, ggZZ, VBFbkg, ZX = getrate("ggH", *args), getrate("VBF", *args), getrate("qqZZ", *args), getrate("ggZZ", *args), getrate("VBF bkg", *args), getrate("ZX", *args)
 
-    result =  fmt.format(ggH, qqZZ, ggZZ, ZX)
+    result =  fmt.format(ggH, VBF, qqZZ, ggZZ, VBFbkg, ZX)
     return result
 
 def gettemplate(*args):

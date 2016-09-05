@@ -317,7 +317,7 @@ class Production(MyEnum):
         if self == "160225": return 2.8
         if self == "160714": return 7.65
         if self == "160720": return 9.2
-        if self in ("160725", "160729"): return 12.9
+        if "160725" <= self <= "160901": return 12.9
         assert False
     def __int__(self):
         return int(str(self))
