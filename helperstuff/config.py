@@ -11,8 +11,8 @@ else:
     raise ValueError("Who/where are you?")
 
 unblinddistributions = True
-unblindscans = True
-expectedscanluminosity = 10
+unblindscans = False
+expectedscanluminosity = 3000
 m4lmin, m4lmax = 105, 140
 blindcut = lambda self: self.D_bkg_0plus() < 0.5
-productionsforcombine = ("160729", "160225")
+productionsforcombine = ("160729",)
