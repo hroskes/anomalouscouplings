@@ -212,9 +212,9 @@ class Projections(MultiEnum):
     g1_mix = sqrt(2)
     gi_mix = sqrt(2)*gi_BSM
 
-    VBFBSM    = TemplateSum(VBFg10gi4.title,                                9,             VBFSM.Integral(), (VBFg10gi4, gi_BSM**4))
+    VBFBSM    = TemplateSum(VBFg10gi4.title,                                3,             VBFSM.Integral(), (VBFg10gi4, gi_BSM**4))
 
-    VBFmix_p  = TemplateSum("VBF {}=#plus0.5" .format(self.analysis.title), 38,            VBFSM.Integral(),
+    VBFmix_p  = TemplateSum("VBF {}=#plus0.5" .format(self.analysis.title), 5,            VBFSM.Integral(),
                             *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(VBFpieces))
                            )
     VBFmix_m  = TemplateSum("VBF {}=#minus0.5".format(self.analysis.title), ROOT.kTeal-1,  VBFSM.Integral(),
