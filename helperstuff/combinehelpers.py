@@ -33,7 +33,7 @@ class __Rate(MultiEnum):
         if self.productionmode != "VBF bkg":
             return self.yamlrate()
 
-        return Template("fa3", "prod+dec", "D_int_decay" if self.category == "VBF2jTaggedIchep16" else None, self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+        return Template("fa3", "prod+dec", "D_int_decay", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
 
     def yamlrate(self):
         if self.production.year == 2016:
@@ -122,14 +122,21 @@ def discriminantnames(*args):
 
 class SigmaIOverSigma1(MultiEnum):
     enums = (Analysis, ProductionMode)
-    def check(self, *args):
-        if self.productionmode == "ggH":
-            raise ValueError("need separate implementation for ggH, gi is defined differently for the pure sample\n{}".format(args))
     @property
     def result(self):
-        sigmai = ReweightingSample(self.analysis.purehypotheses[1], self.productionmode).xsec
-        sigma1 = ReweightingSample("SM", self.productionmode).xsec
-        return sigmai/sigma1
+        if self.productionmode == "ggH":
+            #for ggH gi for the pure BSM sample is defined so the xsecs are equal
+            gi = getattr(
+                         ReweightingSample(self.analysis.purehypotheses[1], self.productionmode),
+                         self.analysis.couplingname
+                        )
+            return 1/gi**2
+        if self.productionmode == "VBF":
+            #for VBF gi for the pure BSM sample is defined = 1
+            sigmai = ReweightingSample(self.analysis.purehypotheses[1], self.productionmode).xsec
+            sigma1 = ReweightingSample("SM", self.productionmode).xsec
+            return sigmai/sigma1
+        assert False
 
 def sigmaioversigma1(*args):
     return SigmaIOverSigma1(*args).result

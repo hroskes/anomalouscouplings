@@ -1,3 +1,4 @@
+import abc
 from collections import OrderedDict
 import config
 import constants
@@ -453,6 +454,14 @@ class MetaclassForMultiEnums(type):
         for _ in "enums", "needenums":
             dct[_] = tuple(dct[_])
         return super(MetaclassForMultiEnums, cls).__new__(cls, clsname, bases, dct)
+
+class MultiEnumABCMeta(MetaclassForMultiEnums, abc.ABCMeta):
+    """
+    needed to resolve conflict
+    http://code.activestate.com/recipes/204197-solving-the-metaclass-conflict/
+    except don't need all their fancy stuff
+    the only function in MetaClassForMultiEnums is __new__ and it calls super
+    """
 
 class MultiEnum(object):
     __metaclass__ = MetaclassForMultiEnums

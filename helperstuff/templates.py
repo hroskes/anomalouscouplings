@@ -1,6 +1,6 @@
 import abc
 import config
-from enums import Analysis, analyses, AnalysisType, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MyEnum, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
+from enums import Analysis, analyses, AnalysisType, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
 from filemanager import tfiles
 from itertools import product
 import numpy
@@ -19,6 +19,9 @@ class TemplatesFile(MultiEnum):
 
         if self.category is None:
             self.category = Category("UntaggedIchep16")
+
+        if self.category == "UntaggedIchep16":
+            self.whichproddiscriminants = None
 
         if self.templategroup != "DATA":
             if self.blindstatus is not None:
@@ -162,7 +165,7 @@ class TemplatesFile(MultiEnum):
 
     @property
     def discriminants(self):
-        return [self.purediscriminant, self.mixdiscriminant, self.bkgdiscriminant]
+        return (self.purediscriminant, self.mixdiscriminant, self.bkgdiscriminant)
 
     @property
     def blind(self):
@@ -260,6 +263,7 @@ class TemplateBase(object):
                 pass
             else:
                 assert False
+        super(TemplateBase, self).applysynonyms(enumsdict)
 
     def templatefile(self):
         return self.templatesfile.templatesfile()
@@ -289,14 +293,6 @@ class TemplateBase(object):
     @abc.abstractmethod
     def getjson(self):
         pass
-
-class MultiEnumABCMeta(MultiEnum.__metaclass__, TemplateBase.__metaclass__):
-    """
-    needed to resolve conflict
-    http://code.activestate.com/recipes/204197-solving-the-metaclass-conflict/
-    except don't need all their fancy stuff
-    the only function in MetaClassForMultiEnums is __new__ and it calls super
-    """
 
 class Template(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
@@ -371,7 +367,7 @@ class Template(TemplateBase, MultiEnum):
         return name
 
     def title(self):
-        if self.productionmode == "ggH":
+        if self.productionmode in ("ggH", "VBF"):
             return "{} {}".format(self.productionmode, self.hypothesis)
         if self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
             return str(self.productionmode).replace("ZZ", "#rightarrowZZ")
@@ -511,8 +507,14 @@ class Template(TemplateBase, MultiEnum):
         result /= len(self.reweightfrom())
         return result
 
+    @property
     def domirror(self):
-        return self.analysis == "fa3" and self.hypothesis not in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5") and self.productionmode != "data"
+        if self.analysis != "fa3": return False
+        if self.productionmode == "data": return False
+        if self.whichproddiscriminants in ("D_g12gi2", "D_g12gi2_prime"): return False
+        if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
+        if self.hypothesis in ("0+", "0-"): return True
+        assert False
 
     def smoothentriesperbin(self):
         if self.analysistype == "decayonly":
@@ -654,7 +656,7 @@ class Template(TemplateBase, MultiEnum):
                 ],
               }
 
-        if self.domirror():
+        if self.domirror:
             mirrorjsn = {
                           "templates":[
                             {
@@ -702,6 +704,7 @@ class Template(TemplateBase, MultiEnum):
 
 class IntTemplate(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
+    enumname = "inttemplate"
     class InterferenceType(MyEnum):
         enumname = "interferencetype"
         enumitems = (
@@ -739,13 +742,18 @@ class IntTemplate(TemplateBase, MultiEnum):
         return result
 
     @property
-    def domirror(self):
-        if self.analysis != "fa3": return False
+    def mirrorjsn(self):
+        if self.analysis != "fa3": return None
+        if self.whichproddiscriminants in ("D_g12gi2", "D_g12gi2_prime"): return None
         if self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
-            return True
+            return {"type":"mirror", "antisymmetric":True, "axis":1}
         elif self.interferencetype == "g12gi2":
-            return False
+            return {"type":"mirror", "antisymmetric":False, "axis":1}
         assert False
+
+    @property
+    def domirror(self):
+        return bool(self.mirrorjsn)
 
     def getjson(self):
         if self.interferencetype == "g11gi1":
@@ -787,7 +795,7 @@ class IntTemplate(TemplateBase, MultiEnum):
                      }
 
         if self.domirror:
-            intjsn["templates"][0]["postprocessing"].append({"type":"mirror", "antisymmetric":True, "axis":1})
+            intjsn["templates"][0]["postprocessing"].append(self.mirrorjsn)
         return intjsn
 
 
