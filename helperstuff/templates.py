@@ -512,8 +512,10 @@ class Template(TemplateBase, MultiEnum):
         if self.analysis != "fa3": return False
         if self.productionmode == "data": return False
         if self.whichproddiscriminants in ("D_g12gi2", "D_g12gi2_prime"): return False
+
         if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
         if self.hypothesis in ("0+", "0-"): return True
+        if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
     def smoothentriesperbin(self):
