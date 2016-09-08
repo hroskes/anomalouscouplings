@@ -24,11 +24,11 @@ text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStr
 """
 runcombinetemplate = """
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo. -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 --saveNLL |& tee log_.oO[expectfai]Oo..exp
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 --saveNLL -S .oO[usesystematics]Oo. |& tee log_.oO[expectfai]Oo..oO[moreappend]Oo..exp
 """
 observationcombinetemplate = """
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points 100 -m 125 -n $1_.oO[append]Oo.       --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo.                  -V -v 3 --saveNLL |& tee log.obs
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo.       --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo.                  -V -v 3 --saveNLL -S .oO[usesystematics]Oo. |& tee log.oO[moreappend]Oo..obs
 """
 
 def check_call_test(*args, **kwargs):
@@ -45,6 +45,9 @@ def runcombine(analysis, foldername, **kwargs):
     CLtextposition = "left"
     productions = config.productionsforcombine
     whichproddiscriminants = None
+    usesystematics = True
+    defaultscanrange = scanrange = (-1.0, 1.0)
+    defaultnpoints = npoints = 100
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -72,6 +75,16 @@ def runcombine(analysis, foldername, **kwargs):
             productions = [Production(p) for p in kwarg.split(",")]
         elif kw == "whichproddiscriminants":
             whichproddiscriminants = WhichProdDiscriminants(kwarg)
+        elif kw == "usesystematics":
+            usesystematics = bool(int(kwarg))
+        elif kw == "scanrange":
+            try:
+                scanrange = tuple(float(a) for a in kwarg.split(","))
+                if len(scanrange) != 2: raise ValueError
+            except ValueError:
+                raise ValueError("scanrange has to contain 2 floats separated by a comma!")
+        elif kw == "npoints":
+            npoints = int(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -82,6 +95,12 @@ def runcombine(analysis, foldername, **kwargs):
     if len(set(years)) != len(years):
         raise ValueError("Some of your productions are from the same year!")
 
+    moreappend = ""
+    if not usesystematics:
+        moreappend += "_nosystematics"
+    if not (npoints == defaultnpoints and scanrange == defaultscanrange):
+        moreappend += "_{},{},{}".format(npoints, *scanrange)
+
     analysis = Analysis(analysis)
     foldername = "{}_{}_{}".format(analysis, foldername, whichproddiscriminants)
     repmap = {
@@ -91,9 +110,13 @@ def runcombine(analysis, foldername, **kwargs):
               "model": "VBFHZZ4l",
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year) for channel, category, production in product(usechannels, usecategories, productions)),
               "workspacefile": "floatMu.root",
-              "filename": "higgsCombine_.oO[append]Oo..MultiDimFit.mH125.root",
+              "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "observedappend": "obs",
+              "usesystematics": str(int(usesystematics)),
+              "moreappend": moreappend,
+              "npoints": str(npoints),
+              "scanrange": "{},{}".format(*scanrange),
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         for production, category in product(productions, categories):
@@ -169,14 +192,16 @@ def runcombine(analysis, foldername, **kwargs):
                 plotscans.append(expectfai)
             for ext in "png eps root pdf".split():
                 plotname = plotname.replace("."+ext, "")
-            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition)
+            plotname += moreappend
+            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=moreappend)
             with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
                 f.write(" ".join(["python"]+sys.argv))
                 f.write("\n\n\n")
                 f.write("python limits.py ")
                 for arg in sys.argv[1:]:
-                    if "=" in arg and "plotname" not in arg: continue
+                    if "=" in arg: continue
                     f.write(arg+" ")
+                f.write("plotname="+plotname+" ")
                 f.write("\n")
 
 if __name__ == "__main__":

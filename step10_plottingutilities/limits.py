@@ -16,9 +16,9 @@ class PrintFormat(MyEnum):
     @property
     def printformat(self):
         if self == "latex":
-            return "${min:.2f}^{{{pluscl:+.2f}}}_{{{minuscl:+.2f}}}$ $ {95%}$"
+            return "${min:.2g}^{{{pluscl:+.2g}}}_{{{minuscl:+.2g}}}$ $ {95%}$"
         if self == "ppt":
-            return "{min:.2f}^({pluscl:+.2f})_({minuscl:+.2f}) {95%}"
+            return "{min:.2g}^({pluscl:+.2g})_({minuscl:+.2g}) {95%}"
         assert False
 
 def findwhereyequals(y, p1, p2):
@@ -95,21 +95,24 @@ def printlimits(analysis, foldername, **kwargs):
                     assert False
             else:
                 print "Need something more complicated for 68% CL!"
-                print "ranges: ", " \cup ".join("[{:.2f},{:.2f}]".format(range_[0],range_[1]) for range_ in results[1])
+                print "ranges: ", " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in results[1])
                 for range_ in results[1.0]:
                     if range_[0] < minimum.x < range_[1]:
                         break
                 repmap["pluscl"] = range_[1] - minimum.x
                 repmap["minuscl"] = range_[0] - minimum.x
 
-        repmap["95%"] = " \cup ".join("[{:.2f},{:.2f}]".format(range_[0],range_[1]) for range_ in results[3.84])
-        if NLL[1] >= NLL[0]:
-            prob = ROOT.TMath.Prob(NLL[1]-NLL[0], 1)/2
-        else:
-            prob = 1 - ROOT.TMath.Prob(NLL[0]-NLL[1], 1)/2
+        repmap["95%"] = " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in results[3.84])
 
         print printformat.printformat.format(**repmap)
-        print "Probability for pure BSM vs. pure SM: {:.2g}{}".format(prob*100, "%" if printformat == "ppt" else r"\%")
+
+        if 0 in NLL and 1 in NLL:
+            if NLL[1] >= NLL[0]:
+                prob = ROOT.TMath.Prob(NLL[1]-NLL[0], 1)/2
+            else:
+                prob = 1 - ROOT.TMath.Prob(NLL[0]-NLL[1], 1)/2
+
+            print "Probability for pure BSM vs. pure SM: {:.2g}{}".format(prob*100, "%" if printformat == "ppt" else r"\%")
         print
         print
 
