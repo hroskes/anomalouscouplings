@@ -195,6 +195,8 @@ def cuttext(text):
     tokeep[cuttext,text].Draw()
 
 def CMS(extratext, lumi):
+    if lumi.is_integer():
+        lumi = int(lumi)
     if (CMS, extratext, lumi) not in tokeep:
         x1, y1, x2, y2 = 0.15, 0.93, 0.85, 1
         pt = tokeep[CMS,extratext,lumi] = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")

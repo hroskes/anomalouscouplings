@@ -1,8 +1,10 @@
 import array
 from collections import namedtuple
 from combinehelpers import Luminosity
+import config
 from enums import Analysis, EnumItem, MyEnum
 from extendedcounter import ExtendedCounter
+from itertools import islice
 import ROOT
 import stylefunctions as style
 import sys
@@ -16,6 +18,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     analysis = Analysis(analysis)
     productions = None
     legendposition = (.2, .7, .6, .9)
+    moreappend = ""
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -23,6 +26,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             legendposition = kwarg
         elif kw == "CLtextposition":
             CLtextposition = kwarg
+        elif kw == "moreappend":
+            moreappend = kwarg
         else:
             assert False
 
@@ -30,7 +35,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     uptocolor = 1
     for arg in args:
         if arg == "obs":
-            scans.append(Scan("obs", "Observed, {} = 0 or #pi".format(analysis.phi), 1, 1))
+            scans.append(Scan("obs{}".format(moreappend), "Observed, {} = 0 or #pi".format(analysis.phi), 1, 1))
             if productions is None:
                 raise ValueError("No productions provided!")
         else:
@@ -39,12 +44,12 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
             if arg == 0:
-                scans.append(Scan("exp_{}".format(arg), "Expected, {} = 0 or #pi".format(analysis.phi), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = 0 or #pi".format(analysis.phi), uptocolor, 2))
             else:
-                scans.append(Scan("exp_{}".format(arg), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title, arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title, arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
-    if productions is None:
+    if productions is None or not config.unblindscans:
         luminosity = float(Luminosity("forexpectedscan"))
     else:
         luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
@@ -62,7 +67,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
         NLL = ExtendedCounter()
 
-        for entry in t:
+        for entry in islice(t, 1, None):
             fa3 = getattr(t, branchname)
             deltaNLL = t.deltaNLL
             NLL[fa3] = 2*deltaNLL
@@ -118,6 +123,8 @@ class XPos(MyEnum):
         else:
             super(XPos, self).__init__("custom")
             self.custompos = value
+    def __nonzero__(self):
+        return self == "right" or self == "left" or -1 <= self.custompos <= 1
     def TPaveText(self, ypos):
         xsize = .1
         ysize = .03
@@ -164,15 +171,18 @@ def drawlines(xpostext="left"):
     oneSig.SetFillStyle(0)
     oneSig.SetTextFont(42)
     oneSig.SetBorderSize(0)
-    oneSig.AddText("68% CL")
-    oneSig.Draw()
-    cache.append(oneSig)
 
     twoSig = xpostext.TPaveText(3.84)
     twoSig.SetFillColor(0)
     twoSig.SetFillStyle(0)
     twoSig.SetTextFont(42)
     twoSig.SetBorderSize(0)
-    twoSig.AddText("95% CL")
+
+    if xpostext:
+        oneSig.AddText("68% CL")
+        twoSig.AddText("95% CL")
+
+    oneSig.Draw()
+    cache.append(oneSig)
     twoSig.Draw()
     cache.append(twoSig)
