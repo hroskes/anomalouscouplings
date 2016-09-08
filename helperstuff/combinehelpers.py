@@ -88,12 +88,21 @@ def getrate(*args):
 
 def getrates(*args, **kwargs):
     fmt = "rate {} {} {} {} {} {}"
+    disableproductionmodes = ()
+    useproductionmodes = ("ggH", "VBF", "qqZZ", "ggZZ", "VBF bkg", "ZX")
     for kw, kwarg in kwargs.iteritems():
         if kw == "format":
             fmt = kwarg
-    ggH, VBF, qqZZ, ggZZ, VBFbkg, ZX = getrate("ggH", *args), getrate("VBF", *args), getrate("qqZZ", *args), getrate("ggZZ", *args), getrate("VBF bkg", *args), getrate("ZX", *args)
+        elif kw == "productionmodes":
+            useproductionmodes = kwarg
+        elif kw == "disableproductionmodes":
+            disableproductionmodes = kwarg
+        else:
+            raise ValueError("Unknown kwarg {}={}!".format(kw, kwarg))
 
-    result =  fmt.format(ggH, VBF, qqZZ, ggZZ, VBFbkg, ZX)
+    rates = [getrate(c, *args) if c not in disableproductionmodes else 0 for c in useproductionmodes]
+
+    result =  fmt.format(*rates)
     return result
 
 def gettemplate(*args):

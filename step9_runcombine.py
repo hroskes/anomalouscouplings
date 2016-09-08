@@ -2,7 +2,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 from helperstuff import config
 from helperstuff import filemanager
 from helperstuff.combinehelpers import getrates
-from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, WhichProdDiscriminants
+from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode, WhichProdDiscriminants
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
 from itertools import product
@@ -48,6 +48,7 @@ def runcombine(analysis, foldername, **kwargs):
     usesystematics = True
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
+    disableproductionmodes = ()
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -85,6 +86,8 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("scanrange has to contain 2 floats separated by a comma!")
         elif kw == "npoints":
             npoints = int(kwarg)
+        elif kw == "disableproductionmodes":
+            disableproductionmodes = [ProductionMode(p) for p in kwarg.split(",")]
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -103,6 +106,8 @@ def runcombine(analysis, foldername, **kwargs):
 
     analysis = Analysis(analysis)
     foldername = "{}_{}_{}".format(analysis, foldername, whichproddiscriminants)
+    if disableproductionmodes:
+        foldername += "_no"+",".join(str(p) for p in disableproductionmodes)
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
@@ -139,9 +144,10 @@ def runcombine(analysis, foldername, **kwargs):
                     for line in contents.split("\n"):
                         if line.startswith("rate"):
                             if config.unblindscans:
-                                rates = getrates(channel, "fordata", production, category)
+                                lumitype = "fordata"
                             else:
-                                rates = getrates(channel, "forexpectedscan", production, category)
+                                lumitype = "forexpectedscan"
+                            rates = getrates(channel, lumitype, production, category, disableproductionmodes=disableproductionmodes)
                             contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
                     with open("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year), "w") as f:
