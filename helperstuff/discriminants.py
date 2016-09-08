@@ -9,29 +9,33 @@ minmax_g1jgik = {
     ("g2", 4, ""): (0, 1),
     ("g1prime2", 0, ""): (0, 1),
     ("g1prime2", 4, ""): (0, 1),
+    ("g4", 0, "_prime"): (0, 1),
+    ("g4", 4, "_prime"): (0, 1),
+    ("g2", 0, "_prime"): (0, 1),
+    ("g2", 4, "_prime"): (0, 1),
+    ("g1prime2", 0, "_prime"): (0, 1),
+    ("g1prime2", 4, "_prime"): (0, 1),
 
 
-    ("g4", 1, ""): (-10, 10),
-    ("g4", 2, ""): (0, 30),
+    ("g4", 1, ""): (-3, 3),
+    ("g4", 2, ""): (0, 5),
     ("g4", 3, ""): (-4, 4),
-    #dummy values
-    ("g2", 1, ""): (-100, 100),
-    ("g2", 2, ""): (0, 100),
-    ("g2", 3, ""): (-100, 100),
-    ("g1prime2", 1, ""): (-100, 100),
-    ("g1prime2", 2, ""): (0, 100),
-    ("g1prime2", 3, ""): (-100, 100),
+    ("g2", 1, ""): (-2, 3),
+    ("g2", 2, ""): (0, 5),
+    ("g2", 3, ""): (-4, 4),
+    ("g1prime2", 1, ""): (-1, 4),
+    ("g1prime2", 2, ""): (0, 1.5),
+    ("g1prime2", 3, ""): (-3, 3),
 
     ("g4", 1, "_prime"): (-1, 1),
     ("g4", 2, "_prime"): (0, 1),
     ("g4", 3, "_prime"): (-.5, .5),
-    #dummy values
-    ("g2", 1, "_prime"): (-1, 1),
+    ("g2", 1, "_prime"): (-.5, 1),
     ("g2", 2, "_prime"): (0, 1),
     ("g2", 3, "_prime"): (-1, 1),
-    ("g1prime2", 1, "_prime"): (-1, 1),
-    ("g1prime2", 2, "_prime"): (0, 1),
-    ("g1prime2", 3, "_prime"): (-1, 1),
+    ("g1prime2", 1, "_prime"): (-.3, 1),
+    ("g1prime2", 2, "_prime"): (0, .5),
+    ("g1prime2", 3, "_prime"): (-.7, 1),
 }
 
 discriminants = {
@@ -61,10 +65,7 @@ discriminants = {
                      "D_g1{}_{}{}_VBFdecay{}".format(i, gj, 4-i, prime),
                      "D{}_[g_[1]^[{}]g_[{}]^[{}]]".format("'" if prime else "", i, gj, 4-i).replace("[", "{").replace("]", "}"),
                      20,
-                     *(
-                            (0 if i%2==0 else -1, 1) if prime
-                       else (minmax_g1jgik[gj, i, prime])
-                      )
+                     *minmax_g1jgik[gj, i, prime]
                     )
             for prime in ("", "_prime")
             for gj in ("g4", "g2", "g1prime2")

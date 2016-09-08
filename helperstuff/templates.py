@@ -361,7 +361,7 @@ class Template(TemplateBase, MultiEnum):
 
         name
 
-        if self.analysis == "fa3" and final and self.productionmode != "data":
+        if self.domirror and final:
             name += "Mirror"
 
         return name
