@@ -25,14 +25,15 @@ folders = [
            Folder("fa3_discriminants_D_int_VBF_noggH",      "D_{CP}^{VBF}",           16),
            Folder("fa3_discriminants_D_g11gi3_noggH",       "D_{g_{1}^{1}g_{4}^{3}}",  2),
            Folder("fa3_discriminants_D_g11gi3_prime_noggH", "D'_{g_{1}^{1}g_{4}^{3}}", 6),
-           Folder("fa3_discriminants_D_g12gi2_noggH",       "D_{g_{1}^{1}g_{4}^{3}}",  4),
-           Folder("fa3_discriminants_D_g12gi2_prime_noggH", "D'_{g_{1}^{1}g_{4}^{3}}", 7),
-           Folder("fa3_discriminants_D_g13gi1_noggH",       "D_{g_{1}^{1}g_{4}^{3}}",  3),
-           Folder("fa3_discriminants_D_g13gi1_prime_noggH", "D'_{g_{1}^{1}g_{4}^{3}}", ROOT.kGreen+3),
+           Folder("fa3_discriminants_D_g12gi2_noggH",       "D_{g_{1}^{2}g_{4}^{2}}",  4),
+           Folder("fa3_discriminants_D_g12gi2_prime_noggH", "D'_{g_{1}^{2}g_{4}^{2}}", 7),
+           Folder("fa3_discriminants_D_g13gi1_noggH",       "D_{g_{1}^{3}g_{4}^{1}}",  3),
+           Folder("fa3_discriminants_D_g13gi1_prime_noggH", "D'_{g_{1}^{3}g_{4}^{1}}", ROOT.kGreen+3),
           ]
 outdir = "fa3_discriminants"
 
 mg = ROOT.TMultiGraph("limit", "limit")
+#l = ROOT.TLegend(.6, .6, .9, .9)
 l = ROOT.TLegend(.6, .2, .9, .5)
 l.SetBorderSize(0)
 l.SetFillStyle(0)
