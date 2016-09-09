@@ -116,8 +116,7 @@ class ProductionMode(MyEnum):
                  EnumItem("VBF"),
                  EnumItem("H+jj", "HJJ"),
                  EnumItem("ZH"),
-                 EnumItem("WminusH"),
-                 EnumItem("WplusH"),
+                 EnumItem("WH"),
                  EnumItem("ttH"),
                  EnumItem("qqZZ"),
                  EnumItem("ggZZ"),
@@ -146,7 +145,7 @@ class Systematic(MyEnum):
         from discriminants import discriminant
         return discriminant("D_bkg_0plus"+self.appendname())
     def appliesto(self, templategroup):
-        if templategroup in ("ggh", "vbf"):
+        if templategroup in ("ggh", "vbf", "zh", "wh"):
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
         elif templategroup == "bkg":
             return self in ("", "ZXUp", "ZXDown")
@@ -160,6 +159,7 @@ class TemplateGroup(MyEnum):
     enumitems = (
                  EnumItem("ggh"),
                  EnumItem("vbf"),
+                 EnumItem("vhhad"),
                  EnumItem("background", "bkg"),
                  EnumItem("DATA"),
                 )
@@ -264,6 +264,7 @@ class Production(MyEnum):
                  EnumItem("160725", "160726"),
                  EnumItem("160729"),
                  EnumItem("160901"),
+                 EnumItem("160909"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -280,6 +281,8 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160726/"
         if self == "160901":
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_prodMEs_fix/AAAOK"
+        if self == "160909":
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VHanomalous/AAAOK"
         assert False
     def CJLSTdir_anomalous(self):
         if self < "160624":
@@ -298,8 +301,12 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160729_complete/"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
-        if self <= "160729":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_prodMEs/PT13TeV"
+        if self < "160901":
+            return type(self)("160901").CJLSTdir()
+        return self.CJLSTdir()
+    def CJLSTdir_anomalous_VH(self):
+        if self < "160909":
+            return type(self)("160909").CJLSTdir()
         return self.CJLSTdir()
     @property
     def useMELAv2(self):
@@ -307,18 +314,11 @@ class Production(MyEnum):
             return False
         return True
     @property
-    def release(self):
-        if self == "160225":
-            return self.Release("76X")
-        elif self in ("160624", "160714", "160720", "160725", "160729"):
-            return self.Release("80X")
-        assert False
-    @property
     def dataluminosity(self):
         if self == "160225": return 2.8
         if self == "160714": return 7.65
         if self == "160720": return 9.2
-        if "160725" <= self <= "160901": return 12.9
+        if "160725" <= self <= "160909": return 12.9
         assert False
     def __int__(self):
         return int(str(self))
@@ -326,18 +326,9 @@ class Production(MyEnum):
     def year(self):
         if self == "160225":
             return 2015
-        if "160624" <= self <= "160901":
+        if "160624" <= self <= "160909":
             return 2016
         assert False
-
-    #put this in here to avoid me getting really confused
-    class Release(MyEnum):
-        enumitems = (
-                     EnumItem("76X"),
-                     EnumItem("80X"),
-                    )
-        def __int__(self):
-            return int(str(self).replace("X", ""))
 
 class BlindStatus(MyEnum):
     enumname = "blindstatus"
@@ -355,12 +346,13 @@ class AnalysisType(MyEnum):
 
 class Category(MyEnum):
     """
-    For now just 2 categories, VBF2j and dump everything else into untagged
+    For now just 3 categories, VBF2j, VH hadronic, and dump everything else into untagged
     """
     enumname = "category"
     enumitems = (
-                 EnumItem("UntaggedIchep16", "VBF1jTaggedIchep16", "VHLeptTaggedIchep16", "VHHadrTaggedIchep16", "ttHTaggedIchep16"),
-                 EnumItem("VBF2jTaggedIchep16"),
+                 EnumItem("Untagged", "UntaggedIchep16", "VBF1jTaggedIchep16", "VHLeptTaggedIchep16", "ttHTaggedIchep16"),
+                 EnumItem("VHHadrtagged","VHHadrTaggedIchep16"),
+                 EnumItem("VBFtagged", "VBF2jTaggedIchep16"),
                 )
     @property
     def idnumbers(self):
@@ -369,18 +361,10 @@ class Category(MyEnum):
         (defined in Category.h)
         """
         import CJLSTscripts
-        return [getattr(CJLSTscripts, name) for name in self.item.names]
+        return [getattr(CJLSTscripts, name) for name in self.item.names if "Ichep16" in name]
 
     def __contains__(self, other):
         return other in self.idnumbers
-
-    @property
-    def make_prop_model(self):
-        if self == "UntaggedIchep16":
-            return "1D"
-        if self == "VBF2jTaggedIchep16":
-            return "VBFHZZ4l"
-        assert False
 
 class WhichProdDiscriminants(MyEnum):
     """
@@ -389,7 +373,7 @@ class WhichProdDiscriminants(MyEnum):
     enumname = "whichproddiscriminants"
     enumitems = (
                  EnumItem("D_int_decay"),
-                 EnumItem("D_int_VBF"),
+                 EnumItem("D_int_prod"),
                  EnumItem("D_g11gi3"),
                  EnumItem("D_g12gi2"),
                  EnumItem("D_g13gi1"),
@@ -416,7 +400,7 @@ productions = Production.items(lambda x: x in ["160901"])
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 categories = Category.items()
-#whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_VBF")
+#whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_prod")
 whichproddiscriminants = WhichProdDiscriminants.items()
 
 class MetaclassForMultiEnums(type):
@@ -535,4 +519,3 @@ class MultiEnum(object):
         for enum in self.enums:
             if enum not in dontcheck and getattr(self, enum.enumname) is None:
                 raise ValueError("No option provided for {}\n{}".format(enum.enumname, args))
-

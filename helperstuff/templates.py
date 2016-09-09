@@ -82,10 +82,26 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1"), ReweightingSample("VBF", "fL1prod0.5"), ReweightingSample("VBF", "fL1dec0.5"), ReweightingSample("VBF", "fL1proddec-0.5")]
 
+        elif self.templategroup == "zh":
+            if self.analysis == "fa3":
+                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "0-"), ReweightingSample("ZH", "fa3prod0.5"), ReweightingSample("ZH", "fa3dec0.5"), ReweightingSample("ZH", "fa3proddec-0.5")]
+            if self.analysis == "fa2":
+                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod0.5"), ReweightingSample("ZH", "fa2dec0.5"), ReweightingSample("ZH", "fa2proddec-0.5")]
+            if self.analysis == "fL1":
+                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "L1"), ReweightingSample("ZH", "fL1prod0.5"), ReweightingSample("ZH", "fL1dec0.5"), ReweightingSample("ZH", "fL1proddec-0.5")]
+
+        elif self.templategroup == "wh":
+            if self.analysis == "fa3":
+                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "0-"), ReweightingSample("WH", "fa3prod0.5"), ReweightingSample("WH", "fa3dec0.5"), ReweightingSample("WH", "fa3proddec-0.5")]
+            if self.analysis == "fa2":
+                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod0.5"), ReweightingSample("WH", "fa2dec0.5"), ReweightingSample("WH", "fa2proddec-0.5")]
+            if self.analysis == "fL1":
+                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "L1"), ReweightingSample("WH", "fL1prod0.5"), ReweightingSample("WH", "fL1dec0.5"), ReweightingSample("WH", "fL1proddec-0.5")]
+
         return reweightingsamples
 
     def templates(self):
-        if self.templategroup in ["ggh", "vbf"]:
+        if self.templategroup in ["ggh", "vbf", "zh", "wh"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
             result = ["qqZZ", "ggZZ"]
@@ -103,6 +119,10 @@ class TemplatesFile(MultiEnum):
             return [IntTemplate(self, "ggH", "g11gi1")]
         elif self.templategroup == "vbf":
             return [IntTemplate(self, "VBF", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
+        elif self.templategroup == "zh":
+            return [IntTemplate(self, "ZH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
+        elif self.templategroup == "wh":
+            return [IntTemplate(self, "WH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup in ("bkg", "DATA"):
             return []
         assert False
@@ -144,7 +164,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 return discriminant("D_g2_decay")
 
-        if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_int_VBF":
+        if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_int_prod":
             if self.analysis == "fa3":
                 return discriminant("D_CP_VBF")
             if self.analysis == "fa2":
@@ -188,7 +208,7 @@ class TemplatesFile(MultiEnum):
 
     @property
     def invertedmatrix(self):
-        assert self.templategroup == "vbf"
+        assert self.templategroup in ("vbf", "zh", "wh")
 
         if not hasattr(self, "__invertedmatrix"):
 
@@ -238,6 +258,8 @@ def tmp():
                                     continue
                             templatesfiles.append(TemplatesFile(channel, systematic, "ggh", analysis, production, category, "prod+dec", w))
                             templatesfiles.append(TemplatesFile(channel, systematic, "vbf", analysis, production, category, "prod+dec", w))
+                            templatesfiles.append(TemplatesFile(channel, systematic, "zh", analysis, production, category, "prod+dec", w))
+                            templatesfiles.append(TemplatesFile(channel, systematic, "wh", analysis, production, category, "prod+dec", w))
                             if systematic == "":
                                 templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production, category, "prod+dec", w))
                             for blindstatus in blindstatuses:
@@ -255,6 +277,10 @@ class TemplateBase(object):
                 enumsdict[TemplateGroup] = "ggh"
             elif enumsdict[ProductionMode] == "VBF":
                 enumsdict[TemplateGroup] = "vbf"
+            elif enumsdict[ProductionMode] == "WH":
+                enumsdict[TemplateGroup] = "wh"
+            elif enumsdict[ProductionMode] == "ZH":
+                enumsdict[TemplateGroup] = "zh"
             elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "VBF bkg", "ZX"):
                 enumsdict[TemplateGroup] = "bkg"
             elif enumsdict[ProductionMode] == "data":
@@ -302,7 +328,7 @@ class Template(TemplateBase, MultiEnum):
     def check(self, *args):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
-        elif self.productionmode in ("ggH", "VBF"):
+        elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if ReweightingSample(self.productionmode, self.hypothesis) not in self.templatesfile.signalsamples():
@@ -337,7 +363,7 @@ class Template(TemplateBase, MultiEnum):
                 name = "template0L1AdapSmooth"
             elif self.hypothesis in ("fa20.5", "fa30.5", "fL10.5"):
                 name = "templateMixAdapSmooth"
-        elif self.productionmode == "VBF":
+        elif self.productionmode in ("VBF", "ZH", "WH"):
             if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
             elif self.hypothesis == "0-":
@@ -367,7 +393,7 @@ class Template(TemplateBase, MultiEnum):
         return name
 
     def title(self):
-        if self.productionmode in ("ggH", "VBF"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             return "{} {}".format(self.productionmode, self.hypothesis)
         if self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
             return str(self.productionmode).replace("ZZ", "#rightarrowZZ")
@@ -502,7 +528,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def scalefactor(self):
         if self.templategroup in ("bkg", "DATA"): return 1
-        if self.productionmode in ("VBF", "ggH"):
+        if self.productionmode in ("VBF", "ggH", "ZH", "WH"):
             result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
         result /= len(self.reweightfrom())
         return result
@@ -721,7 +747,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         if self.productionmode == "ggH":
             if self.interferencetype != "g11gi1":
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
-        elif self.productionmode == "VBF":
+        elif self.productionmode in ("VBF", "ZH", "WH"):
             if self.interferencetype not in ("g11gi3", "g12gi2", "g13gi1"):
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
         else:
@@ -732,7 +758,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         if self.productionmode == "ggH":
             if self.interferencetype == "g11gi1":
                 result = "templateIntAdapSmooth"
-        if self.productionmode == "VBF":
+        if self.productionmode in ("VBF", "ZH", "WH"):
             if self.interferencetype == "g11gi3":
                 result = "templateg11{}3AdapSmooth".format(self.analysis.couplingname)
             if self.interferencetype == "g12gi2":

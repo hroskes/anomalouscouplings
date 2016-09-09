@@ -20,6 +20,16 @@ g4VBF = 0.297979
 g1prime2VBF_gen = -2158.21
 g1prime2VBF_reco = 2158.21
 
+g2ZH = 0.112481;
+g4ZH = 0.144057;
+g1prime2ZH_gen = -517.788;
+g1prime2ZH_reco = 517.788;
+
+g2WH = 0.0998956;
+g4WH = 0.1236136;
+g1prime2WH_gen = -525.274;
+g1prime2WH_reco = 525.274;
+
 #https://twiki.cern.ch/twiki/pub/LHCPhysics/LHCHXSWG/Higgs_XSBR_YR4_update.xlsx
 SMXSggH = (44.14       #'YR4 SM 13TeV'!B24   (ggH cross section, m=125)
              *1000)    #                     (pb to fb)
@@ -47,6 +57,22 @@ JHUXSVBFa1a2     = 2207.72848655;  JHUXSVBFa1a2err     = 0.126379327428
 JHUXSVBFa1a3     = 1937.20646111;  JHUXSVBFa1a3err     = 0.122617320785
 JHUXSVBFa1L1     = 2861.21349769;  JHUXSVBFa1L1err     = 0.0771278408768
 
+JHUXSZHa1        = 9022.36;        JHUXSZHa1err        = 1.17
+JHUXSZHa2        = 713123;         JHUXSZHa2err        = 103
+JHUXSZHa3        = 434763.7;       JHUXSZHa3err        = 62.2
+JHUXSZHL1        = 33652.46e-6;    JHUXSZHL1err        = 4.19e-6
+JHUXSZHa1a2      = 4258.966;       JHUXSZHa1a2err      = 0.783
+JHUXSZHa1a3      = 18040.66;       JHUXSZHa1a3err      = 2.73
+JHUXSZHa1L1      = 6852.307;       JHUXSZHa1L1err      = 0.929
+
+JHUXSWHa1        = 30998.54;       JHUXSWHa1err        = 2.50
+JHUXSWHa2        = 3106339;        JHUXSWHa2err        = 308
+JHUXSWHa3        = 2028656;        JHUXSWHa3err        = 191
+JHUXSWHL1        = 11234.91e-5;    JHUXSWHL1err        = 1.10e-5
+JHUXSWHa1a2      = 16486.68;       JHUXSWHa1a2err      = 2.01
+JHUXSWHa1a3      = 62001.57;       JHUXSWHa1a3err      = 5.54
+JHUXSWHa1L1      = 25302.37;       JHUXSWHa1L1err      = 2.67
+
 if __name__ == "__main__":
     print "All of the following should be 0:"
     print
@@ -63,6 +89,20 @@ if __name__ == "__main__":
     print "    a1XS - g1prime2**2*L1XS    = {}%".format((JHUXSVBFa1 - g1prime2VBF_gen**2 * JHUXSVBFL1      ) / JHUXSVBFa1 * 100)
     print "    a1XS + g4**2*a3XS - a1a3XS = {}%".format((JHUXSVBFa1 + g4VBF**2 * JHUXSVBFa3 - JHUXSVBFa1a3 ) / JHUXSVBFa1 * 100)
     print "    2*a1XS - a1a3XS            = {}%".format((2*JHUXSVBFa1 - JHUXSVBFa1a3                       ) / (2*JHUXSVBFa1) * 100)
+    print
+    print "  ZH:"
+    print "    a1XS - g2**2*a2XS          = {}%".format((JHUXSZHa1 - g2ZH**2           * JHUXSZHa2     ) / JHUXSZHa1 * 100)
+    print "    a1XS - g4**2*a3XS          = {}%".format((JHUXSZHa1 - g4ZH**2           * JHUXSZHa3     ) / JHUXSZHa1 * 100)
+    print "    a1XS - g1prime2**2*L1XS    = {}%".format((JHUXSZHa1 - g1prime2ZH_gen**2 * JHUXSZHL1     ) / JHUXSZHa1 * 100)
+    print "    a1XS + g4**2*a3XS - a1a3XS = {}%".format((JHUXSZHa1 + g4ZH**2 * JHUXSZHa3 - JHUXSZHa1a3 ) / JHUXSZHa1 * 100)
+    print "    2*a1XS - a1a3XS            = {}%".format((2*JHUXSZHa1 - JHUXSZHa1a3                     ) / (2*JHUXSZHa1) * 100)
+    print
+    print "  WH:"
+    print "    a1XS - g2**2*a2XS          = {}%".format((JHUXSWHa1 - g2WH**2           * JHUXSWHa2     ) / JHUXSWHa1 * 100)
+    print "    a1XS - g4**2*a3XS          = {}%".format((JHUXSWHa1 - g4WH**2           * JHUXSWHa3     ) / JHUXSWHa1 * 100)
+    print "    a1XS - g1prime2**2*L1XS    = {}%".format((JHUXSWHa1 - g1prime2WH_gen**2 * JHUXSWHL1     ) / JHUXSWHa1 * 100)
+    print "    a1XS + g4**2*a3XS - a1a3XS = {}%".format((JHUXSWHa1 + g4WH**2 * JHUXSWHa3 - JHUXSWHa1a3 ) / JHUXSWHa1 * 100)
+    print "    2*a1XS - a1a3XS            = {}%".format((2*JHUXSWHa1 - JHUXSWHa1a3                     ) / (2*JHUXSWHa1) * 100)
 
 #Set them to exactly 0
 
@@ -90,6 +130,30 @@ JHUXSVBFL1, JHUXSVBFL1err = JHUXSVBFa1 / g1prime2VBF_gen**2, JHUXSVBFa1err / g1p
 
 JHUXSVBFa1a3, JHUXSVBFa1a3err = JHUXSVBFa1*2, JHUXSVBFa1err*2
 
+#ZH
+
+values = [JHUXSZHa1, JHUXSZHa2*g2ZH**2, JHUXSZHa3*g4ZH**2, JHUXSZHL1*g1prime2ZH_gen**2]
+errors = [JHUXSZHa1err, JHUXSZHa2err*g2ZH**2, JHUXSZHa3err*g4ZH**2, JHUXSZHL1err*g1prime2ZH_gen**2]
+
+JHUXSZHa1, JHUXSZHa1err = sum(value/error**2 for value, error in zip(values, errors)) / sum(1/error**2 for error in errors), sum(1/error**2 for error in errors)**-.5
+JHUXSZHa2, JHUXSZHa2err = JHUXSZHa1 / g2ZH**2, JHUXSZHa1err / g2ZH**2
+JHUXSZHa3, JHUXSZHa3err = JHUXSZHa1 / g4ZH**2, JHUXSZHa1err / g4ZH**2
+JHUXSZHL1, JHUXSZHL1err = JHUXSZHa1 / g1prime2ZH_gen**2, JHUXSZHa1err / g1prime2ZH_gen**2
+
+JHUXSZHa1a3, JHUXSZHa1a3err = JHUXSZHa1*2, JHUXSZHa1err*2
+
+#WH
+
+values = [JHUXSWHa1, JHUXSWHa2*g2WH**2, JHUXSWHa3*g4WH**2, JHUXSWHL1*g1prime2WH_gen**2]
+errors = [JHUXSWHa1err, JHUXSWHa2err*g2WH**2, JHUXSWHa3err*g4WH**2, JHUXSWHL1err*g1prime2WH_gen**2]
+
+JHUXSWHa1, JHUXSWHa1err = sum(value/error**2 for value, error in zip(values, errors)) / sum(1/error**2 for error in errors), sum(1/error**2 for error in errors)**-.5
+JHUXSWHa2, JHUXSWHa2err = JHUXSWHa1 / g2WH**2, JHUXSWHa1err / g2WH**2
+JHUXSWHa3, JHUXSWHa3err = JHUXSWHa1 / g4WH**2, JHUXSWHa1err / g4WH**2
+JHUXSWHL1, JHUXSWHL1err = JHUXSWHa1 / g1prime2WH_gen**2, JHUXSWHa1err / g1prime2WH_gen**2
+
+JHUXSWHa1a3, JHUXSWHa1a3err = JHUXSWHa1*2, JHUXSWHa1err*2
+
 del values, errors
 
 #define interference xsecs instead of mixture xsecs
@@ -102,5 +166,13 @@ JHUXSVBFa1a2, JHUXSVBFa1a2err = JHUXSVBFa1a2 - 2*JHUXSVBFa1, sqrt(JHUXSVBFa1a2er
 JHUXSVBFa1a3, JHUXSVBFa1a3err = JHUXSVBFa1a3 - 2*JHUXSVBFa1, 0
 JHUXSVBFa1L1, JHUXSVBFa1L1err = JHUXSVBFa1L1 - 2*JHUXSVBFa1, sqrt(JHUXSVBFa1L1err**2 + 4*JHUXSVBFa1err**2)
 
+JHUXSZHa1a2, JHUXSZHa1a2err = JHUXSZHa1a2 - 2*JHUXSZHa1, sqrt(JHUXSZHa1a2err**2 + 4*JHUXSZHa1err**2)
+JHUXSZHa1a3, JHUXSZHa1a3err = JHUXSZHa1a3 - 2*JHUXSZHa1, 0
+JHUXSZHa1L1, JHUXSZHa1L1err = JHUXSZHa1L1 - 2*JHUXSZHa1, sqrt(JHUXSZHa1L1err**2 + 4*JHUXSZHa1err**2)
+
+JHUXSWHa1a2, JHUXSWHa1a2err = JHUXSWHa1a2 - 2*JHUXSWHa1, sqrt(JHUXSWHa1a2err**2 + 4*JHUXSWHa1err**2)
+JHUXSWHa1a3, JHUXSWHa1a3err = JHUXSWHa1a3 - 2*JHUXSWHa1, 0
+JHUXSWHa1L1, JHUXSWHa1L1err = JHUXSWHa1L1 - 2*JHUXSWHa1, sqrt(JHUXSWHa1L1err**2 + 4*JHUXSWHa1err**2)
+
 #defined this way, just make sure
-assert JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == 0
+assert JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == JHUXSZHa1a3 == JHUXSWHa1a3 == 0

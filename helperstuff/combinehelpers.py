@@ -38,16 +38,9 @@ class __Rate(MultiEnum):
     def yamlrate(self):
         if self.production.year == 2016:
             filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_ICHEP2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
-            if self.category == "VBF2jTaggedIchep16":
-                tags = ["VBF2jTagged"]
-            else:
-                tags = ["UnTagged", "VBF1jTagged", "VHLeptTagged", "VHHadrTagged", "ttHTagged"]
+            tags = [tag.replace("Ichep16", "") for tag in self.category.names if "Ichep16" in tag]
         elif self.production.year == 2015:
-            filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
-            if self.category == "VBF2jTaggedIchep16":
-                tags = ["VBFTagged"]
-            else:
-                tags = ["UnTagged"]
+            assert False
         with open(filename) as f:
             y = yaml.load(f)
         with open(filename) as f:
@@ -58,7 +51,7 @@ class __Rate(MultiEnum):
             else:
                 raise IOError("No luminosity in {}".format(filename))
         if self.productionmode == "ggH":
-            productionmodes = ["ggH", "WH", "ZH", "ttH"]
+            productionmodes = ["ggH", "ttH"]
         elif self.productionmode == "VBF":
             productionmodes = ["qqH"]
         elif self.productionmode == "ZX":
@@ -87,9 +80,9 @@ def getrate(*args):
     return __cache[rate]
 
 def getrates(*args, **kwargs):
-    fmt = "rate {} {} {} {} {} {}"
+    fmt = "rate {} {} {} {} {} {} {} {}"
     disableproductionmodes = ()
-    useproductionmodes = ("ggH", "VBF", "qqZZ", "ggZZ", "VBF bkg", "ZX")
+    useproductionmodes = ("ggH", "VBF", "WH", "ZH", "qqZZ", "ggZZ", "VBF bkg", "ZX")
     for kw, kwarg in kwargs.iteritems():
         if kw == "format":
             fmt = kwarg
@@ -140,8 +133,8 @@ class SigmaIOverSigma1(MultiEnum):
                          self.analysis.couplingname
                         )
             return 1/gi**2
-        if self.productionmode == "VBF":
-            #for VBF gi for the pure BSM sample is defined = 1
+        if self.productionmode in ("VBF", "ZH", "WH"):
+            #for VBF, ZH, and WH, gi for the pure BSM sample is defined = 1
             sigmai = ReweightingSample(self.analysis.purehypotheses[1], self.productionmode).xsec
             sigma1 = ReweightingSample("SM", self.productionmode).xsec
             return sigmai/sigma1
