@@ -8,7 +8,7 @@ import os
 import ROOT
 import sys
 
-definitelyexists = Sample("ggH", "0+", "160901")
+definitelyexists = Sample("ggH", "0+", "160909")
 print definitelyexists.CJLSTfile()
 assert xrd.exists(definitelyexists.CJLSTfile())
 

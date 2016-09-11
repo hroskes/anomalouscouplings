@@ -159,7 +159,8 @@ class TemplateGroup(MyEnum):
     enumitems = (
                  EnumItem("ggh"),
                  EnumItem("vbf"),
-                 EnumItem("vhhad"),
+                 EnumItem("zh"),
+                 EnumItem("wh"),
                  EnumItem("background", "bkg"),
                  EnumItem("DATA"),
                 )
@@ -396,8 +397,8 @@ proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
 #productions = Production.items(lambda x: x in ("160225", "160729"))
-productions = Production.items(lambda x: x in ["160901"])
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
+productions = Production.items(lambda x: x in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 categories = Category.items()
 #whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_prod")

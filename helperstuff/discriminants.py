@@ -91,10 +91,10 @@ discriminants = {
                      "D_g1{}_{}{}_VBFdecay{}".format(i, gj, 4-i, prime),
                      "D{}^[VBFdec]_[g_[1]^[{}]g_[{}]^[{}]]".format("'" if prime else "", i, gj, 4-i).replace("[", "{").replace("]", "}"),
                      20,
-                     *minmax_g1jgik[gj, i, prime]
+                     *minmax_g1jgik["VBF", gj, i, prime]
                     )
             for prime in ("", "_prime")
-            for gj in ("VBF", "g4", "g2", "g1prime2")
+            for gj in ("g4", "g2", "g1prime2")
             for i in range(1, 4)
     ] + [
         Discriminant("D_0minus_ZH_hadronic", "D_{0-}^{ZHh}", 20, 0, 1),

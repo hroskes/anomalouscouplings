@@ -1313,8 +1313,8 @@ class TreeWrapper(Iterator):
                 for gj in ("g4", "g2", "g1prime2")
                 for i in range(5)
         ]
-        for prod, suffix in (("VBF", ""), ("ZH", "hadronic"), ("WH", "hadronic")):
-            self.toaddtotree += proddiscriminants.format(prod=prod, suffix=suffix)
+        for prod, suffix in (("VBF", ""), ("ZH", "_hadronic"), ("WH", "_hadronic")):
+            self.toaddtotree += [_.format(prod=prod, suffix=suffix) for _ in proddiscriminants]
 
         self.toaddtotree_int = [
             "category",
@@ -1337,6 +1337,8 @@ class TreeWrapper(Iterator):
             "MC_weight_ggH",
             "MC_weight_plain",
             "MC_weight_VBF",
+            "MC_weight_WH",
+            "MC_weight_ZH",
             "minevent",
             "nevents",
             "nevents2L2l",
