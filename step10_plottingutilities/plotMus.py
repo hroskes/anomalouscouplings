@@ -1,7 +1,6 @@
 from ROOT import *
 
-from tdrStyle import *
-setTDRStyle()
+from helperstuff import style
 
 gStyle.SetPadTickY(0)
 gStyle.SetTickLength(0.0, "Y");

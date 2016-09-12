@@ -1,7 +1,7 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff import config
 from helperstuff import filemanager
-from helperstuff.combinehelpers import getrates
+from helperstuff.combinehelpers import getrates, Luminosity
 from helperstuff.enums import Analysis, Channel, channels, Production
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
@@ -46,6 +46,8 @@ def runcombine(analysis, foldername, **kwargs):
     usesystematics = True
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
+    defaultscenario = scenario = 1
+
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -79,8 +81,15 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("scanrange has to contain 2 floats separated by a comma!")
         elif kw == "npoints":
             npoints = int(kwarg)
+        elif kw == "scenario":
+            scenario = int(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
+
+    if not config.unblindscans:
+        luminosity = float(Luminosity("forexpectedscan"))
+    else:
+        luminosity = None
 
     years = [p.year for p in productions]
     if len(set(years)) != len(years):
@@ -94,6 +103,8 @@ def runcombine(analysis, foldername, **kwargs):
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
+    if scenario != defaultscenario:
+        foldername += "_scenario{}".format(scenario)
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
@@ -139,7 +150,7 @@ def runcombine(analysis, foldername, **kwargs):
                         os.remove("hzz4l_{}S_{}.input.root".format(channel, production.year))
             if not os.path.exists(repmap["workspacefile"]):
                 for channel, production in product(usechannels, productions):
-                    replacesystematics(channel, production)
+                    replacesystematics(channel, production, scenario=scenario, luminosity=luminosity)
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
             if config.unblindscans:

@@ -29,7 +29,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         elif kw == "moreappend":
             moreappend = kwarg
         else:
-            assert False
+            raise TypeError("Bad kwarg {}={}".format(kw, kwarg))
 
     scans = []
     uptocolor = 1
