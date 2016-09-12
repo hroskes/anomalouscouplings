@@ -28,7 +28,7 @@ class Luminosity(MultiEnum):
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production]
     def getrate(self):
-        return self.yamlrate()
+        return self.yamlrate() * self.scalefactor()
         if self.productionmode == "ZX" and self.production in ("160725", "160729"):
             if self.channel == "4e":    return 2.39 * float(self.luminosity)/12.9
             if self.channel == "4mu":   return 3.66 * float(self.luminosity)/12.9
@@ -93,6 +93,19 @@ class __Rate(MultiEnum):
                     rate += eval(y[tag][p].replace("@0", "125")) * float(self.luminosity) / lumi
 
         return rate
+
+    def scalefactor(self):
+        assert config.expectedscanluminosity in (300, 3000)
+        if self.channel == "2e2mu":
+            if self.productionmode == "ZX": return 3.15
+            return 1.0
+        if self.channel == "4e":
+            if self.productionmode == "ZX": return 4.70
+            return 0.83
+        if self.channel == "4mu":
+            if self.productionmode == "ZX": return 2.66
+            return 1.17
+        assert False
 
     def __float__(self):
         return self.getrate()
