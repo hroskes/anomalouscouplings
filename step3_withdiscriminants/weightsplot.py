@@ -7,8 +7,8 @@ import helperstuff.style
 ROOT.gStyle.SetCanvasDefW(678)
 ROOT.gStyle.SetPadRightMargin(0.115)
 
-fromsamples = [Sample("VBF", hypothesis, "160729") for hypothesis in prodonlyhypotheses]
-tosamples = [ReweightingSample("VBF", hypothesis) for hypothesis in proddechypotheses]
+fromsamples = [Sample("ZH", hypothesis, "160909") for hypothesis in prodonlyhypotheses]
+tosamples = [ReweightingSample("ZH", hypothesis) for hypothesis in proddechypotheses]
 cache = []
 """
 upperlimit = {
@@ -23,9 +23,6 @@ upperlimit = {
 """
 
 for i, tosample in enumerate(tosamples):
-    dirname = os.path.join(config.plotsbasedir, "weightplots/{}".format(str(tosample).replace(" ", "")))
-    try: os.makedirs(dirname)
-    except: pass
     hstack = None
     del cache[:]
     hstack = ROOT.THStack(str(tosample).replace(" ", ""), "")
@@ -33,6 +30,10 @@ for i, tosample in enumerate(tosamples):
     legend.SetFillStyle(0)
     legend.SetBorderSize(0)
     for fromsample in fromsamples:
+        dirname = os.path.join(config.plotsbasedir, "weightplots/{}".format(str(fromsample).replace(" ", "")))
+        try: os.makedirs(dirname)
+        except: pass
+
         t = ROOT.TChain("candTree")
         t.Add(fromsample.withdiscriminantsfile())
 
@@ -54,10 +55,10 @@ for i, tosample in enumerate(tosamples):
         #cache.append(h)
         legend.AddEntry(h, str(fromsample.hypothesis), "l")
         for ext in "png", "eps", "root", "pdf":
-            c1.SaveAs("{}/{}.{}".format(dirname, fromsample.hypothesis, ext))
+            c1.SaveAs("{}/{}.{}".format(dirname, tosample.hypothesis, ext))
         c1.SetLogx(True)
         for ext in "png", "eps", "root", "pdf":
-            c1.SaveAs("{}/{}_log.{}".format(dirname, fromsample.hypothesis, ext))
+            c1.SaveAs("{}/{}_log.{}".format(dirname, tosample.hypothesis, ext))
     """
     print list(hstack.GetHists())
     print [h.Scale(1/h.Integral()) for h in hstack.GetHists()]

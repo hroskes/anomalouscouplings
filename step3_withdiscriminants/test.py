@@ -14,11 +14,11 @@ ROOT.gErrorIgnoreLevel = ROOT.kError
 c = ROOT.TCanvas()
 for color, hypothesis in enumerate(prodonlyhypotheses, start=1):
     t = ROOT.TChain("candTree", "candTree")
-    t.Add(Sample("VBF", hypothesis, "160729").withdiscriminantsfile())
+    t.Add(Sample("ZH", hypothesis, "160909").withdiscriminantsfile())
     hname = "h{}".format(hypothesis)
 #    weight = "MC_weight_VBF_g1"
-    weight = "D_g1prime2_VBF>-900"
-    t.Draw("D_g1prime2_VBF:D_g1g1prime2_VBF>>{}(1000,-1,0,1000,0,1)".format(hname), weight, "SCAT")
+    weight = "D_g1prime2_ZH_hadronic>-900"
+    t.Draw("D_g1prime2_ZH_hadronic:D_g1g1prime2_ZH_hadronic>>{}(1000,-1,1,1000,0,1)".format(hname), weight, "SCAT")
 #    t.Draw("D_g1prime2_VBF:D_g1g1prime2_VBF>>{}".format(hname), weight, "SCAT")
 #    t.Draw("D_CP_decay>>{}(50,-.5,.5)".format(hname), weight, "hist")
 #    t.Draw("D_CP_VBF>>{}(50,-1,1)".format(hname), weight+"*(D_2jet_0plus>-1)", "hist")
