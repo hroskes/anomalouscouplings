@@ -24,15 +24,13 @@ lumis = [
          Lumi("300fb_sc2",  "September12_forECFA_300_scenario2",
                             "limit_100,-0.05,0.05", "limit_100,-0.2,0.2", "limit_50,-0.2,0.2"),
          Lumi("3000fb",     "September12_forECFA",
-#                            "limit_80,-0.004,0.004", "limit_60,-0.12,0.12", "limit_100,-0.02,0.02"),
-                            "limit_80,-0.004,0.004", "limit_60,-0.12,0.12", "limit_10,-0.02,0.02"),
+                            "limit_80,-0.004,0.004", "limit_60,-0.12,0.12", "limit_100,-0.02,0.02"),
          Lumi("3000fb_sc2", "September12_forECFA_scenario2",
-#                            "limit_80,-0.004,0.004", "limit_60,-0.12,0.12", "limit_100,-0.02,0.02"),
-                            "limit_80,-0.004,0.004", "limit_60,-0.12,0.12", "limit_10,-0.02,0.02"),
+                            "limit_80,-0.004,0.004", "limit_60,-0.12,0.12", "limit_100,-0.02,0.02"),
         ]
 
 for lumi, foldername, fa2plotname, fa3plotname, fL1plotname in lumis:
-  for i, (mu, plotname) in enumerate(zip(['fa3','fa2','fL1'], (fa3plotname, fa2plotname, fL1plotname)), start=1):
+  for i, (mu, plotname) in enumerate(zip(['fL1','fa2','fa3'], (fL1plotname, fa2plotname, fa3plotname)), start=1):
 
     print lumi, mu
     minimum, results = printlimits(mu, foldername, plotname=plotname)
