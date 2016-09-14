@@ -214,17 +214,35 @@ class TreeWrapper(Iterator):
 ##########################
 
     def D_bkg_0plus(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l*self.cconstantforDbkg)
+        try:
+            return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
     def D_bkg_0plus_ResUp(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l_ResUp / (self.p0plus_VAJHU*self.p0plus_m4l_ResUp  + self.bkg_VAMCFM*self.bkg_m4l_ResUp*self.cconstantforDbkg)
+        try:
+            return self.p0plus_VAJHU*self.p0plus_m4l_ResUp / (self.p0plus_VAJHU*self.p0plus_m4l_ResUp  + self.bkg_VAMCFM*self.bkg_m4l_ResUp*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
     def D_bkg_0plus_ResDown(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l_ResDown / (self.p0plus_VAJHU*self.p0plus_m4l_ResDown  + self.bkg_VAMCFM*self.bkg_m4l_ResDown*self.cconstantforDbkg)
+        try:
+            return self.p0plus_VAJHU*self.p0plus_m4l_ResDown / (self.p0plus_VAJHU*self.p0plus_m4l_ResDown  + self.bkg_VAMCFM*self.bkg_m4l_ResDown*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
     def D_bkg_0plus_ScaleUp(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp  + self.bkg_VAMCFM*self.bkg_m4l_ScaleUp*self.cconstantforDbkg)
+        try:
+            return self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp  + self.bkg_VAMCFM*self.bkg_m4l_ScaleUp*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
     def D_bkg_0plus_ScaleDown(self):
-        return self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown  + self.bkg_VAMCFM*self.bkg_m4l_ScaleDown*self.cconstantforDbkg)
+        try:
+            return self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown  + self.bkg_VAMCFM*self.bkg_m4l_ScaleDown*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
     def D_bkg_0minus(self):
-        return self.p0minus_VAJHU*self.p0plus_m4l / (self.p0minus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l*self.cconstantforDbkg)
+        try:
+            return self.p0minus_VAJHU*self.p0plus_m4l / (self.p0minus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
 
     def D_2jet_0plus(self):
         if self.notdijet: return -999
