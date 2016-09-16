@@ -72,28 +72,27 @@ for lumi in ['300fb','3000fb']:
   dummy.GetXaxis().SetLabelSize(0.04)
   dummy.SetNdivisions(510, "X");
   dummy.Draw()
-  
+
   latex2 = TLatex()
   latex2.SetNDC()
   latex2.SetTextSize(0.8*c1.GetTopMargin())
   latex2.SetTextFont(42)
-  latex2.SetTextAlign(11) # align right                                                                                        
+  latex2.SetTextAlign(11) # align right
   latex2.DrawLatex(0.05, 0.95, "CMS Projection")
-  
+
   latex2.SetTextSize(0.55*c1.GetTopMargin())
   latex2.DrawLatex(0.08,0.85, "Expected uncertainties on")
   latex2.DrawLatex(0.08,0.81, "Higgs Boson anomalous couplings")
-  
+
   latex2.SetTextSize(0.55*c1.GetTopMargin())
   latex2.DrawLatex(0.65,0.66, "H #rightarrow ZZ* #rightarrow 4#font[12]{l}")
   latex2.DrawLatex(0.65,0.60, "m_{H} = 125 GeV")
-  
+
   latex2.SetTextSize(0.55*c1.GetTopMargin())
-  
+
   for mu in ["fa3", "fa2", "fL1"]:
     g_mus[lumi+'_'+mu].Draw("|same")
     g_mus[lumi+'_sc2_'+mu].Draw("|same")
-
     latex2.DrawLatex(0.08,a_y[lumi+'_'+mu][0]/8.7+0.13, mu.replace("f", "f_{").replace("L", "#Lambda")+"}^{ZZ}")
 
   line =  TLine(0.0,0.0, 0.0, 5.5)
@@ -113,5 +112,72 @@ for lumi in ['300fb','3000fb']:
 
   for ext in "png eps root pdf".split():
     c1.SaveAs(os.path.join(saveasdir, "faisummary_{}.{}".format(lumi, ext)))
-  
+
+
+
+
+c1 = TCanvas("c1","c1",1000,800)
+c1.SetRightMargin(0.05)
+c1.SetLeftMargin(0.05)
+
+dummy = TH1D("dummy","dummy",1,-0.2,0.2)
+
+dummy.SetMinimum(0.0)
+dummy.SetMaximum(7.0)
+dummy.SetLineColor(0)
+dummy.SetMarkerColor(0)
+dummy.SetLineWidth(0)
+dummy.SetMarkerSize(0)
+dummy.GetYaxis().SetTitle("")
+dummy.GetYaxis().SetLabelSize(0)
+dummy.GetXaxis().SetTitle("expected uncertainty")
+dummy.GetXaxis().SetLabelSize(0.04)
+dummy.SetNdivisions(510, "X");
+dummy.Draw()
+
+latex2 = TLatex()
+latex2.SetNDC()
+latex2.SetTextSize(0.8*c1.GetTopMargin())
+latex2.SetTextFont(42)
+latex2.SetTextAlign(11) # align right
+latex2.DrawLatex(0.05, 0.95, "CMS Projection")
+
+latex2.SetTextSize(0.55*c1.GetTopMargin())
+latex2.DrawLatex(0.08,0.85, "Expected uncertainties on")
+latex2.DrawLatex(0.08,0.81, "Higgs Boson anomalous couplings")
+
+latex2.SetTextSize(0.55*c1.GetTopMargin())
+latex2.DrawLatex(0.65,0.66, "H #rightarrow ZZ* #rightarrow 4#font[12]{l}")
+latex2.DrawLatex(0.65,0.60, "m_{H} = 125 GeV")
+
+latex2.SetTextSize(0.55*c1.GetTopMargin())
+
+for mu in ["fa3", "fa2", "fL1"]:
+  g_mus['300fb_'+mu].SetLineColor(4)
+  g_mus['300fb_sc2_'+mu].SetLineColor(6)
+  for lumi in "300fb", "3000fb":
+    g_mus[lumi+'_'+mu].Draw("|same")
+    #g_mus[lumi+'_sc2_'+mu].Draw("|same")
+
+  latex2.DrawLatex(0.08,a_y[lumi+'_'+mu][0]/8.7+0.13, mu.replace("f", "f_{").replace("L", "#Lambda")+"}^{ZZ}")
+
+line =TLine(0.0,0.0, 0.0, 5.5)
+line.SetLineWidth(2)
+line.SetLineColor(1)
+line.Draw("same")
+
+legend = TLegend(.55,.75,.94,.90)
+legend.SetBorderSize(0)
+for lumi in "300fb", "3000fb":
+  legend.AddEntry(g_mus[lumi+'_'+mu], lumi.replace("fb","")+" fb^{-1} at #sqrt{s}=13 TeV Scenario 1", "l")
+  #legend.AddEntry(g_mus[lumi+'_sc2_'+mu], lumi.replace("fb","")+" fb^{-1} at #sqrt{s}=13 TeV Scenario 2", "l")
+legend.Draw("same")
+
+saveasdir = os.path.join(config.plotsbasedir, "ECFAsummary")
+try: os.makedirs(saveasdir)
+except OSError: pass
+
+for ext in "png eps root pdf".split():
+  c1.SaveAs(os.path.join(saveasdir, "faisummary_both.{}".format(ext)))
+
 
