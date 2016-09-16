@@ -16,12 +16,16 @@ for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2"
     t = ROOT.TChain("candTree", "candTree")
     t.Add(Sample("ZH", hypothesis, "160909").withdiscriminantsfile())
     hname = "h{}".format(hypothesis)
-    weight = "MC_weight_ZH_g1g4_prod"
-    t.Draw("D_CP_ZH_hadronic>>{}(50,-.1,.1)".format(hname), weight, "hist")
-#    t.Draw("D_g1prime2_VBF:D_g1g1prime2_VBF>>{}".format(hname), weight, "SCAT")
+    #weight = "MC_weight_ZH_g1g4_prod * (D_CP_ZH>-998)"
+    weight = "(D_CP_ZH_hadronic>-998)"
+    t.Draw("D_g13_g21_ZHdecay_hadronic_prime>>{}(50,-1,1)".format(hname), weight, "hist")
+#    t.Draw("D_g12_g1prime22_ZHdecay:D_g1g1prime2_ZHdecay>>{}".format(hname), weight, "SCAT")
 #    t.Draw("D_CP_decay>>{}(50,-.5,.5)".format(hname), weight, "hist")
-#    t.Draw("D_CP_VBF>>{}(50,-1,1)".format(hname), weight+"*(D_2jet_0plus>-1)", "hist")
+#    t.Draw("D_CP_ZH>>{}(50,-1,1)".format(hname), weight+"*(D_2jet_0plus>-1)", "hist")
     h = getattr(ROOT, hname)
+    if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
+      h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
+      h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
     hstack.Add(h)
     cache.append(h)
     legend.AddEntry(h, str(hypothesis), "l")
