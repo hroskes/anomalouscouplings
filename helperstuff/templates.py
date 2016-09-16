@@ -1,6 +1,6 @@
 import abc
 import config
-from enums import Analysis, analyses, AnalysisType, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
+from enums import Analysis, analyses, AnalysisType, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
 from filemanager import tfiles
 from itertools import product
 import numpy
@@ -151,12 +151,21 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 return discriminant("D_g1prime2_VBFdecay")
 
+        if self.category == "VHHadrTaggedIchep16":
+            if self.analysis == "fa3":
+                return discriminant("D_0minus_ZHdecay_hadronic")
+            if self.analysis == "fa2":
+                return discriminant("D_g2_ZHdecay_hadronic")
+            if self.analysis == "fL1":
+                return discriminant("D_g1prime2_ZHdecay_hadronic")
+
+        assert False
 
     @property
     def mixdiscriminant(self):
         from discriminants import discriminant
 
-        if self.category == "UntaggedIchep16" or (self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_int_decay"):
+        if self.category == "UntaggedIchep16" or self.whichproddiscriminants == "D_int_decay":
             if self.analysis == "fa3":
                 return discriminant("D_CP_decay")
             if self.analysis == "fa2":
@@ -172,6 +181,14 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 return discriminant("D_g2_VBF")
 
+        if self.category == "VHHadrTaggedIchep16" and self.whichproddiscriminants == "D_int_prod":
+            if self.analysis == "fa3":
+                return discriminant("D_CP_ZH_hadronic")
+            if self.analysis == "fa2":
+                return discriminant("D_g1g2_ZH_hadronic")
+            if self.analysis == "fL1":
+                return discriminant("D_g2_ZH_hadronic")
+
         for i, prime in product(range(1, 4), ("", "_prime")):
             if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_g1{}gi{}{}".format(i, 4-i, prime):
                 if self.analysis == "fa3":
@@ -180,6 +197,14 @@ class TemplatesFile(MultiEnum):
                     return discriminant("D_g1{}_g2{}_VBFdecay{}".format(i, 4-i, prime))
                 if self.analysis == "fL1":
                     return discriminant("D_g1{}_g1prime2{}_VBFdecay{}".format(i, 4-i, prime))
+
+            if self.category == "VHHadrTaggedIchep16" and self.whichproddiscriminants == "D_g1{}gi{}{}".format(i, 4-i, prime):
+                if self.analysis == "fa3":
+                    return discriminant("D_g1{}_g4{}_ZHdecay_hadronic{}".format(i, 4-i, prime))
+                if self.analysis == "fa2":
+                    return discriminant("D_g1{}_g2{}_ZHdecay_hadronic{}".format(i, 4-i, prime))
+                if self.analysis == "fL1":
+                    return discriminant("D_g1{}_g1prime2{}_ZHdecay_hadronic{}".format(i, 4-i, prime))
 
         assert False
 
@@ -204,6 +229,8 @@ class TemplatesFile(MultiEnum):
             return ""
         if self.category == "VBF2jTaggedIchep16":
             return "VBFtag"
+        if self.category == "VHHadrTaggedIchep16":
+            return "VHhadrtag"
         assert False
 
     @property
@@ -449,70 +476,75 @@ class Template(TemplateBase, MultiEnum):
                            ]
         if self.productionmode == "VBF" and self.analysistype == "prod+dec":
             if self.hypothesis == "0+":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0+", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "a2":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #0- and L1 are borderline
                        ]
             if self.hypothesis == "0-":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "L1":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("L1", "fL1prod0.5")   #????? what happened?
                        ]
             if self.hypothesis == "fa2dec0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #0+, 0-, and L1 are borderline
                        ]
             if self.hypothesis == "fa3dec0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fL1dec0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("fL1prod0.5",)
                        ]
             if self.hypothesis == "fa2prod0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fa3prod0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")  #0+ and a2 are borderline
                        ]
             if self.hypothesis == "fL1prod0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #????
                        ]
             if self.hypothesis == "fa2proddec-0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fa3proddec-0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fL1proddec-0.5":
-                return [
+                result=[
                         Sample(self.production, "VBF", hypothesis)
                             for hypothesis in ("a2", "fa3prod0.5", "fL1prod0.5") #????
                        ]
+        if self.productionmode in ("ZH", "WH"):
+            result=[
+                    Sample(self.production, self.productionmode, hypothesis)
+                        for hypothesis in prodonlyhypotheses
+                   ]
         if self.productionmode in ("qqZZ", "ZX"):
             result = [Sample(self.production, self.productionmode)]
         if self.productionmode == "ggZZ":

@@ -1,9 +1,21 @@
 from helperstuff import config
 from helperstuff import style
+from helperstuff.discriminants import discriminant
 from helperstuff.enums import *
 from helperstuff.samples import *
 import ROOT
 import os
+
+#========================
+#inputs
+#weight, bins, min, max can be None
+disc = "D_g11_g23_VBFdecay_prime"
+weight = None
+bins = None
+min = None
+max = None
+#========================
+
 
 hstack = ROOT.THStack()
 legend = ROOT.TLegend(.6, .5, .9, .9)
@@ -11,18 +23,27 @@ cache = []
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
+discname, title, discbins, discmin, discmax = discriminant(disc)
+if bins is None:
+    bins = discbins
+if min is None:
+    min = discmin
+if max is None:
+    max = discmax
+
 c = ROOT.TCanvas()
+hs = {}
 for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2", "fa2prod0.5", "0+"], start=1):
     t = ROOT.TChain("candTree", "candTree")
-    t.Add(Sample("ZH", hypothesis, "160909").withdiscriminantsfile())
+    sample = Sample("VBF", hypothesis, "160909")
+    t.Add(sample.withdiscriminantsfile())
     hname = "h{}".format(hypothesis)
-    #weight = "MC_weight_ZH_g1g4_prod * (D_CP_ZH>-998)"
-    weight = "(D_CP_ZH_hadronic>-998)"
-    t.Draw("D_g13_g21_ZHdecay_hadronic_prime>>{}(50,-1,1)".format(hname), weight, "hist")
-#    t.Draw("D_g12_g1prime22_ZHdecay:D_g1g1prime2_ZHdecay>>{}".format(hname), weight, "SCAT")
-#    t.Draw("D_CP_decay>>{}(50,-.5,.5)".format(hname), weight, "hist")
-#    t.Draw("D_CP_ZH>>{}(50,-1,1)".format(hname), weight+"*(D_2jet_0plus>-1)", "hist")
-    h = getattr(ROOT, hname)
+
+    weightname = weight if weight is not None else sample.weightname()
+
+    wt = "({}>-998)*{}".format(discname, weightname)
+    t.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
+    h = hs[hypothesis] = getattr(ROOT, hname)
     if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
       h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
       h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
@@ -40,3 +61,15 @@ for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2"
 
 hstack.Draw("histnostack")
 c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "test.png"))
+
+hint = hs["0+"].Clone("hint")
+hint.Add(hs["0-"])
+hint.Scale(-.5)
+hint.Add(hs["fa3prod0.5"])
+
+content = {i: hint.GetBinContent(i) + hint.GetBinContent(hint.GetNbinsX()-i+1) for i in range(1, hint.GetNbinsX()+1)}
+for i, content in content.iteritems():
+    hint.SetBinContent(i, content)
+
+hint.Draw("hist")
+c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "a1a3int.png"))
