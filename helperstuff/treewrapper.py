@@ -54,11 +54,11 @@ class TreeWrapper(Iterator):
             or self.isZX and not config.usedata
             or self.isdummy
            ):
-            self.length = 0
-        elif maxevent is None or maxevent >= tree.GetEntries():
-            self.length = tree.GetEntries() - minevent
+            self.__length = 0
+        elif maxevent is None or maxevent >= self.tree.GetEntries():
+            self.__length = self.tree.GetEntries() - minevent
         else:
-            self.length = maxevent - minevent + 1
+            self.__length = maxevent - minevent + 1
 
         if self.isZX:
             ZX.setup(treesample.production)
@@ -86,10 +86,10 @@ class TreeWrapper(Iterator):
             self.__treeentry += 1
             i, t = self.__i, self.tree
             t.GetEntry(self.__treeentry)
-            if i > self.length:
+            if i > len(self):
                 raise StopIteration
-            if i % 10000 == 0 or i == self.length:
-                print i, "/", self.length
+            if i % 10000 == 0 or i == len(self):
+                print i, "/", len(self)
                 #raise StopIteration
 
             if self.isdata:
@@ -208,6 +208,9 @@ class TreeWrapper(Iterator):
 
         self.notdijet = self.M2g1_VBF <= 0 or self.M2g2_HJJ <= 0
         return self
+
+    def __len__(self):
+        return self.__length
 
 ##########################
 #background discriminants#
@@ -1351,7 +1354,6 @@ class TreeWrapper(Iterator):
             "isdata",
             "isdummy",
             "isZX",
-            "length",
             "MC_weight_ggH",
             "MC_weight_plain",
             "MC_weight_VBF",
@@ -1481,6 +1483,8 @@ class TreeWrapper(Iterator):
         for key in set(list(type(self).__dict__) + list(self.__dict__) + self.toaddtotree+self.toaddtotree_int + self.exceptions):
             if key.startswith("__"): continue
             if key.startswith("_abc"): continue
+            if any(key.startswith("_{}__".format(cls.__name__)) for cls in type(self).__mro__):
+                continue
             if key not in self.exceptions and key not in self.toaddtotree+self.toaddtotree_int and (key in self.__dict__ or key in type(self).__dict__):
                 notanywhere.append(key)
             if key in self.toaddtotree+self.toaddtotree_int and key in self.exceptions:
@@ -1498,7 +1502,7 @@ class TreeWrapper(Iterator):
             raise SyntaxError(error)
 
         #cross checking that the order of weights is defined right
-        if self.treesample.productionmode in ("ggH", "VBF", "ZH", "WH"):
+        if self.treesample.productionmode in ("ggH", "VBF", "ZH", "WH") and self:
             if couplings is None:
                 raise SyntaxError("No couplings tree for {}".format(self.treesample))
 
