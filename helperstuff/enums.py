@@ -266,6 +266,7 @@ class Production(MyEnum):
                  EnumItem("160729"),
                  EnumItem("160901"),
                  EnumItem("160909"),
+                 EnumItem("160919"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -284,6 +285,8 @@ class Production(MyEnum):
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_prodMEs_fix/AAAOK"
         if self == "160909":
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VHanomalous/AAAOK"
+        if self == "160919":
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/ggHVBFVHanomalous_cutoffs/AAAOK"
         assert False
     def CJLSTdir_anomalous(self):
         if self < "160624":
@@ -319,7 +322,7 @@ class Production(MyEnum):
         if self == "160225": return 2.8
         if self == "160714": return 7.65
         if self == "160720": return 9.2
-        if "160725" <= self <= "160909": return 12.9
+        if "160725" <= self: return 12.9
         assert False
     def __int__(self):
         return int(str(self))
@@ -327,7 +330,7 @@ class Production(MyEnum):
     def year(self):
         if self == "160225":
             return 2015
-        if "160624" <= self <= "160909":
+        if "160624" <= self:
             return 2016
         assert False
 

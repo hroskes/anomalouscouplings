@@ -9,11 +9,12 @@ import os
 #========================
 #inputs
 #weight, bins, min, max can be None
-disc = "D_g11_g23_VBFdecay_prime"
-weight = None
-bins = None
-min = None
-max = None
+productionmode = "VBF"
+disc           = "D_g12_g22_VBFdecay_prime"
+weight         = None
+bins           = None
+min            = None
+max            = None
 #========================
 
 
@@ -35,7 +36,7 @@ c = ROOT.TCanvas()
 hs = {}
 for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2", "fa2prod0.5", "0+"], start=1):
     t = ROOT.TChain("candTree", "candTree")
-    sample = Sample("VBF", hypothesis, "160909")
+    sample = Sample(productionmode, hypothesis, "160919")
     t.Add(sample.withdiscriminantsfile())
     hname = "h{}".format(hypothesis)
 
@@ -66,10 +67,6 @@ hint = hs["0+"].Clone("hint")
 hint.Add(hs["0-"])
 hint.Scale(-.5)
 hint.Add(hs["fa3prod0.5"])
-
-content = {i: hint.GetBinContent(i) + hint.GetBinContent(hint.GetNbinsX()-i+1) for i in range(1, hint.GetNbinsX()+1)}
-for i, content in content.iteritems():
-    hint.SetBinContent(i, content)
 
 hint.Draw("hist")
 c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "a1a3int.png"))
