@@ -477,74 +477,201 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "VBF" and self.analysistype == "prod+dec":
             if self.hypothesis == "0+":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0+", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "a2":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #0- and L1 are borderline
                        ]
             if self.hypothesis == "0-":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "L1":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("L1", "fL1prod0.5")   #????? what happened?
                        ]
             if self.hypothesis == "fa2dec0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #0+, 0-, and L1 are borderline
                        ]
             if self.hypothesis == "fa3dec0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fL1dec0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("fL1prod0.5",)
                        ]
             if self.hypothesis == "fa2prod0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fa3prod0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")  #0+ and a2 are borderline
                        ]
             if self.hypothesis == "fL1prod0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0+", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #????
                        ]
             if self.hypothesis == "fa2proddec-0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fa3proddec-0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        ]
             if self.hypothesis == "fL1proddec-0.5":
                 result=[
-                        Sample(self.production, "VBF", hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("a2", "fa3prod0.5", "fL1prod0.5") #????
                        ]
-        if self.productionmode in ("ZH", "WH"):
-            result=[
-                    Sample(self.production, self.productionmode, hypothesis)
-                        for hypothesis in prodonlyhypotheses
-                   ]
+        if self.productionmode == "ZH":
+            if self.hypothesis == "0+":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "fa2prod0.5", "fa3prod0.5")
+                       ]
+            if self.hypothesis == "a2":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "fa2prod0.5", "fa3prod0.5")
+                       ]
+            if self.hypothesis == "0-":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "fa2prod0.5", "fa3prod0.5")
+                       ]
+            if self.hypothesis == "L1":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in prodonlyhypotheses
+                       ]
+            if self.hypothesis == "fa2dec0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "fa2prod0.5", "fa3prod0.5")
+                       ]
+            if self.hypothesis == "fa3dec0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "fa2prod0.5", "fa3prod0.5")
+                       ]
+            if self.hypothesis == "fL1dec0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("a2", "fa2prod0.5", "fL1prod0.5")  #not great
+                       ]
+            if self.hypothesis == "fa2prod0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5")
+                       ]
+            if self.hypothesis == "fa3prod0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "fa2prod0.5", "fa3prod0.5")
+                       ]
+            if self.hypothesis == "fL1prod0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in prodonlyhypotheses
+                       ]
+            if self.hypothesis == "fa2proddec-0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
+                       ]
+            if self.hypothesis == "fa3proddec-0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "fa2prod0.5", "fa3prod0.5")
+                       ]
+            if self.hypothesis == "fL1proddec-0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
+                       ]
+        if self.productionmode == "WH":
+            if self.hypothesis == "0+":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "a2", "fa2prod0.5")
+                       ]
+            if self.hypothesis == "a2":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "0-":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "L1":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in prodonlyhypotheses
+                       ]
+            if self.hypothesis == "fa2dec0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "fa3dec0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "fL1dec0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "fa2prod0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "fa3prod0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "fL1prod0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in prodonlyhypotheses
+                       ]
+            if self.hypothesis == "fa2proddec-0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "fa3proddec-0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
+            if self.hypothesis == "fL1proddec-0.5":
+                result=[
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       ]
         if self.productionmode in ("qqZZ", "ZX"):
             result = [Sample(self.production, self.productionmode)]
         if self.productionmode == "ggZZ":

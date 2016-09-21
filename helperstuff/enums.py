@@ -286,7 +286,7 @@ class Production(MyEnum):
         if self == "160909":
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VHanomalous/AAAOK"
         if self == "160919":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/ggHVBFVHanomalous_cutoffs/AAAOK"
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/ggHVBFVHanomalous/AAAOK"
         assert False
     def CJLSTdir_anomalous(self):
         if self < "160624":

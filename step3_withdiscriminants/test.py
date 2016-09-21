@@ -9,9 +9,9 @@ import os
 #========================
 #inputs
 #weight, bins, min, max can be None
-productionmode = "VBF"
-disc           = "D_g12_g22_VBFdecay_prime"
-weight         = None
+productionmode = "WH"
+disc           = "D_g1g2_WH_hadronic"
+weight         = "MC_weight_{}_g2".format(productionmode)
 bins           = None
 min            = None
 max            = None
@@ -53,7 +53,7 @@ for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2"
     legend.AddEntry(h, str(hypothesis), "l")
     h.SetLineColor(color)
     h.SetMarkerStyle(1)
-    print hypothesis, h.Integral()
+    print "{:10} {:.3g}".format(hypothesis, h.Integral())
     try:
         os.makedirs(os.path.join(config.plotsbasedir, "TEST"))
     except OSError:
@@ -69,4 +69,4 @@ hint.Scale(-.5)
 hint.Add(hs["fa3prod0.5"])
 
 hint.Draw("hist")
-c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "a1a3int.png"))
+#c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "a1a3int.png"))
