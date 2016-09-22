@@ -398,7 +398,7 @@ decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
 proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"))
 productionmodes = ProductionMode.items()
-analyses = Analysis.items()
+analyses = Analysis.items(lambda x: x != "fa3")
 #productions = Production.items(lambda x: x in ("160225", "160729"))
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 productions = Production.items(lambda x: x in config.productionsforcombine)

@@ -10,8 +10,8 @@ import os
 #inputs
 #weight, bins, min, max can be None
 productionmode = "WH"
-disc           = "D_g1g2_WH_hadronic"
-weight         = "MC_weight_{}_g2".format(productionmode)
+disc           = "D_CP_decay"
+weight         = "MC_weight_{}_g1g1prime2_proddec_pi".format(productionmode)
 bins           = None
 min            = None
 max            = None
@@ -35,6 +35,7 @@ if max is None:
 c = ROOT.TCanvas()
 hs = {}
 for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2", "fa2prod0.5", "0+"], start=1):
+    if hypothesis in ["0-", "fa3prod0.5"]: continue
     t = ROOT.TChain("candTree", "candTree")
     sample = Sample(productionmode, hypothesis, "160919")
     t.Add(sample.withdiscriminantsfile())
@@ -63,6 +64,7 @@ for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2"
 hstack.Draw("histnostack")
 c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "test.png"))
 
+"""
 hint = hs["0+"].Clone("hint")
 hint.Add(hs["0-"])
 hint.Scale(-.5)
@@ -70,3 +72,4 @@ hint.Add(hs["fa3prod0.5"])
 
 hint.Draw("hist")
 #c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "a1a3int.png"))
+"""

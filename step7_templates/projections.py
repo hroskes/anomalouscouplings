@@ -191,6 +191,8 @@ class Projections(MultiEnum):
   def projections(self):
     print self
 
+    giname = self.analysis.couplingname
+
     ggHSM     = TemplateFromFile(   1,              "ggH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
     ggHBSM    = TemplateFromFile(   ROOT.kCyan,     "ggH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[1])
     ggHint    = IntTemplateFromFile(0,              "ggH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g11gi1")
@@ -207,10 +209,9 @@ class Projections(MultiEnum):
 
     VBFpieces = [VBFg14gi0, VBFg13gi1, VBFg12gi2, VBFg11gi3, VBFg10gi4]
 
-    giname = self.analysis.couplingname
-    gi_BSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", self.analysis.purehypotheses[1]).xsec)**.25
-    g1_mix = sqrt(2)
-    gi_mix = sqrt(2)*gi_BSM
+    gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", self.analysis.purehypotheses[1]).xsec)**.25
+    g1_VBFmix = sqrt(2)
+    gi_VBFmix = sqrt(2)*gi_BSM
 
     VBFBSM    = TemplateSum(VBFg10gi4.title,                                3,             VBFSM.Integral(), (VBFg10gi4, gi_BSM**4))
 
@@ -221,13 +222,65 @@ class Projections(MultiEnum):
                             *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces))
                            )
 
+    ZHSM = \
+    ZHg14gi0 = TemplateFromFile(   ROOT.kAzure+1,  "ZH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
+    ZHg13gi1 = IntTemplateFromFile(0,              "ZH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g13gi1")
+    ZHg12gi2 = IntTemplateFromFile(0,              "ZH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g12gi2")
+    ZHg11gi3 = IntTemplateFromFile(0,              "ZH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g11gi3")
+    ZHg10gi4 = TemplateFromFile(   0,              "ZH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[1])
+
+    ZHpieces = [ZHg14gi0, ZHg13gi1, ZHg12gi2, ZHg11gi3, ZHg10gi4]
+
+    gi_ZHBSM = (ReweightingSample("ZH", "SM").xsec / ReweightingSample("ZH", self.analysis.purehypotheses[1]).xsec)**.25
+    g1_ZHmix = sqrt(2)
+    gi_ZHmix = sqrt(2)*gi_BSM
+
+    ZHBSM    = TemplateSum(ZHg10gi4.title,                                3,             ZHSM.Integral(), (ZHg10gi4, gi_BSM**4))
+
+    ZHmix_p  = TemplateSum("ZH {}=#plus0.5" .format(self.analysis.title), 5,            ZHSM.Integral(),
+                            *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(ZHpieces))
+                           )
+    ZHmix_m  = TemplateSum("ZH {}=#minus0.5".format(self.analysis.title), ROOT.kTeal-1,  ZHSM.Integral(),
+                            *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces))
+                           )
+
+    WHSM = \
+    WHg14gi0 = TemplateFromFile(   ROOT.kAzure+1,  "WH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
+    WHg13gi1 = IntTemplateFromFile(0,              "WH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g13gi1")
+    WHg12gi2 = IntTemplateFromFile(0,              "WH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g12gi2")
+    WHg11gi3 = IntTemplateFromFile(0,              "WH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g11gi3")
+    WHg10gi4 = TemplateFromFile(   0,              "WH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[1])
+
+    WHpieces = [WHg14gi0, WHg13gi1, WHg12gi2, WHg11gi3, WHg10gi4]
+
+    gi_WHBSM = (ReweightingSample("WH", "SM").xsec / ReweightingSample("WH", self.analysis.purehypotheses[1]).xsec)**.25
+    g1_WHmix = sqrt(2)
+    gi_WHmix = sqrt(2)*gi_BSM
+
+    WHBSM    = TemplateSum(WHg10gi4.title,                                3,             WHSM.Integral(), (WHg10gi4, gi_BSM**4))
+
+    WHmix_p  = TemplateSum("WH {}=#plus0.5" .format(self.analysis.title), 5,            WHSM.Integral(),
+                            *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(WHpieces))
+                           )
+    WHmix_m  = TemplateSum("WH {}=#minus0.5".format(self.analysis.title), ROOT.kTeal-1,  WHSM.Integral(),
+                            *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces))
+                           )
+
     qqZZ      = TemplateFromFile(6,              "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ",    self.systematic, self.production)
     ggZZ      = TemplateFromFile(ROOT.kOrange+6, "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ",    self.systematic, self.production)
     VBFbkg    = TemplateFromFile(ROOT.kViolet+7, "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "VBF bkg", self.systematic, self.production)
     ZX        = TemplateFromFile(2,              "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ZX",      self.systematic, self.production)
 
     templates = [
-                 ggHSM, ggHBSM, ggHint, ggHmix_p, ggHmix_m] + VBFpieces + [VBFBSM, VBFmix_p, VBFmix_m, qqZZ, ggZZ, VBFbkg, ZX
+                 ggHSM, ggHBSM, ggHint, ggHmix_p, ggHmix_m,
+                ] + VBFpieces + [
+                 VBFBSM, VBFmix_p, VBFmix_m,
+                ] + ZHpieces + [
+                 ZHBSM, ZHmix_p, ZHmix_m,
+                ] + WHpieces + [
+                 WHBSM, WHmix_p, WHmix_m,
+                ] + [
+                 qqZZ, ggZZ, VBFbkg, ZX
                 ]
 
     if self.enrichstatus == "impoverish" and config.usedata or config.unblinddistributions:
