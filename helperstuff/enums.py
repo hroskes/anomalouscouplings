@@ -58,6 +58,10 @@ class MyEnum(object):
     def items(cls, condition=lambda item: True):
         return [cls(item) for item in cls.enumitems if condition(cls(item))]
 
+    @property
+    def names(self):
+        return self.item.names
+
 class Channel(MyEnum):
     enumname = "channel"
     enumitems = (

@@ -33,12 +33,12 @@ class __Rate(MultiEnum):
         if self.productionmode != "VBF bkg":
             return self.yamlrate()
 
-        return Template("fa3", "prod+dec", "D_int_decay", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+        return Template("fa2", "prod+dec", "D_int_decay", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
 
     def yamlrate(self):
         if self.production.year == 2016:
             filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_ICHEP2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
-            tags = [tag.replace("Ichep16", "") for tag in self.category.names if "Ichep16" in tag]
+            tags = [tag.replace("Ichep16", "").replace("tagged", "Tagged") for tag in self.category.names if "Ichep16" in tag]
         elif self.production.year == 2015:
             assert False
         with open(filename) as f:

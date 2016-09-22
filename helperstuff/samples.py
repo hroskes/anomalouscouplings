@@ -1,11 +1,140 @@
+from abc import ABCMeta, abstractproperty
 import config
 import constants
-from enums import BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, Hypothesis, MultiEnum, ProductionMode, Production
+from enums import BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
 from math import sqrt
 import os
 import ROOT
 
-class ReweightingSample(MultiEnum):
+
+class SampleBase(object):
+    __metaclass__ = ABCMeta
+
+    @abstractproperty
+    def g1(self):
+        pass
+    @abstractproperty
+    def g2(self):
+        pass
+    @abstractproperty
+    def g4(self):
+        pass
+    @abstractproperty
+    def g1prime2(self):
+        pass
+
+    @property
+    def JHUxsec(self):
+        if self.productionmode == "ggH":
+            return (
+                      constants.JHUXSggH2L2la1*self.g1**2
+                    + constants.JHUXSggH2L2la2*self.g2**2
+                    + constants.JHUXSggH2L2la3*self.g4**2
+                    + constants.JHUXSggH2L2lL1*self.g1prime2**2
+                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                   )
+
+        if self.productionmode == "VBF":
+            return (
+                      constants.JHUXSVBFa1 * self.g1**2
+                    + constants.JHUXSVBFa2 * self.g2**2
+                    + constants.JHUXSVBFa3 * self.g4**2
+                    + constants.JHUXSVBFL1 * self.g1prime2**2
+                    + constants.JHUXSVBFa1a2 * self.g1*self.g2 / constants.g2VBF
+                    + constants.JHUXSVBFa1a3 * self.g1*self.g4 / constants.g4VBF
+                    + constants.JHUXSVBFa1L1 * self.g1*self.g1prime2 / constants.g1prime2VBF_gen
+                   ) * (
+                      constants.JHUXSggH2L2la1 * self.g1**2
+                    + constants.JHUXSggH2L2la2 * self.g2**2
+                    + constants.JHUXSggH2L2la3 * self.g4**2
+                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
+                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                   )
+
+        if self.productionmode == "ZH":
+            return (
+                      constants.JHUXSZHa1 * self.g1**2
+                    + constants.JHUXSZHa2 * self.g2**2
+                    + constants.JHUXSZHa3 * self.g4**2
+                    + constants.JHUXSZHL1 * self.g1prime2**2
+                    + constants.JHUXSZHa1a2 * self.g1*self.g2 / constants.g2ZH
+                    + constants.JHUXSZHa1a3 * self.g1*self.g4 / constants.g4ZH
+                    + constants.JHUXSZHa1L1 * self.g1*self.g1prime2 / constants.g1prime2ZH_gen
+                   ) * (
+                      constants.JHUXSggH2L2la1 * self.g1**2
+                    + constants.JHUXSggH2L2la2 * self.g2**2
+                    + constants.JHUXSggH2L2la3 * self.g4**2
+                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
+                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                   )
+
+        if self.productionmode == "WH":
+            return (
+                      constants.JHUXSWHa1 * self.g1**2
+                    + constants.JHUXSWHa2 * self.g2**2
+                    + constants.JHUXSWHa3 * self.g4**2
+                    + constants.JHUXSWHL1 * self.g1prime2**2
+                    + constants.JHUXSWHa1a2 * self.g1*self.g2 / constants.g2WH
+                    + constants.JHUXSWHa1a3 * self.g1*self.g4 / constants.g4WH
+                    + constants.JHUXSWHa1L1 * self.g1*self.g1prime2 / constants.g1prime2WH_gen
+                   ) * (
+                      constants.JHUXSggH2L2la1 * self.g1**2
+                    + constants.JHUXSggH2L2la2 * self.g2**2
+                    + constants.JHUXSggH2L2la3 * self.g4**2
+                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
+                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                   )
+        assert False
+
+    @property
+    def xsec(self):
+        if self.productionmode == "ggH":
+            if self.hypothesis == "SM": return constants.SMXSggH2L2l
+            return constants.SMXSggH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+        if self.productionmode == "VBF":
+            if self.hypothesis == "SM": return constants.SMXSVBF2L2l
+            return constants.SMXSVBF2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+        if self.productionmode == "ZH":
+            if self.hypothesis == "SM": return constants.SMXSZH2L2l
+            return constants.SMXSZH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+        if self.productionmode == "WH":
+            if self.hypothesis == "SM": return constants.SMXSWH2L2l
+            return constants.SMXSWH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+        assert False
+
+
+class ArbitraryCouplingsSample(SampleBase):
+    def __init__(self, productionmode, g1, g2, g4, g1prime2):
+        self.productionmode = ProductionMode(productionmode)
+        self.__g1, self.__g2, self.__g4, self.__g1prime2 = g1, g2, g4, g1prime2
+        if self.productionmode not in ("ggH", "VBF", "ZH", "WH"):
+            raise ValueError("Bad productionmode {}".format(self.productionmode))
+        if sum(bool(g) for g in (g2, g4, g1prime2)) > 1:
+            raise ValueError("Can only set at most one of g2, g4, g1prime2")
+
+    @property
+    def g1(self):
+        return self.__g1
+    @property
+    def g2(self):
+        return self.__g2
+    @property
+    def g4(self):
+        return self.__g4
+    @property
+    def g1prime2(self):
+        return self.__g1prime2
+
+class ReweightingSample(MultiEnum, SampleBase):
+    __metaclass__ = MultiEnumABCMeta
     enumname = "reweightingsample"
     enums = [ProductionMode, Hypothesis, Flavor]
 
@@ -277,93 +406,6 @@ class ReweightingSample(MultiEnum):
                 return -sqrt(constants.g1prime2WH_gen*constants.g1prime2decay_gen)
 
         raise self.ValueError("g1prime2")
-
-    @property
-    def JHUxsec(self):
-        if self.productionmode == "ggH":
-            return (
-                      constants.JHUXSggH2L2la1*self.g1**2
-                    + constants.JHUXSggH2L2la2*self.g2**2
-                    + constants.JHUXSggH2L2la3*self.g4**2
-                    + constants.JHUXSggH2L2lL1*self.g1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                   )
-
-        if self.productionmode == "VBF":
-            return (
-                      constants.JHUXSVBFa1 * self.g1**2
-                    + constants.JHUXSVBFa2 * self.g2**2
-                    + constants.JHUXSVBFa3 * self.g4**2
-                    + constants.JHUXSVBFL1 * self.g1prime2**2
-                    + constants.JHUXSVBFa1a2 * self.g1*self.g2 / constants.g2VBF
-                    + constants.JHUXSVBFa1a3 * self.g1*self.g4 / constants.g4VBF
-                    + constants.JHUXSVBFa1L1 * self.g1*self.g1prime2 / constants.g1prime2VBF_gen
-                   ) * (
-                      constants.JHUXSggH2L2la1 * self.g1**2
-                    + constants.JHUXSggH2L2la2 * self.g2**2
-                    + constants.JHUXSggH2L2la3 * self.g4**2
-                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                   )
-
-        if self.productionmode == "ZH":
-            return (
-                      constants.JHUXSZHa1 * self.g1**2
-                    + constants.JHUXSZHa2 * self.g2**2
-                    + constants.JHUXSZHa3 * self.g4**2
-                    + constants.JHUXSZHL1 * self.g1prime2**2
-                    + constants.JHUXSZHa1a2 * self.g1*self.g2 / constants.g2ZH
-                    + constants.JHUXSZHa1a3 * self.g1*self.g4 / constants.g4ZH
-                    + constants.JHUXSZHa1L1 * self.g1*self.g1prime2 / constants.g1prime2ZH_gen
-                   ) * (
-                      constants.JHUXSggH2L2la1 * self.g1**2
-                    + constants.JHUXSggH2L2la2 * self.g2**2
-                    + constants.JHUXSggH2L2la3 * self.g4**2
-                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                   )
-
-        if self.productionmode == "WH":
-            return (
-                      constants.JHUXSWHa1 * self.g1**2
-                    + constants.JHUXSWHa2 * self.g2**2
-                    + constants.JHUXSWHa3 * self.g4**2
-                    + constants.JHUXSWHL1 * self.g1prime2**2
-                    + constants.JHUXSWHa1a2 * self.g1*self.g2 / constants.g2WH
-                    + constants.JHUXSWHa1a3 * self.g1*self.g4 / constants.g4WH
-                    + constants.JHUXSWHa1L1 * self.g1*self.g1prime2 / constants.g1prime2WH_gen
-                   ) * (
-                      constants.JHUXSggH2L2la1 * self.g1**2
-                    + constants.JHUXSggH2L2la2 * self.g2**2
-                    + constants.JHUXSggH2L2la3 * self.g4**2
-                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                   )
-        raise self.ValueError("JHUxsec")
-
-    @property
-    def xsec(self):
-        if self.productionmode == "ggH":
-            if self.hypothesis == "SM": return constants.SMXSggH2L2l
-            return constants.SMXSggH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
-        if self.productionmode == "VBF":
-            if self.hypothesis == "SM": return constants.SMXSVBF2L2l
-            return constants.SMXSVBF2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
-        if self.productionmode == "ZH":
-            if self.hypothesis == "SM": return constants.SMXSZH2L2l
-            return constants.SMXSZH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
-        if self.productionmode == "WH":
-            if self.hypothesis == "SM": return constants.SMXSWH2L2l
-            return constants.SMXSWH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
-        raise self.ValueError("xsec")
 
 class Sample(ReweightingSample):
     enums = [ReweightingSample, Production, BlindStatus]
