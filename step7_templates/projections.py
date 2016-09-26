@@ -93,16 +93,7 @@ class BaseTemplateFromFile(TemplateForProjection):
         self.color = color
         self.h = self.template.gettemplate().Clone()
 
-        scalefactor = None
-        for kw, kwarg in kwargs.iteritems():
-            if kw == "SMintegral":
-                scalefactor = kwarg / self.Integral()
-            else:
-                raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
-
-        if scalefactor is not None:
-           pass
-        elif self.productionmode in ["ggH", "VBF", "ZH", "WH"]:
+        if self.productionmode in ["ggH", "VBF", "ZH", "WH"]:
             scalefactor = getrate("2e2mu", self.category, self.productionmode, "fordata", self.production) / Template(self.production, self.category, self.analysis, "2e2mu", self.productionmode, "0+", "prod+dec", self.whichproddiscriminants).gettemplate().Integral()
         elif self.productionmode == "data":
             scalefactor = 1
@@ -215,24 +206,24 @@ class Projections(MultiEnum):
     gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25
     gi_VHBSM = ((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25
     if self.category == "UntaggedIchep16":
-        g1_mix = sqrt(2)
-        gi_mix = sqrt(2)*gi_ggHBSM
+        g1_mix = 1/sqrt(2)
+        gi_mix = 1/sqrt(2)*gi_ggHBSM
         fainame = "{}^{{{}}}".format(self.analysis.title, "dec")
     elif self.category == "VBF2jTaggedIchep16":
-        g1_mix = sqrt(2)
-        gi_mix = sqrt(2)*gi_VBFBSM
+        g1_mix = 1/2**.25
+        gi_mix = 1/2**.25 * gi_VBFBSM
         fainame = "{}^{{{}}}".format(self.analysis.title, "VBFdec")
     elif self.category == "VHHadrTaggedIchep16":
-        g1_mix = sqrt(2)
-        gi_mix = sqrt(2)*gi_VHBSM
+        g1_mix = 1/2**.25
+        gi_mix = 1/2**.25 * gi_VHBSM
         fainame = "{}^{{{}}}".format(self.analysis.title, "VHdec")
 
     ggHSM     = TemplateFromFile(   0, "ggH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
-    ggHBSM    = TemplateFromFile(   0, "ggH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, BSMhypothesis, SMintegral=ggHSM.Integral())
+    ggHBSM    = TemplateFromFile(   0, "ggH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, BSMhypothesis)
     ggHint    = IntTemplateFromFile(0, "ggH", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g11gi1")
 
-    ggHmix_p  = ComponentTemplateSum("ggH {}=#plus0.5" .format(fainame), 0, ggHSM.Integral(), (ggHSM, 1), (ggHBSM, 1), (ggHint,  1))
-    ggHmix_m  = ComponentTemplateSum("ggH {}=#minus0.5".format(fainame), 0, ggHSM.Integral(), (ggHSM, 1), (ggHBSM, 1), (ggHint, -1))
+    ggHmix_p  = ComponentTemplateSum("ggH {}=#plus0.5" .format(fainame), 0, ggHSM.Integral(), (ggHSM, g1_mix**2), (ggHBSM, (gi_mix/gi_ggHBSM)**2), (ggHint,  g1_mix*gi_mix/gi_ggHBSM))
+    ggHmix_m  = ComponentTemplateSum("ggH {}=#minus0.5".format(fainame), 0, ggHSM.Integral(), (ggHSM, g1_mix**2), (ggHBSM, (gi_mix/gi_ggHBSM)**2), (ggHint,  -g1_mix*gi_mix/gi_ggHBSM))
 
     VBFSM = \
     VBFg14gi0 = TemplateFromFile(   0, "VBF", "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
@@ -288,10 +279,10 @@ class Projections(MultiEnum):
                                     *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces))
                                    )
 
-    SM    = TemplateSum("total signal SM",                                1,             (ggHSM,    1), (VBFSM,    1), (ZHSM,    1), (WHSM,    1))
-    BSM   = TemplateSum("total signal {}=1".format(self.analysis.title),  ROOT.kCyan,    (ggHBSM,   1), (VBFBSM,   1), (ZHBSM,   1), (WHBSM,   1))
-    mix_p = TemplateSum("total signal {}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, 1), (VBFmix_p, 1), (ZHmix_p, 1), (WHmix_p, 1))
-    mix_m = TemplateSum("total signal {}=#minus0.5".format(fainame),      4,             (ggHmix_m, 1), (VBFmix_m, 1), (ZHmix_m, 1), (WHmix_m, 1))
+    SM    = TemplateSum("SM",                                1,             (ggHSM,    1), (VBFSM,    1), (ZHSM,    1), (WHSM,    1))
+    BSM   = TemplateSum("{}=1".format(self.analysis.title),  ROOT.kCyan,    (ggHBSM,   1), (VBFBSM,   1), (ZHBSM,   1), (WHBSM,   1))
+    mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, 1), (VBFmix_p, 1), (ZHmix_p, 1), (WHmix_p, 1))
+    mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, 1), (VBFmix_m, 1), (ZHmix_m, 1), (WHmix_m, 1))
 
     qqZZ      = TemplateFromFile(6,              "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ",    self.systematic, self.production)
     ggZZ      = TemplateFromFile(ROOT.kOrange+6, "prod+dec", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ",    self.systematic, self.production)
@@ -317,7 +308,7 @@ class Projections(MultiEnum):
                      ]
 
     c1 = ROOT.TCanvas()
-    legend = ROOT.TLegend(.75, .65, .9, .9)
+    legend = ROOT.TLegend(.75, .4, .9, .9)
     legend.SetBorderSize(0)
     legend.SetFillStyle(0)
     for template in templates:
