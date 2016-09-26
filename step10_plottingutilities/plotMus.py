@@ -29,6 +29,8 @@ lumis = [
                             "limit_80,-0.004,0.004", "limit_60,-0.12,0.12", "limit_100,-0.02,0.02"),
         ]
 
+bothscenarios = False
+
 for lumi, foldername, fa2plotname, fa3plotname, fL1plotname in lumis:
   for i, (mu, plotname) in enumerate(zip(['fL1','fa2','fa3'], (fL1plotname, fa2plotname, fa3plotname)), start=1):
 
@@ -68,7 +70,7 @@ for lumi in ['300fb','3000fb']:
   dummy.SetMarkerSize(0)
   dummy.GetYaxis().SetTitle("")
   dummy.GetYaxis().SetLabelSize(0)
-  dummy.GetXaxis().SetTitle("expected uncertainty")
+  dummy.GetXaxis().SetTitle("expected 95% CL limits")
   dummy.GetXaxis().SetLabelSize(0.04)
   dummy.SetNdivisions(510, "X");
   dummy.Draw()
@@ -78,17 +80,17 @@ for lumi in ['300fb','3000fb']:
   latex2.SetTextSize(0.8*c1.GetTopMargin())
   latex2.SetTextFont(42)
   latex2.SetTextAlign(11) # align right
-  latex2.DrawLatex(0.05, .95, "CMS Projection")
+  latex2.DrawLatex(0.05, 0.96, "#font[61]{CMS} #font[52]{Projection}")
 
-  latex2.SetTextSize(0.7*c1.GetTopMargin())
-  latex2.DrawLatex(0.08,0.85, "Expected uncertainties on")
+  latex2.SetTextSize(1*c1.GetTopMargin())
+  latex2.DrawLatex(0.08,0.85, "Expected limits on")
   latex2.DrawLatex(0.08,0.81, "Higgs Boson anomalous couplings")
 
-  latex2.SetTextSize(0.7*c1.GetTopMargin())
+  latex2.SetTextSize(1*c1.GetTopMargin())
   latex2.DrawLatex(0.65,0.66, "H #rightarrow ZZ* #rightarrow 4#font[12]{l}")
   latex2.DrawLatex(0.65,0.60, "m_{H} = 125 GeV")
 
-  latex2.SetTextSize(0.8*c1.GetTopMargin())
+  latex2.SetTextSize(1.2*c1.GetTopMargin())
 
   for mu in ["fa3", "fa2", "fL1"]:
     g_mus[lumi+'_'+mu].Draw("|same")
@@ -100,10 +102,10 @@ for lumi in ['300fb','3000fb']:
   line.SetLineColor(1)
   line.Draw("same")
 
-  legend = TLegend(.5,.75,.94,.90)
+  legend = TLegend(.65,.72,.94,.90)
   legend.SetBorderSize(0)
-  legend.AddEntry(g_mus[lumi+'_'+mu], lumi.replace("fb","")+" fb^{-1} at #sqrt{s}=13 TeV Scenario 1", "l")
-  legend.AddEntry(g_mus[lumi+'_sc2_'+mu], lumi.replace("fb","")+" fb^{-1} at #sqrt{s}=13 TeV Scenario 2", "l")
+  legend.AddEntry(g_mus[lumi+'_'+mu], "ECFA16 S1{} ({}^{{-1}})".format(plus, lumi), "l")
+  legend.AddEntry(g_mus[lumi+'_sc2_'+mu], "ECFA16 S2{} ({}^{{-1}})".format(plus, lumi), "l")
   legend.Draw("same")
 
   saveasdir = os.path.join(config.plotsbasedir, "ECFAsummary")
@@ -130,7 +132,7 @@ dummy.SetLineWidth(0)
 dummy.SetMarkerSize(0)
 dummy.GetYaxis().SetTitle("")
 dummy.GetYaxis().SetLabelSize(0)
-dummy.GetXaxis().SetTitle("expected uncertainty")
+dummy.GetXaxis().SetTitle("expected 95% CL limits")
 dummy.GetXaxis().SetLabelSize(0.04)
 dummy.SetNdivisions(510, "X");
 dummy.Draw()
@@ -140,24 +142,25 @@ latex2.SetNDC()
 latex2.SetTextSize(0.8*c1.GetTopMargin())
 latex2.SetTextFont(42)
 latex2.SetTextAlign(11) # align right
-latex2.DrawLatex(0.05, 0.96, "CMS Projection")
+latex2.DrawLatex(0.05, 0.96, "#font[61]{CMS} #font[52]{Projection}")
 
-latex2.SetTextSize(0.7*c1.GetTopMargin())
-latex2.DrawLatex(0.08,0.85, "Expected uncertainties on")
+latex2.SetTextSize(1*c1.GetTopMargin())
+latex2.DrawLatex(0.08,0.85, "Expected limits on")
 latex2.DrawLatex(0.08,0.81, "Higgs Boson anomalous couplings")
 
-latex2.SetTextSize(0.7*c1.GetTopMargin())
+latex2.SetTextSize(1*c1.GetTopMargin())
 latex2.DrawLatex(0.65,0.66, "H #rightarrow ZZ* #rightarrow 4#font[12]{l}")
 latex2.DrawLatex(0.65,0.60, "m_{H} = 125 GeV")
 
-latex2.SetTextSize(0.8*c1.GetTopMargin())
+latex2.SetTextSize(1.2*c1.GetTopMargin())
 
 for mu in ["fa3", "fa2", "fL1"]:
   g_mus['300fb_'+mu].SetLineColor(4)
   g_mus['300fb_sc2_'+mu].SetLineColor(6)
   for lumi in "300fb", "3000fb":
     g_mus[lumi+'_'+mu].Draw("|same")
-    #g_mus[lumi+'_sc2_'+mu].Draw("|same")
+    if bothscenarios:
+      g_mus[lumi+'_sc2_'+mu].Draw("|same")
 
   latex2.DrawLatex(0.08,a_y[lumi+'_'+mu][0]/8.7+0.13, mu.replace("f", "f_{").replace("L", "#Lambda")+"}^{ZZ}")
 
@@ -166,11 +169,12 @@ line.SetLineWidth(2)
 line.SetLineColor(1)
 line.Draw("same")
 
-legend = TLegend(.5,.75,.94,.90)
+legend = TLegend(.65,.72,.94,.90)
 legend.SetBorderSize(0)
-for lumi in "300fb", "3000fb":
-  legend.AddEntry(g_mus[lumi+'_'+mu], lumi.replace("fb","")+" fb^{-1} at #sqrt{s}=13 TeV Scenario 1", "l")
-  #legend.AddEntry(g_mus[lumi+'_sc2_'+mu], lumi.replace("fb","")+" fb^{-1} at #sqrt{s}=13 TeV Scenario 2", "l")
+for lumi, plus in ("300fb", ""), ("3000fb", "+"):
+  legend.AddEntry(g_mus[lumi+'_'+mu], "ECFA16 S1{} ({}^{{-1}})".format(plus, lumi), "l")
+  if bothscenarios:
+    legend.AddEntry(g_mus[lumi+'_sc2_'+mu], "ECFA16 S2{} ({}^{{-1}})".format(plus, lumi), "l")
 legend.Draw("same")
 
 saveasdir = os.path.join(config.plotsbasedir, "ECFAsummary")
@@ -178,6 +182,6 @@ try: os.makedirs(saveasdir)
 except OSError: pass
 
 for ext in "png eps root pdf".split():
-  c1.SaveAs(os.path.join(saveasdir, "faisummary_both.{}".format(ext)))
+  c1.SaveAs(os.path.join(saveasdir, "faisummary_both{}.{}".format("_bothscenarios" if bothscenarios else "", ext)))
 
 
