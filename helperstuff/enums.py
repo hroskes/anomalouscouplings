@@ -271,6 +271,7 @@ class Production(MyEnum):
                  EnumItem("160901"),
                  EnumItem("160909"),
                  EnumItem("160919"),
+                 EnumItem("160928"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -290,6 +291,8 @@ class Production(MyEnum):
         if self == "160909":
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VHanomalous/AAAOK"
         if self == "160919":
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/ggHVBFVHanomalous_bkp/AAAOK"
+        if self == "160928":
             return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/ggHVBFVHanomalous/AAAOK"
         assert False
     def CJLSTdir_anomalous(self):

@@ -1171,7 +1171,7 @@ class TreeWrapper(Iterator):
 
     def MC_weight_plain(self):
         return self.MC_weight * self.xsec / self.nevents
-    MC_weight_ZH = MC_weight_WH = MC_weight_ttH = MC_weight_plain
+    MC_weight_ttH = MC_weight_plain
 
     def MC_weight_ggH(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXSggH2L2l / self.nevents2L2l[index]
