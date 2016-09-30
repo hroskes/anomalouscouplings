@@ -40,6 +40,11 @@ class TemplatesFile(MultiEnum):
                 raise ValueError("Don't provide whichproddiscriminants for untagged category\n{}".format(args))
             dontcheck.append(WhichProdDiscriminants)
 
+        if self.analysis == "fL1":
+            if self.whichproddiscriminants is not None:
+                raise ValueError("Don't provide whichproddiscriminants for fL1\n{}".format(args))
+            dontcheck.append(WhichProdDiscriminants)
+
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
         if not self.systematic.appliesto(self.templategroup):
@@ -189,6 +194,12 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 return discriminant("D_g2_ZH_hadronic")
 
+        if self.analysis == "fL1":
+            if self.category == "VBF2jTaggedIchep16":
+                return discriminant("D_g2_VBFdecay")
+            if self.category == "VHHadrTaggedIchep16":
+                return discriminant("D_g2_ZHdecay_hadronic")
+
         for i, prime in product(range(1, 4), ("", "_prime")):
             if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_g1{}gi{}{}".format(i, 4-i, prime):
                 if self.analysis == "fa3":
@@ -279,6 +290,11 @@ def tmp():
                     for category in categories:
                         for w in whichproddiscriminants:
                             if category == "UntaggedIchep16":
+                                if w == whichproddiscriminants[0]:
+                                    w = None
+                                else:
+                                    continue
+                            elif analysis == "fL1":
                                 if w == whichproddiscriminants[0]:
                                     w = None
                                 else:
@@ -610,67 +626,67 @@ class Template(TemplateBase, MultiEnum):
             if self.hypothesis == "0+":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "fa2prod0.5")
+                            for hypothesis in ("0+", "a2", "fa2prod0.5", "0-", "fa3prod0.5")
                        }
             if self.hypothesis == "a2":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "fa2prod0.5", "L1")
+                            for hypothesis in ("a2", "fa2prod0.5", "L1", "a3", "fa3prod0.5")
                        }
             if self.hypothesis == "0-":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
+                            for hypothesis in ("0-", "fa3prod0.5", "a2", "fa2prod0.5", "L1")
                        }
             if self.hypothesis == "L1":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "fa2prod0.5", "L1", "fL1prod0.5")
+                            for hypothesis in ("0+", "a2", "fa2prod0.5", "L1", "fL1prod0.5", "0-", "fa3prod0.5")
                        }
             if self.hypothesis == "fa2dec0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "fa2prod0.5", "L1")
+                            for hypothesis in ("a2", "fa2prod0.5", "L1", "0-", "fa3prod0.5")
                        }
             if self.hypothesis == "fa3dec0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
+                            for hypothesis in ("a2", "fa3prod0.5", "0-", "fa3prod0.5", "L1")
                        }
             if self.hypothesis == "fL1dec0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("fL1prod0.5",)
+                            for hypothesis in ("0+", "a2", "fa2prod0.5", "0-", "fa3prod0.5", "L1", "fL1prod0.5",)
                        }
             if self.hypothesis == "fa2prod0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "fa2prod0.5", "fL1prod0.5")
+                            for hypothesis in ("a3", "fa3prod0.5", "a2", "fa2prod0.5", "L1", "fL1prod0.5")
                        }
             if self.hypothesis == "fa3prod0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
+                            for hypothesis in ("0-", "fa3prod0.5", "a2", "fa2prod0.5", "L1")
                        }
             if self.hypothesis == "fL1prod0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("fL1prod0.5", "a2", "L1")
+                            for hypothesis in ("fa2prod0.5", "a3", "fa3prod0.5", "fL1prod0.5", "a2", "L1")
                        }
             if self.hypothesis == "fa2proddec-0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "fa2prod0.5", "L1")
+                            for hypothesis in ("0-", "fa3prod0.5", "a2", "fa2prod0.5", "L1")
                        }
             if self.hypothesis == "fa3proddec-0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
+                            for hypothesis in ("0-", "fa3prod0.5", "a2", "fa2prod0.5")
                        }
             if self.hypothesis == "fL1proddec-0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "L1", "fL1prod0.5")
+                            for hypothesis in ("0-", "fa3prod0.5", "a2", "L1", "fL1prod0.5")
                        }
         if self.productionmode in ("qqZZ", "ZX"):
             result = {Sample(self.production, self.productionmode)}
@@ -932,6 +948,30 @@ class IntTemplate(TemplateBase, MultiEnum):
     def mirrorjsn(self):
         if self.analysis != "fa3": return None
         if self.whichproddiscriminants in ("D_g12gi2", "D_g12gi2_prime"): return None
+
+        #cross talk - production discriminants for the wrong category don't make sense
+        if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode == "ggH":
+            if self.whichproddiscriminants == "D_int_prod":
+                #ggH has no production information, so mirror symmetric
+                return {"type":"mirror", "antisymmetric":False, "axis":1}
+            elif self.whichproddiscriminants == "D_int_decay":
+                pass #continue to the end of the function
+            else:
+                #mix of production and decay information - can't mirror either way
+                return None
+
+        if (   self.category == "VBFtagged" and self.productionmode in ("ZH", "WH")
+            or self.category == "VHHadrtagged" and self.productionmode == "VBF"
+           ):
+            if self.whichproddiscriminants == "D_int_decay":
+                pass
+            elif self.interferencetype in ("g11gi3", "g13gi1"):
+                return None #Even for D_int_prod can't mirror, there is still CP violation even
+                            # though it's not the way this ME expects
+            #but for g12gi2 can mirror, since there's no CP violation
+
+        #cross talk to the untagged category is ok, since the decay is the same
+
         if self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
             return {"type":"mirror", "antisymmetric":True, "axis":1}
         elif self.interferencetype == "g12gi2":

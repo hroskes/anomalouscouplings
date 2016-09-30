@@ -187,16 +187,21 @@ class Projections(MultiEnum):
   enumname = "projections"
 
   def applysynonyms(self, enumsdict):
-    if enumsdict[WhichProdDiscriminants] is None:
-      enumsdict[WhichProdDiscriminants] = "D_g13gi1"
+    if enumsdict[WhichProdDiscriminants] is None and enumsdict[Analysis] != "fL1":
+      enumsdict[WhichProdDiscriminants] = "D_g13gi1_prime"
     super(Projections, self).applysynonyms(enumsdict)
 
   def check(self, *args):
+    dontcheck = []
     if self.normalization is None:
       self.normalization = Normalization("rescalemixtures")
     if self.systematic is None:
       self.systematic = Systematic("")
-    super(Projections, self).check(*args)
+    if self.analysis == "fL1":
+      if self.whichproddiscriminants is not None:
+        raise ValueError("Don't provide whichproddiscriminants for fL1\n{}".format(args))
+      dontcheck.append(WhichProdDiscriminants)
+    super(Projections, self).check(*args, dontcheck=dontcheck)
 
   def projections(self):
     giname = self.analysis.couplingname
@@ -348,6 +353,7 @@ if __name__ == "__main__":
     for production in productions:
       for channel in channels:
         for analysis in analyses:
+          if analysis == "fL1": continue
           for normalization in normalizations:
             for enrichstatus in enrichstatuses:
               for category in categories:

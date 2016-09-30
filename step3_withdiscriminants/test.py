@@ -10,8 +10,8 @@ import os
 #inputs
 #weight, bins, min, max can be None
 productionmode = "WH"
-disc           = "D_0minus_WH_hadronic"
-weight         = "MC_weight_{}_g1".format(productionmode)
+disc           = "D_g1g2_WH_hadronic"
+weight         = "MC_weight_{}_g1g1prime2_proddec_pi".format(productionmode)
 bins           = None
 min            = None
 max            = None
