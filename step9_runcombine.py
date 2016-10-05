@@ -9,6 +9,7 @@ from itertools import product
 import os
 import pipes
 import ROOT
+import shutil
 import subprocess
 import sys
 
@@ -46,9 +47,10 @@ def runcombine(analysis, foldername, **kwargs):
     productions = config.productionsforcombine
     whichproddiscriminants = None
     usesystematics = True
+    subdirectory = ""
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
-    disableproductionmodes = ()
+    defaultusesignalproductionmodes = usesignalproductionmodes = (ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH"))
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -86,8 +88,10 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("scanrange has to contain 2 floats separated by a comma!")
         elif kw == "npoints":
             npoints = int(kwarg)
-        elif kw == "disableproductionmodes":
-            disableproductionmodes = [ProductionMode(p) for p in kwarg.split(",")]
+        elif kw == "usesignalproductionmodes":
+            usesignalproductionmodes = [ProductionMode(p) for p in kwarg.split(",")]
+        elif kw == "subdirectory":
+            subdirectory = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -106,8 +110,11 @@ def runcombine(analysis, foldername, **kwargs):
 
     analysis = Analysis(analysis)
     foldername = "{}_{}_{}".format(analysis, foldername, whichproddiscriminants)
-    if disableproductionmodes:
-        foldername += "_no"+",".join(str(p) for p in disableproductionmodes)
+    if usesignalproductionmodes != defaultusesignalproductionmodes:
+        foldername += "_"+",".join(str(p) for p in usesignalproductionmodes)
+
+    disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
+
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
@@ -124,17 +131,28 @@ def runcombine(analysis, foldername, **kwargs):
               "scanrange": "{},{}".format(*scanrange),
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
+        if subdirectory:
+            try:
+                os.makedirs(subdirectory)
+            except OSError:
+                pass
+        if subdirectory:
+            cardsdir = os.path.join(subdirectory, "cards_{}".format(foldername))
+            if os.path.exists(cardsdir):
+                shutil.move(cardsdir, ".")
         for production, category in product(productions, categories):
             production = Production(production)
             category = Category(category)
-            if not all(os.path.exists("cards_{}/HCG/125/hzz4l_{}S_{}_{}.input.root".format(foldername, channel, category, production.year)) for channel in usechannels):
+            if not all(os.path.exists(os.path.join("cards_{}".format(foldername), "HCG", "125", "hzz4l_{}S_{}_{}.input.root".format(channel, category, production.year))) for channel in usechannels):
                 makeworkspacesmap = repmap.copy()
                 makeworkspacesmap["production"] = str(production)
                 makeworkspacesmap["category"] = str(category)
                 subprocess.check_call(replaceByMap(makeworkspacestemplate, makeworkspacesmap), shell=True)
-        with open("cards_{}/.gitignore".format(foldername), "w") as f:
+        if subdirectory:
+            shutil.move("cards_{}".format(foldername), subdirectory)
+        with open(os.path.join(subdirectory, "cards_{}".format(foldername), ".gitignore"), "w") as f:
             f.write("*")
-        with filemanager.cd("cards_{}/HCG/125".format(foldername)):
+        with filemanager.cd(os.path.join(subdirectory, "cards_{}".format(foldername), "HCG", "125")):
             #replace rates
             for channel, category, production in product(channels, categories, productions):
                 if channel in usechannels and category in usecategories:
@@ -184,7 +202,7 @@ def runcombine(analysis, foldername, **kwargs):
                 if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
                     subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
 
-            saveasdir = os.path.join(config.plotsbasedir, "limits", foldername)
+            saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
             try:
                 os.makedirs(saveasdir)
             except OSError:
@@ -205,7 +223,7 @@ def runcombine(analysis, foldername, **kwargs):
                 f.write("\n\n\n")
                 f.write("python limits.py ")
                 for arg in sys.argv[1:]:
-                    if "=" in arg: continue
+                    if "=" in arg and "subdirectory=" not in arg: continue
                     f.write(arg+" ")
                 f.write("plotname="+plotname+" ")
                 f.write("\n")

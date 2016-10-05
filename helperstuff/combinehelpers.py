@@ -89,7 +89,7 @@ def getrates(*args, **kwargs):
         elif kw == "productionmodes":
             useproductionmodes = kwarg
         elif kw == "disableproductionmodes":
-            disableproductionmodes = kwarg
+            disableproductionmodes = list(kwarg)
         else:
             raise ValueError("Unknown kwarg {}={}!".format(kw, kwarg))
 
@@ -114,10 +114,10 @@ def getdatatree(*args):
 def getsubtractdatatree(*args):
     return tfiles[SubtractDataTree(*args).treefile].candTree
 
-def discriminantnames(*args):
+def discriminants(*args):
     theset = set()
     for production in config.productionsforcombine:
-        result = tuple(d.name for d in Template("ggH", "0+", "2e2mu", "prod+dec", production, *args).discriminants)
+        result = tuple(d for d in Template("ggH", "0+", "2e2mu", "prod+dec", production, *args).discriminants)
         theset.add(result)
     assert len(theset) == 1  #sanity check
     return result

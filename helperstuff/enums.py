@@ -374,6 +374,10 @@ class Category(MyEnum):
         import CJLSTscripts
         return [getattr(CJLSTscripts, name) for name in self.item.names if "Ichep16" in name]
 
+    @property
+    def yamlname(self):
+        return str(self).replace("tagged", "Tagged")
+
     def __contains__(self, other):
         return other in self.idnumbers
 

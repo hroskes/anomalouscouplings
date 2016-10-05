@@ -12,12 +12,12 @@ class SystematicsType(MyEnum):
 
 def ReadSystematics(*args):
     class _(MultiEnum):
-        enums = (Production, Channel)
+        enums = (Production, Channel, Category)
     year = _(*args).production.year
     return {2015: MoriondSystematics, 2016: ICHEPSystematics}[year](*args)
 
 class ReadSystematics_BaseClass(MultiEnum):
-    enums = (Production, Channel)
+    enums = (Production, Channel, Category)
     def __init__(self, *args):
         super(ReadSystematics_BaseClass, self).__init__(*args)
         self.systematics = self.getsystematics()
@@ -30,7 +30,7 @@ class ReadSystematics_BaseClass(MultiEnum):
 
     def getline(self, oldline):
         if not oldline.strip(): return oldline
-        useprocesses = ["ggH", "qqH", "qqZZ", "ggZZ", "qqZZ", "zjets"]
+        useprocesses = ["ggH", "qqH", "WH", "ZH", "qqZZ", "ggZZ", "qqZZ", "zjets"]
 
         oldname = oldline.split()[0]
         systype = oldline.split()[1]
@@ -39,7 +39,7 @@ class ReadSystematics_BaseClass(MultiEnum):
 
         #special cases here
         if oldname == "pdf_hzz4l_accept":
-            uselist = [oldname, "lnN"] + ["1.02" if p == "ggH" else "-" for p in useprocesses]
+            uselist = [oldname, "lnN"] + ["1.02" if p in ("ggH", "qqH", "WH", "ZH") else "-" for p in useprocesses]
             return " ".join(uselist)
         if oldname == "lumi_8TeV":
             #https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM#CurRec
@@ -130,11 +130,10 @@ class ICHEPSystematics(ReadSystematics_BaseClass):
         return self.systematics
 
     def readline(self, name, systype, useprocesses):
-        print name, name == "QCDscale_ggVV"
         if name == "QCDscale_ggVV":   #included in ggH
             return None
         try:
-            s = self[name]["UnTagged"]
+            s = self[name][self.category.yamlname]
         except KeyError:
             s = self[name]["Any"]
         if s["type"] != "lnN":
@@ -153,7 +152,7 @@ def replacesystematics(channel, production, category):
     systematicssection = sections[-1]
     systematicslines = systematicssection.split("\n")
 
-    readsystematics = ReadSystematics(channel, production)
+    readsystematics = ReadSystematics(channel, production, category)
 
     for i, systematic in enumerate(systematicslines[:]):
         systematicslines[i] = readsystematics.getline(systematic)

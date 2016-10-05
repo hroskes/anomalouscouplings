@@ -31,6 +31,7 @@ def printlimits(analysis, foldername, **kwargs):
     foldername = "{}_{}".format(analysis, foldername)
     plotname = "limit"
     printformat = PrintFormat("latex")
+    subdirectory = ""
     for kw, kwarg in kwargs.iteritems():
         if kw == "plotname":
             plotname = kwarg
@@ -38,9 +39,11 @@ def printlimits(analysis, foldername, **kwargs):
                 plotname = plotname.replace("."+ext, "")
         elif kw == "printformat":
             printformat = PrintFormat(kwarg)
+        elif kw == "subdirectory":
+            subdirector = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
-    filename = os.path.join(config.plotsbasedir, "limits", foldername, plotname+".root")
+    filename = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername, plotname+".root")
 
     f = ROOT.TFile(filename)
     c = f.c1
