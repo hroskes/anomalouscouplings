@@ -21,7 +21,7 @@ python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[ana
 createworkspacetemplate = """
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l.txt &&
-text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
+text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
 """
 runcombinetemplate = """
 eval $(scram ru -sh) &&
@@ -51,6 +51,7 @@ def runcombine(analysis, foldername, **kwargs):
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
     defaultusesignalproductionmodes = usesignalproductionmodes = (ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH"))
+    usebkg = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -92,6 +93,13 @@ def runcombine(analysis, foldername, **kwargs):
             usesignalproductionmodes = [ProductionMode(p) for p in kwarg.split(",")]
         elif kw == "subdirectory":
             subdirectory = kwarg
+        elif kw == "usebkg":
+            if kwarg.lower() == "true":
+                usebkg = True
+            elif kwarg.lower() == "false":
+                usebkg = False
+            else:
+                usebkg = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -103,6 +111,8 @@ def runcombine(analysis, foldername, **kwargs):
         raise ValueError("Some of your productions are from the same year!")
 
     moreappend = ""
+    if not usebkg:
+        moreappend += "_nobkg"
     if not usesystematics:
         moreappend += "_nosystematics"
     if not (npoints == defaultnpoints and scanrange == defaultscanrange):
@@ -114,6 +124,8 @@ def runcombine(analysis, foldername, **kwargs):
         foldername += "_"+",".join(str(p) for p in usesignalproductionmodes)
 
     disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
+    if not usebkg:
+        disableproductionmodes |= {ProductionMode(p) for p in "ggZZ", "qqZZ", "VBF bkg", "ZX"}
 
     repmap = {
               "foldername": pipes.quote(foldername),

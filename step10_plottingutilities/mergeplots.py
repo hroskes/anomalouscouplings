@@ -1,15 +1,37 @@
+from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
+from glob import glob
 from helperstuff import config
-from helperstuff.filemanager import tfiles
 from helperstuff import style
-import ROOT
+from helperstuff.enums import Analysis
+from helperstuff.filemanager import tfiles
 import os
+import ROOT
+import sys
 
 class Folder(object):
-    def __init__(self, folder, title, color):
-        self.folder, self.title, self.color = folder, title, color
+    def __init__(self, folder, title, color, analysis, subdir, plotname):
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname = folder, title, color, Analysis(analysis), subdir, plotname
+        self.repmap = {
+                       "analysis": str(self.analysis),
+                       "gi": self.analysis.couplingname.replace("g", "").replace("1prime2", "1}^{#prime2"),
+                       "intname": "CP" if self.analysis == "fa3" else "int",
+                      }
+    @property
+    def folder(self):
+        print config.plotsbasedir, "limits", self.subdir, replaceByMap(self.__folder, self.repmap)
+        result = os.path.join(config.plotsbasedir, "limits", self.subdir, replaceByMap(self.__folder, self.repmap))
+        gl = glob(result)
+        if not gl:
+            raise ValueError("{} does not exist!".format(result))
+        if len(gl) > 1:
+            raise ValueError("{} returns more than one match!".format(result))
+        return gl[0]
+    @property
+    def title(self):
+        return replaceByMap(self.__title, self.repmap)
     @property
     def graph(self):
-        f = tfiles[os.path.join(config.plotsbasedir, "limits", self.folder, plotname)]
+        f = tfiles[os.path.join(self.folder, self.plotname)]
         c = f.c1
         mg = c.GetListOfPrimitives()[1]
         graphs = mg.GetListOfGraphs()
@@ -19,36 +41,62 @@ class Folder(object):
     def addtolegend(self, legend):
         legend.AddEntry(self.graph, self.title, "l")
 
-plotname = "limit_nosystematics.root"
-folders = [
-           Folder("fa3_discriminants_D_int_decay_noggH",    "D_{CP}^{dec}",           1),
-           Folder("fa3_discriminants_D_int_VBF_noggH",      "D_{CP}^{VBF}",           16),
-           Folder("fa3_discriminants_D_g11gi3_noggH",       "D_{g_{1}^{1}g_{4}^{3}}",  2),
-           Folder("fa3_discriminants_D_g11gi3_prime_noggH", "D'_{g_{1}^{1}g_{4}^{3}}", 6),
-           Folder("fa3_discriminants_D_g12gi2_noggH",       "D_{g_{1}^{2}g_{4}^{2}}",  4),
-           Folder("fa3_discriminants_D_g12gi2_prime_noggH", "D'_{g_{1}^{2}g_{4}^{2}}", 7),
-           Folder("fa3_discriminants_D_g13gi1_noggH",       "D_{g_{1}^{3}g_{4}^{1}}",  3),
-           Folder("fa3_discriminants_D_g13gi1_prime_noggH", "D'_{g_{1}^{3}g_{4}^{1}}", ROOT.kGreen+3),
-          ]
-outdir = "fa3_discriminants"
+def mergeplots(analysis, subdir="", plotname="limit_nosystematics.root"):
+    analysis = Analysis(analysis)
+    folders = [
+               Folder(".oO[analysis]Oo._discriminants_D_int_decay_*",    "D_{.oO[intname]Oo.}^{dec}",        1, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_int_prod_*",     "D_{.oO[intname]Oo.}^{prod}",        16, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g11gi3_[ZV]*",  "D_{g_{1}^{1}g_{.oO[gi]Oo.}^{3}}",  2, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g11gi3_prime_*", "D'_{g_{1}^{1}g_{.oO[gi]Oo.}^{3}}", 6, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g12gi2_[ZV]*",  "D_{g_{1}^{2}g_{.oO[gi]Oo.}^{2}}",  4, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g12gi2_prime_*", "D'_{g_{1}^{2}g_{.oO[gi]Oo.}^{2}}", 7, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g13gi1_[ZV]*",  "D_{g_{1}^{3}g_{.oO[gi]Oo.}^{1}}",  3, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g13gi1_prime_*", "D'_{g_{1}^{3}g_{.oO[gi]Oo.}^{1}}", ROOT.kGreen+3, analysis, subdir, plotname),
+              ]
+    outdir = "{}_discriminants".format(analysis)
 
-mg = ROOT.TMultiGraph("limit", "limit")
-#l = ROOT.TLegend(.6, .6, .9, .9)
-l = ROOT.TLegend(.6, .2, .9, .5)
-l.SetBorderSize(0)
-l.SetFillStyle(0)
-l.SetNColumns(2)
-for folder in folders:
-    mg.Add(folder.graph)
-    folder.addtolegend(l)
+    mg = ROOT.TMultiGraph("limit", "limit")
+    if analysis == "fa3":
+        l = ROOT.TLegend(.6, .2, .9, .5)
+    else:
+        l = ROOT.TLegend(.6, .6, .9, .9)
+    l.SetBorderSize(0)
+    l.SetFillStyle(0)
+    l.SetNColumns(2)
+    for folder in folders:
+        mg.Add(folder.graph)
+        folder.addtolegend(l)
 
-c = ROOT.TCanvas()
-mg.Draw("ac")
-l.Draw()
-saveasdir = os.path.join(config.plotsbasedir, "limits", outdir)
-try:
-    os.makedirs(saveasdir)
-except OSError:
-    pass
-for ext in "png eps root pdf".split():
-    c.SaveAs(os.path.join(saveasdir, plotname.replace("root", ext)))
+    c = ROOT.TCanvas()
+    mg.Draw("ac")
+    l.Draw()
+    saveasdir = os.path.join(config.plotsbasedir, "limits", subdir, outdir)
+    try:
+        os.makedirs(saveasdir)
+    except OSError:
+        pass
+    for ext in "png eps root pdf".split():
+        c.SaveAs(os.path.join(saveasdir, plotname.replace("root", ext)))
+
+if __name__ == "__main__":
+    args = []
+    kwargs = {}
+    for arg in sys.argv[1:]:
+        if "=" in arg:
+            kwargs[arg.split("=")[0]] = arg.split("=", 1)[1]
+        else:
+            args.append(arg)
+    if args or kwargs:
+        mergeplots(*args, **kwargs)
+    else:
+        print """
+python mergeplots.py fa3 subdir=VBFonly
+python mergeplots.py fa2 subdir=VBFonly
+python mergeplots.py fa3 subdir=VHonly
+python mergeplots.py fa2 subdir=VHonly
+mkdir -p {basedir}/limits/discriminantcomparison/
+for a in fa2 fa3; do
+    for b in VBF VH; do
+        for c in png eps root pdf; do
+            ln -s {basedir}/limits/${{b}}only/${{a}}_discriminants/*.${{c}} {basedir}/limits/discriminantcomparison/${{b}}_${{a}}.${{c}}
+""".format(basedir=config.plotsbasedir)
