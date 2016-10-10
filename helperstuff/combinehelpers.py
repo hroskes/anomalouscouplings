@@ -8,6 +8,9 @@ from samples import ReweightingSample, Sample
 from templates import DataTree, IntTemplate, Template
 import yaml
 
+datacardprocessline = "ggH qqH WH ZH bkg_qqzz bkg_ggzz bkg_vbf bkg_zjets"
+datacardprocessorder = [ProductionMode(p) for p in datacardprocessline.split()]
+
 class LuminosityType(MyEnum):
     enumname = "luminositytype"
     enumitems = (
@@ -50,18 +53,10 @@ class __Rate(MultiEnum):
                     break
             else:
                 raise IOError("No luminosity in {}".format(filename))
-        if self.productionmode == "ggH":
-            productionmodes = ["ggH", "ttH"]
-        elif self.productionmode == "VBF":
-            productionmodes = ["qqH"]
-        elif self.productionmode == "ZX":
-            productionmodes = ["zjets"]
-        else:
-            productionmodes = [str(self.productionmode)]
         rate = 0
 
         for tag in tags:
-            for p in productionmodes:
+            for p in self.productionmode.yamlratenames:
                 try:
                     rate += float(y[tag][p]) * float(self.luminosity) / lumi
                 except ValueError:
@@ -80,9 +75,8 @@ def getrate(*args):
     return __cache[rate]
 
 def getrates(*args, **kwargs):
-    fmt = "rate {} {} {} {} {} {} {} {}"
     disableproductionmodes = ()
-    useproductionmodes = ("ggH", "VBF", "WH", "ZH", "qqZZ", "ggZZ", "VBF bkg", "ZX")
+    useproductionmodes = datacardprocessorder
     for kw, kwarg in kwargs.iteritems():
         if kw == "format":
             fmt = kwarg
@@ -92,6 +86,8 @@ def getrates(*args, **kwargs):
             disableproductionmodes = list(kwarg)
         else:
             raise ValueError("Unknown kwarg {}={}!".format(kw, kwarg))
+
+    fmt = "rate " + " ".join("{}" for _ in useproductionmodes)
 
     rates = [getrate(c, *args) if c not in disableproductionmodes else 0 for c in useproductionmodes]
 

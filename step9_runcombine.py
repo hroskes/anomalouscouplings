@@ -1,7 +1,7 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff import config
 from helperstuff import filemanager
-from helperstuff.combinehelpers import getrates
+from helperstuff.combinehelpers import datacardprocessline, getrates
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode, WhichProdDiscriminants
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
@@ -18,18 +18,26 @@ eval $(scram ru -sh) &&
 python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo. -C .oO[category]Oo. -m .oO[model]Oo. -W .oO[whichproddiscriminants]Oo.
 """
 
-createworkspacetemplate = """
+createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l.txt &&
-text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
+text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
+                  --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
+                  |& tee log.text2workspace
 """
-runcombinetemplate = """
+runcombinetemplate = r"""
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 --saveNLL -S .oO[usesystematics]Oo. |& tee log_.oO[expectfai]Oo..oO[moreappend]Oo..exp
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
+        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
+        -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 --saveNLL \
+        -S .oO[usesystematics]Oo. |& tee log_.oO[expectfai]Oo..oO[moreappend]Oo..exp
 """
-observationcombinetemplate = """
+observationcombinetemplate = r"""
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo.       --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo.                  -V -v 3 --saveNLL -S .oO[usesystematics]Oo. |& tee log.oO[moreappend]Oo..obs
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
+        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
+              --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo.                  -V -v 3 --saveNLL \
+        -S .oO[usesystematics]Oo. |& tee log.oO[moreappend]Oo..obs
 """
 
 def check_call_test(*args, **kwargs):
@@ -90,7 +98,7 @@ def runcombine(analysis, foldername, **kwargs):
         elif kw == "npoints":
             npoints = int(kwarg)
         elif kw == "usesignalproductionmodes":
-            usesignalproductionmodes = [ProductionMode(p) for p in kwarg.split(",")]
+            usesignalproductionmodes = [ProductionMode(p) for p in sorted(kwarg.split(","))]
         elif kw == "subdirectory":
             subdirectory = kwarg
         elif kw == "usebkg":
@@ -110,9 +118,17 @@ def runcombine(analysis, foldername, **kwargs):
     if len(set(years)) != len(years):
         raise ValueError("Some of your productions are from the same year!")
 
-    moreappend = ""
+    moreappend = workspacefileappend = ""
+    turnoff = []
+    if usesignalproductionmodes != defaultusesignalproductionmodes:
+        moreappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
+        workspacefileappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
+        disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
+        turnoff.append("--PO turnoff={}".format(",".join(p.combinename for p in disableproductionmodes)))
     if not usebkg:
         moreappend += "_nobkg"
+        workspacefileappend += "_nobkg"
+        turnoff.append("--PO nobkg")
     if not usesystematics:
         moreappend += "_nosystematics"
     if not (npoints == defaultnpoints and scanrange == defaultscanrange):
@@ -120,12 +136,6 @@ def runcombine(analysis, foldername, **kwargs):
 
     analysis = Analysis(analysis)
     foldername = "{}_{}_{}".format(analysis, foldername, whichproddiscriminants)
-    if usesignalproductionmodes != defaultusesignalproductionmodes:
-        foldername += "_"+",".join(str(p) for p in usesignalproductionmodes)
-
-    disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
-    if not usebkg:
-        disableproductionmodes |= {ProductionMode(p) for p in ("ggZZ", "qqZZ", "VBF bkg", "ZX")}
 
     repmap = {
               "foldername": pipes.quote(foldername),
@@ -133,7 +143,7 @@ def runcombine(analysis, foldername, **kwargs):
               "whichproddiscriminants": str(whichproddiscriminants),
               "model": "VBFHZZ4l",
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year) for channel, category, production in product(usechannels, usecategories, productions)),
-              "workspacefile": "floatMu.root",
+              "workspacefile": "floatMu.oO[workspacefileappend]Oo..root",
               "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "observedappend": "obs",
@@ -141,6 +151,8 @@ def runcombine(analysis, foldername, **kwargs):
               "moreappend": moreappend,
               "npoints": str(npoints),
               "scanrange": "{},{}".format(*scanrange),
+              "turnoff": " ".join(turnoff),
+              "workspacefileappend": workspacefileappend,
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         if subdirectory:
@@ -171,13 +183,18 @@ def runcombine(analysis, foldername, **kwargs):
                     with open("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year)) as f:
                         contents = f.read()
                         if "\n#rate" in contents: continue #already did this
+                    foundprocessline = False
                     for line in contents.split("\n"):
+                        if line.startswith("process") and not foundprocessline:
+                            foundprocessline = True
+                            if line.strip() != "process "+datacardprocessline:
+                                raise ValueError("process line is not consistent!  check the one in combinehelpers.py\n{}\n{}".format(line.strip(), "process "+datacardprocessline))
                         if line.startswith("rate"):
                             if config.unblindscans:
                                 lumitype = "fordata"
                             else:
                                 lumitype = "forexpectedscan"
-                            rates = getrates(channel, lumitype, production, category, disableproductionmodes=disableproductionmodes)
+                            rates = getrates(channel, lumitype, production, category)
                             contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
                     with open("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year), "w") as f:

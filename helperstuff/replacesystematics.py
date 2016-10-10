@@ -1,3 +1,4 @@
+import combinehelpers
 import config
 from enums import Category, Channel, channels, EnumItem, MultiEnum, MyEnum, Production
 import os
@@ -30,7 +31,7 @@ class ReadSystematics_BaseClass(MultiEnum):
 
     def getline(self, oldline):
         if not oldline.strip(): return oldline
-        useprocesses = ["ggH", "qqH", "WH", "ZH", "qqZZ", "ggZZ", "qqZZ", "zjets"]
+        useprocesses = combinehelpers.datacardprocessorder
 
         oldname = oldline.split()[0]
         systype = oldline.split()[1]
@@ -78,6 +79,8 @@ class ReadSystematics_BaseClass(MultiEnum):
 
 class MoriondSystematics(ReadSystematics_BaseClass):
     year = 2015
+    processline = "WH ZH ggH qqH ttH ggZZ qqZZ zjets"
+    processorder = processline.split()
     def __init__(self, *args, **kwargs):
         super(MoriondSystematics, self).__init__(*args, **kwargs)
         #for theory systematics
@@ -93,13 +96,13 @@ class MoriondSystematics(ReadSystematics_BaseClass):
 
     @staticmethod
     def getindex(processname):
-        return "WH ZH ggH qqH ttH ggZZ qqZZ zjets".split().index(processname)
+        return self.processorder.index(processname)
 
     def readline(self, name, systype, useprocesses):
         if "QCDscale" in name or "pdf_Higgs" in name:
             return self.ichepsystematics.readline(name, systype, useprocesses)
 
-        useindices = [self.getindex(processname) for processname in useprocesses]
+        useindices = [self.getindex(p.yamlsystematicsname) for p in useprocesses]
 
         line = self[name]
         split = line.split()
@@ -138,7 +141,7 @@ class ICHEPSystematics(ReadSystematics_BaseClass):
             s = self[name]["Any"]
         if s["type"] != "lnN":
             raise ValueError("Non-normalization systematic passed to {}.getline():\n{}".format(type(self).__name__, name, line))
-        uselist = [name, s["type"]] + [str(s[p]) if p in s else "-" for p in useprocesses]
+        uselist = [name, s["type"]] + [str(s[p.yamlsystematicsname]) if p.yamlsystematicsname in s else "-" for p in useprocesses]
         return " ".join(uselist)
 
 def replacesystematics(channel, production, category):

@@ -117,17 +117,44 @@ class ProductionMode(MyEnum):
     enumname = "productionmode"
     enumitems = (
                  EnumItem("ggH"),
-                 EnumItem("VBF"),
+                 EnumItem("VBF", "qqH"),
                  EnumItem("H+jj", "HJJ"),
                  EnumItem("ZH"),
                  EnumItem("WH"),
                  EnumItem("ttH"),
-                 EnumItem("qqZZ"),
-                 EnumItem("ggZZ"),
-                 EnumItem("VBFbkg", "VBF bkg"),
-                 EnumItem("ZX"),
+                 EnumItem("qqZZ", "bkg_qqzz"),
+                 EnumItem("ggZZ", "bkg_ggzz"),
+                 EnumItem("VBFbkg", "VBF bkg", "bkg_vbf"),
+                 EnumItem("ZX", "bkg_zjets"),
                  EnumItem("data"),
                 )
+    @property
+    def combinename(self):
+        import combinehelpers
+        for name in combinehelpers.datacardprocessline.split():
+            if self == name:
+                return name
+        assert False
+    @property
+    def yamlratenames(self):
+        if self == "ggH":
+            return ["ggH", "ttH"]
+        elif self == "VBF":
+            return ["qqH"]
+        elif self == "ZX":
+            return ["zjets"]
+        return [str(self)]
+    @property
+    def yamlsystematicsname(self):
+        if self == "ggH":
+            return "ggH"
+        elif self == "VBF":
+            return "qqH"
+        elif self == "ZX":
+            return "zjets"
+        elif self == "VBF bkg":
+            return "qqZZ"
+        return str(self)
 
 class Systematic(MyEnum):
     enumname = "systematic"
