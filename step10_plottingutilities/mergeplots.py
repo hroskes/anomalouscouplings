@@ -44,14 +44,14 @@ class Folder(object):
 def mergeplots(analysis, subdir="", plotname="limit_nosystematics.root"):
     analysis = Analysis(analysis)
     folders = [
-               Folder(".oO[analysis]Oo._discriminants_D_int_decay_*",    "D_{.oO[intname]Oo.}^{dec}",        1, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_int_prod_*",     "D_{.oO[intname]Oo.}^{prod}",        16, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g11gi3_[ZV]*",  "D_{g_{1}^{1}g_{.oO[gi]Oo.}^{3}}",  2, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g11gi3_prime_*", "D'_{g_{1}^{1}g_{.oO[gi]Oo.}^{3}}", 6, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g12gi2_[ZV]*",  "D_{g_{1}^{2}g_{.oO[gi]Oo.}^{2}}",  4, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g12gi2_prime_*", "D'_{g_{1}^{2}g_{.oO[gi]Oo.}^{2}}", 7, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g13gi1_[ZV]*",  "D_{g_{1}^{3}g_{.oO[gi]Oo.}^{1}}",  3, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g13gi1_prime_*", "D'_{g_{1}^{3}g_{.oO[gi]Oo.}^{1}}", ROOT.kGreen+3, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_int_decay",    "D_{.oO[intname]Oo.}^{dec}",        1, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_int_prod",     "D_{.oO[intname]Oo.}^{prod}",      16, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g11gi3",       "D_{g_{1}^{1}g_{.oO[gi]Oo.}^{3}}",  2, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g11gi3_prime", "D'_{g_{1}^{1}g_{.oO[gi]Oo.}^{3}}", 6, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g12gi2",       "D_{g_{1}^{2}g_{.oO[gi]Oo.}^{2}}",  4, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g12gi2_prime", "D'_{g_{1}^{2}g_{.oO[gi]Oo.}^{2}}", 7, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g13gi1",       "D_{g_{1}^{3}g_{.oO[gi]Oo.}^{1}}",  3, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_g13gi1_prime", "D'_{g_{1}^{3}g_{.oO[gi]Oo.}^{1}}", ROOT.kGreen+3, analysis, subdir, plotname),
               ]
     outdir = "{}_discriminants".format(analysis)
 
@@ -90,13 +90,20 @@ if __name__ == "__main__":
         mergeplots(*args, **kwargs)
     else:
         print """
-python mergeplots.py fa3 subdir=VBFonly
-python mergeplots.py fa2 subdir=VBFonly
-python mergeplots.py fa3 subdir=VHonly
-python mergeplots.py fa2 subdir=VHonly
+python mergeplots.py fa3 plotname=limit_VBF_nobkg_nosystematics.root
+python mergeplots.py fa2 plotname=limit_VBF_nobkg_nosystematics.root
+python mergeplots.py fa3 plotname=limit_WH,ZH_nobkg_nosystematics.root
+python mergeplots.py fa2 plotname=limit_WH,ZH_nobkg_nosystematics.root
+python mergeplots.py fa3 plotname=limit_VBF_nosystematics.root
+python mergeplots.py fa2 plotname=limit_VBF_nosystematics.root
+python mergeplots.py fa3 plotname=limit_WH,ZH_nosystematics.root
+python mergeplots.py fa2 plotname=limit_WH,ZH_nosystematics.root
 mkdir -p {basedir}/limits/discriminantcomparison/
 for a in fa2 fa3; do
-    for b in VBF VH; do
-        for c in png eps root pdf; do
-            ln -s {basedir}/limits/${{b}}only/${{a}}_discriminants/*.${{c}} {basedir}/limits/discriminantcomparison/${{b}}_${{a}}.${{c}}
+    for c in png eps root pdf; do
+        for file in $(ls {basedir}/limits/${{a}}_discriminants/ | grep ".${{c}}$"); do
+            ln -s {basedir}/limits/${{a}}_discriminants/$file {basedir}/limits/discriminantcomparison/${{a}}_${{file}}
+        done
+    done
+done
 """.format(basedir=config.plotsbasedir)

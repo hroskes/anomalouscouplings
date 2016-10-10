@@ -14,7 +14,6 @@ def replotlimits(fileorfolder):
                     print fileorfolder
                     filename = os.path.dirname(fileorfolder).replace("/", "")
                     with KeepWhileOpenFile(filename) as f:
-                        print f, bool(f)
                         if f:
                             subprocess.check_call(contents)
             except IndexError:
