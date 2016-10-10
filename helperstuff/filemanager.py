@@ -24,3 +24,29 @@ def cd(newdir):
         yield
     finally:
         os.chdir(prevdir)
+
+class KeepWhileOpenFile(object):
+    def __init__(self, name):
+        self.filename = name
+        self.pwd = os.getcwd()
+        self.fd = self.f = None
+    def __enter__(self):
+        with cd(self.pwd):
+            try:
+                self.fd = os.open(self.filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            except OSError, e:
+                if e.errno == 17:
+                    return None
+                else:
+                    raise
+            else:
+                self.f = os.fdopen(self.fd, 'w')
+                return self.f
+    def __exit__(self, *args):
+        if self:
+            self.f.close()
+            with cd(self.pwd):
+                os.remove(self.filename)
+            self.fd = self.f = None
+    def __nonzero__(self):
+        return bool(self.f)
