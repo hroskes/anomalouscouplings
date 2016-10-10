@@ -14,6 +14,9 @@ class TemplatesFile(MultiEnum):
     def check(self, *args):
         dontcheck = []
 
+        if self.analysistype is None:
+            self.analysistype = AnalysisType("prod+dec")
+
         if self.systematic is None:
             self.systematic = Systematic("")
 
@@ -299,15 +302,15 @@ def tmp():
                                     w = None
                                 else:
                                     continue
-                            templatesfiles.append(TemplatesFile(channel, systematic, "ggh", analysis, production, category, "prod+dec", w))
-                            templatesfiles.append(TemplatesFile(channel, systematic, "vbf", analysis, production, category, "prod+dec", w))
-                            templatesfiles.append(TemplatesFile(channel, systematic, "zh", analysis, production, category, "prod+dec", w))
-                            templatesfiles.append(TemplatesFile(channel, systematic, "wh", analysis, production, category, "prod+dec", w))
+                            templatesfiles.append(TemplatesFile(channel, systematic, "ggh", analysis, production, category, w))
+                            templatesfiles.append(TemplatesFile(channel, systematic, "vbf", analysis, production, category, w))
+                            templatesfiles.append(TemplatesFile(channel, systematic, "zh", analysis, production, category, w))
+                            templatesfiles.append(TemplatesFile(channel, systematic, "wh", analysis, production, category, w))
                             if systematic == "":
-                                templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production, category, "prod+dec", w))
+                                templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production, category, w))
                             for blindstatus in blindstatuses:
                                 if systematic == "" and (blindstatus == "blind" or config.unblinddistributions) and config.usedata:
-                                    templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus, category, "prod+dec", w))
+                                    templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus, category, w))
 tmp()
 del tmp
 

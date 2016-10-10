@@ -17,7 +17,7 @@ def makecontrolplots(*args):
 
     exts = "png", "eps", "root", "pdf"
 
-    axistitles = [templatesfile.analysis.purediscriminant(True), templatesfile.analysis.mixdiscriminant(True), templatesfile.systematic.D_bkg_0plus(True)]
+    axistitles = [_.name for _ in templatesfile.discriminants]
 
     for key in d.GetListOfKeys():
       c = key.ReadObj()

@@ -9,11 +9,11 @@ import os
 #========================
 #inputs
 #weight, bins, min, max can be None
-productionmode = "WH"
-disc           = "D_g1g2_WH_hadronic"
-weight         = "MC_weight_{}_g1g1prime2_proddec_pi".format(productionmode)
+productionmode = "VBF"
+disc           = "D_g12_g22_VBFdecay"
+weight         = "MC_weight_{}_g1".format(productionmode)
 bins           = None
-min            = None
+min            = -1
 max            = None
 #========================
 
