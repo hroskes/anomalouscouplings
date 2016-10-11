@@ -2,7 +2,7 @@ import abc
 import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate, gettemplate
-from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, productions, Systematic, WhichProdDiscriminants
+from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, productions, Systematic, WhichProdDiscriminants, whichproddiscriminants
 from helperstuff.filemanager import tfiles
 from helperstuff.samples import ReweightingSample
 import helperstuff.style
@@ -358,7 +358,11 @@ if __name__ == "__main__":
             for enrichstatus in enrichstatuses:
               for category in categories:
                 if normalization != "rescalemixtures": continue   #uncomment this to get the niceplots fast
-                yield Projections(channel, analysis, normalization, production, enrichstatus, category)
+                if category == "Untagged":
+                  yield Projections(channel, analysis, normalization, production, enrichstatus, category)
+                else:
+                  for w in whichproddiscriminants:
+                    yield Projections(channel, analysis, normalization, production, enrichstatus, category, w)
 
   length = len(list(projections()))
   for i, p in enumerate(projections(), start=1):

@@ -14,8 +14,6 @@ if cmssw[0] == 8:
 def buildtemplates(*args):
     templatesfile = TemplatesFile(*args)
     print templatesfile
-    if os.path.exists(templatesfile.templatesfile()):
-        return
     with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
         if f:
             if not os.path.exists(templatesfile.templatesfile()):
