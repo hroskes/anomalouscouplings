@@ -375,13 +375,6 @@ class BlindStatus(MyEnum):
                  EnumItem("blind"),
                 )
 
-class AnalysisType(MyEnum):
-    enumname = "analysistype"
-    enumitems = (
-                 EnumItem("decayonly"),
-                 EnumItem("prod+dec"),
-                )
-
 class Category(MyEnum):
     """
     For now just 3 categories, VBF2j, VH hadronic, and dump everything else into untagged

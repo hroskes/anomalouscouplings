@@ -1,6 +1,6 @@
 import abc
 import config
-from enums import Analysis, analyses, AnalysisType, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
+from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
 from filemanager import tfiles
 from itertools import product
 import numpy
@@ -9,13 +9,10 @@ from samples import ReweightingSample, Sample
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, Systematic, TemplateGroup, Analysis, Production, BlindStatus, AnalysisType, WhichProdDiscriminants, Category]
+    enums = [Channel, Systematic, TemplateGroup, Analysis, Production, BlindStatus, WhichProdDiscriminants, Category]
 
     def check(self, *args):
         dontcheck = []
-
-        if self.analysistype is None:
-            self.analysistype = AnalysisType("prod+dec")
 
         if self.systematic is None:
             self.systematic = Systematic("")
@@ -30,13 +27,6 @@ class TemplatesFile(MultiEnum):
             if self.blindstatus is not None:
                 raise ValueError("Can't blind MC!\n{}".format(args))
             dontcheck.append(BlindStatus)
-
-        if self.analysistype == "decayonly":
-            if self.whichproddiscriminants is not None:
-                raise ValueError("Don't provide whichproddiscriminants for decayonly\n{}".format(args))
-            if self.category != "UntaggedIchep16":
-                raise ValueError("Only one category for decayonly analysis\n{}".format(args))
-            dontcheck.append(WhichProdDiscriminants)
 
         if self.category == "UntaggedIchep16":
             if self.whichproddiscriminants is not None:
@@ -115,8 +105,7 @@ class TemplatesFile(MultiEnum):
             result = ["qqZZ", "ggZZ"]
             if config.usedata:
                 result.append("ZX")
-            if self.analysistype == "prod+dec":
-                result.append("VBF bkg")
+            result.append("VBF bkg")
             return [Template(self, productionmode) for productionmode in result]
         elif self.templategroup == "DATA":
             return [Template(self, "data")]
@@ -394,9 +383,6 @@ class Template(TemplateBase, MultiEnum):
         else:
             raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
 
-        if self.analysistype == "decayonly" and self.productionmode == "VBF bkg":
-            raise ValueError("No {} for {} analysis\n{}".format(self.productionmode, self.analysistype, args))
-
     def templatename(self, final=True):
         if self.productionmode == "ggH":
             if self.hypothesis == "0+":
@@ -493,7 +479,7 @@ class Template(TemplateBase, MultiEnum):
                             Sample(self.production, "ggH", "fa30.5"),
                             Sample(self.production, "ggH", "fL10.5"),
                            }
-        if self.productionmode == "VBF" and self.analysistype == "prod+dec":
+        if self.productionmode == "VBF":
             if self.hypothesis == "0+":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
@@ -722,119 +708,23 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
+    @property
     def smoothentriesperbin(self):
-        if self.analysistype == "decayonly":
-            if self.analysis == "fL1":
-                if self.channel in ["2e2mu", "4e"]:
-                    if self.productionmode == "ZX":
-                        return 20
-                    if self.productionmode == "ggZZ":
-                        return 100
-                    if self.productionmode == "qqZZ":
-                        return 70
-                if self.channel == "4mu":
-                    if self.productionmode == "ZX":
-                        return 9
-                    if self.productionmode == "ggZZ":
-                        return 100
-                    if self.productionmode == "qqZZ":
-                        return 100
-            if self.analysis == "fa2":
-                if self.channel == "2e2mu":
-                    if self.productionmode == "ZX":
-                        return 45
-                    if self.productionmode == "ggZZ":
-                        return 20
-                    if self.productionmode == "qqZZ":
-                        return 30
-                if self.channel == "4e":
-                    if self.productionmode == "ZX":
-                        return 6   #too much and the peak in axis 1 at .9 goes away, less (or reweight) and the bump at .4 comes back
-                    if self.productionmode == "ggZZ":
-                        return 100
-                    if self.productionmode == "qqZZ":
-                        if self.production == "160225":
-                            return 25
-                        return 15  #similar to Z+X
-                if self.channel == "4mu":
-                    if self.productionmode == "ZX":
-                        return 9
-                    if self.productionmode == "ggZZ":
-                        return 150
-                    if self.productionmode == "qqZZ":
-                        if self.production == "160225":
-                            return 50
-                        return 100
-            if self.analysis == "fa3":
-                if self.channel == "2e2mu":
-                    if self.productionmode == "ZX":
-                        return 20
-                    if self.productionmode == "ggZZ":
-                        return 500
-                    if self.productionmode == "qqZZ":
-                        return 60
-                if self.channel == "4e":
-                    if self.productionmode == "ZX":
-                        return 10
-                    if self.productionmode == "ggZZ":
-                        return 100
-                    if self.productionmode == "qqZZ":
-                        return 50
-                if self.channel == "4mu":
-                    if self.productionmode == "ZX":
-                        return 10
-                    if self.productionmode == "ggZZ":
-                        return 100
-                    if self.productionmode == "qqZZ":
-                        return 100
-            if self.productionmode == "ZX":
-                return 5
-            elif self.templategroup == "bkg":
-                return 20
-        return 50
+      return 0
 
+    @property
     def reweightaxes(self):
-        if self.analysistype == "decayonly":
-            if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fa3":
-                return [1, 2]
-            if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fa2":
-                return [1, 2]
-            if self.channel == "2e2mu" and self.productionmode == "ggZZ" and self.analysis == "fL1":
-                return [0, 2]
-            if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa2":
-                return [2]
-            if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fL1":
-                return [0, 2]
-            if self.channel == "2e2mu" and self.productionmode == "qqZZ" and self.analysis == "fa3":
-                return [1, 2]
-            if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fL1":
-                return [0, 2]
-            if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fa3":
-                return [2]
-            if self.channel == "2e2mu" and self.productionmode == "ZX"   and self.analysis == "fa2":
-                return [2]
-            if self.channel == "4e"    and self.productionmode == "ggZZ" and self.analysis == "fa3":
-                return [1, 2]
-            if self.channel == "4e"    and self.productionmode == "qqZZ" and self.analysis == "fa2":
-                if self.production == "160225":
-                    return [2]
-                return [0, 2]
-            if self.channel == "4e"    and self.productionmode == "qqZZ" and self.analysis == "fa3":
-                return [1, 2]
-            if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fL1":
-                return [0, 2]
-            if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fa3":
-                return [1]
-            if self.channel == "4e"    and self.productionmode == "ZX"   and self.analysis == "fa2":
-                return []
-            if self.channel == "4mu"   and self.productionmode == "qqZZ" and self.analysis in ["fa3", "fa2"]:
-                return [1, 2]
-            if self.channel == "4mu"   and self.productionmode == "qqZZ" and self.analysis == "fL1":
-                if self.production != "160225":
-                    return [0, 2]
-            if self.channel == "4mu"   and self.productionmode == "ZX":
-                return []
-        return [0, 1, 2]
+      return [0, 1, 2]
+
+    @property
+    def postprocessingjson(self):
+      result = []
+      if self.smoothentriesperbin:
+        result.append({"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin})
+        if self.reweightaxes:
+          result.append({"type": "reweight", "axes": self.reweightaxes})
+      result.append({"type": "rescale", "factor": self.scalefactor})
+      return result
 
     def getjson(self):
         jsn = {
@@ -852,11 +742,7 @@ class Template(TemplateBase, MultiEnum):
                      "bins": self.binning,
                    },
                    "conserveSumOfWeights": True,
-                   "postprocessing": [
-#                     {"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin()},
-#                     {"type": "reweight", "axes": self.reweightaxes()},
-                     {"type": "rescale","factor": self.scalefactor},
-                   ],
+                   "postprocessing": self.postprocessingjson,
                    "filloverflows": True,
                   },
                 ],

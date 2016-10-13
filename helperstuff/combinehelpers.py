@@ -36,7 +36,7 @@ class __Rate(MultiEnum):
         if self.productionmode != "VBF bkg":
             return self.yamlrate()
 
-        return Template("fa2", "prod+dec", "D_int_decay", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+        return Template("fa2", "D_int_decay", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
 
     def yamlrate(self):
         if self.production.year == 2016:
@@ -97,9 +97,9 @@ def getrates(*args, **kwargs):
 def gettemplate(*args):
     try:
         try:
-            return Template("prod+dec", *args).gettemplate()
+            return Template(*args).gettemplate()
         except ValueError as e1:
-            return IntTemplate("prod+dec", *args).gettemplate()
+            return IntTemplate(*args).gettemplate()
     except ValueError as e2:
         raise ValueError("Can't gettemplate using args:\n{}\n\nTrying to make a regular template:\n{}\n\nTrying to make an interference template:\n{}".format(args, e1.message, e2.message))
 
@@ -113,7 +113,7 @@ def getsubtractdatatree(*args):
 def discriminants(*args):
     theset = set()
     for production in config.productionsforcombine:
-        result = tuple(d for d in Template("ggH", "0+", "2e2mu", "prod+dec", production, *args).discriminants)
+        result = tuple(d for d in Template("ggH", "0+", "2e2mu", production, *args).discriminants)
         theset.add(result)
     assert len(theset) == 1  #sanity check
     return result
