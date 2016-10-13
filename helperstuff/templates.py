@@ -731,7 +731,7 @@ class Template(TemplateBase, MultiEnum):
                "templates": [
                  {
                    "name": self.templatename(final=False),
-                   "files": [os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()],
+                   "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
                    "tree": "candTree",
                    "variables": [d.name for d in self.discriminants],
                    "weight": self.weightname(),
