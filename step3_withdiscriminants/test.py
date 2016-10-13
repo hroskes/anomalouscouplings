@@ -10,10 +10,10 @@ import os
 #inputs
 #weight, bins, min, max can be None
 productionmode = "VBF"
-disc           = "D_g12_g22_VBFdecay"
+disc           = "D_g2_VBFdecay"
 weight         = "MC_weight_{}_g1".format(productionmode)
 bins           = None
-min            = -1
+min            = None
 max            = None
 #========================
 
@@ -46,6 +46,7 @@ for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2"
     wt = "({}>-998)*{}".format(discname, weightname)
     t.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
     h = hs[hypothesis] = getattr(ROOT, hname)
+    h.GetXaxis().SetTitle(title)
     if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
       h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
       h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
@@ -62,6 +63,7 @@ for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2"
     c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}.png".format(hypothesis)))
 
 hstack.Draw("histnostack")
+hstack.GetXaxis().SetTitle(title)
 c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "test.png"))
 
 """

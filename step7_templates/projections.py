@@ -72,8 +72,8 @@ class EnrichStatus(MyEnum):
     enumname = "enrichstatus"
     enumitems = [
                  EnumItem("enrich"),
-                 EnumItem("noenrich"),
-                 EnumItem("impoverish"),
+                 EnumItem("fullrange", "noenrich"),
+                 EnumItem("blind", "impoverish"),
                 ]
     def cuttext(self):
         if self == "enrich": return "D_{bkg} > 0.5"
@@ -81,10 +81,7 @@ class EnrichStatus(MyEnum):
         if self == "impoverish": return "D_{bkg} < 0.5"
         assert False
     def dirname(self):
-        if self == "enrich": return "enrich"
-        if self == "noenrich": return "fullrange"
-        if self == "impoverish": return "blind"
-        assert False
+        return str(self)
 enrichstatuses = EnrichStatus.items()
 
 class BaseTemplateFromFile(TemplateForProjection):
@@ -313,7 +310,7 @@ class Projections(MultiEnum):
                      ]
 
     c1 = ROOT.TCanvas()
-    legend = ROOT.TLegend(.75, .4, .9, .9)
+    legend = ROOT.TLegend(.65, .6, .9, .9)
     legend.SetBorderSize(0)
     legend.SetFillStyle(0)
     for template in templates:
@@ -350,6 +347,12 @@ def projections(*args):
 
 if __name__ == "__main__":
   def projections():
+#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_decay")
+#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
+#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
+#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
+#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "Untagged")
+#    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:
