@@ -4,8 +4,7 @@ import shutil
 import subprocess
 import tempfile
 
-print """Hi!
-step 1 is the CJLST trees, they should already exist.
+print """
 Please set this repository's location and the directory to store plots in helperstuff/config.py
 Checking to see if you've done it already..."""
 import helperstuff.config
