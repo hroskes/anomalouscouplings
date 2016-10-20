@@ -273,8 +273,11 @@ class TemplatesFile(MultiEnum):
 
         return self.__invertedmatrix
 
-templatesfiles = []
-def tmp():
+def listfromiterator(function):
+    return list(function())
+
+@listfromiterator
+def templatesfiles():
     for systematic in treesystematics:
         for channel in channels:
             for production in productions:
@@ -291,17 +294,18 @@ def tmp():
                                     w = None
                                 else:
                                     continue
-                            templatesfiles.append(TemplatesFile(channel, systematic, "ggh", analysis, production, category, w))
-                            templatesfiles.append(TemplatesFile(channel, systematic, "vbf", analysis, production, category, w))
-                            templatesfiles.append(TemplatesFile(channel, systematic, "zh", analysis, production, category, w))
-                            templatesfiles.append(TemplatesFile(channel, systematic, "wh", analysis, production, category, w))
+                            else:
+                                if w != "D_int_prod":
+                                    continue
+                            yield TemplatesFile(channel, systematic, "ggh", analysis, production, category, w)
+                            yield TemplatesFile(channel, systematic, "vbf", analysis, production, category, w)
+                            yield TemplatesFile(channel, systematic, "zh", analysis, production, category, w)
+                            yield TemplatesFile(channel, systematic, "wh", analysis, production, category, w)
                             if systematic == "":
-                                templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production, category, w))
+                                yield TemplatesFile(channel, "bkg", analysis, production, category, w)
                             for blindstatus in blindstatuses:
                                 if systematic == "" and (blindstatus == "blind" or config.unblinddistributions) and config.usedata:
-                                    templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus, category, w))
-tmp()
-del tmp
+                                    yield TemplatesFile(channel, "DATA", analysis, production, blindstatus, category, w)
 
 class TemplateBase(object):
     __metaclass__ = abc.ABCMeta
@@ -710,7 +714,19 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def smoothentriesperbinandreweightaxes(self):
+      if self.productionmode == "ggH":
+        if self.category == "Untagged":
+          pass
+      elif self.productionmode == "VBF":
+        if self.category == "VBFtagged":
+          pass
+      elif self.productionmode == "WH":
+        if self.category == "VHHadrtagged":
+          pass
       if self.productionmode == "ZH":
+        if self.category == "VHHadrtagged":
+          pass
+
         if self.category == "VBFtagged":
           if self.channel == "2e2mu":
             if self.analysis == "fa2":
