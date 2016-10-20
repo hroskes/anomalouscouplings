@@ -435,8 +435,8 @@ config.productionsforcombine = type(config.productionsforcombine)(Production(pro
 productions = Production.items(lambda x: x in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 categories = Category.items()
-#whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_prod")
-whichproddiscriminants = WhichProdDiscriminants.items()
+whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_prod")
+#whichproddiscriminants = WhichProdDiscriminants.items()
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):

@@ -709,12 +709,24 @@ class Template(TemplateBase, MultiEnum):
         assert False
 
     @property
+    def smoothentriesperbinandreweightaxes(self):
+      if self.productionmode == "ZH":
+        if self.category == "VBFtagged":
+          if self.channel == "2e2mu":
+            if self.analysis == "fa2":
+              if self.whichproddiscriminants == "D_int_prod":
+                if self.hypothesis in ("fa2prod0.5", "fa2proddec-0.5"): return 50, [0, 1, 2]
+                elif self.hypothesis in ("SM", "a2", "fa2dec0.5"): return 50, [0, 2]
+                else: assert False
+      return None, None
+
+    @property
     def smoothentriesperbin(self):
-      return 0
+      return self.smoothentriesperbinandreweightaxes[0]
 
     @property
     def reweightaxes(self):
-      return [0, 1, 2]
+      return self.smoothentriesperbinandreweightaxes[1]
 
     @property
     def postprocessingjson(self):

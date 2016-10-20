@@ -35,6 +35,12 @@ def makecontrolplots(*args):
         c1.SaveAs("{}/{}.{}".format(saveasdir, key.ReadObj().GetName(), ext))
 
 if __name__ == "__main__":
-    for templatesfile in templatesfiles:
-        if templatesfile != TemplatesFile("2e2mu", "vbf", "fa2", "D_g12gi2", "VBFtagged", "160928"): continue
+    def thetemplatesfiles():
+        yield TemplatesFile("zh", "VBFtagged", "2e2mu", "fa2", "D_int_prod", "160928")
+        return
+        for templatesfile in templatesfiles:
+             yield templatesfile
+    length = len(list(thetemplatesfiles()))
+    for i, templatesfile in enumerate(thetemplatesfiles(), start=1):
         makecontrolplots(templatesfile)
+        print i, "/", length
