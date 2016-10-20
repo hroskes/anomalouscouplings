@@ -19,6 +19,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     productions = None
     legendposition = (.2, .7, .6, .9)
     moreappend = ""
+    luminosity = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -28,6 +29,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             CLtextposition = kwarg
         elif kw == "moreappend":
             moreappend = kwarg
+        elif kw == "luminosity":
+            luminosity = kwarg
         else:
             assert False
 
@@ -49,10 +52,11 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                 scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title, arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
-    if productions is None or not config.unblindscans:
-        luminosity = float(Luminosity("forexpectedscan"))
-    else:
-        luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
+    if luminosity is None:
+        if productions is None or not config.unblindscans:
+            luminosity = float(Luminosity("forexpectedscan"))
+        else:
+            luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
 
     mg = ROOT.TMultiGraph()
     l = ROOT.TLegend(*legendposition)

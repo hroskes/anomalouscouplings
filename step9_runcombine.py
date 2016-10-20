@@ -1,7 +1,7 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff import config
 from helperstuff import filemanager
-from helperstuff.combinehelpers import datacardprocessline, getrates
+from helperstuff.combinehelpers import datacardprocessline, getrates, Luminosity
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode, WhichProdDiscriminants
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
@@ -20,23 +20,24 @@ python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[ana
 
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
-combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l.txt &&
-text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
+combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l_lumi.oO[totallumi]Oo..txt &&
+text2workspace.py -m 125 hzz4l_4l_lumi.oO[totallumi]Oo..txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
                   --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
-                  |& tee log.text2workspace
+                  |& tee log.text2workspace &&
+exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = r"""
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
         --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
-        -t -1 --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 --saveNLL \
+        -t -1 --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
         -S .oO[usesystematics]Oo. |& tee log_.oO[expectfai]Oo..oO[moreappend]Oo..exp
 """
 observationcombinetemplate = r"""
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
         --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
-              --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo.                  -V -v 3 --saveNLL \
+              --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
         -S .oO[usesystematics]Oo. |& tee log.oO[moreappend]Oo..obs
 """
 
@@ -60,6 +61,10 @@ def runcombine(analysis, foldername, **kwargs):
     defaultnpoints = npoints = 100
     defaultusesignalproductionmodes = usesignalproductionmodes = (ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH"))
     usebkg = True
+    if config.unblindscans:
+        lumitype = "fordata"
+    else:
+        lumitype = "forexpectedscan"
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -109,24 +114,34 @@ def runcombine(analysis, foldername, **kwargs):
             else:
                 usebkg = bool(int(kwarg))
         elif kw == "luminosity":
-            luminosity = float(kwarg)
+            if config.unblindscans:
+                raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
+            lumitype = float(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
     if whichproddiscriminants is None:
         raise TypeError("Need to provide whichproddiscriminants kwarg.")
+    if len(productions) > 1 and lumitype != "fordata":
+        raise TypeError("If there's >1 production, have to use lumitype == 'fordata'")
 
     years = [p.year for p in productions]
     if len(set(years)) != len(years):
         raise ValueError("Some of your productions are from the same year!")
 
-    moreappend = workspacefileappend = ""
+    moreappend = workspacefileappend = "_lumi.oO[totallumi]Oo."
     turnoff = []
     if usesignalproductionmodes != defaultusesignalproductionmodes:
         moreappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         workspacefileappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
         turnoff.append("--PO turnoff={}".format(",".join(p.combinename for p in disableproductionmodes)))
+    if set(usechannels) != set(channels):
+        moreappend += "_" + ",".join(sorted(str(c) for c in usechannels))
+        workspacefileappend += "_" + ",".join(sorted(str(c) for c in usechannels))
+    if set(usecategories) != set(categories):
+        moreappend += "_" + ",".join(sorted(str(c) for c in usecategories))
+        workspacefileappend += "_" + ",".join(sorted(str(c) for c in usecategories))
     if not usebkg:
         moreappend += "_nobkg"
         workspacefileappend += "_nobkg"
@@ -144,17 +159,20 @@ def runcombine(analysis, foldername, **kwargs):
               "analysis": str(analysis),
               "whichproddiscriminants": str(whichproddiscriminants),
               "model": "VBFHZZ4l",
-              "cardstocombine": " ".join("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year) for channel, category, production in product(usechannels, usecategories, productions)),
+              "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
               "workspacefile": "floatMu.oO[workspacefileappend]Oo..root",
               "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
+              "totallumi": str(sum(float(Luminosity(p, lumitype)) for p in productions)),
               "observedappend": "obs",
+              "setphysicsmodelparameters": ".oO[expectrs]Oo.,CMS_zz4l_fai1=.oO[expectfai]Oo.",
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "npoints": str(npoints),
               "scanrange": "{},{}".format(*scanrange),
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
+              "expectrs": "r_ggH=1,r_VVH=1",
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         if subdirectory:
@@ -166,7 +184,7 @@ def runcombine(analysis, foldername, **kwargs):
             cardsdir = os.path.join(subdirectory, "cards_{}".format(foldername))
             if os.path.exists(cardsdir):
                 shutil.move(cardsdir, ".")
-        for production, category in product(productions, categories):
+        for production, category in product(productions, usecategories):
             production = Production(production)
             category = Category(category)
             if not all(os.path.exists(os.path.join("cards_{}".format(foldername), "HCG", "125", "hzz4l_{}S_{}_{}.input.root".format(channel, category, production.year))) for channel in usechannels):
@@ -179,32 +197,31 @@ def runcombine(analysis, foldername, **kwargs):
         with open(os.path.join(subdirectory, "cards_{}".format(foldername), ".gitignore"), "w") as f:
             f.write("*")
         with filemanager.cd(os.path.join(subdirectory, "cards_{}".format(foldername), "HCG", "125")):
+            for channel, category, production in product(usechannels, usecategories, productions):
+                luminosity = float(Luminosity(lumitype, production))
+                if not os.path.exists("hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity)):
+                    os.symlink("hzz4l_{}S_{}_{}.input.root".format(channel, category, production.year), "hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity))
+                    shutil.copy("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year), "hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, luminosity))
             #replace rates
             for channel, category, production in product(channels, categories, productions):
                 if channel in usechannels and category in usecategories:
-                    with open("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year)) as f:
+                    luminosity = float(Luminosity(lumitype, production))
+                    with open("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, luminosity)) as f:
                         contents = f.read()
                         if "\n#rate" in contents: continue #already did this
                     foundprocessline = False
+                    contents = contents.replace("hzz4l_{}S_{}_{}.input.root".format(channel, category, production.year), "hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity))
                     for line in contents.split("\n"):
                         if line.startswith("process") and not foundprocessline:
                             foundprocessline = True
                             if line.strip() != "process "+datacardprocessline:
                                 raise ValueError("process line is not consistent!  check the one in combinehelpers.py\n{}\n{}".format(line.strip(), "process "+datacardprocessline))
                         if line.startswith("rate"):
-                            if config.unblindscans:
-                                lumitype = "fordata"
-                            else:
-                                lumitype = "forexpectedscan"
                             rates = getrates(channel, lumitype, production, category)
                             contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
-                    with open("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year), "w") as f:
+                    with open("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, luminosity), "w") as f:
                         f.write(contents)
-                else:
-                    if os.path.exists("hzz4l_{}S_{}.txt".format(channel, production.year)):
-                        os.remove("hzz4l_{}S_{}.txt".format(channel, production.year))
-                        os.remove("hzz4l_{}S_{}.input.root".format(channel, production.year))
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 for channel, production, category in product(usechannels, productions, usecategories):
                     replacesystematics(channel, production, category)
@@ -247,8 +264,8 @@ def runcombine(analysis, foldername, **kwargs):
                 plotscans.append(expectfai)
             for ext in "png eps root pdf".split():
                 plotname = plotname.replace("."+ext, "")
-            plotname += moreappend
-            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=moreappend)
+            plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
+            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=luminosity)
             with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
                 f.write(" ".join(["python"]+sys.argv))
                 f.write("\n\n\n")
