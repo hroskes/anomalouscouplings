@@ -36,7 +36,7 @@ def makecontrolplots(*args):
 
 if __name__ == "__main__":
     def thetemplatesfiles():
-        yield TemplatesFile("zh", "VBFtagged", "2e2mu", "fa2", "D_int_prod", "160928")
+        yield TemplatesFile("vbf", "VBFtagged", "4e", "fa3", "D_int_prod", "160928")
         return
         for templatesfile in templatesfiles:
              yield templatesfile
