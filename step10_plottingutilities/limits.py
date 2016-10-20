@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from collections import namedtuple
 from helperstuff import config
 from helperstuff.enums import Analysis, EnumItem, MyEnum

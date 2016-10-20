@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from helperstuff import config
 from helperstuff import stylefunctions as style
 from helperstuff.combinehelpers import Luminosity

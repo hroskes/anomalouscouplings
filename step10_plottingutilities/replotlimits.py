@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from helperstuff import config
 from helperstuff.filemanager import cd, KeepWhileOpenFile
 import os

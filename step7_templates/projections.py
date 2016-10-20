@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import abc
 import collections
 from helperstuff import config, constants

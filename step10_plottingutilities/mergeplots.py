@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
 from glob import glob
 from helperstuff import config

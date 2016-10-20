@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from helperstuff import filemanager
 import os
 import shutil

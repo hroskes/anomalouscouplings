@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from array import array
 from helperstuff import config
 from helperstuff import xrd

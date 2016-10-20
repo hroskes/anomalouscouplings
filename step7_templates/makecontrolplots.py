@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from helperstuff import config, style  #style needed to remove the statbox and title and adjust the axis label size
 from helperstuff.templates import TemplatesFile, templatesfiles
 import os
@@ -31,8 +32,16 @@ def makecontrolplots(*args):
       c1 = ROOT.TCanvas(c.GetName(), c.GetTitle())
       hstack.Draw("nostack")
       hstack.GetXaxis().SetTitle(axistitles[axisnumber])
+      name = (key.ReadObj().GetName()
+                                     .replace("afterFill", "after1Fill")
+                                     .replace("afterFloor", "after2Floor")
+                                     .replace("afterSmooth", "after3Smooth")
+                                     .replace("afterReweight", "after4Reweight")
+                                     .replace("afterNormalization", "after5Normalization")
+                                     .replace("afterMirror", "after6Mirror")
+             )
       for ext in exts:
-        c1.SaveAs("{}/{}.{}".format(saveasdir, key.ReadObj().GetName(), ext))
+        c1.SaveAs("{}/{}.{}".format(saveasdir, name, ext))
 
 if __name__ == "__main__":
     def thetemplatesfiles():

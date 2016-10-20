@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 combine ScaleUp, ResUp --> ScaleResUp
 ZX systematics templates from qqZZ

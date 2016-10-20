@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from collections import Counter
 from helperstuff import config
 from helperstuff.combinehelpers import getrates

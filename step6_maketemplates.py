@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from helperstuff import config
 from helperstuff.filemanager import KeepWhileOpenFile
 from helperstuff.samples import Sample
