@@ -1,7 +1,7 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
 from glob import glob
 from helperstuff import config
-from helperstuff import style
+import helperstuff.stylefunctions as style
 from helperstuff.enums import Analysis
 from helperstuff.filemanager import tfiles
 import os
@@ -18,7 +18,6 @@ class Folder(object):
                       }
     @property
     def folder(self):
-        print config.plotsbasedir, "limits", self.subdir, replaceByMap(self.__folder, self.repmap)
         result = os.path.join(config.plotsbasedir, "limits", self.subdir, replaceByMap(self.__folder, self.repmap))
         gl = glob(result)
         if not gl:
@@ -37,46 +36,60 @@ class Folder(object):
         graphs = mg.GetListOfGraphs()
         assert len(graphs) == 1
         graphs[0].SetLineColor(self.color)
+        self.__xtitle = mg.GetXaxis().GetTitle()
+        self.__ytitle = mg.GetYaxis().GetTitle()
         return graphs[0]
+    @property
+    def xtitle(self):
+        try:
+            return self.__xtitle
+        except AttributeError:
+            self.graph
+            return self.__xtitle
+    @property
+    def ytitle(self):
+        try:
+            return self.__ytitle
+        except AttributeError:
+            self.graph
+            return self.__ytitle
     def addtolegend(self, legend):
         legend.AddEntry(self.graph, self.title, "l")
 
-def mergeplots(analysis, subdir="", plotname="limit_nosystematics.root"):
+def mergeplots(analysis, subdir="", plotname="limit_.oO[analysis]Oo._comparetoICHEPstyle.root"):
     analysis = Analysis(analysis)
     folders = [
-               Folder(".oO[analysis]Oo._discriminants_D_int_decay",    "D_{.oO[intname]Oo.}^{dec}",        1, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_int_prod",     "D_{.oO[intname]Oo.}^{prod}",      16, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g11gi3",       "D_{g_{1}^{1}g_{.oO[gi]Oo.}^{3}}",  2, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g11gi3_prime", "D'_{g_{1}^{1}g_{.oO[gi]Oo.}^{3}}", 6, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g12gi2",       "D_{g_{1}^{2}g_{.oO[gi]Oo.}^{2}}",  4, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g12gi2_prime", "D'_{g_{1}^{2}g_{.oO[gi]Oo.}^{2}}", 7, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g13gi1",       "D_{g_{1}^{3}g_{.oO[gi]Oo.}^{1}}",  3, analysis, subdir, plotname),
-               Folder(".oO[analysis]Oo._discriminants_D_g13gi1_prime", "D'_{g_{1}^{3}g_{.oO[gi]Oo.}^{1}}", ROOT.kGreen+3, analysis, subdir, plotname),
+               Folder(".oO[analysis]Oo._discriminants_D_int_prod",    "production+decay", 2, analysis, subdir, plotname="limit_lumi30.0_nosystematics.root"),
+               Folder("/afs/cern.ch/user/h/hroskes/www/anomalouscouplings/limits/.oO[analysis]Oo._October20_30fb/", "ICHEP style", 4, analysis, subdir, plotname="limit_nosystematics.root"),
               ]
-    outdir = "{}_discriminants".format(analysis)
+    outdir = "comparetoICHEPstyle"
 
-    mg = ROOT.TMultiGraph("limit", "limit")
+    mg = ROOT.TMultiGraph("limit", "")
     if analysis == "fa3":
-        l = ROOT.TLegend(.6, .2, .9, .5)
+        l = ROOT.TLegend(.3, .6, .6, .9)
     else:
         l = ROOT.TLegend(.6, .6, .9, .9)
     l.SetBorderSize(0)
     l.SetFillStyle(0)
-    l.SetNColumns(2)
     for folder in folders:
         mg.Add(folder.graph)
         folder.addtolegend(l)
 
-    c = ROOT.TCanvas()
+    c = ROOT.TCanvas("c", "", 8, 30, 800, 800)
     mg.Draw("ac")
+    mg.GetXaxis().SetTitle(folders[0].xtitle)
+    mg.GetYaxis().SetTitle(folders[0].ytitle)
     l.Draw()
+    style.applycanvasstyle(c)
+    style.applyaxesstyle(mg)
+    style.CMS("Preliminary", 30.)
     saveasdir = os.path.join(config.plotsbasedir, "limits", subdir, outdir)
     try:
         os.makedirs(saveasdir)
     except OSError:
         pass
     for ext in "png eps root pdf".split():
-        c.SaveAs(os.path.join(saveasdir, plotname.replace("root", ext)))
+        c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), {"analysis":str(analysis)})))
 
 if __name__ == "__main__":
     args = []
