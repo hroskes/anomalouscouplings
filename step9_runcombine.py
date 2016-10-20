@@ -108,6 +108,8 @@ def runcombine(analysis, foldername, **kwargs):
                 usebkg = False
             else:
                 usebkg = bool(int(kwarg))
+        elif kw == "luminosity":
+            luminosity = float(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
