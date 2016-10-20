@@ -95,6 +95,7 @@ class __Rate(MultiEnum):
         return rate
 
     def scalefactor(self):
+        if config.expectedscanluminosity == 30: return 1
         assert config.expectedscanluminosity in (300, 3000)
         if self.channel == "2e2mu":
             if self.productionmode == "ZX": return 3.15
