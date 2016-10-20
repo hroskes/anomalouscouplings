@@ -49,6 +49,11 @@ class LuminosityType(MyEnum):
         except AttributeError:
             raise TypeError("Can't convert LuminosityType('{}') to float".format(self))
 
+    def __eq__(self, other):
+        if isinstance(other, LuminosityType) and self == "customluminosity" == other:
+            return float(other) == float(self)
+        return super(LuminosityType, self).__eq__(other)
+
 class Luminosity(MultiEnum):
     enumname = "luminosity"
     enums = [LuminosityType, Production]
