@@ -56,11 +56,11 @@ class Folder(object):
     def addtolegend(self, legend):
         legend.AddEntry(self.graph, self.title, "l")
 
-def mergeplots(analysis, subdir="", plotname="limit_.oO[analysis]Oo._comparetoICHEPstyle.root"):
+def mergeplots(analysis, subdir="", plotname="limit_.oO[analysis]Oo._comparetoICHEPstyle_40.root"):
     analysis = Analysis(analysis)
     folders = [
                Folder(".oO[analysis]Oo._discriminants_D_int_prod",    "production+decay", 2, analysis, subdir, plotname="limit_lumi30.0_nosystematics.root"),
-               Folder("/afs/cern.ch/user/h/hroskes/www/anomalouscouplings/limits/.oO[analysis]Oo._October20_30fb/", "ICHEP style", 4, analysis, subdir, plotname="limit_nosystematics.root"),
+               Folder(".oO[analysis]Oo._discriminants_D_int_prod",    "ICHEP style", 4, analysis, subdir, plotname="limit_lumi36.0_ggH_Untagged_nosystematics.root"),
               ]
     outdir = "comparetoICHEPstyle"
 
