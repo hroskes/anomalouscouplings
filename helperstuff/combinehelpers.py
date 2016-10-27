@@ -16,18 +16,56 @@ class LuminosityType(MyEnum):
     enumitems = (
                  EnumItem("fordata"),
                  EnumItem("forexpectedscan"),
+                 EnumItem("customluminosity"),
                 )
+    def __init__(self, value):
+        tryfloat = True
+        try:
+            Production(value)
+            tryfloat = False
+        except ValueError:
+            pass
+
+        if (isinstance(value, MyEnum) or isinstance(value, MultiEnum)) and not (
+              isinstance(value, LuminosityType) and value == "customluminosity"
+           ):
+            tryfloat = False
+
+        if tryfloat:
+            try:
+                value = float(value)
+                isfloat = True
+            except (TypeError, ValueError):
+                isfloat = False
+        if tryfloat and isfloat:
+            super(LuminosityType, self).__init__("customluminosity")
+            self.customluminosity = value
+        else:
+            super(LuminosityType, self).__init__(value)
+
+    def __float__(self):
+        try:
+            return self.customluminosity
+        except AttributeError:
+            raise TypeError("Can't convert LuminosityType('{}') to float".format(self))
+
+    def __eq__(self, other):
+        if isinstance(other, LuminosityType) and self == "customluminosity" == other:
+            return float(other) == float(self)
+        return super(LuminosityType, self).__eq__(other)
 
 class Luminosity(MultiEnum):
     enumname = "luminosity"
     enums = [LuminosityType, Production]
     def check(self, *args):
-        super(Luminosity, self).check(self, *args, dontcheck=[Production])
-        if self.luminositytype == "fordata":
-            super(Luminosity, self).check(self, *args)
+        dontcheck = []
+        if self.luminositytype != "fordata":
+            dontcheck.append(Production)
+        super(Luminosity, self).check(self, *args, dontcheck=dontcheck)
     def __float__(self):
         if self.luminositytype == "forexpectedscan": return float(config.expectedscanluminosity)
         if self.luminositytype == "fordata": return float(self.production.dataluminosity)
+        if self.luminositytype == "customluminosity": return float(self.luminositytype)
 
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production, Category]
