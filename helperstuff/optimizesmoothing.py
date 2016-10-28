@@ -31,6 +31,30 @@ def cache(function):
     newfunction.__name__ = function.__name__
     return newfunction
 
+class Range(namedtuple("Range", "low hi lowval hival")):
+    def __init__(self, *args, **kwargs):
+        super(Range, self).__init__(*args, **kwargs)
+        if self.low > self.hi:
+            raise ValueError("Can't have a range that goes from {} to {}!\nMaybe try switching the order?".format(self.low, self.hi))
+
+    @property
+    @cache
+    def significance(self):
+        """
+        This function is supposed to return a number
+        The bigger this number is, the greater the probability
+          that this range is a real thing rather than a statistical fluctuation
+
+        This is my first try:
+        """
+        return (self.hi - self.low) * abs(self.hival - self.lowval)
+
+    def __contains__(self, other):
+        return self.hi > other.hi > other.low > self.low
+
+    def samedirection(self, other):
+        return sign(self.hival - self.lowval) == sign(other.hival - other.lowval)
+
 class HistInfo(object):
     def __init__(self, h):
         self.h = h
@@ -55,29 +79,32 @@ class HistInfo(object):
     def increasingordecreasingranges(self):
         ranges = []
         direction = 0
-        rangebegin = self.bins[0].low
-        nextrangebegin = rangeend = None
-        for middle, difference, differror in self.derivative:
+        rangebegin = 1
+        nextrangebegin = rangeend = nextrangebeginval = rangeendval = None
+        for i, (middle, difference, differror) in enumerate(self.derivative, start=2):
             if direction == 0:
                 direction = sign(difference)
                 if rangebegin is None:
-                    rangebegin = middle
+                    rangebegin = i
             if sign(difference) != direction:
                 if rangeend is None:
-                    rangeend = middle
+                    rangeend = i
                 if sign(difference) == 0:
-                    nextrangebegin = middle
+                    nextrangebegin = i
                 if sign(difference) != 0:
                     if nextrangebegin is None:
-                        nextrangebegin = middle
+                        nextrangebegin = i
                     direction = sign(difference)
-                    ranges.append((rangebegin, rangeend))
+                    ranges.append(self.range(rangebegin, rangeend))
                     rangebegin, rangeend, nextrangebegin = nextrangebegin, None, None
             else:
                 nextrangebegin = rangeend = None
-        rangeend = self.bins[-1].hi
-        ranges.append((rangebegin, rangeend))
+        rangeend = self.h.GetNbinsX()+1
+        ranges.append(self.range(rangebegin, rangeend))
         return ranges
+
+    def range(self, begin, end):
+        return Range(self.h.GetBinLowEdge(begin), self.h.GetBinLowEdge(end), self.h.GetBinContent(begin), self.h.GetBinContent(end))
 
 def printranges(disc, *args):
     template = Template(*args)
@@ -89,17 +116,17 @@ def printranges(disc, *args):
     hraw, hproj = (HistInfo(h) for h in canvas.GetListOfPrimitives())
 
     print "raw ranges:"
-    for low, hi in hraw.increasingordecreasingranges:
+    for low, hi, lowval, hival in hraw.increasingordecreasingranges:
         print "   ", low, hi
     print "proj ranges:"
-    for low, hi in hproj.increasingordecreasingranges:
+    for low, hi, lowval, hival in hproj.increasingordecreasingranges:
         print "   ", low, hi
 
 if __name__ == "__main__":
-    t = Template("WH", "fa3", "D_int_prod", "2e2mu", "VHHadrtagged", "160928", "0+")
+    t = Template("WH", "fa3", "D_int_prod", "2e2mu", "VHHadrtagged", "160928", "fa3prod0.5")
     for d in t.discriminants:
         print d
-        printstuff(d, t)
+        printranges(d, t)
         print
         print
         print
