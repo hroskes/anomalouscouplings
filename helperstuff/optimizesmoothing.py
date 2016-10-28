@@ -31,6 +31,12 @@ def cache(function):
     newfunction.__name__ = function.__name__
     return newfunction
 
+def generatortolist(function):
+    def newfunction(*args, **kwargs):
+        return list(function(*args, **kwargs))
+    newfunction.__name__ = function.__name__
+    return newfunction
+
 class Range(namedtuple("Range", "low hi lowval hival lowerr hierr")):
     def __init__(self, *args, **kwargs):
         super(Range, self).__init__(*args, **kwargs)
@@ -48,10 +54,20 @@ class Range(namedtuple("Range", "low hi lowval hival lowerr hierr")):
         return (self.hi - self.low) * abs(self.hival - self.lowval) / sqrt(self.lowerr**2 + self.hierr**2)
 
     def __contains__(self, other):
-        return self.hi >= other.hi > other.low >= self.low
+        return self.low <= other.low < other.hi <= self.hi
+
+    def overlap(self, other):
+        """
+        http://stackoverflow.com/a/2953979/5228524
+        """
+        return max(0, min(self.hi, other.hi) - max(self.low, other.low))
 
     def samedirection(self, other):
         return sign(self.hival - self.lowval) == sign(other.hival - other.lowval)
+
+    @property
+    def length(self):
+        return self.hi - self.low
 
 class HistInfo(object):
     def __init__(self, h):
@@ -60,8 +76,8 @@ class HistInfo(object):
     @property
     @cache
     def bins(self):
-        return [Bin(self.h.GetBinLowEdge(i), self.h.GetBinLowEdge(i+1), self.h.GetBinContent(i), self.h.GetBinError(i))
-                       for i in range(1, self.h.GetNbinsX()+1)]
+        return [Bin(self.GetBinLowEdge(i), self.GetBinLowEdge(i+1), self.GetBinContent(i), self.GetBinError(i))
+                       for i in range(1, self.GetNbinsX()+1)]
 
     @property
     @cache
@@ -97,32 +113,79 @@ class HistInfo(object):
                     rangebegin, rangeend, nextrangebegin = nextrangebegin, None, None
             else:
                 nextrangebegin = rangeend = None
-        rangeend = self.h.GetNbinsX()+1
+        rangeend = self.GetNbinsX()+1
         ranges.append(self.getrange(rangebegin, rangeend))
         return ranges
 
     def getrange(self, begin, end):
         return Range(
-                     self.h.GetBinLowEdge(begin), self.h.GetBinLowEdge(end),
-                     self.h.GetBinContent(begin), self.h.GetBinContent(end),
-                     self.h.GetBinError(begin), self.h.GetBinError(end),
+                     self.GetBinLowEdge(begin), self.GetBinLowEdge(end),
+                     self.GetBinContent(begin), self.GetBinContent(end),
+                     self.GetBinError(begin),   self.GetBinError(end),
                     )
 
-def printranges(disc, *args):
-    template = Template(*args)
-    f = tfiles[template.templatesfile.templatesfile()]
-    controlPlots = f.controlPlots
-    axis = template.discriminants.index(discriminant(disc))
+    @cache
+    def GetBinWidth(self):
+        assert len(set(self.h.GetBinWidth(i) for i in range(1, self.GetNbinsX()+1))) == 1
+        return self.h.GetBinWidth(1)
 
-    canvas = controlPlots.Get("control_{}_projAxis{}_afterNormalization".format(template.templatename(final=False), axis))
-    hraw, hproj = (HistInfo(h) for h in canvas.GetListOfPrimitives())
+    def __getattr__(self, attr):
+        try:
+            return getattr(self.h, attr)
+        except AttributeError:
+            raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, attr))
+
+class ControlPlot(object):
+    def __init__(self, disc, *args):
+        self.template = Template(*args)
+        f = tfiles[self.template.templatesfile.templatesfile()]
+        controlPlots = f.controlPlots
+        axis = self.template.discriminants.index(discriminant(disc))
+
+        canvas = controlPlots.Get("control_{}_projAxis{}_afterNormalization".format(self.template.templatename(final=False), axis))
+        self.hraw, self.hproj = (HistInfo(h) for h in canvas.GetListOfPrimitives())
+
+    @cache
+    def GetBinWidth(self):
+        assert self.hraw.GetBinWidth() == self.hproj.GetBinWidth()
+        return self.hraw.GetBinWidth()
+
+    @property
+    @generatortolist
+    def rangesthataresmoothedaway(self):
+        result = []
+
+        for rawrange in self.rawranges:
+            overlaps = [projrange for projrange in self.projranges if rawrange.overlap(projrange)]
+            if max(projrange.overlap(rawrange) for projrange in overlaps) <= rawrange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
+                yield rawrange
+                continue
+            biggestoverlap = max(overlaps, key = lambda x: x.overlap(rawrange))
+            if not biggestoverlap.samedirection(rawrange):
+                yield rawrange
+                continue
+
+    @property
+    def rawranges(self):
+        return self.hraw.increasingordecreasingranges
+    @property
+    def projranges(self):
+        return  self.hproj.increasingordecreasingranges
+
+
+def printranges(disc, *args):
+    controlplot = ControlPlot(disc, *args)
+
+    print controlplot.rangesthataresmoothedaway
+
+    fmt = "    {:8.3g} {:8.3g} {:8.3g} {:8}"
 
     print "raw ranges:"
-    for _ in hraw.increasingordecreasingranges:
-        print "   ", _.low, _.hi, _.significance
+    for _ in controlplot.rawranges:
+        print fmt.format(_.low, _.hi, _.significance, _ in controlplot.rangesthataresmoothedaway)
     print "proj ranges:"
-    for _ in hproj.increasingordecreasingranges:
-        print "   ", _.low, _.hi, _.significance
+    for _ in controlplot.projranges:
+        print fmt.format(_.low, _.hi, _.significance, "")
 
 if __name__ == "__main__":
     t = Template("WH", "fa3", "D_int_prod", "2e2mu", "VHHadrtagged", "160928", "fa3prod0.5")
