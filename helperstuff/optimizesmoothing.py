@@ -95,15 +95,15 @@ class HistInfo(object):
                     if nextrangebegin is None:
                         nextrangebegin = i
                     direction = sign(difference)
-                    ranges.append(self.range(rangebegin, rangeend))
+                    ranges.append(self.getrange(rangebegin, rangeend))
                     rangebegin, rangeend, nextrangebegin = nextrangebegin, None, None
             else:
                 nextrangebegin = rangeend = None
         rangeend = self.h.GetNbinsX()+1
-        ranges.append(self.range(rangebegin, rangeend))
+        ranges.append(self.getrange(rangebegin, rangeend))
         return ranges
 
-    def range(self, begin, end):
+    def getrange(self, begin, end):
         return Range(self.h.GetBinLowEdge(begin), self.h.GetBinLowEdge(end), self.h.GetBinContent(begin), self.h.GetBinContent(end))
 
 def printranges(disc, *args):
