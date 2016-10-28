@@ -722,7 +722,12 @@ class Template(TemplateBase, MultiEnum):
           pass
       elif self.productionmode == "WH":
         if self.category == "VHHadrtagged":
-          pass
+          if self.channel == "2e2mu":
+            if self.analysis == "fa3":
+              if self.whichproddiscriminants == "D_int_prod":
+                if self.hypothesis in ("0-", "fa3dec0.5"): return 20, [0, 2]#need less agressive smoothing and don't reweight D_CP=axis1
+                if self.hypothesis in ("0+", "fa3prod0.5"): return 50, [0, 1, 2]#need less agressive smoothing and don't reweight D_bkg=axis2?
+                return 50, [0, 1, 2]
       if self.productionmode == "ZH":
         if self.category == "VHHadrtagged":
           pass
