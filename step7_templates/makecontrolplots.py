@@ -9,8 +9,7 @@ def makecontrolplots(*args):
     f = ROOT.TFile.Open(templatesfile.templatesfile())
     d = f.controlPlots
 
-    split = os.path.split(templatesfile.templatesfile())
-    saveasdir = os.path.join(config.plotsbasedir, "templateprojections", "controlplots", split[1].replace(".root", ""))
+    saveasdir = templatesfile.controlplotsdir
     try:
         os.makedirs(saveasdir)
     except OSError:

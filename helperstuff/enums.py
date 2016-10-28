@@ -382,7 +382,7 @@ class Category(MyEnum):
     enumname = "category"
     enumitems = (
                  EnumItem("Untagged", "UntaggedIchep16", "VBF1jTaggedIchep16", "VHLeptTaggedIchep16", "ttHTaggedIchep16"),
-                 EnumItem("VHHadrtagged","VHHadrTaggedIchep16"),
+                 EnumItem("VHHadrtagged", "VHHadrTaggedIchep16"),
                  EnumItem("VBFtagged", "VBF2jTaggedIchep16"),
                 )
     @property

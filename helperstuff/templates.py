@@ -63,6 +63,11 @@ class TemplatesFile(MultiEnum):
 
         return result
 
+    @property
+    def controlplotsdir(self):
+        split = os.path.split(self.templatesfile())
+        return os.path.join(config.plotsbasedir, "templateprojections", "controlplots", split[1].replace(".root", ""))
+
     def signalsamples(self):
         if self.templategroup == "ggh":
             if self.analysis == "fa3":

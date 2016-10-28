@@ -143,4 +143,5 @@ discriminants = {
 del minmax_g1jgik
 
 def discriminant(name):
+    if isinstance(name, Discriminant): return name
     return discriminants[name]
