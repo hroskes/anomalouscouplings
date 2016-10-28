@@ -31,7 +31,7 @@ def cache(function):
     newfunction.__name__ = function.__name__
     return newfunction
 
-class Range(namedtuple("Range", "low hi lowval hival")):
+class Range(namedtuple("Range", "low hi lowval hival lowerr hierr")):
     def __init__(self, *args, **kwargs):
         super(Range, self).__init__(*args, **kwargs)
         if self.low > self.hi:
@@ -44,13 +44,11 @@ class Range(namedtuple("Range", "low hi lowval hival")):
         This function is supposed to return a number
         The bigger this number is, the greater the probability
           that this range is a real thing rather than a statistical fluctuation
-
-        This is my first try:
         """
-        return (self.hi - self.low) * abs(self.hival - self.lowval)
+        return (self.hi - self.low) * abs(self.hival - self.lowval) / sqrt(self.lowerr**2 + self.hierr**2)
 
     def __contains__(self, other):
-        return self.hi > other.hi > other.low > self.low
+        return self.hi >= other.hi > other.low >= self.low
 
     def samedirection(self, other):
         return sign(self.hival - self.lowval) == sign(other.hival - other.lowval)
@@ -93,7 +91,7 @@ class HistInfo(object):
                     nextrangebegin = i
                 if sign(difference) != 0:
                     if nextrangebegin is None:
-                        nextrangebegin = i
+                        nextrangebegin = i-1
                     direction = sign(difference)
                     ranges.append(self.getrange(rangebegin, rangeend))
                     rangebegin, rangeend, nextrangebegin = nextrangebegin, None, None
@@ -104,7 +102,11 @@ class HistInfo(object):
         return ranges
 
     def getrange(self, begin, end):
-        return Range(self.h.GetBinLowEdge(begin), self.h.GetBinLowEdge(end), self.h.GetBinContent(begin), self.h.GetBinContent(end))
+        return Range(
+                     self.h.GetBinLowEdge(begin), self.h.GetBinLowEdge(end),
+                     self.h.GetBinContent(begin), self.h.GetBinContent(end),
+                     self.h.GetBinError(begin), self.h.GetBinError(end),
+                    )
 
 def printranges(disc, *args):
     template = Template(*args)
@@ -116,11 +118,11 @@ def printranges(disc, *args):
     hraw, hproj = (HistInfo(h) for h in canvas.GetListOfPrimitives())
 
     print "raw ranges:"
-    for low, hi, lowval, hival in hraw.increasingordecreasingranges:
-        print "   ", low, hi
+    for _ in hraw.increasingordecreasingranges:
+        print "   ", _.low, _.hi, _.significance
     print "proj ranges:"
-    for low, hi, lowval, hival in hproj.increasingordecreasingranges:
-        print "   ", low, hi
+    for _ in hproj.increasingordecreasingranges:
+        print "   ", _.low, _.hi, _.significance
 
 if __name__ == "__main__":
     t = Template("WH", "fa3", "D_int_prod", "2e2mu", "VHHadrtagged", "160928", "fa3prod0.5")
