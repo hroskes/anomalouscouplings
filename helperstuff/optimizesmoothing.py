@@ -148,11 +148,13 @@ class ControlPlot(object):
 
         self.h = {}
 
-        canvas = controlPlots.Get("control_{}_projAxis{}_afterReweight".format(self.template.templatename(final=False), axis))
-        self.h["raw"], self.h["reweight"] = (HistInfo(h) for h in canvas.GetListOfPrimitives())
+        for step in "Fill", "Floor", "Smooth", "Reweight", "Normalization":
 
-        canvas = controlPlots.Get("control_{}_projAxis{}_afterSmooth".format(self.template.templatename(final=False), axis))
-        _, self.h["smooth"] = (HistInfo(h) for h in canvas.GetListOfPrimitives())
+            canvas = controlPlots.Get("control_{}_projAxis{}_after{}".format(self.template.templatename(final=False), axis, step))
+            if canvas:
+                _, self.h[step.lower()] = (HistInfo(h) for h in canvas.GetListOfPrimitives())
+
+        self.h["raw"] = _
 
     @property
     @cache
