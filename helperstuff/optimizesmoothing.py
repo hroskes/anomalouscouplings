@@ -22,12 +22,15 @@ def sign(x):
 
 def cache(function):
     cachename = "__cache_{}".format(function.__name__)
-    def newfunction(self):
+    def newfunction(self, *args):
         try:
-            return getattr(self, cachename)
+            return getattr(self, cachename)[args]
         except AttributeError:
-            setattr(self, cachename, function(self))
-            return newfunction(self)
+            setattr(self, cachename, {})
+            return newfunction(self, *args)
+        except KeyError:
+            getattr(self, cachename)[args] = function(self, *args)
+            return newfunction(self, *args)
     newfunction.__name__ = function.__name__
     return newfunction
 
@@ -163,12 +166,13 @@ class ControlPlot(object):
         assert len(_) == 1
         return _.pop()
 
+    @cache
     @generatortolist
-    def rangesthataresmoothedaway(self, step):
+    def rangesinonebutnotintheother(self, inthisone, notinthisone):
         result = []
 
-        for rawrange in self.ranges("raw"):
-            overlaps = [smoothrange for smoothrange in self.ranges(step) if rawrange.overlap(smoothrange)]
+        for rawrange in self.ranges(inthisone):
+            overlaps = [smoothrange for smoothrange in self.ranges(notinthisone) if rawrange.overlap(smoothrange)]
             if max(smoothrange.overlap(rawrange) for smoothrange in overlaps) <= rawrange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
                 yield rawrange
                 continue
@@ -177,12 +181,45 @@ class ControlPlot(object):
                 yield rawrange
                 continue
 
+    @cache
+    @generatortolist
+    def rangesthataresmoothedaway(self, step):
+        return self.rangesinonebutnotintheother("raw", step)
+
     @property
+    @cache
     @generatortolist
     def rangesthataresmoothedawaybutreweightedback(self):
         smoothedaway = self.rangesthataresmoothedaway("smooth")
         stillgoneafterreweight = self.rangesthataresmoothedaway("reweight")
-        return [range_ for range_ in smoothedaway if range_ not in stillgoneafterreweight]
+        therawranges = [range_ for range_ in smoothedaway if range_ not in stillgoneafterreweight]
+        reweightedranges = [
+                            max(
+                                (reweightrange for reweightrange in self.ranges("reweight")),
+                                key = lambda x: x.overlap(rawrange)
+                               ) for rawrange in therawranges
+                           ]
+        return reweightedranges
+
+    @property
+    @cache
+    @generatortolist
+    def rangesintroducedbyreweighting(self):
+        """
+        Not entirely sure how these get introduced
+        but I've seen some of them
+        """
+        smoothedaway = self.rangesthataresmoothedaway("smooth")
+        stillgoneafterreweight = self.rangesthataresmoothedaway("reweight")
+        therawranges = [range_ for range_ in stillgoneafterreweight if range_ not in smoothedaway]
+        reweightedranges = [
+                            max(
+                                (reweightrange for reweightrange in self.ranges("reweight")),
+                                key = lambda x: x.overlap(rawrange)
+                               ) for rawrange in therawranges
+                           ]
+        return reweightedranges
+
 
     def ranges(self, step):
         return self.h[step].increasingordecreasingranges
@@ -191,20 +228,25 @@ class ControlPlot(object):
 def printranges(disc, *args):
     controlplot = ControlPlot(disc, *args)
 
-    print controlplot.rangesthataresmoothedaway("reweight")
-
-    fmt = "    {:8.3g} {:8.3g} {:8.3g} {:8}"
+    fmt = "    {:8.3g} {:8.3g} {:8.3g} {:3} {:3}"
 
     print "raw ranges:"
     for _ in controlplot.ranges("raw"):
-        print fmt.format(_.low, _.hi, _.significance, _ in controlplot.rangesthataresmoothedawaybutreweightedback)
+        print fmt.format(
+                         _.low, _.hi, _.significance,
+                         "", "",
+                        )
     for step in "smooth", "reweight":
         print step, "ranges:"
         for _ in controlplot.ranges(step):
-            print fmt.format(_.low, _.hi, _.significance, "")
+            print fmt.format(
+                             _.low, _.hi, _.significance,
+                             _ in controlplot.rangesthataresmoothedawaybutreweightedback,
+                             _ in controlplot.rangesintroducedbyreweighting,
+                            )
 
 if __name__ == "__main__":
-    t = Template("WH", "fa3", "D_int_prod", "2e2mu", "VHHadrtagged", "160928", "fa3prod0.5")
+    t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
     for d in t.discriminants:
         print d
         printranges(d, t)
