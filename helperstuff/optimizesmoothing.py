@@ -133,8 +133,11 @@ class HistInfo(object):
     def __getattr__(self, attr):
         try:
             return getattr(self.h, attr)
-        except AttributeError:
-            raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, attr))
+        except AttributeError as e:
+            if "'{}'".format(attr) in str(e):
+                raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, attr))
+            else:
+                raise
 
 class ControlPlot(object):
     def __init__(self, disc, *args):
@@ -143,23 +146,28 @@ class ControlPlot(object):
         controlPlots = f.controlPlots
         axis = self.template.discriminants.index(discriminant(disc))
 
-        canvas = controlPlots.Get("control_{}_projAxis{}_afterNormalization".format(self.template.templatename(final=False), axis))
-        self.hraw, self.hproj = (HistInfo(h) for h in canvas.GetListOfPrimitives())
+        self.h = {}
+
+        canvas = controlPlots.Get("control_{}_projAxis{}_afterReweight".format(self.template.templatename(final=False), axis))
+        self.h["raw"], self.h["reweight"] = (HistInfo(h) for h in canvas.GetListOfPrimitives())
+
+        canvas = controlPlots.Get("control_{}_projAxis{}_afterSmooth".format(self.template.templatename(final=False), axis))
+        _, self.h["smooth"] = (HistInfo(h) for h in canvas.GetListOfPrimitives())
 
     @property
     @cache
     def binwidth(self):
-        assert self.hraw.binwidth() == self.hproj.binwidth()
-        return self.hraw.binwidth()
+        _ = set(v.binwidth for k, v in self.h.iteritems())
+        assert len(_) == 1
+        return _.pop()
 
-    @property
     @generatortolist
-    def rangesthataresmoothedaway(self):
+    def rangesthataresmoothedaway(self, step):
         result = []
 
-        for rawrange in self.rawranges:
-            overlaps = [projrange for projrange in self.projranges if rawrange.overlap(projrange)]
-            if max(projrange.overlap(rawrange) for projrange in overlaps) <= rawrange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
+        for rawrange in self.ranges("raw"):
+            overlaps = [smoothrange for smoothrange in self.ranges(step) if rawrange.overlap(smoothrange)]
+            if max(smoothrange.overlap(rawrange) for smoothrange in overlaps) <= rawrange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
                 yield rawrange
                 continue
             biggestoverlap = max(overlaps, key = lambda x: x.overlap(rawrange))
@@ -168,26 +176,30 @@ class ControlPlot(object):
                 continue
 
     @property
-    def rawranges(self):
-        return self.hraw.increasingordecreasingranges
-    @property
-    def projranges(self):
-        return  self.hproj.increasingordecreasingranges
+    @generatortolist
+    def rangesthataresmoothedawaybutreweightedback(self):
+        smoothedaway = self.rangesthataresmoothedaway("smooth")
+        stillgoneafterreweight = self.rangesthataresmoothedaway("reweight")
+        return [range_ for range_ in smoothedaway if range_ not in stillgoneafterreweight]
+
+    def ranges(self, step):
+        return self.h[step].increasingordecreasingranges
 
 
 def printranges(disc, *args):
     controlplot = ControlPlot(disc, *args)
 
-    print controlplot.rangesthataresmoothedaway
+    print controlplot.rangesthataresmoothedaway("reweight")
 
     fmt = "    {:8.3g} {:8.3g} {:8.3g} {:8}"
 
     print "raw ranges:"
-    for _ in controlplot.rawranges:
-        print fmt.format(_.low, _.hi, _.significance, _ in controlplot.rangesthataresmoothedaway)
-    print "proj ranges:"
-    for _ in controlplot.projranges:
-        print fmt.format(_.low, _.hi, _.significance, "")
+    for _ in controlplot.ranges("raw"):
+        print fmt.format(_.low, _.hi, _.significance, _ in controlplot.rangesthataresmoothedawaybutreweightedback)
+    for step in "smooth", "reweight":
+        print step, "ranges:"
+        for _ in controlplot.ranges(step):
+            print fmt.format(_.low, _.hi, _.significance, "")
 
 if __name__ == "__main__":
     t = Template("WH", "fa3", "D_int_prod", "2e2mu", "VHHadrtagged", "160928", "fa3prod0.5")
