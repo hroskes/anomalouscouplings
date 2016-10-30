@@ -5,13 +5,6 @@ from helperstuff.templates import TemplatesFile, templatesfiles
 import json
 import os
 
-def jsonloads(jsonstring):
-    try:
-        return json.loads(jsonstring)
-    except:
-        print jsonstring
-        raise
-
 def makejson(*args):
     templatesfile = TemplatesFile(*args)
     print templatesfile

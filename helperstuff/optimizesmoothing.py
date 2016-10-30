@@ -1,6 +1,6 @@
 from collections import namedtuple
 from discriminants import discriminant
-from filemanager import tfiles
+from filemanager import cache, tfiles
 import itertools
 from math import sqrt
 import numpy
@@ -19,20 +19,6 @@ def pairwise(iterable):
 
 def sign(x):
     return cmp(x, 0)
-
-def cache(function):
-    cachename = "__cache_{}".format(function.__name__)
-    def newfunction(self, *args):
-        try:
-            return getattr(self, cachename)[args]
-        except AttributeError:
-            setattr(self, cachename, {})
-            return newfunction(self, *args)
-        except KeyError:
-            getattr(self, cachename)[args] = function(self, *args)
-            return newfunction(self, *args)
-    newfunction.__name__ = function.__name__
-    return newfunction
 
 def generatortolist(function):
     def newfunction(*args, **kwargs):

@@ -1,5 +1,6 @@
 import collections
 import contextlib
+import json
 import os
 import ROOT
 
@@ -14,6 +15,20 @@ class keydefaultdict(collections.defaultdict):
             ret = self[key] = self.default_factory(key)
             return ret
 tfiles = keydefaultdict(ROOT.TFile.Open)
+
+def cache(function):
+    cachename = "__cache_{}".format(function.__name__)
+    def newfunction(self, *args):
+        try:
+            return getattr(self, cachename)[args]
+        except AttributeError:
+            setattr(self, cachename, {})
+            return newfunction(self, *args)
+        except KeyError:
+            getattr(self, cachename)[args] = function(self, *args)
+            return newfunction(self, *args)
+    newfunction.__name__ = function.__name__
+    return newfunction
 
 @contextlib.contextmanager
 def cd(newdir):
@@ -50,3 +65,10 @@ class KeepWhileOpenFile(object):
             self.fd = self.f = None
     def __nonzero__(self):
         return bool(self.f)
+
+def jsonloads(jsonstring):
+    try:
+        return json.loads(jsonstring)
+    except:
+        print jsonstring
+        raise

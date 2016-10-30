@@ -1,7 +1,7 @@
 import abc
 import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
-from filemanager import tfiles
+from filemanager import cache, jsonloads, tfiles
 from itertools import product
 import numpy
 import os
@@ -717,34 +717,34 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
-    @property
-    def smoothentriesperbinandreweightaxes(self):
-      if self.productionmode == "ggH":
-        if self.category == "Untagged":
+    @classmethod
+    @cache
+    def getsmoothingparametersdict(cls):
+      try:
+        with open(os.path.join(config.repositorybasedir, "step5_json", "smoothingparameters", "smoothingparameters.json")) as f:
+          jsonstring = f.read()
+      except IOError:
+        try:
+          os.makedirs(os.path.join(config.repositorybasedir, "step5_json", "smoothingparameters"))
+        except OSError:
           pass
-      elif self.productionmode == "VBF":
-        if self.category == "VBFtagged":
-          pass
-      elif self.productionmode == "WH":
-        if self.category == "VHHadrtagged":
-          if self.channel == "2e2mu":
-            if self.analysis == "fa3":
-              if self.whichproddiscriminants == "D_int_prod":
-                if self.hypothesis in ("0-", "fa3dec0.5"): return 20, [0, 2]#need less agressive smoothing and don't reweight D_CP=axis1
-                if self.hypothesis in ("0+", "fa3prod0.5"): return 50, [0, 1, 2]#need less agressive smoothing and don't reweight D_bkg=axis2?
-                return 50, [0, 1, 2]
-      if self.productionmode == "ZH":
-        if self.category == "VHHadrtagged":
-          pass
+        with open(os.path.join(config.repositorybasedir, "step5_json", "smoothingparameters", "smoothingparameters.json"), "w") as f:
+          f.write("{}\n")
+          jsonstring = "{}"
+      return jsonstring
 
-        if self.category == "VBFtagged":
-          if self.channel == "2e2mu":
-            if self.analysis == "fa2":
-              if self.whichproddiscriminants == "D_int_prod":
-                if self.hypothesis in ("fa2prod0.5", "fa2proddec-0.5"): return 50, [0, 1, 2]
-                elif self.hypothesis in ("SM", "a2", "fa2dec0.5"): return 50, [0, 2]
-                else: assert False
-      return None, None
+    @property
+    def smoothingparameters(self):
+      try:
+        return (self.getsmoothingparametersdict()
+                                                 [str(self.productionmode)]
+                                                 [str(self.category)]
+                                                 [str(self.analysis)]
+                                                 [str(self.whichproddiscriminants)]
+                                                 [str(self.hypothesis)]
+               )
+      except KeyError:
+        return None, None, None
 
     @property
     def smoothentriesperbin(self):
@@ -755,12 +755,19 @@ class Template(TemplateBase, MultiEnum):
       return self.smoothentriesperbinandreweightaxes[1]
 
     @property
+    def reweightrebin(self):
+      return self.smoothentriesperbinandreweightaxes[2]
+
+    @property
     def postprocessingjson(self):
       result = []
       if self.smoothentriesperbin:
         result.append({"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin})
         if self.reweightaxes:
-          result.append({"type": "reweight", "axes": self.reweightaxes})
+          reweight = {"type": "reweight", "axes": self.reweightaxes}
+          if self.reweightrebin:
+            reweight.update({"rebinning": self.reweightrebin})
+          result.append(reweight)
       result.append({"type": "rescale", "factor": self.scalefactor})
       return result
 
