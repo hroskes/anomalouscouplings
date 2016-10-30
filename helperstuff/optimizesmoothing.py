@@ -102,9 +102,9 @@ class HistInfo(object):
                     rangebegin = i
             if sign(difference) != direction:
                 if rangeend is None:
-                    rangeend = i
+                    rangeend = i-1
                 if sign(difference) == 0:
-                    nextrangebegin = i
+                    nextrangebegin = i-1
                 if sign(difference) != 0:
                     if nextrangebegin is None:
                         nextrangebegin = i-1
@@ -113,19 +113,20 @@ class HistInfo(object):
                     rangebegin, rangeend, nextrangebegin = nextrangebegin, None, None
             else:
                 nextrangebegin = rangeend = None
-        rangeend = self.GetNbinsX()+1
+        rangeend = self.GetNbinsX()
         ranges.append(self.getrange(rangebegin, rangeend))
         return ranges
 
     def getrange(self, begin, end):
         return Range(
-                     self.GetBinLowEdge(begin), self.GetBinLowEdge(end),
-                     self.GetBinContent(begin), self.GetBinContent(end),
-                     self.GetBinError(begin),   self.GetBinError(end),
+                     self.GetBinLowEdge(begin) + self.binwidth/2, self.GetBinLowEdge(end) + self.binwidth/2,
+                     self.GetBinContent(begin),                   self.GetBinContent(end),
+                     self.GetBinError(begin),                     self.GetBinError(end),
                     )
 
+    @property
     @cache
-    def GetBinWidth(self):
+    def binwidth(self):
         assert len(set(self.h.GetBinWidth(i) for i in range(1, self.GetNbinsX()+1))) == 1
         return self.h.GetBinWidth(1)
 
@@ -145,10 +146,11 @@ class ControlPlot(object):
         canvas = controlPlots.Get("control_{}_projAxis{}_afterNormalization".format(self.template.templatename(final=False), axis))
         self.hraw, self.hproj = (HistInfo(h) for h in canvas.GetListOfPrimitives())
 
+    @property
     @cache
-    def GetBinWidth(self):
-        assert self.hraw.GetBinWidth() == self.hproj.GetBinWidth()
-        return self.hraw.GetBinWidth()
+    def binwidth(self):
+        assert self.hraw.binwidth() == self.hproj.binwidth()
+        return self.hraw.binwidth()
 
     @property
     @generatortolist
