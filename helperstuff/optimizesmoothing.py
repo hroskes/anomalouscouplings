@@ -112,7 +112,7 @@ class HistInfo(object):
     def getrange(self, begin, end):
         return Range(
                      self.GetBinLowEdge(begin) + self.binwidth/2, self.GetBinLowEdge(end) + self.binwidth/2,
-                     self.binwidth * ReweightBinning.tolerancefactor
+                     self.binwidth * ReweightBinning.tolerancefactor,
                      self.GetBinContent(begin),                   self.GetBinContent(end),
                      self.GetBinError(begin),                     self.GetBinError(end),
                     )
@@ -293,7 +293,7 @@ class ReweightBinning(object):
         self.sortcombineintervals()
 
         for interval in self.combineintervals:
-            for _ in interval.low, interval.hi
+            for _ in interval.low, interval.hi:
                 if abs((_ - xmin) % self.binwidth) > self.tolerance:
                     raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(_, (_ - self.xmin) % self.binwidth))
             if interval.tolerance != self.tolerance:
@@ -314,7 +314,7 @@ class ReweightBinning(object):
                     currentcombineinterval = nextcombineinterval
                     nextcombineinterval = next(combineintervals)
 
-    def addcombineinterval(self, low, hi)
+    def addcombineinterval(self, low, hi):
         self.combineintervals.append(Interval(low, hi, self.tolerance))
         self.reweightbinningfromcombineintervals()
 
@@ -346,4 +346,9 @@ class TemplateIterate(Template):
 if __name__ == "__main__":
     t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
     for d in t.discriminants:
-        print ControlPlot(d, t).h["raw"].GetEffectiveEntries()
+        print d
+        printranges(d, t)
+        print
+        print
+        print
+
