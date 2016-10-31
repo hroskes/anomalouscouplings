@@ -220,13 +220,13 @@ class ControlPlot(object):
 def printranges(disc, *args):
     controlplot = ControlPlot(disc, *args)
 
-    fmt = "    {:8.3g} {:8.3g} {:8.3g} {:3} {:3}"
+    fmt = "    {:8.3g} {:8.3g} {:8.3g} {:3} {:3} {:3}"
 
     print "raw ranges:"
     for _ in controlplot.ranges("raw"):
         print fmt.format(
                          _.low, _.hi, _.significance,
-                         "", "",
+                         "", "", "",
                         )
     for step in "smooth", "reweight":
         print step, "ranges:"
@@ -235,6 +235,7 @@ def printranges(disc, *args):
                              _.low, _.hi, _.significance,
                              _ in controlplot.rangesthataresmoothedawaybutreweightedback,
                              _ in controlplot.rangesintroducedbyreweighting,
+                             _ in controlplot.rangesthatshouldnotbereweighted,
                             )
 
 class ReweightBinning(object):
@@ -351,4 +352,3 @@ if __name__ == "__main__":
         print
         print
         print
-
