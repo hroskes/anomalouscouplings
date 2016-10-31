@@ -748,15 +748,15 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def smoothentriesperbin(self):
-      return self.smoothentriesperbinandreweightaxes[0]
+      return self.smoothingparameters[0]
 
     @property
     def reweightaxes(self):
-      return self.smoothentriesperbinandreweightaxes[1]
+      return self.smoothingparameters[1]
 
     @property
     def reweightrebin(self):
-      return self.smoothentriesperbinandreweightaxes[2]
+      return self.smoothingparameters[2]
 
     @property
     def postprocessingjson(self):

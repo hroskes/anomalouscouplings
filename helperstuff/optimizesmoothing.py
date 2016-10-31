@@ -26,12 +26,28 @@ def generatortolist(function):
     newfunction.__name__ = function.__name__
     return newfunction
 
-class Range(namedtuple("Range", "low hi lowval hival lowerr hierr")):
+class Interval(namedtuple("Interval", "low hi tolerance")):
     def __init__(self, *args, **kwargs):
-        super(Range, self).__init__(*args, **kwargs)
+        super(Interval, self).__init__(*args, **kwargs)
         if self.low > self.hi:
-            raise ValueError("Can't have a range that goes from {} to {}!\nMaybe try switching the order?".format(self.low, self.hi))
+            raise ValueError("Can't have an interval that goes from {} to {}!\nMaybe try switching the order?".format(self.low, self.hi))
 
+    def __contains__(self, other):
+        if isinstance(other, numbers.Number):
+            return self.low-self.tolerance <= other <= self.hi-self.tolerance
+        return self.low-self.tolerance <= other.low < other.hi <= self.hi+self.tolerance
+
+    def overlap(self, other):
+        """
+        http://stackoverflow.com/a/2953979/5228524
+        """
+        return max(0, min(self.hi, other.hi) - max(self.low, other.low))
+
+    @property
+    def length(self):
+        return self.hi - self.low
+
+class Range(namedtuple("Range", "low hi tolerance lowval hival lowerr hierr"), Interval):
     @property
     @cache
     def significance(self):
@@ -42,21 +58,8 @@ class Range(namedtuple("Range", "low hi lowval hival lowerr hierr")):
         """
         return (self.hi - self.low) * abs(self.hival - self.lowval) / sqrt(self.lowerr**2 + self.hierr**2)
 
-    def __contains__(self, other):
-        return self.low <= other.low < other.hi <= self.hi
-
-    def overlap(self, other):
-        """
-        http://stackoverflow.com/a/2953979/5228524
-        """
-        return max(0, min(self.hi, other.hi) - max(self.low, other.low))
-
     def samedirection(self, other):
         return sign(self.hival - self.lowval) == sign(other.hival - other.lowval)
-
-    @property
-    def length(self):
-        return self.hi - self.low
 
 class HistInfo(object):
     def __init__(self, h):
@@ -109,6 +112,7 @@ class HistInfo(object):
     def getrange(self, begin, end):
         return Range(
                      self.GetBinLowEdge(begin) + self.binwidth/2, self.GetBinLowEdge(end) + self.binwidth/2,
+                     self.binwidth * ReweightBinning.tolerancefactor
                      self.GetBinContent(begin),                   self.GetBinContent(end),
                      self.GetBinError(begin),                     self.GetBinError(end),
                     )
@@ -168,13 +172,11 @@ class ControlPlot(object):
                 continue
 
     @cache
-    @generatortolist
     def rangesthataresmoothedaway(self, step):
         return self.rangesinonebutnotintheother("raw", step)
 
     @property
     @cache
-    @generatortolist
     def rangesthataresmoothedawaybutreweightedback(self):
         smoothedaway = self.rangesthataresmoothedaway("smooth")
         stillgoneafterreweight = self.rangesthataresmoothedaway("reweight")
@@ -189,7 +191,6 @@ class ControlPlot(object):
 
     @property
     @cache
-    @generatortolist
     def rangesintroducedbyreweighting(self):
         """
         Not entirely sure how these get introduced
@@ -210,6 +211,11 @@ class ControlPlot(object):
     def ranges(self, step):
         return self.h[step].increasingordecreasingranges
 
+    @property
+    def rangesthatshouldnotbereweighted(self):
+        maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("reweight"))
+        return list(set(range for range in self.rangesthataresmoothedawaybutreweightedback + self.rangesintroducedbyreweighting
+                                   if range.significance < maxsmoothedsignificance))
 
 def printranges(disc, *args):
     controlplot = ControlPlot(disc, *args)
@@ -231,11 +237,113 @@ def printranges(disc, *args):
                              _ in controlplot.rangesintroducedbyreweighting,
                             )
 
+class ReweightBinning(object):
+    tolerancefactor = 1.0 / 100000
+
+    def __init__(self, *args):
+        if len(args) == 4:
+            #combine intervals
+            self.combineintervals, self.nbins, self.xmin, self.xmax = args
+            self.sortcombineintervals()
+            self.reweightbinning = self.reweightbinningfromcombineintervals(self.combineintervals, self.nbins, self.xmin, self.xmax)
+        elif len(args) == 2:
+            #reweight binning
+            self.reweightbinning, self.nbins = args
+            self.xmin, self.xmax = self.reweightbinning[0], self.reweightbinning[-1]
+            self.combineintervals = self.combineintervalsfromreweightbinning(self.reweightbinning, self.nbins, self.xmin, self.xmax)
+        self.binwidth = (self.xmax - self.xmin) / self.nbins
+        self.tolerance = self.binwidth*self.tolerancefactor
+
+    def sortcombineintervals(self):
+        self.combineintervals.sort(lambda x: x.low)
+        while True:
+            for (i1, interval1), (i2, interval2) in pairwise(enumerate(self.combineintervals[:])):
+                if interval1.hi > interval2.low:
+                    if interval1.hi >= interval2.hi:  #interval2 is unnecessary
+                        self.combineintervals.remove(interval2)
+                    else:                             #merge them
+                        assert interval1.tolerance == interval2.tolerance
+                        self.combineintervals.remove(interval2)
+                        self.combineintervals[i1] = Interval(interval1.low, interval2.hi, interval1.tolerance)
+                    break
+            else:
+                break
+
+    def combineintervalsfromreweightbinning(self):
+        for bin in self.reweightbinning:
+            if abs((bin - self.xmin) % self.binwidth) > self.tolerance:
+                raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(bin, (bin - self.xmin) % self.binwidth))
+
+        self.combineintervals = []
+        for i in range(nbins+1):
+            combinefrom = combineto = None
+            currentvalue = self.xmin + i*self.binwidth
+            if any(abs(bin - currentvalue) < self.tolerance for bin in self.reweightbinning):   #there is a bin boundary with this value
+                if combinefrom is not None:
+                    combineto = currentvalue
+                    self.combineintervals.append(Interval(combinefrom, combineto, self.tolerance))
+                    combinefrom = combineto = None
+            else:                                               #no bin boundary with this value
+                if combinefrom is None:
+                    combinefrom = currentvalue - self.binwidth
+
+        assert combinefrom is None
+
+    def reweightbinningfromcombineintervals(self):
+        self.sortcombineintervals()
+
+        for interval in self.combineintervals:
+            for _ in interval.low, interval.hi
+                if abs((_ - xmin) % self.binwidth) > self.tolerance:
+                    raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(_, (_ - self.xmin) % self.binwidth))
+            if interval.tolerance != self.tolerance:
+                raise ValueError("Inconsistent tolerances {!r} {!r}".format(self.tolerance, interval.tolerance))
+
+        self.reweightbinning = []
+        combineintervals = iter(self.combineintervals)
+        nextcombineinterval = next(combineintervals)
+        currentcombineinterval = None
+        for i in range(self.nbins+1):
+            if currentcombineinterval is not None:
+                if abs(self.xmin + (i+1)*self.binwidth) not in currentcombineinterval:  #then we are at the upper edge
+                    currentcombineinterval = None
+
+            if currentcombineinterval is None:    #not else!!
+                self.reweightbinning.append(i)
+                if self.xmin + i*self.binwidth in nextcombineinterval:
+                    currentcombineinterval = nextcombineinterval
+                    nextcombineinterval = next(combineintervals)
+
+    def addcombineinterval(self, low, hi)
+        self.combineintervals.append(Interval(low, hi, self.tolerance))
+        self.reweightbinningfromcombineintervals()
+
+class TemplateIterate(Template):
+    @property
+    @cache
+    def controlplots(self):
+        return [ControlPlot(disc, self) for disc in self.discriminants]
+
+    def getnextiteration(self):
+        if self.smoothingparameters[0] is None:
+            #first iteration --> try smoothing with reweight on all axes, with no rebinning
+            #                    200 bins if possible, as in the TemplateBuilder examples
+            #                    but maximum of 4 bins in the template
+            neffectiveentries = controlplots[0]["raw"].GetEffectiveEntries()  #effective entries should be the same for any axis
+            nbins = min(neffectiveentries/4, 200)
+            message = "First iteration-->{} bins".format(nbins)
+            if nbins != 200:
+                message += " ({} effective entries)".format(neffectiveentries)
+            message += ", reweight on all axes"
+            return [nbins, [0, 1, 2], None], message
+
+        #find increasing/decreasing ranges that were not properly smoothed away
+        reweightbinnings = [ReweightBinning(axis) if axis is not None else None for axis in self.smoothingparameters[2]]
+        for controlplot, binning in zip(self.controlplots, reweightbinnings):
+            for range in controlplot.rangesthatshouldnotbereweighted:
+                controlplot.addcombinerange(range.low, range.hi)
+
 if __name__ == "__main__":
     t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
     for d in t.discriminants:
-        print d
-        printranges(d, t)
-        print
-        print
-        print
+        print ControlPlot(d, t).h["raw"].GetEffectiveEntries()
