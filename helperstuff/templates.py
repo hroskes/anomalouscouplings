@@ -717,18 +717,20 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
+    smoothingparametersfile = os.path.join(config.repositorybasedir, "step5_json", "smoothingparameters", "smoothingparameters.json")
+
     @classmethod
     @cache
     def getsmoothingparametersdict(cls):
       try:
-        with open(os.path.join(config.repositorybasedir, "step5_json", "smoothingparameters", "smoothingparameters.json")) as f:
+        with open(self.smoothingparametersfile) as f:
           jsonstring = f.read()
       except IOError:
         try:
-          os.makedirs(os.path.join(config.repositorybasedir, "step5_json", "smoothingparameters"))
+          os.makedirs(os.path.dirname(smoothingparametersfile))
         except OSError:
           pass
-        with open(os.path.join(config.repositorybasedir, "step5_json", "smoothingparameters", "smoothingparameters.json"), "w") as f:
+        with open(self.smoothingparametersfile, "w") as f:
           f.write("{}\n")
           jsonstring = "{}"
       return jsonstring
