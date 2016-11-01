@@ -39,13 +39,6 @@ elif config.host == "MARCC":
     def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[]):
         jobtemplate = textwrap.dedent("""
             #!/bin/bash
-            #SBATCH --job-name=.oO[jobname]Oo.
-            #SBATCH --time=.oO[jobtime]Oo.
-            #SBATCH --nodes=1
-            #SBATCH --ntasks-per-node=1
-            #SBATCH --partition=.oO[queue]Oo.
-            #SBATCH --mem=3000
-            .oO[dependency]Oo.
 
             . /work-zfs/lhc/cms/cmsset_default.sh &&
             cd .oO[CMSSW_BASE]Oo.                 &&
@@ -58,24 +51,40 @@ elif config.host == "MARCC":
         """).strip()
 
         repmap = {
-                  "jobtext": quote("cd .oO[CMSSW_BASE]Oo. && eval $(scram ru -sh) && cd .oO[pwd]Oo. && "+jobtext),
+                  "jobtext": "cd .oO[CMSSW_BASE]Oo. && eval $(scram ru -sh) && cd .oO[pwd]Oo. && "+jobtext,
                   "CMSSW_BASE": os.environ["CMSSW_BASE"],
                   "pwd": os.getcwd(),
                   "jobname": jobname,
                   "jobtime": jobtime,
                   "queue": queue,
-                  "dependency": "#SLURM --dependency=afterany:.oO[waitids]Oo." if waitids else "",
                   "waitids": ":".join("{:d}".format(id) for id in waitids)
                  }
 
-        with tempfile.NamedTemporaryFile(bufsize=0) as f:
-            f.write(replaceByMap(jobtemplate, repmap))
-            os.chmod(f.name, os.stat(f.name).st_mode | stat.S_IEXEC)
+        options = {
+                   "--job-name": ".oO[jobname]Oo.",
+                   "--time": ".oO[jobtime]Oo.",
+                   "--nodes": "1",
+                   "--ntasks-per-node": "1",
+                   "--partition": ".oO[queue]Oo.",
+                   "--mem": "3000",
+                  }
+        if waitids:
+            options["--dependency"] = "afterany:.oO[waitids]Oo."
 
-            if interactive:
-                subprocess.check_call(["srun", f.name])
-            else:
-                sbatchout = subprocess.check_output(["sbatch", f.name])
+        options = {replaceByMap(k, repmap): replaceByMap(v, repmap) for k, v in options.iteritems()}
+        options = [quote("{}={}".format(k, v)) for k, v in options.iteritems()]
+
+        if interactive:
+            subprocess.check_call(
+                                  ["srun"] + options +
+                                  ["bash", "-c", quote(replaceByMap(".oO[jobtext]Oo.", repmap))]
+                                 )
+        else:
+            with tempfile.NamedTemporaryFile(bufsize=0) as f:
+                f.write(replaceByMap(jobtemplate, repmap))
+                os.chmod(f.name, os.stat(f.name).st_mode | stat.S_IEXEC)
+
+                sbatchout = subprocess.check_output(["sbatch"] + options + [f.name])
                 jobid = int(sbatchout.split()[-1])
                 print sbatchout,
                 return jobid
