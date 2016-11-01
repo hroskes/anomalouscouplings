@@ -2,8 +2,10 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 import config
 import os
 from pipes import quote
+import stat
 import subprocess
 import tempfile
+import textwrap
 
 if config.host == "lxplus":
     def submitjob(jobtext, jobname=None, jobtime=None, queue="1nd", interactive=False, waitids=[]):
