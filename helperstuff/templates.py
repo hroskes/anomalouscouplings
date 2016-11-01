@@ -3,6 +3,7 @@ import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
 from filemanager import cache, jsonloads, tfiles
 from itertools import product
+import json
 import numpy
 import os
 from samples import ReweightingSample, Sample
@@ -717,23 +718,24 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
-    smoothingparametersfile = os.path.join(config.repositorybasedir, "step5_json", "smoothingparameters", "smoothingparameters.json")
+    smoothingparametersfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
 
     @classmethod
-    @cache
-    def getsmoothingparametersdict(cls):
-      try:
-        with open(self.smoothingparametersfile) as f:
-          jsonstring = f.read()
-      except IOError:
+    def getsmoothingparametersdict(cls, trycache=True):
+      if not hasattr(cls, "__smoothingparametersdict") or not trycache:
         try:
-          os.makedirs(os.path.dirname(smoothingparametersfile))
-        except OSError:
-          pass
-        with open(self.smoothingparametersfile, "w") as f:
-          f.write("{}\n")
-          jsonstring = "{}"
-      return jsonstring
+          with open(cls.smoothingparametersfile) as f:
+            jsonstring = f.read()
+        except IOError:
+          try:
+            os.makedirs(os.path.dirname(cls.smoothingparametersfile))
+          except OSError:
+            pass
+          with open(cls.smoothingparametersfile, "w") as f:
+            f.write("{}\n")
+            jsonstring = "{}"
+        cls.__smoothingparametersdict = json.loads(jsonstring)
+      return cls.__smoothingparametersdict
 
     @property
     def smoothingparameters(self):
@@ -741,9 +743,12 @@ class Template(TemplateBase, MultiEnum):
         return (self.getsmoothingparametersdict()
                                                  [str(self.productionmode)]
                                                  [str(self.category)]
+                                                 [str(self.channel)]
                                                  [str(self.analysis)]
                                                  [str(self.whichproddiscriminants)]
                                                  [str(self.hypothesis)]
+                                                 [str(self.systematic)]
+                                                 [str(self.production)]
                )
       except KeyError:
         return None, None, None

@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 
 if config.host == "lxplus":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue="1nd", interactive=False):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue="1nd", interactive=False, waitids=[]):
         run = """
                  echo .oO[jobtext]Oo. | bsub .oO[options]Oo.
               """
@@ -16,6 +16,8 @@ if config.host == "lxplus":
                        "-q": queue,
                        "-J": jobname,
                       }
+        if waitids:
+            optionsdict["-w"] = " && ".join("ended({:d})".format(id) for id in waitids)
         repmap = {
                   "jobtext": quote("cd .oO[CMSSW_BASE]Oo. && eval $(scram ru -sh) && cd .oO[pwd]Oo. && "+jobtext),
                   "CMSSW_BASE": os.environ["CMSSW_BASE"],
@@ -32,7 +34,7 @@ if config.host == "lxplus":
             return jobid
 
 elif config.host == "MARCC":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[]):
         jobtemplate = textwrap.dedent("""
             #!/bin/bash
             #SBATCH --job-name=.oO[jobname]Oo.
@@ -41,6 +43,7 @@ elif config.host == "MARCC":
             #SBATCH --ntasks-per-node=1
             #SBATCH --partition=.oO[queue]Oo.
             #SBATCH --mem=3000
+            .oO[dependency]Oo.
 
             . /work-zfs/lhc/cms/cmsset_default.sh &&
             cd .oO[CMSSW_BASE]Oo.                 &&
@@ -59,6 +62,8 @@ elif config.host == "MARCC":
                   "jobname": jobname,
                   "jobtime": jobtime,
                   "queue": queue,
+                  "dependency": "#SLURM --dependency=afterany:.oO[waitids]Oo." if waitids else "",
+                  "waitids": ":".join("{:d}".format(id) for id in waitids)
                  }
 
         with tempfile.NamedTemporaryFile(bufsize=0) as f:
