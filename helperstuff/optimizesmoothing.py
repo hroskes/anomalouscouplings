@@ -4,6 +4,7 @@ from filemanager import cache, tfiles
 import itertools
 from math import sqrt
 import numpy
+import os
 import ROOT
 from templates import Template
 
@@ -330,8 +331,8 @@ class TemplateIterate(Template):
     def getnextiteration(self):
         message = ""
 
-        if not os.path.exists(template.templatefile()):
-            return [None, None, None], "Zeroeth iteration-->run with no smoothing"
+        if not os.path.exists(self.templatefile()):
+            return [None, None, None], "0th iteration-->run with no smoothing"
 
         if self.smoothingparameters[0] is None:
             #first iteration --> try smoothing with reweight on all axes, with no rebinning
@@ -345,10 +346,11 @@ class TemplateIterate(Template):
             return [entriesperbin, [0, 1, 2], None], message
 
         baddiscriminants = ", ".join(
-                                     disc.name for disc, controlplot in zip(self.discriminants, self.controlplots
+                                     disc.name for disc, controlplot in zip(self.discriminants, self.controlplots)
                                        if controlplot.insufficientsmoothing
                                     )
         if baddiscriminants:
+            cansmoothmore = True
             entriesperbin = self.smoothingparameters[0]
             neffectiveentries = controlplots[0]["raw"].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
             nbins = neffectiveentries / entriesperbin
@@ -364,13 +366,14 @@ class TemplateIterate(Template):
                 newnbins = neffectiveentries / entriesperbin #to be correct in the message
                 if newnbins == nbins:
                     #um... not much we can do...
-                    message += "Would like to smooth more (due to {}), but can't, already at 2 bins.  ".format(baddiscriminants)
-                    break
+                    message += "Would like to smooth more (due to {}), but can't, already at {} bins.  ".format(baddiscriminants, nbinbs)
+                    cansmoothmore = False
                 else:
                     nbins = newnbins
 
-            message += "Insufficient smoothing ({}), going to {} entries per bin ({} bins)".format(baddiscriminants, entriesperbin, nbins)
-            return [entriesperbin, [0, 1, 2], None], message
+            if cansmoothmore:
+                message += "Insufficient smoothing ({}), going to {} entries per bin ({} bins)".format(baddiscriminants, entriesperbin, nbins)
+                return [entriesperbin, [0, 1, 2], None], message
 
         #find increasing/decreasing ranges that were not properly smoothed away
         if self.smoothingparameters[2] is None:

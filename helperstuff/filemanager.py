@@ -72,3 +72,23 @@ def jsonloads(jsonstring):
     except:
         print jsonstring
         raise
+
+def getnesteddictvalue(thedict, *keys, **kwargs):
+    hasdefault = False
+    for kw, kwarg in kwargs.iteritems():
+       if kw == "default":
+           hasdefault = True
+           default = kwarg
+       else:
+           raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    if len(keys) == 0:
+        return thedict
+
+    if hasdefault and keys[0] not in thedict:
+        if len(keys) == 1:
+            thedict[keys[0]] = default
+        else:
+            thedict[keys[0]] = {}
+
+    return getnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)

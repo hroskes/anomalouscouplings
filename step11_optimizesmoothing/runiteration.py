@@ -1,9 +1,12 @@
 from collections import OrderedDict
 from copy import deepcopy
+from helperstuff import config
 from helperstuff.optimizesmoothing import TemplateIterate
-from helperstuff.templates import templatesfiles
+from helperstuff.templates import Template, templatesfiles
 from helperstuff.submitjob import submitjob
+import os
 import shutil
+import sys
 
 def iterate(smoothingparametersdict):
     nchangedfiles = 0
@@ -11,13 +14,14 @@ def iterate(smoothingparametersdict):
     for templatesfile in templatesfiles:
         anychange = False
         for template in templatesfile.templates():
+
             template = TemplateIterate(template)
             nextiteration = template.getnextiteration()
             if nextiteration is None:
                 continue
             nextiteration, message = nextiteration
-            previousparameters = copy.deepcopy(template.smoothingparameters)
-            if nextiteration == previousparameters:  #shouldn't be able to happen, but just in case
+            previousparameters = deepcopy(template.smoothingparameters)
+            if nextiteration == previousparameters and os.path.exists(template.templatefile()):  #shouldn't be able to happen, but just in case
                 continue
             anychange = True
 
@@ -64,13 +68,15 @@ def runiteration(iternumber):
 
     smoothingparametersdict = Template.getsmoothingparametersdict(trycache=False)
 
-    if "iteration" not in smoothingparametersdict and iternumber != 0:
-        raise IOError("Wrong iteration number {}!  smoothingparametersdict does not indicate an iteration number, so your iteration number should be 0.".format(iternumber))
+    if "iteration" not in smoothingparametersdict:
+        if iternumber != 0:
+            raise IOError("Wrong iteration number {}!  smoothingparametersdict does not indicate an iteration number, so your iteration number should be 0.".format(iternumber))
+        smoothingparametersdict["iteration"] = -1
 
     if smoothingparametersdict["iteration"] == iternumber:
         pass #already iterated the values, just need to make the templates for this iteration
     elif smoothingparametersdict["iteration"] == iternumber-1:
-       smoothingparametersdict["iteration"] = iternumber
+        smoothingparametersdict["iteration"] = iternumber
  
         converged = iterate(smoothingparametersdict)
 
@@ -130,7 +136,7 @@ def runiteration(iternumber):
     return False
 
 if __name__ == "__main__":
-    lastiter = sys.argv[1]
+    lastiter = int(sys.argv[1])
     if "iteration" in Template.getsmoothingparametersdict():
         previousruniter = Template.getsmoothingparametersdict()["iteration"]
         if len(sys.argv) > 2:

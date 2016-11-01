@@ -1,4 +1,4 @@
-from Alignment.OfflineValidation.TkAlAllInOneTool.helperfunctions import replaceByMap
+from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
 import config
 import os
 from pipes import quote

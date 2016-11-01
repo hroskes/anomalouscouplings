@@ -1,7 +1,7 @@
 import abc
 import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
-from filemanager import cache, jsonloads, tfiles
+from filemanager import cache, getnesteddictvalue, jsonloads, tfiles
 from itertools import product
 import json
 import numpy
@@ -739,19 +739,17 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def smoothingparameters(self):
-      try:
-        return (self.getsmoothingparametersdict()
-                                                 [str(self.productionmode)]
-                                                 [str(self.category)]
-                                                 [str(self.channel)]
-                                                 [str(self.analysis)]
-                                                 [str(self.whichproddiscriminants)]
-                                                 [str(self.hypothesis)]
-                                                 [str(self.systematic)]
-                                                 [str(self.production)]
-               )
-      except KeyError:
-        return None, None, None
+      keys = (
+              str(self.productionmode),
+              str(self.category),
+              str(self.channel),
+              str(self.analysis),
+              str(self.whichproddiscriminants),
+              str(self.hypothesis),
+              str(self.systematic),
+              str(self.production),
+             )
+      return getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])
 
     @property
     def smoothentriesperbin(self):
