@@ -1,14 +1,28 @@
+#!/usr/bin/env python
 from collections import OrderedDict
 from copy import deepcopy
 from helperstuff import config
 from helperstuff.optimizesmoothing import TemplateIterate
 from helperstuff.templates import Template, templatesfiles
 from helperstuff.submitjob import submitjob
+import json
 import os
 import shutil
+import subprocess
 import sys
 
-def iterate(smoothingparametersdict):
+def iterate(smoothingparametersdict, iternumber):
+    bkptemplatesdir = os.path.join(config.repositorydir, "step7_templates", "bkp_iter{}".format(iternumber-1))
+    bkpjsondir = os.path.join(config.repositorydir, "step5_json", "bkp_iter{}".format(iternumber-1))
+    try:
+        os.makedirs(bkptemplatesdir)
+    except OSError:
+        pass
+    try:
+        os.makedirs(bkpjsondir)
+    except OSError:
+        pass
+
     nchangedfiles = 0
     messages = OrderedDict()
     for templatesfile in templatesfiles:
@@ -29,12 +43,14 @@ def iterate(smoothingparametersdict):
 
             messages[template] = message
 
-        if anychange and os.path.exists(templatesfile.templatesfile()):
-            nchangedfiles += 1
-            shutil.move(templatesfile.templatesfile(), bkptemplatesdir)
-        else:
-            shutil.copy(templatesfile.templatesfile(), bkptemplatesdir)
-        shutil.move(templatesfile.jsonfile(), bkpjsondir)
+        if os.path.exists(templatesfile.templatesfile()):
+            if anychange:
+                nchangedfiles += 1
+                shutil.move(templatesfile.templatesfile(), bkptemplatesdir)
+            else:
+                shutil.copy(templatesfile.templatesfile(), bkptemplatesdir)
+        if os.path.exists(templatesfile.jsonfile()):
+            shutil.move(templatesfile.jsonfile(), bkpjsondir)
 
     jsonstring = json.dumps(smoothingparametersdict, sort_keys=True, indent=4, separators=(',', ': '))
 
@@ -55,16 +71,6 @@ def iterate(smoothingparametersdict):
 
 def runiteration(iternumber):
     iternumber = int(iternumber)
-    bkptemplatesdir = os.path.join(config.repositorydir, "step7_templates", "bkp_iter{}".format(iternumber-1))
-    bkpjsondir = os.path.join(config.repositorydir, "step5_json", "bkp_iter{}".format(iternumber-1))
-    try:
-        os.makedirs(bkptemplatesdir)
-    except OSError:
-        pass
-    try:
-        os.makedirs(bkpjsondir)
-    except OSError:
-        pass
 
     smoothingparametersdict = Template.getsmoothingparametersdict(trycache=False)
 
@@ -78,7 +84,7 @@ def runiteration(iternumber):
     elif smoothingparametersdict["iteration"] == iternumber-1:
         smoothingparametersdict["iteration"] = iternumber
  
-        converged = iterate(smoothingparametersdict)
+        converged = iterate(smoothingparametersdict, iternumber)
 
         if converged:
             print
