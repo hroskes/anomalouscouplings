@@ -722,7 +722,7 @@ class Template(TemplateBase, MultiEnum):
 
     @classmethod
     def getsmoothingparametersdict(cls, trycache=True):
-      if not hasattr(cls, "__smoothingparametersdict") or not trycache:
+      if not hasattr(cls, "smoothingparametersdict_cache") or not trycache:
         try:
           with open(cls.smoothingparametersfile) as f:
             jsonstring = f.read()
@@ -734,8 +734,8 @@ class Template(TemplateBase, MultiEnum):
           with open(cls.smoothingparametersfile, "w") as f:
             f.write("{}\n")
             jsonstring = "{}"
-        cls.__smoothingparametersdict = json.loads(jsonstring)
-      return cls.__smoothingparametersdict
+        cls.smoothingparametersdict_cache = json.loads(jsonstring)
+      return cls.smoothingparametersdict_cache
 
     @property
     def smoothingparameters(self):
