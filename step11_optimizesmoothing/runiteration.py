@@ -50,6 +50,9 @@ def iterate(smoothingparametersdict, iternumber):
                 shutil.move(templatesfile.templatesfile(), bkptemplatesdir)
             else:
                 shutil.copy(templatesfile.templatesfile(), bkptemplatesdir)
+        else:
+            nchangedfiles += 1
+
         if os.path.exists(templatesfile.jsonfile()):
             shutil.move(templatesfile.jsonfile(), bkpjsondir)
 
@@ -60,15 +63,16 @@ def iterate(smoothingparametersdict, iternumber):
 
     Template.getsmoothingparametersdict(trycache=False)  #clear the cache
 
+    print len(messages), nchangedfiles
+    assert bool(messages) == bool(nchangedfiles)
+
     if messages:
         subprocess.check_call(["git", "add", Template.smoothingparametersfile])
         message = ("Iterate smoothing parameters:\n\n"
                   + "\n".join("{}: {}".format(k, v) for k, v in messages.iteritems()))
         subprocess.check_call(["git", "commit", "-m", message])
-        return False
 
-    return True
-
+    return nchangedfiles
 
 def runiteration(iternumber):
     iternumber = int(iternumber)
@@ -81,11 +85,13 @@ def runiteration(iternumber):
         smoothingparametersdict["iteration"] = -1
 
     if smoothingparametersdict["iteration"] == iternumber:
+        nchangedfiles = len(templatesfiles)
         pass #already iterated the values, just need to make the templates for this iteration
     elif smoothingparametersdict["iteration"] == iternumber-1:
         smoothingparametersdict["iteration"] = iternumber
  
-        converged = iterate(smoothingparametersdict, iternumber)
+        nchangedfiles = iterate(smoothingparametersdict, iternumber)
+        converged = (nchangedfiles == 0)
 
         if converged:
             print
