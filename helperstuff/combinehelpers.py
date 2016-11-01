@@ -27,7 +27,8 @@ class Luminosity(MultiEnum):
 
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production]
-    def getrate(self):
+    def getrate(self, usebkg=True):
+        if self.productionmode != "ggH" and not usebkg: return 0.00001
         return self.yamlrate() * self.scalefactor()
         if self.productionmode == "ZX" and self.production in ("160725", "160729"):
             if self.channel == "4e":    return 2.39 * float(self.luminosity)/12.9
@@ -112,18 +113,23 @@ class __Rate(MultiEnum):
         return self.getrate()
 
 __cache = {}
-def getrate(*args):
+def getrate(*args, **kwargs):
+    if "usebkg" not in kwargs: kwargs["usebkg"] = True
+    assert len(kwargs) == 1
     rate = __Rate(*args)
     if rate not in __cache:
-        __cache[rate] = float(rate)
+        __cache[rate] = rate.getrate(**kwargs)
     return __cache[rate]
 
 def getrates(*args, **kwargs):
     fmt = "rate {} {} {} {}"
+    usebkg = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "format":
             fmt = kwarg
-    ggH, qqZZ, ggZZ, ZX = getrate("ggH", *args), getrate("qqZZ", *args), getrate("ggZZ", *args), getrate("ZX", *args)
+        if kw == "usebkg":
+            usebkg = kwarg
+    ggH, qqZZ, ggZZ, ZX = getrate("ggH", *args, usebkg=usebkg), getrate("qqZZ", *args, usebkg=usebkg), getrate("ggZZ", *args, usebkg=usebkg), getrate("ZX", *args, usebkg=usebkg)
 
     result =  fmt.format(ggH, qqZZ, ggZZ, ZX)
     return result

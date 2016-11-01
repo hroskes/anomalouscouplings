@@ -44,6 +44,7 @@ def runcombine(analysis, foldername, **kwargs):
     CLtextposition = "left"
     productions = config.productionsforcombine
     usesystematics = True
+    usebkg = True
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
     defaultscenario = scenario = 1
@@ -73,6 +74,8 @@ def runcombine(analysis, foldername, **kwargs):
             productions = [Production(p) for p in kwarg.split(",")]
         elif kw == "usesystematics":
             usesystematics = bool(int(kwarg))
+        elif kw == "usebkg":
+            usebkg = bool(int(kwarg))
         elif kw == "scanrange":
             try:
                 scanrange = tuple(float(a) for a in kwarg.split(","))
@@ -137,9 +140,9 @@ def runcombine(analysis, foldername, **kwargs):
                     for line in contents.split("\n"):
                         if line.startswith("rate"):
                             if config.unblindscans:
-                                rates = getrates(channel, "fordata", production)
+                                rates = getrates(channel, "fordata", production, usebkg=usebkg)
                             else:
-                                rates = getrates(channel, "forexpectedscan", production)
+                                rates = getrates(channel, "forexpectedscan", production, usebkg=usebkg)
                             contents = contents.replace(line, "#"+line+"\n"+rates)
                             break
                     with open("hzz4l_{}S_{}.txt".format(channel, production.year), "w") as f:
