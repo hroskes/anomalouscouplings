@@ -27,8 +27,9 @@ class Luminosity(MultiEnum):
 
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production]
-    def getrate(self):
-        return self.yamlrate()
+    def getrate(self, usebkg=True):
+        if self.productionmode != "ggH" and not usebkg: return 0.00001
+        return self.yamlrate() * self.scalefactor()
         if self.productionmode == "ZX" and self.production in ("160725", "160729"):
             if self.channel == "4e":    return 2.39 * float(self.luminosity)/12.9
             if self.channel == "4mu":   return 3.66 * float(self.luminosity)/12.9
@@ -94,22 +95,41 @@ class __Rate(MultiEnum):
 
         return rate
 
+    def scalefactor(self):
+        if config.expectedscanluminosity == 30: return 1
+        assert config.expectedscanluminosity in (300, 3000)
+        if self.channel == "2e2mu":
+            if self.productionmode == "ZX": return 3.15
+            return 1.0
+        if self.channel == "4e":
+            if self.productionmode == "ZX": return 4.70
+            return 0.83
+        if self.channel == "4mu":
+            if self.productionmode == "ZX": return 2.66
+            return 1.17
+        assert False
+
     def __float__(self):
         return self.getrate()
 
 __cache = {}
-def getrate(*args):
+def getrate(*args, **kwargs):
+    if "usebkg" not in kwargs: kwargs["usebkg"] = True
+    assert len(kwargs) == 1
     rate = __Rate(*args)
     if rate not in __cache:
-        __cache[rate] = float(rate)
+        __cache[rate] = rate.getrate(**kwargs)
     return __cache[rate]
 
 def getrates(*args, **kwargs):
     fmt = "rate {} {} {} {}"
+    usebkg = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "format":
             fmt = kwarg
-    ggH, qqZZ, ggZZ, ZX = getrate("ggH", *args), getrate("qqZZ", *args), getrate("ggZZ", *args), getrate("ZX", *args)
+        if kw == "usebkg":
+            usebkg = kwarg
+    ggH, qqZZ, ggZZ, ZX = getrate("ggH", *args, usebkg=usebkg), getrate("qqZZ", *args, usebkg=usebkg), getrate("ggZZ", *args, usebkg=usebkg), getrate("ZX", *args, usebkg=usebkg)
 
     result =  fmt.format(ggH, qqZZ, ggZZ, ZX)
     return result

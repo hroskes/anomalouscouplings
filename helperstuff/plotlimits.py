@@ -29,7 +29,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         elif kw == "moreappend":
             moreappend = kwarg
         else:
-            assert False
+            raise TypeError("Bad kwarg {}={}".format(kw, kwarg))
 
     scans = []
     uptocolor = 1
@@ -92,7 +92,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)
-    style.CMS("Preliminary", luminosity)
+    style.CMS("Projection", luminosity)
 
     drawlines(CLtextposition)
     for ext in "png eps root pdf".split():

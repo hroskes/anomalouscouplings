@@ -1,2 +1,2 @@
-from stylefunctions import tdrstyle
+from stylefunctions import *
 tdrstyle()

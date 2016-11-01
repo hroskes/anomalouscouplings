@@ -1,5 +1,6 @@
 import config
 from enums import Channel, channels, EnumItem, MultiEnum, MyEnum, Production
+from math import sqrt
 import os
 import yaml
 
@@ -10,16 +11,67 @@ class SystematicsType(MyEnum):
                 )
     enumname = "systematicstype"
 
-def ReadSystematics(*args):
+class SingleNormalizationSystematic(object):
+    def __init__(self, value):
+        self.value = float(value)
+    def __mul__(self, other):
+        return type(self)(1 + (self.value-1)*other)
+    def __div__(self, other):
+        return self * (1.0/other)
+    def __float__(self):
+        return self.value
+    def __str__(self):
+        return str(float(self))
+
+class UpDownSystematic(object):
+    def __init__(self, valueorup, down=None):
+        if down is None:
+            try:
+                self.up, self.down = (float(_) for _ in valueorup.split("/"))
+            except ValueError:
+                raise ValueError("{} is not a valid up/down systematic.  Has to be two floats separated by /.".format(value))
+        else:
+            self.up, self.down = float(valueorup), float(down)
+
+    def __mul__(self, other):
+        up = 1 + (self.up-1)*other
+        down = 1 + (self.down-1)*other
+        return type(self)(up, down)
+
+    def __div__(self, other):
+        return self * (1.0/other)
+
+    def __str__(self):
+        return "{}/{}".format(self.up, self.down)
+
+def SystematicValue(value):
+    try:
+        return SingleNormalizationSystematic(value)
+    except ValueError as e:
+        try:
+            return UpDownSystematic(value)
+        except ValueError as e2:
+            raise ValueError("Can't construct systematic from {}:\n\nTrying as a single value:\n{}\n\nTrying as up/down:\n{}".format(value, e.message, e2.message))
+
+def ReadSystematics(*args, **kwargs):
     class _(MultiEnum):
         enums = (Production, Channel)
     year = _(*args).production.year
-    return {2015: MoriondSystematics, 2016: ICHEPSystematics}[year](*args)
+    return {2015: MoriondSystematics, 2016: ICHEPSystematics}[year](*args, **kwargs)
 
 class ReadSystematics_BaseClass(MultiEnum):
     enums = (Production, Channel)
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         super(ReadSystematics_BaseClass, self).__init__(*args)
+        self.scenario = 1
+        self.luminosity = self.production.dataluminosity
+        for kw, kwarg in kwargs.iteritems():
+            if kw == "scenario":
+                self.scenario = kwarg
+            elif kw == "luminosity":
+                self.luminosity = kwarg
+            else:
+                raise TypeError("Bad kwarg {}={}".format(kw, kwarg))
         self.systematics = self.getsystematics()
     def check(self, *args):
         if self.production.year != self.year:
@@ -41,16 +93,16 @@ class ReadSystematics_BaseClass(MultiEnum):
         if oldname == "pdf_hzz4l_accept":
             uselist = [oldname, "lnN"] + ["1.02" if p == "ggH" else "-" for p in useprocesses]
             return " ".join(uselist)
-        if oldname == "lumi_8TeV":
+        #if oldname == "lumi_8TeV":
             #https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM#CurRec
-            correlation = " ".join(["lumi_13TeV_common", "lnN"] + ["1.023" for p in useprocesses])
-            if self.year == 2015:
-                mysys = " ".join(["lumi_13TeV_2015", "lnN"] + ["1.015" for p in useprocesses])
-            if self.year == 2016:
-                mysys = " ".join(["lumi_13TeV_2016", "lnN"] + ["1.058" for p in useprocesses])
-            return "\n".join((correlation, mysys))
-        if "lumi_13TeV" in oldname:
-            return oldline
+            #correlation = " ".join(["lumi_13TeV_common", "lnN"] + ["1.023" for p in useprocesses])
+            #if self.year == 2015:
+            #    mysys = " ".join(["lumi_13TeV_2015", "lnN"] + ["1.015" for p in useprocesses])
+            #if self.year == 2016:
+            #    mysys = " ".join(["lumi_13TeV_2016", "lnN"] + ["1.058" for p in useprocesses])
+            #return "\n".join((correlation, mysys))
+        #if "lumi_13TeV" in oldname:
+            #return oldline
 
         thedict = {
                    "pdf_gg": "pdf_Higgs_gg",
@@ -64,6 +116,7 @@ class ReadSystematics_BaseClass(MultiEnum):
                    "BRhiggs_hzz4l": "BRhiggs_hzz4l",
                    "CMS_eff_m": "CMS_eff_m",
                    "CMS_eff_e": "CMS_eff_e",
+                   "lumi_8TeV": "lumi_13TeV",
                   }
         thedict.update({"CMS_hzz{}_Zjets".format(channel): "CMS_zz{}_zjets".format(channel) for channel in channels})
         if oldname in thedict.values():
@@ -80,6 +133,8 @@ class MoriondSystematics(ReadSystematics_BaseClass):
     year = 2015
     def __init__(self, *args, **kwargs):
         super(MoriondSystematics, self).__init__(*args, **kwargs)
+        if self.scenario != 1:
+            raise ValueError("Bad scenario {}".format(self.scenario))
         #for theory systematics
         self.ichepsystematics = ICHEPSystematics([_ for _ in config.productionsforcombine if _.year == 2016][0], self.channel)
 
@@ -112,6 +167,11 @@ class MoriondSystematics(ReadSystematics_BaseClass):
 
 class ICHEPSystematics(ReadSystematics_BaseClass):
     year = 2016
+    def __init__(self, *args, **kwargs):
+        super(ICHEPSystematics, self).__init__(*args, **kwargs)
+        if self.scenario not in (1, 2):
+            raise ValueError("Bad scenario {}".format(self.scenario))
+
     def getsystematics(self):
         filenames = [os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_ICHEP2016", "LegoCards", "configs", "inputs", f)
                        for f in [
@@ -126,11 +186,33 @@ class ICHEPSystematics(ReadSystematics_BaseClass):
             with open(filename) as f:
                 y = yaml.load(f)
             assert not set(y).intersection(set(self.systematics))
+            if "leptonScaleAndResol" in filename: continue
+
+            if self.scenario == 2:
+                for sysname, sys in y.iteritems():
+                    for catname, category in sys.iteritems():
+                        for productionmode, value in category.iteritems():
+                            if productionmode == "type": continue
+                            value = SystematicValue(value)
+                            if "theory" in filename:
+                                value /= 2
+                            elif sysname.lower() in ("cms_eff_e", "cms_eff_m"):
+                                if "2e2mu.yaml" in filename:
+                                    value = SystematicValue(1.02)
+                                else:
+                                    value = SystematicValue(1.04)
+                            elif sysname.endswith("_zjets") or sysname in ("JES", "bTagSF"):
+                                value /= sqrt(self.luminosity / self.production.dataluminosity)
+                            elif sysname == "lumi_13TeV":
+                                pass
+                            else:
+                                raise ValueError("Don't know what do do with {}".format(sysname))
+                            category[productionmode] = value
+
             self.systematics.update(y)
         return self.systematics
 
     def readline(self, name, systype, useprocesses):
-        print name, name == "QCDscale_ggVV"
         if name == "QCDscale_ggVV":   #included in ggH
             return None
         try:
@@ -142,7 +224,7 @@ class ICHEPSystematics(ReadSystematics_BaseClass):
         uselist = [name, s["type"]] + [str(s[p]) if p in s else "-" for p in useprocesses]
         return " ".join(uselist)
 
-def replacesystematics(channel, production):
+def replacesystematics(channel, production, scenario=1, luminosity=None):
     channel = Channel(channel)
     production = Production(production)
     cardfilename = "hzz4l_{}S_{}.txt".format(channel, production.year)
@@ -152,7 +234,7 @@ def replacesystematics(channel, production):
     systematicssection = sections[-1]
     systematicslines = systematicssection.split("\n")
 
-    readsystematics = ReadSystematics(channel, production)
+    readsystematics = ReadSystematics(channel, production, scenario=scenario, luminosity=luminosity)
 
     for i, systematic in enumerate(systematicslines[:]):
         systematicslines[i] = readsystematics.getline(systematic)

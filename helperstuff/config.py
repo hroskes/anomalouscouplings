@@ -12,7 +12,7 @@ else:
 
 unblinddistributions = True
 unblindscans = False
-expectedscanluminosity = 15.7
+expectedscanluminosity = 30
 m4lmin, m4lmax = 105, 140
 blindcut = lambda self: self.D_bkg_0plus() < 0.5
 productionsforcombine = ("160729",)
