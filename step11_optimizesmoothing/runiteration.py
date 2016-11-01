@@ -83,6 +83,8 @@ def runiteration(iternumber):
         if iternumber != 0:
             raise IOError("Wrong iteration number {}!  smoothingparametersdict does not indicate an iteration number, so your iteration number should be 0.".format(iternumber))
         smoothingparametersdict["iteration"] = -1
+        if any(os.path.exists(_.templatesfile()) or os.path.exists(_.jsonfile()) for _ in templatesfiles):
+            raise IOError("For the 0th iteration, please delete all json and template files")
 
     if smoothingparametersdict["iteration"] == iternumber:
         nchangedfiles = len(templatesfiles)
