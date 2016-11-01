@@ -767,7 +767,7 @@ class Template(TemplateBase, MultiEnum):
         result.append({"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin})
         if self.reweightaxes:
           reweight = {"type": "reweight", "axes": self.reweightaxes}
-          if self.reweightrebin:
+          if self.reweightrebin and any(self.reweightrebin):
             reweight.update({"rebinning": self.reweightrebin})
           result.append(reweight)
       result.append({"type": "rescale", "factor": self.scalefactor})

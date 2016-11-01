@@ -330,6 +330,9 @@ class TemplateIterate(Template):
     def getnextiteration(self):
         message = ""
 
+        if not os.path.exists(template.templatefile()):
+            return [None, None, None], "Zeroeth iteration-->run with no smoothing"
+
         if self.smoothingparameters[0] is None:
             #first iteration --> try smoothing with reweight on all axes, with no rebinning
             #                    200 bins if possible, as in the TemplateBuilder examples
