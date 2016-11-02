@@ -11,6 +11,7 @@ import os
 import shutil
 import subprocess
 import sys
+import ROOT
 
 def iterate(smoothingparametersdict, iternumber):
     bkptemplatesdir = os.path.join(config.repositorydir, "step7_templates", "bkp_iter{}".format(iternumber-1))
