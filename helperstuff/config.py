@@ -1,4 +1,5 @@
 import getpass
+import re
 import socket
 
 
@@ -11,7 +12,7 @@ if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and 
         repositorydir = "/afs/cern.ch/work/r/rbarr/anomalouscouplings"
         plotsbasedir = "/afs/cern.ch/user/r/rbarr/www/anomalouscouplings_production/"
 
-elif "login-node" in socket.gethostname() and getpass.getuser() == "jroskes1@jhu.edu":
+elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname()) and getpass.getuser() == "jroskes1@jhu.edu":
     host = "MARCC"
     repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/"
     plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/"
