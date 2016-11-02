@@ -21,7 +21,7 @@ try:
     plotsbasedir
     host
 except NameError:
-    raise ValueError("Who/where are you?")
+    raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
 usedata = False
 unblinddistributions = False
