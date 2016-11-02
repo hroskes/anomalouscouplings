@@ -77,7 +77,7 @@ elif config.host == "MARCC":
         if interactive:
             subprocess.check_call(
                                   ["srun"] + options +
-                                  ["bash", "-c", quote(replaceByMap(".oO[jobtext]Oo.", repmap))]
+                                  ["bash", "-c", replaceByMap(".oO[jobtext]Oo.", repmap)]
                                  )
         else:
             with tempfile.NamedTemporaryFile(bufsize=0) as f:
