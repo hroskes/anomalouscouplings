@@ -287,7 +287,7 @@ class ReweightBinning(object):
     def sortcombineintervals(self):
         if not self.combineintervals:
             self.reweightbinning = []
-        self.combineintervals.sort(lambda x: x.low)
+        self.combineintervals.sort(key=lambda x: x.low)
         while True:
             for (i1, interval1), (i2, interval2) in pairwise(enumerate(self.combineintervals[:])):
                 if interval1.hi > interval2.low:
