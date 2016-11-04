@@ -271,7 +271,7 @@ class ReweightBinning(object):
         if len(args) == 4:
             #combine intervals
             self.combineintervals, self.nbins, self.xmin, self.xmax = args
-            self.binwidth = (self.xmax - self.xmin) / self.nbins
+            self.binwidth = float(self.xmax - self.xmin) / self.nbins
             self.tolerance = self.binwidth*self.tolerancefactor
             self.sortcombineintervals()
             self.reweightbinningfromcombineintervals()
@@ -279,7 +279,7 @@ class ReweightBinning(object):
             #reweight binning
             self.reweightbinning, self.nbins = args
             self.xmin, self.xmax = self.reweightbinning[0], self.reweightbinning[-1]
-            self.binwidth = (self.xmax - self.xmin) / self.nbins
+            self.binwidth = float(self.xmax - self.xmin) / self.nbins
             self.tolerance = self.binwidth*self.tolerancefactor
             self.combineintervalsfromreweightbinning()
 
@@ -302,7 +302,7 @@ class ReweightBinning(object):
 
     def combineintervalsfromreweightbinning(self):
         for bin in self.reweightbinning:
-            if abs((bin - self.xmin) % self.binwidth) > self.tolerance:
+            if abs((bin - self.xmin) % self.binwidth) > self.tolerance and abs((bin - self.xmin) % self.binwidth - self.binwidth) > self.tolerance:
                 raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(bin, (bin - self.xmin) % self.binwidth))
 
         self.combineintervals = []
@@ -325,7 +325,7 @@ class ReweightBinning(object):
 
         for interval in self.combineintervals:
             for _ in interval.low, interval.hi:
-                if abs((_ - self.xmin) % self.binwidth) > self.tolerance:
+                if abs((_ - self.xmin) % self.binwidth) > self.tolerance and abs((_ - self.xmin) % self.binwidth - self.binwidth) > self.tolerance:
                     raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(_, (_ - self.xmin) % self.binwidth))
             if interval.tolerance != self.tolerance:
                 raise ValueError("Inconsistent tolerances {!r} {!r}".format(self.tolerance, interval.tolerance))
