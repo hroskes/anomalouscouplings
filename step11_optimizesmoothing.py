@@ -127,7 +127,7 @@ def runiteration(iternumber):
             os.makedirs(logdir)
         except OSError:
             pass
-        outfile = os.path.join(logdir, "log_{jobid}.out")
+        outputfile = os.path.join(logdir, "log_{jobid}.out")
 
         ntries=3
 
@@ -135,7 +135,7 @@ def runiteration(iternumber):
             print "submitting jobs..."
             jobids = []
             for i in range(nchangedfiles):
-                jobids.append(submitjob("python step6_maketemplates.py", jobname="iter{}_job{}".format(iternumber, i), jobtime="10:0:0", outfile=outfile))
+                jobids.append(submitjob("python step6_maketemplates.py", jobname="iter{}_job{}".format(iternumber, i), jobtime="10:0:0", outputfile=outputfile))
 
             submitjob("echo done", jobname="afteriteration", jobtime="0:0:10", interactive=True, waitids=jobids)
 
