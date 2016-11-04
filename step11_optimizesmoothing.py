@@ -122,12 +122,20 @@ def runiteration(iternumber):
                                                  #otherwise the jobs will try to compile them simultaneously
                                                  #and fail
 
+        logdir = os.path.join(config.repositorydir, "step7_templates", "logs_iter{}".format(iternumber-1))
+        try:
+            os.makedirs(logdir)
+        except OSError:
+            pass
+        outfile = os.path.join(logdir, "log_{jobid}.out")
+
         ntries=3
+
         for ntry in range(ntries):
             print "submitting jobs..."
             jobids = []
             for i in range(nchangedfiles):
-                jobids.append(submitjob("python step6_maketemplates.py", jobname="iter{}_job{}".format(iternumber, i), jobtime="10:0:0"))
+                jobids.append(submitjob("python step6_maketemplates.py", jobname="iter{}_job{}".format(iternumber, i), jobtime="10:0:0", outfile=outfile))
 
             submitjob("echo done", jobname="afteriteration", jobtime="0:0:10", interactive=True, waitids=jobids)
 
