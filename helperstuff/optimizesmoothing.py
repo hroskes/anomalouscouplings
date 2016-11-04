@@ -214,12 +214,34 @@ class ControlPlot(object):
 
     @property
     def rangesthatshouldnotbereweighted(self):
-        maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("reweight"))
+        try:
+            maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("reweight"))
+        except ValueError:#no ranges are smoothed away
+            try:
+                maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("smooth"))
+            except ValueError:
+                #in this case smoothing didn't do too much, so it's safe to say that reweighting won't ruin it
+                return []
         return list(set(range for range in self.rangesthataresmoothedawaybutreweightedback + self.rangesintroducedbyreweighting
                                    if range.significance < maxsmoothedsignificance))
 
     def GetEffectiveEntries(self, step, *args, **kwargs):
         return self.h[step].GetEffectiveEntries(*args, **kwargs)
+
+    @property
+    def sufficientsmoothing(self):
+        try:
+            maxsmoothedsignificance = max(range.significance for range in smoothedaway = self.rangesthataresmoothedaway("smooth"))
+        except ValueError:#nothing was smoothed away!  ...I have no idea!
+            if len(self.ranges("smooth")) > 5:  #sure why not
+                return False
+            return True
+
+        for range in self.ranges("smooth"):
+            if range.significance < maxsmoothedsignificance:
+                return False
+
+        return True
 
 def printranges(disc, *args):
     controlplot = ControlPlot(disc, *args)
@@ -350,7 +372,7 @@ class TemplateIterate(Template):
 
         baddiscriminants = ", ".join(
                                      disc.name for disc, controlplot in zip(self.discriminants, self.controlplots)
-                                       if controlplot.insufficientsmoothing
+                                       if not controlplot.sufficientsmoothing
                                     )
         if baddiscriminants:
             cansmoothmore = True
@@ -404,7 +426,8 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
+    t = Template("qqZZ", "fa2", "D_int_prod", "4mu", "VHHadrtagged", "160928")
+#    t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
     for d in t.discriminants:
         print d
         printranges(d, t)
