@@ -96,12 +96,10 @@ def runiteration(iternumber):
             return
     elif smoothingparametersdict["iteration"] == iternumber-1:
         if any(
-               any(_2.smoothingparameters != [None, None, None] for _2 in _.templates)
+               any(_2.smoothingparameters != [None, None, None] for _2 in _.templates())
                  and not os.path.exists(_.templatesfile()) for _ in templatesfiles
               ):
             raise IOError("Some templates have smoothing parameters defined but do not exist.  Please run the {}th iteration again.".format(iternumber-1))
-
-        assert False
 
         smoothingparametersdict["iteration"] = iternumber
  
