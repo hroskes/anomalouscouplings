@@ -404,11 +404,11 @@ class TemplateIterate(Template):
         if self.smoothingparameters[2] is None:
             self.smoothingparameters[2] = [None, None, None]
         reweightbinnings = [
-                            ReweightBinning(axis, discriminant.bins)
+                            ReweightBinning(axis, disc.bins)
                               if axis is not None
                               else
-                            ReweightBinning([], discriminant.bins, discriminant.min, discriminant.max)
-                              for axis in self.smoothingparameters[2]
+                            ReweightBinning([], disc.bins, disc.min, disc.max)
+                              for axis, disc in zip(self.smoothingparameters[2], self.discriminants)
                            ]
         for controlplot, binning in zip(self.controlplots, reweightbinnings):
             for range in controlplot.rangesthatshouldnotbereweighted:
