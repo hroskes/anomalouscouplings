@@ -141,6 +141,8 @@ def runiteration(iternumber):
                 if not os.path.exists(templatesfile.templatesfile()):
                     allgood = False
                     print templatesfile.templatesfile(), "was not created."
+                    if not os.path.exists(templatesfile.templatesfile()+".tmp"):
+                        os.remove(templatesfile.templatesfile()+".tmp")
                     continue
 
                 f = ROOT.TFile(templatesfile.templatesfile())
