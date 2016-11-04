@@ -218,6 +218,9 @@ class ControlPlot(object):
         return list(set(range for range in self.rangesthataresmoothedawaybutreweightedback + self.rangesintroducedbyreweighting
                                    if range.significance < maxsmoothedsignificance))
 
+    def GetEffectiveEntries(self, step, *args, **kwargs):
+        return self.h[step].GetEffectiveEntries(*args, **kwargs)
+
 def printranges(disc, *args):
     controlplot = ControlPlot(disc, *args)
 
@@ -338,7 +341,7 @@ class TemplateIterate(Template):
             #first iteration --> try smoothing with reweight on all axes, with no rebinning
             #                    200 bins if possible, as in the TemplateBuilder examples
             #                    but maximum of 4 bins in the template
-            neffectiveentries = controlplots[0].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
+            neffectiveentries = self.controlplots[0].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
             entriesperbin = min(neffectiveentries/4, 200)
             nbins = neffectiveentries / entriesperbin
             message += "First iteration-->{} entries per bin ({} bins), ".format(entriesperbin, nbins)
@@ -352,7 +355,7 @@ class TemplateIterate(Template):
         if baddiscriminants:
             cansmoothmore = True
             entriesperbin = self.smoothingparameters[0]
-            neffectiveentries = controlplots[0]["raw"].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
+            neffectiveentries = self.controlplots[0]["raw"].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
             nbins = neffectiveentries / entriesperbin
             if nbins >= 20:
                 entriesperbin *= 2
