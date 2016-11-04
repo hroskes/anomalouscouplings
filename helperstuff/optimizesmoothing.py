@@ -231,7 +231,7 @@ class ControlPlot(object):
     @property
     def sufficientsmoothing(self):
         try:
-            maxsmoothedsignificance = max(range.significance for range in smoothedaway = self.rangesthataresmoothedaway("smooth"))
+            maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("smooth"))
         except ValueError:#nothing was smoothed away!  ...I have no idea!
             if len(self.ranges("smooth")) > 5:  #sure why not
                 return False
