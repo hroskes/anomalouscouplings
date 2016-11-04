@@ -419,7 +419,7 @@ class TemplateIterate(Template):
                            ]
         for controlplot, binning in zip(self.controlplots, reweightbinnings):
             for range in controlplot.rangesthatshouldnotbereweighted:
-                controlplot.addcombineinterval(range.low, range.hi)
+                binning.addcombineinterval(range.low, range.hi)
 
         newreweightbinning = [binning.reweightbinning for binning in reweightbinnings]
         baddiscriminants = ", ".join(
