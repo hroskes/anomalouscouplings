@@ -271,15 +271,17 @@ class ReweightBinning(object):
         if len(args) == 4:
             #combine intervals
             self.combineintervals, self.nbins, self.xmin, self.xmax = args
+            self.binwidth = (self.xmax - self.xmin) / self.nbins
+            self.tolerance = self.binwidth*self.tolerancefactor
             self.sortcombineintervals()
             self.reweightbinningfromcombineintervals()
         elif len(args) == 2:
             #reweight binning
             self.reweightbinning, self.nbins = args
             self.xmin, self.xmax = self.reweightbinning[0], self.reweightbinning[-1]
+            self.binwidth = (self.xmax - self.xmin) / self.nbins
+            self.tolerance = self.binwidth*self.tolerancefactor
             self.combineintervalsfromreweightbinning()
-        self.binwidth = (self.xmax - self.xmin) / self.nbins
-        self.tolerance = self.binwidth*self.tolerancefactor
 
     def sortcombineintervals(self):
         if not self.combineintervals:
