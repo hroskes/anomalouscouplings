@@ -92,7 +92,7 @@ def runiteration(iternumber):
     if smoothingparametersdict["iteration"] == iternumber:
         #already iterated the values, just need to make the templates for this iteration
         nchangedfiles = len(list(_ for _ in templatesfiles if not os.path.exists(_.templatesfile())))
-        if len(nchangedfiles) == 0:
+        if nchangedfiles == 0:
             return
     elif smoothingparametersdict["iteration"] == iternumber-1:
         if any(
