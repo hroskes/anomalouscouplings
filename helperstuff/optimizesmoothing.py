@@ -3,6 +3,7 @@ from discriminants import discriminant
 from filemanager import cache, tfiles
 import itertools
 from math import sqrt
+import numbers
 import numpy
 import os
 import ROOT
