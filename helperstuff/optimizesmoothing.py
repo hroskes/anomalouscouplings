@@ -325,7 +325,7 @@ class ReweightBinning(object):
 
         for interval in self.combineintervals:
             for _ in interval.low, interval.hi:
-                if abs((_ - xmin) % self.binwidth) > self.tolerance:
+                if abs((_ - self.xmin) % self.binwidth) > self.tolerance:
                     raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(_, (_ - self.xmin) % self.binwidth))
             if interval.tolerance != self.tolerance:
                 raise ValueError("Inconsistent tolerances {!r} {!r}".format(self.tolerance, interval.tolerance))
