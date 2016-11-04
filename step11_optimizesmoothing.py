@@ -84,13 +84,25 @@ def runiteration(iternumber):
         if iternumber != 0:
             raise IOError("Wrong iteration number {}!  smoothingparametersdict does not indicate an iteration number, so your iteration number should be 0.".format(iternumber))
         smoothingparametersdict["iteration"] = -1
+
+    if iternumber == 0:
         if any(os.path.exists(_.templatesfile()) or os.path.exists(_.jsonfile()) for _ in templatesfiles):
             raise IOError("For the 0th iteration, please delete all json and template files")
 
     if smoothingparametersdict["iteration"] == iternumber:
-        nchangedfiles = len(templatesfiles)
-        pass #already iterated the values, just need to make the templates for this iteration
+        #already iterated the values, just need to make the templates for this iteration
+        nchangedfiles = len(list(_ for _ in templatesfiles if not os.path.exists(_.templatesfile)))
+        if len(nchangedfiles) == 0:
+            return
     elif smoothingparametersdict["iteration"] == iternumber-1:
+        if any(
+               any(_2.smoothingparameters != [None, None, None] for _2 in _.templates)
+                 and not os.path.exists(_.templatesfile()) for _ in templatesfiles
+              ):
+            raise IOError("Some templates have smoothing parameters defined but do not exist.  Please run the {}th iteration again.".format(iternumber-1))
+
+        assert False
+
         smoothingparametersdict["iteration"] = iternumber
  
         nchangedfiles = iterate(smoothingparametersdict, iternumber)
@@ -155,13 +167,7 @@ if __name__ == "__main__":
     lastiter = int(sys.argv[1])
     if "iteration" in Template.getsmoothingparametersdict():
         previousruniter = Template.getsmoothingparametersdict()["iteration"]
-        if len(sys.argv) > 2:
-            if sys.argv[2] == "remaketemplates":
-                firstiter = previousruniter
-            else:
-                raise ValueError("unknown sys.argv[2] {}".format(sys.argv[2]))
-        else:
-           firstiter = previousruniter+1
+        firstiter = previousruniter
     else:
         firstiter = 0
 
