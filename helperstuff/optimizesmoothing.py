@@ -381,7 +381,7 @@ class TemplateIterate(Template):
         if baddiscriminants:
             cansmoothmore = True
             entriesperbin = self.smoothingparameters[0]
-            neffectiveentries = self.controlplots[0]["raw"].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
+            neffectiveentries = self.controlplots[0].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
             nbins = neffectiveentries / entriesperbin
             if nbins >= 20:
                 entriesperbin *= 2
