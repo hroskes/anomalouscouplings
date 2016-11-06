@@ -48,14 +48,14 @@ def iterate(smoothingparametersdict, iternumber):
         if os.path.exists(templatesfile.templatesfile()):
             if anychange:
                 nchangedfiles += 1
-                shutil.move(templatesfile.templatesfile(), bkptemplatesdir)
+                shutil.move(templatesfile.templatesfile(), os.path.join(bkptemplatesdir, templatesfile.templatesfile()))
             else:
-                shutil.copy(templatesfile.templatesfile(), bkptemplatesdir)
+                shutil.copy(templatesfile.templatesfile(), os.path.join(bkptemplatesdir, templatesfile.templatesfile()))
         else:
             nchangedfiles += 1
 
         if os.path.exists(templatesfile.jsonfile()):
-            shutil.move(templatesfile.jsonfile(), bkpjsondir)
+            shutil.move(templatesfile.jsonfile(), os.path.join(bkpjsondir, templatesfile.jsonfile()))
 
     jsonstring = json.dumps(smoothingparametersdict, sort_keys=True, indent=4, separators=(',', ': '))
 
