@@ -48,9 +48,9 @@ def iterate(smoothingparametersdict, iternumber):
         if os.path.exists(templatesfile.templatesfile()):
             if anychange:
                 nchangedfiles += 1
-                shutil.move(templatesfile.templatesfile(), os.path.join(bkptemplatesdir, templatesfile.templatesfile()))
+                shutil.move(templatesfile.templatesfile(), os.path.join(bkptemplatesdir, os.path.basename(templatesfile.templatesfile())))
             else:
-                shutil.copy(templatesfile.templatesfile(), os.path.join(bkptemplatesdir, templatesfile.templatesfile()))
+                shutil.copy(templatesfile.templatesfile(), os.path.join(bkptemplatesdir, os.path.basename(templatesfile.templatesfile())))
         else:
             nchangedfiles += 1
 
