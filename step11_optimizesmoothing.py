@@ -122,7 +122,7 @@ def runiteration(iternumber):
                                                  #otherwise the jobs will try to compile them simultaneously
                                                  #and fail
 
-        logdir = os.path.join(config.repositorydir, "step7_templates", "logs_iter{}".format(iternumber-1))
+        logdir = os.path.join(config.repositorydir, "step7_templates", "logs_iter{}".format(iternumber))
         try:
             os.makedirs(logdir)
         except OSError:

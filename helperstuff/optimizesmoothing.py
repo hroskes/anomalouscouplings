@@ -278,15 +278,13 @@ class ReweightBinning(object):
             self.reweightbinningfromcombineintervals()
         elif len(args) == 2:
             #reweight binning
-            self.reweightbinning, self.nbins = args
-            self.xmin, self.xmax = self.reweightbinning[0], self.reweightbinning[-1]
+            self.__reweightbinning, self.nbins = args
+            self.xmin, self.xmax = self.__reweightbinning[0], self.__reweightbinning[-1]
             self.binwidth = float(self.xmax - self.xmin) / self.nbins
             self.tolerance = self.binwidth*self.tolerancefactor
             self.combineintervalsfromreweightbinning()
 
     def sortcombineintervals(self):
-        if not self.combineintervals:
-            self.reweightbinning = []
         self.combineintervals.sort(key=lambda x: x.low)
         while True:
             for (i1, interval1), (i2, interval2) in pairwise(enumerate(self.combineintervals[:])):
@@ -302,7 +300,7 @@ class ReweightBinning(object):
                 break
 
     def combineintervalsfromreweightbinning(self):
-        for bin in self.reweightbinning:
+        for bin in self.__reweightbinning:
             if abs((bin - self.xmin) % self.binwidth) > self.tolerance and abs((bin - self.xmin) % self.binwidth - self.binwidth) > self.tolerance:
                 raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(bin, (bin - self.xmin) % self.binwidth))
 
@@ -310,7 +308,7 @@ class ReweightBinning(object):
         for i in range(nbins+1):
             combinefrom = combineto = None
             currentvalue = self.xmin + i*self.binwidth
-            if any(abs(bin - currentvalue) < self.tolerance for bin in self.reweightbinning):   #there is a bin boundary with this value
+            if any(abs(bin - currentvalue) < self.tolerance for bin in self.__reweightbinning):   #there is a bin boundary with this value
                 if combinefrom is not None:
                     combineto = currentvalue
                     self.combineintervals.append(Interval(combinefrom, combineto, self.tolerance))
@@ -331,7 +329,7 @@ class ReweightBinning(object):
             if interval.tolerance != self.tolerance:
                 raise ValueError("Inconsistent tolerances {!r} {!r}".format(self.tolerance, interval.tolerance))
 
-        self.reweightbinning = []
+        self.__reweightbinning = []
 
         combineintervals = iter(self.combineintervals+[None])
         nextcombineinterval = next(combineintervals)
@@ -342,7 +340,7 @@ class ReweightBinning(object):
                     currentcombineinterval = None
 
             if currentcombineinterval is None:    #not else!!
-                self.reweightbinning.append(self.xmin + i*self.binwidth)
+                self.__reweightbinning.append(self.xmin + i*self.binwidth)
                 if nextcombineinterval is not None and self.xmin + i*self.binwidth in nextcombineinterval:
                     currentcombineinterval = nextcombineinterval
                     nextcombineinterval = next(combineintervals)
@@ -350,6 +348,13 @@ class ReweightBinning(object):
     def addcombineinterval(self, low, hi):
         self.combineintervals.append(Interval(low, hi, self.tolerance))
         self.reweightbinningfromcombineintervals()
+
+    @property
+    def reweightbinning(self):
+        if self.combineintervals:
+            return self.__reweightbinning
+        else:
+            return None
 
 class TemplateIterate(Template):
     @property
