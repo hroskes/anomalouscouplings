@@ -36,7 +36,7 @@ class Interval(namedtuple("Interval", "low hi tolerance")):
 
     def __contains__(self, other):
         if isinstance(other, numbers.Number):
-            return self.low-self.tolerance <= other <= self.hi-self.tolerance
+            return self.low-self.tolerance <= other <= self.hi+self.tolerance
         return self.low-self.tolerance <= other.low < other.hi <= self.hi+self.tolerance
 
     def overlap(self, other):
@@ -305,7 +305,7 @@ class ReweightBinning(object):
                 raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(bin, (bin - self.xmin) % self.binwidth))
 
         self.combineintervals = []
-        for i in range(nbins+1):
+        for i in range(self.nbins+1):
             combinefrom = combineto = None
             currentvalue = self.xmin + i*self.binwidth
             if any(abs(bin - currentvalue) < self.tolerance for bin in self.__reweightbinning):   #there is a bin boundary with this value
