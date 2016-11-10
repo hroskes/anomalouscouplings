@@ -10,4 +10,4 @@ for filename in os.listdir("."):
   if len(f.GetListOfKeys()) == 0:
     delete.append(filename)
 
-print "rm", " ".join(delete)
+print "rm", "\\\n   ".join(delete)
