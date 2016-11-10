@@ -44,7 +44,9 @@ class TemplateForProjection(object):
             result.SetName(self.discriminants[i].name)
             result.SetTitle(self.discriminants[i].title)
             result.SetXTitle(self.discriminants[i].title)
-            result.SetLineColor(self.color)
+            result.SetLineColor(2)
+            result.SetLineStyle(self.color)
+            result.SetLineWidth(2)
             self.projections[i] = result
         return self.projections[i]
 
@@ -283,7 +285,7 @@ class Projections(MultiEnum):
                                    )
 
     SM    = TemplateSum("SM",                                1,             (ggHSM,    1), (VBFSM,    1), (ZHSM,    1), (WHSM,    1))
-    BSM   = TemplateSum("{}=1".format(self.analysis.title),  ROOT.kCyan,    (ggHBSM,   1), (VBFBSM,   1), (ZHBSM,   1), (WHBSM,   1))
+    BSM   = TemplateSum("{}=1".format(self.analysis.title),  2,             (ggHBSM,   1), (VBFBSM,   1), (ZHBSM,   1), (WHBSM,   1))
     mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, 1), (VBFmix_p, 1), (ZHmix_p, 1), (WHmix_p, 1))
     mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, 1), (VBFmix_m, 1), (ZHmix_m, 1), (WHmix_m, 1))
 
@@ -301,8 +303,8 @@ class Projections(MultiEnum):
                 ] + WHpieces + [
                  WHBSM, WHmix_p, WHmix_m,
                 ] + [
-                 SM, BSM, mix_p, mix_m,
-                 qqZZ, ggZZ, VBFbkg, ZX,
+                 SM, BSM, #mix_p, mix_m,
+#                 qqZZ, ggZZ, VBFbkg, ZX,
                 ]
 
     if self.enrichstatus == "impoverish" and config.usedata or config.unblinddistributions:
@@ -311,7 +313,7 @@ class Projections(MultiEnum):
                      ]
 
     c1 = ROOT.TCanvas()
-    legend = ROOT.TLegend(.65, .6, .9, .9)
+    legend = ROOT.TLegend(.65, .75, .9, .9)
     legend.SetBorderSize(0)
     legend.SetFillStyle(0)
     for template in templates:
@@ -329,7 +331,7 @@ class Projections(MultiEnum):
             if template.color:
                 hstack.Add(template.Projection(i), template.hstackoption)
         hstack.Draw("nostack")
-        hstack.GetXaxis().SetTitle(discriminant.title)
+        hstack.GetXaxis().SetTitle(discriminant.title.replace("ZHhdec", "VH+dec").replace("VBFdec", "VBF+dec").replace("dec", "decay"))
         legend.Draw()
         try:
             os.makedirs(self.saveasdir)
@@ -350,10 +352,10 @@ if __name__ == "__main__":
   def projections():
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
-#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "Untagged")
-#    return
+    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
+    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
+    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "Untagged")
+    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:
