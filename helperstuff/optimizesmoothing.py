@@ -336,7 +336,7 @@ class ReweightBinning(object):
         currentcombineinterval = None
         for i in range(self.nbins+1):
             if currentcombineinterval is not None:
-                if abs(self.xmin + (i+1)*self.binwidth) not in currentcombineinterval:  #then we are at the upper edge
+                if self.xmin + (i+1)*self.binwidth not in currentcombineinterval:  #then we are at the upper edge
                     currentcombineinterval = None
 
             if currentcombineinterval is None:    #not else!!
