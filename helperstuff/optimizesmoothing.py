@@ -301,7 +301,7 @@ class ReweightBinning(object):
 
     def combineintervalsfromreweightbinning(self):
         for bin in self.__reweightbinning:
-            if abs((bin - self.xmin) % self.binwidth) > self.tolerance and abs((bin - self.xmin) % self.binwidth - self.binwidth) > self.tolerance:
+            if abs((bin - self.xmin) % self.binwidth) > self.tolerance and abs(abs((bin - self.xmin) % self.binwidth) - self.binwidth) > self.tolerance:
                 raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(bin, (bin - self.xmin) % self.binwidth))
 
         self.combineintervals = []
@@ -435,7 +435,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("qqZZ", "fa2", "D_int_prod", "4mu", "VHHadrtagged", "160928")
+    t = Template("VBF", "fa3", "2e2mu", "Untagged", "160928", "0+")
 #    t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
     for d in t.discriminants:
         print d

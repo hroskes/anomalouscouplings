@@ -71,6 +71,8 @@ def iterate(smoothingparametersdict, iternumber):
         subprocess.check_call(["git", "add", Template.smoothingparametersfile])
         message = ("Iterate smoothing parameters:\n\n"
                   + "\n".join("{}: {}".format(k, v) for k, v in messages.iteritems()))
+        #print message
+        #raw_input("press enter: ")
         subprocess.check_call(["git", "commit", "-m", message])
 
     return nchangedfiles
