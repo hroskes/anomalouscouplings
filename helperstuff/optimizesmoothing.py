@@ -400,7 +400,7 @@ class TemplateIterate(Template):
                 newnbins = neffectiveentries / entriesperbin #to be correct in the message
                 if newnbins == nbins:
                     #um... not much we can do...
-                    message += "Would like to smooth more (due to {}), but can't, already at {} bins.  ".format(baddiscriminants, nbinbs)
+                    message += "Would like to smooth more (due to {}), but can't, already at {} bins.  ".format(baddiscriminants, nbins)
                     cansmoothmore = False
                 else:
                     nbins = newnbins
