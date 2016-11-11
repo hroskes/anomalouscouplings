@@ -283,6 +283,8 @@ class ReweightBinning(object):
             self.binwidth = float(self.xmax - self.xmin) / self.nbins
             self.tolerance = self.binwidth*self.tolerancefactor
             self.combineintervalsfromreweightbinning()
+        else:
+            raise TypeError("Wrong number of args for {}.__init__".format(type(self).__name__))
 
     def sortcombineintervals(self):
         self.combineintervals.sort(key=lambda x: x.low)
@@ -305,8 +307,8 @@ class ReweightBinning(object):
                 raise ValueError("({!r} - xmin) % binwidth = {!r} != 0".format(bin, (bin - self.xmin) % self.binwidth))
 
         self.combineintervals = []
+        combinefrom = combineto = None
         for i in range(self.nbins+1):
-            combinefrom = combineto = None
             currentvalue = self.xmin + i*self.binwidth
             if any(abs(bin - currentvalue) < self.tolerance for bin in self.__reweightbinning):   #there is a bin boundary with this value
                 if combinefrom is not None:
