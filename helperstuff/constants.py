@@ -30,6 +30,9 @@ g4WH = 0.1236136;
 g1prime2WH_gen = -525.274;
 g1prime2WH_reco = 525.274;
 
+ghg4HJJ = 1.0062
+kappa_tilde_ttH = 1.6
+
 #https://twiki.cern.ch/twiki/pub/LHCPhysics/LHCHXSWG/Higgs_XSBR_YR4_update.xlsx
 SMXSggH  = (44.14      #'YR4 SM 13TeV'!B24   (ggH cross section, m=125)
              *1000)    #                     (pb to fb)
@@ -80,6 +83,14 @@ JHUXSWHa1a2      = 16486.68;       JHUXSWHa1a2err      = 2.01
 JHUXSWHa1a3      = 62001.57;       JHUXSWHa1a3err      = 5.54
 JHUXSWHa1L1      = 25302.37;       JHUXSWHa1L1err      = 2.67
 
+JHUXSHJJa2       = 14583.61;       JHUXSHJJa2err       = 0.94
+JHUXSHJJa3       = 14397.13;       JHUXSHJJa3err       = 0.97
+JHUXSHJJa2a3     = 29169.2;        JHUXSHJJa2a3err     = 2.1
+
+JHUXSttHkappa    = 0.912135589;    JHUXSttHkappaerr    = 0.00143032
+JHUXSttHkappatilde = 0.35609194;   JHUXSttHkappatildeerr = 0.000492662
+JHUXSttHkappakappatilde = 1.8231162489;   JHUXSttHkappakappatildeerr = 0.00254131
+
 if __name__ == "__main__":
     print "All of the following should be 0:"
     print
@@ -110,6 +121,16 @@ if __name__ == "__main__":
     print "    a1XS - g1prime2**2*L1XS    = {}%".format((JHUXSWHa1 - g1prime2WH_gen**2 * JHUXSWHL1     ) / JHUXSWHa1 * 100)
     print "    a1XS + g4**2*a3XS - a1a3XS = {}%".format((JHUXSWHa1 + g4WH**2 * JHUXSWHa3 - JHUXSWHa1a3 ) / JHUXSWHa1 * 100)
     print "    2*a1XS - a1a3XS            = {}%".format((2*JHUXSWHa1 - JHUXSWHa1a3                     ) / (2*JHUXSWHa1) * 100)
+    print
+    print "  HJJ:"
+    print "    a2XS - g4**2*a3XS          = {}%".format((JHUXSHJJa2 - ghg4HJJ**2              * JHUXSHJJa3   ) / JHUXSHJJa2 * 100)
+    print "    a2XS + g4**2*a3XS - a2a3XS = {}%".format((JHUXSHJJa2 + ghg4HJJ**2 * JHUXSHJJa3 - JHUXSHJJa2a3 ) / JHUXSHJJa2 * 100)
+    print "    2*a2XS - a2a3XS            = {}%".format((2*JHUXSHJJa2 - JHUXSHJJa2a3                         ) / (2*JHUXSHJJa2) * 100)
+    print
+    print "  ttH:"
+    print "    kappaXS - kappa_tilde**2*kappatildeXS                     = {}%".format((JHUXSttHkappa - kappa_tilde_ttH**2                      * JHUXSttHkappatilde      ) / JHUXSttHkappa * 100)
+    print "    kappaXS + kappa_tilde**2*kappatildeXS - kappakappatildeXS = {}%".format((JHUXSttHkappa + kappa_tilde_ttH**2 * JHUXSttHkappatilde - JHUXSttHkappakappatilde ) / JHUXSttHkappa * 100)
+    print "    2*kappaXS - kappakappatildeXS                             = {}%".format((2*JHUXSttHkappa - JHUXSttHkappakappatilde                                         ) / (2*JHUXSttHkappa) * 100)
 
 #Set them to exactly 0
 
@@ -161,6 +182,28 @@ JHUXSWHL1, JHUXSWHL1err = JHUXSWHa1 / g1prime2WH_gen**2, JHUXSWHa1err / g1prime2
 
 JHUXSWHa1a3, JHUXSWHa1a3err = JHUXSWHa1*2, JHUXSWHa1err*2
 
+#HJJ
+
+values = [JHUXSHJJa2, JHUXSHJJa3*ghg4HJJ**2]
+errors = [JHUXSHJJa2err, JHUXSHJJa3err*ghg4HJJ**2]
+
+JHUXSHJJa2, JHUXSHJJa2err = sum(value/error**2 for value, error in zip(values, errors)) / sum(1/error**2 for error in errors), sum(1/error**2 for error in errors)**-.5
+JHUXSHJJa3, JHUXSHJJa3err = JHUXSHJJa2 / ghg4HJJ**2, JHUXSHJJa2err / ghg4HJJ**2
+
+JHUXSHJJa2a3, JHUXSHJJa2a3err = JHUXSHJJa2*2, JHUXSHJJa2err*2
+
+del values, errors
+
+#ttH
+
+values = [JHUXSttHkappa, JHUXSttHkappatilde*kappa_tilde_ttH**2]
+errors = [JHUXSttHkappaerr, JHUXSttHkappatildeerr*kappa_tilde_ttH**2]
+
+JHUXSttHkappa, JHUXSttHkappaerr = sum(value/error**2 for value, error in zip(values, errors)) / sum(1/error**2 for error in errors), sum(1/error**2 for error in errors)**-.5
+JHUXSttHkappatilde, JHUXSttHkappatildeerr = JHUXSttHkappa / kappa_tilde_ttH**2, JHUXSttHkappaerr / kappa_tilde_ttH**2
+
+JHUXSttHkappakappatilde, JHUXSttHkappakappatildeerr = JHUXSttHkappa*2, JHUXSttHkappaerr*2
+
 del values, errors
 
 #define interference xsecs instead of mixture xsecs
@@ -181,5 +224,8 @@ JHUXSWHa1a2, JHUXSWHa1a2err = JHUXSWHa1a2 - 2*JHUXSWHa1, sqrt(JHUXSWHa1a2err**2 
 JHUXSWHa1a3, JHUXSWHa1a3err = JHUXSWHa1a3 - 2*JHUXSWHa1, 0
 JHUXSWHa1L1, JHUXSWHa1L1err = JHUXSWHa1L1 - 2*JHUXSWHa1, sqrt(JHUXSWHa1L1err**2 + 4*JHUXSWHa1err**2)
 
+JHUXSHJJa2a3, JHUXSHJJa2a3err = JHUXSHJJa2a3 - 2*JHUXSHJJa2, 0
+JHUXSttHkappakappatilde, JHUXSttHkappakappatildeerr = JHUXSttHkappakappatilde - 2*JHUXSttHkappa, 0
+
 #defined this way, just make sure
-assert JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == JHUXSZHa1a3 == JHUXSWHa1a3 == 0
+assert JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == JHUXSZHa1a3 == JHUXSWHa1a3 == JHUXSHJJa2a3 == JHUXSttHkappakappatilde == 0
