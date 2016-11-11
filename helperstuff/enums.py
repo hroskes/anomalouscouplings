@@ -118,7 +118,7 @@ class ProductionMode(MyEnum):
     enumitems = (
                  EnumItem("ggH"),
                  EnumItem("VBF", "qqH"),
-                 EnumItem("H+jj", "HJJ"),
+                 EnumItem("HJJ", "H+jj"),
                  EnumItem("ZH"),
                  EnumItem("WH"),
                  EnumItem("ttH"),

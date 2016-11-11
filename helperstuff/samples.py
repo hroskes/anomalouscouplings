@@ -306,14 +306,14 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_{}_g1g4_proddec_pi".format(self.productionmode)
             elif self.hypothesis == "fL1proddec-0.5":
                 return "MC_weight_{}_g1g1prime2_proddec_pi".format(self.productionmode)
-        elif self.productionmode in "HJJ":
+        elif self.productionmode == "HJJ":
             if self.hypothesis == "0+":
-                return "MC_weight_HJJ_g1"
+                return "MC_weight_HJJ_g2"
             elif self.hypothesis == "0-":
                 return "MC_weight_HJJ_g4"
-            elif self.hypothesis == "fa30.5":
-                return "MC_weight_HJJ_g1g4"
-        elif self.productionmode in "ttH":
+            elif self.hypothesis == "fCP0.5":
+                return "MC_weight_HJJ_g2g4"
+        elif self.productionmode == "ttH":
             if self.hypothesis == "0+":
                 return "MC_weight_ttH_kappa"
             elif self.hypothesis == "0-":
@@ -558,7 +558,8 @@ class Sample(ReweightingSample):
             if self.hypothesis == "fa30.5": return "0Mf05ph0"
             if self.hypothesis == "fL10.5": return "0L1f05ph0"
         if (self.productionmode in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH") and self.production >= "160714"):
-            s = {"ggH": "ggH", "VBF": "VBFH", "ZH": "ZH", "WH": "WH"}[str(self.productionmode)]
+            s = str(self.productionmode)
+            if self.productionmode == "VBF": s = "VBFH"
             if self.hypothesis == "0+": return "{}0PM_M125".format(s)
             if self.hypothesis == "a2": return "{}0PH_M125".format(s)
             if self.hypothesis == "0-": return "{}0M_M125".format(s)

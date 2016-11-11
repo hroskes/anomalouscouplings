@@ -1169,9 +1169,13 @@ class TreeWrapper(Iterator):
 #Reweighting weights#
 #####################
 
-    def MC_weight_plain(self):
+    def MC_weight_plain_xsec(self):
         return self.MC_weight * self.xsec / self.nevents
-    MC_weight_ttH = MC_weight_plain
+    def MC_weight_plain_noxsec(self):
+        return self.MC_weight / self.nevents
+    MC_weight_ttH_kappa = MC_weight_ttH_kappatilde = MC_weight_ttH_kappakappatilde = \
+    MC_weight_HJJ_g2    = MC_weight_HJJ_g4         = MC_weight_HJJ_g2g4 = \
+        MC_weight_plain_noxsec
 
     def MC_weight_ggH(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXSggH2L2l / self.nevents2L2l[index]
@@ -1289,7 +1293,7 @@ class TreeWrapper(Iterator):
         else:
             KFactor = self.tree.KFactorEWKqqZZ * self.tree.KFactorQCDqqZZ_M
         return self.MC_weight * self.xsec * KFactor / self.nevents
-    MC_weight_VBFbkg = MC_weight_plain
+    MC_weight_VBFbkg = MC_weight_plain_xsec
     def MC_weight_ZX(self):
         self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
         return ZX.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ZX.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
@@ -1355,10 +1359,11 @@ class TreeWrapper(Iterator):
             "isdummy",
             "isZX",
             "MC_weight_ggH",
-            "MC_weight_plain",
             "MC_weight_VBF",
             "MC_weight_WH",
             "MC_weight_ZH",
+            "MC_weight_plain_xsec",
+            "MC_weight_plain_noxsec",
             "minevent",
             "nevents",
             "nevents2L2l",
@@ -1424,6 +1429,11 @@ class TreeWrapper(Iterator):
             ReweightingSample("WH", "fa3proddec-0.5"),
             ReweightingSample("WH", "fL1proddec-0.5"),
             ReweightingSample("ttH", "0+"),
+            ReweightingSample("ttH", "0-"),
+            ReweightingSample("ttH", "fCP0.5"),
+            ReweightingSample("HJJ", "0+"),
+            ReweightingSample("HJJ", "0-"),
+            ReweightingSample("HJJ", "fCP0.5"),
             ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
             ReweightingSample("qqZZ"),
             ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
