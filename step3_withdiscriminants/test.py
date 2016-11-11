@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from helperstuff import config
 from helperstuff import style
 from helperstuff.discriminants import discriminant
@@ -9,9 +10,9 @@ import os
 #========================
 #inputs
 #weight, bins, min, max can be None
-productionmode = "VBF"
-disc           = "D_g2_VBFdecay"
-weight         = "MC_weight_{}_g1".format(productionmode)
+productionmode = "ggH"
+disc           = "D_0minus_VBF"
+weight         = None
 bins           = None
 min            = None
 max            = None
@@ -34,8 +35,15 @@ if max is None:
 
 c = ROOT.TCanvas()
 hs = {}
-for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2", "fa2prod0.5", "0+"], start=1):
-#    if hypothesis in ["0-", "fa3prod0.5"]: continue
+
+def hypothesestouse():
+    for hypothesis in hypotheses:
+        if productionmode == "ggH" and hypothesis not in decayonlyhypotheses: continue
+        if productionmode in ["VBF", "ZH", "WH"] and hypothesis not in prodonlyhypotheses: continue
+        if productionmode in ["HJJ", "ttH"] and hypothesis not in hffhypotheses: continue
+        yield hypothesis
+
+for color, hypothesis in enumerate(hypothesestouse(), start=1):
     t = ROOT.TChain("candTree", "candTree")
     sample = Sample(productionmode, hypothesis, "160928")
     t.Add(sample.withdiscriminantsfile())
