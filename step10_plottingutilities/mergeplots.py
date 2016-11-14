@@ -61,15 +61,15 @@ def mergeplots(analysis, subdir="", plotname="limit_.oO[analysis]Oo._comparetoIC
     analysis = Analysis(analysis)
     folders = [
                Folder(".oO[analysis]Oo._discriminants_D_int_prod",    "production+decay", 2, analysis, subdir, plotname="limit_lumi30.0_nosystematics.root"),
-               Folder(".oO[analysis]Oo._discriminants_D_int_prod",    "ICHEP style", 4, analysis, subdir, plotname="limit_lumi36.0_ggH_Untagged_nosystematics.root"),
+               Folder(".oO[analysis]Oo._discriminants_D_int_prod",    "decay only", 4, analysis, subdir, plotname="limit_lumi36.0_ggH_Untagged_nosystematics.root"),
               ]
     outdir = "comparetoICHEPstyle"
 
     mg = ROOT.TMultiGraph("limit", "")
     if analysis == "fa3":
-        l = ROOT.TLegend(.3, .6, .6, .9)
+        l = ROOT.TLegend(.3, .6, .7, .9)
     else:
-        l = ROOT.TLegend(.6, .6, .9, .9)
+        l = ROOT.TLegend(.5, .6, .9, .9)
     l.SetBorderSize(0)
     l.SetFillStyle(0)
     for folder in folders:
@@ -83,7 +83,7 @@ def mergeplots(analysis, subdir="", plotname="limit_.oO[analysis]Oo._comparetoIC
     l.Draw()
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
-    style.CMS("Preliminary", 30.)
+    #style.CMS("Preliminary", 30.)
     saveasdir = os.path.join(config.plotsbasedir, "limits", subdir, outdir)
     try:
         os.makedirs(saveasdir)
