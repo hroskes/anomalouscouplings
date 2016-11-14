@@ -165,7 +165,7 @@ class ControlPlot(object):
 
         for rawrange in self.ranges(inthisone):
             overlaps = [smoothrange for smoothrange in self.ranges(notinthisone) if rawrange.overlap(smoothrange)]
-            if max(smoothrange.overlap(rawrange) for smoothrange in overlaps) <= rawrange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
+            if not overlaps or max(smoothrange.overlap(rawrange) for smoothrange in overlaps) <= rawrange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
                 yield rawrange
                 continue
             biggestoverlap = max(overlaps, key = lambda x: x.overlap(rawrange))
@@ -437,7 +437,8 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("VBF", "fa3", "2e2mu", "Untagged", "160928", "0+")
+#    t = Template("VBF", "fa2", "2e2mu", "Untagged", "160928", "fa20.5")
+    t = Template(*"2e2mu  zh fa2 160928 D_int_prod VBFtagged ZH fa20.5".split())
 #    t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
     for d in t.discriminants:
         print d
