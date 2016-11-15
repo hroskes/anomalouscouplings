@@ -103,18 +103,19 @@ def runiteration(iternumber):
               ):
             raise IOError("Some templates have smoothing parameters defined but do not exist.  Please run the {}th iteration again.".format(iternumber-1))
 
-        smoothingparametersdict["iteration"] = iternumber
- 
         nchangedfiles = iterate(smoothingparametersdict, iternumber)
         converged = (nchangedfiles == 0)
 
         if converged:
             print
-            print "***********************************" + "*"*len(str(iternumber))-2
+            print "***********************************" + "*"*(len(str(iternumber))-2)
             print "* converged after {} iterations!! *".format(iternumber)
-            print "***********************************" + "*"*len(str(iternumber))-2
+            print "***********************************" + "*"*(len(str(iternumber))-2)
             print
             return True
+
+        smoothingparametersdict["iteration"] = iternumber
+
     else:
         raise IOError("Wrong iteration number {}!  smoothingparametersdict says {}, so you should use either {} or {}".format(iternumber, smoothingparametersdict["iteration"], smoothingparametersdict["iteration"]+1))
 
