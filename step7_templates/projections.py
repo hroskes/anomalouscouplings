@@ -316,8 +316,11 @@ class Projections(MultiEnum):
                  WHBSM, WHmix_p, WHmix_m,
                 ] + [
                  SM, BSM, mix_p, mix_m,
-                 qqZZ, ggZZ, VBFbkg, ZX,
                 ]
+    if ggHfactor == VBFfactor == VHfactor == 1:
+        templates += [
+                      qqZZ, ggZZ, VBFbkg, ZX,
+                     ]
 
     if self.enrichstatus == "impoverish" and config.usedata or config.unblinddistributions:
         templates += [
