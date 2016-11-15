@@ -365,6 +365,8 @@ class TemplateBase(object):
     def getjson(self):
         pass
 
+smoothingparametersfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
+
 class Template(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
     enums = [TemplatesFile, ProductionMode, Hypothesis]
@@ -718,24 +720,23 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
-    smoothingparametersfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
-
-    @classmethod
-    def getsmoothingparametersdict(cls, trycache=True):
-      if not hasattr(cls, "smoothingparametersdict_cache") or not trycache:
+    @staticmethod
+    def getsmoothingparametersdict(trycache=True):
+      import globals
+      if globals.smoothingparametersdict_cache is None or not trycache:
         try:
-          with open(cls.smoothingparametersfile) as f:
+          with open(smoothingparametersfile) as f:
             jsonstring = f.read()
         except IOError:
           try:
-            os.makedirs(os.path.dirname(cls.smoothingparametersfile))
+            os.makedirs(os.path.dirname(smoothingparametersfile))
           except OSError:
             pass
-          with open(cls.smoothingparametersfile, "w") as f:
+          with open(smoothingparametersfile, "w") as f:
             f.write("{}\n")
             jsonstring = "{}"
-        cls.smoothingparametersdict_cache = json.loads(jsonstring)
-      return cls.smoothingparametersdict_cache
+        globals.smoothingparametersdict_cache = json.loads(jsonstring)
+      return globals.smoothingparametersdict_cache
 
     @property
     def smoothingparameters(self):

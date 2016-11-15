@@ -5,7 +5,7 @@ from helperstuff import config
 from helperstuff.filemanager import cd
 from helperstuff.optimizesmoothing import TemplateIterate
 from helperstuff.submitjob import submitjob
-from helperstuff.templates import Template, templatesfiles
+from helperstuff.templates import smoothingparametersfile, Template, templatesfiles
 import json
 import os
 import shutil
@@ -59,7 +59,7 @@ def iterate(smoothingparametersdict, iternumber):
 
     jsonstring = json.dumps(smoothingparametersdict, sort_keys=True, indent=4, separators=(',', ': '))
 
-    with open(Template.smoothingparametersfile, "w") as f:
+    with open(smoothingparametersfile, "w") as f:
         f.write(jsonstring)
 
     Template.getsmoothingparametersdict(trycache=False)  #clear the cache
@@ -68,7 +68,7 @@ def iterate(smoothingparametersdict, iternumber):
     assert bool(messages) == bool(nchangedfiles)
 
     if messages:
-        subprocess.check_call(["git", "add", Template.smoothingparametersfile])
+        subprocess.check_call(["git", "add", smoothingparametersfile])
         message = ("Iterate smoothing parameters:\n\n"
                   + "\n".join("{}: {}".format(k, v) for k, v in messages.iteritems()))
         #print message
