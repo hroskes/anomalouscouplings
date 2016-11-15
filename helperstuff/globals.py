@@ -1,2 +1,2 @@
 #yes globals are bad
-smoothingparameters_cache = None
+smoothingparametersdict_cache = None
