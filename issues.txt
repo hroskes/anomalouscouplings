@@ -1,0 +1,12 @@
+D_0h+_decay fa2=-0.5 in VBF VH vs. ggH
+
+POWHEG VBF VH ttH (systematics?)
+
+VBFMELA and VHMELA selection, check 0+ 0- fa2=-0.5 fL1=+/-0.5
+
+put back fL1
+
+VH discriminants
+
+ggH parameterization (systematics JHUGen H+jj)
+
