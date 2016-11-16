@@ -117,7 +117,7 @@ def runiteration(iternumber):
         smoothingparametersdict["iteration"] = iternumber
 
     else:
-        raise IOError("Wrong iteration number {}!  smoothingparametersdict says {}, so you should use either {} or {}".format(iternumber, smoothingparametersdict["iteration"], smoothingparametersdict["iteration"]+1))
+        raise IOError("Wrong iteration number {}!  smoothingparametersdict says {}, so you should use either {} or {}".format(iternumber, smoothingparametersdict["iteration"], smoothingparametersdict["iteration"], smoothingparametersdict["iteration"]+1))
 
     with cd(config.repositorydir):
         subprocess.check_call(["python", "step4_makejson.py"])
