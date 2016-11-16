@@ -107,8 +107,8 @@ def runiteration(iternumber):
                 if not isgood:
                     os.remove(_.templatesfile())
 
-            if os.path.exists(templatesfile.templatesfile()+".tmp"):
-                os.remove(templatesfile.templatesfile()+".tmp")
+            if os.path.exists(_.templatesfile()+".tmp"):
+                os.remove(_.templatesfile()+".tmp")
 
             if not os.path.exists(_.templatesfile()):
                 nchangedfiles += 1
