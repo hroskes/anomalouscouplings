@@ -74,6 +74,8 @@ def iterate(smoothingparametersdict, iternumber):
         #print message
         #raw_input("press enter: ")
         subprocess.check_call(["git", "commit", "-m", message])
+    else:
+        subprocess.check_call(["git", "checkout", "--", smoothingparametersfile])
 
     return nchangedfiles
 
@@ -93,7 +95,14 @@ def runiteration(iternumber):
 
     if smoothingparametersdict["iteration"] == iternumber:
         #already iterated the values, just need to make the templates for this iteration
-        nchangedfiles = len(list(_ for _ in templatesfiles if not os.path.exists(_.templatesfile()) or len(ROOT.TFile(_.templatesfile()).GetListOfKeys()) == 0))
+        nchangedfiles = len(
+                            list(_ for _ in templatesfiles
+                                     if
+                                        not os.path.exists(_.templatesfile())
+                                     or
+                                        len(ROOT.TFile(_.templatesfile()).GetListOfKeys()) == 0
+                                )
+                           )
         if nchangedfiles == 0:
             return
     elif smoothingparametersdict["iteration"] == iternumber-1:
@@ -102,6 +111,8 @@ def runiteration(iternumber):
                  and not os.path.exists(_.templatesfile()) for _ in templatesfiles
               ):
             raise IOError("Some templates have smoothing parameters defined but do not exist.  Please run the {}th iteration again.".format(iternumber-1))
+
+        smoothingparametersdict["iteration"] = iternumber
 
         nchangedfiles = iterate(smoothingparametersdict, iternumber)
         converged = (nchangedfiles == 0)
@@ -113,8 +124,6 @@ def runiteration(iternumber):
             print "***********************************" + "*"*(len(str(iternumber))-2)
             print
             return True
-
-        smoothingparametersdict["iteration"] = iternumber
 
     else:
         raise IOError("Wrong iteration number {}!  smoothingparametersdict says {}, so you should use either {} or {}".format(iternumber, smoothingparametersdict["iteration"], smoothingparametersdict["iteration"], smoothingparametersdict["iteration"]+1))
