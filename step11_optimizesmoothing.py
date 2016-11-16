@@ -95,14 +95,24 @@ def runiteration(iternumber):
 
     if smoothingparametersdict["iteration"] == iternumber:
         #already iterated the values, just need to make the templates for this iteration
-        nchangedfiles = len(
-                            list(_ for _ in templatesfiles
-                                     if
-                                        not os.path.exists(_.templatesfile())
-                                     or
-                                        len(ROOT.TFile(_.templatesfile()).GetListOfKeys()) == 0
-                                )
-                           )
+        nchangedfiles = 0
+        for _ in templatesfiles:
+
+            isgood = True
+            if os.path.exists(_.templatesfile()):
+                f = ROOT.TFile(_.templatesfile())
+                if len(f.GetListOfKeys()) == 0:
+                    isgood = False
+                f.Close()
+                if not isgood:
+                    os.remove(_.templatesfile())
+
+            if os.path.exists(templatesfile.templatesfile()+".tmp"):
+                os.remove(templatesfile.templatesfile()+".tmp")
+
+            if not os.path.exists(_.templatesfile()):
+                nchangedfiles += 1
+
         if nchangedfiles == 0:
             return
     elif smoothingparametersdict["iteration"] == iternumber-1:
