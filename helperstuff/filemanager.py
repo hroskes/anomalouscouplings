@@ -4,7 +4,7 @@ import json
 import os
 import ROOT
 
-class keydefaultdict(collections.defaultdict):
+class KeyDefaultDict(collections.defaultdict):
     """
     http://stackoverflow.com/a/2912455
     """
@@ -14,7 +14,15 @@ class keydefaultdict(collections.defaultdict):
         else:
             ret = self[key] = self.default_factory(key)
             return ret
-tfiles = keydefaultdict(ROOT.TFile.Open)
+
+class TFilesDict(KeyDefaultDict):
+    def __init__(self):
+        return super(TFilesDict, self).__init__(ROOT.TFile.Open)
+    def __delitem__(self, key):
+        self[key].Close()
+        return super(TFilesDict, self).__delitem__(key)
+
+tfiles = TFilesDict()
 
 def cache(function):
     cachename = "__cache_{}".format(function.__name__)
