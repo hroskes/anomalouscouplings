@@ -245,8 +245,8 @@ class ControlPlot(object):
 
         return True
 
-def printranges(disc, *args):
-    controlplot = ControlPlot(disc, *args)
+def printranges(disc, *args, **kwargs):
+    controlplot = ControlPlot(disc, *args, **kwargs)
 
     print "smoothed sufficiently:", controlplot.sufficientsmoothing
 
