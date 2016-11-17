@@ -3,13 +3,14 @@ from helperstuff import config, style  #style needed to remove the statbox and t
 from helperstuff.templates import TemplatesFile, templatesfiles
 import os
 import ROOT
+import sys
 
-def makecontrolplots(*args):
+def makecontrolplots(*args, **kwargs):
     templatesfile = TemplatesFile(*args)
-    f = ROOT.TFile.Open(templatesfile.templatesfile())
+    f = ROOT.TFile.Open(templatesfile.templatesfile(**kwargs))
     d = f.controlPlots
 
-    saveasdir = templatesfile.controlplotsdir
+    saveasdir = templatesfile.controlplotsdir(**kwargs)
     try:
         os.makedirs(saveasdir)
     except OSError:
@@ -22,7 +23,7 @@ def makecontrolplots(*args):
     for key in d.GetListOfKeys():
       c = key.ReadObj()
       if not isinstance(c, ROOT.TCanvas):
-        raise TypeError("Unknown object {} in {}/controlPlots".format(key.GetName(), templatesfile.templatesfile()))
+        raise TypeError("Unknown object {} in {}/controlPlots".format(key.GetName(), templatesfile.templatesfile(**kwargs)))
       c.GetListOfPrimitives()[1].SetLineColor(2)  #put the line back to red, importing style breaks this for some reason
       axisnumber = int(c.GetName().split("_")[-2].replace("projAxis", ""))
       hstack = ROOT.THStack()
@@ -44,9 +45,19 @@ def makecontrolplots(*args):
 
 if __name__ == "__main__":
     def thetemplatesfiles():
+        yield TemplatesFile("2e2mu", "vbf", "VBFtagged", "fa3", "160928", "D_int_prod")
+        return
         for templatesfile in templatesfiles:
              yield templatesfile
     length = len(list(thetemplatesfiles()))
+
+    if len(sys.argv) == 1:
+        iteration = None
+    elif len(sys.argv) == 2:
+        iteration = sys.argv[1]
+    else:
+        raise TypeError("Too many command line arguments ({})".format(len(sys.argv)))
+
     for i, templatesfile in enumerate(thetemplatesfiles(), start=1):
-        makecontrolplots(templatesfile)
+        makecontrolplots(templatesfile, iteration=iteration)
         print i, "/", length

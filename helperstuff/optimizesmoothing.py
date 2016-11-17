@@ -135,9 +135,9 @@ class HistInfo(object):
                 raise
 
 class ControlPlot(object):
-    def __init__(self, disc, *args):
+    def __init__(self, disc, *args, **kwargs):
         self.template = Template(*args)
-        f = tfiles[self.template.templatesfile.templatesfile()]
+        f = tfiles[self.template.templatefile(**kwargs)]
         controlPlots = f.controlPlots
         axis = self.template.discriminants.index(discriminant(disc))
 
@@ -438,11 +438,11 @@ class TemplateIterate(Template):
 
 if __name__ == "__main__":
 #    t = Template("VBF", "fa2", "2e2mu", "Untagged", "160928", "fa20.5")
-    t = Template(*"2e2mu  zh fa2 160928 D_int_prod VBFtagged ZH fa20.5".split())
+    t = Template("2e2mu", "VBF", "VBFtagged", "fa3", "160928", "D_int_prod", "0-")
 #    t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
     for d in t.discriminants:
         print d
-        printranges(d, t)
+        printranges(d, t, iteration=1)
         print
         print
         print
