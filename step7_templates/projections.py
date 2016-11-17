@@ -44,8 +44,8 @@ class TemplateForProjection(object):
             result.SetName(self.discriminants[i].name)
             result.SetTitle(self.discriminants[i].title)
             result.SetXTitle(self.discriminants[i].title)
-            result.SetLineColor(2)
-            result.SetLineStyle(self.color)
+            result.SetLineColor(self.color)
+            result.SetLineStyle(1)
             result.SetLineWidth(2)
             self.projections[i] = result
         return self.projections[i]
@@ -208,8 +208,9 @@ class Projections(MultiEnum):
     BSMhypothesis = self.analysis.purehypotheses[1]
 
     gi_ggHBSM = (ReweightingSample("ggH", "SM").xsec / ReweightingSample("ggH", BSMhypothesis).xsec)**.5
-    gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25
-    gi_VHBSM = ((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25
+    gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25 / ReweightingSample("ggH", "PS").g4**.5
+    gi_VHBSM = ((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25 / ReweightingSample("ggH", "PS").g4**.5
+#    print gi_ggHBSM, gi_VBFBSM, gi_VHBSM; assert False
     if self.category == "UntaggedIchep16":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
@@ -217,11 +218,11 @@ class Projections(MultiEnum):
     elif self.category == "VBF2jTaggedIchep16":
         g1_mix = 1/2**.25
         gi_mix = 1/2**.25 * gi_VBFBSM
-        fainame = "{}^{{{}}}".format(self.analysis.title, "VBFdec")
+        fainame = "{}^{{{}}}".format(self.analysis.title, "VBF")
     elif self.category == "VHHadrTaggedIchep16":
         g1_mix = 1/2**.25
         gi_mix = 1/2**.25 * gi_VHBSM
-        fainame = "{}^{{{}}}".format(self.analysis.title, "VHdec")
+        fainame = "{}^{{{}}}".format(self.analysis.title, "VH")
 
     ggHSM     = TemplateFromFile(   0, "ggH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
     ggHBSM    = TemplateFromFile(   0, "ggH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, BSMhypothesis)
@@ -284,8 +285,12 @@ class Projections(MultiEnum):
                                     *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces))
                                    )
 
-    SM    = TemplateSum("SM",                                1,             (ggHSM,    1), (VBFSM,    1), (ZHSM,    1), (WHSM,    1))
-    BSM   = TemplateSum("{}=1".format(self.analysis.title),  2,             (ggHBSM,   1), (VBFBSM,   1), (ZHBSM,   1), (WHBSM,   1))
+    ggHcoeff = 1 if self.category == "Untagged" else 0
+    VBFcoeff = 1 if self.category == "VBFtagged" else 0
+    VHcoeff  = 1 if self.category == "VHHadrtagged" else 0
+
+    SM    = TemplateSum("SM",                                2,             (ggHSM,    ggHcoeff), (VBFSM,    VBFcoeff), (ZHSM,    VHcoeff), (WHSM,    VHcoeff))
+    BSM   = TemplateSum("{}=1".format(self.analysis.title),  4,             (ggHBSM,   ggHcoeff), (VBFBSM,   VBFcoeff), (ZHBSM,   VHcoeff), (WHBSM,   VHcoeff))
     mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, 1), (VBFmix_p, 1), (ZHmix_p, 1), (WHmix_p, 1))
     mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, 1), (VBFmix_m, 1), (ZHmix_m, 1), (WHmix_m, 1))
 
@@ -303,7 +308,7 @@ class Projections(MultiEnum):
                 ] + WHpieces + [
                  WHBSM, WHmix_p, WHmix_m,
                 ] + [
-                 SM, BSM, #mix_p, mix_m,
+                 SM, BSM, mix_p, #mix_m,
 #                 qqZZ, ggZZ, VBFbkg, ZX,
                 ]
 
@@ -313,22 +318,22 @@ class Projections(MultiEnum):
                      ]
 
     c1 = ROOT.TCanvas()
-    legend = ROOT.TLegend(.65, .75, .9, .9)
-    legend.SetBorderSize(0)
-    legend.SetFillStyle(0)
-    for template in templates:
-        if template.color:
-            if self.normalization == "areanormalize":
-                try:
-                    template.Scale(1/template.Integral())
-                except ZeroDivisionError:
-                    pass
-            template.AddToLegend(legend)
 
     for i, discriminant in enumerate(TemplatesFile(self.channel, self.systematic, "ggh", self.analysis, self.production, self.whichproddiscriminants, self.category).discriminants):
+        legend = ROOT.TLegend(.65, .75, .9, .9)
+        legend.SetBorderSize(0)
+        legend.SetFillStyle(0)
         hstack = ROOT.THStack(discriminant.name, discriminant.title)
         for template in templates:
+            if template is mix_p and "0minus" in discriminant.name or template is BSM and "CP" in discriminant.name:
+                continue
             if template.color:
+                if self.normalization == "areanormalize" or True:
+                    try:
+                        template.Scale(1/template.Integral())
+                    except ZeroDivisionError:
+                        pass
+                template.AddToLegend(legend)
                 hstack.Add(template.Projection(i), template.hstackoption)
         hstack.Draw("nostack")
         hstack.GetXaxis().SetTitle(discriminant.title.replace("ZHhdec", "VH+dec").replace("VBFdec", "VBF+dec").replace("dec", "decay"))
