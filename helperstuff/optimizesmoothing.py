@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from collections import namedtuple
 from discriminants import discriminant
 from filemanager import cache, tfiles
@@ -247,6 +248,8 @@ class ControlPlot(object):
 def printranges(disc, *args):
     controlplot = ControlPlot(disc, *args)
 
+    print "smoothed sufficiently:", controlplot.sufficientsmoothing
+
     fmt = "    {:8.3g} {:8.3g} {:8.3g} {:3} {:3} {:3}"
 
     print "raw ranges:"
@@ -256,6 +259,8 @@ def printranges(disc, *args):
                          "", "", "",
                         )
     for step in "smooth", "reweight":
+        maxsmoothedsignificance = max(range.significance for range in controlplot.rangesthataresmoothedaway(step))
+        print step, "maxsmoothedsignificance =", maxsmoothedsignificance
         print step, "ranges:"
         for _ in controlplot.ranges(step):
             print fmt.format(
@@ -437,9 +442,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-#    t = Template("VBF", "fa2", "2e2mu", "Untagged", "160928", "fa20.5")
     t = Template("2e2mu", "VBF", "VBFtagged", "fa3", "160928", "D_int_prod", "0-")
-#    t = Template("ZH", "fa2", "D_int_prod", "2e2mu", "VBFtagged", "160928", "0+")
     for d in t.discriminants:
         print d
         printranges(d, t, iteration=1)
