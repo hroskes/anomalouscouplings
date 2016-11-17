@@ -2,7 +2,7 @@
 from collections import OrderedDict
 from copy import deepcopy
 from helperstuff import config
-from helperstuff.filemanager import cd
+from helperstuff.filemanager import cd, tfiles
 from helperstuff.optimizesmoothing import TemplateIterate
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import smoothingparametersfile, Template, templatesfiles
@@ -63,6 +63,7 @@ def iterate(smoothingparametersdict, iternumber):
         f.write(jsonstring)
 
     Template.getsmoothingparametersdict(trycache=False)  #clear the cache
+    tfiles.clear()
 
     print len(messages), nchangedfiles
     assert bool(messages) == bool(nchangedfiles)
@@ -83,6 +84,7 @@ def runiteration(iternumber):
     iternumber = int(iternumber)
 
     smoothingparametersdict = Template.getsmoothingparametersdict(trycache=False)
+    tfiles.clear()
 
     if "iteration" not in smoothingparametersdict:
         if iternumber != 0:
@@ -178,6 +180,7 @@ def runiteration(iternumber):
                     allgood = False
                     print templatesfile.templatesfile(), "contains nothing.  Removing it."
                     os.remove(templatesfile.templatesfile())
+                f.Close()
 
             if allgood:
                 print "...yes they were"
