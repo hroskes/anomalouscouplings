@@ -198,16 +198,14 @@ class ControlPlot(object):
             raise ValueError("therange {}-{} does not come from fromstep {}!".format(therange.low, therange.hi, fromstep))
 
         overlaps = [smoothrange for smoothrange in self.ranges(instep) if therange.overlap(smoothrange)]
-        """
         if abs(therange.length - self.binwidth*2) < therange.tolerance and len(overlaps) == 2:
             #special case --> 3 bins wide, split in half
             #could just mean it was moved over a bit
             samedirection = [_ for _ in overlaps if _.samedirection(therange)]
             assert len(samedirection) == 1
             samedirection = samedirection[0]
-            if samedirection.length-samedirection.tolerance > 5*self.binwidth:
-                continue
-        """
+            if samedirection.length+samedirection.tolerance > 5*self.binwidth:
+                return 1
         if not overlaps or max(smoothrange.overlap(therange) for smoothrange in overlaps) <= therange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
             return -1
         biggestoverlap = max(overlaps, key = lambda x: x.overlap(therange))
