@@ -187,20 +187,50 @@ class ControlPlot(object):
         assert len(_) == 1
         return _.pop()
 
+    def whathappenstoit(self, therange, fromstep, instep):
+        """
+        returns:
+          1 if therange from fromstep is absorbed in a bigger range in instep
+         -1 if therange from fromstep is smoothed away in instep
+          0 if neither
+        """
+        if therange not in self.ranges(fromstep):
+            raise ValueError("therange {}-{} does not come from fromstep {}!".format(therange.low, therange.hi, fromstep))
+
+        overlaps = [smoothrange for smoothrange in self.ranges(instep) if therange.overlap(smoothrange)]
+        """
+        if abs(therange.length - self.binwidth*2) < therange.tolerance and len(overlaps) == 2:
+            #special case --> 3 bins wide, split in half
+            #could just mean it was moved over a bit
+            samedirection = [_ for _ in overlaps if _.samedirection(therange)]
+            assert len(samedirection) == 1
+            samedirection = samedirection[0]
+            if samedirection.length-samedirection.tolerance > 5*self.binwidth:
+                continue
+        """
+        if not overlaps or max(smoothrange.overlap(therange) for smoothrange in overlaps) <= therange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
+            return -1
+        biggestoverlap = max(overlaps, key = lambda x: x.overlap(therange))
+        if not biggestoverlap.samedirection(therange):
+            return -1
+
+        if len(overlaps) >= 2:
+            if therange.length - biggestoverlap.overlap(therange) + therange.tolerance > therange.length / 5:
+                return 0
+
+        overlapoverlaps = [otherrange for otherrange in self.ranges(fromstep) if otherrange != therange and otherrange.overlap(biggestoverlap)]
+        for otherrange in overlapoverlaps:
+            if otherrange in biggestoverlap: #if biggestoverlap contains at least one other range
+                return 1
+
+        return 0
+
     @cache
     @generatortolist
     def rangesinonebutnotintheother(self, inthisone, notinthisone):
-        result = []
-
         for rawrange in self.ranges(inthisone):
-            overlaps = [smoothrange for smoothrange in self.ranges(notinthisone) if rawrange.overlap(smoothrange)]
-            if not overlaps or max(smoothrange.overlap(rawrange) for smoothrange in overlaps) <= rawrange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
+            if self.whathappenstoit(rawrange, inthisone, notinthisone) == -1:
                 yield rawrange
-                continue
-            biggestoverlap = max(overlaps, key = lambda x: x.overlap(rawrange))
-            if not biggestoverlap.samedirection(rawrange):
-                yield rawrange
-                continue
 
     @cache
     def rangesthataresmoothedaway(self, step):
@@ -245,25 +275,8 @@ class ControlPlot(object):
         Ranges that are absorbed in a bigger range going in the same direction
         """
         for rawrange in self.ranges(inthisone):
-            overlaps = [smoothrange for smoothrange in self.ranges(absorbedinthisone) if rawrange.overlap(smoothrange)]
-            if len(overlaps) == 0:
-                continue
-            elif len(overlaps) == 1:
-                theoverlap = overlaps[0]
-            else:
-                theoverlap = max(overlaps, key = lambda x: x.overlap(rawrange))
-                if rawrange.length - theoverlap.overlap(rawrange) > rawrange.length / 5:
-                    continue
-#            if rawrange not in theoverlap:
-#                continue  #only happens if theoverlap is smaller on at least 1 side, i.e. the distribution is flat
-            if not theoverlap.samedirection(rawrange):
-                continue
-
-            overlapoverlaps = [otherrange for otherrange in self.ranges(inthisone) if otherrange != rawrange and otherrange.overlap(theoverlap)]
-            for otherrange in overlapoverlaps:
-                if otherrange in theoverlap: #if theoverlap contains at least one other range
-                    yield rawrange
-                    break
+            if self.whathappenstoit(rawrange, inthisone, absorbedinthisone) == 1:
+                yield rawrange
 
     @property
     @cache
