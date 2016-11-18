@@ -44,7 +44,10 @@ class Interval(namedtuple("Interval", "low hi tolerance")):
         """
         http://stackoverflow.com/a/2953979/5228524
         """
-        return max(0, min(self.hi, other.hi) - max(self.low, other.low))
+        result = max(0, min(self.hi, other.hi) - max(self.low, other.low))
+        if result <= self.tolerance:
+            return 0  #so that __bool__ returns the right thing (False)
+        return result
 
     @property
     def length(self):
@@ -53,13 +56,38 @@ class Interval(namedtuple("Interval", "low hi tolerance")):
 class Range(namedtuple("Range", "low hi tolerance lowval hival lowerr hierr"), Interval):
     @property
     @cache
+    def deltax(self):
+        return self.hi - self.low
+    @property
+    @cache
+    def deltay(self):
+        return abs(self.hival - self.lowval)
+    @property
+    @cache
+    def deltayerror(self):
+        return sqrt(self.lowerr**2 + self.hierr**2)
+
+    @property
+    @cache
     def significance(self):
         """
         This function is supposed to return a number
         The bigger this number is, the greater the probability
           that this range is a real thing rather than a statistical fluctuation
         """
-        return (self.hi - self.low) * abs(self.hival - self.lowval) / sqrt(self.lowerr**2 + self.hierr**2)
+        return self.deltax * self.deltay / self.deltayerror
+
+    @property
+    @cache
+    def significanceerror(self):
+        """
+        Error on significance would have to involve error on error on deltay
+        This involves the kurtosis https://en.wikipedia.org/wiki/Variance#Distribution_of_the_sample_variance
+        I think this could in principle be calculated from here https://arxiv.org/pdf/1309.1287.pdf
+        But there's no such thing as Sumw4() or something like that
+        I'll let 15% stand in, for now
+        """
+        return .15 * self.significance
 
     def samedirection(self, other):
         return sign(self.hival - self.lowval) == sign(other.hival - other.lowval)
@@ -210,11 +238,44 @@ class ControlPlot(object):
                            ]
         return reweightedranges
 
+    @cache
+    @generatortolist
+    def rangesthatareabsorbed(self, inthisone, absorbedinthisone):
+        """
+        Ranges that are absorbed in a bigger range going in the same direction
+        """
+        for rawrange in self.ranges(inthisone):
+            overlaps = [smoothrange for smoothrange in self.ranges(absorbedinthisone) if rawrange.overlap(smoothrange)]
+            if len(overlaps) == 0:
+                continue
+            elif len(overlaps) == 1:
+                theoverlap = overlaps[0]
+            else:
+                theoverlap = max(overlaps, key = lambda x: x.overlap(rawrange))
+                if rawrange.length - theoverlap.overlap(rawrange) > rawrange.length / 5:
+                    continue
+#            if rawrange not in theoverlap:
+#                continue  #only happens if theoverlap is smaller on at least 1 side, i.e. the distribution is flat
+            if not theoverlap.samedirection(rawrange):
+                continue
+
+            overlapoverlaps = [otherrange for otherrange in self.ranges(inthisone) if otherrange != rawrange and otherrange.overlap(theoverlap)]
+            for otherrange in overlapoverlaps:
+                if otherrange in theoverlap: #if theoverlap contains at least one other range
+                    yield rawrange
+                    break
+
+    @property
+    @cache
+    def rangesabsorbedbysmoothing(self):
+        return self.rangesthatareabsorbed("raw", "smooth")
+
 
     def ranges(self, step):
         return self.h[step].increasingordecreasingranges
 
     @property
+    @cache
     def rangesthatshouldnotbereweighted(self):
         try:
             maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("reweight"))
@@ -231,19 +292,36 @@ class ControlPlot(object):
         return self.h[step].GetEffectiveEntries(*args, **kwargs)
 
     @property
-    def sufficientsmoothing(self):
+    @cache
+    @generatortolist
+    def rangesthatshouldhavebeensmoothed(self):
+        def maybeprint(*stuff):
+            #print " ".join(str(a) for a in stuff)
+            pass
+
         try:
-            maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("smooth"))
+            maxsmoothedsignificance_pluserror = max(
+                                                    range.significance + range.significanceerror
+                                                      for range in self.rangesthataresmoothedaway("smooth")
+                                                   )
         except ValueError:#nothing was smoothed away!  ...I have no idea!
-            if len(self.ranges("smooth")) > 5:  #sure why not
-                return False
-            return True
+            significances = [_.significance for _ in self.ranges("raw")]
+            average = numpy.average(significances)
+            stdev = numpy.std(significances)
+            for range in self.ranges("raw"):
+                if range.significance < average-3*stdev:
+                    yield range
+            return
 
-        for range in self.ranges("smooth"):
-            if range.significance < maxsmoothedsignificance:
-                return False
+        for i, range in enumerate(self.ranges("raw")):
+            if range in self.rangesthataresmoothedaway("smooth"): maybeprint(i, range.low, range.hi, 1); continue
+            if range in self.rangesabsorbedbysmoothing: maybeprint(i, range.low, range.hi, 2); continue
+            if range.significance < maxsmoothedsignificance_pluserror: maybeprint(i, range.low, range.hi, 4); yield range; continue
+            maybeprint(i, range.low, range.hi, 3); continue
 
-        return True
+    @property
+    def sufficientsmoothing(self):
+        return not self.rangesthatshouldhavebeensmoothed
 
 def printranges(disc, *args, **kwargs):
     controlplot = ControlPlot(disc, *args, **kwargs)
@@ -256,11 +334,14 @@ def printranges(disc, *args, **kwargs):
     for _ in controlplot.ranges("raw"):
         print fmt.format(
                          _.low, _.hi, _.significance,
-                         "", "", "",
+                         _ in controlplot.rangesthataresmoothedaway("smooth"),
+                         _ in controlplot.rangesabsorbedbysmoothing,
+                         _ in controlplot.rangesthatshouldhavebeensmoothed,
                         )
     for step in "smooth", "reweight":
         maxsmoothedsignificance = max(range.significance for range in controlplot.rangesthataresmoothedaway(step))
-        print step, "maxsmoothedsignificance =", maxsmoothedsignificance
+        maxsmoothedsignificance_pluserror = max(range.significance+range.significanceerror for range in controlplot.rangesthataresmoothedaway(step))
+        print step, "maxsmoothedsignificance =", maxsmoothedsignificance, "+/-", maxsmoothedsignificance_pluserror
         print step, "ranges:"
         for _ in controlplot.ranges(step):
             print fmt.format(
@@ -442,7 +523,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("2e2mu", "VBF", "VBFtagged", "fa3", "160928", "D_int_prod", "0-")
+    t = Template("2e2mu", "VBF", "VBFtagged", "fa3", "160928", "D_int_prod", "0+")
     for d in t.discriminants:
         print d
         printranges(d, t, iteration=1)
