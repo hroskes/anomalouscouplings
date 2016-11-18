@@ -154,6 +154,16 @@ class HistInfo(object):
         assert len(set(self.h.GetBinWidth(i) for i in range(1, self.GetNbinsX()+1))) == 1
         return self.h.GetBinWidth(1)
 
+    @property
+    @cache
+    def xmin(self):
+        return self.h.GetXaxis().GetXmin()
+
+    @property
+    @cache
+    def xmax(self):
+        return self.h.GetXaxis().GetXmax()
+
     def __getattr__(self, attr):
         try:
             return getattr(self.h, attr)
@@ -186,6 +196,29 @@ class ControlPlot(object):
         _ = set(v.binwidth for k, v in self.h.iteritems())
         assert len(_) == 1
         return _.pop()
+
+    @property
+    @cache
+    def xmin(self):
+        _ = set(v.xmin for k, v in self.h.iteritems())
+        assert len(_) == 1
+        return _.pop()
+
+    @property
+    @cache
+    def xmax(self):
+        _ = set(v.xmin for k, v in self.h.iteritems())
+        assert len(_) == 1
+        return _.pop()
+
+    def isontheedge(self, range):
+        #print "=================================="
+        #print self.xmin, range.low - self.binwidth/2, self.xmax, range.hi+self.binwidth/2
+        #print "=================================="
+        return (
+                   abs(range.low - self.binwidth/2 - self.xmin) < range.tolerance
+                or abs(range.hi  + self.binwidth/2 - self.xmax) < range.tolerance
+               )
 
     def whathappenstoit(self, therange, fromstep, instep):
         """
@@ -287,6 +320,7 @@ class ControlPlot(object):
 
     @property
     @cache
+    @generatortolist
     def rangesthatshouldnotbereweighted(self):
         try:
             maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("reweight"))
@@ -295,9 +329,14 @@ class ControlPlot(object):
                 maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("smooth"))
             except ValueError:
                 #in this case smoothing didn't do too much, so it's safe to say that reweighting won't ruin it
-                return []
-        return list(set(range for range in self.rangesthataresmoothedawaybutreweightedback + self.rangesintroducedbyreweighting
-                                   if range.significance < maxsmoothedsignificance))
+                return
+
+        for range in set(self.rangesthataresmoothedawaybutreweightedback + self.rangesintroducedbyreweighting):
+            significance = range.significance
+            if self.isontheedge(range):
+                significance *= 2
+            if significance < maxsmoothedsignificance:
+                yield range
 
     def GetEffectiveEntries(self, step, *args, **kwargs):
         return self.h[step].GetEffectiveEntries(*args, **kwargs)
@@ -327,7 +366,8 @@ class ControlPlot(object):
         for i, range in enumerate(self.ranges("raw")):
             if range in self.rangesthataresmoothedaway("smooth"): maybeprint(i, range.low, range.hi, 1); continue
             if range in self.rangesabsorbedbysmoothing: maybeprint(i, range.low, range.hi, 2); continue
-            if range.significance < maxsmoothedsignificance_pluserror: maybeprint(i, range.low, range.hi, 4); yield range; continue
+            if not self.isontheedge(range) and range.significance < maxsmoothedsignificance_pluserror: maybeprint(i, range.low, range.hi, 4); yield range; continue
+            if self.isontheedge(range) and 2*range.significance < maxsmoothedsignificance_pluserror: maybeprint(i, range.low, range.hi, 5); yield range; continue
             maybeprint(i, range.low, range.hi, 3); continue
 
     @property
@@ -534,7 +574,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("2e2mu", "VBF", "VBFtagged", "fa3", "160928", "D_int_prod", "0+")
+    t = Template("2e2mu", "VBF", "VBFtagged", "fa3", "160928", "D_int_prod", "fa3prod0.5")
     for d in t.discriminants:
         print d
         printranges(d, t, iteration=1)
