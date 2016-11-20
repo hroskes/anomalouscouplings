@@ -392,7 +392,7 @@ def printranges(disc, *args, **kwargs):
     for step in "smooth", "reweight":
         maxsmoothedsignificance = max(range.significance for range in controlplot.rangesthataresmoothedaway(step))
         maxsmoothedsignificance_pluserror = max(range.significance+range.significanceerror for range in controlplot.rangesthataresmoothedaway(step))
-        print step, "maxsmoothedsignificance =", maxsmoothedsignificance, "+/-", maxsmoothedsignificance_pluserror
+        print step, "maxsmoothedsignificance =", maxsmoothedsignificance, "+/-", maxsmoothedsignificance_pluserror-maxsmoothedsignificance
         print step, "ranges:"
         for _ in controlplot.ranges(step):
             print fmt.format(
@@ -574,7 +574,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("2e2mu", "VBF", "VBFtagged", "fa3", "160928", "D_int_prod", "fa3prod0.5")
+    t = Template("2e2mu", "ZH", "VBFtagged", "fa3", "160928", "D_int_prod", "0-")
     for d in t.discriminants:
         print d
         printranges(d, t, iteration=1)
