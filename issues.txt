@@ -10,3 +10,4 @@ VH discriminants
 
 ggH parameterization (systematics JHUGen H+jj)
 
+smoothing, binning
