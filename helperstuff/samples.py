@@ -185,11 +185,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         raise self.ValueError("reweightingsamples")
 
     def isbkg(self):
-        if self.productionmode in ("ggH", "data", "VBF", "ZH", "WH", "ttH"):
-            return False
-        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
-            return True
-        raise self.ValueError("isbkg")
+        return self.productionmode.isbkg()
 
     def isZX(self):
         if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH"):

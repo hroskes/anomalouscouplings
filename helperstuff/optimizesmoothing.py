@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import namedtuple
 from discriminants import discriminant
 from filemanager import cache, tfiles
@@ -39,6 +40,9 @@ class Interval(namedtuple("Interval", "low hi tolerance")):
         if isinstance(other, numbers.Number):
             return self.low-self.tolerance <= other <= self.hi+self.tolerance
         return self.low-self.tolerance <= other.low < other.hi <= self.hi+self.tolerance
+
+    def overlapinterval(self, other):
+        return Interval(max(self.low, other.low), min(self.hi, other.hi), max(self.tolerance, other.tolerance))
 
     def overlap(self, other):
         """
@@ -173,12 +177,14 @@ class HistInfo(object):
             else:
                 raise
 
-class ControlPlot(object):
+class ControlPlotBase(object):
+    __metaclass__ = ABCMeta
     def __init__(self, disc, *args, **kwargs):
         self.template = Template(*args)
+        self.disc = discriminant(disc)
         f = tfiles[self.template.templatefile(**kwargs)]
         controlPlots = f.controlPlots
-        axis = self.template.discriminants.index(discriminant(disc))
+        axis = self.template.discriminants.index(self.disc)
 
         self.h = {}
 
@@ -189,6 +195,15 @@ class ControlPlot(object):
                 _, self.h[step.lower()] = (HistInfo(h) for h in canvas.GetListOfPrimitives())
 
         self.h["raw"] = _
+
+        self.checkthatthisworks()
+
+    @abstractmethod
+    def checkthatthisworks(self):
+        """
+        Called by __init__.  This should check the parameters of self.template, and maybe other things
+        raise WrongControlPlotError if this particular subclass doesn't apply to this template
+        """
 
     @property
     @cache
@@ -210,6 +225,14 @@ class ControlPlot(object):
         _ = set(v.xmin for k, v in self.h.iteritems())
         assert len(_) == 1
         return _.pop()
+
+    @property
+    @cache
+    def nbins(self):
+        result = float(self.xmax - self.xmin) / self.binwidth
+        if abs(result - int(result)) < 1e-9: return int(result)
+        if 1-1e-9 < result - int(result) < 1: return int(result)+1
+        assert False
 
     def isontheedge(self, range):
         #print "=================================="
@@ -324,7 +347,7 @@ class ControlPlot(object):
     def ranges(self, step):
         return self.h[step].increasingordecreasingranges
 
-    @property
+    @abstractproperty
     @cache
     @generatortolist
     def rangesthatshouldnotbereweighted(self):
@@ -350,7 +373,7 @@ class ControlPlot(object):
     def GetEffectiveEntries(self, step, *args, **kwargs):
         return self.h[step].GetEffectiveEntries(*args, **kwargs)
 
-    @property
+    @abstractproperty
     @cache
     @generatortolist
     def rangesthatshouldhavebeensmoothed(self):
@@ -383,8 +406,72 @@ class ControlPlot(object):
     def sufficientsmoothing(self):
         return not self.rangesthatshouldhavebeensmoothed
 
+class WrongControlPlotException(Exception): pass
+
+class ControlPlotSimple(ControlPlotBase):
+    def checkthatthisworks(self):
+        pass
+    @property
+    def rangesthatshouldnotbereweighted(self):
+        return super(ControlPlotSimple, self).rangesthatshouldnotbereweighted
+    @property
+    def rangesthatshouldhavebeensmoothed(self):
+        return super(ControlPlotSimple, self).rangesthatshouldhavebeensmoothed
+
+class ControlPlotOneBigRange(ControlPlotBase):
+    """
+    For plots that are just increasing, or just decreasing
+    (with possibly a bin or two at each end doing something else)
+    """
+    @property
+    @cache
+    @generatortolist
+    def rangesthatshouldnotbereweighted(self):
+        result = super(ControlPlotOneBigRange, self).rangesthatshouldnotbereweighted
+        if result: pass
+            #for _ in result: yield _
+            #return
+        smoothranges = self.ranges("smooth")
+        reweightranges = self.ranges("reweight")
+        biggestsmoothrange = max((_ for _ in smoothranges), key=lambda x: x.significance)
+        if biggestsmoothrange.length <= self.binwidth * (self.nbins/2 + .0001):
+            raise WrongControlPlotException
+        for reweightrange in reweightranges:
+            if (
+                reweightrange.overlap(biggestsmoothrange)
+                and not reweightrange.samedirection(biggestsmoothrange)
+                and not self.isontheedge(reweightrange)
+               ):
+                print reweightrange.overlapinterval(biggestsmoothrange)
+                yield reweightrange.overlapinterval(biggestsmoothrange)
+
+    @property
+    def rangesthatshouldhavebeensmoothed(self):
+        return super(ControlPlotOneBigRange, self).rangesthatshouldhavebeensmoothed
+
+    def checkthatthisworks(self):
+        self.rangesthatshouldnotbereweighted  #might raise WrongControlPlotException
+        t, d = self.template, self.disc
+        if d == discriminant("D_bkg_0plus"): return
+        if d == discriminant("D_0minus_VBFdecay"):
+            if t.productionmode == "VBF" and t.hypothesis not in ("0+", "0-"):
+                raise WrongControlPlotException
+            else:
+                return
+        raise WrongControlPlotException
+
+def ControlPlot(*args, **kwargs):
+    for cls in ControlPlotOneBigRange, ControlPlotSimple:
+        #ControlPlotSimple should be the last, since it works for everything
+        try:
+            return cls(*args, **kwargs)
+        except WrongControlPlotException:
+            continue
+
+
 def printranges(disc, *args, **kwargs):
     controlplot = ControlPlot(disc, *args, **kwargs)
+    print controlplot
 
     print "smoothed sufficiently:", controlplot.sufficientsmoothing
 
@@ -589,7 +676,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("2e2mu", "ZH", "VBFtagged", "fa3", "160928", "D_int_prod", "0-")
+    t = Template("2e2mu", "ZH", "VBFtagged", "fa3", "160928", "D_int_prod", "fa3dec0.5")
     print t
     print
     for d in t.discriminants:

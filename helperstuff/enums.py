@@ -155,6 +155,12 @@ class ProductionMode(MyEnum):
         elif self == "VBF bkg":
             return "qqZZ"
         return str(self)
+    def isbkg(self):
+        if self in ("ggH", "data", "VBF", "ZH", "WH", "ttH"):
+            return False
+        elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
+            return True
+        assert False
 
 class Systematic(MyEnum):
     enumname = "systematic"
