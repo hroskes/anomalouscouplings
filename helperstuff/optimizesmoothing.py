@@ -575,6 +575,8 @@ class TemplateIterate(Template):
 
 if __name__ == "__main__":
     t = Template("2e2mu", "ZH", "VBFtagged", "fa3", "160928", "D_int_prod", "0-")
+    print t
+    print
     for d in t.discriminants:
         print d
         printranges(d, t, iteration=1)
