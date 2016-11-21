@@ -220,6 +220,13 @@ class ControlPlot(object):
                 or abs(range.hi  + self.binwidth/2 - self.xmax) < range.tolerance
                )
 
+    @cache
+    def overlaps(self, therange, step):
+        return sorted(
+                      [_ for _ in self.ranges(step) if therange.overlap(_) > therange.tolerance],
+                      key = lambda x: therange.overlap(x)
+                     )
+
     def whathappenstoit(self, therange, fromstep, instep):
         """
         returns:
@@ -230,7 +237,7 @@ class ControlPlot(object):
         if therange not in self.ranges(fromstep):
             raise ValueError("therange {}-{} does not come from fromstep {}!".format(therange.low, therange.hi, fromstep))
 
-        overlaps = [smoothrange for smoothrange in self.ranges(instep) if therange.overlap(smoothrange)]
+        overlaps = self.overlaps(therange, instep)
         if abs(therange.length - self.binwidth*2) < therange.tolerance and len(overlaps) == 2:
             #special case --> 3 bins wide, split in half
             #could just mean it was moved over a bit
@@ -239,9 +246,14 @@ class ControlPlot(object):
             samedirection = samedirection[0]
             if samedirection.length+samedirection.tolerance > 5*self.binwidth:
                 return 1
-        if not overlaps or max(smoothrange.overlap(therange) for smoothrange in overlaps) <= therange.length/2:  #if it's broken in half or more, with no majority, it's basically gone
+
+        if not overlaps:
             return -1
-        biggestoverlap = max(overlaps, key = lambda x: x.overlap(therange))
+        biggestoverlap = overlaps[-1]
+        if biggestoverlap.overlap(therange) <= therange.length/2 + therange.tolerance:
+            #if it's broken in half or more, with no majority, it's basically gone
+            #except for the special case above
+            return -1
         if not biggestoverlap.samedirection(therange):
             return -1
 
@@ -249,7 +261,7 @@ class ControlPlot(object):
             if therange.length - biggestoverlap.overlap(therange) + therange.tolerance > therange.length / 5:
                 return 0
 
-        overlapoverlaps = [otherrange for otherrange in self.ranges(fromstep) if otherrange != therange and otherrange.overlap(biggestoverlap)]
+        overlapoverlaps = [_ for _ in self.overlaps(biggestoverlap, fromstep) if _ != therange]
         for otherrange in overlapoverlaps:
             if otherrange in biggestoverlap: #if biggestoverlap contains at least one other range
                 return 1
@@ -273,13 +285,7 @@ class ControlPlot(object):
         smoothedaway = self.rangesthataresmoothedaway("smooth")
         stillgoneafterreweight = self.rangesthataresmoothedaway("reweight")
         therawranges = [range_ for range_ in smoothedaway if range_ not in stillgoneafterreweight]
-        reweightedranges = [
-                            max(
-                                (reweightrange for reweightrange in self.ranges("reweight")),
-                                key = lambda x: x.overlap(rawrange)
-                               ) for rawrange in therawranges
-                           ]
-        return reweightedranges
+        return therawranges
 
     @property
     @cache
@@ -323,20 +329,23 @@ class ControlPlot(object):
     @generatortolist
     def rangesthatshouldnotbereweighted(self):
         try:
-            maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("reweight"))
+            maxsmoothedsignificance = max(_.significance for _ in self.rangesthataresmoothedaway("reweight"))
         except ValueError:#no ranges are smoothed away
             try:
-                maxsmoothedsignificance = max(range.significance for range in self.rangesthataresmoothedaway("smooth"))
+                maxsmoothedsignificance = max(_.significance for _ in self.rangesthataresmoothedaway("smooth"))
             except ValueError:
                 #in this case smoothing didn't do too much, so it's safe to say that reweighting won't ruin it
                 return
 
-        for range in set(self.rangesthataresmoothedawaybutreweightedback + self.rangesintroducedbyreweighting):
-            significance = range.significance
-            if self.isontheedge(range):
+        for therange in self.rangesthataresmoothedawaybutreweightedback:
+            significance = therange.significance
+            if self.isontheedge(therange):
                 significance *= 2
             if significance < maxsmoothedsignificance:
-                yield range
+                yield therange
+
+        for range in self.rangesintroducedbyreweighting:
+            yield therange
 
     def GetEffectiveEntries(self, step, *args, **kwargs):
         return self.h[step].GetEffectiveEntries(*args, **kwargs)
@@ -379,7 +388,7 @@ def printranges(disc, *args, **kwargs):
 
     print "smoothed sufficiently:", controlplot.sufficientsmoothing
 
-    fmt = "    {:8.3g} {:8.3g} {:8.3g} {:3} {:3} {:3}"
+    fmt = "    {:8.3g} {:8.3g} {:8.3g} {:5.2g} {:5.2g} {:5.2g}"
 
     print "raw ranges:"
     for _ in controlplot.ranges("raw"):
@@ -389,6 +398,7 @@ def printranges(disc, *args, **kwargs):
                          _ in controlplot.rangesabsorbedbysmoothing,
                          _ in controlplot.rangesthatshouldhavebeensmoothed,
                         )
+
     for step in "smooth", "reweight":
         maxsmoothedsignificance = max(range.significance for range in controlplot.rangesthataresmoothedaway(step))
         maxsmoothedsignificance_pluserror = max(range.significance+range.significanceerror for range in controlplot.rangesthataresmoothedaway(step))
@@ -397,10 +407,15 @@ def printranges(disc, *args, **kwargs):
         for _ in controlplot.ranges(step):
             print fmt.format(
                              _.low, _.hi, _.significance,
-                             _ in controlplot.rangesthataresmoothedawaybutreweightedback,
+                             min(sum(_.overlap(_2) for _2 in controlplot.rangesthataresmoothedawaybutreweightedback) / _.length, 1),
                              _ in controlplot.rangesintroducedbyreweighting,
-                             _ in controlplot.rangesthatshouldnotbereweighted,
+                             min(sum(_.overlap(_2) for _2 in controlplot.rangesthatshouldnotbereweighted) / _.length, 1),
                             )
+
+#    print
+#    print "controlplot.rangesthataresmoothedawaybutreweightedback"
+#    for _ in controlplot.rangesthataresmoothedawaybutreweightedback:
+#        print "    {:8.3g} {:8.3g}".format(_.low, _.hi)
 
 class ReweightBinning(object):
     tolerancefactor = 1.0 / 100000
