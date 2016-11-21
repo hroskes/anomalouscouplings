@@ -458,6 +458,19 @@ class ControlPlotOneBigRange(ControlPlotBase):
                 raise WrongControlPlotException
             else:
                 return
+        if d == discriminant("D_g2_VBFdecay"):
+            if t.productionmode == "VBF" and t.hypothesis not in ("0+", "a2"): #L1 also doesn't work
+                raise WrongControlPlotException
+            else:
+                return
+        if d == discriminant("D_g1prime2_VBFdecay"):
+            if (
+                t.productionmode == "VBF" and t.hypothesis not in ("0+", "L1")
+                or t.productionmode in ("ZH", "WH") and t.hypothesis != "0+"
+               ):
+                raise WrongControlPlotException
+            else:
+                return
         raise WrongControlPlotException
 
 def ControlPlot(*args, **kwargs):
