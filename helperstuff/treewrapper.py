@@ -29,6 +29,7 @@ class TreeWrapper(Iterator):
         self.isbkg = treesample.isbkg()
         self.isdata = treesample.isdata()
         self.isZX = treesample.isZX()
+        self.isPOWHEG = treesample.alternategenerator == "POWHEG"
         self.useMELAv2 = treesample.useMELAv2
         self.isdummy = isdummy
         if self.isdata:
@@ -102,7 +103,7 @@ class TreeWrapper(Iterator):
                     self.MC_weight = 0
             else:
                 self.MC_weight = t.overallEventWeight
-            if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
+            if self.productionmode in ("ggH", "VBF", "ZH", "WH") and not self.isPOWHEG:
                 self.reweightingweights = t.reweightingweights
             isSelected = bool(self.MC_weight)
 
@@ -1173,7 +1174,7 @@ class TreeWrapper(Iterator):
         return self.MC_weight * self.xsec / self.nevents
     def MC_weight_plain_noxsec(self):
         return self.MC_weight / self.nevents
-    MC_weight_ttH_kappa = MC_weight_ttH_kappatilde = MC_weight_ttH_kappakappatilde = \
+    MC_weight_ttH_kappatilde = MC_weight_ttH_kappakappatilde = \
     MC_weight_HJJ_g2    = MC_weight_HJJ_g4         = MC_weight_HJJ_g2g4 = \
         MC_weight_plain_noxsec
 
@@ -1197,6 +1198,7 @@ class TreeWrapper(Iterator):
     def MC_weight_VBF(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXSVBF2L2l / self.nevents2L2l[index]
     def MC_weight_VBF_g1(self):
+        if self.isPOWHEG: return self.MC_weight_plain_xsec()
         return self.MC_weight_VBF(0)
     def MC_weight_VBF_g2(self):
         return self.MC_weight_VBF(1)
@@ -1226,6 +1228,7 @@ class TreeWrapper(Iterator):
     def MC_weight_ZH(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXSZH2L2l / self.nevents2L2l[index]
     def MC_weight_ZH_g1(self):
+        if self.isPOWHEG: return self.MC_weight_plain_xsec()
         return self.MC_weight_ZH(0)
     def MC_weight_ZH_g2(self):
         return self.MC_weight_ZH(1)
@@ -1280,6 +1283,10 @@ class TreeWrapper(Iterator):
         return self.MC_weight_WH(11)
     def MC_weight_WH_g1g1prime2_proddec_pi(self):
         return self.MC_weight_WH(12)
+
+    def MC_weight_ttH_kappa(self):
+        if self.isPOWHEG: return self.MC_weight_plain_xsec()
+        return self.MC_weight_plain_noxsec()
 
     def MC_weight_ggZZ(self):
         if self.useMELAv2:
@@ -1357,6 +1364,7 @@ class TreeWrapper(Iterator):
             "isbkg",
             "isdata",
             "isdummy",
+            "isPOWHEG",
             "isZX",
             "MC_weight_ggH",
             "MC_weight_VBF",
@@ -1512,7 +1520,11 @@ class TreeWrapper(Iterator):
             raise SyntaxError(error)
 
         #cross checking that the order of weights is defined right
-        if self.treesample.productionmode in ("ggH", "VBF", "ZH", "WH") and self:
+        if (
+                self
+            and self.treesample.productionmode in ("ggH", "VBF", "ZH", "WH")
+            and self.treesample.alternategenerator is None
+           ):
             if couplings is None:
                 raise SyntaxError("No couplings tree for {}".format(self.treesample))
 
