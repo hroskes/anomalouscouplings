@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractproperty
 import config
 import constants
-from enums import BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
+from enums import AlternateGenerator, BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
 from math import sqrt
 import os
 import ROOT
@@ -547,7 +547,7 @@ class Sample(ReweightingSample):
                  or self.productionmode not in ("VBF", "ZH", "WplusH", "WminusH", "ttH")
                 )
            ):
-            raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args)
+            raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args))
 
         super(Sample, self).check(*args)
 
@@ -565,6 +565,12 @@ class Sample(ReweightingSample):
         return self.production.CJLSTdir()
 
     def CJLSTdirname(self):
+        if self.alternategenerator == "POWHEG":
+            if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
+                s = str(self.productionmode)
+                if self.productionmode == "VBF": s = "VBFH"
+                if self.hypothesis == "0+": return "{}125"
+            raise self.ValueError("CJLSTdirname")
         if self.productionmode == "ggH" and self.production <= "160624":
             if self.hypothesis == "0+": return "0PM"
             if self.hypothesis == "a2": return "0PH"
@@ -573,7 +579,7 @@ class Sample(ReweightingSample):
             if self.hypothesis == "fa20.5": return "0PHf05ph0"
             if self.hypothesis == "fa30.5": return "0Mf05ph0"
             if self.hypothesis == "fL10.5": return "0L1f05ph0"
-        if (self.productionmode in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH") and self.production >= "160714"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH") and self.production >= "160714":
             s = str(self.productionmode)
             if self.productionmode == "VBF": s = "VBFH"
             if self.hypothesis == "0+": return "{}0PM_M125".format(s)
