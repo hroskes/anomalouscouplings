@@ -85,7 +85,7 @@ if __name__ == '__main__':
             if not flavor.hastaus:
                 adddiscriminants("VBF bkg", flavor, production)
         for productionmode in "VBF", "ZH", "WplusH", "WminusH", "ttH":
-            adddiscriminants(productionmode, "0+", "POWHEG")
+            adddiscriminants(productionmode, "0+", "POWHEG", production)
         adddiscriminants("qqZZ", production)
         adddiscriminants("ZX", production)
         adddiscriminants("data", production, "unblind")

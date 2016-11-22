@@ -569,7 +569,7 @@ class Sample(ReweightingSample):
             if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
                 s = str(self.productionmode)
                 if self.productionmode == "VBF": s = "VBFH"
-                if self.hypothesis == "0+": return "{}125"
+                if self.hypothesis == "0+": return "{}125".format(s)
             raise self.ValueError("CJLSTdirname")
         if self.productionmode == "ggH" and self.production <= "160624":
             if self.hypothesis == "0+": return "0PM"
