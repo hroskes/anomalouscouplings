@@ -108,6 +108,10 @@ class SampleBase(object):
         if self.productionmode == "WH":
             if self.hypothesis == "SM": return constants.SMXSWH2L2l
             return constants.SMXSWH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+        if self.productionmode == "WplusH":
+            if self.hypothesis == "SM": return constants.SMXSWpH2L2l
+        if self.productionmode == "WminusH":
+            if self.hypothesis == "SM": return constants.SMXSWmH2L2l
         assert False
 
 
@@ -141,10 +145,13 @@ class ReweightingSample(MultiEnum, SampleBase):
     def check(self, *args):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
-        elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
+        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.productionmode == "ggH" and self.hypothesis not in decayonlyhypotheses:
+            if (
+                self.productionmode == "ggH" and self.hypothesis not in decayonlyhypotheses
+                or self.productionmode in ("WplusH", "WminusH") and self.hypothesis != "SM"
+               ):
                 raise ValueError("{} hypothesis can't be {}\n{}".format(self.productionmode, self.hypothesis, args))
             if self.flavor is not None:
                 raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
@@ -178,7 +185,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in decayonlyhypotheses]
         elif self.productionmode in ("VBF", "ZH", "WH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in proddechypotheses]
-        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ttH"):
+        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ttH", "WplusH", "WminusH"):
             return [self]
         elif self.productionmode == "data":
             return []
@@ -188,14 +195,14 @@ class ReweightingSample(MultiEnum, SampleBase):
         return self.productionmode.isbkg
 
     def isZX(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH"):
             return False
         elif self.productionmode == "ZX":
             return True
         raise self.ValueError("isZX")
 
     def isdata(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WH", "ttH"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH"):
             return False
         elif self.productionmode == "data":
             return True
@@ -217,7 +224,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_ggH_g1g4"
             elif self.hypothesis == "fL10.5":
                 return "MC_weight_ggH_g1g1prime2"
-        elif self.productionmode in ("VBF", "ZH", "WH"):
+        elif self.productionmode in ("VBF", "ZH", "WH", "WplusH", "WminusH"):
             if self.hypothesis == "0+":
                 return "MC_weight_{}_g1".format(self.productionmode)
             elif self.hypothesis == "a2":
@@ -257,7 +264,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         raise self.ValueError("weightname")
 
     def TDirectoryname(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH") or self.productionmode == "ZX" and not config.usedata:
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH") or self.productionmode == "ZX" and not config.usedata:
             return "ZZTree"
         if self.productionmode == "ZX":
             return "CRZLLTree"
@@ -284,7 +291,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     def onlyweights(self):
         """True if this sample is not needed for making templates,
            and only the weight and ZZMass should be recorded in the tree"""
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "data"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "data", "WplusH", "WminusH"):
             return False
         if self.productionmode == "ttH":
             return True
@@ -300,7 +307,7 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def g1(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH"):
             if self.hypothesis in ["0+"] + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3", "fL1") for b in ("dec", "prod", "proddec-")]:
                 return 1
             if self.hypothesis in ("a2", "0-", "L1"):
@@ -404,17 +411,32 @@ class ReweightingSample(MultiEnum, SampleBase):
         raise self.ValueError("g1prime2")
 
 class Sample(ReweightingSample):
-    enums = [ReweightingSample, Production, BlindStatus]
+    enums = [ReweightingSample, Production, BlindStatus, AlternateGenerator]
 
     def check(self, *args):
         if self.production is None:
             raise ValueError("No option provided for production\n{}".format(args))
+
         if self.blindstatus is None and self.productionmode == "data":
             raise ValueError("No blindstatus provided for data sample!\n{}".format(args))
         if self.blindstatus is not None and self.productionmode != "data":
             raise ValueError("blindstatus provided for MC sample!\n{}".format(args))
+
         if self.productionmode in ("VBF", "ZH", "WH") and self.hypothesis not in prodonlyhypotheses:
             raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
+
+        if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
+            raise ValueError("Separate {} sample is produced with POWHEG.  Maybe you meant to specify POWHEG, or WH?\n{}".format(self.productionmode, args))
+
+        if (
+            self.alternategenerator == "POWHEG"
+            and (
+                 self.hypothesis != "0+"
+                 or self.productionmode not in ("VBF", "ZH", "WplusH", "WminusH", "ttH")
+                )
+           ):
+            raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args)
+
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
@@ -438,7 +460,7 @@ class Sample(ReweightingSample):
             if self.hypothesis == "fa30.5": return "0Mf05ph0"
             if self.hypothesis == "fL10.5": return "0L1f05ph0"
         if (self.productionmode in ("ggH", "VBF", "ZH", "WH") and self.production >= "160714"):
-            s = {"ggH": "ggH", "VBF": "VBFH", "ZH": "ZH", "WH": "WH"}[str(self.productionmode)]
+            s = "VBFH" if self.productionmode == "VBF" else str(self.productionmode)
             if self.hypothesis == "0+": return "{}0PM_M125".format(s)
             if self.hypothesis == "a2": return "{}0PH_M125".format(s)
             if self.hypothesis == "0-": return "{}0M_M125".format(s)

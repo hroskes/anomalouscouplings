@@ -127,6 +127,8 @@ class ProductionMode(MyEnum):
                  EnumItem("VBFbkg", "VBF bkg", "bkg_vbf"),
                  EnumItem("ZX", "bkg_zjets"),
                  EnumItem("data"),
+                 EnumItem("WplusH"),
+                 EnumItem("WminusH"),
                 )
     @property
     def combinename(self):
@@ -420,6 +422,12 @@ class WhichProdDiscriminants(MyEnum):
                  EnumItem("D_g11gi3_prime"),
                  EnumItem("D_g12gi2_prime"),
                  EnumItem("D_g13gi1_prime"),
+                )
+
+class AlternateGenerator(MyEnum):
+    enumname = "alternategenerator"
+    enumitems = (
+                 EnumItem("POWHEG"),
                 )
 
 channels = Channel.items()
