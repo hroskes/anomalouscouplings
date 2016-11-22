@@ -103,7 +103,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fa30.5", "fa3dec0.5"),
                  EnumItem("fL10.5", "fL1dec0.5"),
                  EnumItem("fa2prod0.5"),
-                 EnumItem("fa3prod0.5"),
+                 EnumItem("fa3prod0.5", "fCP0.5"),
                  EnumItem("fL1prod0.5"),
                  EnumItem("fa2proddec-0.5"),
                  EnumItem("fa3proddec-0.5"),
@@ -118,7 +118,7 @@ class ProductionMode(MyEnum):
     enumitems = (
                  EnumItem("ggH"),
                  EnumItem("VBF", "qqH"),
-                 EnumItem("H+jj", "HJJ"),
+                 EnumItem("HJJ", "H+jj"),
                  EnumItem("ZH"),
                  EnumItem("WH"),
                  EnumItem("ttH"),
@@ -157,7 +157,7 @@ class ProductionMode(MyEnum):
         return str(self)
     @property
     def isbkg(self):
-        if self in ("ggH", "data", "VBF", "ZH", "WH", "ttH"):
+        if self in ("ggH", "data", "VBF", "ZH", "WH", "ttH", "HJJ"):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
@@ -337,6 +337,10 @@ class Production(MyEnum):
         if self == "160720":
             return "root://lxcms03//data3/Higgs/160718/"
         return self.CJLSTdir()
+    def CJLSTdir_HJJttH(self):
+        if self <= "160928":
+            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/HJJttHanomalous/AAAOK/"
+        assert False
     def CJLSTdir_data(self):
         if self == "160714":
             return "root://lxcms03//data3/Higgs/160716/"
@@ -441,6 +445,7 @@ hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
 proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"))
+hffhypotheses = Hypothesis.items(lambda x: x in ("0+", "0-", "fCP0.5"))
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
 #productions = Production.items(lambda x: x in ("160225", "160729"))
