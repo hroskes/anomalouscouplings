@@ -137,9 +137,7 @@ class ProductionMode(MyEnum):
         assert False
     @property
     def yamlratenames(self):
-        if self == "ggH":
-            return ["ggH", "ttH"]
-        elif self == "VBF":
+        if self == "VBF":
             return ["qqH"]
         elif self == "ZX":
             return ["zjets"]
@@ -155,6 +153,13 @@ class ProductionMode(MyEnum):
         elif self == "VBF bkg":
             return "qqZZ"
         return str(self)
+    @property
+    def isbkg(self):
+        if self in ("ggH", "data", "VBF", "ZH", "WH", "ttH"):
+            return False
+        elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
+            return True
+        assert False
 
 class Systematic(MyEnum):
     enumname = "systematic"

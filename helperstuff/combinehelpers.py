@@ -74,7 +74,7 @@ class __Rate(MultiEnum):
         if self.productionmode != "VBF bkg":
             return self.yamlrate()
 
-        return Template("fa2", "D_int_decay", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+        return Template("fa2", "D_int_prod", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
 
     def yamlrate(self):
         if self.production.year == 2016:
