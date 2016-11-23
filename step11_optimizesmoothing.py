@@ -97,8 +97,6 @@ def runiteration(iternumber):
         if any(os.path.exists(_.templatesfile()) or os.path.exists(_.jsonfile()) for _ in templatesfiles):
             raise IOError("For the 0th iteration, please delete all json and template files")
 
-    assert False
-
     if smoothingparametersdict["iteration"] == iternumber:
         #already iterated the values, just need to make the templates for this iteration
         nchangedfiles = 0
