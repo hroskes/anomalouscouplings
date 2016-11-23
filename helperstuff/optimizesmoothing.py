@@ -450,7 +450,8 @@ class ControlPlotOneBigRange(ControlPlotBase):
         return super(ControlPlotOneBigRange, self).rangesthatshouldhavebeensmoothed
 
     def checkthatthisworks(self):
-        self.rangesthatshouldnotbereweighted  #might raise WrongControlPlotException
+        if "reweight" in self.h:
+            self.rangesthatshouldnotbereweighted  #might raise WrongControlPlotException
         t, d = self.template, self.disc
         if d == discriminant("D_bkg_0plus"): return
         if d == discriminant("D_0minus_VBFdecay"):
