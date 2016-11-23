@@ -53,7 +53,7 @@ for discname, title, bins, min, max in discriminants:
     hstack.GetXaxis().SetTitle(title)
     legend.Draw()
 
-    directory = os.path.join(config.plotsbasedir, "TEST", str(productionmode))
+    directory = os.path.join(config.plotsbasedir, "templateprojections", "compare_POWHEG_JHUGen", str(productionmode))
     try:
       os.makedirs(directory)
     except OSError:
