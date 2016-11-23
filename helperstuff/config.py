@@ -32,7 +32,7 @@ useQGTagging = False
 
 assert unblindscans >= unblinddistributions >= usedata
 
-expectedscanluminosity = 15.7
+expectedscanluminosity = 30
 
 m4lmin, m4lmax = 105, 140
 
