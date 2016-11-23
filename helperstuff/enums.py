@@ -157,7 +157,7 @@ class ProductionMode(MyEnum):
         return str(self)
     @property
     def isbkg(self):
-        if self in ("ggH", "data", "VBF", "ZH", "WH", "ttH", "HJJ"):
+        if self in ("ggH", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH"):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
@@ -337,10 +337,6 @@ class Production(MyEnum):
         if self == "160720":
             return "root://lxcms03//data3/Higgs/160718/"
         return self.CJLSTdir()
-    def CJLSTdir_HJJttH(self):
-        if self <= "160928":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/HJJttHanomalous/AAAOK/"
-        assert False
     def CJLSTdir_data(self):
         if self == "160714":
             return "root://lxcms03//data3/Higgs/160716/"

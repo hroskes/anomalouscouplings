@@ -558,8 +558,6 @@ class Sample(ReweightingSample):
             return self.production.CJLSTdir_anomalous_VBF()
         if self.productionmode in ("ZH", "WH"):
             return self.production.CJLSTdir_anomalous_VH()
-        if self.productionmode in ("HJJ", "ttH"):
-            return self.production.CJLSTdir_HJJttH()
         if self.productionmode in ("data", "ZX"):
             return self.production.CJLSTdir_data()
         return self.production.CJLSTdir()

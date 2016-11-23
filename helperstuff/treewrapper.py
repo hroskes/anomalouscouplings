@@ -1174,6 +1174,7 @@ class TreeWrapper(Iterator):
         return self.MC_weight * self.xsec / self.nevents
     def MC_weight_plain_noxsec(self):
         return self.MC_weight / self.nevents
+    MC_weight_WplusH_g1 = MC_weight_WminusH_g1 = \
     MC_weight_ttH_kappatilde = MC_weight_ttH_kappakappatilde = \
     MC_weight_HJJ_g2    = MC_weight_HJJ_g4         = MC_weight_HJJ_g2g4 = \
         MC_weight_plain_noxsec
@@ -1442,6 +1443,8 @@ class TreeWrapper(Iterator):
             ReweightingSample("HJJ", "0+"),
             ReweightingSample("HJJ", "0-"),
             ReweightingSample("HJJ", "fCP0.5"),
+            ReweightingSample("WplusH", "0+"),
+            ReweightingSample("WminusH", "0+"),
             ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
             ReweightingSample("qqZZ"),
             ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
