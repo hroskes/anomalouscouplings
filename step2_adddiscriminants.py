@@ -2,7 +2,7 @@
 from array import array
 from helperstuff import config
 from helperstuff import xrd
-from helperstuff.enums import flavors, decayonlyhypotheses, prodonlyhypotheses, productions
+from helperstuff.enums import flavors, decayonlyhypotheses, hffhypotheses, prodonlyhypotheses, productions
 from helperstuff.samples import Sample
 from helperstuff.treewrapper import TreeWrapper
 import os
@@ -77,12 +77,16 @@ if __name__ == '__main__':
             adddiscriminants("VBF", hypothesis, production)
             adddiscriminants("ZH", hypothesis, production)
             adddiscriminants("WH", hypothesis, production)
+        for hypothesis in hffhypotheses:
+            adddiscriminants("HJJ", hypothesis, production)
+            adddiscriminants("ttH", hypothesis, production)
         for flavor in flavors:
             adddiscriminants("ggZZ", flavor, production)
             if not flavor.hastaus:
                 adddiscriminants("VBF bkg", flavor, production)
+        for productionmode in "VBF", "ZH", "WplusH", "WminusH", "ttH":
+            adddiscriminants(productionmode, "0+", "POWHEG", production)
         adddiscriminants("qqZZ", production)
         adddiscriminants("ZX", production)
-        adddiscriminants("ttH", "0+", production)
         adddiscriminants("data", production, "unblind")
         adddiscriminants("data", production, "blind")
