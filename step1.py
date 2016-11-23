@@ -15,7 +15,7 @@ print """Yes, config is set up!
 """
 
 print "Initiating git submodules..."
-#subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
+subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
 if set(os.listdir("CMSSW_7_6_5")) != set(["src", ".gitignore"]):
     print """CMSSW_7_6_5 area already set up."""
