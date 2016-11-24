@@ -367,7 +367,7 @@ class ControlPlotBase(object):
             if significance < maxsmoothedsignificance:
                 yield therange
 
-        for range in self.rangesintroducedbyreweighting:
+        for therange in self.rangesintroducedbyreweighting:
             yield therange
 
     def GetEffectiveEntries(self, step, *args, **kwargs):
