@@ -243,7 +243,6 @@ class ControlPlotBase(object):
                 or abs(therange.hi  + self.binwidth/2 - self.xmax) < therange.tolerance
                )
 
-    @cache
     @generatortolist
     def adjacent(self, therange, step, onlyrelevant=False):
         if therange not in self.ranges(step):
