@@ -234,14 +234,34 @@ class ControlPlotBase(object):
         if 1-1e-9 < result - int(result) < 1: return int(result)+1
         assert False
 
-    def isontheedge(self, range):
+    def isontheedge(self, therange):
         #print "=================================="
-        #print self.xmin, range.low - self.binwidth/2, self.xmax, range.hi+self.binwidth/2
+        #print self.xmin, therange.low - self.binwidth/2, self.xmax, therange.hi+self.binwidth/2
         #print "=================================="
         return (
-                   abs(range.low - self.binwidth/2 - self.xmin) < range.tolerance
-                or abs(range.hi  + self.binwidth/2 - self.xmax) < range.tolerance
+                   abs(therange.low - self.binwidth/2 - self.xmin) < therange.tolerance
+                or abs(therange.hi  + self.binwidth/2 - self.xmax) < therange.tolerance
                )
+
+    @cache
+    @generatortolist
+    def adjacent(self, therange, step, onlyrelevant=False):
+        if therange not in self.ranges(step):
+            raise ValueError("therange {}-{} does not come from step {}!".format(therange.low, therange.hi, step))
+        lowerranges = [_ for _ in self.ranges(step) if _.hi < therange.hi]
+        higherranges = [_ for _ in self.ranges(step) if _.hi > therange.hi]
+        assert therange not in lowerranges and therange not in higherranges
+        if onlyrelevant:
+            lowerranges = [_ for _ in lowerranges if self.isrelevant(_, step)]
+            higherranges = [_ for _ in higherranges if self.isrelevant(_, step)]
+        if lowerranges:
+            loweradjacent = max((_ for _ in lowerranges), key=lambda x: x.hi)
+            assert loweradjacent.hi <= therange.low + therange.tolerance
+            yield loweradjacent
+        if higherranges:
+            higheradjacent = max((_ for _ in higherranges), key=lambda x: x.hi)
+            assert higheradjacent.low >= therange.hi - therange.tolerance
+            yield higheradjacent
 
     @cache
     def overlaps(self, therange, step):
@@ -250,7 +270,7 @@ class ControlPlotBase(object):
                       key = lambda x: therange.overlap(x)
                      )
 
-    def whathappenstoit(self, therange, fromstep, instep):
+    def whathappenstoit(self, therange, fromstep, instep, onlyrelevant=False):
         """
         returns:
           1 if therange from fromstep is absorbed in a bigger range in instep
@@ -259,6 +279,9 @@ class ControlPlotBase(object):
         """
         if therange not in self.ranges(fromstep):
             raise ValueError("therange {}-{} does not come from fromstep {}!".format(therange.low, therange.hi, fromstep))
+
+        if onlyrelevant and not self.isrelevant(therange, fromstep):
+            return 0
 
         overlaps = self.overlaps(therange, instep)
         if abs(therange.length - self.binwidth*2) < therange.tolerance and len(overlaps) == 2:
@@ -278,6 +301,10 @@ class ControlPlotBase(object):
             #except for the special case above
             return -1
         if not biggestoverlap.samedirection(therange):
+            if onlyrelevant and not self.isrelevant(biggestoverlap, instep):
+                adjacenttobiggestoverlap = self.adjacent(biggestoverlap, instep, onlyrelevant=onlyrelevant)
+                if all(_.samedirection(therange) for _ in adjacenttobiggestoverlap):
+                    return 1
             return -1
 
         if len(overlaps) >= 2:
@@ -292,28 +319,27 @@ class ControlPlotBase(object):
         return 0
 
     @cache
-    def isrelevant(self, therange):
-        maxsignificance = max(_.significance for step in self.h.keys() for _ in self.ranges(step))
+    def isrelevant(self, therange, step):
+        maxsignificance = max(_.significance for _ in self.ranges(step))
         if therange.significance < maxsignificance / 100:
             return False
         return True
 
-    @cache
     @generatortolist
-    def rangesinonebutnotintheother(self, inthisone, notinthisone):
+    def rangesinonebutnotintheother(self, inthisone, notinthisone, onlyrelevant=False):
         for rawrange in self.ranges(inthisone):
-            if self.whathappenstoit(rawrange, inthisone, notinthisone) == -1:
+            if onlyrelevant and not self.isrelevant(rawrange, inthisone): continue
+            if self.whathappenstoit(rawrange, inthisone, notinthisone, onlyrelevant=onlyrelevant) == -1:
                 yield rawrange
 
-    @cache
-    def rangesthataresmoothedaway(self, step):
-        return self.rangesinonebutnotintheother("raw", step)
+    def rangesthataresmoothedaway(self, step, onlyrelevant=False):
+        return self.rangesinonebutnotintheother("raw", step, onlyrelevant=onlyrelevant)
 
     @property
     @cache
     def rangesthataresmoothedawaybutreweightedback(self):
-        smoothedaway = self.rangesthataresmoothedaway("smooth")
-        stillgoneafterreweight = self.rangesthataresmoothedaway("reweight")
+        smoothedaway = self.rangesthataresmoothedaway("smooth", onlyrelevant=True)
+        stillgoneafterreweight = self.rangesthataresmoothedaway("reweight", onlyrelevant=True)
         therawranges = [range_ for range_ in smoothedaway if range_ not in stillgoneafterreweight]
         return therawranges
 
@@ -368,7 +394,7 @@ class ControlPlotBase(object):
                 return
 
         for therange in self.rangesthataresmoothedawaybutreweightedback:
-            if not self.isrelevant(therange): continue
+            if not self.isrelevant(therange, "raw"): continue
             significance = therange.significance
             if self.isontheedge(therange):
                 significance *= 2
@@ -376,7 +402,7 @@ class ControlPlotBase(object):
                 yield therange
 
         for therange in self.rangesintroducedbyreweighting:
-            if not self.isrelevant(therange): continue
+            if not self.isrelevant(therange, "reweight"): continue
             yield therange
 
     def GetEffectiveEntries(self, step, *args, **kwargs):
@@ -401,12 +427,12 @@ class ControlPlotBase(object):
             average = numpy.average(significances)
             stdev = numpy.std(significances)
             for therange in self.ranges("raw"):
-                if self.isrelevant(therange) and therange.significance < average-3*stdev:
+                if self.isrelevant(therange, "raw") and therange.significance < average-3*stdev:
                     yield therange
             return
 
         for i, therange in enumerate(self.ranges("raw")):
-            if not self.isrelevant(therange): maybeprint(i, therange.low, therange.hi, 0); continue
+            if not self.isrelevant(therange, "raw"): maybeprint(i, therange.low, therange.hi, 0); continue
             if therange in self.rangesthataresmoothedaway("smooth"): maybeprint(i, therange.low, therange.hi, 1); continue
             if therange in self.rangesabsorbedbysmoothing: maybeprint(i, therange.low, therange.hi, 2); continue
             if not self.isontheedge(therange) and therange.significance < maxsmoothedsignificance_pluserror: maybeprint(i, therange.low, therange.hi, 4); yield therange; continue
@@ -704,7 +730,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template(*"4mu  vbf fL1 160928 Untagged VBF L1".split())
+    t = Template("background", "fa2", "D_int_prod", "4mu", "VHHadrtagged", "160928", "ggZZ")
     print t
     print
     for d in t.discriminants:
