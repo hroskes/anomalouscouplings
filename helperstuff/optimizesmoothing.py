@@ -292,6 +292,13 @@ class ControlPlotBase(object):
         return 0
 
     @cache
+    def isrelevant(self, therange):
+        maxsignificance = max(_.significance for step in self.h.keys() for _ in self.ranges(step))
+        if therange.significance < maxsignificance / 100:
+            return False
+        return True
+
+    @cache
     @generatortolist
     def rangesinonebutnotintheother(self, inthisone, notinthisone):
         for rawrange in self.ranges(inthisone):
@@ -361,6 +368,7 @@ class ControlPlotBase(object):
                 return
 
         for therange in self.rangesthataresmoothedawaybutreweightedback:
+            if not self.isrelevant(therange): continue
             significance = therange.significance
             if self.isontheedge(therange):
                 significance *= 2
@@ -368,6 +376,7 @@ class ControlPlotBase(object):
                 yield therange
 
         for therange in self.rangesintroducedbyreweighting:
+            if not self.isrelevant(therange): continue
             yield therange
 
     def GetEffectiveEntries(self, step, *args, **kwargs):
@@ -378,8 +387,9 @@ class ControlPlotBase(object):
     @generatortolist
     def rangesthatshouldhavebeensmoothed(self):
         def maybeprint(*stuff):
-            #print " ".join(str(a) for a in stuff)
-            pass
+            for a in stuff:
+                #print a,
+                pass
 
         try:
             maxsmoothedsignificance_pluserror = max(
@@ -390,17 +400,18 @@ class ControlPlotBase(object):
             significances = [_.significance for _ in self.ranges("raw")]
             average = numpy.average(significances)
             stdev = numpy.std(significances)
-            for range in self.ranges("raw"):
-                if range.significance < average-3*stdev:
-                    yield range
+            for therange in self.ranges("raw"):
+                if self.isrelevant(therange) and therange.significance < average-3*stdev:
+                    yield therange
             return
 
-        for i, range in enumerate(self.ranges("raw")):
-            if range in self.rangesthataresmoothedaway("smooth"): maybeprint(i, range.low, range.hi, 1); continue
-            if range in self.rangesabsorbedbysmoothing: maybeprint(i, range.low, range.hi, 2); continue
-            if not self.isontheedge(range) and range.significance < maxsmoothedsignificance_pluserror: maybeprint(i, range.low, range.hi, 4); yield range; continue
-            if self.isontheedge(range) and 2*range.significance < maxsmoothedsignificance_pluserror: maybeprint(i, range.low, range.hi, 5); yield range; continue
-            maybeprint(i, range.low, range.hi, 3); continue
+        for i, therange in enumerate(self.ranges("raw")):
+            if not self.isrelevant(therange): maybeprint(i, therange.low, therange.hi, 0); continue
+            if therange in self.rangesthataresmoothedaway("smooth"): maybeprint(i, therange.low, therange.hi, 1); continue
+            if therange in self.rangesabsorbedbysmoothing: maybeprint(i, therange.low, therange.hi, 2); continue
+            if not self.isontheedge(therange) and therange.significance < maxsmoothedsignificance_pluserror: maybeprint(i, therange.low, therange.hi, 4); yield therange; continue
+            if self.isontheedge(therange) and 2*therange.significance < maxsmoothedsignificance_pluserror: maybeprint(i, therange.low, therange.hi, 5); yield therange; continue
+            maybeprint(i, therange.low, therange.hi, 3); continue
 
     @property
     def sufficientsmoothing(self):
@@ -501,9 +512,12 @@ def printranges(disc, *args, **kwargs):
                         )
 
     for step in "smooth", "reweight":
-        maxsmoothedsignificance = max(range.significance for range in controlplot.rangesthataresmoothedaway(step))
-        maxsmoothedsignificance_pluserror = max(range.significance+range.significanceerror for range in controlplot.rangesthataresmoothedaway(step))
-        print step, "maxsmoothedsignificance =", maxsmoothedsignificance, "+/-", maxsmoothedsignificance_pluserror-maxsmoothedsignificance
+        if controlplot.rangesthataresmoothedaway(step):
+            maxsmoothedsignificance = max(range.significance for range in controlplot.rangesthataresmoothedaway(step))
+            maxsmoothedsignificance_pluserror = max(range.significance+range.significanceerror for range in controlplot.rangesthataresmoothedaway(step))
+            print step, "maxsmoothedsignificance =", maxsmoothedsignificance, "+/-", maxsmoothedsignificance_pluserror-maxsmoothedsignificance
+        else:
+            print step, "nothing smoothed away"
         print step, "ranges:"
         for _ in controlplot.ranges(step):
             print fmt.format(
@@ -690,7 +704,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("2e2mu", "ZH", "VBFtagged", "fa3", "160928", "D_int_prod", "fa3dec0.5")
+    t = Template(*"4mu  vbf fL1 160928 Untagged VBF L1".split())
     print t
     print
     for d in t.discriminants:
