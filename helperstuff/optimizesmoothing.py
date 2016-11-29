@@ -478,7 +478,7 @@ class ControlPlotOneBigRange(ControlPlotBase):
                 and not reweightrange.samedirection(biggestsmoothrange)
                 and not self.isontheedge(reweightrange)
                ):
-                print reweightrange.overlapinterval(biggestsmoothrange)
+                #print reweightrange.overlapinterval(biggestsmoothrange)
                 yield reweightrange.overlapinterval(biggestsmoothrange)
 
     @property
@@ -510,8 +510,40 @@ class ControlPlotOneBigRange(ControlPlotBase):
                 return
         raise WrongControlPlotException
 
+class ControlPlotUnsalvageable(ControlPlotBase):
+    @property
+    @cache
+    @generatortolist
+    def rangesthatshouldnotbereweighted(self):
+        maximum, maximumbin = self.h["raw"].GetMaximum(), self.h["raw"].GetMaximumBin()
+        if maximum >= 5 * self.h["raw"].Integral()/nbins:
+            #if it's >= 5 * the average content
+            #then we want to preserve the basic shape of the peak
+            if maximumbin != 1:
+                yield self.h["raw"].getrange(1, maximumbin-1)
+            if maximumbin != self.nbins:
+                yield self.h["raw"].getrange(maximumbin+1, self.nbins)
+        else:
+            yield self.h["raw"].getrange(1, self.nbins)
+
+    @property
+    def rangesthatshouldhavebeensmoothed(self):
+        return []
+
+    def checkthatthisworks(self):
+        if self.GetEffectiveEntries("raw") > 1000:
+            raise WrongControlPlotException
+#        from combinehelpers import getrate
+#        t = self.template
+#        if config.unblindscans:
+#            lumitype = "fordata"
+#        else:
+#            lumitype = "forexpectedscan"
+#        if getrate(t.productionmode, t.category, t.channel, t.production, lumitype) >= 1:
+#            raise WrongControlPlotException
+
 def ControlPlot(*args, **kwargs):
-    for cls in ControlPlotOneBigRange, ControlPlotSimple:
+    for cls in ControlPlotUnsalvageable, ControlPlotOneBigRange, ControlPlotSimple:
         #ControlPlotSimple should be the last, since it works for everything
         try:
             return cls(*args, **kwargs)
