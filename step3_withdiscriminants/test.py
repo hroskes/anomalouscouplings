@@ -9,13 +9,14 @@ import os
 
 #========================
 #inputs
-#weight, bins, min, max can be None
+#weight, bins, min, max, category can be None
 productionmode = "ggH"
-disc           = "D_0minus_VBF"
+disc           = "D_g2_decay"
 weight         = None
 bins           = None
 min            = None
 max            = None
+category       = "Untagged"
 #========================
 
 
@@ -52,6 +53,11 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     weightname = weight if weight is not None else sample.weightname()
 
     wt = "({}>-998)*{}".format(discname, weightname)
+
+    if category is not None:
+        wt += "*({})".format(" || ".join("(category=={})".format(_) for _ in Category(category).idnumbers))
+
+
     t.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
     h = hs[hypothesis] = getattr(ROOT, hname)
     h.GetXaxis().SetTitle(title)
