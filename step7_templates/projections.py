@@ -201,7 +201,21 @@ class Projections(MultiEnum):
       dontcheck.append(WhichProdDiscriminants)
     super(Projections, self).check(*args, dontcheck=dontcheck)
 
-  def projections(self):
+  def projections(self, **kwargs):
+    ggHfactor = VBFfactor = VHfactor = 1
+    subdir = ""
+    for kw, kwarg in kwargs.iteritems():
+       if kw == "ggHfactor":
+           ggHfactor = float(kwarg)
+       elif kw == "VBFfactor":
+           VBFfactor = float(kwarg)
+       elif kw == "VHfactor":
+           VHfactor = float(kwarg)
+       elif kw == "subdir":
+           subdir = kwarg
+       else:
+           raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
     giname = self.analysis.couplingname
     BSMhypothesis = self.analysis.purehypotheses[1]
 
@@ -282,10 +296,10 @@ class Projections(MultiEnum):
                                     *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces))
                                    )
 
-    SM    = TemplateSum("SM",                                1,             (ggHSM,    1), (VBFSM,    1), (ZHSM,    1), (WHSM,    1))
-    BSM   = TemplateSum("{}=1".format(self.analysis.title),  ROOT.kCyan,    (ggHBSM,   1), (VBFBSM,   1), (ZHBSM,   1), (WHBSM,   1))
-    mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, 1), (VBFmix_p, 1), (ZHmix_p, 1), (WHmix_p, 1))
-    mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, 1), (VBFmix_m, 1), (ZHmix_m, 1), (WHmix_m, 1))
+    SM    = TemplateSum("SM",                                1,             (ggHSM,    ggHfactor), (VBFSM,    VBFfactor), (ZHSM,    VHfactor), (WHSM,    VHfactor))
+    BSM   = TemplateSum("{}=1".format(self.analysis.title),  ROOT.kCyan,    (ggHBSM,   ggHfactor), (VBFBSM,   VBFfactor), (ZHBSM,   VHfactor), (WHBSM,   VHfactor))
+    mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (ZHmix_p, VHfactor), (WHmix_p, VHfactor))
+    mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (ZHmix_m, VHfactor), (WHmix_m, VHfactor))
 
     qqZZ      = TemplateFromFile(6,              self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ",    self.systematic, self.production)
     ggZZ      = TemplateFromFile(ROOT.kOrange+6, self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ",    self.systematic, self.production)
@@ -302,8 +316,11 @@ class Projections(MultiEnum):
                  WHBSM, WHmix_p, WHmix_m,
                 ] + [
                  SM, BSM, mix_p, mix_m,
-                 qqZZ, ggZZ, VBFbkg, ZX,
                 ]
+    if ggHfactor == VBFfactor == VHfactor == 1:
+        templates += [
+                      qqZZ, ggZZ, VBFbkg, ZX,
+                     ]
 
     if self.enrichstatus == "impoverish" and config.usedata or config.unblinddistributions:
         templates += [
@@ -332,11 +349,11 @@ class Projections(MultiEnum):
         hstack.GetXaxis().SetTitle(discriminant.title)
         legend.Draw()
         try:
-            os.makedirs(self.saveasdir)
+            os.makedirs(os.path.join(self.saveasdir, subdir))
         except OSError:
             pass
         for ext in exts:
-            c1.SaveAs(os.path.join(self.saveasdir, "{}.{}".format(discriminant.name, ext)))
+            c1.SaveAs(os.path.join(self.saveasdir, subdir, "{}.{}".format(discriminant.name, ext)))
 
   @property
   def saveasdir(self):
@@ -371,4 +388,7 @@ if __name__ == "__main__":
   length = len(list(projections()))
   for i, p in enumerate(projections(), start=1):
     p.projections()
+    p.projections(subdir="ggH", ggHfactor=1, VBFfactor=0, VHfactor=0)
+    p.projections(subdir="VBF", ggHfactor=0, VBFfactor=1, VHfactor=0)
+    p.projections(subdir="VH",  ggHfactor=0, VBFfactor=0, VHfactor=1)
     print i, "/", length
