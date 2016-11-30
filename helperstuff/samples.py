@@ -22,6 +22,18 @@ class SampleBase(object):
     @abstractproperty
     def g1prime2(self):
         pass
+    @abstractproperty
+    def ghg2(self):
+        pass
+    @abstractproperty
+    def ghg4(self):
+        pass
+    @abstractproperty
+    def kappa(self):
+        pass
+    @abstractproperty
+    def kappa_tilde(self):
+        pass
 
     @property
     def JHUxsec(self):
@@ -125,29 +137,94 @@ class SampleBase(object):
     @property
     def xsec(self):
         if self.productionmode == "ggH":
-            if self.hypothesis == "SM": return constants.SMXSggH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSggH2L2l
             return constants.SMXSggH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "VBF":
-            if self.hypothesis == "SM": return constants.SMXSVBF2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSVBF2L2l
             return constants.SMXSVBF2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "ZH":
-            if self.hypothesis == "SM": return constants.SMXSZH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSZH2L2l
             return constants.SMXSZH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "WH":
-            if self.hypothesis == "SM": return constants.SMXSWH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWH2L2l
             return constants.SMXSWH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "WplusH":
-            if self.hypothesis == "SM": return constants.SMXSWpH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWpH2L2l
         if self.productionmode == "WminusH":
-            if self.hypothesis == "SM": return constants.SMXSWmH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWmH2L2l
         if self.productionmode == "HJJ":
-            if self.hypothesis == "SM": return constants.SMXSHJJ2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSHJJ2L2l
             return constants.SMXSHJJ2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "ttH":
-            if self.hypothesis == "SM": return constants.SMXSttH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSttH2L2l
             return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         assert False
 
+    def __pos__(self):
+        return --self
+    def __neg__(self):
+        return ArbitraryCouplingsSample(
+                                        self.productionmode,
+                                        g1 = -self.g1,
+                                        g2 = -self.g2,
+                                        g4 = -self.g4,
+                                        g1prime2 = -self.g1prime2,
+                                        ghg2 = -self.ghg2 if self.productionmode == "HJJ" else None,
+                                        ghg4 = -self.ghg4 if self.productionmode == "HJJ" else None,
+                                        kappa = -self.kappa if self.productionmode == "ttH" else None,
+                                        kappa_tilde = -self.kappa_tilde if self.productionmode == "ttH" else None,
+                                       )
+
+    def __add__(self, other):
+        if self.productionmode != other.productionmode:
+            raise TypeError("Adding two different kinds of samples together ({}, {})!".format(self.productionmode, other.productionmode))
+        return ArbitraryCouplingsSample(
+                                        self.productionmode,
+                                        g1 = self.g1 + other.g1,
+                                        g2 = self.g2 + other.g2,
+                                        g4 = self.g4 + other.g4,
+                                        g1prime2 = self.g1prime2 + other.g1prime2,
+                                        ghg2 = self.ghg2 + other.ghg2 if self.productionmode == "HJJ" else None,
+                                        ghg4 = self.ghg4 + other.ghg4 if self.productionmode == "HJJ" else None,
+                                        kappa = self.kappa + other.kappa if self.productionmode == "ttH" else None,
+                                        kappa_tilde = self.kappa_tilde + other.kappa_tilde if self.productionmode == "ttH" else None,
+                                       )
+    def __sub__(self, other):
+        return self + -other
+    def __mul__(self, other):
+        return ArbitraryCouplingsSample(
+                                        self.productionmode,
+                                        g1 = self.g1 * other,
+                                        g2 = self.g2 * other,
+                                        g4 = self.g4 * other,
+                                        g1prime2 = self.g1prime2 * other,
+                                        ghg2 = self.ghg2 * other if self.productionmode == "HJJ" else None,
+                                        ghg4 = self.ghg4 * other if self.productionmode == "HJJ" else None,
+                                        kappa = self.kappa * other if self.productionmode == "ttH" else None,
+                                        kappa_tilde = self.kappa_tilde * other if self.productionmode == "ttH" else None,
+                                       )
+    def __div__(self, other):
+        return self * 1.0/other
+    def __eq__(self, other):
+        return all((
+                   self.productionmode == other.productionmode,
+                   self.g1 == other.g1,
+                   self.g2 == other.g2,
+                   self.g4 == other.g4,
+                   self.g1prime2 == other.g1prime2,
+               )) and (
+                   self.productionmode != "HJJ" or all((
+                       self.ghg2 == other.ghg2,
+                       self.ghg4 == other.ghg4,
+                   ))
+               ) and (
+                   self.productionmode != "ttH" or all((
+                       self.kappa == other.kappa,
+                       self.kappa_tilde == other.kappa_tilde,
+                   ))
+               )
+    def __ne__(self, other):
+        return not self == other
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
@@ -199,10 +276,38 @@ class ArbitraryCouplingsSample(SampleBase):
     def kappa_tilde(self):
         return self.__kappa_tilde
 
+    def __repr__(self):
+        couplings = ("g1", "g2", "g4", "g1prime2")
+        if self.productionmode == "HJJ": couplings += ("ghg2", "ghg4")
+        if self.productionmode == "ttH": couplings += ("kappa", "kappa_tilde")
+        return "{}({}, {})".format(
+                                   type(self).__name__,
+                                   repr(self.productionmode.item.name),
+                                   ", ".join(
+                                             "{}={}".format(coupling, getattr(self, coupling))
+                                             for coupling in couplings
+                                            ),
+                                  )
+
 class ReweightingSample(MultiEnum, SampleBase):
     __metaclass__ = MultiEnumABCMeta
     enumname = "reweightingsample"
     enums = [ProductionMode, Hypothesis, Flavor]
+
+    def __eq__(self, other):
+        try:
+            return MultiEnum.__eq__(self, other)
+        except BaseException as e1:
+            try:
+                return SampleBase.__eq__(self, other)
+            except BaseException as e2:
+                raise ValueError(
+                                 "Can't compare {} == {}!  Trying to compare as MultiEnums:\n"
+                                 "  {}\n"
+                                 "Trying to compare couplings:\n"
+                                 "  {}"
+                                 .format(self, other, e1, e2)
+                                )
 
     def check(self, *args):
         if self.productionmode is None:

@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 from helperstuff import config
+from helperstuff import constants
 from helperstuff import style
+from helperstuff.combinehelpers import gettemplate
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import *
 from helperstuff.samples import *
+import re
 import ROOT
 import os
 
@@ -12,12 +15,32 @@ import os
 #weight, bins, min, max, category can be None
 productionmode = "ggH"
 disc           = "D_g2_decay"
-weight         = None
+weight         = (
+                  "   MC_weight_ggH_g1*{}".format(1)
+                + " + MC_weight_ggH_g2*{}".format(1)
+                + " - ("
+                + "    MC_weight_ggH_g1g2*{}".format(0.6076979235542687*6)
+                + " -  MC_weight_ggH_g1*{}".format(1)
+                + " -  MC_weight_ggH_g2*{}".format(1)
+                + "   )*{}".format(1)
+                 )
 bins           = None
 min            = None
 max            = None
+enrich         = True
+channel        = "2e2mu"
 category       = "Untagged"
 #========================
+
+for name, value in constants.__dict__.iteritems():
+    try:
+        value = "{:g}".format(value)
+    except ValueError:
+        continue
+    weight = re.sub(r"\b"+name+r"\b", value, weight)
+    disc = re.sub(r"\b"+name+r"\b", value, disc)
+
+print weight
 
 
 hstack = ROOT.THStack()
@@ -52,10 +75,14 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
 
     weightname = weight if weight is not None else sample.weightname()
 
-    wt = "({}>-998)*{}".format(discname, weightname)
+    wt = "({}>-998)*({})".format(discname, weightname)
 
     if category is not None:
         wt += "*({})".format(" || ".join("(category=={})".format(_) for _ in Category(category).idnumbers))
+    if enrich:
+        wt += "*(D_bkg_0plus>0.5)"
+    if channel is not None:
+        wt += "*(Z1Flav*Z2Flav=={})".format(Channel(channel).ZZFlav)
 
 
     t.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
