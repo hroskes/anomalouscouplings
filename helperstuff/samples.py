@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from abc import ABCMeta, abstractproperty
 import config
 import constants
@@ -160,51 +161,6 @@ class SampleBase(object):
             return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         assert False
 
-    def __pos__(self):
-        return --self
-    def __neg__(self):
-        return ArbitraryCouplingsSample(
-                                        self.productionmode,
-                                        g1 = -self.g1,
-                                        g2 = -self.g2,
-                                        g4 = -self.g4,
-                                        g1prime2 = -self.g1prime2,
-                                        ghg2 = -self.ghg2 if self.productionmode == "HJJ" else None,
-                                        ghg4 = -self.ghg4 if self.productionmode == "HJJ" else None,
-                                        kappa = -self.kappa if self.productionmode == "ttH" else None,
-                                        kappa_tilde = -self.kappa_tilde if self.productionmode == "ttH" else None,
-                                       )
-
-    def __add__(self, other):
-        if self.productionmode != other.productionmode:
-            raise TypeError("Adding two different kinds of samples together ({}, {})!".format(self.productionmode, other.productionmode))
-        return ArbitraryCouplingsSample(
-                                        self.productionmode,
-                                        g1 = self.g1 + other.g1,
-                                        g2 = self.g2 + other.g2,
-                                        g4 = self.g4 + other.g4,
-                                        g1prime2 = self.g1prime2 + other.g1prime2,
-                                        ghg2 = self.ghg2 + other.ghg2 if self.productionmode == "HJJ" else None,
-                                        ghg4 = self.ghg4 + other.ghg4 if self.productionmode == "HJJ" else None,
-                                        kappa = self.kappa + other.kappa if self.productionmode == "ttH" else None,
-                                        kappa_tilde = self.kappa_tilde + other.kappa_tilde if self.productionmode == "ttH" else None,
-                                       )
-    def __sub__(self, other):
-        return self + -other
-    def __mul__(self, other):
-        return ArbitraryCouplingsSample(
-                                        self.productionmode,
-                                        g1 = self.g1 * other,
-                                        g2 = self.g2 * other,
-                                        g4 = self.g4 * other,
-                                        g1prime2 = self.g1prime2 * other,
-                                        ghg2 = self.ghg2 * other if self.productionmode == "HJJ" else None,
-                                        ghg4 = self.ghg4 * other if self.productionmode == "HJJ" else None,
-                                        kappa = self.kappa * other if self.productionmode == "ttH" else None,
-                                        kappa_tilde = self.kappa_tilde * other if self.productionmode == "ttH" else None,
-                                       )
-    def __div__(self, other):
-        return self * 1.0/other
     def __eq__(self, other):
         return all((
                    self.productionmode == other.productionmode,
@@ -226,23 +182,34 @@ class SampleBase(object):
     def __ne__(self, other):
         return not self == other
 
-    """
+    @property
     def linearcombinationofreweightingsamples(self):
-        from collections import Counter
-        result = Counter()
-        def rws(hypothesis):
-            return ReweightingSample(self.productionmode, hypothesis)
-        if self.productionmode == "ggH":
-
-            result.update({rws("0+"): self.g1 / rws("0+").g1}
-            result.update({rws("0h+"): self.g2 / rws("0h+").g2}
-            result.update({rws("0-"): self.g4 / rws("0-").g4}
-            result.update({rws("L1"): self.g1prime2 / rws("L1").g1prime2}
-
-            result.update({
-                           rws("fa20.5"): self.g1*self.g2 / (rws("fa20.5").g1*rws("fa20.5").g2),
-                           rws("0+"): -self.g1*self.g2 / (rws("fa20.5").g1*rws("fa20.5").g2)
-    """
+        import numpy
+        from templates import TemplatesFile
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
+            g1 = self.g1
+            if   self.g2 == self.g1prime2 == 0: analysis = "fa3"; gi = self.g4
+            elif self.g4 == self.g1prime2 == 0: analysis = "fa2"; gi = self.g2
+            elif self.g2 == self.g4 == 0:       analysis = "fL1"; gi = self.g1prime2
+            else: assert False
+            templatesfile = TemplatesFile(str(self.productionmode).lower(), analysis, "2e2mu", config.productionsforcombine[0], "Untagged", "")
+            vectorofreweightingsamples = templatesfile.signalsamples()
+            invertedmatrix = templatesfile.invertedmatrix
+            maxpower = invertedmatrix.shape[0]-1
+            vectorTofg1xgiy = numpy.matrix([[g1**(maxpower-i)*gi**i for i in range(maxpower+1)]])
+            vectorTmatrix = vectorTofg1xgiy*invertedmatrix
+            vectorTmatrixaslist = numpy.array(vectorTmatrix).flatten().tolist()
+            return {
+                    reweightingsample: factor
+                     for reweightingsample, factor in zip(vectorofreweightingsamples, vectorTmatrixaslist)
+                     if factor
+                   }
+    @property
+    def MC_weight(self):
+        return " + ".join(
+                          "{}*{}".format(reweightingsample.weightname(), factor*reweightingsample.xsec/self.xsec)
+                            for reweightingsample, factor in self.linearcombinationofreweightingsamples.iteritems()
+                         )
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
@@ -740,3 +707,7 @@ class Sample(ReweightingSample):
         if self.productionmode == "data":
             return self.blindstatus == "unblind"
         raise self.ValueError("unblind")
+
+if __name__ == "__main__":
+    print ArbitraryCouplingsSample("ggH", 2, 0, 0, 0).MC_weight
+    print ArbitraryCouplingsSample("ZH", 3, 0, 0, -3*sqrt(constants.g1prime2ZH_gen*constants.g1prime2decay_gen)).MC_weight

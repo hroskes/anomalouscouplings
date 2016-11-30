@@ -32,15 +32,14 @@ channel        = "2e2mu"
 category       = "Untagged"
 #========================
 
-for name, value in constants.__dict__.iteritems():
-    try:
-        value = "{:g}".format(value)
-    except ValueError:
-        continue
-    weight = re.sub(r"\b"+name+r"\b", value, weight)
-    disc = re.sub(r"\b"+name+r"\b", value, disc)
-
-print weight
+if weight is not None:
+    for name, value in constants.__dict__.iteritems():
+        try:
+            value = "{:g}".format(value)
+        except ValueError:
+            continue
+        weight = re.sub(r"\b"+name+r"\b", value, weight)
+        disc = re.sub(r"\b"+name+r"\b", value, disc)
 
 
 hstack = ROOT.THStack()
