@@ -226,6 +226,24 @@ class SampleBase(object):
     def __ne__(self, other):
         return not self == other
 
+    """
+    def linearcombinationofreweightingsamples(self):
+        from collections import Counter
+        result = Counter()
+        def rws(hypothesis):
+            return ReweightingSample(self.productionmode, hypothesis)
+        if self.productionmode == "ggH":
+
+            result.update({rws("0+"): self.g1 / rws("0+").g1}
+            result.update({rws("0h+"): self.g2 / rws("0h+").g2}
+            result.update({rws("0-"): self.g4 / rws("0-").g4}
+            result.update({rws("L1"): self.g1prime2 / rws("L1").g1prime2}
+
+            result.update({
+                           rws("fa20.5"): self.g1*self.g2 / (rws("fa20.5").g1*rws("fa20.5").g2),
+                           rws("0+"): -self.g1*self.g2 / (rws("fa20.5").g1*rws("fa20.5").g2)
+    """
+
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
         self.productionmode = ProductionMode(productionmode)
