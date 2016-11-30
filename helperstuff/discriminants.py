@@ -137,6 +137,8 @@ discriminants = {
             for prime in ("", "_prime")
             for gj in ("g4", "g2", "g1prime2")
             for i in range(1, 4)
+    ] + [
+        Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500)
     ]
 }
 

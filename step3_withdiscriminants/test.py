@@ -1,22 +1,40 @@
 #!/usr/bin/env python
 from helperstuff import config
+from helperstuff import constants
 from helperstuff import style
+from helperstuff.combinehelpers import gettemplate
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import *
 from helperstuff.samples import *
+import re
 import ROOT
 import os
 
 #========================
 #inputs
-#weight, bins, min, max can be None
-productionmode = "ggH"
-disc           = "D_0minus_VBF"
-weight         = None
+#weight, bins, min, max, category can be None
+productionmode = "VBF"
+disc           = "D_g2_decay"
+weight         = ArbitraryCouplingsSample(productionmode, 1, -constants.g2decay, 0, 0)
 bins           = None
 min            = None
 max            = None
+enrich         = True
+channel        = "2e2mu"
+category       = "Untagged"
 #========================
+
+if isinstance(weight, SampleBase):
+    weight = weight.MC_weight
+
+if weight is not None:
+    for name, value in constants.__dict__.iteritems():
+        try:
+            value = "{:g}".format(value)
+        except ValueError:
+            continue
+        weight = re.sub(r"\b"+name+r"\b", value, weight)
+        disc = re.sub(r"\b"+name+r"\b", value, disc)
 
 
 hstack = ROOT.THStack()
@@ -51,7 +69,16 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
 
     weightname = weight if weight is not None else sample.weightname()
 
-    wt = "({}>-998)*{}".format(discname, weightname)
+    wt = "({}>-998)*({})".format(discname, weightname)
+
+    if category is not None:
+        wt += "*({})".format(" || ".join("(category=={})".format(_) for _ in Category(category).idnumbers))
+    if enrich:
+        wt += "*(D_bkg_0plus>0.5)"
+    if channel is not None:
+        wt += "*(Z1Flav*Z2Flav=={})".format(Channel(channel).ZZFlav)
+
+
     t.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
     h = hs[hypothesis] = getattr(ROOT, hname)
     h.GetXaxis().SetTitle(title)

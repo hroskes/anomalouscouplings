@@ -37,6 +37,8 @@ class MyEnum(object):
 
     def __str__(self):
         return str(self.item)
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, repr(self.item.name))
 
     def __eq__(self, other):
         if isinstance(other, MyEnum) and not isinstance(other, type(self)) and not isinstance(self, type(other)):
@@ -548,6 +550,7 @@ class MultiEnum(object):
         self.items = tuple(getattr(self, enum.enumname) for enum in self.enums)
 
     def __eq__(self, other):
+        if type(self) != type(other): raise ValueError("Comparing two different types of MultiEnums!")
         return self.items == other.items
     def __ne__(self, other):
         return not self == other
@@ -556,6 +559,8 @@ class MultiEnum(object):
 
     def __str__(self):
         return " ".join(str(item) for item in self.items if item is not None)
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, ", ".join(repr(_.item.name) for _ in self.items if _ is not None))
 
     def applysynonyms(self, enumsdict):
         pass

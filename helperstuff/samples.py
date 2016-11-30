@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from abc import ABCMeta, abstractproperty
 import config
 import constants
@@ -21,6 +22,18 @@ class SampleBase(object):
         pass
     @abstractproperty
     def g1prime2(self):
+        pass
+    @abstractproperty
+    def ghg2(self):
+        pass
+    @abstractproperty
+    def ghg4(self):
+        pass
+    @abstractproperty
+    def kappa(self):
+        pass
+    @abstractproperty
+    def kappa_tilde(self):
         pass
 
     @property
@@ -125,29 +138,78 @@ class SampleBase(object):
     @property
     def xsec(self):
         if self.productionmode == "ggH":
-            if self.hypothesis == "SM": return constants.SMXSggH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSggH2L2l
             return constants.SMXSggH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "VBF":
-            if self.hypothesis == "SM": return constants.SMXSVBF2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSVBF2L2l
             return constants.SMXSVBF2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "ZH":
-            if self.hypothesis == "SM": return constants.SMXSZH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSZH2L2l
             return constants.SMXSZH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "WH":
-            if self.hypothesis == "SM": return constants.SMXSWH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWH2L2l
             return constants.SMXSWH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "WplusH":
-            if self.hypothesis == "SM": return constants.SMXSWpH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWpH2L2l
         if self.productionmode == "WminusH":
-            if self.hypothesis == "SM": return constants.SMXSWmH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWmH2L2l
         if self.productionmode == "HJJ":
-            if self.hypothesis == "SM": return constants.SMXSHJJ2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSHJJ2L2l
             return constants.SMXSHJJ2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "ttH":
-            if self.hypothesis == "SM": return constants.SMXSttH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSttH2L2l
             return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         assert False
 
+    def __eq__(self, other):
+        return all((
+                   self.productionmode == other.productionmode,
+                   self.g1 == other.g1,
+                   self.g2 == other.g2,
+                   self.g4 == other.g4,
+                   self.g1prime2 == other.g1prime2,
+               )) and (
+                   self.productionmode != "HJJ" or all((
+                       self.ghg2 == other.ghg2,
+                       self.ghg4 == other.ghg4,
+                   ))
+               ) and (
+                   self.productionmode != "ttH" or all((
+                       self.kappa == other.kappa,
+                       self.kappa_tilde == other.kappa_tilde,
+                   ))
+               )
+    def __ne__(self, other):
+        return not self == other
+
+    @property
+    def linearcombinationofreweightingsamples(self):
+        import numpy
+        from templates import TemplatesFile
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
+            g1 = self.g1
+            if   self.g2 == self.g1prime2 == 0: analysis = "fa3"; gi = self.g4
+            elif self.g4 == self.g1prime2 == 0: analysis = "fa2"; gi = self.g2
+            elif self.g2 == self.g4 == 0:       analysis = "fL1"; gi = self.g1prime2
+            else: assert False
+            templatesfile = TemplatesFile(str(self.productionmode).lower(), analysis, "2e2mu", config.productionsforcombine[0], "Untagged", "")
+            vectorofreweightingsamples = templatesfile.signalsamples()
+            invertedmatrix = templatesfile.invertedmatrix
+            maxpower = invertedmatrix.shape[0]-1
+            vectorTofg1xgiy = numpy.matrix([[g1**(maxpower-i)*gi**i for i in range(maxpower+1)]])
+            vectorTmatrix = vectorTofg1xgiy*invertedmatrix
+            vectorTmatrixaslist = numpy.array(vectorTmatrix).flatten().tolist()
+            return {
+                    reweightingsample: factor
+                     for reweightingsample, factor in zip(vectorofreweightingsamples, vectorTmatrixaslist)
+                     if factor
+                   }
+    @property
+    def MC_weight(self):
+        return " + ".join(
+                          "{}*{}".format(reweightingsample.weightname(), factor*reweightingsample.xsec/self.xsec)
+                            for reweightingsample, factor in self.linearcombinationofreweightingsamples.iteritems()
+                         )
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
@@ -199,10 +261,38 @@ class ArbitraryCouplingsSample(SampleBase):
     def kappa_tilde(self):
         return self.__kappa_tilde
 
+    def __repr__(self):
+        couplings = ("g1", "g2", "g4", "g1prime2")
+        if self.productionmode == "HJJ": couplings += ("ghg2", "ghg4")
+        if self.productionmode == "ttH": couplings += ("kappa", "kappa_tilde")
+        return "{}({}, {})".format(
+                                   type(self).__name__,
+                                   repr(self.productionmode.item.name),
+                                   ", ".join(
+                                             "{}={}".format(coupling, getattr(self, coupling))
+                                             for coupling in couplings
+                                            ),
+                                  )
+
 class ReweightingSample(MultiEnum, SampleBase):
     __metaclass__ = MultiEnumABCMeta
     enumname = "reweightingsample"
     enums = [ProductionMode, Hypothesis, Flavor]
+
+    def __eq__(self, other):
+        try:
+            return MultiEnum.__eq__(self, other)
+        except BaseException as e1:
+            try:
+                return SampleBase.__eq__(self, other)
+            except BaseException as e2:
+                raise ValueError(
+                                 "Can't compare {} == {}!  Trying to compare as MultiEnums:\n"
+                                 "  {}\n"
+                                 "Trying to compare couplings:\n"
+                                 "  {}"
+                                 .format(self, other, e1, e2)
+                                )
 
     def check(self, *args):
         if self.productionmode is None:
@@ -617,3 +707,7 @@ class Sample(ReweightingSample):
         if self.productionmode == "data":
             return self.blindstatus == "unblind"
         raise self.ValueError("unblind")
+
+if __name__ == "__main__":
+    print ArbitraryCouplingsSample("ggH", 2, 0, 0, 0).MC_weight
+    print ArbitraryCouplingsSample("ZH", 3, 0, 0, -3*sqrt(constants.g1prime2ZH_gen*constants.g1prime2decay_gen)).MC_weight
