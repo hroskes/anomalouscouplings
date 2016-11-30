@@ -13,17 +13,9 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "ggH"
+productionmode = "VBF"
 disc           = "D_g2_decay"
-weight         = (
-                  "   MC_weight_ggH_g1*{}".format(1)
-                + " + MC_weight_ggH_g2*{}".format(1)
-                + " - ("
-                + "    MC_weight_ggH_g1g2*{}".format(0.6076979235542687*6)
-                + " -  MC_weight_ggH_g1*{}".format(1)
-                + " -  MC_weight_ggH_g2*{}".format(1)
-                + "   )*{}".format(1)
-                 )
+weight         = ArbitraryCouplingsSample(productionmode, 1, -constants.g2decay, 0, 0)
 bins           = None
 min            = None
 max            = None
@@ -31,6 +23,9 @@ enrich         = True
 channel        = "2e2mu"
 category       = "Untagged"
 #========================
+
+if isinstance(weight, SampleBase):
+    weight = weight.MC_weight
 
 if weight is not None:
     for name, value in constants.__dict__.iteritems():
