@@ -4,7 +4,7 @@ import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate, gettemplate
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, WhichProdDiscriminants, whichproddiscriminants
-from helperstuff.filemanager import cache, tfiles
+from helperstuff.filemanager import cache, tfiles, pairwise
 from helperstuff.samples import ReweightingSample, samplewithfai
 import helperstuff.style
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
@@ -247,6 +247,7 @@ class Projections(MultiEnum):
     subdir = ""
     saveasdir = self.saveasdir
     customfai = None
+    animation = False
     saveasappend = ""
     exts = "png", "eps", "root", "pdf"
     for kw, kwarg in kwargs.iteritems():
@@ -380,30 +381,34 @@ class Projections(MultiEnum):
         templates += [
                       WHBSM, WHmix_p, WHmix_m,
                      ]
-    if customfai is None:
+    if not animation:
         templates += [
                       SM, BSM, mix_p, mix_m,
                      ]
     else:
+        assert ggHfactor == VBFfactor == VHfactor == 1
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
         if customfai  > 0: plusminus = "#plus"
-        ggHcustom = ComponentTemplateSum("ggH {}={}{}".format(fainame, plusminus, abs(customfai)), 0, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
-        VBFcustom = ComponentTemplateSum("VBF {}={}{}".format(fainame, plusminus, abs(customfai)), 0, VBFSM.Integral(),
+        ggHcustom = ComponentTemplateSum("ggH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "dec", plusminus, abs(customsample.fai("ggH", BSMhypothesis))), 1, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
+        VBFcustom = ComponentTemplateSum("VBF ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VBF", plusminus, abs(customsample.fai("VBF", BSMhypothesis))), 2, VBFSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces))
                                         )
-        ZHcustom  = ComponentTemplateSum("ZH {}={}{}".format(fainame, plusminus, abs(customfai)), 0, ZHSM.Integral(),
+        ZHcustom  = ComponentTemplateSum("", 0, ZHSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces))
                                         )
-        WHcustom  = ComponentTemplateSum("WH {}={}{}".format(fainame, plusminus, abs(customfai)), 0, WHSM.Integral(),
+        WHcustom  = ComponentTemplateSum("", 0, WHSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces))
                                         )
-        custom = TemplateSum("", 1, (ggHcustom, ggHfactor), (VBFcustom, VBFfactor), (ZHcustom, VHfactor), (WHcustom, VHfactor))
+        VHcustom = TemplateSum("VH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", BSMhypothesis))), 4, (ZHcustom, 1), (WHcustom, 1))
+        for t in ggHcustom, VBFcustom, VHcustom:
+            t.Scale(1.0/t.Integral())
+
         templates += [
-                      ggHcustom, VBFcustom, ZHcustom, WHcustom, custom
+                      ggHcustom, VBFcustom, ZHcustom, WHcustom, VHcustom
                      ]
 
-    if ggHfactor == VBFfactor == VHfactor == 1:
+    if ggHfactor == VBFfactor == VHfactor == 1 and not animation:
         templates += [
                       qqZZ, ggZZ, VBFbkg, ZX,
                      ]
@@ -426,11 +431,6 @@ class Projections(MultiEnum):
                     pass
             if template.title:
                 template.AddToLegend(legend)
-
-    if customfai is not None:
-        legend.AddEntry(0, "{}^{{{}}}={}{:.2f}".format(self.analysis.title, "dec", plusminus, abs(customsample.fai("ggH", BSMhypothesis))), "")
-        legend.AddEntry(0, "{}^{{{}}}={}{:.2f}".format(self.analysis.title, "VBF", plusminus, abs(customsample.fai("VBF", BSMhypothesis))), "")
-        legend.AddEntry(0, "{}^{{{}}}={}{:.2f}".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", BSMhypothesis))), "")
 
     for i, discriminant in enumerate(self.discriminants):
         hstack = ROOT.THStack("{}{}".format(discriminant.name, saveasappend), discriminant.title)
@@ -465,39 +465,33 @@ class Projections(MultiEnum):
         sample = samplewithfai(self.productionmode, self.analysis, self.fai)
         self.fai_decay = sample.fai("ggH", BSMhypothesis)
     def __cmp__(self, other):
-        return cmp(self.fai_decay, other.fai_decay)
+        assert self.analysis == other.analysis
+        return cmp((self.fai_decay, self.delay), (other.fai_decay, other.delay))
 
-  def animation(self, productionmode):
-      if productionmode == "VH": productionmodes = [ProductionMode("ZH"), ProductionMode("WH")]
-      else: productionmodes = ProductionMode(productionmode)
-      factorto1 = "{}factor".format(productionmode)
+  def animation(self):
       tmpdir = mkdtemp()
 
       nsteps = 200
-      animation = [
-                   self.AnimationStep(
-                                      productionmode,
-                                      self.analysis,
-                                      -1+(2.*i/nsteps),
-                                      50 if ((-1+(2.*i/nsteps))*2).is_integer() else 5
-                                     ) for i in range(nsteps+1)
-                  ]
-      if productionmode != "ggH":
+      animation = []
+      for productionmode in "VBF", "ZH", "ggH":
           animation += [
                         self.AnimationStep(
-                                           "ggH",
+                                           productionmode,
                                            self.analysis,
                                            -1+(2.*i/nsteps),
                                            50 if ((-1+(2.*i/nsteps))*2).is_integer() else 5
                                           ) for i in range(nsteps+1)
                        ]
-      animation.sort()
+      animation = sorted(set(animation))
+      while True:
+          for step, nextstep in pairwise(animation[:]):
+              if step.fai_decay == nextstep.fai_decay:
+                  animation.remove(step)
+                  break
+          else:
+              break
 
       kwargs_base = {
-                     "ggHfactor": 0,
-                     "VBFfactor": 0,
-                     "VHfactor": 0,
-                     factorto1: 1,
                      "saveasdir": tmpdir,
                     }
 
@@ -515,10 +509,10 @@ class Projections(MultiEnum):
                   convertcommand += ["-delay", str(step.delay)]
               convertcommand.append(os.path.join(tmpdir, "{}{}.gif".format(discriminant.name, i)))
           try:
-              os.makedirs(os.path.join(self.saveasdir, productionmode))
+              os.makedirs(os.path.join(self.saveasdir, "animation"))
           except OSError:
               pass
-          convertcommand.append(os.path.join(self.saveasdir, productionmode, "{}.gif".format(discriminant.name)))
+          convertcommand.append(os.path.join(self.saveasdir, "animation", "{}.gif".format(discriminant.name)))
           subprocess.check_call(convertcommand)
 
 def projections(*args):
@@ -530,7 +524,7 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "Untagged")
+    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "enrich", "Untagged")
     return
     for production in productions:
       for channel in channels:
@@ -552,7 +546,5 @@ if __name__ == "__main__":
     p.projections(subdir="ggH", ggHfactor=1, VBFfactor=0, VHfactor=0)
     p.projections(subdir="VBF", ggHfactor=0, VBFfactor=1, VHfactor=0)
     p.projections(subdir="VH",  ggHfactor=0, VBFfactor=0, VHfactor=1)
-    p.animation("ggH")
-    p.animation("VBF")
-    p.animation("VH")
+    p.animation()
     print i, "/", length

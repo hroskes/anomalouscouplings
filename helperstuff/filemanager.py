@@ -1,5 +1,6 @@
 import collections
 import contextlib
+from itertools import tee, izip
 import json
 import os
 import ROOT
@@ -100,3 +101,12 @@ def getnesteddictvalue(thedict, *keys, **kwargs):
             thedict[keys[0]] = {}
 
     return getnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
+def pairwise(iterable):
+    """
+    https://docs.python.org/2/library/itertools.html#recipes
+    """
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return izip(a, b)
