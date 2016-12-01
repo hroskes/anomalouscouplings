@@ -288,11 +288,11 @@ class Analysis(MyEnum):
     @property
     def purehypotheses(self):
         if self == "fa3":
-            return "0+", "0-"
+            return Hypothesis("0+"), Hypothesis("0-")
         if self == "fa2":
-            return "0+", "a2"
+            return Hypothesis("0+"), Hypothesis("a2")
         if self == "fL1":
-            return "0+", "L1"
+            return Hypothesis("0+"), Hypothesis("L1")
     @property
     def mixdecayhypothesis(self):
         if self == "fa3":
@@ -568,7 +568,7 @@ class MultiEnum(object):
     def __str__(self):
         return " ".join(str(item) for item in self.items if item is not None)
     def __repr__(self):
-        return "{}({})".format(type(self).__name__, ", ".join(repr(_.item.name) for _ in self.items if _ is not None))
+        return "{}({})".format(type(self).__name__, ", ".join(repr(_.item.name if isinstance(_, MyEnum) else _) for _ in self.items if _ is not None))
 
     def applysynonyms(self, enumsdict):
         pass

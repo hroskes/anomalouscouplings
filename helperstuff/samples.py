@@ -220,8 +220,8 @@ class SampleBase(object):
 
         if not hypothesis.ispure:
             raise ValueError("fai doesn't make sense for {} because it's not pure".format(hypothesis))
-        if productionmode == "ggH" and not withdecay:
-            raise ValueError("ggH without decay does not make sense! (except H+jj but that's not implemented)")
+        if productionmode == "ggH":
+            withdecay = True
 
         power = 4 if productionmode != "ggH" and withdecay else 2
         numerator = None
@@ -305,8 +305,8 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False):
     from combinehelpers import sigmaioversigma1
     analysis = Analysis(analysis)
     productionmode = ProductionMode(productionmode)
-    if productionmode == "ggH" and not withdecay:
-        raise ValueError("ggH without decay does not make sense! (except H+jj but that's not implemented)")
+    if productionmode == "ggH":
+        withdecay = True
     kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2")}
     power = (.25 if productionmode != "ggH" and withdecay else .5)
     kwargs["g1"] = (1-abs(fai))**power
