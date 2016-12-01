@@ -114,6 +114,13 @@ class Hypothesis(MyEnum):
     @property
     def ispure(self):
         return self in ("0+", "0-", "0h+", "L1")
+    @property
+    def couplingname(self):
+        if self == "0+": return "g1"
+        if self == "a2": return "g2"
+        if self == "0-": return "g4"
+        if self == "L1": return "g1prime2"
+        assert False
 
 class ProductionMode(MyEnum):
     enumname = "productionmode"
@@ -443,6 +450,7 @@ hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
 proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"))
+purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = Hypothesis.items(lambda x: x in ("0+", "0-", "fCP0.5"))
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
