@@ -38,6 +38,16 @@ del Projection
 
 class TemplateForProjection(object):
     __metaclass__ = abc.ABCMeta
+
+    def __init__(self, *args, **kwargs):
+        self.__initedhistogram = False
+        super(TemplateForProjection, self).__init__(*args, **kwargs)
+
+    @abc.abstractmethod
+    def inithistogram(self):
+        self.__initedhistogram = True
+        self.projections = {}
+
     def Projection(self, i):
         if i not in self.projections:
             result = self.h.Projection(i)
@@ -60,6 +70,14 @@ class TemplateForProjection(object):
     @abc.abstractproperty
     def discriminants(self):
         pass
+
+    def __getattr__(self, attr):
+        if not self.__initedhistogram and attr in self.histogramattrs:
+            self.inithistogram()
+
+    @property
+    def histogramattrs(self):
+        return "h", "hstackoption"
 
 class Normalization(MyEnum):
     enumname = "normalization"
@@ -89,6 +107,8 @@ class BaseTemplateFromFile(TemplateForProjection):
     def __init__(self, color, *args, **kwargs):
         super(BaseTemplateFromFile, self).__init__(*args)
         self.color = color
+
+    def inithistogram(self):
         self.h = self.template.gettemplate().Clone()
 
         if self.productionmode in ["ggH", "VBF", "ZH", "WH"]:
@@ -102,7 +122,6 @@ class BaseTemplateFromFile(TemplateForProjection):
             if (self.enrichstatus == "impoverish" and self.h.GetZaxis().GetBinLowEdge(z) >= .5 \
              or self.enrichstatus == "enrich"     and self.h.GetZaxis().GetBinLowEdge(z) < .5):
                 self.h.SetBinContent(x, y, z, 0)
-        self.projections = {}
         if self.productionmode == "data":
             self.hstackoption = "P"
             self.h.SetMarkerColor(self.color)
@@ -111,6 +130,8 @@ class BaseTemplateFromFile(TemplateForProjection):
             self.hstackoption = "hist"
 
         self.Scale(scalefactor)
+
+        super(BaseTemplateFromFile, self).inithistogram()
 
     def check(self, *args):
         if self.normalization is None:
@@ -145,21 +166,25 @@ class IntTemplateFromFile(BaseTemplateFromFile, MultiEnum):
 
 class TemplateSum(TemplateForProjection):
     def __init__(self, title, color, *templatesandfactors):
-        self.projections = {}
         self.title = title
         self.color = color
         self.h = None
         self.templatesandfactors = templatesandfactors
-        for template, factor in templatesandfactors:
+        analyses = {t[0].analysis for t in templatesandfactors}
+        assert len(analyses) == 1
+        self.analysis = analyses.pop()
+        super(TemplateSum, self).__init__()
+
+    def inithistogram(self):
+        for template, factor in self.templatesandfactors:
+            if not factor: continue
             if self.h is None:
                 self.h = template.h.Clone()
                 self.h.Scale(factor)
             else:
                 self.h.Add(template.h, factor)
-        analyses = {t[0].analysis for t in templatesandfactors}
-        assert len(analyses) == 1
-        self.analysis = analyses.pop()
         self.hstackoption = "hist"
+        super(TemplateSum, self).inithistogram()
 
     @property
     def discriminants(self):
@@ -175,6 +200,9 @@ class ComponentTemplateSum(TemplateSum):
         for template, factor in templatesandfactors:
             if not isinstance(template, BaseTemplateFromFile):
                 raise TypeError("ComponentTemplateSum can only come from TemplatesFromFiles")
+
+    def inithistogram(self):
+        super(ComponentTemplateSum, self).inithistogram()
         self.Scale(SMintegral / self.Integral())
 
 exts = "png", "eps", "root", "pdf"
@@ -202,8 +230,12 @@ class Projections(MultiEnum):
     super(Projections, self).check(*args, dontcheck=dontcheck)
 
   def projections(self, **kwargs):
+    giname = self.analysis.couplingname
+    BSMhypothesis = self.analysis.purehypotheses[1]
+
     ggHfactor = VBFfactor = VHfactor = 1
     subdir = ""
+    customfai = None
     for kw, kwarg in kwargs.iteritems():
        if kw == "ggHfactor":
            ggHfactor = float(kwarg)
@@ -213,11 +245,16 @@ class Projections(MultiEnum):
            VHfactor = float(kwarg)
        elif kw == "subdir":
            subdir = kwarg
+       elif kw == "customfaiforanimation":
+           animation = True
+           customfai, customfaiproductionmode = kwarg.split()
+           customfai = float(customfai)
+           customfaiproductionmode = ProductionMode(customfaiproductionmode)
+           customsample = samplewithfai(customfaiproductionmode, self.analysis, customfai, False)
+           g1_custom = customsample.g1
+           gi_custom = getattr(customsample, BSMhypothesis.couplingname)
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
-
-    giname = self.analysis.couplingname
-    BSMhypothesis = self.analysis.purehypotheses[1]
 
     gi_ggHBSM = (ReweightingSample("ggH", "SM").xsec / ReweightingSample("ggH", BSMhypothesis).xsec)**.5
     gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25
@@ -306,17 +343,44 @@ class Projections(MultiEnum):
     VBFbkg    = TemplateFromFile(ROOT.kViolet+7, self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "VBF bkg", self.systematic, self.production)
     ZX        = TemplateFromFile(2,              self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ZX",      self.systematic, self.production)
 
-    templates = [
-                 ggHSM, ggHBSM, ggHint, ggHmix_p, ggHmix_m,
-                ] + VBFpieces + [
-                 VBFBSM, VBFmix_p, VBFmix_m,
-                ] + ZHpieces + [
-                 ZHBSM, ZHmix_p, ZHmix_m,
-                ] + WHpieces + [
-                 WHBSM, WHmix_p, WHmix_m,
-                ] + [
-                 SM, BSM, mix_p, mix_m,
-                ]
+    templates = []
+    if ggHfactor:
+        templates += [
+                      ggHSM, ggHBSM, ggHint, ggHmix_p, ggHmix_m,
+                     ]
+    if VBFfactor:
+        templates += VBFpieces
+        templates += [
+                      VBFBSM, VBFmix_p, VBFmix_m,
+                     ]
+    if VHfactor:
+        templates += ZHpieces
+        templates += [
+                      ZHBSM, ZHmix_p, ZHmix_m,
+                     ]
+        templates += WHpieces
+        templates += [
+                      WHBSM, WHmix_p, WHmix_m,
+                     ]
+    if customfai is None:
+        templates += [
+                      SM, BSM, mix_p, mix_m,
+                     ]
+    else:
+        if customfai <  0: plusminus = "#minus"
+        if customfai == 0: plusminus = ""
+        if customfai  > 0: plusminus = "#plus"
+        ggHcustom = ComponentTemplateSum("ggH {}={}{}".format(fainame, plusminus, abs(customfai)), 0, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
+        VBFcustom = ComponentTemplateSum("VBF {}={}{}".format(fainame, plusminus, abs(customfai)), 0, VBFSM.Integral(),
+                                         *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces))
+                                        )
+        ZHcustom  = ComponentTemplateSum("ZH {}={}{}".format(fainame, plusminus, abs(customfai)), 0, ZHSM.Integral(),
+                                         *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces))
+                                        )
+        WHcustom  = ComponentTemplateSum("WH {}={}{}".format(fainame, plusminus, abs(customfai)), 0, WHSM.Integral(),
+                                         *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces))
+                                        )
+
     if ggHfactor == VBFfactor == VHfactor == 1:
         templates += [
                       qqZZ, ggZZ, VBFbkg, ZX,
@@ -340,6 +404,11 @@ class Projections(MultiEnum):
                     pass
             template.AddToLegend(legend)
 
+    if customfai is not None:
+        legend.AddEntry(0, "{}^{{{}}}={}{}".format(self.analysis.title, "dec", plusminus, customsample.fai("ggH", BSMhypothesis))
+        legend.AddEntry(0, "{}^{{{}}}={}{}".format(self.analysis.title, "VBF", plusminus, customsample.fai("VBF", BSMhypothesis))
+        legend.AddEntry(0, "{}^{{{}}}={}{}".format(self.analysis.title, "VH", plusminus, customsample.fai("VH", BSMhypothesis))
+
     for i, discriminant in enumerate(TemplatesFile(self.channel, self.systematic, "ggh", self.analysis, self.production, self.whichproddiscriminants, self.category).discriminants):
         hstack = ROOT.THStack(discriminant.name, discriminant.title)
         for template in templates:
@@ -358,7 +427,6 @@ class Projections(MultiEnum):
   @property
   def saveasdir(self):
       return os.path.join(config.plotsbasedir, "templateprojections", self.enrichstatus.dirname(), str(self.normalization), "{}_{}/{}/{}".format(self.analysis, self.production, self.category, self.channel))
-
 
 def projections(*args):
     Projections(*args).projections()
