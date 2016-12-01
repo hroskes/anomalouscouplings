@@ -212,18 +212,25 @@ class SampleBase(object):
                          )
 
     def fai(self, productionmode, hypothesis, withdecay=False):
-        rws = ReweightingSample(productionmode, hypothesis)
-        productionmode, hypothesis = rws.productionmode, rws.hypothesis
+        hypothesis = Hypothesis(hypothesis)
+        if productionmode == "VH":
+            productionmodes = [ProductionMode("ZH"), ProductionMode("WH")]
+        else:
+            productionmodes = [ProductionMode(productionmode)]
+
         if not hypothesis.ispure:
             raise ValueError("fai doesn't make sense for {} because it's not pure".format(hypothesis))
         if productionmode == "ggH" and not withdecay:
             raise ValueError("ggH without decay does not make sense! (except H+jj but that's not implemented)")
+
         power = 4 if productionmode != "ggH" and withdecay else 2
         numerator = None
         denominator = 0
         for h in purehypotheses:
             kwargs = {_.couplingname: 1 if _ == h else 0 for _ in purehypotheses}
-            term = getattr(self, h.couplingname)**power * ArbitraryCouplingsSample(productionmode, **kwargs).xsec
+            term = 0
+            for productionmode in productionmodes:
+                term += getattr(self, h.couplingname)**power * ArbitraryCouplingsSample(productionmode, **kwargs).xsec
             if not withdecay:
                 term /= ArbitraryCouplingsSample("ggH", **kwargs).xsec
             denominator += term
