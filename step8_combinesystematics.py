@@ -6,7 +6,7 @@ ZX systematics templates from qqZZ
 
 from helperstuff import config
 from helperstuff.enums import analyses, channels, productions
-from helperstuff.filemanager import tfiles
+from helperstuff.utilities import tfiles
 from helperstuff.templates import Template, TemplatesFile
 import ROOT
 

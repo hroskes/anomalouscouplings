@@ -1,4 +1,4 @@
-from filemanager import keydefaultdict
+from utilities import keydefaultdict
 import os
 from pipes import quote
 import subprocess

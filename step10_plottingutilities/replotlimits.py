@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from helperstuff import config
-from helperstuff.filemanager import cd, KeepWhileOpenFile
+from helperstuff.utilities import cd, KeepWhileOpenFile
 import os
 import subprocess
 

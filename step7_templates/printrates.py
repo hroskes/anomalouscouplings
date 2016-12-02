@@ -4,7 +4,7 @@ from helperstuff import config
 from helperstuff.combinehelpers import getrate
 from helperstuff.enums import categories, Channel, channels, ProductionMode
 from helperstuff.templates import DataTree
-from helperstuff.filemanager import tfiles
+from helperstuff.utilities import tfiles
 import os
 from projections import Projections
 import ROOT

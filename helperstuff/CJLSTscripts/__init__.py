@@ -1,4 +1,4 @@
-from .. import filemanager
+from .. import utilities
 import downloadfromCJLST
 import os
 import ROOT
@@ -9,7 +9,7 @@ CJLSTscriptsfile = os.path.join(CJLSTscriptsfolder, "CJLSTscripts.cc")
 #have to be in order of who includes whose header file
 scripts = ["cConstants", "Category"]
 
-with filemanager.cd(CJLSTscriptsfolder):
+with utilities.cd(CJLSTscriptsfolder):
     for script in scripts:
         downloadfromCJLST.download("AnalysisStep/src/{}.cc".format(script))
         downloadfromCJLST.download("AnalysisStep/interface/{}.h".format(script))

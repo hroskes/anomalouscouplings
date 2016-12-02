@@ -1,7 +1,7 @@
 import abc
 import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
-from filemanager import cache, getnesteddictvalue, jsonloads, tfiles
+from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 from itertools import product
 import json
 import numpy
@@ -249,12 +249,11 @@ class TemplatesFile(MultiEnum):
         assert False
 
     @property
+    @cache
     def invertedmatrix(self):
-        assert self.templategroup in ("vbf", "zh", "wh")
+        ganomalous = self.analysis.couplingname
+        if self.templategroup in ("vbf", "zh", "wh"):
 
-        if not hasattr(self, "__invertedmatrix"):
-
-            ganomalous = self.analysis.couplingname
             matrix = numpy.matrix(
                                   [
                                    [
@@ -276,14 +275,28 @@ class TemplatesFile(MultiEnum):
                templates for each respective term (g1^4g4^0, g1^3g4^1, ...)
             In the PDF, the templates need to be multiplied by (g1^i)(g4^(4-i))
             """
-            self.__invertedmatrix = invertedmatrix = matrix.I
+            invertedmatrix = matrix.I
             #make sure the two pure templates can be used as is
             #these assertions should be equivalent to asserting that SMtemplate.g1 == anomaloustemplate.ganomalous == 1
             # and that the two pure samples are in the right places on the list
             assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
             assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
 
-        return self.__invertedmatrix
+        if self.templategroup == "ggh":
+            matrix = numpy.matrix(
+                                  [
+                                   [
+                                    template.sample.g1**(2-i) * getattr(template.sample, ganomalous)**i
+                                        for i in range(3)
+                                   ]
+                                       for template in self.templates()
+                                  ]
+                                 )
+            invertedmatrix = matrix.I
+            assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,3))
+            assert invertedmatrix[2,0] == 0 and invertedmatrix[2,2] == 0 #can't assert invertedmatrix[2,1] == 1 because different convention :(
+
+        return invertedmatrix
 
 def listfromiterator(function):
     return list(function())
