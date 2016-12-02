@@ -2,8 +2,8 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
 from glob import glob
 from helperstuff import config
-import helperstuff.stylefunctions as style
 from helperstuff.enums import Analysis
+import helperstuff.stylefunctions as style
 from helperstuff.utilities import tfiles
 import os
 import ROOT

@@ -6,8 +6,8 @@ ZX systematics templates from qqZZ
 
 from helperstuff import config
 from helperstuff.enums import analyses, channels, productions
-from helperstuff.utilities import tfiles
 from helperstuff.templates import Template, TemplatesFile
+from helperstuff.utilities import tfiles
 import ROOT
 
 def combinesystematics(flavor, analysis, production):
