@@ -524,8 +524,8 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "enrich", "Untagged")
-    return
+#    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "enrich", "Untagged")
+#    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:
@@ -546,5 +546,6 @@ if __name__ == "__main__":
     p.projections(subdir="ggH", ggHfactor=1, VBFfactor=0, VHfactor=0)
     p.projections(subdir="VBF", ggHfactor=0, VBFfactor=1, VHfactor=0)
     p.projections(subdir="VH",  ggHfactor=0, VBFfactor=0, VHfactor=1)
-    p.animation()
+    if p.enrichstatus == "fullrange":
+      p.animation()
     print i, "/", length
