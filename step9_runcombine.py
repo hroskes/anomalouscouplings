@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff import config
-from helperstuff import filemanager
+from helperstuff import utilities
 from helperstuff.combinehelpers import datacardprocessline, getrates, Luminosity
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode, WhichProdDiscriminants
 from helperstuff.plotlimits import plotlimits
@@ -175,7 +175,7 @@ def runcombine(analysis, foldername, **kwargs):
               "workspacefileappend": workspacefileappend,
               "expectrs": "r_ggH=1,r_VVH=1",
              }
-    with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
+    with utilities.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         if subdirectory:
             try:
                 os.makedirs(subdirectory)
@@ -197,7 +197,7 @@ def runcombine(analysis, foldername, **kwargs):
             shutil.move("cards_{}".format(foldername), subdirectory)
         with open(os.path.join(subdirectory, "cards_{}".format(foldername), ".gitignore"), "w") as f:
             f.write("*")
-        with filemanager.cd(os.path.join(subdirectory, "cards_{}".format(foldername), "HCG", "125")):
+        with utilities.cd(os.path.join(subdirectory, "cards_{}".format(foldername), "HCG", "125")):
             for channel, category, production in product(usechannels, usecategories, productions):
                 luminosity = float(Luminosity(lumitype, production))
                 if not os.path.exists("hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity)):

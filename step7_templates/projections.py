@@ -4,7 +4,7 @@ import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate, gettemplate
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, WhichProdDiscriminants, whichproddiscriminants
-from helperstuff.filemanager import cache, tfiles, pairwise
+from helperstuff.utilities import cache, tfiles, pairwise
 from helperstuff.samples import ReweightingSample, samplewithfai
 import helperstuff.style
 from helperstuff.templates import IntTemplate, Template, TemplatesFile

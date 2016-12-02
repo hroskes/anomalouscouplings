@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from helperstuff.discriminants import discriminant
-from helperstuff.filemanager import tfiles
+from helperstuff.utilities import tfiles
 from helperstuff.enums import *
 from helperstuff.samples import *
 from helperstuff import style
