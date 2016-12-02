@@ -2,8 +2,8 @@
 from abc import ABCMeta, abstractproperty
 import config
 import constants
-from enums import AlternateGenerator, BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
-from math import sqrt
+from enums import AlternateGenerator, Analysis, BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, purehypotheses, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
+from math import copysign, sqrt
 import os
 import ROOT
 
@@ -211,6 +211,33 @@ class SampleBase(object):
                             for reweightingsample, factor in self.linearcombinationofreweightingsamples.iteritems()
                          )
 
+    def fai(self, productionmode, hypothesis, withdecay=False):
+        hypothesis = Hypothesis(hypothesis)
+        if productionmode == "VH":
+            productionmodes = [ProductionMode("ZH"), ProductionMode("WH")]
+        else:
+            productionmodes = [ProductionMode(productionmode)]
+
+        if not hypothesis.ispure:
+            raise ValueError("fai doesn't make sense for {} because it's not pure".format(hypothesis))
+        if productionmode == "ggH":
+            withdecay = True
+
+        power = 4 if productionmode != "ggH" and withdecay else 2
+        numerator = None
+        denominator = 0
+        for h in purehypotheses:
+            kwargs = {_.couplingname: 1 if _ == h else 0 for _ in purehypotheses}
+            term = 0
+            for productionmode in productionmodes:
+                term += getattr(self, h.couplingname)**power * ArbitraryCouplingsSample(productionmode, **kwargs).xsec
+            if not withdecay:
+                term /= ArbitraryCouplingsSample("ggH", **kwargs).xsec
+            denominator += term
+            if h == hypothesis:
+                numerator = term
+        return copysign(numerator / denominator, getattr(self, hypothesis.couplingname))
+
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
         self.productionmode = ProductionMode(productionmode)
@@ -273,6 +300,21 @@ class ArbitraryCouplingsSample(SampleBase):
                                              for coupling in couplings
                                             ),
                                   )
+
+def samplewithfai(productionmode, analysis, fai, withdecay=False):
+    from combinehelpers import sigmaioversigma1
+    analysis = Analysis(analysis)
+    productionmode = ProductionMode(productionmode)
+    if productionmode == "ggH":
+        withdecay = True
+    kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2")}
+    power = (.25 if productionmode != "ggH" and withdecay else .5)
+    kwargs["g1"] = (1-abs(fai))**power
+    xsecratio = sigmaioversigma1(analysis, productionmode)
+    if not withdecay:
+        xsecratio /= sigmaioversigma1(analysis, "ggH")
+    kwargs[analysis.couplingname] = copysign((abs(fai) / xsecratio)**power, fai)
+    return ArbitraryCouplingsSample(productionmode, **kwargs)
 
 class ReweightingSample(MultiEnum, SampleBase):
     __metaclass__ = MultiEnumABCMeta
@@ -709,5 +751,5 @@ class Sample(ReweightingSample):
         raise self.ValueError("unblind")
 
 if __name__ == "__main__":
-    print ArbitraryCouplingsSample("ggH", 2, 0, 0, 0).MC_weight
-    print ArbitraryCouplingsSample("ZH", 3, 0, 0, -3*sqrt(constants.g1prime2ZH_gen*constants.g1prime2decay_gen)).MC_weight
+    for fa2 in 0, .25, -.5, .75, 1:
+        print fa2, " ".join(str(samplewithfai("VBF", "fa2", fa2).fai("VBF", _)) for _ in purehypotheses)

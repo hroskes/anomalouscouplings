@@ -114,6 +114,13 @@ class Hypothesis(MyEnum):
     @property
     def ispure(self):
         return self in ("0+", "0-", "0h+", "L1")
+    @property
+    def couplingname(self):
+        if self == "0+": return "g1"
+        if self == "a2": return "g2"
+        if self == "0-": return "g4"
+        if self == "L1": return "g1prime2"
+        assert False
 
 class ProductionMode(MyEnum):
     enumname = "productionmode"
@@ -281,11 +288,11 @@ class Analysis(MyEnum):
     @property
     def purehypotheses(self):
         if self == "fa3":
-            return "0+", "0-"
+            return Hypothesis("0+"), Hypothesis("0-")
         if self == "fa2":
-            return "0+", "a2"
+            return Hypothesis("0+"), Hypothesis("a2")
         if self == "fL1":
-            return "0+", "L1"
+            return Hypothesis("0+"), Hypothesis("L1")
     @property
     def mixdecayhypothesis(self):
         if self == "fa3":
@@ -443,6 +450,7 @@ hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
 proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"))
+purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = Hypothesis.items(lambda x: x in ("0+", "0-", "fCP0.5"))
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
@@ -560,7 +568,7 @@ class MultiEnum(object):
     def __str__(self):
         return " ".join(str(item) for item in self.items if item is not None)
     def __repr__(self):
-        return "{}({})".format(type(self).__name__, ", ".join(repr(_.item.name) for _ in self.items if _ is not None))
+        return "{}({})".format(type(self).__name__, ", ".join(repr(_.item.name if isinstance(_, MyEnum) else _) for _ in self.items if _ is not None))
 
     def applysynonyms(self, enumsdict):
         pass
