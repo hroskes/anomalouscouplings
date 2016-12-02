@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
-from helperstuff import config
-from helperstuff import utilities
+from helperstuff import config, utilities
 from helperstuff.combinehelpers import datacardprocessline, getrates, Luminosity
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode, WhichProdDiscriminants
 from helperstuff.plotlimits import plotlimits

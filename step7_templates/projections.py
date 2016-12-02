@@ -4,10 +4,10 @@ import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate, gettemplate
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, WhichProdDiscriminants, whichproddiscriminants
-from helperstuff.utilities import cache, tfiles, pairwise
 from helperstuff.samples import ReweightingSample, samplewithfai
 import helperstuff.style
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
+from helperstuff.utilities import cache, tfiles, pairwise
 import itertools
 from math import sqrt
 import os

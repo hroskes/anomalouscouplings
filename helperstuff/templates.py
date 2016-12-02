@@ -1,12 +1,12 @@
 import abc
 import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
-from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 from itertools import product
 import json
 import numpy
 import os
 from samples import ReweightingSample, Sample
+from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"

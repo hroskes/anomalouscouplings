@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
+from helperstuff import style
 from helperstuff.discriminants import discriminant
-from helperstuff.utilities import tfiles
 from helperstuff.enums import *
 from helperstuff.samples import *
-from helperstuff import style
+from helperstuff.utilities import tfiles
 import ROOT
 
 discriminants = [discriminant(_) for _ in "D_0minus_VBF", "D_CP_VBF", "D_0minus_ZH_hadronic", "D_CP_ZH_hadronic"]

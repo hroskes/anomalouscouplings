@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from helperstuff import config
-from helperstuff.utilities import KeepWhileOpenFile
 from helperstuff.samples import Sample
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
+from helperstuff.utilities import KeepWhileOpenFile
 import os
 import ROOT
 import subprocess

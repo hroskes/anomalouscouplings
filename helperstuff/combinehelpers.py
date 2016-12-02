@@ -1,11 +1,11 @@
 import collections
 import config
 from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode
-from utilities import tfiles
 import os
 import ROOT
 from samples import ReweightingSample, Sample
 from templates import DataTree, IntTemplate, Template
+from utilities import tfiles
 import yaml
 
 datacardprocessline = "ggH qqH WH ZH bkg_qqzz bkg_ggzz bkg_vbf bkg_zjets"
