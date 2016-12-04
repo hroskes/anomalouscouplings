@@ -5,6 +5,7 @@ from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate, gettemplate
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, WhichProdDiscriminants, whichproddiscriminants
 from helperstuff.samples import ReweightingSample, samplewithfai
+import helperstuff.rootoverloads.histogramaxisnumbers
 import helperstuff.style
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import cache, tfiles, pairwise
@@ -14,28 +15,6 @@ import os
 import ROOT
 import subprocess
 from tempfile import mkdtemp
-
-def GetAxis(self, i):
-    if i == 0:
-        return self.GetXaxis()
-    elif i == 1:
-        return self.GetYaxis()
-    elif i == 2:
-        return self.GetZaxis()
-    assert False
-ROOT.TH1.GetAxis = GetAxis
-del GetAxis
-
-def Projection(self, i):
-    if i == 0:
-        return self.ProjectionX()
-    elif i == 1:
-        return self.ProjectionY()
-    elif i == 2:
-        return self.ProjectionZ()
-    assert False
-ROOT.TH1.Projection = Projection
-del Projection
 
 class TemplateForProjection(object):
     __metaclass__ = abc.ABCMeta

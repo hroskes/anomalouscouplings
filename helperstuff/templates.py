@@ -11,6 +11,13 @@ class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
     enums = [Channel, Systematic, TemplateGroup, Analysis, Production, BlindStatus, WhichProdDiscriminants, Category]
 
+    def applysynonyms(self, enumsdict):
+        if enumsdict[Production] is None and len(config.productionsforcombine) == 1:
+            enumsdict[Production] = config.productionsforcombine[0]
+        if enumsdict[WhichProdDiscriminants] is None and len(whichproddiscriminants) == 1:
+            enumsdict[WhichProdDiscriminants] = whichproddiscriminants[0]
+        super(TemplatesFile, self).applysynonyms(enumsdict)
+
     def check(self, *args):
         dontcheck = []
 
@@ -29,11 +36,13 @@ class TemplatesFile(MultiEnum):
             dontcheck.append(BlindStatus)
 
         if self.category == "UntaggedIchep16":
+            if len(whichproddiscriminants) == 1: self.whichproddiscriminants = None
             if self.whichproddiscriminants is not None:
                 raise ValueError("Don't provide whichproddiscriminants for untagged category\n{}".format(args))
             dontcheck.append(WhichProdDiscriminants)
 
         if self.analysis == "fL1":
+            if len(whichproddiscriminants) == 1: self.whichproddiscriminants = None
             if self.whichproddiscriminants is not None:
                 raise ValueError("Don't provide whichproddiscriminants for fL1\n{}".format(args))
             dontcheck.append(WhichProdDiscriminants)
