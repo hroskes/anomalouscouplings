@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+assert __name__ == "__main__"
+
 from helperstuff import config
 from helperstuff import constants
 from helperstuff import style
@@ -13,13 +16,14 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "VBF"
-disc           = "D_g2_decay"
-weight         = ArbitraryCouplingsSample(productionmode, 1, -constants.g2decay, 0, 0)
+productionmode = "ZH"
+disc           = "D_bkg_0plus"
+weight         = None
 bins           = None
 min            = None
 max            = None
-enrich         = True
+enrich         = False
+masscut        = True
 channel        = "2e2mu"
 category       = "Untagged"
 #========================
@@ -61,6 +65,13 @@ def hypothesestouse():
         if productionmode in ["HJJ", "ttH"] and hypothesis not in hffhypotheses: continue
         yield hypothesis
 
+for hypothesis in hypotheses:
+    if hypothesis not in hypothesestouse():
+        try:
+            os.remove(os.path.join(config.plotsbasedir, "TEST", "{}.png".format(hypothesis)))
+        except OSError:
+            pass
+
 for color, hypothesis in enumerate(hypothesestouse(), start=1):
     t = ROOT.TChain("candTree", "candTree")
     sample = Sample(productionmode, hypothesis, "160928")
@@ -69,15 +80,22 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
 
     weightname = weight if weight is not None else sample.weightname()
 
-    wt = "({}>-998)*({})".format(discname, weightname)
+    weightfactors = [
+                     weightname,
+                     "{}>-998".format(discname),
+                    ]
 
     if category is not None:
-        wt += "*({})".format(" || ".join("(category=={})".format(_) for _ in Category(category).idnumbers))
+        weightfactors.append(" || ".join("(category=={})".format(_) for _ in Category(category).idnumbers))
     if enrich:
-        wt += "*(D_bkg_0plus>0.5)"
+        weightfactors.append("D_bkg_0plus>0.5")
     if channel is not None:
-        wt += "*(Z1Flav*Z2Flav=={})".format(Channel(channel).ZZFlav)
+        weightfactors.append("Z1Flav*Z2Flav=={}".format(Channel(channel).ZZFlav))
+    if masscut:
+        weightfactors.append("ZZMass > {}".format(config.m4lmin))
+        weightfactors.append("ZZMass < {}".format(config.m4lmax))
 
+    wt = "*".join("("+_+")" for _ in weightfactors)
 
     t.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
     h = hs[hypothesis] = getattr(ROOT, hname)
