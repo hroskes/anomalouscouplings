@@ -503,17 +503,16 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "fullrange", "Untagged")
+#    yield Projections("160928", "2e2mu", "fL1", "rescalemixtures", "fullrange", "Untagged")
 #    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:
-          if analysis == "fL1": continue
           for normalization in normalizations:
             for enrichstatus in enrichstatuses:
               for category in categories:
                 if normalization != "rescalemixtures": continue   #uncomment this to get the niceplots fast
-                if category == "Untagged":
+                if category == "Untagged" or analysis == "fL1":
                   yield Projections(channel, analysis, normalization, production, enrichstatus, category)
                 else:
                   for w in whichproddiscriminants:
