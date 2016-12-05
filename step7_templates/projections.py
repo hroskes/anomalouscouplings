@@ -254,7 +254,7 @@ class Projections(MultiEnum):
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
-    gi_ggHBSM = (ReweightingSample("ggH", "SM").xsec / ReweightingSample("ggH", BSMhypothesis).xsec)**.5
+    gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
     gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25
     gi_VHBSM = ((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25
     if self.category == "UntaggedIchep16":
@@ -503,7 +503,7 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "enrich", "Untagged")
+#    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "fullrange", "Untagged")
 #    return
     for production in productions:
       for channel in channels:

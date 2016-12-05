@@ -8,6 +8,7 @@ from helperstuff import style
 from helperstuff.combinehelpers import gettemplate
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import *
+import helperstuff.rootoverloads.histogramfloor
 from helperstuff.samples import *
 import re
 import ROOT
@@ -16,9 +17,9 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "ZH"
-disc           = "D_bkg_0plus"
-weight         = None
+productionmode = "ggH"
+disc           = "D_g2_decay"
+weight         = samplewithfai(productionmode, "fa2", -.14, productionmodeforfai="ggH")
 bins           = None
 min            = None
 max            = None
@@ -103,6 +104,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
       h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
       h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
+    h.Floor()
     hstack.Add(h)
     cache.append(h)
     legend.AddEntry(h, str(hypothesis), "l")

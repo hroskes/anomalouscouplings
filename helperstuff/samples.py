@@ -204,6 +204,8 @@ class SampleBase(object):
                      for reweightingsample, factor in zip(vectorofreweightingsamples, vectorTmatrixaslist)
                      if factor
                    }
+        assert False
+
     @property
     def MC_weight(self):
         return " + ".join(
@@ -301,16 +303,19 @@ class ArbitraryCouplingsSample(SampleBase):
                                             ),
                                   )
 
-def samplewithfai(productionmode, analysis, fai, withdecay=False):
+def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmodeforfai=None):
     from combinehelpers import sigmaioversigma1
     analysis = Analysis(analysis)
     productionmode = ProductionMode(productionmode)
-    if productionmode == "ggH":
+    if productionmodeforfai is None:
+        productionmodeforfai = productionmode
+    productionmodeforfai = ProductionMode(productionmodeforfai)
+    if productionmodeforfai == "ggH":
         withdecay = True
     kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2")}
-    power = (.25 if productionmode != "ggH" and withdecay else .5)
+    power = (.25 if productionmodeforfai != "ggH" and withdecay else .5)
     kwargs["g1"] = (1-abs(fai))**power
-    xsecratio = sigmaioversigma1(analysis, productionmode)
+    xsecratio = sigmaioversigma1(analysis, productionmodeforfai)
     if not withdecay:
         xsecratio /= sigmaioversigma1(analysis, "ggH")
     kwargs[analysis.couplingname] = copysign((abs(fai) / xsecratio)**power, fai)
