@@ -91,6 +91,11 @@ class BaseTemplateFromFile(TemplateForProjection):
     def __init__(self, color, *args, **kwargs):
         super(BaseTemplateFromFile, self).__init__(*args)
         self.color = color
+        #I don't know what the following line accomplishes
+        # but it fixes the WH interference templates.
+        #Otherwise they are wrong in some way that
+        # I don't understand
+        self.template.gettemplate()
 
     def inithistogram(self):
         self.h = self.template.gettemplate().Clone()
@@ -503,7 +508,7 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fL1", "rescalemixtures", "fullrange", "Untagged")
+#    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "fullrange", "Untagged")
 #    return
     for production in productions:
       for channel in channels:
