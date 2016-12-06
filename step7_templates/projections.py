@@ -201,7 +201,7 @@ class Projections(MultiEnum):
 
   def applysynonyms(self, enumsdict):
     if enumsdict[WhichProdDiscriminants] is None and enumsdict[Analysis] != "fL1":
-      enumsdict[WhichProdDiscriminants] = "D_g12gi2"
+      enumsdict[WhichProdDiscriminants] = "D_int_prod"
     super(Projections, self).applysynonyms(enumsdict)
 
   def check(self, *args):
