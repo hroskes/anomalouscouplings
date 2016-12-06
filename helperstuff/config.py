@@ -1,8 +1,10 @@
 import getpass
+import re
 import socket
 
 
 if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and getpass.getuser() in ["hroskes","rbarr"] :
+    host = "lxplus"
     if getpass.getuser() == "hroskes":
         repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production"
         plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/"
@@ -10,11 +12,17 @@ if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and 
         repositorydir = "/afs/cern.ch/work/r/rbarr/anomalouscouplings"
         plotsbasedir = "/afs/cern.ch/user/r/rbarr/www/anomalouscouplings_production/"
 
-elif "login-node" in socket.gethostname() and getpass.getuser() == "jroskes1@jhu.edu":
+elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname()) and getpass.getuser() == "jroskes1@jhu.edu":
+    host = "MARCC"
     repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/"
     plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/"
-else:
-    raise ValueError("Who/where are you?")
+
+try:
+    repositorydir
+    plotsbasedir
+    host
+except NameError:
+    raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
 usedata = False
 unblinddistributions = False

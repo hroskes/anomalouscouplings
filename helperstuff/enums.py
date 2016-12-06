@@ -398,7 +398,7 @@ class Category(MyEnum):
     enumname = "category"
     enumitems = (
                  EnumItem("Untagged", "UntaggedIchep16", "VBF1jTaggedIchep16", "VHLeptTaggedIchep16", "ttHTaggedIchep16"),
-                 EnumItem("VHHadrtagged","VHHadrTaggedIchep16"),
+                 EnumItem("VHHadrtagged", "VHHadrTaggedIchep16"),
                  EnumItem("VBFtagged", "VBF2jTaggedIchep16"),
                 )
     @property
@@ -476,7 +476,7 @@ class MetaclassForMultiEnums(type):
             else:
                 raise TypeError("MultiEnum class {} does not define enums!".format(clsname))
             dct["enums"] = enums
-        dct["needenums"] = needenums = enums[:]
+        dct["needenums"] = needenums = list(enums)
         dct["subenums"] = subenums = OrderedDict()
         while True:
             for enum in needenums[:]:

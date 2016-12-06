@@ -2,10 +2,11 @@ import abc
 import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
 from itertools import product
+import json
 import numpy
 import os
 from samples import ReweightingSample, Sample
-from utilities import cache, tfiles
+from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
@@ -71,6 +72,11 @@ class TemplatesFile(MultiEnum):
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
 
         return result
+
+    @property
+    def controlplotsdir(self):
+        split = os.path.split(self.templatesfile())
+        return os.path.join(config.plotsbasedir, "templateprojections", "controlplots", split[1].replace(".root", ""))
 
     def signalsamples(self):
         if self.templategroup == "ggh":
@@ -734,42 +740,50 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
-    @property
-    def smoothentriesperbinandreweightaxes(self):
-      if self.productionmode == "ggH":
-        if self.category == "Untagged":
-          pass
-      elif self.productionmode == "VBF":
-        if self.category == "VBFtagged":
-          pass
-      elif self.productionmode == "WH":
-        if self.category == "VHHadrtagged":
-          if self.channel == "2e2mu":
-            if self.analysis == "fa3":
-              if self.whichproddiscriminants == "D_int_prod":
-                if self.hypothesis in ("0-", "fa3dec0.5"): return 20, [0, 2]#need less agressive smoothing and don't reweight D_CP=axis1
-                if self.hypothesis in ("0+", "fa3prod0.5"): return 50, [0, 1, 2]#need less agressive smoothing and don't reweight D_bkg=axis2?
-                return 50, [0, 1, 2]
-      if self.productionmode == "ZH":
-        if self.category == "VHHadrtagged":
-          pass
+    smoothingparametersfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
 
-        if self.category == "VBFtagged":
-          if self.channel == "2e2mu":
-            if self.analysis == "fa2":
-              if self.whichproddiscriminants == "D_int_prod":
-                if self.hypothesis in ("fa2prod0.5", "fa2proddec-0.5"): return 50, [0, 1, 2]
-                elif self.hypothesis in ("SM", "a2", "fa2dec0.5"): return 50, [0, 2]
-                else: assert False
-      return None, None
+    @classmethod
+    def getsmoothingparametersdict(cls, trycache=True):
+      if not hasattr(cls, "smoothingparametersdict_cache") or not trycache:
+        try:
+          with open(cls.smoothingparametersfile) as f:
+            jsonstring = f.read()
+        except IOError:
+          try:
+            os.makedirs(os.path.dirname(cls.smoothingparametersfile))
+          except OSError:
+            pass
+          with open(cls.smoothingparametersfile, "w") as f:
+            f.write("{}\n")
+            jsonstring = "{}"
+        cls.smoothingparametersdict_cache = json.loads(jsonstring)
+      return cls.smoothingparametersdict_cache
+
+    @property
+    def smoothingparameters(self):
+      keys = (
+              str(self.productionmode),
+              str(self.category),
+              str(self.channel),
+              str(self.analysis),
+              str(self.whichproddiscriminants),
+              str(self.hypothesis),
+              str(self.systematic),
+              str(self.production),
+             )
+      return getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])
 
     @property
     def smoothentriesperbin(self):
-      return self.smoothentriesperbinandreweightaxes[0]
+      return self.smoothingparameters[0]
 
     @property
     def reweightaxes(self):
-      return self.smoothentriesperbinandreweightaxes[1]
+      return self.smoothingparameters[1]
+
+    @property
+    def reweightrebin(self):
+      return self.smoothingparameters[2]
 
     @property
     def postprocessingjson(self):
@@ -777,7 +791,10 @@ class Template(TemplateBase, MultiEnum):
       if self.smoothentriesperbin:
         result.append({"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin})
         if self.reweightaxes:
-          result.append({"type": "reweight", "axes": self.reweightaxes})
+          reweight = {"type": "reweight", "axes": self.reweightaxes}
+          if self.reweightrebin and any(self.reweightrebin):
+            reweight.update({"rebinning": self.reweightrebin})
+          result.append(reweight)
       result.append({"type": "rescale", "factor": self.scalefactor})
       return result
 
