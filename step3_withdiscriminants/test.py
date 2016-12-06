@@ -17,16 +17,16 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "ggH"
-disc           = "D_g2_decay"
-weight         = samplewithfai(productionmode, "fa2", -.14, productionmodeforfai="ggH")
+productionmode = "ZH"
+disc           = "D_CP_VH_hadronic"
+weight         = ReweightingSample(productionmode, "fa3prod0.5")
 bins           = None
 min            = None
 max            = None
 enrich         = False
 masscut        = True
 channel        = "2e2mu"
-category       = "Untagged"
+category       = "VHHadrtagged"
 #========================
 
 if isinstance(weight, SampleBase):
