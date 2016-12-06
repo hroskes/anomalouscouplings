@@ -2,10 +2,10 @@
 from collections import OrderedDict
 from copy import deepcopy
 from helperstuff import config
-from helperstuff.filemanager import cd
 from helperstuff.optimizesmoothing import TemplateIterate
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import Template, templatesfiles
+from helperstuff.utilities import cd
 import json
 import os
 import shutil

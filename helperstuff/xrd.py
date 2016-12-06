@@ -1,7 +1,7 @@
-from filemanager import keydefaultdict
 import os
 from pipes import quote
 import subprocess
+from utilities import KeyDefaultDict
 
 xrdlstemplate = """
 echo '
@@ -25,7 +25,7 @@ def xrdls(hostfolder):
         line = line.split(folder)[-1]
         result.append(line)
     return result
-xrdls = keydefaultdict(xrdls)
+xrdls = KeyDefaultDict(xrdls)
     
 
 def exists(filename):

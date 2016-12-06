@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from helperstuff import filemanager
+from helperstuff import utilities
 import os
 import shutil
 import subprocess
@@ -15,7 +15,7 @@ print """Yes, config is set up!
 """
 
 print "Initiating git submodules..."
-#subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
+subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
 if set(os.listdir("CMSSW_7_6_5")) != set(["src", ".gitignore"]):
     print """CMSSW_7_6_5 area already set up."""
@@ -36,7 +36,7 @@ else:
         shutil.move(os.path.join(tmpdir, "src"), "CMSSW_7_6_5/src")
         shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_7_6_5/.gitignore")
 
-    with filemanager.cd("CMSSW_7_6_5/src"):
+    with utilities.cd("CMSSW_7_6_5/src"):
         subprocess.check_call(["scram", "b"])
 
     print """CMSSW area is set up"""

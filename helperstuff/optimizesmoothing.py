@@ -1,12 +1,12 @@
 from collections import namedtuple
 from discriminants import discriminant
-from filemanager import cache, tfiles
 import itertools
 from math import sqrt
 import numpy
 import os
 import ROOT
 from templates import Template
+from utilities import cache, tfiles
 
 Bin = namedtuple("Bin", "low hi contents error")
 Derivative = namedtuple("Derivative", "center difference differror")

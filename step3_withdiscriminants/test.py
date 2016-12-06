@@ -1,21 +1,45 @@
+#!/usr/bin/env python
+
+assert __name__ == "__main__"
+
 from helperstuff import config
+from helperstuff import constants
 from helperstuff import style
+from helperstuff.combinehelpers import gettemplate
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import *
+import helperstuff.rootoverloads.histogramfloor
 from helperstuff.samples import *
+import re
 import ROOT
 import os
 
 #========================
 #inputs
-#weight, bins, min, max can be None
-productionmode = "VBF"
-disc           = "D_g2_VBFdecay"
-weight         = "MC_weight_{}_g1".format(productionmode)
+#weight, bins, min, max, category can be None
+productionmode = "ZH"
+disc           = "D_CP_VH_hadronic"
+weight         = ReweightingSample(productionmode, "fa3prod0.5")
 bins           = None
 min            = None
 max            = None
+enrich         = False
+masscut        = True
+channel        = "2e2mu"
+category       = "VHHadrtagged"
 #========================
+
+if isinstance(weight, SampleBase):
+    weight = weight.MC_weight
+
+if weight is not None:
+    for name, value in constants.__dict__.iteritems():
+        try:
+            value = "{:g}".format(value)
+        except ValueError:
+            continue
+        weight = re.sub(r"\b"+name+r"\b", value, weight)
+        disc = re.sub(r"\b"+name+r"\b", value, disc)
 
 
 hstack = ROOT.THStack()
@@ -34,8 +58,22 @@ if max is None:
 
 c = ROOT.TCanvas()
 hs = {}
-for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2", "fa2prod0.5", "0+"], start=1):
-#    if hypothesis in ["0-", "fa3prod0.5"]: continue
+
+def hypothesestouse():
+    for hypothesis in hypotheses:
+        if productionmode == "ggH" and hypothesis not in decayonlyhypotheses: continue
+        if productionmode in ["VBF", "ZH", "WH"] and hypothesis not in prodonlyhypotheses: continue
+        if productionmode in ["HJJ", "ttH"] and hypothesis not in hffhypotheses: continue
+        yield hypothesis
+
+for hypothesis in hypotheses:
+    if hypothesis not in hypothesestouse():
+        try:
+            os.remove(os.path.join(config.plotsbasedir, "TEST", "{}.png".format(hypothesis)))
+        except OSError:
+            pass
+
+for color, hypothesis in enumerate(hypothesestouse(), start=1):
     t = ROOT.TChain("candTree", "candTree")
     sample = Sample(productionmode, hypothesis, "160928")
     t.Add(sample.withdiscriminantsfile())
@@ -43,13 +81,30 @@ for color, hypothesis in enumerate(["L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2"
 
     weightname = weight if weight is not None else sample.weightname()
 
-    wt = "({}>-998)*{}".format(discname, weightname)
+    weightfactors = [
+                     weightname,
+                     "{}>-998".format(discname),
+                    ]
+
+    if category is not None:
+        weightfactors.append(" || ".join("(category=={})".format(_) for _ in Category(category).idnumbers))
+    if enrich:
+        weightfactors.append("D_bkg_0plus>0.5")
+    if channel is not None:
+        weightfactors.append("Z1Flav*Z2Flav=={}".format(Channel(channel).ZZFlav))
+    if masscut:
+        weightfactors.append("ZZMass > {}".format(config.m4lmin))
+        weightfactors.append("ZZMass < {}".format(config.m4lmax))
+
+    wt = "*".join("("+_+")" for _ in weightfactors)
+
     t.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
     h = hs[hypothesis] = getattr(ROOT, hname)
     h.GetXaxis().SetTitle(title)
     if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
       h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
       h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
+    h.Floor()
     hstack.Add(h)
     cache.append(h)
     legend.AddEntry(h, str(hypothesis), "l")

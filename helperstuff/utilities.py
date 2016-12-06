@@ -1,10 +1,11 @@
 import collections
 import contextlib
+from itertools import tee, izip
 import json
 import os
 import ROOT
 
-class keydefaultdict(collections.defaultdict):
+class KeyDefaultDict(collections.defaultdict):
     """
     http://stackoverflow.com/a/2912455
     """
@@ -14,7 +15,15 @@ class keydefaultdict(collections.defaultdict):
         else:
             ret = self[key] = self.default_factory(key)
             return ret
-tfiles = keydefaultdict(ROOT.TFile.Open)
+
+class TFilesDict(KeyDefaultDict):
+    def __init__(self):
+        return super(TFilesDict, self).__init__(ROOT.TFile.Open)
+    def __delitem__(self, key):
+        self[key].Close()
+        return super(TFilesDict, self).__delitem__(key)
+
+tfiles = TFilesDict()
 
 def cache(function):
     cachename = "__cache_{}".format(function.__name__)
@@ -92,3 +101,12 @@ def getnesteddictvalue(thedict, *keys, **kwargs):
             thedict[keys[0]] = {}
 
     return getnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
+def pairwise(iterable):
+    """
+    https://docs.python.org/2/library/itertools.html#recipes
+    """
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return izip(a, b)

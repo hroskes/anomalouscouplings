@@ -37,6 +37,8 @@ class MyEnum(object):
 
     def __str__(self):
         return str(self.item)
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, repr(self.item.name))
 
     def __eq__(self, other):
         if isinstance(other, MyEnum) and not isinstance(other, type(self)) and not isinstance(self, type(other)):
@@ -103,7 +105,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fa30.5", "fa3dec0.5"),
                  EnumItem("fL10.5", "fL1dec0.5"),
                  EnumItem("fa2prod0.5"),
-                 EnumItem("fa3prod0.5"),
+                 EnumItem("fa3prod0.5", "fCP0.5"),
                  EnumItem("fL1prod0.5"),
                  EnumItem("fa2proddec-0.5"),
                  EnumItem("fa3proddec-0.5"),
@@ -112,13 +114,20 @@ class Hypothesis(MyEnum):
     @property
     def ispure(self):
         return self in ("0+", "0-", "0h+", "L1")
+    @property
+    def couplingname(self):
+        if self == "0+": return "g1"
+        if self == "a2": return "g2"
+        if self == "0-": return "g4"
+        if self == "L1": return "g1prime2"
+        assert False
 
 class ProductionMode(MyEnum):
     enumname = "productionmode"
     enumitems = (
                  EnumItem("ggH"),
                  EnumItem("VBF", "qqH"),
-                 EnumItem("H+jj", "HJJ"),
+                 EnumItem("HJJ", "H+jj"),
                  EnumItem("ZH"),
                  EnumItem("WH"),
                  EnumItem("ttH"),
@@ -127,6 +136,8 @@ class ProductionMode(MyEnum):
                  EnumItem("VBFbkg", "VBF bkg", "bkg_vbf"),
                  EnumItem("ZX", "bkg_zjets"),
                  EnumItem("data"),
+                 EnumItem("WplusH"),
+                 EnumItem("WminusH"),
                 )
     @property
     def combinename(self):
@@ -137,9 +148,7 @@ class ProductionMode(MyEnum):
         assert False
     @property
     def yamlratenames(self):
-        if self == "ggH":
-            return ["ggH", "ttH"]
-        elif self == "VBF":
+        if self == "VBF":
             return ["qqH"]
         elif self == "ZX":
             return ["zjets"]
@@ -155,6 +164,13 @@ class ProductionMode(MyEnum):
         elif self == "VBF bkg":
             return "qqZZ"
         return str(self)
+    @property
+    def isbkg(self):
+        if self in ("ggH", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH"):
+            return False
+        elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
+            return True
+        assert False
 
 class Systematic(MyEnum):
     enumname = "systematic"
@@ -272,11 +288,11 @@ class Analysis(MyEnum):
     @property
     def purehypotheses(self):
         if self == "fa3":
-            return "0+", "0-"
+            return Hypothesis("0+"), Hypothesis("0-")
         if self == "fa2":
-            return "0+", "a2"
+            return Hypothesis("0+"), Hypothesis("a2")
         if self == "fL1":
-            return "0+", "L1"
+            return Hypothesis("0+"), Hypothesis("L1")
     @property
     def mixdecayhypothesis(self):
         if self == "fa3":
@@ -417,6 +433,12 @@ class WhichProdDiscriminants(MyEnum):
                  EnumItem("D_g13gi1_prime"),
                 )
 
+class AlternateGenerator(MyEnum):
+    enumname = "alternategenerator"
+    enumitems = (
+                 EnumItem("POWHEG"),
+                )
+
 channels = Channel.items()
 if config.applyshapesystematics:
     systematics = Systematic.items()
@@ -428,6 +450,8 @@ hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
 proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"))
+purehypotheses = Hypothesis.items(lambda x: x.ispure)
+hffhypotheses = Hypothesis.items(lambda x: x in ("0+", "0-", "fCP0.5"))
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
 #productions = Production.items(lambda x: x in ("160225", "160729"))
@@ -534,6 +558,7 @@ class MultiEnum(object):
         self.items = tuple(getattr(self, enum.enumname) for enum in self.enums)
 
     def __eq__(self, other):
+        if type(self) != type(other): raise ValueError("Comparing two different types of MultiEnums!")
         return self.items == other.items
     def __ne__(self, other):
         return not self == other
@@ -542,6 +567,8 @@ class MultiEnum(object):
 
     def __str__(self):
         return " ".join(str(item) for item in self.items if item is not None)
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, ", ".join(repr(_.item.name if isinstance(_, MyEnum) else _) for _ in self.items if _ is not None))
 
     def applysynonyms(self, enumsdict):
         pass

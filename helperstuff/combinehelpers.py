@@ -1,11 +1,11 @@
 import collections
 import config
 from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode
-from filemanager import tfiles
 import os
 import ROOT
 from samples import ReweightingSample, Sample
 from templates import DataTree, IntTemplate, Template
+from utilities import tfiles
 import yaml
 
 datacardprocessline = "ggH qqH WH ZH bkg_qqzz bkg_ggzz bkg_vbf bkg_zjets"
@@ -74,7 +74,7 @@ class __Rate(MultiEnum):
         if self.productionmode != "VBF bkg":
             return self.yamlrate()
 
-        return Template("fa2", "D_int_decay", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+        return Template("fa2", "D_int_prod", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
 
     def yamlrate(self):
         if self.production.year == 2016:

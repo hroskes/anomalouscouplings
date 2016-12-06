@@ -33,9 +33,9 @@ def makecontrolplots(*args):
       hstack.GetXaxis().SetTitle(axistitles[axisnumber])
       name = (key.ReadObj().GetName()
                                      .replace("afterFill", "after1Fill")
-                                     .replace("afterFloor", "after2Floor")
-                                     .replace("afterSmooth", "after3Smooth")
-                                     .replace("afterReweight", "after4Reweight")
+                                     .replace("afterSmooth", "after2Smooth")
+                                     .replace("afterReweight", "after3Reweight")
+                                     .replace("afterFloor", "after4Floor")
                                      .replace("afterNormalization", "after5Normalization")
                                      .replace("afterMirror", "after6Mirror")
              )
@@ -44,8 +44,8 @@ def makecontrolplots(*args):
 
 if __name__ == "__main__":
     def thetemplatesfiles():
-        yield TemplatesFile("wh", "VHHadrtagged", "2e2mu", "fa3", "D_int_prod", "160928")
-        return
+#        yield TemplatesFile("ggh", "VBFtagged", "2e2mu", "fa3")
+#        return
         for templatesfile in templatesfiles:
              yield templatesfile
     length = len(list(thetemplatesfiles()))

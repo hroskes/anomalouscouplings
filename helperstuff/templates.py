@@ -1,16 +1,23 @@
 import abc
 import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
-from filemanager import cache, getnesteddictvalue, jsonloads, tfiles
 from itertools import product
 import json
 import numpy
 import os
 from samples import ReweightingSample, Sample
+from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
     enums = [Channel, Systematic, TemplateGroup, Analysis, Production, BlindStatus, WhichProdDiscriminants, Category]
+
+    def applysynonyms(self, enumsdict):
+        if enumsdict[Production] is None and len(config.productionsforcombine) == 1:
+            enumsdict[Production] = config.productionsforcombine[0]
+        if enumsdict[WhichProdDiscriminants] is None and len(whichproddiscriminants) == 1:
+            enumsdict[WhichProdDiscriminants] = whichproddiscriminants[0]
+        super(TemplatesFile, self).applysynonyms(enumsdict)
 
     def check(self, *args):
         dontcheck = []
@@ -30,11 +37,13 @@ class TemplatesFile(MultiEnum):
             dontcheck.append(BlindStatus)
 
         if self.category == "UntaggedIchep16":
+            if len(whichproddiscriminants) == 1: self.whichproddiscriminants = None
             if self.whichproddiscriminants is not None:
                 raise ValueError("Don't provide whichproddiscriminants for untagged category\n{}".format(args))
             dontcheck.append(WhichProdDiscriminants)
 
         if self.analysis == "fL1":
+            if len(whichproddiscriminants) == 1: self.whichproddiscriminants = None
             if self.whichproddiscriminants is not None:
                 raise ValueError("Don't provide whichproddiscriminants for fL1\n{}".format(args))
             dontcheck.append(WhichProdDiscriminants)
@@ -156,11 +165,11 @@ class TemplatesFile(MultiEnum):
 
         if self.category == "VHHadrTaggedIchep16":
             if self.analysis == "fa3":
-                return discriminant("D_0minus_ZHdecay_hadronic")
+                return discriminant("D_0minus_VHdecay_hadronic")
             if self.analysis == "fa2":
-                return discriminant("D_g2_ZHdecay_hadronic")
+                return discriminant("D_g2_VHdecay_hadronic")
             if self.analysis == "fL1":
-                return discriminant("D_g1prime2_ZHdecay_hadronic")
+                return discriminant("D_g1prime2_VHdecay_hadronic")
 
         assert False
 
@@ -186,17 +195,17 @@ class TemplatesFile(MultiEnum):
 
         if self.category == "VHHadrTaggedIchep16" and self.whichproddiscriminants == "D_int_prod":
             if self.analysis == "fa3":
-                return discriminant("D_CP_ZH_hadronic")
+                return discriminant("D_CP_VH_hadronic")
             if self.analysis == "fa2":
-                return discriminant("D_g1g2_ZH_hadronic")
+                return discriminant("D_g1g2_VH_hadronic")
             if self.analysis == "fL1":
-                return discriminant("D_g2_ZH_hadronic")
+                return discriminant("D_g2_VH_hadronic")
 
         if self.analysis == "fL1":
             if self.category == "VBF2jTaggedIchep16":
                 return discriminant("D_g2_VBFdecay")
             if self.category == "VHHadrTaggedIchep16":
-                return discriminant("D_g2_ZHdecay_hadronic")
+                return discriminant("D_g2_VHdecay_hadronic")
 
         for i, prime in product(range(1, 4), ("", "_prime")):
             if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_g1{}gi{}{}".format(i, 4-i, prime):
@@ -243,12 +252,11 @@ class TemplatesFile(MultiEnum):
         assert False
 
     @property
+    @cache
     def invertedmatrix(self):
-        assert self.templategroup in ("vbf", "zh", "wh")
+        ganomalous = self.analysis.couplingname
+        if self.templategroup in ("vbf", "zh", "wh"):
 
-        if not hasattr(self, "__invertedmatrix"):
-
-            ganomalous = self.analysis.couplingname
             matrix = numpy.matrix(
                                   [
                                    [
@@ -270,14 +278,28 @@ class TemplatesFile(MultiEnum):
                templates for each respective term (g1^4g4^0, g1^3g4^1, ...)
             In the PDF, the templates need to be multiplied by (g1^i)(g4^(4-i))
             """
-            self.__invertedmatrix = invertedmatrix = matrix.I
+            invertedmatrix = matrix.I
             #make sure the two pure templates can be used as is
             #these assertions should be equivalent to asserting that SMtemplate.g1 == anomaloustemplate.ganomalous == 1
             # and that the two pure samples are in the right places on the list
             assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
             assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
 
-        return self.__invertedmatrix
+        if self.templategroup == "ggh":
+            matrix = numpy.matrix(
+                                  [
+                                   [
+                                    template.sample.g1**(2-i) * getattr(template.sample, ganomalous)**i
+                                        for i in range(3)
+                                   ]
+                                       for template in self.templates()
+                                  ]
+                                 )
+            invertedmatrix = matrix.I
+            assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,3))
+            assert invertedmatrix[2,0] == 0 and invertedmatrix[2,2] == 0 #can't assert invertedmatrix[2,1] == 1 because different convention :(
+
+        return invertedmatrix
 
 def listfromiterator(function):
     return list(function())
