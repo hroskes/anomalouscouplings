@@ -91,6 +91,11 @@ class BaseTemplateFromFile(TemplateForProjection):
     def __init__(self, color, *args, **kwargs):
         super(BaseTemplateFromFile, self).__init__(*args)
         self.color = color
+        #I don't know what the following line accomplishes
+        # but it fixes the WH interference templates.
+        #Otherwise they are wrong in some way that
+        # I don't understand
+        self.template.gettemplate()
 
     def inithistogram(self):
         self.h = self.template.gettemplate().Clone()
@@ -196,7 +201,7 @@ class Projections(MultiEnum):
 
   def applysynonyms(self, enumsdict):
     if enumsdict[WhichProdDiscriminants] is None and enumsdict[Analysis] != "fL1":
-      enumsdict[WhichProdDiscriminants] = "D_g12gi2"
+      enumsdict[WhichProdDiscriminants] = "D_int_prod"
     super(Projections, self).applysynonyms(enumsdict)
 
   def check(self, *args):
@@ -254,7 +259,7 @@ class Projections(MultiEnum):
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
-    gi_ggHBSM = (ReweightingSample("ggH", "SM").xsec / ReweightingSample("ggH", BSMhypothesis).xsec)**.5
+    gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
     gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25
     gi_VHBSM = ((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25
     if self.category == "UntaggedIchep16":
@@ -503,17 +508,16 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "enrich", "Untagged")
+#    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "fullrange", "Untagged")
 #    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:
-          if analysis == "fL1": continue
           for normalization in normalizations:
             for enrichstatus in enrichstatuses:
               for category in categories:
                 if normalization != "rescalemixtures": continue   #uncomment this to get the niceplots fast
-                if category == "Untagged":
+                if category == "Untagged" or analysis == "fL1":
                   yield Projections(channel, analysis, normalization, production, enrichstatus, category)
                 else:
                   for w in whichproddiscriminants:
