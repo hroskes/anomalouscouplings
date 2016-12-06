@@ -163,3 +163,22 @@ nice
 
 * [link](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fL1_160928/VHHadrtagged/4e/animation/)
 * VBF is very noisy and goes very negative
+
+#Background
+
+##Untagged
+
+* looks fine
+* of course Z+X will have to be dealt with
+
+##VBF tagged
+
+* VBF bkg has great stats
+* gg->ZZ is ok
+* qq->ZZ has issues, and Z+X is the dominant background... :(
+
+##VH hadronic tagged
+
+* VBF bkg and gg->ZZ are fine
+* qq->ZZ is a bit bigger than Z+X; together they dominate
+* qq->ZZ is not very good
