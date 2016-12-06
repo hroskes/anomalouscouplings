@@ -159,11 +159,11 @@ class TemplatesFile(MultiEnum):
 
         if self.category == "VHHadrTaggedIchep16":
             if self.analysis == "fa3":
-                return discriminant("D_0minus_ZHdecay_hadronic")
+                return discriminant("D_0minus_VHdecay_hadronic")
             if self.analysis == "fa2":
-                return discriminant("D_g2_ZHdecay_hadronic")
+                return discriminant("D_g2_VHdecay_hadronic")
             if self.analysis == "fL1":
-                return discriminant("D_g1prime2_ZHdecay_hadronic")
+                return discriminant("D_g1prime2_VHdecay_hadronic")
 
         assert False
 
@@ -189,17 +189,17 @@ class TemplatesFile(MultiEnum):
 
         if self.category == "VHHadrTaggedIchep16" and self.whichproddiscriminants == "D_int_prod":
             if self.analysis == "fa3":
-                return discriminant("D_CP_ZH_hadronic")
+                return discriminant("D_CP_VH_hadronic")
             if self.analysis == "fa2":
-                return discriminant("D_g1g2_ZH_hadronic")
+                return discriminant("D_g1g2_VH_hadronic")
             if self.analysis == "fL1":
-                return discriminant("D_g2_ZH_hadronic")
+                return discriminant("D_g2_VH_hadronic")
 
         if self.analysis == "fL1":
             if self.category == "VBF2jTaggedIchep16":
                 return discriminant("D_g2_VBFdecay")
             if self.category == "VHHadrTaggedIchep16":
-                return discriminant("D_g2_ZHdecay_hadronic")
+                return discriminant("D_g2_VHdecay_hadronic")
 
         for i, prime in product(range(1, 4), ("", "_prime")):
             if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_g1{}gi{}{}".format(i, 4-i, prime):
