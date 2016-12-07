@@ -42,7 +42,7 @@
 ####fa3
 
 * [link](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/Untagged/4e/animation/)
-nice
+* nice
 
 ####fa2
 
@@ -168,17 +168,20 @@ nice
 
 ##Untagged
 
+* [2e2mu](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/Untagged/2e2mu/) [4e](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/Untagged/4e/) [4mu](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/Untagged/4mu/)
 * looks fine
 * of course Z+X will have to be dealt with
 
 ##VBF tagged
 
+* [2e2mu](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/VBFtagged/2e2mu/) [4e](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/VBFtagged/4e/) [4mu](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/VBFtagged/4mu/)
 * VBF bkg has great stats
 * gg->ZZ is ok
 * qq->ZZ has issues, and Z+X is the dominant background... :(
 
 ##VH hadronic tagged
 
+* [2e2mu](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/VHHadrtagged/2e2mu/) [4e](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/VHHadrtagged/4e/) [4mu](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fa3_160928/VHHadrtagged/4mu/)
 * VBF bkg and gg->ZZ are fine
 * qq->ZZ is a bit bigger than Z+X; together they dominate
 * qq->ZZ is not very good
