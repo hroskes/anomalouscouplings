@@ -214,6 +214,7 @@ class SampleBase(object):
                          )
 
     def fai(self, productionmode, analysis, withdecay=False):
+        from combinehelpers import mixturesign
         analysis = Analysis(analysis)
         hypothesis = analysis.purehypotheses[1]
         mixhypothesis = analysis.mixdecayhypothesis
@@ -240,9 +241,8 @@ class SampleBase(object):
                 numerator = term
         return copysign(
                         numerator / denominator,
-                        getattr(self, hypothesis.couplingname)
-                          #multiply by -1 for fL1
-                          * getattr(ReweightingSample(productionmodes[0], mixhypothesis), hypothesis.couplingname)
+                        #mixturesign: multiply by -1 for fL1
+                        mixturesign(analysis)*getattr(self, hypothesis.couplingname)
                        )
 
 class ArbitraryCouplingsSample(SampleBase):
@@ -309,7 +309,7 @@ class ArbitraryCouplingsSample(SampleBase):
                                   )
 
 def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmodeforfai=None):
-    from combinehelpers import sigmaioversigma1
+    from combinehelpers import mixturesign, sigmaioversigma1
     analysis = Analysis(analysis)
     productionmode = ProductionMode(productionmode)
     if productionmodeforfai is None:
@@ -326,12 +326,8 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
     mixhypothesis = analysis.mixdecayhypothesis
     kwargs[analysis.couplingname] = copysign(
                                              (abs(fai) / xsecratio)**power,
-                                             fai
-                                               #multiply by -1 for fL1
-                                               * getattr(
-                                                         ReweightingSample(productionmode, mixhypothesis),
-                                                         analysis.couplingname
-                                                        )
+                                             #mixturesign: multiply by -1 for fL1
+                                             mixturesign(analysis)*fai
                                             )
     return ArbitraryCouplingsSample(productionmode, **kwargs)
 
@@ -772,5 +768,5 @@ class Sample(ReweightingSample):
 if __name__ == "__main__":
     for productionmode in "ggH", "VBF", "ZH":
         for analysis in "fa3", "fa2", "fL1":
-            for fai in 0.5, -0.5:
+            for fai in 0.5, -0.2:
                 assert abs(samplewithfai(productionmode, analysis, fai).fai(productionmode, analysis)/fai - 1) < 1e-15
