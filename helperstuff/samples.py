@@ -213,15 +213,15 @@ class SampleBase(object):
                             for reweightingsample, factor in self.linearcombinationofreweightingsamples.iteritems()
                          )
 
-    def fai(self, productionmode, hypothesis, withdecay=False):
-        hypothesis = Hypothesis(hypothesis)
+    def fai(self, productionmode, analysis, withdecay=False):
+        analysis = Analysis(analysis)
+        hypothesis = analysis.purehypotheses[1]
+        mixhypothesis = analysis.mixdecayhypothesis
         if productionmode == "VH":
             productionmodes = [ProductionMode("ZH"), ProductionMode("WH")]
         else:
             productionmodes = [ProductionMode(productionmode)]
 
-        if not hypothesis.ispure:
-            raise ValueError("fai doesn't make sense for {} because it's not pure".format(hypothesis))
         if productionmode == "ggH":
             withdecay = True
 
@@ -238,7 +238,12 @@ class SampleBase(object):
             denominator += term
             if h == hypothesis:
                 numerator = term
-        return copysign(numerator / denominator, getattr(self, hypothesis.couplingname))
+        return copysign(
+                        numerator / denominator,
+                        getattr(self, hypothesis.couplingname)
+                          #multiply by -1 for fL1
+                          * getattr(ReweightingSample(productionmodes[0], mixhypothesis), hypothesis.couplingname)
+                       )
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
@@ -318,7 +323,16 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
     xsecratio = sigmaioversigma1(analysis, productionmodeforfai)
     if not withdecay:
         xsecratio /= sigmaioversigma1(analysis, "ggH")
-    kwargs[analysis.couplingname] = copysign((abs(fai) / xsecratio)**power, fai)
+    mixhypothesis = analysis.mixdecayhypothesis
+    kwargs[analysis.couplingname] = copysign(
+                                             (abs(fai) / xsecratio)**power,
+                                             fai
+                                               #multiply by -1 for fL1
+                                               * getattr(
+                                                         ReweightingSample(productionmode, mixhypothesis),
+                                                         analysis.couplingname
+                                                        )
+                                            )
     return ArbitraryCouplingsSample(productionmode, **kwargs)
 
 class ReweightingSample(MultiEnum, SampleBase):
@@ -756,5 +770,7 @@ class Sample(ReweightingSample):
         raise self.ValueError("unblind")
 
 if __name__ == "__main__":
-    for fa2 in 0, .25, -.5, .75, 1:
-        print fa2, " ".join(str(samplewithfai("VBF", "fa2", fa2).fai("VBF", _)) for _ in purehypotheses)
+    for productionmode in "ggH", "VBF", "ZH":
+        for analysis in "fa3", "fa2", "fL1":
+            for fai in 0.5, -0.5:
+                assert abs(samplewithfai(productionmode, analysis, fai).fai(productionmode, analysis)/fai - 1) < 1e-15

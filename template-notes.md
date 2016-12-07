@@ -71,7 +71,7 @@ nice
 ####fL1
 
 * [link](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fL1_160928/VBFtagged/2e2mu/animation/)
-* VBF goes below 0 at fL1_VBF~=0.5.  This is within the allowed limits of ICHEP (and near the minimum of Run 1)
+* VBF goes below 0 at fL1_VBF~=-0.5.
 
 ###4mu
 
@@ -90,7 +90,7 @@ nice
 
 * [link](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fL1_160928/VBFtagged/4mu/animation/)
 * VH goes very negative
-* Also VBF has some noise and goes negative close to fa2_decay=0.5
+* Also VBF has some noise and goes negative close to fa2_decay=-0.5
 
 ###4e
 
@@ -126,7 +126,7 @@ nice
 ####fL1
 
 * [link](https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/fullrange/rescalemixtures/fL1_160928/VHHadrtagged/2e2mu/animation/)
-* VBF goes negative near fL1_VBF=0.5
+* VBF goes negative near fL1_VBF=-0.5
 * ggH has some ugly noise
 
 ###4mu

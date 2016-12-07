@@ -10,7 +10,7 @@ import helperstuff.style
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import cache, tfiles, pairwise
 import itertools
-from math import sqrt
+from math import copysign, sqrt
 import os
 import ROOT
 import subprocess
@@ -260,8 +260,8 @@ class Projections(MultiEnum):
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
     gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
-    gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25
-    gi_VHBSM = ((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25
+    gi_VBFBSM = copysign((ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25, gi_ggHBSM)
+    gi_VHBSM = copysign(((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
     if self.category == "UntaggedIchep16":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
@@ -374,8 +374,8 @@ class Projections(MultiEnum):
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
         if customfai  > 0: plusminus = "#plus"
-        ggHcustom = ComponentTemplateSum("ggH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "dec", plusminus, abs(customsample.fai("ggH", BSMhypothesis))), 1, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
-        VBFcustom = ComponentTemplateSum("VBF ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VBF", plusminus, abs(customsample.fai("VBF", BSMhypothesis))), 2, VBFSM.Integral(),
+        ggHcustom = ComponentTemplateSum("ggH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "dec", plusminus, abs(customsample.fai("ggH", self.analysis))), 1, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
+        VBFcustom = ComponentTemplateSum("VBF ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VBF", plusminus, abs(customsample.fai("VBF", self.analysis))), 2, VBFSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces))
                                         )
         ZHcustom  = ComponentTemplateSum("", 0, ZHSM.Integral(),
@@ -384,7 +384,7 @@ class Projections(MultiEnum):
         WHcustom  = ComponentTemplateSum("", 0, WHSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces))
                                         )
-        VHcustom = TemplateSum("VH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", BSMhypothesis))), 4, (ZHcustom, 1), (WHcustom, 1))
+        VHcustom = TemplateSum("VH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", self.analysis))), 4, (ZHcustom, 1), (WHcustom, 1))
         for t in ggHcustom, VBFcustom, VHcustom:
             t.Scale(1.0/t.Integral())
 
@@ -445,9 +445,8 @@ class Projections(MultiEnum):
         self.analysis = analysis
         self.fai = fai
         self.delay = delay
-        BSMhypothesis = self.analysis.purehypotheses[1]
         sample = samplewithfai(self.productionmode, self.analysis, self.fai)
-        self.fai_decay = sample.fai("ggH", BSMhypothesis)
+        self.fai_decay = sample.fai("ggH", self.analysis)
     def __cmp__(self, other):
         assert self.analysis == other.analysis
         return cmp((self.fai_decay, self.delay), (other.fai_decay, other.delay))
@@ -508,8 +507,9 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "fullrange", "Untagged")
-#    return
+#    yield Projections("160928", "2e2mu", "fL1", "rescalemixtures", "fullrange", "VBFtagged")
+    yield Projections("160928", "2e2mu", "fL1", "rescalemixtures", "fullrange", "VHHadrtagged")
+    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:
