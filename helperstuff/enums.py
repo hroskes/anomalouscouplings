@@ -179,7 +179,7 @@ class ProductionMode(MyEnum):
         if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
         if self == "VBF":
-            return Hypothesis.items(lambda x: x in proddechypotheses)
+            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
         if self == "ZH":
             return Hypothesis.items(lambda x: x in proddechypotheses)
         if self == "WH":
@@ -190,6 +190,17 @@ class ProductionMode(MyEnum):
             return Hypothesis.items(lambda x: x in hffhypotheses)
         if self in ("WplusH", "WminusH"):
             return Hypothesis.items(lambda x: x == "0+")
+        assert False
+    @property
+    def directlyreweightedhypotheses(self):
+        if self == "ggH":
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
+        if self == "VBF":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        if self == "ZH":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        if self == "WH":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
         assert False
     @property
     def generatedhypotheses(self):

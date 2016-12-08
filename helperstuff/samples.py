@@ -4,8 +4,10 @@ import config
 import constants
 from enums import AlternateGenerator, Analysis, BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, purehypotheses, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
 from math import copysign, sqrt
+import numpy
 import os
 import ROOT
+from utilities import cache
 
 
 class SampleBase(object):
@@ -182,36 +184,56 @@ class SampleBase(object):
     def __ne__(self, other):
         return not self == other
 
-    @property
-    def linearcombinationofreweightingsamples(self):
-        import numpy
-        from templates import TemplatesFile
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
-            g1 = self.g1
-            if   self.g2 == self.g1prime2 == 0: analysis = "fa3"; gi = self.g4
-            elif self.g4 == self.g1prime2 == 0: analysis = "fa2"; gi = self.g2
-            elif self.g2 == self.g4 == 0:       analysis = "fL1"; gi = self.g1prime2
-            else: assert False
-            templatesfile = TemplatesFile(str(self.productionmode).lower(), analysis, "2e2mu", config.productionsforcombine[0], "Untagged", "")
-            vectorofreweightingsamples = templatesfile.signalsamples()
-            invertedmatrix = templatesfile.invertedmatrix
-            maxpower = invertedmatrix.shape[0]-1
-            vectorTofg1xgiy = numpy.matrix([[g1**(maxpower-i)*gi**i for i in range(maxpower+1)]])
-            vectorTmatrix = vectorTofg1xgiy*invertedmatrix
-            vectorTmatrixaslist = numpy.array(vectorTmatrix).flatten().tolist()
-            return {
-                    reweightingsample: factor
-                     for reweightingsample, factor in zip(vectorofreweightingsamples, vectorTmatrixaslist)
-                     if factor
-                   }
-        assert False
+    def linearcombinationofreweightingsamples(self, hypotheses):
+        g1 = self.g1
+        if   self.g2 == self.g1prime2 == 0: analysis = Analysis("fa3"); gi = self.g4
+        elif self.g4 == self.g1prime2 == 0: analysis = Analysis("fa2"); gi = self.g2
+        elif self.g2 == self.g4 == 0:       analysis = Analysis("fL1"); gi = self.g1prime2
+        else: assert False
+
+        if hypotheses == "templates":
+            from templates import TemplatesFile
+            templatesfile = TemplatesFile(analysis, str(self.productionmode).lower(), "2e2mu", "Untagged", config.productionsforcombine[0])
+            hypotheses = [_.hypothesis for _ in templatesfile.templates()]
+        if hypotheses == "directlyreweighted":
+            if self.productionmode == "ggH":
+                if analysis == "fa3": hypotheses = ["0+", "0-", "fa30.5"]
+                if analysis == "fa2": hypotheses = ["0+", "a2", "fa20.5"]
+                if analysis == "fL1": hypotheses = ["0+", "L1", "fL10.5"]
+            elif self.productionmode in ("VBF", "WH", "ZH"):
+                if analysis == "fa3": hypotheses = ["0+", "0-", "fa3dec0.5", "fa3prod0.5", "fa3proddec-0.5"]
+                if analysis == "fa2": hypotheses = ["0+", "a2", "fa2dec0.5", "fa2prod0.5", "fa2proddec-0.5"]
+                if analysis == "fL1": hypotheses = ["0+", "L1", "fL1dec0.5", "fL1prod0.5", "fL1proddec-0.5"]
+
+        basis = SampleBasis(hypotheses, self.productionmode, analysis)
+        vectorofreweightingsamples = [ReweightingSample(self.productionmode, hypothesis) for hypothesis in hypotheses]
+        invertedmatrix = basis.invertedmatrix
+        maxpower = invertedmatrix.shape[0]-1
+        vectorTofg1xgiy = numpy.matrix([[g1**(maxpower-i)*gi**i for i in range(maxpower+1)]])
+        vectorTmatrix = vectorTofg1xgiy*invertedmatrix
+        vectorTmatrixaslist = numpy.array(vectorTmatrix).flatten().tolist()
+        return {
+                reweightingsample: factor
+                 for reweightingsample, factor in zip(vectorofreweightingsamples, vectorTmatrixaslist)
+                 if factor
+               }
 
     @property
     def MC_weight(self):
         return " + ".join(
                           "{}*{}".format(reweightingsample.weightname(), factor*reweightingsample.xsec/self.xsec)
-                            for reweightingsample, factor in self.linearcombinationofreweightingsamples.iteritems()
+                            for reweightingsample, factor in self.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
                          )
+
+    def get_MC_weight_function(self_sample):
+        terms = tuple(
+                      (reweightingsample.weightname(), factor)
+                               for reweightingsample, factor in self_sample.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
+                     )
+        def MC_weight_function(self_tree):
+            return sum(factor*getattr(self_tree, componentweightname)() for componentweightname, factor in terms)
+        MC_weight_function.__name__ = self_sample.weightname()
+        return MC_weight_function
 
     def fai(self, productionmode, analysis, withdecay=False):
         from combinehelpers import mixturesign
@@ -380,12 +402,19 @@ class ReweightingSample(MultiEnum, SampleBase):
         return ValueError("invalid sample {} in function {}".format(self, functionname))
 
     def reweightingsamples(self):
-        if self.productionmode == "ggH":
-            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in decayonlyhypotheses]
-        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ttH", "HJJ") or self.alternategenerator == "POWHEG":
+        if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ttH", "HJJ") or self.alternategenerator == "POWHEG":
             return [self]
-        elif self.productionmode in ("VBF", "ZH", "WH"):
-            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in proddechypotheses]
+        elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
+            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
+        elif self.productionmode == "data":
+            return []
+        raise self.ValueError("reweightingsamples")
+
+    def directreweightingsamples(self):
+        if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ttH", "HJJ") or self.alternategenerator == "POWHEG":
+            return [self]
+        elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
+            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.directlyreweightedhypotheses]
         elif self.productionmode == "data":
             return []
         raise self.ValueError("reweightingsamples")
@@ -432,24 +461,35 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_{}_g4".format(self.productionmode)
             elif self.hypothesis == "L1":
                 return "MC_weight_{}_g1prime2".format(self.productionmode)
+
             elif self.hypothesis == "fa2dec0.5":
                 return "MC_weight_{}_g1g2_dec".format(self.productionmode)
             elif self.hypothesis == "fa3dec0.5":
                 return "MC_weight_{}_g1g4_dec".format(self.productionmode)
             elif self.hypothesis == "fL1dec0.5":
                 return "MC_weight_{}_g1g1prime2_dec".format(self.productionmode)
+
             elif self.hypothesis == "fa2prod0.5":
                 return "MC_weight_{}_g1g2_prod".format(self.productionmode)
             elif self.hypothesis == "fa3prod0.5":
                 return "MC_weight_{}_g1g4_prod".format(self.productionmode)
             elif self.hypothesis == "fL1prod0.5":
                 return "MC_weight_{}_g1g1prime2_prod".format(self.productionmode)
+
             elif self.hypothesis == "fa2proddec-0.5":
                 return "MC_weight_{}_g1g2_proddec_pi".format(self.productionmode)
             elif self.hypothesis == "fa3proddec-0.5":
                 return "MC_weight_{}_g1g4_proddec_pi".format(self.productionmode)
             elif self.hypothesis == "fL1proddec-0.5":
                 return "MC_weight_{}_g1g1prime2_proddec_pi".format(self.productionmode)
+
+            elif self.hypothesis == "fa2dec-0.5":
+                return "MC_weight_{}_g1g2_dec_pi".format(self.productionmode)
+            elif self.hypothesis == "fa2prod-0.5":
+                return "MC_weight_{}_g1g2_prod_pi".format(self.productionmode)
+            elif self.hypothesis == "fa2proddec0.5":
+                return "MC_weight_{}_g1g2_proddec".format(self.productionmode)
+
         elif self.productionmode == "HJJ":
             if self.hypothesis == "0+":
                 return "MC_weight_HJJ_g2"
@@ -519,7 +559,11 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode in ("ttH", "HJJ"):
             return 1
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH"):
-            if self.hypothesis in ["0+"] + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3", "fL1") for b in ("dec", "prod", "proddec-")]:
+            if self.hypothesis in (
+                                   ["0+"]
+                                   + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3", "fL1") for b in ("dec", "prod", "proddec-")]
+                                   + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
+                                  ):
                 return 1
             if self.hypothesis in ("a2", "0-", "L1"):
                 return 0
@@ -529,7 +573,10 @@ class ReweightingSample(MultiEnum, SampleBase):
     def g2(self):
         if self.productionmode in ("ttH", "HJJ"):
             return 0
-        if self.hypothesis in ["0+", "0-", "L1"] + ["{}{}0.5".format(a, b) for a in ("fa3", "fL1") for b in ("dec", "prod", "proddec-")]:
+        if self.hypothesis in (
+                               ["0+", "0-", "L1"]
+                             + ["{}{}0.5".format(a, b) for a in ("fa3", "fL1") for b in ("dec", "prod", "proddec-")]
+                              ):
             return 0
         if self.hypothesis == "a2":
             if self.productionmode == "ggH":
@@ -557,13 +604,21 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fa2proddec-0.5":
                 return -sqrt(constants.g2WH*constants.g2decay)
 
+        if self.hypothesis == "fa2prod-0.5": return -ReweightingSample(self.productionmode, "fa2prod0.5").g2
+        if self.hypothesis == "fa2dec-0.5": return -ReweightingSample(self.productionmode, "fa2dec0.5").g2
+        if self.hypothesis == "fa2proddec0.5": return -ReweightingSample(self.productionmode, "fa2proddec-0.5").g2
+
         raise self.ValueError("g2")
 
     @property
     def g4(self):
         if self.productionmode in ("ttH", "HJJ"):
             return 0
-        if self.hypothesis in ["0+", "a2", "L1"] + ["{}{}0.5".format(a, b) for a in ("fa2", "fL1") for b in ("dec", "prod", "proddec-")]:
+        if self.hypothesis in (
+                               ["0+", "a2", "L1"]
+                             + ["{}{}0.5".format(a, b) for a in ("fa2", "fL1") for b in ("dec", "prod", "proddec-")]
+                             + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
+                              ):
             return 0
         if self.hypothesis == "0-":
             if self.productionmode == "ggH":
@@ -597,7 +652,11 @@ class ReweightingSample(MultiEnum, SampleBase):
     def g1prime2(self):
         if self.productionmode in ("ttH", "HJJ"):
             return 0
-        if self.hypothesis in ["0+", "a2", "0-"] + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]:
+        if self.hypothesis in (
+                               ["0+", "a2", "0-"]
+                             + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]
+                             + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
+                              ):
             return 0
         if self.hypothesis == "L1":
             if self.productionmode == "ggH":
@@ -677,7 +736,7 @@ class Sample(ReweightingSample):
         if self.blindstatus is not None and self.productionmode != "data":
             raise ValueError("blindstatus provided for MC sample!\n{}".format(args))
 
-        if self.hypothesis not in self.productionmode.generatedhypotheses:
+        if self.hypothesis is not None and self.hypothesis not in self.productionmode.generatedhypotheses:
             raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
 
         if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
@@ -761,8 +820,51 @@ class Sample(ReweightingSample):
             return self.blindstatus == "unblind"
         raise self.ValueError("unblind")
 
+class SampleBasis(MultiEnum):
+    enums = [ProductionMode, Analysis]
+    def __init__(self, hypotheses, *args):
+        self.hypotheses = [Hypothesis(_) for _ in hypotheses]
+        super(SampleBasis, self).__init__(*args)
+
+    def check(self, *args):
+        args = (self.hypotheses,)+args
+        if self.productionmode == "ggH":
+            dimension = 3
+        elif self.productionmode in ("VBF", "WH", "ZH"):
+            dimension = 5
+        else:
+            raise ValueError("Bad productionmode {}\n{}".format(self.productionmode, args))
+
+        if len(self.hypotheses) != dimension:
+            raise ValueError("Wrong number of hypotheses ({}, should be {})\n{}".format(len(self.hypotheses), dimension, args))
+        if len(set(self.hypotheses)) != len(self.hypotheses):
+            raise ValueError("Duplicate hypothesis\n{}".format(args))
+
+    @property
+    @cache
+    def matrix(self):
+        dimension = len(self.hypotheses)
+        maxpower = dimension-1
+        samples = [ReweightingSample(self.productionmode, _) for _ in self.hypotheses]
+        return numpy.matrix(
+                            [
+                             [
+                              sample.g1**(maxpower-i) * getattr(sample, self.analysis.couplingname)**i
+                                  for i in range(dimension)
+                             ]
+                                 for sample in samples
+                            ]
+                           )
+    @property
+    @cache
+    def invertedmatrix(self):
+        return self.matrix.I
+
+
 if __name__ == "__main__":
     for productionmode in "ggH", "VBF", "ZH":
         for analysis in "fa3", "fa2", "fL1":
             for fai in 0.5, -0.2:
                 assert abs(samplewithfai(productionmode, analysis, fai).fai(productionmode, analysis)/fai - 1) < 1e-15
+    print ReweightingSample("fa2dec-0.5", "VBF").linearcombinationofreweightingsamples("directlyreweighted")
+    print ReweightingSample("fa2dec-0.5", "VBF").linearcombinationofreweightingsamples("templates")

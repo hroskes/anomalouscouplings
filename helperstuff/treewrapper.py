@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from array import array
 import CJLSTscripts
 from collections import Counter, Iterator
@@ -1341,6 +1342,10 @@ class TreeWrapper(Iterator):
     def MC_weight_VBF_g1g1prime2_proddec_pi(self):
         return self.MC_weight_VBF(12)
 
+    MC_weight_VBF_g1g2_dec_pi = ReweightingSample("VBF", "fa2dec-0.5").get_MC_weight_function("MC_weight_VBF_g1g2_dec_pi")
+    MC_weight_VBF_g1g2_prod_pi = ReweightingSample("VBF", "fa2prod-0.5").get_MC_weight_function("MC_weight_VBF_g1g2_prod_pi")
+    MC_weight_VBF_g1g2_proddec = ReweightingSample("VBF", "fa2proddec0.5").get_MC_weight_function("MC_weight_VBF_g1g2_proddec")
+
     def MC_weight_ZH(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXSZH2L2l / self.nevents2L2l[index]
     def MC_weight_ZH_g1(self):
@@ -1530,6 +1535,9 @@ class TreeWrapper(Iterator):
             ReweightingSample("VBF", "fa2proddec-0.5"),
             ReweightingSample("VBF", "fa3proddec-0.5"),
             ReweightingSample("VBF", "fL1proddec-0.5"),
+            ReweightingSample("VBF", "fa2dec-0.5"),
+            ReweightingSample("VBF", "fa2prod-0.5"),
+            ReweightingSample("VBF", "fa2proddec0.5"),
             ReweightingSample("ZH", "0+"),
             ReweightingSample("ZH", "a2"),
             ReweightingSample("ZH", "0-"),
@@ -1660,7 +1668,7 @@ class TreeWrapper(Iterator):
                 raise SyntaxError("Something is very very wrong.  {} {}".format(len(self.treesample.reweightingsamples), len(self.weightfunctions)))
 
             couplings.GetEntry(0)
-            for i, (sample, function) in enumerate(zip(self.treesample.reweightingsamples(), self.weightfunctions)):
+            for i, (sample, function) in enumerate(zip(self.treesample.directreweightingsamples(), self.weightfunctions)):
                 if self.getweightfunction(sample)() != self.getmainweightfunction()(i):
                     raise SyntaxError("{}() == {}, but {}({}) == {}!\nCheck the order of reweightingsamples or the weight functions!".format(self.getweightfunction(sample).__name__, self.getweightfunction(sample)(), self.getmainweightfunction().__name__, i, self.getmainweightfunction()(i)))
                 print couplings.ghz1Re[i], couplings.ghz2Re[i], couplings.ghz4Re[i], couplings.ghz1_prime2Re[i], sample.g1, sample.g2, sample.g4, sample.g1prime2
@@ -1689,12 +1697,13 @@ if __name__ == '__main__':
         productionmode = "graviton fusion"
         hypothesis = "spin 3"
         useMELAv2 = True
+        alternategenerator = "magic"
         def isbkg(self): return False
         def isdata(self): return False
         def isZX(self): return False
         def onlyweights(self): return False
         def reweightingsamples(self): return []
         def weightname(self): return "__init__"
-    TreeWrapper(DummyTree(), DummySample(), None, None)
+    TreeWrapper(DummyTree(), DummySample(), None, None, None)
     print "You are good to go!"
 
