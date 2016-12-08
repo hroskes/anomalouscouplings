@@ -16,7 +16,8 @@ def allowedintervals2sigma(analysis):
     if analysis == "fL1":
         return [AllowedInterval(-.25, .37)]
     if analysis == "fa2":
-        return [AllowedInterval(-.66, -.57), AllowedInterval(-.15, 1)]
+        return [AllowedInterval(-1, -.999), #this one isn't in the table, included so that -1 is allowed like +1
+                AllowedInterval(-.66, -.57), AllowedInterval(-.15, 1)]
     if analysis == "fa3":
         return [AllowedInterval(-.4, .43)]
 
