@@ -357,11 +357,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "HJJ", "ttH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if (
-                   self.productionmode == "ggH" and self.hypothesis not in decayonlyhypotheses
-                or self.productionmode in ("HJJ", "ttH") and self.hypothesis not in hffhypotheses
-                or self.productionmode in ("WplusH", "WminusH") and self.hypothesis != "SM"
-               ):
+            if self.hypothesis not in self.productionmode.validhypotheses:
                 raise ValueError("{} hypothesis can't be {}\n{}".format(self.productionmode, self.hypothesis, args))
             if self.flavor is not None:
                 raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
@@ -681,7 +677,7 @@ class Sample(ReweightingSample):
         if self.blindstatus is not None and self.productionmode != "data":
             raise ValueError("blindstatus provided for MC sample!\n{}".format(args))
 
-        if self.productionmode in ("VBF", "ZH", "WH") and self.hypothesis not in prodonlyhypotheses:
+        if self.hypothesis not in self.productionmode.generatedhypotheses:
             raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
 
         if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":

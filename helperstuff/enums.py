@@ -110,6 +110,9 @@ class Hypothesis(MyEnum):
                  EnumItem("fa2proddec-0.5"),
                  EnumItem("fa3proddec-0.5"),
                  EnumItem("fL1proddec-0.5"),
+                 EnumItem("fa2dec-0.5"),
+                 EnumItem("fa2prod-0.5"),
+                 EnumItem("fa2proddec0.5"),
                 )
     @property
     def ispure(self):
@@ -170,6 +173,40 @@ class ProductionMode(MyEnum):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
+        assert False
+    @property
+    def validhypotheses(self):
+        if self == "ggH":
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
+        if self == "VBF":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        if self == "ZH":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        if self == "WH":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        if self == "ttH":
+            return Hypothesis.items(lambda x: x in hffhypotheses)
+        if self == "HJJ":
+            return Hypothesis.items(lambda x: x in hffhypotheses)
+        if self in ("WplusH", "WminusH"):
+            return Hypothesis.items(lambda x: x == "0+")
+        assert False
+    @property
+    def generatedhypotheses(self):
+        if self == "ggH":
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
+        if self == "VBF":
+            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
+        if self == "ZH":
+            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
+        if self == "WH":
+            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
+        if self == "ttH":
+            return Hypothesis.items(lambda x: x in hffhypotheses)
+        if self == "HJJ":
+            return Hypothesis.items(lambda x: x in hffhypotheses)
+        if self in ("WplusH", "WminusH"):
+            return Hypothesis.items(lambda x: x == "0+")
         assert False
 
 class Systematic(MyEnum):
