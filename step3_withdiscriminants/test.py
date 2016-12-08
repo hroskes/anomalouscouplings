@@ -17,16 +17,16 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "ZH"
-disc           = "D_CP_VH_hadronic"
-weight         = ReweightingSample(productionmode, "fa3prod0.5")
+productionmode = "VBF"
+disc           = "D_g1g2_VBF"
+weight         = ReweightingSample(productionmode, "fa2prod-0.5")
 bins           = None
 min            = None
 max            = None
 enrich         = False
 masscut        = True
 channel        = "2e2mu"
-category       = "VHHadrtagged"
+category       = "VBFtagged"
 #========================
 
 if isinstance(weight, SampleBase):

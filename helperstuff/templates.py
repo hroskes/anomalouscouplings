@@ -5,7 +5,7 @@ from itertools import product
 import json
 import numpy
 import os
-from samples import ReweightingSample, Sample
+from samples import ReweightingSample, Sample, SampleBasis
 from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
@@ -91,7 +91,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "0-"), ReweightingSample("VBF", "fa3prod0.5"), ReweightingSample("VBF", "fa3dec0.5"), ReweightingSample("VBF", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod0.5"), ReweightingSample("VBF", "fa2dec0.5"), ReweightingSample("VBF", "fa2proddec-0.5")]
+                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod-0.5"), ReweightingSample("VBF", "fa2dec-0.5"), ReweightingSample("VBF", "fa2proddec0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1"), ReweightingSample("VBF", "fL1prod0.5"), ReweightingSample("VBF", "fL1dec0.5"), ReweightingSample("VBF", "fL1proddec-0.5")]
 
@@ -99,7 +99,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "0-"), ReweightingSample("ZH", "fa3prod0.5"), ReweightingSample("ZH", "fa3dec0.5"), ReweightingSample("ZH", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod0.5"), ReweightingSample("ZH", "fa2dec0.5"), ReweightingSample("ZH", "fa2proddec-0.5")]
+                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod-0.5"), ReweightingSample("ZH", "fa2dec-0.5"), ReweightingSample("ZH", "fa2proddec0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "L1"), ReweightingSample("ZH", "fL1prod0.5"), ReweightingSample("ZH", "fL1dec0.5"), ReweightingSample("ZH", "fL1proddec-0.5")]
 
@@ -107,7 +107,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "0-"), ReweightingSample("WH", "fa3prod0.5"), ReweightingSample("WH", "fa3dec0.5"), ReweightingSample("WH", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod0.5"), ReweightingSample("WH", "fa2dec0.5"), ReweightingSample("WH", "fa2proddec-0.5")]
+                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod-0.5"), ReweightingSample("WH", "fa2dec-0.5"), ReweightingSample("WH", "fa2proddec0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "L1"), ReweightingSample("WH", "fL1prod0.5"), ReweightingSample("WH", "fL1dec0.5"), ReweightingSample("WH", "fL1proddec-0.5")]
 
@@ -255,8 +255,8 @@ class TemplatesFile(MultiEnum):
     @cache
     def invertedmatrix(self):
         ganomalous = self.analysis.couplingname
-        productionmode = str(self.templategroup.upper())
-        basis = SampleBasis([template.hypothesis for template in self.templates], productionmode, self.analysis)
+        productionmode = str(self.templategroup).upper()
+        basis = SampleBasis([template.hypothesis for template in self.templates()], productionmode, self.analysis)
         invertedmatrix = basis.invertedmatrix
         if self.templategroup in ("vbf", "zh", "wh"):
             """
@@ -424,6 +424,12 @@ class Template(TemplateBase, MultiEnum):
                 name = "templateMixProdAdapSmooth"
             elif self.hypothesis in ("fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"):
                 name = "templateMixProdDecPiAdapSmooth"
+            elif self.hypothesis in ("fa2dec-0.5",):
+                name = "templateMixDecayPiAdapSmooth"
+            elif self.hypothesis in ("fa2prod-0.5",):
+                name = "templateMixProdPiAdapSmooth"
+            elif self.hypothesis in ("fa2proddec0.5",):
+                name = "templateMixProdDecAdapSmooth"
         elif self.productionmode == "ZX" and not config.usedata:
             name = "templateqqZZAdapSmooth"
         elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
@@ -559,6 +565,21 @@ class Template(TemplateBase, MultiEnum):
                         Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("a2", "fa3prod0.5", "fL1prod0.5") #????
                        }
+            if self.hypothesis == "fa2dec-0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       }
+            if self.hypothesis == "fa2prod-0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "fa3prod0.5") #MAYBE fa2prod0.5
+                       }
+            if self.hypothesis == "fa2proddec0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       }
         if self.productionmode == "ZH":
             if self.hypothesis == "0+":
                 result={
@@ -625,6 +646,21 @@ class Template(TemplateBase, MultiEnum):
                         Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                        }
+            if self.hypothesis == "fa2dec-0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       }
+            if self.hypothesis == "fa2prod-0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       }
+            if self.hypothesis == "fa2proddec0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       }
         if self.productionmode == "WH":
             if self.hypothesis == "0+":
                 result={
@@ -690,6 +726,21 @@ class Template(TemplateBase, MultiEnum):
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
                             for hypothesis in ("0-", "fa3prod0.5", "a2", "L1", "fL1prod0.5")
+                       }
+            if self.hypothesis == "fa2dec-0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       }
+            if self.hypothesis == "fa2prod-0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
+                       }
+            if self.hypothesis == "fa2proddec0.5":
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ()
                        }
         if self.productionmode in ("qqZZ", "ZX"):
             result = {Sample(self.production, self.productionmode)}
