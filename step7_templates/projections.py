@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import abc
 import collections
-from helperstuff import config, constants
+from helperstuff import config, constants, run1info
 from helperstuff.combinehelpers import getrate, gettemplate
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, WhichProdDiscriminants, whichproddiscriminants
 from helperstuff.samples import ReweightingSample, samplewithfai
@@ -234,6 +234,7 @@ class Projections(MultiEnum):
     animation = False
     saveasappend = ""
     exts = "png", "eps", "root", "pdf"
+    otherthingstodraw = []
     for kw, kwarg in kwargs.iteritems():
        if kw == "ggHfactor":
            ggHfactor = float(kwarg)
@@ -256,6 +257,8 @@ class Projections(MultiEnum):
            g1_custom = customsample.g1
            gi_custom = getattr(customsample, BSMhypothesis.couplingname)
            exts = "gif",
+       elif kw == "otherthingstodraw":
+           otherthingstodraw += kwarg
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -424,6 +427,9 @@ class Projections(MultiEnum):
         hstack.Draw("nostack")
         hstack.GetXaxis().SetTitle(discriminant.title)
         legend.Draw()
+        for thing in otherthingstodraw:
+            if thing:
+                thing.Draw()
         try:
             os.makedirs(os.path.join(saveasdir, subdir))
         except OSError:
@@ -450,6 +456,21 @@ class Projections(MultiEnum):
     def __cmp__(self, other):
         assert self.analysis == other.analysis
         return cmp((self.fai_decay, self.delay), (other.fai_decay, other.delay))
+    @property
+    @cache
+    def excludedtext(self):
+        allowed = run1info.isallowed2sigma(self.analysis, self.fai_decay)
+        if allowed: return
+        x1, y1, x2, y2 = .2, .7, .5, .8
+        pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
+        pt.SetBorderSize(0)
+        pt.SetFillStyle(0)
+        pt.SetTextAlign(12)
+        pt.SetTextFont(42)
+        pt.SetTextSize(0.045)
+        text = pt.AddText("Excluded in Run 1")
+        text.SetTextColor(2)
+        return pt
 
   def animation(self):
       tmpdir = mkdtemp()
@@ -482,6 +503,7 @@ class Projections(MultiEnum):
           kwargs = kwargs_base.copy()
           kwargs["customfaiforanimation"] = step.fai, step.productionmode
           kwargs["saveasappend"] = i
+          kwargs["otherthingstodraw"] = [step.excludedtext]
           self.projections(**kwargs)
 
       for discriminant in self.discriminants:
