@@ -1342,9 +1342,9 @@ class TreeWrapper(Iterator):
     def MC_weight_VBF_g1g1prime2_proddec(self):
         return self.MC_weight_VBF(12)
 
-    MC_weight_VBF_g1g2_dec_pi = ReweightingSample("VBF", "fa2dec-0.5").get_MC_weight_function("MC_weight_VBF_g1g2_dec_pi")
-    MC_weight_VBF_g1g2_prod_pi = ReweightingSample("VBF", "fa2prod-0.5").get_MC_weight_function("MC_weight_VBF_g1g2_prod_pi")
-    MC_weight_VBF_g1g2_proddec = ReweightingSample("VBF", "fa2proddec0.5").get_MC_weight_function("MC_weight_VBF_g1g2_proddec")
+    MC_weight_VBF_g1g2_dec_pi = ReweightingSample("VBF", "fa2dec-0.5").get_MC_weight_function()
+    MC_weight_VBF_g1g2_prod_pi = ReweightingSample("VBF", "fa2prod-0.5").get_MC_weight_function()
+    MC_weight_VBF_g1g2_proddec = ReweightingSample("VBF", "fa2proddec0.5").get_MC_weight_function()
 
     def MC_weight_ZH(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXSZH2L2l / self.nevents2L2l[index]
