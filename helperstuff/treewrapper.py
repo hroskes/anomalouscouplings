@@ -1339,7 +1339,7 @@ class TreeWrapper(Iterator):
         return self.MC_weight_VBF(10)
     def MC_weight_VBF_g1g4_proddec_pi(self):
         return self.MC_weight_VBF(11)
-    def MC_weight_VBF_g1g1prime2_proddec_pi(self):
+    def MC_weight_VBF_g1g1prime2_proddec(self):
         return self.MC_weight_VBF(12)
 
     MC_weight_VBF_g1g2_dec_pi = ReweightingSample("VBF", "fa2dec-0.5").get_MC_weight_function("MC_weight_VBF_g1g2_dec_pi")
@@ -1373,7 +1373,7 @@ class TreeWrapper(Iterator):
         return self.MC_weight_ZH(10)
     def MC_weight_ZH_g1g4_proddec_pi(self):
         return self.MC_weight_ZH(11)
-    def MC_weight_ZH_g1g1prime2_proddec_pi(self):
+    def MC_weight_ZH_g1g1prime2_proddec(self):
         return self.MC_weight_ZH(12)
 
     def MC_weight_WH(self, index):
@@ -1402,7 +1402,7 @@ class TreeWrapper(Iterator):
         return self.MC_weight_WH(10)
     def MC_weight_WH_g1g4_proddec_pi(self):
         return self.MC_weight_WH(11)
-    def MC_weight_WH_g1g1prime2_proddec_pi(self):
+    def MC_weight_WH_g1g1prime2_proddec(self):
         return self.MC_weight_WH(12)
 
     def MC_weight_ttH_kappa(self):
@@ -1534,7 +1534,7 @@ class TreeWrapper(Iterator):
             ReweightingSample("VBF", "fL1prod0.5"),
             ReweightingSample("VBF", "fa2proddec-0.5"),
             ReweightingSample("VBF", "fa3proddec-0.5"),
-            ReweightingSample("VBF", "fL1proddec-0.5"),
+            ReweightingSample("VBF", "fL1proddec0.5"),
             ReweightingSample("VBF", "fa2dec-0.5"),
             ReweightingSample("VBF", "fa2prod-0.5"),
             ReweightingSample("VBF", "fa2proddec0.5"),
@@ -1550,7 +1550,7 @@ class TreeWrapper(Iterator):
             ReweightingSample("ZH", "fL1prod0.5"),
             ReweightingSample("ZH", "fa2proddec-0.5"),
             ReweightingSample("ZH", "fa3proddec-0.5"),
-            ReweightingSample("ZH", "fL1proddec-0.5"),
+            ReweightingSample("ZH", "fL1proddec0.5"),
             ReweightingSample("WH", "0+"),
             ReweightingSample("WH", "a2"),
             ReweightingSample("WH", "0-"),
@@ -1563,7 +1563,7 @@ class TreeWrapper(Iterator):
             ReweightingSample("WH", "fL1prod0.5"),
             ReweightingSample("WH", "fa2proddec-0.5"),
             ReweightingSample("WH", "fa3proddec-0.5"),
-            ReweightingSample("WH", "fL1proddec-0.5"),
+            ReweightingSample("WH", "fL1proddec0.5"),
             ReweightingSample("ttH", "0+"),
             ReweightingSample("ttH", "0-"),
             ReweightingSample("ttH", "fCP0.5"),

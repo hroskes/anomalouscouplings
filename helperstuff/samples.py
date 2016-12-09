@@ -203,7 +203,7 @@ class SampleBase(object):
             elif self.productionmode in ("VBF", "WH", "ZH"):
                 if analysis == "fa3": hypotheses = ["0+", "0-", "fa3dec0.5", "fa3prod0.5", "fa3proddec-0.5"]
                 if analysis == "fa2": hypotheses = ["0+", "a2", "fa2dec0.5", "fa2prod0.5", "fa2proddec-0.5"]
-                if analysis == "fL1": hypotheses = ["0+", "L1", "fL1dec0.5", "fL1prod0.5", "fL1proddec-0.5"]
+                if analysis == "fL1": hypotheses = ["0+", "L1", "fL1dec0.5", "fL1prod0.5", "fL1proddec0.5"]
 
         basis = SampleBasis(hypotheses, self.productionmode, analysis)
         vectorofreweightingsamples = [ReweightingSample(self.productionmode, hypothesis) for hypothesis in hypotheses]
@@ -480,8 +480,8 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_{}_g1g2_proddec_pi".format(self.productionmode)
             elif self.hypothesis == "fa3proddec-0.5":
                 return "MC_weight_{}_g1g4_proddec_pi".format(self.productionmode)
-            elif self.hypothesis == "fL1proddec-0.5":
-                return "MC_weight_{}_g1g1prime2_proddec_pi".format(self.productionmode)
+            elif self.hypothesis == "fL1proddec0.5":
+                return "MC_weight_{}_g1g1prime2_proddec".format(self.productionmode)
 
             elif self.hypothesis == "fa2dec-0.5":
                 return "MC_weight_{}_g1g2_dec_pi".format(self.productionmode)
@@ -669,19 +669,19 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode == "VBF":
             if self.hypothesis == "fL1prod0.5":
                 return constants.g1prime2VBF_gen
-            if self.hypothesis == "fL1proddec-0.5":
+            if self.hypothesis == "fL1proddec0.5":
                 return -sqrt(constants.g1prime2VBF_gen*constants.g1prime2decay_gen)
 
         if self.productionmode == "ZH":
             if self.hypothesis == "fL1prod0.5":
                 return constants.g1prime2ZH_gen
-            if self.hypothesis == "fL1proddec-0.5":
+            if self.hypothesis == "fL1proddec0.5":
                 return -sqrt(constants.g1prime2ZH_gen*constants.g1prime2decay_gen)
 
         if self.productionmode == "WH":
             if self.hypothesis == "fL1prod0.5":
                 return constants.g1prime2WH_gen
-            if self.hypothesis == "fL1proddec-0.5":
+            if self.hypothesis == "fL1proddec0.5":
                 return -sqrt(constants.g1prime2WH_gen*constants.g1prime2decay_gen)
 
         raise self.ValueError("g1prime2")
