@@ -465,6 +465,12 @@ class Category(MyEnum):
     def __contains__(self, other):
         return other in self.idnumbers
 
+    @property
+    def mainsignals(self):
+        if self == "Untagged": return [ProductionMode("ggH")]
+        if self == "VBFtagged": return [ProductionMode("VBF")]
+        if self == "VHHadrtagged": return [ProductionMode("ZH"), ProductionMode("WH")]
+
 class WhichProdDiscriminants(MyEnum):
     """
     D_bkg and D_(0minus/0hplus/L1)_VBFdecay, but which third one?
