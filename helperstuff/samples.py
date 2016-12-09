@@ -204,6 +204,8 @@ class SampleBase(object):
                      for reweightingsample, factor in zip(vectorofreweightingsamples, vectorTmatrixaslist)
                      if factor
                    }
+        assert False
+
     @property
     def MC_weight(self):
         return " + ".join(
@@ -211,15 +213,16 @@ class SampleBase(object):
                             for reweightingsample, factor in self.linearcombinationofreweightingsamples.iteritems()
                          )
 
-    def fai(self, productionmode, hypothesis, withdecay=False):
-        hypothesis = Hypothesis(hypothesis)
+    def fai(self, productionmode, analysis, withdecay=False):
+        from combinehelpers import mixturesign
+        analysis = Analysis(analysis)
+        hypothesis = analysis.purehypotheses[1]
+        mixhypothesis = analysis.mixdecayhypothesis
         if productionmode == "VH":
             productionmodes = [ProductionMode("ZH"), ProductionMode("WH")]
         else:
             productionmodes = [ProductionMode(productionmode)]
 
-        if not hypothesis.ispure:
-            raise ValueError("fai doesn't make sense for {} because it's not pure".format(hypothesis))
         if productionmode == "ggH":
             withdecay = True
 
@@ -236,7 +239,11 @@ class SampleBase(object):
             denominator += term
             if h == hypothesis:
                 numerator = term
-        return copysign(numerator / denominator, getattr(self, hypothesis.couplingname))
+        return copysign(
+                        numerator / denominator,
+                        #mixturesign: multiply by -1 for fL1
+                        mixturesign(analysis)*getattr(self, hypothesis.couplingname)
+                       )
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
@@ -301,19 +308,27 @@ class ArbitraryCouplingsSample(SampleBase):
                                             ),
                                   )
 
-def samplewithfai(productionmode, analysis, fai, withdecay=False):
-    from combinehelpers import sigmaioversigma1
+def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmodeforfai=None):
+    from combinehelpers import mixturesign, sigmaioversigma1
     analysis = Analysis(analysis)
     productionmode = ProductionMode(productionmode)
-    if productionmode == "ggH":
+    if productionmodeforfai is None:
+        productionmodeforfai = productionmode
+    productionmodeforfai = ProductionMode(productionmodeforfai)
+    if productionmodeforfai == "ggH":
         withdecay = True
     kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2")}
-    power = (.25 if productionmode != "ggH" and withdecay else .5)
+    power = (.25 if productionmodeforfai != "ggH" and withdecay else .5)
     kwargs["g1"] = (1-abs(fai))**power
-    xsecratio = sigmaioversigma1(analysis, productionmode)
+    xsecratio = sigmaioversigma1(analysis, productionmodeforfai)
     if not withdecay:
         xsecratio /= sigmaioversigma1(analysis, "ggH")
-    kwargs[analysis.couplingname] = copysign((abs(fai) / xsecratio)**power, fai)
+    mixhypothesis = analysis.mixdecayhypothesis
+    kwargs[analysis.couplingname] = copysign(
+                                             (abs(fai) / xsecratio)**power,
+                                             #mixturesign: multiply by -1 for fL1
+                                             mixturesign(analysis)*fai
+                                            )
     return ArbitraryCouplingsSample(productionmode, **kwargs)
 
 class ReweightingSample(MultiEnum, SampleBase):
@@ -751,5 +766,7 @@ class Sample(ReweightingSample):
         raise self.ValueError("unblind")
 
 if __name__ == "__main__":
-    for fa2 in 0, .25, -.5, .75, 1:
-        print fa2, " ".join(str(samplewithfai("VBF", "fa2", fa2).fai("VBF", _)) for _ in purehypotheses)
+    for productionmode in "ggH", "VBF", "ZH":
+        for analysis in "fa3", "fa2", "fL1":
+            for fai in 0.5, -0.2:
+                assert abs(samplewithfai(productionmode, analysis, fai).fai(productionmode, analysis)/fai - 1) < 1e-15

@@ -2,10 +2,10 @@
 from collections import OrderedDict
 from copy import deepcopy
 from helperstuff import config
-from helperstuff.filemanager import cd, tfiles
 from helperstuff.optimizesmoothing import TemplateIterate
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import smoothingparametersfile, Template, templatesfiles
+from helperstuff.utilities import cd, tfiles
 import json
 import os
 import shutil

@@ -1,6 +1,7 @@
 import collections
 import config
 from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode
+from math import copysign
 import os
 import ROOT
 from samples import ReweightingSample, Sample
@@ -176,3 +177,10 @@ class SigmaIOverSigma1(MultiEnum):
 
 def sigmaioversigma1(*args):
     return SigmaIOverSigma1(*args).result
+
+def mixturesign(analysis, productionmode=None):
+    analysis = Analysis(analysis)
+    if productionmode is None:
+        assert mixturesign(analysis, "ggH") == mixturesign(analysis, "VBF") == mixturesign(analysis, "ZH")
+        productionmode = "ggH"
+    return copysign(1, getattr(ReweightingSample(productionmode, analysis.mixdecayhypothesis), analysis.couplingname))

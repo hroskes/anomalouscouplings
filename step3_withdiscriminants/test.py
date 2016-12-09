@@ -1,10 +1,14 @@
 #!/usr/bin/env python
+
+assert __name__ == "__main__"
+
 from helperstuff import config
 from helperstuff import constants
 from helperstuff import style
 from helperstuff.combinehelpers import gettemplate
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import *
+import helperstuff.rootoverloads.histogramfloor
 from helperstuff.samples import *
 import re
 import ROOT
@@ -13,15 +17,16 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "VBF"
-disc           = "D_g2_decay"
-weight         = ArbitraryCouplingsSample(productionmode, 1, -constants.g2decay, 0, 0)
+productionmode = "ZH"
+disc           = "D_CP_VH_hadronic"
+weight         = ReweightingSample(productionmode, "fa3prod0.5")
 bins           = None
 min            = None
 max            = None
-enrich         = True
+enrich         = False
+masscut        = True
 channel        = "2e2mu"
-category       = "Untagged"
+category       = "VHHadrtagged"
 #========================
 
 if isinstance(weight, SampleBase):
@@ -61,6 +66,13 @@ def hypothesestouse():
         if productionmode in ["HJJ", "ttH"] and hypothesis not in hffhypotheses: continue
         yield hypothesis
 
+for hypothesis in hypotheses:
+    if hypothesis not in hypothesestouse():
+        try:
+            os.remove(os.path.join(config.plotsbasedir, "TEST", "{}.png".format(hypothesis)))
+        except OSError:
+            pass
+
 for color, hypothesis in enumerate(hypothesestouse(), start=1):
     t = ROOT.TChain("candTree", "candTree")
     sample = Sample(productionmode, hypothesis, "160928")
@@ -69,15 +81,22 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
 
     weightname = weight if weight is not None else sample.weightname()
 
-    wt = "({}>-998)*({})".format(discname, weightname)
+    weightfactors = [
+                     weightname,
+                     "{}>-998".format(discname),
+                    ]
 
     if category is not None:
-        wt += "*({})".format(" || ".join("(category=={})".format(_) for _ in Category(category).idnumbers))
+        weightfactors.append(" || ".join("(category=={})".format(_) for _ in Category(category).idnumbers))
     if enrich:
-        wt += "*(D_bkg_0plus>0.5)"
+        weightfactors.append("D_bkg_0plus>0.5")
     if channel is not None:
-        wt += "*(Z1Flav*Z2Flav=={})".format(Channel(channel).ZZFlav)
+        weightfactors.append("Z1Flav*Z2Flav=={}".format(Channel(channel).ZZFlav))
+    if masscut:
+        weightfactors.append("ZZMass > {}".format(config.m4lmin))
+        weightfactors.append("ZZMass < {}".format(config.m4lmax))
 
+    wt = "*".join("("+_+")" for _ in weightfactors)
 
     t.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
     h = hs[hypothesis] = getattr(ROOT, hname)
@@ -85,6 +104,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
       h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
       h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
+    h.Floor()
     hstack.Add(h)
     cache.append(h)
     legend.AddEntry(h, str(hypothesis), "l")

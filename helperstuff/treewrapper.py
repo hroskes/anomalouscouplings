@@ -341,6 +341,77 @@ class TreeWrapper(Iterator):
         if self.notdijet: return -999
         return self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco / (self.M2g1_WH_hadronic + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2)
 
+###############################################
+#VH hadronic anomalous couplings discriminants#
+###############################################
+
+    def D_0minus_VH_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_WH_hadronic*constants.JHUXSWHa1 + self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+               /
+                 (
+                   (self.M2g1_WH_hadronic + self.M2g4_WH_hadronic*constants.g4WH**2)*constants.JHUXSWHa1
+                 +
+                   (self.M2g1_ZH_hadronic + self.M2g4_ZH_hadronic*constants.g4ZH**2)*constants.JHUXSZHa1
+                 )
+               )
+    def D_CP_VH_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1g4_WH_hadronic*constants.g4WH*constants.JHUXSWHa1 + self.M2g1g4_ZH_hadronic*constants.g4ZH*constants.JHUXSZHa1)
+               /
+                 (
+                   (self.M2g1_WH_hadronic + self.M2g4_WH_hadronic*constants.g4WH**2)*constants.JHUXSWHa1
+                 +
+                   (self.M2g1_ZH_hadronic + self.M2g4_ZH_hadronic*constants.g4ZH**2)*constants.JHUXSZHa1
+                 )
+               )
+    def D_g2_VH_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_WH_hadronic*constants.JHUXSWHa1 + self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+               /
+                 (
+                   (self.M2g1_WH_hadronic + self.M2g2_WH_hadronic*constants.g2WH**2)*constants.JHUXSWHa1
+                 +
+                   (self.M2g1_ZH_hadronic + self.M2g2_ZH_hadronic*constants.g2ZH**2)*constants.JHUXSZHa1
+                 )
+               )
+    def D_g1g2_VH_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1g2_WH_hadronic*constants.g2WH*constants.JHUXSWHa1 + self.M2g1g2_ZH_hadronic*constants.g2ZH*constants.JHUXSZHa1)
+               /
+                 (
+                   (self.M2g1_WH_hadronic + self.M2g2_WH_hadronic*constants.g2WH**2)*constants.JHUXSWHa1
+                 +
+                   (self.M2g1_ZH_hadronic + self.M2g2_ZH_hadronic*constants.g2ZH**2)*constants.JHUXSZHa1
+                 )
+               )
+    def D_g1prime2_VH_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_WH_hadronic*constants.JHUXSWHa1 + self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+               /
+                 (
+                   (self.M2g1_WH_hadronic + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2)*constants.JHUXSWHa1
+                 +
+                   (self.M2g1_ZH_hadronic + self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
+                 )
+               )
+    def D_g1g1prime2_VH_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco*constants.JHUXSWHa1 + self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco*constants.JHUXSZHa1)
+               /
+                 (
+                   (self.M2g1_WH_hadronic + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2)*constants.JHUXSWHa1
+                 +
+                   (self.M2g1_ZH_hadronic + self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
+                 )
+               )
+
 ############################################
 #VBFdecay anomalous couplings discriminants#
 ############################################
@@ -382,6 +453,50 @@ class TreeWrapper(Iterator):
     def D_g1prime2_WHdecay_hadronic(self):
         if self.notdijet: return -999
         return self.M2g1_WH_hadronic*self.M2g1_decay / (self.M2g1_WH_hadronic*self.M2g1_decay + self.M2g1prime2_WH_hadronic*self.M2g1prime2_decay * (constants.g1prime2WH_reco*constants.g1prime2decay_reco)**2)
+
+####################################################
+#VHdecay hadronic anomalous couplings discriminants#
+####################################################
+
+    def D_0minus_VHdecay_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                        *self.M2g1_decay
+                 + (self.M2g4_WH_hadronic*constants.g4WH**2*constants.JHUXSWHa1+self.M2g4_ZH_hadronic*constants.g4ZH**2*constants.JHUXSZHa1)
+                        *self.M2g4_decay*constants.g4decay**2
+                 )
+               )
+    def D_g2_VHdecay_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                        *self.M2g1_decay
+                 + (self.M2g2_WH_hadronic*constants.g2WH**2*constants.JHUXSWHa1+self.M2g2_ZH_hadronic*constants.g2ZH**2*constants.JHUXSZHa1)
+                        *self.M2g2_decay*constants.g2decay**2
+                 )
+               )
+    def D_g1prime2_VHdecay_hadronic(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                        *self.M2g1_decay
+                 + (self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2*constants.JHUXSWHa1+self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2*constants.JHUXSZHa1)
+                        *self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                 )
+               )
 
 ######################################
 #VBFdecay g1^x gi^(4-x) discriminants#
@@ -1330,28 +1445,6 @@ class TreeWrapper(Iterator):
             "D_g1prime2_decay",
             "D_g1g1prime2_decay",
         ]
-        proddiscriminants = [
-            "D_0minus_{prod}{suffix}",
-            "D_CP_{prod}{suffix}",
-            "D_g2_{prod}{suffix}",
-            "D_g1g2_{prod}{suffix}",
-            "D_g1prime2_{prod}{suffix}",
-            "D_g1g1prime2_{prod}{suffix}",
-            "D_0minus_{prod}decay{suffix}",
-            "D_g2_{prod}decay{suffix}",
-            "D_g1prime2_{prod}decay{suffix}",
-        ] + [
-            "D_g1{}_{}{}_{{prod}}decay{{suffix}}{}".format(i, gj, 4-i, prime)
-                for prime in ("", "_prime")
-                for gj in ("g4", "g2", "g1prime2")
-                for i in range(5)
-        ]
-        for prod, suffix in (("VBF", ""), ("ZH", "_hadronic"), ("WH", "_hadronic")):
-            self.toaddtotree += [_.format(prod=prod, suffix=suffix) for _ in proddiscriminants]
-
-        self.toaddtotree_int = [
-            "category",
-        ]
 
         self.exceptions = [
             "cconstantforDbkg",
@@ -1388,6 +1481,32 @@ class TreeWrapper(Iterator):
             "useMELAv2",
             "weightfunctions",
             "xsec",
+        ]
+
+        proddiscriminants = [
+            "D_0minus_{prod}{suffix}",
+            "D_CP_{prod}{suffix}",
+            "D_g2_{prod}{suffix}",
+            "D_g1g2_{prod}{suffix}",
+            "D_g1prime2_{prod}{suffix}",
+            "D_g1g1prime2_{prod}{suffix}",
+            "D_0minus_{prod}decay{suffix}",
+            "D_g2_{prod}decay{suffix}",
+            "D_g1prime2_{prod}decay{suffix}",
+        ]
+        prodcomponentdiscriminants = [
+            "D_g1{}_{}{}_{{prod}}decay{{suffix}}{}".format(i, gj, 4-i, prime)
+                for prime in ("", "_prime")
+                for gj in ("g4", "g2", "g1prime2")
+                for i in range(5)
+        ]
+        for prod, suffix in (("VBF", ""), ("ZH", "_hadronic"), ("WH", "_hadronic"), ("VH", "_hadronic")):
+            self.toaddtotree += [_.format(prod=prod, suffix=suffix) for _ in proddiscriminants]
+            if prod != "VH":
+                self.exceptions += [_.format(prod=prod, suffix=suffix) for _ in prodcomponentdiscriminants]
+
+        self.toaddtotree_int = [
+            "category",
         ]
 
         allsamples = [    #all samples that have weight functions defined in this class

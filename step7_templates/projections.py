@@ -1,41 +1,20 @@
 #!/usr/bin/env python
 import abc
 import collections
-from helperstuff import config, constants
+from helperstuff import config, constants, run1info
 from helperstuff.combinehelpers import getrate, gettemplate
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, WhichProdDiscriminants, whichproddiscriminants
 from helperstuff.samples import ReweightingSample, samplewithfai
+import helperstuff.rootoverloads.histogramaxisnumbers
 import helperstuff.style
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import cache, tfiles, pairwise
 import itertools
-from math import sqrt
+from math import copysign, sqrt
 import os
 import ROOT
 import subprocess
 from tempfile import mkdtemp
-
-def GetAxis(self, i):
-    if i == 0:
-        return self.GetXaxis()
-    elif i == 1:
-        return self.GetYaxis()
-    elif i == 2:
-        return self.GetZaxis()
-    assert False
-ROOT.TH1.GetAxis = GetAxis
-del GetAxis
-
-def Projection(self, i):
-    if i == 0:
-        return self.ProjectionX()
-    elif i == 1:
-        return self.ProjectionY()
-    elif i == 2:
-        return self.ProjectionZ()
-    assert False
-ROOT.TH1.Projection = Projection
-del Projection
 
 class TemplateForProjection(object):
     __metaclass__ = abc.ABCMeta
@@ -112,6 +91,11 @@ class BaseTemplateFromFile(TemplateForProjection):
     def __init__(self, color, *args, **kwargs):
         super(BaseTemplateFromFile, self).__init__(*args)
         self.color = color
+        #I don't know what the following line accomplishes
+        # but it fixes the WH interference templates.
+        #Otherwise they are wrong in some way that
+        # I don't understand
+        self.template.gettemplate()
 
     def inithistogram(self):
         self.h = self.template.gettemplate().Clone()
@@ -217,7 +201,7 @@ class Projections(MultiEnum):
 
   def applysynonyms(self, enumsdict):
     if enumsdict[WhichProdDiscriminants] is None and enumsdict[Analysis] != "fL1":
-      enumsdict[WhichProdDiscriminants] = "D_g12gi2"
+      enumsdict[WhichProdDiscriminants] = "D_int_prod"
     super(Projections, self).applysynonyms(enumsdict)
 
   def check(self, *args):
@@ -250,6 +234,7 @@ class Projections(MultiEnum):
     animation = False
     saveasappend = ""
     exts = "png", "eps", "root", "pdf"
+    otherthingstodraw = []
     for kw, kwarg in kwargs.iteritems():
        if kw == "ggHfactor":
            ggHfactor = float(kwarg)
@@ -272,12 +257,14 @@ class Projections(MultiEnum):
            g1_custom = customsample.g1
            gi_custom = getattr(customsample, BSMhypothesis.couplingname)
            exts = "gif",
+       elif kw == "otherthingstodraw":
+           otherthingstodraw += kwarg
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
-    gi_ggHBSM = (ReweightingSample("ggH", "SM").xsec / ReweightingSample("ggH", BSMhypothesis).xsec)**.5
-    gi_VBFBSM = (ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25
-    gi_VHBSM = ((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25
+    gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
+    gi_VBFBSM = copysign((ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25, gi_ggHBSM)
+    gi_VHBSM = copysign(((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
     if self.category == "UntaggedIchep16":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
@@ -390,8 +377,8 @@ class Projections(MultiEnum):
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
         if customfai  > 0: plusminus = "#plus"
-        ggHcustom = ComponentTemplateSum("ggH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "dec", plusminus, abs(customsample.fai("ggH", BSMhypothesis))), 1, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
-        VBFcustom = ComponentTemplateSum("VBF ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VBF", plusminus, abs(customsample.fai("VBF", BSMhypothesis))), 2, VBFSM.Integral(),
+        ggHcustom = ComponentTemplateSum("ggH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "dec", plusminus, abs(customsample.fai("ggH", self.analysis))), 1, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
+        VBFcustom = ComponentTemplateSum("VBF ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VBF", plusminus, abs(customsample.fai("VBF", self.analysis))), 2, VBFSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces))
                                         )
         ZHcustom  = ComponentTemplateSum("", 0, ZHSM.Integral(),
@@ -400,7 +387,7 @@ class Projections(MultiEnum):
         WHcustom  = ComponentTemplateSum("", 0, WHSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces))
                                         )
-        VHcustom = TemplateSum("VH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", BSMhypothesis))), 4, (ZHcustom, 1), (WHcustom, 1))
+        VHcustom = TemplateSum("VH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", self.analysis))), 4, (ZHcustom, 1), (WHcustom, 1))
         for t in ggHcustom, VBFcustom, VHcustom:
             t.Scale(1.0/t.Integral())
 
@@ -440,6 +427,9 @@ class Projections(MultiEnum):
         hstack.Draw("nostack")
         hstack.GetXaxis().SetTitle(discriminant.title)
         legend.Draw()
+        for thing in otherthingstodraw:
+            if thing:
+                thing.Draw()
         try:
             os.makedirs(os.path.join(saveasdir, subdir))
         except OSError:
@@ -461,12 +451,26 @@ class Projections(MultiEnum):
         self.analysis = analysis
         self.fai = fai
         self.delay = delay
-        BSMhypothesis = self.analysis.purehypotheses[1]
         sample = samplewithfai(self.productionmode, self.analysis, self.fai)
-        self.fai_decay = sample.fai("ggH", BSMhypothesis)
+        self.fai_decay = sample.fai("ggH", self.analysis)
     def __cmp__(self, other):
         assert self.analysis == other.analysis
         return cmp((self.fai_decay, self.delay), (other.fai_decay, other.delay))
+    @property
+    @cache
+    def excludedtext(self):
+        allowed = run1info.isallowed2sigma(self.analysis, self.fai_decay)
+        if allowed: return
+        x1, y1, x2, y2 = .2, .7, .5, .8
+        pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
+        pt.SetBorderSize(0)
+        pt.SetFillStyle(0)
+        pt.SetTextAlign(12)
+        pt.SetTextFont(42)
+        pt.SetTextSize(0.045)
+        text = pt.AddText("Excluded in Run 1")
+        text.SetTextColor(2)
+        return pt
 
   def animation(self):
       tmpdir = mkdtemp()
@@ -499,6 +503,7 @@ class Projections(MultiEnum):
           kwargs = kwargs_base.copy()
           kwargs["customfaiforanimation"] = step.fai, step.productionmode
           kwargs["saveasappend"] = i
+          kwargs["otherthingstodraw"] = [step.excludedtext]
           self.projections(**kwargs)
 
       for discriminant in self.discriminants:
@@ -524,17 +529,16 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "enrich", "Untagged")
+#    yield Projections("160928", "2e2mu", "fL1", "rescalemixtures", "fullrange", "VBFtagged")
 #    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:
-          if analysis == "fL1": continue
           for normalization in normalizations:
             for enrichstatus in enrichstatuses:
               for category in categories:
                 if normalization != "rescalemixtures": continue   #uncomment this to get the niceplots fast
-                if category == "Untagged":
+                if category == "Untagged" or analysis == "fL1":
                   yield Projections(channel, analysis, normalization, production, enrichstatus, category)
                 else:
                   for w in whichproddiscriminants:

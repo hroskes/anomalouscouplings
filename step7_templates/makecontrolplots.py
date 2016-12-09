@@ -45,8 +45,8 @@ def makecontrolplots(*args, **kwargs):
 
 if __name__ == "__main__":
     def thetemplatesfiles():
-        yield TemplatesFile("2e2mu", "wh", "VBFtagged", "fa3", "160928", "D_int_prod")
-        return
+#        yield TemplatesFile("ggh", "VBFtagged", "2e2mu", "fa3")
+#        return
         for templatesfile in templatesfiles:
              yield templatesfile
     length = len(list(thetemplatesfiles()))

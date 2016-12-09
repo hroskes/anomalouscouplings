@@ -2,7 +2,6 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import namedtuple
 from discriminants import discriminant
-from filemanager import cache, tfiles
 import itertools
 from math import sqrt
 import numbers
@@ -10,6 +9,7 @@ import numpy
 import os
 import ROOT
 from templates import Template
+from utilities import cache, tfiles
 
 Bin = namedtuple("Bin", "low hi contents error")
 Derivative = namedtuple("Derivative", "center difference differror")
