@@ -518,7 +518,7 @@ class Template(TemplateBase, MultiEnum):
             if self.hypothesis == "L1":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("L1", "fL1prod0.5")   #????? what happened?
+                            for hypothesis in ("L1", "fL1prod0.5", "0-", "fa3prod0.5")
                        }
             if self.hypothesis == "fa2dec0.5":
                 result={
@@ -533,7 +533,7 @@ class Template(TemplateBase, MultiEnum):
             if self.hypothesis == "fL1dec0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("fL1prod0.5",)
+                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fL1prod0.5", "fa3prod0.5")
                        }
             if self.hypothesis == "fa2prod0.5":
                 result={
@@ -563,12 +563,12 @@ class Template(TemplateBase, MultiEnum):
             if self.hypothesis == "fL1proddec0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "fa3prod0.5", "fL1prod0.5") #????
+                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fL1prod0.5", "fa3prod0.5")
                        }
             if self.hypothesis == "fa2dec-0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
+                            for hypothesis in ("0+", "a2", "fa2prod0.5", "fL1prod0.5")
                        }
             if self.hypothesis == "fa2prod-0.5":
                 result={
@@ -578,7 +578,7 @@ class Template(TemplateBase, MultiEnum):
             if self.hypothesis == "fa2proddec0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
+                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fL1prod0.5", "fa3prod0.5")
                        }
         if self.productionmode == "ZH":
             if self.hypothesis == "0+":
