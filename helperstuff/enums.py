@@ -181,9 +181,9 @@ class ProductionMode(MyEnum):
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
         if self == "ZH":
-            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+            return Hypothesis.items(lambda x: x in proddechypotheses+0*["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
         if self == "WH":
-            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+            return Hypothesis.items(lambda x: x in proddechypotheses+0*["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
         if self == "ttH":
             return Hypothesis.items(lambda x: x in hffhypotheses)
         if self == "HJJ":

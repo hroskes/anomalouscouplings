@@ -561,7 +561,8 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH"):
             if self.hypothesis in (
                                    ["0+"]
-                                   + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3", "fL1") for b in ("dec", "prod", "proddec-")]
+                                   + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]
+                                   + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
                                    + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
                                   ):
                 return 1
@@ -575,7 +576,8 @@ class ReweightingSample(MultiEnum, SampleBase):
             return 0
         if self.hypothesis in (
                                ["0+", "0-", "L1"]
-                             + ["{}{}0.5".format(a, b) for a in ("fa3", "fL1") for b in ("dec", "prod", "proddec-")]
+                             + ["{}{}0.5".format(a, b) for a in ("fa3",) for b in ("dec", "prod", "proddec-")]
+                             + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
                               ):
             return 0
         if self.hypothesis == "a2":
@@ -616,7 +618,8 @@ class ReweightingSample(MultiEnum, SampleBase):
             return 0
         if self.hypothesis in (
                                ["0+", "a2", "L1"]
-                             + ["{}{}0.5".format(a, b) for a in ("fa2", "fL1") for b in ("dec", "prod", "proddec-")]
+                             + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec", "prod", "proddec-")]
+                             + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
                              + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
                               ):
             return 0
