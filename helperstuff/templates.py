@@ -53,8 +53,10 @@ class TemplatesFile(MultiEnum):
         if not self.systematic.appliesto(self.templategroup):
             raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.templategroup, args))
 
-    def jsonfile(self):
+    def jsonfile(self, iteration=None):
         folder = os.path.join(config.repositorydir, "step5_json")
+        if iteration is not None:
+            folder = os.path.join(folder, "bkp_iter{}".format(iteration))
 
         nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
 
@@ -63,8 +65,12 @@ class TemplatesFile(MultiEnum):
 
         return result
 
-    def templatesfile(self):
+    def templatesfile(self, iteration=None):
         folder = os.path.join(config.repositorydir, "step7_templates")
+        if iteration is not None:
+            folder = os.path.join(folder, "bkp_iter{}".format(iteration))
+            if not os.path.exists(folder):
+                raise IOError("No folder {}".format(folder))
 
         nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic if config.applyshapesystematics else "", self.production, self.blindnamepart]
 
@@ -73,10 +79,10 @@ class TemplatesFile(MultiEnum):
 
         return result
 
-    @property
-    def controlplotsdir(self):
-        split = os.path.split(self.templatesfile())
-        return os.path.join(config.plotsbasedir, "templateprojections", "controlplots", split[1].replace(".root", ""))
+    def controlplotsdir(self, *args, **kwargs):
+        relpath = os.path.relpath(self.templatesfile(*args, **kwargs), os.path.join(config.repositorydir, "step7_templates"))
+        assert ".." not in relpath
+        return os.path.join(config.plotsbasedir, "templateprojections", "controlplots", relpath.replace(".root", "").replace("bkp_", ""))
 
     def signalsamples(self):
         if self.templategroup == "ggh":
@@ -358,19 +364,19 @@ class TemplateBase(object):
                 assert False
         super(TemplateBase, self).applysynonyms(enumsdict)
 
-    def templatefile(self):
-        return self.templatesfile.templatesfile()
+    def templatefile(self, *args, **kwargs):
+        return self.templatesfile.templatesfile(*args, **kwargs)
 
     @abc.abstractmethod
     def templatename(self):
         pass
 
-    def gettemplate(self):
-        f = tfiles[self.templatefile()]
+    def gettemplate(self, *args, **kwargs):
+        f = tfiles[self.templatefile(**kwargs)]
         try:
             return getattr(f, self.templatename())
         except AttributeError:
-            raise IOError("No template {} in {}".format(self.templatename(), self.templatefile()))
+            raise IOError("No template {} in {}".format(self.templatename(), self.templatefile(**kwargs)))
 
     @property
     def discriminants(self):
@@ -386,6 +392,8 @@ class TemplateBase(object):
     @abc.abstractmethod
     def getjson(self):
         pass
+
+smoothingparametersfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
 
 class Template(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
@@ -740,24 +748,23 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
-    smoothingparametersfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
-
-    @classmethod
-    def getsmoothingparametersdict(cls, trycache=True):
-      if not hasattr(cls, "smoothingparametersdict_cache") or not trycache:
+    @staticmethod
+    def getsmoothingparametersdict(trycache=True):
+      import globals
+      if globals.smoothingparametersdict_cache is None or not trycache:
         try:
-          with open(cls.smoothingparametersfile) as f:
+          with open(smoothingparametersfile) as f:
             jsonstring = f.read()
         except IOError:
           try:
-            os.makedirs(os.path.dirname(cls.smoothingparametersfile))
+            os.makedirs(os.path.dirname(smoothingparametersfile))
           except OSError:
             pass
-          with open(cls.smoothingparametersfile, "w") as f:
+          with open(smoothingparametersfile, "w") as f:
             f.write("{}\n")
             jsonstring = "{}"
-        cls.smoothingparametersdict_cache = json.loads(jsonstring)
-      return cls.smoothingparametersdict_cache
+        globals.smoothingparametersdict_cache = json.loads(jsonstring)
+      return globals.smoothingparametersdict_cache
 
     @property
     def smoothingparameters(self):

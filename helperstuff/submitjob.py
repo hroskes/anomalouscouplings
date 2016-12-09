@@ -8,7 +8,11 @@ import tempfile
 import textwrap
 
 if config.host == "lxplus":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue="1nd", interactive=False, waitids=[]):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue="1nd", interactive=False, waitids=[], outputfile=None, errorfile=None):
+        if outputfile is not None:
+            outputfile = outputfile.format(jobid="%J")
+        if errorfile is not None:
+            errorfile = errorfile.format(jobid="%J")
         run = """
                  echo .oO[jobtext]Oo. | bsub .oO[options]Oo.
               """
@@ -17,6 +21,8 @@ if config.host == "lxplus":
         optionsdict = {
                        "-q": queue,
                        "-J": jobname,
+                       "-o": outputfile,
+                       "-e": errorfile,
                       }
         if waitids:
             optionsdict["-w"] = " && ".join("ended({:d})".format(id) for id in waitids)
@@ -36,7 +42,11 @@ if config.host == "lxplus":
             return jobid
 
 elif config.host == "MARCC":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[]):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[], outputfile=None, errorfile=None):
+        if outputfile is not None:
+            outputfile = outputfile.format(jobid="%j")
+        if errorfile is not None:
+            errorfile = errorfile.format(jobid="%j")
         jobtemplate = textwrap.dedent("""
             #!/bin/bash
 
@@ -67,11 +77,13 @@ elif config.host == "MARCC":
                    "--ntasks-per-node": "1",
                    "--partition": ".oO[queue]Oo.",
                    "--mem": "3000",
+                   "--output": outputfile,
+                   "--error": errorfile,
                   }
         if waitids:
             options["--dependency"] = "afterany:.oO[waitids]Oo."
 
-        options = {replaceByMap(k, repmap): replaceByMap(v, repmap) for k, v in options.iteritems()}
+        options = {replaceByMap(k, repmap): replaceByMap(v, repmap) for k, v in options.iteritems() if v is not None}
         options = [quote("{}={}".format(k, v)) for k, v in options.iteritems()]
 
         if interactive:
