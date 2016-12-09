@@ -5,6 +5,7 @@ from helperstuff import xrd
 from helperstuff.enums import flavors, decayonlyhypotheses, hffhypotheses, prodonlyhypotheses, productions
 from helperstuff.samples import Sample
 from helperstuff.treewrapper import TreeWrapper
+from helperstuff.utilities import KeepWhileOpenFile
 import os
 import ROOT
 import sys
@@ -15,12 +16,15 @@ assert xrd.exists(definitelyexists.CJLSTfile())
 
 def adddiscriminants(*args):
 
-    sample = Sample(*args)
-    reweightingsamples = sample.reweightingsamples()
+  sample = Sample(*args)
+  reweightingsamples = sample.reweightingsamples()
 
-    filename = sample.CJLSTfile()
-    newfilename = sample.withdiscriminantsfile()
-    print newfilename
+  filename = sample.CJLSTfile()
+  newfilename = sample.withdiscriminantsfile()
+  print newfilename
+  with KeepWhileOpenFile(newfilename+".tmp") as kwof:
+    if not kwof:
+        return
     if os.path.exists(newfilename):
         return
 
