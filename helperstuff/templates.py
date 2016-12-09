@@ -573,7 +573,7 @@ class Template(TemplateBase, MultiEnum):
             if self.hypothesis == "fa2prod-0.5":
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "fa3prod0.5") #MAYBE fa2prod0.5
+                            for hypothesis in ("0+", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5")
                        }
             if self.hypothesis == "fa2proddec0.5":
                 result={
