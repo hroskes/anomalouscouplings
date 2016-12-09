@@ -105,7 +105,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "0-"), ReweightingSample("ZH", "fa3prod0.5"), ReweightingSample("ZH", "fa3dec0.5"), ReweightingSample("ZH", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod-0.5"), ReweightingSample("ZH", "fa2dec-0.5"), ReweightingSample("ZH", "fa2proddec0.5")]
+                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod0.5"), ReweightingSample("ZH", "fa2dec0.5"), ReweightingSample("ZH", "fa2proddec-0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "L1"), ReweightingSample("ZH", "fL1prod0.5"), ReweightingSample("ZH", "fL1dec0.5"), ReweightingSample("ZH", "fL1proddec0.5")]
 
@@ -113,7 +113,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "0-"), ReweightingSample("WH", "fa3prod0.5"), ReweightingSample("WH", "fa3dec0.5"), ReweightingSample("WH", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod-0.5"), ReweightingSample("WH", "fa2dec-0.5"), ReweightingSample("WH", "fa2proddec0.5")]
+                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod0.5"), ReweightingSample("WH", "fa2dec0.5"), ReweightingSample("WH", "fa2proddec-0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "L1"), ReweightingSample("WH", "fL1prod0.5"), ReweightingSample("WH", "fL1dec0.5"), ReweightingSample("WH", "fL1proddec0.5")]
 
