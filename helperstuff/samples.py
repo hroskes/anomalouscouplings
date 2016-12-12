@@ -225,13 +225,21 @@ class SampleBase(object):
                             for reweightingsample, factor in self.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
                          )
 
-    def get_MC_weight_function(self_sample):
+    def get_MC_weight_function(self_sample, fortest=False):
         terms = tuple(
                       (reweightingsample.weightname(), factor*reweightingsample.xsec/self_sample.xsec)
                                for reweightingsample, factor in self_sample.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
                      )
+
         def MC_weight_function(self_tree):
-            return sum(factor*getattr(self_tree, componentweightname) for componentweightname, factor in terms)
+            return sum(factor*getattr(self_tree, componentweightname)() for componentweightname, factor in terms)
+
+        if fortest:
+            #the same thing but without () on the getattr
+            #this can run on a tree, rather than a TreeWrapper
+            def MC_weight_function(self_tree):
+                return sum(factor*getattr(self_tree, componentweightname) for componentweightname, factor in terms)
+
         MC_weight_function.__name__ = self_sample.weightname()
         return MC_weight_function
 
@@ -874,7 +882,7 @@ if __name__ == "__main__":
     s = ReweightingSample("VBF", "fa2prod-0.5")
     length = min(t.GetEntries(), 100)
     for i, entry in enumerate(t, start=1):
-        if s.get_MC_weight_function()(t) < 0:
+        if s.get_MC_weight_function(fortest=True)(t) < 0:
             t.Show()
             assert False
         print i, "/", length
