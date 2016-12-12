@@ -529,8 +529,8 @@ if __name__ == "__main__":
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
 #    yield Projections("160928", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("160928", "2e2mu", "fL1", "rescalemixtures", "fullrange", "VBFtagged")
-#    return
+    yield Projections("160928", "2e2mu", "fa2", "rescalemixtures", "fullrange", "VBFtagged")
+    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:

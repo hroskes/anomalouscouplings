@@ -231,7 +231,7 @@ class SampleBase(object):
                                for reweightingsample, factor in self_sample.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
                      )
         def MC_weight_function(self_tree):
-            return sum(factor*getattr(self_tree, componentweightname)() for componentweightname, factor in terms)
+            return sum(factor*getattr(self_tree, componentweightname) for componentweightname, factor in terms)
         MC_weight_function.__name__ = self_sample.weightname()
         return MC_weight_function
 
