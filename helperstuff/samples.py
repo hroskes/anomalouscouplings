@@ -227,7 +227,7 @@ class SampleBase(object):
 
     def get_MC_weight_function(self_sample):
         terms = tuple(
-                      (reweightingsample.weightname(), factor)
+                      (reweightingsample.weightname(), factor*reweightingsample.xsec/self_sample.xsec)
                                for reweightingsample, factor in self_sample.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
                      )
         def MC_weight_function(self_tree):
@@ -871,7 +871,12 @@ if __name__ == "__main__":
                 assert abs(samplewithfai(productionmode, analysis, fai).fai(productionmode, analysis)/fai - 1) < 1e-15
     f = ROOT.TFile(Sample("VBF", "0+", "160928").withdiscriminantsfile())
     t = f.candTree
-    t.GetEntry(0)
     s = ReweightingSample("VBF", "fa2prod-0.5")
-    print eval(s.MC_weight.replace("MC", "t.MC"))
-    print s.get_MC_weight_function()(t)
+    length = min(t.GetEntries(), 100)
+    for i, entry in enumerate(t, start=1):
+        if s.get_MC_weight_function()(t) < 0:
+            t.Show()
+            assert False
+        print i, "/", length
+        if i == length:
+            break
