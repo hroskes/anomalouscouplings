@@ -869,5 +869,9 @@ if __name__ == "__main__":
         for analysis in "fa3", "fa2", "fL1":
             for fai in 0.5, -0.2:
                 assert abs(samplewithfai(productionmode, analysis, fai).fai(productionmode, analysis)/fai - 1) < 1e-15
-    print ReweightingSample("fa2dec-0.5", "VBF").linearcombinationofreweightingsamples("directlyreweighted")
-    print ReweightingSample("fa2dec-0.5", "VBF").linearcombinationofreweightingsamples("templates")
+    f = ROOT.TFile(Sample("VBF", "0+", "160928").withdiscriminantsfile())
+    t = f.candTree
+    t.GetEntry(0)
+    s = ReweightingSample("VBF", "fa2prod-0.5")
+    print eval(s.MC_weight.replace("MC", "t.MC"))
+    print s.get_MC_weight_function()(t)
