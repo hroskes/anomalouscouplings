@@ -27,7 +27,7 @@ from __future__ import division
 import cmath
 from enums import Analysis
 import numpy
-from samples import ReweightingSample, Sample
+from samples import ReweightingSample, Sample, SampleBasis
 from templates import TemplatesFile
 from utilities import tfiles
 
@@ -48,6 +48,9 @@ def get5components(tree, analysis, productionmode, basehypothesis=None):
     for template in templatesfile.templates():
         sample = ReweightingSample(productionmode, template.hypothesis)
         vectorofweights.append([getattr(tree, sample.weightname()) * sample.xsec / basexsec])
+
+    wts = tree.reweightingweights
+    vectorofweights = [[wts[0]], [wts[1]], [wts[7]], [wts[4]], [wts[11]]]
 
     return invertedmatrix * vectorofweights
 

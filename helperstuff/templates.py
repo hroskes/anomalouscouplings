@@ -97,7 +97,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "0-"), ReweightingSample("VBF", "fa3prod0.5"), ReweightingSample("VBF", "fa3dec0.5"), ReweightingSample("VBF", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod-0.5"), ReweightingSample("VBF", "fa2dec-0.5"), ReweightingSample("VBF", "fa2proddec0.5")]
+                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod0.5"), ReweightingSample("VBF", "fa2dec0.5"), ReweightingSample("VBF", "fa2proddec-0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1"), ReweightingSample("VBF", "fL1prod0.5"), ReweightingSample("VBF", "fL1dec0.5"), ReweightingSample("VBF", "fL1proddec0.5")]
 
