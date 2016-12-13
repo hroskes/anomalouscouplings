@@ -107,3 +107,18 @@ if __name__ == "__main__":
     result = getindividualcomponents(t, "fa2", "VBF", "0+")
     print result
     print getweightsback(*result)
+
+    def weight(sample):
+        couplingsarray = numpy.array([sample.g1**(4-i)*sample.g2**i for i in range(5)])
+        return numpy.dot(couplingsarray, proddeccomponents)*ReweightingSample("VBF", "SM").xsec / sample.xsec
+
+    def weight2(sample):
+        couplingsarray = numpy.array([sample.g1**(2-i)*sample.g2**i for i in range(3)])
+        return numpy.dot(couplingsarray, prodcomponents)*numpy.dot(couplingsarray, deccomponents)*ReweightingSample("VBF", "SM").xsec / sample.xsec
+
+    proddeccomponents = get5components(t, "fa2", "VBF", "0+").flat
+    prodcomponents = result[0:3]
+    deccomponents = result[3:6]
+
+    print weight(ReweightingSample("VBF", "fa2dec-0.5"))
+    print weight2(ReweightingSample("VBF", "fa2dec-0.5"))
