@@ -47,14 +47,11 @@ def get5components(tree, analysis, productionmode, basehypothesis=None):
     vectorofweights = []
     for template in templatesfile.templates():
         sample = ReweightingSample(productionmode, template.hypothesis)
-        vectorofweights.append([getattr(tree, sample.weightname()) * sample.xsec / basexsec])
-
-    wts = tree.reweightingweights
-    vectorofweights = [[wts[0]], [wts[1]], [wts[7]], [wts[4]], [wts[11]]]
+        vectorofweights.append([tree.reweightingweights[sample.indexinreweightingweights]])
 
     return invertedmatrix * vectorofweights
 
-def getindividualcomponents(tree, analysis, productionmode, basehypothesis=None):
+def getindividualcomponents(tree, analysis, productionmode, basehypothesis=None, whichsolution=0):
     x0, x1, x2, x3, x4 = get5components(tree, analysis, productionmode, basehypothesis).flat
 
     y0 = List(x0, x0, x0, x0, x0, x0)
@@ -88,7 +85,7 @@ def getindividualcomponents(tree, analysis, productionmode, basehypothesis=None)
                   )):
             possible.append(i)
     print possible
-    i = possible[0]
+    i = possible[whichsolution]
 
     return y0[i], y1[i], y2[i], z0[i], z1[i], z2[i]
 
@@ -105,7 +102,7 @@ def getweightsback(y0, y1, y2, z0, z1, z2):
 if __name__ == "__main__":
     s = Sample("VBF", "0+", "160928")
     t = tfiles[s.withdiscriminantsfile()].candTree
-    t.Show(65)
+    t.Show(8917)
     print tuple(get5components(t, "fa2", "VBF", "0+").flat)
     result = getindividualcomponents(t, "fa2", "VBF", "0+")
     print result
