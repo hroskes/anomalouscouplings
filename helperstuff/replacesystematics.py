@@ -144,11 +144,11 @@ class ICHEPSystematics(ReadSystematics_BaseClass):
         uselist = [name, s["type"]] + [str(s[p.yamlsystematicsname]) if p.yamlsystematicsname in s else "-" for p in useprocesses]
         return " ".join(uselist)
 
-def replacesystematics(channel, production, category):
+def replacesystematics(channel, production, category, lumi):
     channel = Channel(channel)
     production = Production(production)
     category = Category(category)
-    cardfilename = "hzz4l_{}S_{}_{}.txt".format(channel, category, production.year)
+    cardfilename = "hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(lumi))
     with open(cardfilename) as f:
         contents = f.read()
     sections = contents.split("------------\n")

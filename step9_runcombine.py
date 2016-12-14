@@ -224,7 +224,7 @@ def runcombine(analysis, foldername, **kwargs):
                         f.write(contents)
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 for channel, production, category in product(usechannels, productions, usecategories):
-                    replacesystematics(channel, production, category)
+                    replacesystematics(channel, production, category, float(Luminosity(lumitype, production)))
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
             if config.unblindscans:
