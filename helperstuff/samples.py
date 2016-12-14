@@ -226,19 +226,19 @@ class SampleBase(object):
                          )
 
     def get_MC_weight_function(self_sample, fortest=False):
-        terms = tuple(
-                      (reweightingsample.weightname(), factor*reweightingsample.xsec/self_sample.xsec)
-                               for reweightingsample, factor in self_sample.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
-                     )
+        indicesandfactors = tuple(
+                                  (reweightingsample.indexinreweightingweights, factor)
+                                          for reweightingsample, factor in self_sample.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
+                                 )
 
+        MC_weight_linearcombination_name = "MC_weight_{}_linearcombination".format(self_sample.productionmode)
         def MC_weight_function(self_tree):
-            return sum(factor*getattr(self_tree, componentweightname)() for componentweightname, factor in terms)
+            return getattr(self_tree, MC_weight_linearcombination_name)(indicesandfactors)
 
         if fortest:
+            assert False
             #the same thing but without () on the getattr
             #this can run on a tree, rather than a TreeWrapper
-            def MC_weight_function(self_tree):
-                return sum(factor*getattr(self_tree, componentweightname) for componentweightname, factor in terms)
 
         MC_weight_function.__name__ = self_sample.weightname()
         return MC_weight_function
@@ -443,7 +443,12 @@ class ReweightingSample(MultiEnum, SampleBase):
         elif self.productionmode == "data":
             return True
         raise self.ValueError("isdata")
-        
+
+    @property
+    def indexinreweightingweights(self):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
+           return ["0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec0.5"].index(self.hypothesis)
+
     def weightname(self):
         if self.productionmode == "ggH":
             if self.hypothesis == "0+":

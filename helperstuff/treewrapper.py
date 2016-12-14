@@ -1314,6 +1314,8 @@ class TreeWrapper(Iterator):
 
     def MC_weight_VBF(self, index):
         return self.MC_weight * self.reweightingweights[index] * constants.SMXSVBF2L2l / self.nevents2L2l[index]
+    def MC_weight_VBF_linearcombination(self, indicesandfactors):
+        return self.MC_weight * constants.SMXSVBF2L2l * sum(factor*self.reweightingweights[index] for index, factor in indicesandfactors) / sum(factor * self.nevents2L2l[index] for index, factor in indicesandfactors)
     def MC_weight_VBF_g1(self):
         if self.isPOWHEG: return self.MC_weight_plain_xsec()
         return self.MC_weight_VBF(0)
@@ -1467,6 +1469,7 @@ class TreeWrapper(Iterator):
             "isZX",
             "MC_weight_ggH",
             "MC_weight_VBF",
+            "MC_weight_VBF_linearcombination",
             "MC_weight_WH",
             "MC_weight_ZH",
             "MC_weight_plain_xsec",
@@ -1669,16 +1672,20 @@ class TreeWrapper(Iterator):
 
             couplings.GetEntry(0)
             for i, (sample, function) in enumerate(zip(self.treesample.directreweightingsamples(), self.weightfunctions)):
+                if sample.indexinreweightingweights != i:
+                    raise SyntaxError("{!r}.indexinreweightingweights == {} when it should be {}!".format(sample, sample.indexinreweightingweights, i))
                 if self.getweightfunction(sample)() != self.getmainweightfunction()(i):
                     raise SyntaxError("{}() == {}, but {}({}) == {}!\nCheck the order of reweightingsamples or the weight functions!".format(self.getweightfunction(sample).__name__, self.getweightfunction(sample)(), self.getmainweightfunction().__name__, i, self.getmainweightfunction()(i)))
                 print couplings.ghz1Re[i], couplings.ghz2Re[i], couplings.ghz4Re[i], couplings.ghz1_prime2Re[i], sample.g1, sample.g2, sample.g4, sample.g1prime2
                 if sample.productionmode != "ggH" and self.treesample.production <= "160729":
                     continue
 
-                #to set gi=1 for the pure samples to compare to the couplings tree
-                #should just check ratios, but that's annoying when most of them are 0
                 gs = g1, g2, g4, g1prime2 = sample.g1, sample.g2, sample.g4, sample.g1prime2
-                if len([g for g in gs if g!=0]) == 1:
+                if len([g for g in gs if g!=0]) == 1 and self.productionmode == "ggH":
+                    #to set gi=1 for the pure samples to compare to the couplings tree
+                    #should just check ratios, but that's annoying when most of them are 0
+                    #can only do this for ggH, because VBF and VH have the linear combination weight branches
+                    # and they have to be the correct couplings not just ratios
                     gs = g1, g2, g4, g1prime2 = [1 if g else 0 for g in gs]
 
                 if not (couplings.spin[i] == 0 and couplings.ghz1Re[i] == g1 and couplings.ghz2Re[i] == g2 and couplings.ghz4Re[i] == g4 and couplings.ghz1_prime2Re[i] == g1prime2):
