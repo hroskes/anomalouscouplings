@@ -37,23 +37,23 @@ if __name__ == "__main__":
   print "Table:"
   print
   flavors = [Channel(f) for f in "4e", "4mu", "2e2mu"]
-  fmt = "{:<10}"*4
-  print fmt.format(*([""]+flavors))
+  fmt = "{:<10}"*5
+  print fmt.format(*([""]+flavors+["total"]))
   for c in categories:
     totalsig = Counter()
     totalbkg = Counter()
     print c
     for p in productionmodes:
-      print fmt.format(*([p] + ["{:.2f}".format(exp[p,f,c]) for f in flavors]))
+      print fmt.format(*([p] + ["{:.2f}".format(exp[p,f,c]) for f in flavors] + ["{:.2f}".format(sum(exp[p,f,c] for f in flavors))]))
       for f in flavors:
         if p.isbkg:
           totalbkg[f] += exp[p,f,c]
         else:
           totalsig[f] += exp[p,f,c]
     print
-    print fmt.format(*(["bkg"] + ["{:.2f}".format(totalbkg[f]) for f in flavors]))
-    print fmt.format(*(["signal"] + ["{:.2f}".format(totalsig[f]) for f in flavors]))
-    print fmt.format(*(["observed"] + [sum(tfiles[DataTree(production, flavor, category).treefile].candTree.GetEntries() for production in config.productionsforcombine) for flavor in flavors]))
+    print fmt.format(*(["bkg"] + ["{:.2f}".format(totalbkg[f]) for f in flavors] + ["{:.2f}".format(sum(totalbkg[f] for f in flavors))]))
+    print fmt.format(*(["signal"] + ["{:.2f}".format(totalsig[f]) for f in flavors] + ["{:.2f}".format(sum(totalsig[f] for f in flavors))]))
+    print fmt.format(*(["observed"] + [sum(tfiles[DataTree(production, flavor, category).treefile].candTree.GetEntries() for production in config.productionsforcombine) for flavor in flavors] + [""]))
     print
     print
   print "Total:"

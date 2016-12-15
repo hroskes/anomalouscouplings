@@ -54,7 +54,7 @@ def runcombine(analysis, foldername, **kwargs):
     legendposition = (.2, .7, .6, .9)
     CLtextposition = "left"
     productions = config.productionsforcombine
-    whichproddiscriminants = None
+    whichproddiscriminants = WhichProdDiscriminants("D_int_prod")#None
     usesystematics = True
     subdirectory = ""
     defaultscanrange = scanrange = (-1.0, 1.0)
@@ -152,7 +152,7 @@ def runcombine(analysis, foldername, **kwargs):
         moreappend += "_{},{},{}".format(npoints, *scanrange)
 
     analysis = Analysis(analysis)
-    foldername = "{}_{}_{}".format(analysis, foldername, whichproddiscriminants)
+    foldername = "{}_{}".format(analysis, foldername)
 
     repmap = {
               "foldername": pipes.quote(foldername),
