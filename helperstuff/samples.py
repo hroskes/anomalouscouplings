@@ -313,6 +313,15 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
     analysis = Analysis(analysis)
     productionmode = ProductionMode(productionmode)
 
+    if isinstance(withdecay, (basestring, ProductionMode)) and productionmodeforfai is None:
+        raise TypeError(
+                        "withdecay is a {thetype}!  Maybe you meant\n"
+                        "  samplewithfai({productionmode!r}, {analysis!r}, {fai!r}, productionmodeforfai={withdecay!r})\n"
+                        "or\n"
+                        "  samplewithfai({productionmode!r}, {analysis!r}, {fai!r}, bool({withdecay!r}))"
+                        .format(thetype=type(withdecay).__name__, productionmode=productionmode, analysis=analysis, fai=fai, withdecay=withdecay)
+                       )
+
     if productionmodeforfai is None:
         productionmodeforfai = productionmode
 

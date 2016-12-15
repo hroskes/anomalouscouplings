@@ -449,7 +449,7 @@ class Projections(MultiEnum):
     def __init__(self, productionmodeforfai, analysis, fai, delay):
         self.analysis = analysis
         self.delay = delay
-        sample = samplewithfai("ggH", self.analysis, fai, productionmodeforfai)
+        sample = samplewithfai("ggH", self.analysis, fai, productionmodeforfai=productionmodeforfai)
         self.fai_decay = sample.fai("ggH", self.analysis)
     def __cmp__(self, other):
         assert self.analysis == other.analysis
