@@ -446,12 +446,10 @@ class Projections(MultiEnum):
       return TemplatesFile(self.channel, self.systematic, "ggh", self.analysis, self.production, self.whichproddiscriminants, self.category).discriminants
 
   class AnimationStep(object):
-    def __init__(self, productionmode, analysis, fai, delay):
-        self.productionmode = productionmode
+    def __init__(self, productionmodeforfai, analysis, fai, delay):
         self.analysis = analysis
-        self.fai = fai
         self.delay = delay
-        sample = samplewithfai(self.productionmode, self.analysis, self.fai)
+        sample = samplewithfai("ggH", self.analysis, fai, productionmodeforfai)
         self.fai_decay = sample.fai("ggH", self.analysis)
     def __cmp__(self, other):
         assert self.analysis == other.analysis
@@ -477,7 +475,7 @@ class Projections(MultiEnum):
 
       nsteps = 200
       animation = []
-      for productionmode in "VBF", "ZH", "ggH":
+      for productionmode in "VBF", "VH", "ggH":
           animation += [
                         self.AnimationStep(
                                            productionmode,
@@ -501,7 +499,7 @@ class Projections(MultiEnum):
 
       for i, step in enumerate(animation):
           kwargs = kwargs_base.copy()
-          kwargs["customfaiforanimation"] = step.fai, step.productionmode
+          kwargs["customfaiforanimation"] = step.fai_decay, "ggH"
           kwargs["saveasappend"] = i
           kwargs["otherthingstodraw"] = [step.excludedtext]
           self.projections(**kwargs)

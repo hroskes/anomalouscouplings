@@ -312,11 +312,18 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
     from combinehelpers import mixturesign, sigmaioversigma1
     analysis = Analysis(analysis)
     productionmode = ProductionMode(productionmode)
+
     if productionmodeforfai is None:
         productionmodeforfai = productionmode
-    productionmodeforfai = ProductionMode(productionmodeforfai)
+
     if productionmodeforfai == "ggH":
         withdecay = True
+
+    if str(productionmodeforfai) == "VH":
+        pass
+    else:
+        productionmodeforfai = ProductionMode(productionmodeforfai)
+
     kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2")}
     power = (.25 if productionmodeforfai != "ggH" and withdecay else .5)
     kwargs["g1"] = (1-abs(fai))**power

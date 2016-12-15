@@ -175,7 +175,19 @@ class SigmaIOverSigma1(MultiEnum):
             return sigmai/sigma1
         assert False
 
+class SigmaIOverSigma1_VH(MultiEnum):
+    enums = (Analysis,)
+    @property
+    def result(self):
+        sigmai = sum(ReweightingSample(self.analysis.purehypotheses[1], VH).xsec for VH in ("ZH", "WH"))
+        sigma1 = sum(ReweightingSample("SM", VH).xsec for VH in ("ZH", "WH"))
+        return sigmai/sigma1
+
 def sigmaioversigma1(*args):
+    if "VH" in [str(_) for _ in args]:
+        args = list(args)
+        args = [_ for _ in args if str(_) != "VH"]
+        return SigmaIOverSigma1_VH(*args).result
     return SigmaIOverSigma1(*args).result
 
 def mixturesign(analysis, productionmode=None):
