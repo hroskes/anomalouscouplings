@@ -122,6 +122,8 @@ def runcombine(analysis, foldername, **kwargs):
 
     if whichproddiscriminants is None:
         raise TypeError("Need to provide whichproddiscriminants kwarg.")
+    if whichproddiscriminants != "D_int_prod":
+        raise TypeError("Has to be D_int_prod at the moment (otherwise need to revert part of fcdaf0e)")
     if len(productions) > 1 and lumitype != "fordata":
         raise TypeError("If there's >1 production, have to use lumitype == 'fordata'")
 
