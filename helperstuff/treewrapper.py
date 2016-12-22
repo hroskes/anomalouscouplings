@@ -137,8 +137,8 @@ class TreeWrapper(Iterator):
         self.M2g1g4_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen
         self.M2g2_decay         = t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
         self.M2g1g2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen
-        self.M2g1prime2_decay   = t.p_GG_SIG_ghg2_1_ghz1prime2_1_JHUGen
-        self.M2g1g1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1_JHUGen
+        self.M2g1prime2_decay   = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_JHUGen / 1e4
+        self.M2g1g1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1E4_JHUGen / 1e4
 
         self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal = \
         self.M2g1_VBF         = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal
@@ -160,8 +160,8 @@ class TreeWrapper(Iterator):
         self.M2g1g4_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal
         self.M2g2_HadZH         = t.p_HadZH_SIG_ghz2_1_JHUGen_JECNominal
         self.M2g1g2_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
-        self.M2g1prime2_HadZH   = t.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECNominal
-        self.M2g1g1prime2_HadZH = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal
+        self.M2g1prime2_HadZH   = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.M2g1g1prime2_HadZH = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
 
         self.p_HadWH_SIG_ghz1_1_JHUGen_JECNominal = \
         self.M2g1_HadWH         = t.p_HadWH_SIG_ghz1_1_JHUGen_JECNominal
@@ -169,8 +169,8 @@ class TreeWrapper(Iterator):
         self.M2g1g4_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal
         self.M2g2_HadWH         = t.p_HadWH_SIG_ghz2_1_JHUGen_JECNominal
         self.M2g1g2_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
-        self.M2g1prime2_HadWH   = t.p_HadWH_SIG_ghz1prime2_1_JHUGen_JECNominal
-        self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal
+        self.M2g1prime2_HadWH   = t.p_HadWH_SIG_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
 
         #category variables
         self.nExtraLep = t.nExtraLep
