@@ -18,7 +18,7 @@ import os
 #inputs
 #weight, bins, min, max, category can be None
 productionmode = "ZH"
-disc           = "D_CP_VH_hadronic"
+disc           = "D_CP_HadVH"
 weight         = ReweightingSample(productionmode, "fa3prod0.5")
 bins           = None
 min            = None

@@ -7,7 +7,7 @@ from helperstuff.samples import *
 from helperstuff.utilities import tfiles
 import ROOT
 
-discriminants = [discriminant(_) for _ in "D_0minus_VBF", "D_CP_VBF", "D_0minus_ZH_hadronic", "D_CP_ZH_hadronic"]
+discriminants = [discriminant(_) for _ in "D_0minus_VBF", "D_CP_VBF", "D_0minus_HadZH", "D_CP_HadZH"]
 
 assert len(config.productionsforcombine) == 1
 production = config.productionsforcombine[0]
