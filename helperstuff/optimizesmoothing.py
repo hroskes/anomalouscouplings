@@ -761,7 +761,7 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("background", "fa2", "D_int_prod", "4mu", "VHHadrtagged", "160928", "ggZZ")
+    t = Template("background", "fa2", "D_int_prod", "4mu", "VHHadrtagged", "161221", "ggZZ")
     print t
     print
     for d in t.discriminants:

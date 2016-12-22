@@ -30,7 +30,6 @@ class TreeWrapper(Iterator):
         self.isdata = treesample.isdata()
         self.isZX = treesample.isZX()
         self.isPOWHEG = treesample.alternategenerator == "POWHEG"
-        self.useMELAv2 = treesample.useMELAv2
         self.isdummy = isdummy
         if self.isdata:
             self.unblind = treesample.unblind
@@ -122,12 +121,8 @@ class TreeWrapper(Iterator):
         self.ZZMass = t.ZZMass
 
         #self.cconstantforDbkgkin = CJLSTscripts.getDbkgkinConstant(self.flavor, self.ZZMass)
-        if self.useMELAv2:
-            self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.flavor, self.ZZMass)
-            self.cconstantforD2jet = CJLSTscripts.getDVBF2jetsConstant(self.ZZMass)
-        else:
-            self.cconstantforDbkg = 1
-            self.cconstantforD2jet = 1
+        self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.flavor, self.ZZMass)
+        self.cconstantforD2jet = CJLSTscripts.getDVBF2jetsConstant(self.ZZMass)
 
         self.bkg_m4l = t.bkg_m4l
         for a in "Scale", "Res":
@@ -143,66 +138,52 @@ class TreeWrapper(Iterator):
         self.pg1g1prime2_VAJHU = t.pg1g1prime2_VAJHU
 
         #express in terms of |M|^2, this will make life easier
-        if self.useMELAv2:
-            self.M2g1_decay         = self.p0plus_VAJHU
-            self.M2g4_decay         = self.p0minus_VAJHU
-            self.M2g1g4_decay       = self.pg1g4_VAJHU
-            self.M2g2_decay         = self.p0hplus_VAJHU
-            self.M2g1g2_decay       = self.pg1g2_VAJHU
-            self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU
-            self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU
+        self.M2g1_decay         = self.p0plus_VAJHU
+        self.M2g4_decay         = self.p0minus_VAJHU
+        self.M2g1g4_decay       = self.pg1g4_VAJHU
+        self.M2g2_decay         = self.p0hplus_VAJHU
+        self.M2g1g2_decay       = self.pg1g2_VAJHU
+        self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU
+        self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU
 
-            self.M2g1_VBF         = self.pvbf_VAJHU_highestPTJets = t.pvbf_VAJHU_highestPTJets
-            self.M2g4_VBF         = t.pvbf_0minus_VAJHU_highestPTJets
-            self.M2g1g4_VBF       = t.pvbf_g1g4_VAJHU_highestPTJets
-            self.M2g2_VBF         = t.pvbf_0hplus_VAJHU_highestPTJets
-            self.M2g1g2_VBF       = t.pvbf_g1g2_VAJHU_highestPTJets
-            self.M2g1prime2_VBF   = t.pvbf_0_g1prime2_VAJHU_highestPTJets
-            self.M2g1g1prime2_VBF = t.pvbf_g1g1prime2_VAJHU_highestPTJets
+        self.M2g1_VBF         = self.pvbf_VAJHU_highestPTJets = t.pvbf_VAJHU_highestPTJets
+        self.M2g4_VBF         = t.pvbf_0minus_VAJHU_highestPTJets
+        self.M2g1g4_VBF       = t.pvbf_g1g4_VAJHU_highestPTJets
+        self.M2g2_VBF         = t.pvbf_0hplus_VAJHU_highestPTJets
+        self.M2g1g2_VBF       = t.pvbf_g1g2_VAJHU_highestPTJets
+        self.M2g1prime2_VBF   = t.pvbf_0_g1prime2_VAJHU_highestPTJets
+        self.M2g1g1prime2_VBF = t.pvbf_g1g1prime2_VAJHU_highestPTJets
 
-            self.M2g2_HJJ = self.phjj_VAJHU_highestPTJets = t.phjj_VAJHU_highestPTJets
-            self.M2g4_HJJ = t.phjj_0minus_VAJHU_highestPTJets
+        self.M2g2_HJJ = self.phjj_VAJHU_highestPTJets = t.phjj_VAJHU_highestPTJets
+        self.M2g4_HJJ = t.phjj_0minus_VAJHU_highestPTJets
+        self.M2g1_ZH_hadronic         = self.pzh_hadronic_VAJHU = t.pzh_hadronic_VAJHU
+        self.M2g4_ZH_hadronic         = t.pzh_0minus_hadronic_VAJHU
+        self.M2g1g4_ZH_hadronic       = t.pzh_g1g4_hadronic_VAJHU
+        self.M2g2_ZH_hadronic         = t.pzh_0hplus_hadronic_VAJHU
+        self.M2g1g2_ZH_hadronic       = t.pzh_g1g2_hadronic_VAJHU
+        self.M2g1prime2_ZH_hadronic   = t.pzh_0_g1prime2_hadronic_VAJHU
+        self.M2g1g1prime2_ZH_hadronic = t.pzh_g1g1prime2_hadronic_VAJHU
 
-            self.M2g1_ZH_hadronic         = self.pzh_hadronic_VAJHU = t.pzh_hadronic_VAJHU
-            self.M2g4_ZH_hadronic         = t.pzh_0minus_hadronic_VAJHU
-            self.M2g1g4_ZH_hadronic       = t.pzh_g1g4_hadronic_VAJHU
-            self.M2g2_ZH_hadronic         = t.pzh_0hplus_hadronic_VAJHU
-            self.M2g1g2_ZH_hadronic       = t.pzh_g1g2_hadronic_VAJHU
-            self.M2g1prime2_ZH_hadronic   = t.pzh_0_g1prime2_hadronic_VAJHU
-            self.M2g1g1prime2_ZH_hadronic = t.pzh_g1g1prime2_hadronic_VAJHU
+        self.M2g1_WH_hadronic         = self.pwh_hadronic_VAJHU = t.pwh_hadronic_VAJHU
+        self.M2g4_WH_hadronic         = t.pwh_0minus_hadronic_VAJHU
+        self.M2g1g4_WH_hadronic       = t.pwh_g1g4_hadronic_VAJHU
+        self.M2g2_WH_hadronic         = t.pwh_0hplus_hadronic_VAJHU
+        self.M2g1g2_WH_hadronic       = t.pwh_g1g2_hadronic_VAJHU
+        self.M2g1prime2_WH_hadronic   = t.pwh_0_g1prime2_hadronic_VAJHU
+        self.M2g1g1prime2_WH_hadronic = t.pwh_g1g1prime2_hadronic_VAJHU
 
-            self.M2g1_WH_hadronic         = self.pwh_hadronic_VAJHU = t.pwh_hadronic_VAJHU
-            self.M2g4_WH_hadronic         = t.pwh_0minus_hadronic_VAJHU
-            self.M2g1g4_WH_hadronic       = t.pwh_g1g4_hadronic_VAJHU
-            self.M2g2_WH_hadronic         = t.pwh_0hplus_hadronic_VAJHU
-            self.M2g1g2_WH_hadronic       = t.pwh_g1g2_hadronic_VAJHU
-            self.M2g1prime2_WH_hadronic   = t.pwh_0_g1prime2_hadronic_VAJHU
-            self.M2g1g1prime2_WH_hadronic = t.pwh_g1g1prime2_hadronic_VAJHU
+        #category variables
+        self.nExtraLep = t.nExtraLep
+        self.nExtraZ = t.nExtraZ
+        self.nCleanedJetsPt30 = t.nCleanedJetsPt30
+        self.nCleanedJetsPt30BTagged = t.nCleanedJetsPt30BTagged
+        self.jetQGLikelihood = t.JetQGLikelihood.data()
+        self.phj_VAJHU = t.phj_VAJHU
+        self.pAux_vbf_VAJHU = t.pAux_vbf_VAJHU
+        self.jetPhi = t.JetPhi.data()
 
-            #category variables
-            self.nExtraLep = t.nExtraLep
-            self.nExtraZ = t.nExtraZ
-            self.nCleanedJetsPt30 = t.nCleanedJetsPt30
-            self.nCleanedJetsPt30BTagged = t.nCleanedJetsPt30BTagged
-            self.jetQGLikelihood = t.JetQGLikelihood.data()
-            self.phj_VAJHU = t.phj_VAJHU
-            self.pAux_vbf_VAJHU = t.pAux_vbf_VAJHU
-            self.jetPhi = t.JetPhi.data()
-
-            if self.nCleanedJetsPt30 == 0:
-                self.jetQGLikelihood = self.jetPhi = dummyfloatstar
-
-        else:
-            self.M2g1_decay   = self.p0plus_VAJHU
-            self.M2g4_decay   = self.p0minus_VAJHU / constants.CJLSTg4decay_pure[self.flavor]**2
-            self.M2g1g4_decay = self.pg1g4_VAJHU / constants.CJLSTg4decay_mix
-            self.M2g2_decay   = self.p0hplus_VAJHU / constants.CJLSTg2decay_pure[self.flavor]**2
-            self.M2g1g2_decay = self.pg1g2_VAJHU / constants.CJLSTg2decay_mix
-            self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU / constants.CJLSTg1prime2decay_pure**2
-            self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU / constants.CJLSTg1prime2decay_mix
-
-            self.M2g1_VBF = t.pvbf_VAJHU_new
-            self.M2g2_HJJ = t.phjj_VAJHU_new
+        if self.nCleanedJetsPt30 == 0:
+            self.jetQGLikelihood = self.jetPhi = dummyfloatstar
 
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
@@ -1405,16 +1386,10 @@ class TreeWrapper(Iterator):
         return self.MC_weight_plain_noxsec()
 
     def MC_weight_ggZZ(self):
-        if self.useMELAv2:
-            KFactor = self.tree.KFactor_QCD_ggZZ_Nominal
-        else:
-            KFactor = self.tree.KFactorggZZ
+        KFactor = self.tree.KFactor_QCD_ggZZ_Nominal
         return self.MC_weight * self.xsec * KFactor / self.nevents
     def MC_weight_qqZZ(self):
-        if self.useMELAv2:
-            KFactor = self.tree.KFactor_EW_qqZZ * self.tree.KFactor_QCD_qqZZ_M
-        else:
-            KFactor = self.tree.KFactorEWKqqZZ * self.tree.KFactorQCDqqZZ_M
+        KFactor = self.tree.KFactor_EW_qqZZ * self.tree.KFactor_QCD_qqZZ_M
         return self.MC_weight * self.xsec * KFactor / self.nevents
     MC_weight_VBFbkg = MC_weight_plain_xsec
     def MC_weight_ZX(self):
@@ -1478,7 +1453,6 @@ class TreeWrapper(Iterator):
             "tree",
             "treesample",
             "unblind",
-            "useMELAv2",
             "weightfunctions",
             "xsec",
         ]
@@ -1688,7 +1662,6 @@ if __name__ == '__main__':
     class DummySample(object):
         productionmode = "graviton fusion"
         hypothesis = "spin 3"
-        useMELAv2 = True
         def isbkg(self): return False
         def isdata(self): return False
         def isZX(self): return False

@@ -75,7 +75,7 @@ for hypothesis in hypotheses:
 
 for color, hypothesis in enumerate(hypothesestouse(), start=1):
     t = ROOT.TChain("candTree", "candTree")
-    sample = Sample(productionmode, hypothesis, "160928")
+    sample = Sample(productionmode, hypothesis, "161221")
     t.Add(sample.withdiscriminantsfile())
     hname = "h{}".format(hypothesis)
 

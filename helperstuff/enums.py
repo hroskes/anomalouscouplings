@@ -305,82 +305,31 @@ class Analysis(MyEnum):
 class Production(MyEnum):
     enumname = "production"
     enumitems = (
-                 EnumItem("160225"),
-                 EnumItem("160624"),
-                 EnumItem("160714"),
-                 EnumItem("160720"),
-                 EnumItem("160725", "160726"),
-                 EnumItem("160729"),
-                 EnumItem("160901"),
-                 EnumItem("160909"),
-                 EnumItem("160919"),
-                 EnumItem("160928"),
+                 EnumItem("161221"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
-        if self == "160225":
-            return "root://lxcms03//data3/Higgs/160225/"
-        if self == "160624":
-            return "root://lxcms03//data3/Higgs/160624/"
-        if self == "160714":
-            return "root://lxcms03//data3/Higgs/160714/"
-        if self == "160720":
-            return "root://lxcms03//data3/Higgs/160720/"
-        if self == "160725" or self == "160729":
-            return "root://lxcms03//data3/Higgs/160726/"
-        if self == "160901":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VBFanomalous_prodMEs_fix/AAAOK"
-        if self == "160909":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/VHanomalous/AAAOK"
-        if self == "160919":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/ggHVBFVHanomalous_bkp/AAAOK"
-        if self == "160928":
-            return "/afs/cern.ch/work/h/hroskes/reweighting_CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/ggHVBFVHanomalous/AAAOK"
+        if self == "161221":
+            if config.host == "lxplus":
+                return "/afs/cern.ch/work/h/hroskes/public/reweighting_CJLST/CMSSW_8_0_24_patch1/src/ZZAnalysis/AnalysisStep/test/prod/anomalouscouplings/AAAOK"
         assert False
     def CJLSTdir_anomalous(self):
-        if self < "160624":
-            return type(self)("160624").CJLSTdir_anomalous()
-        if self == "160714":
-            return "/afs/cern.ch/work/h/hroskes/public/CJLST/CMSSW_8_0_8/src/ZZAnalysis/AnalysisStep/test/prod/anomalous/PT13TeV"
-        if self == "160720":
-            return "root://lxcms03//data3/Higgs/160718/"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
-        if self == "160714":
-            return "root://lxcms03//data3/Higgs/160716/"
-        if self == "160725":
-            return "root://lxcms03//data3/Higgs/160725/"
-        if self == "160729":
-            return "root://lxcms03//data3/Higgs/160729_complete/"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
-        if self < "160901":
-            return type(self)("160901").CJLSTdir()
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VH(self):
-        if self < "160909":
-            return type(self)("160909").CJLSTdir()
         return self.CJLSTdir()
     @property
-    def useMELAv2(self):
-        if self in ("160225", "160624"):
-            return False
-        return True
-    @property
     def dataluminosity(self):
-        if self == "160225": return 2.8
-        if self == "160714": return 7.65
-        if self == "160720": return 9.2
-        if "160725" <= self: return 12.9
         assert False
     def __int__(self):
         return int(str(self))
     @property
     def year(self):
-        if self == "160225":
-            return 2015
-        if "160624" <= self:
+        if "161221" <= self:
             return 2016
         assert False
 

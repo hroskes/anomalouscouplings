@@ -772,10 +772,6 @@ class Sample(ReweightingSample):
         raise self.ValueError("withdiscriminantsfile")
 
     @property
-    def useMELAv2(self):
-        return self.production.useMELAv2
-
-    @property
     def unblind(self):
         if self.productionmode == "data":
             return self.blindstatus == "unblind"
