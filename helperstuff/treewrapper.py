@@ -112,65 +112,65 @@ class TreeWrapper(Iterator):
                 break
 
         #I prefer this to defining __getattr__ because it's faster
-        self.p0plus_VAJHU = t.p0plus_VAJHU
-        self.p0minus_VAJHU = t.p0minus_VAJHU
-        self.pg1g4_VAJHU = t.pg1g4_VAJHU
-        self.p0plus_m4l = t.p0plus_m4l
-        self.bkg_VAMCFM = t.bkg_VAMCFM
-
         self.ZZMass = t.ZZMass
 
         #self.cconstantforDbkgkin = CJLSTscripts.getDbkgkinConstant(self.flavor, self.ZZMass)
         self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.flavor, self.ZZMass)
         self.cconstantforD2jet = CJLSTscripts.getDVBF2jetsConstant(self.ZZMass)
 
-        self.bkg_m4l = t.bkg_m4l
-        for a in "Scale", "Res":
-            for b in "Up", "Down":
-                attr = "p0plus_m4l_{}{}".format(a, b)
-                setattr(self, attr, getattr(t, attr))
-                attr = "bkg_m4l_{}{}".format(a, b)
-                setattr(self, attr, getattr(t, attr))
+        self.p_m4l_BKG = t.p_m4l_BKG
+        self.p_m4l_SIG = t.p_m4l_SIG
 
-        self.p0hplus_VAJHU = t.p0hplus_VAJHU
-        self.pg1g2_VAJHU = t.pg1g2_VAJHU
-        self.p0_g1prime2_VAJHU = t.p0_g1prime2_VAJHU
-        self.pg1g1prime2_VAJHU = t.pg1g1prime2_VAJHU
+        for a in "SIG", "BKG":
+            for b in "Scale", "Res":
+                for c in "Up", "Down":
+                    attr = "p_m4l_{} {}{}".format(a, b, c)
+                    setattr(self, attr, getattr(t, attr))
+                    attr = "p_m4l_{}_{}{}".format(a, b, c)
+                    setattr(self, attr, getattr(t, attr))
 
         #express in terms of |M|^2, this will make life easier
-        self.M2g1_decay         = self.p0plus_VAJHU
-        self.M2g4_decay         = self.p0minus_VAJHU
-        self.M2g1g4_decay       = self.pg1g4_VAJHU
-        self.M2g2_decay         = self.p0hplus_VAJHU
-        self.M2g1g2_decay       = self.pg1g2_VAJHU
-        self.M2g1prime2_decay   = self.p0_g1prime2_VAJHU
-        self.M2g1g1prime2_decay = self.pg1g1prime2_VAJHU
+        self.M2qqZZ = t.p_QQB_BKG_MCFM
 
-        self.M2g1_VBF         = self.pvbf_VAJHU_highestPTJets = t.pvbf_VAJHU_highestPTJets
-        self.M2g4_VBF         = t.pvbf_0minus_VAJHU_highestPTJets
-        self.M2g1g4_VBF       = t.pvbf_g1g4_VAJHU_highestPTJets
-        self.M2g2_VBF         = t.pvbf_0hplus_VAJHU_highestPTJets
-        self.M2g1g2_VBF       = t.pvbf_g1g2_VAJHU_highestPTJets
-        self.M2g1prime2_VBF   = t.pvbf_0_g1prime2_VAJHU_highestPTJets
-        self.M2g1g1prime2_VBF = t.pvbf_g1g1prime2_VAJHU_highestPTJets
+        self.M2g1_decay         = t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
+        self.M2g4_decay         = t.p_GG_SIG_ghg2_1_ghz4_1_JHUGen
+        self.M2g1g4_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen - self.M2g1_decay - self.M2g4_decay
+        self.M2g2_decay         = t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
+        self.M2g1g2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen - t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen - t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
+        self.M2g1prime2_decay   = t.p_GG_SIG_ghg2_1_ghz1prime2_1_JHUGen
+        self.M2g1g1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1_JHUGen - t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen - t.p_GG_SIG_ghg2_1_ghz1prime2_1_JHUGen
 
-        self.M2g2_HJJ = self.phjj_VAJHU_highestPTJets = t.phjj_VAJHU_highestPTJets
-        self.M2g4_HJJ = t.phjj_0minus_VAJHU_highestPTJets
-        self.M2g1_ZH_hadronic         = self.pzh_hadronic_VAJHU = t.pzh_hadronic_VAJHU
-        self.M2g4_ZH_hadronic         = t.pzh_0minus_hadronic_VAJHU
-        self.M2g1g4_ZH_hadronic       = t.pzh_g1g4_hadronic_VAJHU
-        self.M2g2_ZH_hadronic         = t.pzh_0hplus_hadronic_VAJHU
-        self.M2g1g2_ZH_hadronic       = t.pzh_g1g2_hadronic_VAJHU
-        self.M2g1prime2_ZH_hadronic   = t.pzh_0_g1prime2_hadronic_VAJHU
-        self.M2g1g1prime2_ZH_hadronic = t.pzh_g1g1prime2_hadronic_VAJHU
+        self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal = \
+        self.M2g1_VBF         = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal
+        self.M2g4_VBF         = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal
+        self.M2g1g4_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal - self.M2g1_VBF - self.M2g4_VBF
+        self.M2g2_VBF         = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECNominal
+        self.M2g1g2_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal - self.M2g1_VBF - self.M2g2_VBF
+        self.M2g1prime2_VBF   = t.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECNominal
+        self.M2g1g1prime2_VBF = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECNominal - self.M2g1_VBF - self.M2g1prime2_VBF
 
-        self.M2g1_WH_hadronic         = self.pwh_hadronic_VAJHU = t.pwh_hadronic_VAJHU
-        self.M2g4_WH_hadronic         = t.pwh_0minus_hadronic_VAJHU
-        self.M2g1g4_WH_hadronic       = t.pwh_g1g4_hadronic_VAJHU
-        self.M2g2_WH_hadronic         = t.pwh_0hplus_hadronic_VAJHU
-        self.M2g1g2_WH_hadronic       = t.pwh_g1g2_hadronic_VAJHU
-        self.M2g1prime2_WH_hadronic   = t.pwh_0_g1prime2_hadronic_VAJHU
-        self.M2g1g1prime2_WH_hadronic = t.pwh_g1g1prime2_hadronic_VAJHU
+        self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal = \
+        self.M2g2_HJJ   = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal
+        self.M2g4_HJJ   = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal
+        self.M2g2g4_HJJ = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECNominal - self.M2g2_HJJ - self.M2g4_HJJ
+
+        self.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal = \
+        self.M2g1_HadZH         = t.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g4_HadZH         = t.p_HadZH_SIG_ghz4_1_JHUGen_JECNominal
+        self.M2g1g4_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal - self.M2g1_HadZH - self.M2g4_HadZH
+        self.M2g2_HadZH         = t.p_HadZH_SIG_ghz2_1_JHUGen_JECNominal
+        self.M2g1g2_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal - self.M2g1_HadZH - self.M2g2_HadZH
+        self.M2g1prime2_HadZH   = t.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECNominal
+        self.M2g1g1prime2_HadZH = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal - self.M2g1_HadZH - self.M2g1prime2_HadZH
+
+        self.p_HadWH_SIG_ghz1_1_JHUGen_JECNominal = \
+        self.M2g1_HadWH         = t.p_HadWH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g4_HadWH         = t.p_HadWH_SIG_ghz4_1_JHUGen_JECNominal
+        self.M2g1g4_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal - self.M2g1_HadWH - self.M2g4_HadWH
+        self.M2g2_HadWH         = t.p_HadWH_SIG_ghz2_1_JHUGen_JECNominal
+        self.M2g1g2_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal - self.M2g1_HadWH - self.M2g2_HadWH
+        self.M2g1prime2_HadWH   = t.p_HadWH_SIG_ghz1prime2_1_JHUGen_JECNominal
+        self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal - self.M2g1_HadWH - self.M2g1prime2_HadWH
 
         #category variables
         self.nExtraLep = t.nExtraLep
@@ -178,8 +178,9 @@ class TreeWrapper(Iterator):
         self.nCleanedJetsPt30 = t.nCleanedJetsPt30
         self.nCleanedJetsPt30BTagged = t.nCleanedJetsPt30BTagged
         self.jetQGLikelihood = t.JetQGLikelihood.data()
-        self.phj_VAJHU = t.phj_VAJHU
-        self.pAux_vbf_VAJHU = t.pAux_vbf_VAJHU
+        self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal = t.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal
+        self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal = t.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal
+        self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal
         self.jetPhi = t.JetPhi.data()
 
         if self.nCleanedJetsPt30 == 0:
@@ -188,7 +189,7 @@ class TreeWrapper(Iterator):
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
 
-        self.notdijet = self.M2g1_VBF <= 0 or self.M2g2_HJJ <= 0
+        self.notdijet = self.M2g1_VBF < 0 or self.M2g2_HJJ < 0
         return self
 
     def __len__(self):
@@ -200,32 +201,27 @@ class TreeWrapper(Iterator):
 
     def D_bkg_0plus(self):
         try:
-            return self.p0plus_VAJHU*self.p0plus_m4l / (self.p0plus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l*self.cconstantforDbkg)
+            return self.p0plus_VAJHU*self.p_m4l_SIG / (self.p0plus_VAJHU*self.p_m4l_SIG  + self.M2qqZZ*self.p_m4l_BKG*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
     def D_bkg_0plus_ResUp(self):
         try:
-            return self.p0plus_VAJHU*self.p0plus_m4l_ResUp / (self.p0plus_VAJHU*self.p0plus_m4l_ResUp  + self.bkg_VAMCFM*self.bkg_m4l_ResUp*self.cconstantforDbkg)
+            return self.p0plus_VAJHU*self.p_m4l_SIG_ResUp / (self.p0plus_VAJHU*self.p_m4l_SIG_ResUp  + self.M2qqZZ*self.p_m4l_BKG_ResUp*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
     def D_bkg_0plus_ResDown(self):
         try:
-            return self.p0plus_VAJHU*self.p0plus_m4l_ResDown / (self.p0plus_VAJHU*self.p0plus_m4l_ResDown  + self.bkg_VAMCFM*self.bkg_m4l_ResDown*self.cconstantforDbkg)
+            return self.p0plus_VAJHU*self.p_m4l_SIG_ResDown / (self.p0plus_VAJHU*self.p_m4l_SIG_ResDown  + self.M2qqZZ*self.p_m4l_BKG_ResDown*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
     def D_bkg_0plus_ScaleUp(self):
         try:
-            return self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleUp  + self.bkg_VAMCFM*self.bkg_m4l_ScaleUp*self.cconstantforDbkg)
+            return self.p0plus_VAJHU*self.p_m4l_SIG_ScaleUp / (self.p0plus_VAJHU*self.p_m4l_SIG_ScaleUp  + self.M2qqZZ*self.p_m4l_BKG_ScaleUp*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
     def D_bkg_0plus_ScaleDown(self):
         try:
-            return self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown / (self.p0plus_VAJHU*self.p0plus_m4l_ScaleDown  + self.bkg_VAMCFM*self.bkg_m4l_ScaleDown*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
-    def D_bkg_0minus(self):
-        try:
-            return self.p0minus_VAJHU*self.p0plus_m4l / (self.p0minus_VAJHU*self.p0plus_m4l  + self.bkg_VAMCFM*self.bkg_m4l*self.cconstantforDbkg)
+            return self.p0plus_VAJHU*self.p_m4l_SIG_ScaleDown / (self.p0plus_VAJHU*self.p_m4l_SIG_ScaleDown  + self.M2qqZZ*self.p_m4l_BKG_ScaleDown*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
 
@@ -280,116 +276,116 @@ class TreeWrapper(Iterator):
 #ZH hadronic anomalous couplings discriminants#
 ###############################################
 
-    def D_0minus_ZH_hadronic(self):
+    def D_0minus_HadZH(self):
         if self.notdijet: return -999
-        return self.M2g1_ZH_hadronic / (self.M2g1_ZH_hadronic + self.M2g4_ZH_hadronic*constants.g4ZH**2)
-    def D_CP_ZH_hadronic(self):
+        return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2g4_HadZH*constants.g4ZH**2)
+    def D_CP_HadZH(self):
         if self.notdijet: return -999
-        return self.M2g1g4_ZH_hadronic*constants.g4ZH / (self.M2g1_ZH_hadronic + self.M2g4_ZH_hadronic*constants.g4ZH**2)
-    def D_g2_ZH_hadronic(self):
+        return self.M2g1g4_HadZH*constants.g4ZH / (self.M2g1_HadZH + self.M2g4_HadZH*constants.g4ZH**2)
+    def D_g2_HadZH(self):
         if self.notdijet: return -999
-        return self.M2g1_ZH_hadronic / (self.M2g1_ZH_hadronic + self.M2g2_ZH_hadronic*constants.g2ZH**2)
-    def D_g1g2_ZH_hadronic(self):
+        return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)
+    def D_g1g2_HadZH(self):
         if self.notdijet: return -999
-        return self.M2g1g2_ZH_hadronic*constants.g2ZH / (self.M2g1_ZH_hadronic + self.M2g2_ZH_hadronic*constants.g2ZH**2)
-    def D_g1prime2_ZH_hadronic(self):
+        return self.M2g1g2_HadZH*constants.g2ZH / (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)
+    def D_g1prime2_HadZH(self):
         if self.notdijet: return -999
-        return self.M2g1_ZH_hadronic / (self.M2g1_ZH_hadronic + self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2)
-    def D_g1g1prime2_ZH_hadronic(self):
+        return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)
+    def D_g1g1prime2_HadZH(self):
         if self.notdijet: return -999
-        return self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco / (self.M2g1_ZH_hadronic + self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2)
+        return self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco / (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)
 
 ###############################################
 #WH hadronic anomalous couplings discriminants#
 ###############################################
 
-    def D_0minus_WH_hadronic(self):
+    def D_0minus_HadWH(self):
         if self.notdijet: return -999
-        return self.M2g1_WH_hadronic / (self.M2g1_WH_hadronic + self.M2g4_WH_hadronic*constants.g4WH**2)
-    def D_CP_WH_hadronic(self):
+        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g4_HadWH*constants.g4WH**2)
+    def D_CP_HadWH(self):
         if self.notdijet: return -999
-        return self.M2g1g4_WH_hadronic*constants.g4WH / (self.M2g1_WH_hadronic + self.M2g4_WH_hadronic*constants.g4WH**2)
-    def D_g2_WH_hadronic(self):
+        return self.M2g1g4_HadWH*constants.g4WH / (self.M2g1_HadWH + self.M2g4_HadWH*constants.g4WH**2)
+    def D_g2_HadWH(self):
         if self.notdijet: return -999
-        return self.M2g1_WH_hadronic / (self.M2g1_WH_hadronic + self.M2g2_WH_hadronic*constants.g2WH**2)
-    def D_g1g2_WH_hadronic(self):
+        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g2_HadWH*constants.g2WH**2)
+    def D_g1g2_HadWH(self):
         if self.notdijet: return -999
-        return self.M2g1g2_WH_hadronic*constants.g2WH / (self.M2g1_WH_hadronic + self.M2g2_WH_hadronic*constants.g2WH**2)
-    def D_g1prime2_WH_hadronic(self):
+        return self.M2g1g2_HadWH*constants.g2WH / (self.M2g1_HadWH + self.M2g2_HadWH*constants.g2WH**2)
+    def D_g1prime2_HadWH(self):
         if self.notdijet: return -999
-        return self.M2g1_WH_hadronic / (self.M2g1_WH_hadronic + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2)
-    def D_g1g1prime2_WH_hadronic(self):
+        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)
+    def D_g1g1prime2_HadWH(self):
         if self.notdijet: return -999
-        return self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco / (self.M2g1_WH_hadronic + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2)
+        return self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco / (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)
 
 ###############################################
 #VH hadronic anomalous couplings discriminants#
 ###############################################
 
-    def D_0minus_VH_hadronic(self):
+    def D_0minus_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1_WH_hadronic*constants.JHUXSWHa1 + self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                 (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
                /
                  (
-                   (self.M2g1_WH_hadronic + self.M2g4_WH_hadronic*constants.g4WH**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g4_HadWH*constants.g4WH**2)*constants.JHUXSWHa1
                  +
-                   (self.M2g1_ZH_hadronic + self.M2g4_ZH_hadronic*constants.g4ZH**2)*constants.JHUXSZHa1
+                   (self.M2g1_HadZH + self.M2g4_HadZH*constants.g4ZH**2)*constants.JHUXSZHa1
                  )
                )
-    def D_CP_VH_hadronic(self):
+    def D_CP_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g4_WH_hadronic*constants.g4WH*constants.JHUXSWHa1 + self.M2g1g4_ZH_hadronic*constants.g4ZH*constants.JHUXSZHa1)
+                 (self.M2g1g4_HadWH*constants.g4WH*constants.JHUXSWHa1 + self.M2g1g4_HadZH*constants.g4ZH*constants.JHUXSZHa1)
                /
                  (
-                   (self.M2g1_WH_hadronic + self.M2g4_WH_hadronic*constants.g4WH**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g4_HadWH*constants.g4WH**2)*constants.JHUXSWHa1
                  +
-                   (self.M2g1_ZH_hadronic + self.M2g4_ZH_hadronic*constants.g4ZH**2)*constants.JHUXSZHa1
+                   (self.M2g1_HadZH + self.M2g4_HadZH*constants.g4ZH**2)*constants.JHUXSZHa1
                  )
                )
-    def D_g2_VH_hadronic(self):
+    def D_g2_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1_WH_hadronic*constants.JHUXSWHa1 + self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                 (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
                /
                  (
-                   (self.M2g1_WH_hadronic + self.M2g2_WH_hadronic*constants.g2WH**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g2_HadWH*constants.g2WH**2)*constants.JHUXSWHa1
                  +
-                   (self.M2g1_ZH_hadronic + self.M2g2_ZH_hadronic*constants.g2ZH**2)*constants.JHUXSZHa1
+                   (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)*constants.JHUXSZHa1
                  )
                )
-    def D_g1g2_VH_hadronic(self):
+    def D_g1g2_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g2_WH_hadronic*constants.g2WH*constants.JHUXSWHa1 + self.M2g1g2_ZH_hadronic*constants.g2ZH*constants.JHUXSZHa1)
+                 (self.M2g1g2_HadWH*constants.g2WH*constants.JHUXSWHa1 + self.M2g1g2_HadZH*constants.g2ZH*constants.JHUXSZHa1)
                /
                  (
-                   (self.M2g1_WH_hadronic + self.M2g2_WH_hadronic*constants.g2WH**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g2_HadWH*constants.g2WH**2)*constants.JHUXSWHa1
                  +
-                   (self.M2g1_ZH_hadronic + self.M2g2_ZH_hadronic*constants.g2ZH**2)*constants.JHUXSZHa1
+                   (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)*constants.JHUXSZHa1
                  )
                )
-    def D_g1prime2_VH_hadronic(self):
+    def D_g1prime2_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1_WH_hadronic*constants.JHUXSWHa1 + self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                 (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
                /
                  (
-                   (self.M2g1_WH_hadronic + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)*constants.JHUXSWHa1
                  +
-                   (self.M2g1_ZH_hadronic + self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
+                   (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
                  )
                )
-    def D_g1g1prime2_VH_hadronic(self):
+    def D_g1g1prime2_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco*constants.JHUXSWHa1 + self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco*constants.JHUXSZHa1)
+                 (self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco*constants.JHUXSWHa1 + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco*constants.JHUXSZHa1)
                /
                  (
-                   (self.M2g1_WH_hadronic + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)*constants.JHUXSWHa1
                  +
-                   (self.M2g1_ZH_hadronic + self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
+                   (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
                  )
                )
 
@@ -411,70 +407,70 @@ class TreeWrapper(Iterator):
 #ZHdecay hadronic anomalous couplings discriminants#
 ####################################################
 
-    def D_0minus_ZHdecay_hadronic(self):
+    def D_0minus_HadZHdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_ZH_hadronic*self.M2g1_decay / (self.M2g1_ZH_hadronic*self.M2g1_decay + self.M2g4_ZH_hadronic*self.M2g4_decay*(constants.g4ZH*constants.g4decay)**2)
-    def D_g2_ZHdecay_hadronic(self):
+        return self.M2g1_HadZH*self.M2g1_decay / (self.M2g1_HadZH*self.M2g1_decay + self.M2g4_HadZH*self.M2g4_decay*(constants.g4ZH*constants.g4decay)**2)
+    def D_g2_HadZHdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_ZH_hadronic*self.M2g1_decay / (self.M2g1_ZH_hadronic*self.M2g1_decay + self.M2g2_ZH_hadronic*self.M2g2_decay * (constants.g2ZH*constants.g2decay)**2)
-    def D_g1prime2_ZHdecay_hadronic(self):
+        return self.M2g1_HadZH*self.M2g1_decay / (self.M2g1_HadZH*self.M2g1_decay + self.M2g2_HadZH*self.M2g2_decay * (constants.g2ZH*constants.g2decay)**2)
+    def D_g1prime2_HadZHdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_ZH_hadronic*self.M2g1_decay / (self.M2g1_ZH_hadronic*self.M2g1_decay + self.M2g1prime2_ZH_hadronic*self.M2g1prime2_decay * (constants.g1prime2ZH_reco*constants.g1prime2decay_reco)**2)
+        return self.M2g1_HadZH*self.M2g1_decay / (self.M2g1_HadZH*self.M2g1_decay + self.M2g1prime2_HadZH*self.M2g1prime2_decay * (constants.g1prime2ZH_reco*constants.g1prime2decay_reco)**2)
 
 ####################################################
 #WHdecay hadronic anomalous couplings discriminants#
 ####################################################
 
-    def D_0minus_WHdecay_hadronic(self):
+    def D_0minus_HadWHdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_WH_hadronic*self.M2g1_decay / (self.M2g1_WH_hadronic*self.M2g1_decay + self.M2g4_WH_hadronic*self.M2g4_decay*(constants.g4WH*constants.g4decay)**2)
-    def D_g2_WHdecay_hadronic(self):
+        return self.M2g1_HadWH*self.M2g1_decay / (self.M2g1_HadWH*self.M2g1_decay + self.M2g4_HadWH*self.M2g4_decay*(constants.g4WH*constants.g4decay)**2)
+    def D_g2_HadWHdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_WH_hadronic*self.M2g1_decay / (self.M2g1_WH_hadronic*self.M2g1_decay + self.M2g2_WH_hadronic*self.M2g2_decay * (constants.g2WH*constants.g2decay)**2)
-    def D_g1prime2_WHdecay_hadronic(self):
+        return self.M2g1_HadWH*self.M2g1_decay / (self.M2g1_HadWH*self.M2g1_decay + self.M2g2_HadWH*self.M2g2_decay * (constants.g2WH*constants.g2decay)**2)
+    def D_g1prime2_HadWHdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_WH_hadronic*self.M2g1_decay / (self.M2g1_WH_hadronic*self.M2g1_decay + self.M2g1prime2_WH_hadronic*self.M2g1prime2_decay * (constants.g1prime2WH_reco*constants.g1prime2decay_reco)**2)
+        return self.M2g1_HadWH*self.M2g1_decay / (self.M2g1_HadWH*self.M2g1_decay + self.M2g1prime2_HadWH*self.M2g1prime2_decay * (constants.g1prime2WH_reco*constants.g1prime2decay_reco)**2)
 
 ####################################################
 #VHdecay hadronic anomalous couplings discriminants#
 ####################################################
 
-    def D_0minus_VHdecay_hadronic(self):
+    def D_0minus_HadVHdecay(self):
         if self.notdijet: return -999
         return (
-                 ((self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                 ((self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
                     *self.M2g1_decay)
                /
                  (
-                   (self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                   (self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
                         *self.M2g1_decay
-                 + (self.M2g4_WH_hadronic*constants.g4WH**2*constants.JHUXSWHa1+self.M2g4_ZH_hadronic*constants.g4ZH**2*constants.JHUXSZHa1)
+                 + (self.M2g4_HadWH*constants.g4WH**2*constants.JHUXSWHa1+self.M2g4_HadZH*constants.g4ZH**2*constants.JHUXSZHa1)
                         *self.M2g4_decay*constants.g4decay**2
                  )
                )
-    def D_g2_VHdecay_hadronic(self):
+    def D_g2_HadVHdecay(self):
         if self.notdijet: return -999
         return (
-                 ((self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                 ((self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
                     *self.M2g1_decay)
                /
                  (
-                   (self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                   (self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
                         *self.M2g1_decay
-                 + (self.M2g2_WH_hadronic*constants.g2WH**2*constants.JHUXSWHa1+self.M2g2_ZH_hadronic*constants.g2ZH**2*constants.JHUXSZHa1)
+                 + (self.M2g2_HadWH*constants.g2WH**2*constants.JHUXSWHa1+self.M2g2_HadZH*constants.g2ZH**2*constants.JHUXSZHa1)
                         *self.M2g2_decay*constants.g2decay**2
                  )
                )
-    def D_g1prime2_VHdecay_hadronic(self):
+    def D_g1prime2_HadVHdecay(self):
         if self.notdijet: return -999
         return (
-                 ((self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                 ((self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
                     *self.M2g1_decay)
                /
                  (
-                   (self.M2g1_WH_hadronic*constants.JHUXSWHa1+self.M2g1_ZH_hadronic*constants.JHUXSZHa1)
+                   (self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
                         *self.M2g1_decay
-                 + (self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2*constants.JHUXSWHa1+self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2*constants.JHUXSZHa1)
+                 + (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2*constants.JHUXSWHa1+self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2*constants.JHUXSZHa1)
                         *self.M2g1prime2_decay*constants.g1prime2decay_reco**2
                  )
                )
@@ -741,123 +737,123 @@ class TreeWrapper(Iterator):
     #g4#
     ####
 
-    def D_g14_g40_ZHdecay_hadronic(self):
+    def D_g14_g40_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_ZH_hadronic*self.M2g1_decay
+                self.M2g1_HadZH*self.M2g1_decay
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g4ZH**2*self.M2g4_ZH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g4ZH**2*self.M2g4_HadZH * constants.g4decay**2*self.M2g4_decay)
                )
-    def D_g13_g41_ZHdecay_hadronic(self):
+    def D_g13_g41_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_ZH_hadronic*constants.g4ZH * self.M2g1_decay)
+                (self.M2g1_HadZH * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_HadZH*constants.g4ZH * self.M2g1_decay)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g4ZH**2*self.M2g4_ZH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g4ZH**2*self.M2g4_HadZH * constants.g4decay**2*self.M2g4_decay)
                )
-    def D_g12_g42_ZHdecay_hadronic(self):
+    def D_g12_g42_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g4_decay*constants.g4decay**2 + self.M2g4_ZH_hadronic*constants.g4ZH**2 * self.M2g1_decay
-                   + self.M2g1g4_ZH_hadronic*constants.g4ZH * self.M2g1g4_decay*constants.g4decay)
+                (self.M2g1_HadZH * self.M2g4_decay*constants.g4decay**2 + self.M2g4_HadZH*constants.g4ZH**2 * self.M2g1_decay
+                   + self.M2g1g4_HadZH*constants.g4ZH * self.M2g1g4_decay*constants.g4decay)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g4ZH**2*self.M2g4_ZH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g4ZH**2*self.M2g4_HadZH * constants.g4decay**2*self.M2g4_decay)
                )
-    def D_g11_g43_ZHdecay_hadronic(self):
+    def D_g11_g43_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g4_ZH_hadronic*constants.g4ZH**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_ZH_hadronic*constants.g4ZH * self.M2g4_decay*constants.g4decay**2)
+                (self.M2g4_HadZH*constants.g4ZH**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_HadZH*constants.g4ZH * self.M2g4_decay*constants.g4decay**2)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g4ZH**2*self.M2g4_ZH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g4ZH**2*self.M2g4_HadZH * constants.g4decay**2*self.M2g4_decay)
                )
-    def D_g10_g44_ZHdecay_hadronic(self):
+    def D_g10_g44_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g4_ZH_hadronic*constants.g4ZH**2 * self.M2g4_decay*constants.g4decay**2
+                self.M2g4_HadZH*constants.g4ZH**2 * self.M2g4_decay*constants.g4decay**2
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g4ZH**2*self.M2g4_ZH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g4ZH**2*self.M2g4_HadZH * constants.g4decay**2*self.M2g4_decay)
                )
 
     ####
     #g2#
     ####
 
-    def D_g14_g20_ZHdecay_hadronic(self):
+    def D_g14_g20_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_ZH_hadronic*self.M2g1_decay
+                self.M2g1_HadZH*self.M2g1_decay
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g2ZH**2*self.M2g2_ZH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g2ZH**2*self.M2g2_HadZH * constants.g2decay**2*self.M2g2_decay)
                )
-    def D_g13_g21_ZHdecay_hadronic(self):
+    def D_g13_g21_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_ZH_hadronic*constants.g2ZH * self.M2g1_decay)
+                (self.M2g1_HadZH * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_HadZH*constants.g2ZH * self.M2g1_decay)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g2ZH**2*self.M2g2_ZH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g2ZH**2*self.M2g2_HadZH * constants.g2decay**2*self.M2g2_decay)
                )
-    def D_g12_g22_ZHdecay_hadronic(self):
+    def D_g12_g22_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g2_decay*constants.g2decay**2 + self.M2g2_ZH_hadronic*constants.g2ZH**2 * self.M2g1_decay
-                   + self.M2g1g2_ZH_hadronic*constants.g2ZH * self.M2g1g2_decay*constants.g2decay)
+                (self.M2g1_HadZH * self.M2g2_decay*constants.g2decay**2 + self.M2g2_HadZH*constants.g2ZH**2 * self.M2g1_decay
+                   + self.M2g1g2_HadZH*constants.g2ZH * self.M2g1g2_decay*constants.g2decay)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g2ZH**2*self.M2g2_ZH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g2ZH**2*self.M2g2_HadZH * constants.g2decay**2*self.M2g2_decay)
                )
-    def D_g11_g23_ZHdecay_hadronic(self):
+    def D_g11_g23_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g2_ZH_hadronic*constants.g2ZH**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_ZH_hadronic*constants.g2ZH * self.M2g2_decay*constants.g2decay**2)
+                (self.M2g2_HadZH*constants.g2ZH**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_HadZH*constants.g2ZH * self.M2g2_decay*constants.g2decay**2)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g2ZH**2*self.M2g2_ZH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g2ZH**2*self.M2g2_HadZH * constants.g2decay**2*self.M2g2_decay)
                )
-    def D_g10_g24_ZHdecay_hadronic(self):
+    def D_g10_g24_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g2_ZH_hadronic*constants.g2ZH**2 * self.M2g2_decay*constants.g2decay**2
+                self.M2g2_HadZH*constants.g2ZH**2 * self.M2g2_decay*constants.g2decay**2
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g2ZH**2*self.M2g2_ZH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g2ZH**2*self.M2g2_HadZH * constants.g2decay**2*self.M2g2_decay)
                )
 
     ##########
     #g1prime2#
     ##########
 
-    def D_g14_g1prime20_ZHdecay_hadronic(self):
+    def D_g14_g1prime20_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_ZH_hadronic*self.M2g1_decay
+                self.M2g1_HadZH*self.M2g1_decay
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
-    def D_g13_g1prime21_ZHdecay_hadronic(self):
+    def D_g13_g1prime21_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco * self.M2g1_decay)
+                (self.M2g1_HadZH * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco * self.M2g1_decay)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
-    def D_g12_g1prime22_ZHdecay_hadronic(self):
+    def D_g12_g1prime22_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2 * self.M2g1_decay
-                   + self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
+                (self.M2g1_HadZH * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 * self.M2g1_decay
+                   + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
-    def D_g11_g1prime23_ZHdecay_hadronic(self):
+    def D_g11_g1prime23_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+                (self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
-    def D_g10_g1prime24_ZHdecay_hadronic(self):
+    def D_g10_g1prime24_HadZHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
                  /
-                (self.M2g1_ZH_hadronic * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadZH * self.M2g1_decay + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
 
 ####################################################
@@ -868,123 +864,123 @@ class TreeWrapper(Iterator):
     #g4#
     ####
 
-    def D_g14_g40_ZHdecay_hadronic_prime(self):
+    def D_g14_g40_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_ZH_hadronic*self.M2g1_decay
+                self.M2g1_HadZH*self.M2g1_decay
                  /
-                ((self.M2g1_ZH_hadronic + constants.g4ZH**2*self.M2g4_ZH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadZH + constants.g4ZH**2*self.M2g4_HadZH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
-    def D_g13_g41_ZHdecay_hadronic_prime(self):
+    def D_g13_g41_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_ZH_hadronic*constants.g4ZH * self.M2g1_decay)
+                (self.M2g1_HadZH * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_HadZH*constants.g4ZH * self.M2g1_decay)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g4ZH**2*self.M2g4_ZH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadZH + constants.g4ZH**2*self.M2g4_HadZH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
-    def D_g12_g42_ZHdecay_hadronic_prime(self):
+    def D_g12_g42_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g4_decay*constants.g4decay**2 + self.M2g4_ZH_hadronic*constants.g4ZH**2 * self.M2g1_decay
-                   + self.M2g1g4_ZH_hadronic*constants.g4ZH * self.M2g1g4_decay*constants.g4decay)
+                (self.M2g1_HadZH * self.M2g4_decay*constants.g4decay**2 + self.M2g4_HadZH*constants.g4ZH**2 * self.M2g1_decay
+                   + self.M2g1g4_HadZH*constants.g4ZH * self.M2g1g4_decay*constants.g4decay)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g4ZH**2*self.M2g4_ZH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadZH + constants.g4ZH**2*self.M2g4_HadZH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
-    def D_g11_g43_ZHdecay_hadronic_prime(self):
+    def D_g11_g43_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g4_ZH_hadronic*constants.g4ZH**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_ZH_hadronic*constants.g4ZH * self.M2g4_decay*constants.g4decay**2)
+                (self.M2g4_HadZH*constants.g4ZH**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_HadZH*constants.g4ZH * self.M2g4_decay*constants.g4decay**2)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g4ZH**2*self.M2g4_ZH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadZH + constants.g4ZH**2*self.M2g4_HadZH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
-    def D_g10_g44_ZHdecay_hadronic_prime(self):
+    def D_g10_g44_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g4_ZH_hadronic*constants.g4ZH**2 * self.M2g4_decay*constants.g4decay**2
+                self.M2g4_HadZH*constants.g4ZH**2 * self.M2g4_decay*constants.g4decay**2
                  /
-                ((self.M2g1_ZH_hadronic + constants.g4ZH**2*self.M2g4_ZH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadZH + constants.g4ZH**2*self.M2g4_HadZH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
 
     ####
     #g2#
     ####
 
-    def D_g14_g20_ZHdecay_hadronic_prime(self):
+    def D_g14_g20_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_ZH_hadronic*self.M2g1_decay
+                self.M2g1_HadZH*self.M2g1_decay
                  /
-                ((self.M2g1_ZH_hadronic + constants.g2ZH**2*self.M2g2_ZH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadZH + constants.g2ZH**2*self.M2g2_HadZH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
-    def D_g13_g21_ZHdecay_hadronic_prime(self):
+    def D_g13_g21_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_ZH_hadronic*constants.g2ZH * self.M2g1_decay)
+                (self.M2g1_HadZH * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_HadZH*constants.g2ZH * self.M2g1_decay)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g2ZH**2*self.M2g2_ZH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadZH + constants.g2ZH**2*self.M2g2_HadZH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
-    def D_g12_g22_ZHdecay_hadronic_prime(self):
+    def D_g12_g22_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g2_decay*constants.g2decay**2 + self.M2g2_ZH_hadronic*constants.g2ZH**2 * self.M2g1_decay
-                   + self.M2g1g2_ZH_hadronic*constants.g2ZH * self.M2g1g2_decay*constants.g2decay)
+                (self.M2g1_HadZH * self.M2g2_decay*constants.g2decay**2 + self.M2g2_HadZH*constants.g2ZH**2 * self.M2g1_decay
+                   + self.M2g1g2_HadZH*constants.g2ZH * self.M2g1g2_decay*constants.g2decay)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g2ZH**2*self.M2g2_ZH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadZH + constants.g2ZH**2*self.M2g2_HadZH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
-    def D_g11_g23_ZHdecay_hadronic_prime(self):
+    def D_g11_g23_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g2_ZH_hadronic*constants.g2ZH**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_ZH_hadronic*constants.g2ZH * self.M2g2_decay*constants.g2decay**2)
+                (self.M2g2_HadZH*constants.g2ZH**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_HadZH*constants.g2ZH * self.M2g2_decay*constants.g2decay**2)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g2ZH**2*self.M2g2_ZH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadZH + constants.g2ZH**2*self.M2g2_HadZH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
-    def D_g10_g24_ZHdecay_hadronic_prime(self):
+    def D_g10_g24_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g2_ZH_hadronic*constants.g2ZH**2 * self.M2g2_decay*constants.g2decay**2
+                self.M2g2_HadZH*constants.g2ZH**2 * self.M2g2_decay*constants.g2decay**2
                  /
-                ((self.M2g1_ZH_hadronic + constants.g2ZH**2*self.M2g2_ZH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadZH + constants.g2ZH**2*self.M2g2_HadZH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
 
     ##########
     #g1prime2#
     ##########
 
-    def D_g14_g1prime20_ZHdecay_hadronic_prime(self):
+    def D_g14_g1prime20_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_ZH_hadronic*self.M2g1_decay
+                self.M2g1_HadZH*self.M2g1_decay
                  /
-                ((self.M2g1_ZH_hadronic + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadZH + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
-    def D_g13_g1prime21_ZHdecay_hadronic_prime(self):
+    def D_g13_g1prime21_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco * self.M2g1_decay)
+                (self.M2g1_HadZH * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco * self.M2g1_decay)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadZH + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
-    def D_g12_g1prime22_ZHdecay_hadronic_prime(self):
+    def D_g12_g1prime22_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_ZH_hadronic * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2 * self.M2g1_decay
-                   + self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
+                (self.M2g1_HadZH * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 * self.M2g1_decay
+                   + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadZH + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
-    def D_g11_g1prime23_ZHdecay_hadronic_prime(self):
+    def D_g11_g1prime23_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_ZH_hadronic*constants.g1prime2ZH_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+                (self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
                  /
-                ((self.M2g1_ZH_hadronic + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadZH + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
-    def D_g10_g1prime24_ZHdecay_hadronic_prime(self):
+    def D_g10_g1prime24_HadZHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g1prime2_ZH_hadronic*constants.g1prime2ZH_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
                  /
-                ((self.M2g1_ZH_hadronic + constants.g1prime2ZH_reco**2*self.M2g1prime2_ZH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadZH + constants.g1prime2ZH_reco**2*self.M2g1prime2_HadZH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
 
 ##############################################
@@ -995,123 +991,123 @@ class TreeWrapper(Iterator):
     #g4#
     ####
 
-    def D_g14_g40_WHdecay_hadronic(self):
+    def D_g14_g40_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_WH_hadronic*self.M2g1_decay
+                self.M2g1_HadWH*self.M2g1_decay
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g4WH**2*self.M2g4_WH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g4WH**2*self.M2g4_HadWH * constants.g4decay**2*self.M2g4_decay)
                )
-    def D_g13_g41_WHdecay_hadronic(self):
+    def D_g13_g41_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_WH_hadronic*constants.g4WH * self.M2g1_decay)
+                (self.M2g1_HadWH * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_HadWH*constants.g4WH * self.M2g1_decay)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g4WH**2*self.M2g4_WH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g4WH**2*self.M2g4_HadWH * constants.g4decay**2*self.M2g4_decay)
                )
-    def D_g12_g42_WHdecay_hadronic(self):
+    def D_g12_g42_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g4_decay*constants.g4decay**2 + self.M2g4_WH_hadronic*constants.g4WH**2 * self.M2g1_decay
-                   + self.M2g1g4_WH_hadronic*constants.g4WH * self.M2g1g4_decay*constants.g4decay)
+                (self.M2g1_HadWH * self.M2g4_decay*constants.g4decay**2 + self.M2g4_HadWH*constants.g4WH**2 * self.M2g1_decay
+                   + self.M2g1g4_HadWH*constants.g4WH * self.M2g1g4_decay*constants.g4decay)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g4WH**2*self.M2g4_WH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g4WH**2*self.M2g4_HadWH * constants.g4decay**2*self.M2g4_decay)
                )
-    def D_g11_g43_WHdecay_hadronic(self):
+    def D_g11_g43_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g4_WH_hadronic*constants.g4WH**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_WH_hadronic*constants.g4WH * self.M2g4_decay*constants.g4decay**2)
+                (self.M2g4_HadWH*constants.g4WH**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_HadWH*constants.g4WH * self.M2g4_decay*constants.g4decay**2)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g4WH**2*self.M2g4_WH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g4WH**2*self.M2g4_HadWH * constants.g4decay**2*self.M2g4_decay)
                )
-    def D_g10_g44_WHdecay_hadronic(self):
+    def D_g10_g44_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g4_WH_hadronic*constants.g4WH**2 * self.M2g4_decay*constants.g4decay**2
+                self.M2g4_HadWH*constants.g4WH**2 * self.M2g4_decay*constants.g4decay**2
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g4WH**2*self.M2g4_WH_hadronic * constants.g4decay**2*self.M2g4_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g4WH**2*self.M2g4_HadWH * constants.g4decay**2*self.M2g4_decay)
                )
 
     ####
     #g2#
     ####
 
-    def D_g14_g20_WHdecay_hadronic(self):
+    def D_g14_g20_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_WH_hadronic*self.M2g1_decay
+                self.M2g1_HadWH*self.M2g1_decay
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g2WH**2*self.M2g2_WH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g2WH**2*self.M2g2_HadWH * constants.g2decay**2*self.M2g2_decay)
                )
-    def D_g13_g21_WHdecay_hadronic(self):
+    def D_g13_g21_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_WH_hadronic*constants.g2WH * self.M2g1_decay)
+                (self.M2g1_HadWH * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_HadWH*constants.g2WH * self.M2g1_decay)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g2WH**2*self.M2g2_WH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g2WH**2*self.M2g2_HadWH * constants.g2decay**2*self.M2g2_decay)
                )
-    def D_g12_g22_WHdecay_hadronic(self):
+    def D_g12_g22_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g2_decay*constants.g2decay**2 + self.M2g2_WH_hadronic*constants.g2WH**2 * self.M2g1_decay
-                   + self.M2g1g2_WH_hadronic*constants.g2WH * self.M2g1g2_decay*constants.g2decay)
+                (self.M2g1_HadWH * self.M2g2_decay*constants.g2decay**2 + self.M2g2_HadWH*constants.g2WH**2 * self.M2g1_decay
+                   + self.M2g1g2_HadWH*constants.g2WH * self.M2g1g2_decay*constants.g2decay)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g2WH**2*self.M2g2_WH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g2WH**2*self.M2g2_HadWH * constants.g2decay**2*self.M2g2_decay)
                )
-    def D_g11_g23_WHdecay_hadronic(self):
+    def D_g11_g23_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g2_WH_hadronic*constants.g2WH**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_WH_hadronic*constants.g2WH * self.M2g2_decay*constants.g2decay**2)
+                (self.M2g2_HadWH*constants.g2WH**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_HadWH*constants.g2WH * self.M2g2_decay*constants.g2decay**2)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g2WH**2*self.M2g2_WH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g2WH**2*self.M2g2_HadWH * constants.g2decay**2*self.M2g2_decay)
                )
-    def D_g10_g24_WHdecay_hadronic(self):
+    def D_g10_g24_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g2_WH_hadronic*constants.g2WH**2 * self.M2g2_decay*constants.g2decay**2
+                self.M2g2_HadWH*constants.g2WH**2 * self.M2g2_decay*constants.g2decay**2
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g2WH**2*self.M2g2_WH_hadronic * constants.g2decay**2*self.M2g2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g2WH**2*self.M2g2_HadWH * constants.g2decay**2*self.M2g2_decay)
                )
 
     ##########
     #g1prime2#
     ##########
 
-    def D_g14_g1prime20_WHdecay_hadronic(self):
+    def D_g14_g1prime20_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_WH_hadronic*self.M2g1_decay
+                self.M2g1_HadWH*self.M2g1_decay
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
-    def D_g13_g1prime21_WHdecay_hadronic(self):
+    def D_g13_g1prime21_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco * self.M2g1_decay)
+                (self.M2g1_HadWH * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco * self.M2g1_decay)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
-    def D_g12_g1prime22_WHdecay_hadronic(self):
+    def D_g12_g1prime22_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2 * self.M2g1_decay
-                   + self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
+                (self.M2g1_HadWH * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 * self.M2g1_decay
+                   + self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
-    def D_g11_g1prime23_WHdecay_hadronic(self):
+    def D_g11_g1prime23_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+                (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
-    def D_g10_g1prime24_WHdecay_hadronic(self):
+    def D_g10_g1prime24_HadWHdecay(self):
         if self.notdijet: return -999
         return (
-                self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
                  /
-                (self.M2g1_WH_hadronic * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
+                (self.M2g1_HadWH * self.M2g1_decay + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH * constants.g1prime2decay_reco**2*self.M2g1prime2_decay)
                )
 
 ####################################################
@@ -1122,123 +1118,123 @@ class TreeWrapper(Iterator):
     #g4#
     ####
 
-    def D_g14_g40_WHdecay_hadronic_prime(self):
+    def D_g14_g40_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_WH_hadronic*self.M2g1_decay
+                self.M2g1_HadWH*self.M2g1_decay
                  /
-                ((self.M2g1_WH_hadronic + constants.g4WH**2*self.M2g4_WH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadWH + constants.g4WH**2*self.M2g4_HadWH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
-    def D_g13_g41_WHdecay_hadronic_prime(self):
+    def D_g13_g41_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_WH_hadronic*constants.g4WH * self.M2g1_decay)
+                (self.M2g1_HadWH * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_HadWH*constants.g4WH * self.M2g1_decay)
                  /
-                ((self.M2g1_WH_hadronic + constants.g4WH**2*self.M2g4_WH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadWH + constants.g4WH**2*self.M2g4_HadWH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
-    def D_g12_g42_WHdecay_hadronic_prime(self):
+    def D_g12_g42_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g4_decay*constants.g4decay**2 + self.M2g4_WH_hadronic*constants.g4WH**2 * self.M2g1_decay
-                   + self.M2g1g4_WH_hadronic*constants.g4WH * self.M2g1g4_decay*constants.g4decay)
+                (self.M2g1_HadWH * self.M2g4_decay*constants.g4decay**2 + self.M2g4_HadWH*constants.g4WH**2 * self.M2g1_decay
+                   + self.M2g1g4_HadWH*constants.g4WH * self.M2g1g4_decay*constants.g4decay)
                  /
-                ((self.M2g1_WH_hadronic + constants.g4WH**2*self.M2g4_WH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadWH + constants.g4WH**2*self.M2g4_HadWH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
-    def D_g11_g43_WHdecay_hadronic_prime(self):
+    def D_g11_g43_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g4_WH_hadronic*constants.g4WH**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_WH_hadronic*constants.g4WH * self.M2g4_decay*constants.g4decay**2)
+                (self.M2g4_HadWH*constants.g4WH**2 * self.M2g1g4_decay*constants.g4decay + self.M2g1g4_HadWH*constants.g4WH * self.M2g4_decay*constants.g4decay**2)
                  /
-                ((self.M2g1_WH_hadronic + constants.g4WH**2*self.M2g4_WH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadWH + constants.g4WH**2*self.M2g4_HadWH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
-    def D_g10_g44_WHdecay_hadronic_prime(self):
+    def D_g10_g44_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g4_WH_hadronic*constants.g4WH**2 * self.M2g4_decay*constants.g4decay**2
+                self.M2g4_HadWH*constants.g4WH**2 * self.M2g4_decay*constants.g4decay**2
                  /
-                ((self.M2g1_WH_hadronic + constants.g4WH**2*self.M2g4_WH_hadronic) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
+                ((self.M2g1_HadWH + constants.g4WH**2*self.M2g4_HadWH) * (self.M2g1_decay + constants.g4decay**2*self.M2g4_decay))
                )
 
     ####
     #g2#
     ####
 
-    def D_g14_g20_WHdecay_hadronic_prime(self):
+    def D_g14_g20_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_WH_hadronic*self.M2g1_decay
+                self.M2g1_HadWH*self.M2g1_decay
                  /
-                ((self.M2g1_WH_hadronic + constants.g2WH**2*self.M2g2_WH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadWH + constants.g2WH**2*self.M2g2_HadWH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
-    def D_g13_g21_WHdecay_hadronic_prime(self):
+    def D_g13_g21_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_WH_hadronic*constants.g2WH * self.M2g1_decay)
+                (self.M2g1_HadWH * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_HadWH*constants.g2WH * self.M2g1_decay)
                  /
-                ((self.M2g1_WH_hadronic + constants.g2WH**2*self.M2g2_WH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadWH + constants.g2WH**2*self.M2g2_HadWH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
-    def D_g12_g22_WHdecay_hadronic_prime(self):
+    def D_g12_g22_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g2_decay*constants.g2decay**2 + self.M2g2_WH_hadronic*constants.g2WH**2 * self.M2g1_decay
-                   + self.M2g1g2_WH_hadronic*constants.g2WH * self.M2g1g2_decay*constants.g2decay)
+                (self.M2g1_HadWH * self.M2g2_decay*constants.g2decay**2 + self.M2g2_HadWH*constants.g2WH**2 * self.M2g1_decay
+                   + self.M2g1g2_HadWH*constants.g2WH * self.M2g1g2_decay*constants.g2decay)
                  /
-                ((self.M2g1_WH_hadronic + constants.g2WH**2*self.M2g2_WH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadWH + constants.g2WH**2*self.M2g2_HadWH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
-    def D_g11_g23_WHdecay_hadronic_prime(self):
+    def D_g11_g23_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g2_WH_hadronic*constants.g2WH**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_WH_hadronic*constants.g2WH * self.M2g2_decay*constants.g2decay**2)
+                (self.M2g2_HadWH*constants.g2WH**2 * self.M2g1g2_decay*constants.g2decay + self.M2g1g2_HadWH*constants.g2WH * self.M2g2_decay*constants.g2decay**2)
                  /
-                ((self.M2g1_WH_hadronic + constants.g2WH**2*self.M2g2_WH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadWH + constants.g2WH**2*self.M2g2_HadWH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
-    def D_g10_g24_WHdecay_hadronic_prime(self):
+    def D_g10_g24_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g2_WH_hadronic*constants.g2WH**2 * self.M2g2_decay*constants.g2decay**2
+                self.M2g2_HadWH*constants.g2WH**2 * self.M2g2_decay*constants.g2decay**2
                  /
-                ((self.M2g1_WH_hadronic + constants.g2WH**2*self.M2g2_WH_hadronic) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
+                ((self.M2g1_HadWH + constants.g2WH**2*self.M2g2_HadWH) * (self.M2g1_decay + constants.g2decay**2*self.M2g2_decay))
                )
 
     ##########
     #g1prime2#
     ##########
 
-    def D_g14_g1prime20_WHdecay_hadronic_prime(self):
+    def D_g14_g1prime20_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g1_WH_hadronic*self.M2g1_decay
+                self.M2g1_HadWH*self.M2g1_decay
                  /
-                ((self.M2g1_WH_hadronic + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadWH + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
-    def D_g13_g1prime21_WHdecay_hadronic_prime(self):
+    def D_g13_g1prime21_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco * self.M2g1_decay)
+                (self.M2g1_HadWH * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco * self.M2g1_decay)
                  /
-                ((self.M2g1_WH_hadronic + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadWH + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
-    def D_g12_g1prime22_WHdecay_hadronic_prime(self):
+    def D_g12_g1prime22_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1_WH_hadronic * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2 * self.M2g1_decay
-                   + self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
+                (self.M2g1_HadWH * self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 * self.M2g1_decay
+                   + self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco * self.M2g1g1prime2_decay*constants.g1prime2decay_reco)
                  /
-                ((self.M2g1_WH_hadronic + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadWH + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
-    def D_g11_g1prime23_WHdecay_hadronic_prime(self):
+    def D_g11_g1prime23_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                (self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_WH_hadronic*constants.g1prime2WH_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+                (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 * self.M2g1g1prime2_decay*constants.g1prime2decay_reco + self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco * self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
                  /
-                ((self.M2g1_WH_hadronic + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadWH + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
-    def D_g10_g1prime24_WHdecay_hadronic_prime(self):
+    def D_g10_g1prime24_HadWHdecay_prime(self):
         if self.notdijet: return -999
         return (
-                self.M2g1prime2_WH_hadronic*constants.g1prime2WH_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 * self.M2g1prime2_decay*constants.g1prime2decay_reco**2
                  /
-                ((self.M2g1_WH_hadronic + constants.g1prime2WH_reco**2*self.M2g1prime2_WH_hadronic) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
+                ((self.M2g1_HadWH + constants.g1prime2WH_reco**2*self.M2g1prime2_HadWH) * (self.M2g1_decay + constants.g1prime2decay_reco**2*self.M2g1prime2_decay))
                )
 
 ##########
@@ -1247,21 +1243,23 @@ class TreeWrapper(Iterator):
 
     def category(self):
         return CJLSTscripts.categoryIchep16(
-                                            self.nExtraLep,
-                                            self.nExtraZ,
-                                            self.nCleanedJetsPt30,
-                                            self.nCleanedJetsPt30BTagged,
-                                            self.jetQGLikelihood,
-                                            self.phjj_VAJHU_highestPTJets,
-                                            self.phj_VAJHU,
-                                            self.pvbf_VAJHU_highestPTJets,
-                                            self.pAux_vbf_VAJHU,
-                                            self.pwh_hadronic_VAJHU,
-                                            self.pzh_hadronic_VAJHU,
-                                            self.jetPhi,
-                                            self.ZZMass,
-                                            config.useQGTagging,
-                                           )
+              nExtraLep,
+              nExtraZ,
+              nCleanedJetsPt30,
+              nCleanedJetsPt30BTagged,
+              jetQGLikelihood,
+              p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal,
+              p_JQCD_SIG_ghg2_1_JHUGen_JECNominal,
+              p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal,
+              p_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+              pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+              p_HadWH_SIG_ghv1_1_JHUGen_JECNominal,
+              p_HadZH_SIG_ghz1_1_JHUGen_JECNominal,
+              jetPhi,
+              ZZMass,
+              useQGTagging,
+             )
+
 #####################
 #Reweighting weights#
 #####################
@@ -1410,7 +1408,6 @@ class TreeWrapper(Iterator):
             "D_bkg_0plus_ResDown",
             "D_bkg_0plus_ScaleUp",
             "D_bkg_0plus_ScaleDown",
-            "D_bkg_0minus",
             "D_2jet_0plus",
             "D_2jet_0minus",
             "D_0minus_decay",
@@ -1566,19 +1563,24 @@ class TreeWrapper(Iterator):
             "nExtraZ",
             "nCleanedJetsPt30",
             "nCleanedJetsPt30BTagged",
-            "JetQGLikelihood",
-            "phj_VAJHU",
-            "pAux_vbf_VAJHU",
-            "pwh_hadronic_VAJHU",
-            "pzh_hadronic_VAJHU",
-            "JetPhi",
+            "jetQGLikelihood",
+            "p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal",
+            "p_JQCD_SIG_ghg2_1_JHUGen_JECNominal",
+            "p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal",
+            "p_JVBF_SIG_ghv1_1_JHUGen_JECNominal",
+            "pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal",
+            "p_HadWH_SIG_ghv1_1_JHUGen_JECNominal",
+            "p_HadZH_SIG_ghz1_1_JHUGen_JECNominal",
+            "jetPhi",
+            "ZZMass",
+            "useQGTagging",
         ]
 
         for lst in (self.toaddtotree, self.toaddtotree_int):
-            for name in self.toaddtotree[:]:
+            for name in lst[:]:
                 if name not in reweightingweightnames + ["category"]:
                     self.exceptions.append(name)
-                    self.toaddtotree.remove(name)
+                    lst.remove(name)
         self.tree.GetEntry(0)  #to initialize the vectors to something other than (vector<float>*)0 which gives a segfault in python
         self.tree.SetBranchStatus("*", 0)
         self.tree.SetBranchStatus("ZZMass", 1)
