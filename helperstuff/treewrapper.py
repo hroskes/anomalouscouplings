@@ -134,43 +134,43 @@ class TreeWrapper(Iterator):
 
         self.M2g1_decay         = t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
         self.M2g4_decay         = t.p_GG_SIG_ghg2_1_ghz4_1_JHUGen
-        self.M2g1g4_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen - self.M2g1_decay - self.M2g4_decay
+        self.M2g1g4_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen
         self.M2g2_decay         = t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
-        self.M2g1g2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen - t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen - t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
+        self.M2g1g2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen
         self.M2g1prime2_decay   = t.p_GG_SIG_ghg2_1_ghz1prime2_1_JHUGen
-        self.M2g1g1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1_JHUGen - t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen - t.p_GG_SIG_ghg2_1_ghz1prime2_1_JHUGen
+        self.M2g1g1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1_JHUGen
 
         self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal = \
         self.M2g1_VBF         = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal
         self.M2g4_VBF         = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal
-        self.M2g1g4_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal - self.M2g1_VBF - self.M2g4_VBF
+        self.M2g1g4_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal
         self.M2g2_VBF         = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECNominal
-        self.M2g1g2_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal - self.M2g1_VBF - self.M2g2_VBF
+        self.M2g1g2_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal
         self.M2g1prime2_VBF   = t.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECNominal
-        self.M2g1g1prime2_VBF = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECNominal - self.M2g1_VBF - self.M2g1prime2_VBF
+        self.M2g1g1prime2_VBF = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECNominal
 
         self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal = \
         self.M2g2_HJJ   = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal
         self.M2g4_HJJ   = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal
-        self.M2g2g4_HJJ = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECNominal - self.M2g2_HJJ - self.M2g4_HJJ
+        self.M2g2g4_HJJ = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECNominal
 
         self.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal = \
         self.M2g1_HadZH         = t.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal
         self.M2g4_HadZH         = t.p_HadZH_SIG_ghz4_1_JHUGen_JECNominal
-        self.M2g1g4_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal - self.M2g1_HadZH - self.M2g4_HadZH
+        self.M2g1g4_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal
         self.M2g2_HadZH         = t.p_HadZH_SIG_ghz2_1_JHUGen_JECNominal
-        self.M2g1g2_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal - self.M2g1_HadZH - self.M2g2_HadZH
+        self.M2g1g2_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
         self.M2g1prime2_HadZH   = t.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECNominal
-        self.M2g1g1prime2_HadZH = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal - self.M2g1_HadZH - self.M2g1prime2_HadZH
+        self.M2g1g1prime2_HadZH = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal
 
         self.p_HadWH_SIG_ghz1_1_JHUGen_JECNominal = \
         self.M2g1_HadWH         = t.p_HadWH_SIG_ghz1_1_JHUGen_JECNominal
         self.M2g4_HadWH         = t.p_HadWH_SIG_ghz4_1_JHUGen_JECNominal
-        self.M2g1g4_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal - self.M2g1_HadWH - self.M2g4_HadWH
+        self.M2g1g4_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal
         self.M2g2_HadWH         = t.p_HadWH_SIG_ghz2_1_JHUGen_JECNominal
-        self.M2g1g2_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal - self.M2g1_HadWH - self.M2g2_HadWH
+        self.M2g1g2_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
         self.M2g1prime2_HadWH   = t.p_HadWH_SIG_ghz1prime2_1_JHUGen_JECNominal
-        self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal - self.M2g1_HadWH - self.M2g1prime2_HadWH
+        self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal
 
         #category variables
         self.nExtraLep = t.nExtraLep
