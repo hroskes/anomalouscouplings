@@ -109,7 +109,10 @@ class Hypothesis(MyEnum):
                  EnumItem("fL1prod0.5"),
                  EnumItem("fa2proddec-0.5"),
                  EnumItem("fa3proddec-0.5"),
-                 EnumItem("fL1proddec-0.5"),
+                 EnumItem("fL1proddec0.5"),
+                 EnumItem("fa2dec-0.5"),
+                 EnumItem("fa2prod-0.5"),
+                 EnumItem("fa2proddec0.5"),
                 )
     @property
     def ispure(self):
@@ -170,6 +173,51 @@ class ProductionMode(MyEnum):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
+        assert False
+    @property
+    def validhypotheses(self):
+        if self == "ggH":
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
+        if self == "VBF":
+            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+        if self == "ZH":
+            return Hypothesis.items(lambda x: x in proddechypotheses+0*["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+        if self == "WH":
+            return Hypothesis.items(lambda x: x in proddechypotheses+0*["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+        if self == "ttH":
+            return Hypothesis.items(lambda x: x in hffhypotheses)
+        if self == "HJJ":
+            return Hypothesis.items(lambda x: x in hffhypotheses)
+        if self in ("WplusH", "WminusH"):
+            return Hypothesis.items(lambda x: x == "0+")
+        assert False
+    @property
+    def directlyreweightedhypotheses(self):
+        if self == "ggH":
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
+        if self == "VBF":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        if self == "ZH":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        if self == "WH":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        assert False
+    @property
+    def generatedhypotheses(self):
+        if self == "ggH":
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
+        if self == "VBF":
+            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
+        if self == "ZH":
+            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
+        if self == "WH":
+            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
+        if self == "ttH":
+            return Hypothesis.items(lambda x: x in hffhypotheses)
+        if self == "HJJ":
+            return Hypothesis.items(lambda x: x in hffhypotheses)
+        if self in ("WplusH", "WminusH"):
+            return Hypothesis.items(lambda x: x == "0+")
         assert False
 
 class Systematic(MyEnum):
@@ -404,7 +452,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
-proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5"))
+proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec0.5"))
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = Hypothesis.items(lambda x: x in ("0+", "0-", "fCP0.5"))
 productionmodes = ProductionMode.items()

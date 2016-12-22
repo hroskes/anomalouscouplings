@@ -26,7 +26,7 @@ max            = None
 enrich         = False
 masscut        = True
 channel        = "2e2mu"
-category       = "VHHadrtagged"
+category       = "VBFtagged"
 #========================
 
 if isinstance(weight, SampleBase):
@@ -74,6 +74,7 @@ for hypothesis in hypotheses:
             pass
 
 for color, hypothesis in enumerate(hypothesestouse(), start=1):
+    if color == 5: color = ROOT.kYellow+3
     t = ROOT.TChain("candTree", "candTree")
     sample = Sample(productionmode, hypothesis, "161221")
     t.Add(sample.withdiscriminantsfile())

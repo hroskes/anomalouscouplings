@@ -1,4 +1,4 @@
-from .. import utilities
+import utilities
 import downloadfromCJLST
 import os
 import ROOT
