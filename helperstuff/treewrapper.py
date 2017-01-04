@@ -15,13 +15,14 @@ sys.setrecursionlimit(10000)
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
 
+@initweightfunctions
 class TreeWrapper(Iterator):
 
-    def __init__(self, tree, treesample, Counters, Counters_reweighted, couplings, minevent=0, maxevent=None, isdummy=False):
+    def __init__(self, tree, treesample, Counters, couplings, minevent=0, maxevent=None, isdummy=False):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
-        Counters_reweighted - from the CJLST file
+        Counters - from the CJLST file
         """
         self.tree = tree
         self.treesample = treesample
@@ -39,15 +40,9 @@ class TreeWrapper(Iterator):
 
         self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
 
-        self.nevents = self.nevents2L2l = None
+        self.nevents = self.nevents2L2l = self.cutoffs = None
         if Counters is not None:
             self.nevents = Counters.GetBinContent(40)
-        if Counters_reweighted is not None:
-            self.nevents2L2l = [
-                                Counters_reweighted.GetBinContent(4, i) #2e2mu
-                              + Counters_reweighted.GetBinContent(8, i) #2e2tau+2mu2tau
-                                  for i, sample in enumerate(treesample.reweightingsamples(), start=1)
-                               ]
 
         self.minevent = minevent
         if (
@@ -94,22 +89,19 @@ class TreeWrapper(Iterator):
                 #raise StopIteration
 
             if self.isdata:
-                self.MC_weight = 1
+                self.overallEventWeight = 1
             elif self.isZX:
                 CRflag = t.CRflag
                 if CRflag and ZX.test_bit(CRflag, ZX.CRZLLss):
-                    self.MC_weight = 1
+                    self.overallEventWeight = 1
                 else:
-                    self.MC_weight = 0
+                    self.overallEventWeight = 0
             else:
-                self.MC_weight = t.overallEventWeight
-            if self.productionmode in ("ggH", "VBF", "ZH", "WH") and not self.isPOWHEG:
-                self.reweightingweights = t.reweightingweights
-            isSelected = bool(self.MC_weight)
+                self.overallEventWeight = t.overallEventWeight
 
             self.flavor = abs(t.Z1Flav*t.Z2Flav)
 
-            if isSelected:
+            if self.overallEventWeight:
                 break
 
         #I prefer this to defining __getattr__ because it's faster
@@ -172,6 +164,10 @@ class TreeWrapper(Iterator):
         self.M2g1g2_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
         self.M2g1prime2_HadWH   = t.p_HadWH_SIG_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
         self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
+
+        #Gen MEs
+        for weightname in genMEs:
+            setattr(self, weightname, getattr(t, weightname))
 
         #category variables
         self.nExtraLep = t.nExtraLep
@@ -1265,148 +1261,14 @@ class TreeWrapper(Iterator):
 #Reweighting weights#
 #####################
 
-    def MC_weight_plain_xsec(self):
-        return self.MC_weight * self.xsec / self.nevents
-    def MC_weight_plain_noxsec(self):
-        return self.MC_weight / self.nevents
-    MC_weight_WplusH_g1 = MC_weight_WminusH_g1 = \
-    MC_weight_ttH_kappatilde = MC_weight_ttH_kappakappatilde = \
-    MC_weight_HJJ_g2    = MC_weight_HJJ_g4         = MC_weight_HJJ_g2g4 = \
-        MC_weight_plain_noxsec
-
-    def MC_weight_ggH(self, index):
-        return self.MC_weight * self.reweightingweights[index] * constants.SMXSggH2L2l / self.nevents2L2l[index]
-    def MC_weight_ggH_g1(self):
-        return self.MC_weight_ggH(0)
-    def MC_weight_ggH_g2(self):
-        return self.MC_weight_ggH(1)
-    def MC_weight_ggH_g4(self):
-        return self.MC_weight_ggH(2)
-    def MC_weight_ggH_g1prime2(self):
-        return self.MC_weight_ggH(3)
-    def MC_weight_ggH_g1g2(self):
-        return self.MC_weight_ggH(4)
-    def MC_weight_ggH_g1g4(self):
-        return self.MC_weight_ggH(5)
-    def MC_weight_ggH_g1g1prime2(self):
-        return self.MC_weight_ggH(6)
-
-    def MC_weight_VBF(self, index):
-        return self.MC_weight * self.reweightingweights[index] * constants.SMXSVBF2L2l / self.nevents2L2l[index]
-    def MC_weight_VBF_linearcombination(self, indicesandfactors):
-        return self.MC_weight * constants.SMXSVBF2L2l * sum(factor*self.reweightingweights[index] for index, factor in indicesandfactors) / sum(factor * self.nevents2L2l[index] for index, factor in indicesandfactors)
-    def MC_weight_VBF_g1(self):
-        if self.isPOWHEG: return self.MC_weight_plain_xsec()
-        return self.MC_weight_VBF(0)
-    def MC_weight_VBF_g2(self):
-        return self.MC_weight_VBF(1)
-    def MC_weight_VBF_g4(self):
-        return self.MC_weight_VBF(2)
-    def MC_weight_VBF_g1prime2(self):
-        return self.MC_weight_VBF(3)
-    def MC_weight_VBF_g1g2_dec(self):
-        return self.MC_weight_VBF(4)
-    def MC_weight_VBF_g1g4_dec(self):
-        return self.MC_weight_VBF(5)
-    def MC_weight_VBF_g1g1prime2_dec(self):
-        return self.MC_weight_VBF(6)
-    def MC_weight_VBF_g1g2_prod(self):
-        return self.MC_weight_VBF(7)
-    def MC_weight_VBF_g1g4_prod(self):
-        return self.MC_weight_VBF(8)
-    def MC_weight_VBF_g1g1prime2_prod(self):
-        return self.MC_weight_VBF(9)
-    def MC_weight_VBF_g1g2_proddec_pi(self):
-        return self.MC_weight_VBF(10)
-    def MC_weight_VBF_g1g4_proddec_pi(self):
-        return self.MC_weight_VBF(11)
-    def MC_weight_VBF_g1g1prime2_proddec(self):
-        return self.MC_weight_VBF(12)
-
-    MC_weight_VBF_g1g2_dec_pi = ReweightingSample("VBF", "fa2dec-0.5").get_MC_weight_function()
-    MC_weight_VBF_g1g2_prod_pi = ReweightingSample("VBF", "fa2prod-0.5").get_MC_weight_function()
-    MC_weight_VBF_g1g2_proddec = ReweightingSample("VBF", "fa2proddec0.5").get_MC_weight_function()
-
-    def MC_weight_ZH(self, index):
-        return self.MC_weight * self.reweightingweights[index] * constants.SMXSZH2L2l / self.nevents2L2l[index]
-    def MC_weight_ZH_g1(self):
-        if self.isPOWHEG: return self.MC_weight_plain_xsec()
-        return self.MC_weight_ZH(0)
-    def MC_weight_ZH_g2(self):
-        return self.MC_weight_ZH(1)
-    def MC_weight_ZH_g4(self):
-        return self.MC_weight_ZH(2)
-    def MC_weight_ZH_g1prime2(self):
-        return self.MC_weight_ZH(3)
-    def MC_weight_ZH_g1g2_dec(self):
-        return self.MC_weight_ZH(4)
-    def MC_weight_ZH_g1g4_dec(self):
-        return self.MC_weight_ZH(5)
-    def MC_weight_ZH_g1g1prime2_dec(self):
-        return self.MC_weight_ZH(6)
-    def MC_weight_ZH_g1g2_prod(self):
-        return self.MC_weight_ZH(7)
-    def MC_weight_ZH_g1g4_prod(self):
-        return self.MC_weight_ZH(8)
-    def MC_weight_ZH_g1g1prime2_prod(self):
-        return self.MC_weight_ZH(9)
-    def MC_weight_ZH_g1g2_proddec_pi(self):
-        return self.MC_weight_ZH(10)
-    def MC_weight_ZH_g1g4_proddec_pi(self):
-        return self.MC_weight_ZH(11)
-    def MC_weight_ZH_g1g1prime2_proddec(self):
-        return self.MC_weight_ZH(12)
-
-    def MC_weight_WH(self, index):
-        return self.MC_weight * self.reweightingweights[index] * constants.SMXSWH2L2l / self.nevents2L2l[index]
-    def MC_weight_WH_g1(self):
-        return self.MC_weight_WH(0)
-    def MC_weight_WH_g2(self):
-        return self.MC_weight_WH(1)
-    def MC_weight_WH_g4(self):
-        return self.MC_weight_WH(2)
-    def MC_weight_WH_g1prime2(self):
-        return self.MC_weight_WH(3)
-    def MC_weight_WH_g1g2_dec(self):
-        return self.MC_weight_WH(4)
-    def MC_weight_WH_g1g4_dec(self):
-        return self.MC_weight_WH(5)
-    def MC_weight_WH_g1g1prime2_dec(self):
-        return self.MC_weight_WH(6)
-    def MC_weight_WH_g1g2_prod(self):
-        return self.MC_weight_WH(7)
-    def MC_weight_WH_g1g4_prod(self):
-        return self.MC_weight_WH(8)
-    def MC_weight_WH_g1g1prime2_prod(self):
-        return self.MC_weight_WH(9)
-    def MC_weight_WH_g1g2_proddec_pi(self):
-        return self.MC_weight_WH(10)
-    def MC_weight_WH_g1g4_proddec_pi(self):
-        return self.MC_weight_WH(11)
-    def MC_weight_WH_g1g1prime2_proddec(self):
-        return self.MC_weight_WH(12)
-
-    def MC_weight_ttH_kappa(self):
-        if self.isPOWHEG: return self.MC_weight_plain_xsec()
-        return self.MC_weight_plain_noxsec()
-
-    def MC_weight_ggZZ(self):
-        KFactor = self.tree.KFactor_QCD_ggZZ_Nominal
-        return self.MC_weight * self.xsec * KFactor / self.nevents
-    def MC_weight_qqZZ(self):
-        KFactor = self.tree.KFactor_EW_qqZZ * self.tree.KFactor_QCD_qqZZ_M
-        return self.MC_weight * self.xsec * KFactor / self.nevents
-    MC_weight_VBFbkg = MC_weight_plain_xsec
-    def MC_weight_ZX(self):
-        self.LepPt, self.LepEta, self.LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
-        return ZX.fakeRate13TeV(self.LepPt[2],self.LepEta[2],self.LepLepId[2]) * ZX.fakeRate13TeV(self.LepPt[3],self.LepEta[3],self.LepLepId[3])
-
     def getweightfunction(self, sample):
         return getattr(self, sample.weightname())
-        raise RuntimeError("{} does not work!".format(sample))
 
-    def getmainweightfunction(self):
-        return getattr(self, "MC_weight_{}".format(self.productionmode))
+    @classmethod
+    def initweightfunctions(cls):
+        for sample in cls.allsamples:
+            setattr(cls, sample.weightname(), sample.get_MC_weight_function())
+        return cls
 
     def initlists(self):
         self.toaddtotree = [
@@ -1488,81 +1350,23 @@ class TreeWrapper(Iterator):
             "category",
         ]
 
-        allsamples = [    #all samples that have weight functions defined in this class
-            ReweightingSample("ggH", "0+"),
-            ReweightingSample("ggH", "a2"),
-            ReweightingSample("ggH", "0-"),
-            ReweightingSample("ggH", "L1"),
-            ReweightingSample("ggH", "fa20.5"),
-            ReweightingSample("ggH", "fa30.5"),
-            ReweightingSample("ggH", "fL10.5"),
-            ReweightingSample("VBF", "0+"),
-            ReweightingSample("VBF", "a2"),
-            ReweightingSample("VBF", "0-"),
-            ReweightingSample("VBF", "L1"),
-            ReweightingSample("VBF", "fa2dec0.5"),
-            ReweightingSample("VBF", "fa3dec0.5"),
-            ReweightingSample("VBF", "fL1dec0.5"),
-            ReweightingSample("VBF", "fa2prod0.5"),
-            ReweightingSample("VBF", "fa3prod0.5"),
-            ReweightingSample("VBF", "fL1prod0.5"),
-            ReweightingSample("VBF", "fa2proddec-0.5"),
-            ReweightingSample("VBF", "fa3proddec-0.5"),
-            ReweightingSample("VBF", "fL1proddec0.5"),
-            ReweightingSample("VBF", "fa2dec-0.5"),
-            ReweightingSample("VBF", "fa2prod-0.5"),
-            ReweightingSample("VBF", "fa2proddec0.5"),
-            ReweightingSample("ZH", "0+"),
-            ReweightingSample("ZH", "a2"),
-            ReweightingSample("ZH", "0-"),
-            ReweightingSample("ZH", "L1"),
-            ReweightingSample("ZH", "fa2dec0.5"),
-            ReweightingSample("ZH", "fa3dec0.5"),
-            ReweightingSample("ZH", "fL1dec0.5"),
-            ReweightingSample("ZH", "fa2prod0.5"),
-            ReweightingSample("ZH", "fa3prod0.5"),
-            ReweightingSample("ZH", "fL1prod0.5"),
-            ReweightingSample("ZH", "fa2proddec-0.5"),
-            ReweightingSample("ZH", "fa3proddec-0.5"),
-            ReweightingSample("ZH", "fL1proddec0.5"),
-            ReweightingSample("WH", "0+"),
-            ReweightingSample("WH", "a2"),
-            ReweightingSample("WH", "0-"),
-            ReweightingSample("WH", "L1"),
-            ReweightingSample("WH", "fa2dec0.5"),
-            ReweightingSample("WH", "fa3dec0.5"),
-            ReweightingSample("WH", "fL1dec0.5"),
-            ReweightingSample("WH", "fa2prod0.5"),
-            ReweightingSample("WH", "fa3prod0.5"),
-            ReweightingSample("WH", "fL1prod0.5"),
-            ReweightingSample("WH", "fa2proddec-0.5"),
-            ReweightingSample("WH", "fa3proddec-0.5"),
-            ReweightingSample("WH", "fL1proddec0.5"),
-            ReweightingSample("ttH", "0+"),
-            ReweightingSample("ttH", "0-"),
-            ReweightingSample("ttH", "fCP0.5"),
-            ReweightingSample("HJJ", "0+"),
-            ReweightingSample("HJJ", "0-"),
-            ReweightingSample("HJJ", "fCP0.5"),
-            ReweightingSample("WplusH", "0+"),
-            ReweightingSample("WminusH", "0+"),
-            ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
-            ReweightingSample("qqZZ"),
-            ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
-            ReweightingSample("ZX"),
-        ]
-
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
-        allreweightingweightnames = [sample.weightname() for sample in allsamples]
+        allreweightingweightnames = [sample.weightname() for sample in self.allsamples]
         for name in reweightingweightnames:
             if name not in allreweightingweightnames:
                 raise ValueError("{} not in allreweightingweightnames!".format(name))
-        for sample in allsamples:
+        for sample in self.allsamples:
             if sample.weightname() in self.toaddtotree or sample.weightname() in self.exceptions: continue
             if sample.weightname() in reweightingweightnames:
                 self.toaddtotree.append(sample.weightname())
             else:
                 self.exceptions.append(sample.weightname())
+
+        self.genMEs = []
+        for sample in self.treesample.reweightingsamples():
+            for factor in sample.MC_weight_terms:
+                for weightname, couplingsq in factor:
+                    self.genMEs.append(weightname)
 
     def onlyweights(self):
         """Call this to only add the weights and ZZMass to the new tree"""
@@ -1628,47 +1432,112 @@ class TreeWrapper(Iterator):
         if error:
             raise SyntaxError(error)
 
-        #cross checking that the order of weights is defined right
-        if (
-                self
-            and self.treesample.productionmode in ("ggH", "VBF", "ZH", "WH")
-            and self.treesample.alternategenerator is None
-           ):
-            if couplings is None:
-                raise SyntaxError("No couplings tree for {}".format(self.treesample))
+    def preliminaryloop(self):
+        """
+        Do the initial loops through the tree to find, for each hypothesis,
+        the cutoff and then the sum of weights for 2L2l
+        """
+        if self.isbkg: continue
+        print "Doing initial loop through tree"
+        self.tree.SetBranchStatus("*", 0)
+        for weightname in self.genMEs:
+            self.tree.SetBranchStatus(weightname, 1)
+        self.tree.SetBranchStatus("GenZ*Flav", 1)
 
-            for entry in self:
-                if self.getmainweightfunction()(0) != 0:
-                    break
-            else:
-                raise SyntaxError("All weights are 0?!")
+        functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in self.treesample.reweightingsamples()}
+        is2L2l = []
+        flavs2L2l = {11*11*13*13, 11*11*15*15, 13*13*15*15}
+        values = functionsandarrays.values()
+        #will fail if multiple have the same str() which would make no sense
+        assert len(functionsandarrays) == len(self.treesample.reweightingsamples())
 
-            if len(self.treesample.reweightingsamples()) != len(self.weightfunctions):
-                raise SyntaxError("Something is very very wrong.  {} {}".format(len(self.treesample.reweightingsamples), len(self.weightfunctions)))
+        length = self.tree.GetEntries()
+        for i, entry in enumerate(self.tree):
+            is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
+            for function, array in values:
+                array.append(function(entry))
+            if i % 10000 == 0 or i == length:
+                print i, "/", length, "   (preliminary run)"
 
-            couplings.GetEntry(0)
-            for i, (sample, function) in enumerate(zip(self.treesample.directreweightingsamples(), self.weightfunctions)):
-                if sample.indexinreweightingweights != i:
-                    raise SyntaxError("{!r}.indexinreweightingweights == {} when it should be {}!".format(sample, sample.indexinreweightingweights, i))
-                if self.getweightfunction(sample)() != self.getmainweightfunction()(i):
-                    raise SyntaxError("{}() == {}, but {}({}) == {}!\nCheck the order of reweightingsamples or the weight functions!".format(self.getweightfunction(sample).__name__, self.getweightfunction(sample)(), self.getmainweightfunction().__name__, i, self.getmainweightfunction()(i)))
-                print couplings.ghz1Re[i], couplings.ghz2Re[i], couplings.ghz4Re[i], couplings.ghz1_prime2Re[i], sample.g1, sample.g2, sample.g4, sample.g1prime2
-                if sample.productionmode != "ggH" and self.treesample.production <= "160729":
-                    continue
+        self.cutoffs = {}
+        self.nevents2L2l = {}
 
-                gs = g1, g2, g4, g1prime2 = sample.g1, sample.g2, sample.g4, sample.g1prime2
-                if len([g for g in gs if g!=0]) == 1 and self.productionmode == "ggH":
-                    #to set gi=1 for the pure samples to compare to the couplings tree
-                    #should just check ratios, but that's annoying when most of them are 0
-                    #can only do this for ggH, because VBF and VH have the linear combination weight branches
-                    # and they have to be the correct couplings not just ratios
-                    gs = g1, g2, g4, g1prime2 = [1 if g else 0 for g in gs]
+        for sample, (function, array) in functionsandarrays.iteritems():
+            array = numpy.array(array)
+            cutoff = self.cutoffs[str(sample)] = numpy.percentile(array, 99.99)
+            self.nevents2L2l[str(sample)] = sum(
+                                                weight if weight < cutoff else cutoff**2/weight
+                                                     for weight, isthis2L2l for weight, isthis2L2l in array, is2L2l
+                                                     if isthis2L2l
+                                               )
 
-                if not (couplings.spin[i] == 0 and couplings.ghz1Re[i] == g1 and couplings.ghz2Re[i] == g2 and couplings.ghz4Re[i] == g4 and couplings.ghz1_prime2Re[i] == g1prime2):
-                    raise SyntaxError("Order of reweightingsamples or the weight functions seems wrong!  Check entry {} in couplings with respect to {}.".format(i, sample))
-
+        self.tree.SetBranchStatus("*", 1)
 
     passesblindcut = config.blindcut
+
+    allsamples = [    #all samples that should have weight functions defined in this class
+        ReweightingSample("ggH", "0+"),
+        ReweightingSample("ggH", "a2"),
+        ReweightingSample("ggH", "0-"),
+        ReweightingSample("ggH", "L1"),
+        ReweightingSample("ggH", "fa20.5"),
+        ReweightingSample("ggH", "fa30.5"),
+        ReweightingSample("ggH", "fL10.5"),
+        ReweightingSample("VBF", "0+"),
+        ReweightingSample("VBF", "a2"),
+        ReweightingSample("VBF", "0-"),
+        ReweightingSample("VBF", "L1"),
+        ReweightingSample("VBF", "fa2dec0.5"),
+        ReweightingSample("VBF", "fa3dec0.5"),
+        ReweightingSample("VBF", "fL1dec0.5"),
+        ReweightingSample("VBF", "fa2prod0.5"),
+        ReweightingSample("VBF", "fa3prod0.5"),
+        ReweightingSample("VBF", "fL1prod0.5"),
+        ReweightingSample("VBF", "fa2proddec-0.5"),
+        ReweightingSample("VBF", "fa3proddec-0.5"),
+        ReweightingSample("VBF", "fL1proddec0.5"),
+        ReweightingSample("VBF", "fa2dec-0.5"),
+        ReweightingSample("VBF", "fa2prod-0.5"),
+        ReweightingSample("VBF", "fa2proddec0.5"),
+        ReweightingSample("ZH", "0+"),
+        ReweightingSample("ZH", "a2"),
+        ReweightingSample("ZH", "0-"),
+        ReweightingSample("ZH", "L1"),
+        ReweightingSample("ZH", "fa2dec0.5"),
+        ReweightingSample("ZH", "fa3dec0.5"),
+        ReweightingSample("ZH", "fL1dec0.5"),
+        ReweightingSample("ZH", "fa2prod0.5"),
+        ReweightingSample("ZH", "fa3prod0.5"),
+        ReweightingSample("ZH", "fL1prod0.5"),
+        ReweightingSample("ZH", "fa2proddec-0.5"),
+        ReweightingSample("ZH", "fa3proddec-0.5"),
+        ReweightingSample("ZH", "fL1proddec0.5"),
+        ReweightingSample("WH", "0+"),
+        ReweightingSample("WH", "a2"),
+        ReweightingSample("WH", "0-"),
+        ReweightingSample("WH", "L1"),
+        ReweightingSample("WH", "fa2dec0.5"),
+        ReweightingSample("WH", "fa3dec0.5"),
+        ReweightingSample("WH", "fL1dec0.5"),
+        ReweightingSample("WH", "fa2prod0.5"),
+        ReweightingSample("WH", "fa3prod0.5"),
+        ReweightingSample("WH", "fL1prod0.5"),
+        ReweightingSample("WH", "fa2proddec-0.5"),
+        ReweightingSample("WH", "fa3proddec-0.5"),
+        ReweightingSample("WH", "fL1proddec0.5"),
+        ReweightingSample("ttH", "0+"),
+        ReweightingSample("ttH", "0-"),
+        ReweightingSample("ttH", "fCP0.5"),
+        ReweightingSample("HJJ", "0+"),
+        ReweightingSample("HJJ", "0-"),
+        ReweightingSample("HJJ", "fCP0.5"),
+        ReweightingSample("WplusH", "0+"),
+        ReweightingSample("WminusH", "0+"),
+        ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
+        ReweightingSample("qqZZ"),
+        ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
+        ReweightingSample("ZX"),
+    ]
 
 if __name__ == '__main__':
     class DummyTree(object):

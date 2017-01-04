@@ -266,33 +266,58 @@ class SampleBase(object):
                              )
         return factorsstr
 
-    def get_MC_weight_function(self_sample, functionname=None):
-        factors = self_sample.MC_weight_terms
+    def get_MC_weight_function(self_sample, functionname=None, reweightingonly=False):
         if functionname is None:
             functionname = self_sample.weightname()
 
-        SMxsec = ReweightingSample(self_sample.productionmode, "SM").xsec
-        strsample = str(self_sample)
+        if self_sample.productionmode == "ggZZ":
+            def MC_weight_function(self_tree):
+                KFactor = self_tree.tree.KFactor_QCD_ggZZ_Nominal
+                return self_tree.MC_weight * self_tree.xsec * KFactor / self_tree.nevents
 
-        def MC_weight_function(self_tree):
-            #finalresult = 1
-            #for factor in factors:
-            #    result = 0
-            #    for weightname, couplingsq in factor:
-            #        result += getattr(self_tree, weightname) * couplingsq
-            #    finalresult *= result
-            #return finalresult
-            return (
-                    self_tree.overallEventWeight
-                    * product(
-                              sum(
-                                  getattr(self_tree, weightname) * couplingsq
-                                        for weightname, couplingsq in factor
-                                 ) for factor in factors
-                             )
-                    * SMxsec
-                    / self_tree.nevents[strsample]
-                   )
+        elif self_sample.productionmode == "qqZZ":
+            def MC_weight_function(self_tree):
+                KFactor = self_tree.tree.KFactor_EW_qqZZ * self_tree.tree.KFactor_QCD_qqZZ_M
+                return self_tree.MC_weight * self_tree.xsec * KFactor / self_tree.nevents
+
+        elif self_sample.productionmode == "ZX":
+            import ZX
+            def MC_weight_function(self_tree):
+                LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
+                return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
+
+        elif self_sample.issignal():
+
+            factors = self_sample.MC_weight_terms
+
+            SMxsec = ReweightingSample(self_sample.productionmode, "SM").xsec
+            strsample = str(self_sample)
+
+            def MC_weight_function(self_tree):
+                #finalresult = 1
+                #for factor in factors:
+                #    result = 0
+                #    for weightname, couplingsq in factor:
+                #        result += getattr(self_tree, weightname) * couplingsq
+                #    finalresult *= result
+                #return finalresult
+                result = product(
+                                 sum(
+                                     getattr(self_tree, weightname) * couplingsq
+                                           for weightname, couplingsq in factor
+                                    ) for factor in factors
+                                )
+
+                if not reweightingonly:
+                    cutoff = self_tree.cutoffs[strsample]
+                    if result > cutoff:
+                        result = cutoff**2 / result
+                    result *= (
+                                 self_tree.overallEventWeight
+                               * SMxsec
+                               / self_tree.nevents[strsample]
+                              )
+                return result
 
         MC_weight_function.__name__ = functionname
         return MC_weight_function
@@ -509,6 +534,8 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     def isbkg(self):
         return self.productionmode.isbkg
+    def issignal(self):
+        return not self.isbkg()
 
     def isZX(self):
         if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH"):
