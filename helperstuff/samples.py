@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from abc import ABCMeta, abstractproperty
+from collections import Counter
 import config
 import constants
 from enums import AlternateGenerator, Analysis, BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, purehypotheses, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
@@ -8,6 +9,7 @@ import numpy
 import os
 import ROOT
 from utilities import cache
+from weightshelper import WeightsHelper
 
 
 class SampleBase(object):
@@ -219,28 +221,80 @@ class SampleBase(object):
                }
 
     @property
+    def MC_weight_terms(self):
+        factors = []
+
+        weightshelper = WeightsHelper(self)
+        if weightshelper.weightprodstring is not None:
+            prod = {}
+            SMcoupling  = getattr(self, weightshelper.prodSMcoupling )
+            BSMcoupling = getattr(self, weightshelper.prodBSMcoupling) / float(weightshelper.prodBSMcouplingvalue)
+            prod[weightshelper.prodweightSM]  = SMcoupling**2
+            prod[weightshelper.prodweightmix] = SMcoupling * BSMcoupling
+            prod[weightshelper.prodweightBSM] = BSMcoupling**2
+            factors.append([
+                            (weightname, couplingsq)
+                                  for weightname, couplingsq in prod.iteritems()
+                                   if couplingsq
+                           ])
+
+        if weightshelper.weightdecaystring is not None:
+            decay = {}
+            SMcoupling  = getattr(self, weightshelper.decaySMcoupling )
+            BSMcoupling = getattr(self, weightshelper.decayBSMcoupling) / float(weightshelper.decayBSMcouplingvalue)
+            decay[weightshelper.decayweightSM]  = SMcoupling**2
+            decay[weightshelper.decayweightmix] = SMcoupling * BSMcoupling
+            decay[weightshelper.decayweightBSM] = BSMcoupling**2
+            factors.append([
+                            (weightname, couplingsq)
+                                  for weightname, couplingsq in decay.iteritems()
+                                   if couplingsq
+                           ])
+
+        return factors
+
+    @property
     def MC_weight(self):
-        return " + ".join(
-                          "{}*{}".format(reweightingsample.weightname(), factor*reweightingsample.xsec/self.xsec)
-                            for reweightingsample, factor in self.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
-                         )
+        factors = self.MC_weight_terms
+        factorsstr = "*".join(
+                              "("+
+                              "+".join(
+                                       "({}*{})".format(weightname, couplingsq)
+                                                for weightname, couplingsq in factor
+                                      )
+                              +")" for factor in factors
+                             )
+        return factorsstr
 
-    def get_MC_weight_function(self_sample, fortest=False):
-        indicesandfactors = tuple(
-                                  (reweightingsample.indexinreweightingweights, factor)
-                                          for reweightingsample, factor in self_sample.linearcombinationofreweightingsamples("directlyreweighted").iteritems()
-                                 )
+    def get_MC_weight_function(self_sample, functionname=None):
+        factors = self_sample.MC_weight_terms
+        if functionname is None:
+            functionname = self_sample.weightname()
 
-        MC_weight_linearcombination_name = "MC_weight_{}_linearcombination".format(self_sample.productionmode)
+        SMxsec = ReweightingSample(self_sample.productionmode, "SM").xsec
+        strsample = str(self_sample)
+
         def MC_weight_function(self_tree):
-            return getattr(self_tree, MC_weight_linearcombination_name)(indicesandfactors)
+            #finalresult = 1
+            #for factor in factors:
+            #    result = 0
+            #    for weightname, couplingsq in factor:
+            #        result += getattr(self_tree, weightname) * couplingsq
+            #    finalresult *= result
+            #return finalresult
+            return (
+                    self_tree.overallEventWeight
+                    * product(
+                              sum(
+                                  getattr(self_tree, weightname) * couplingsq
+                                        for weightname, couplingsq in factor
+                                 ) for factor in factors
+                             )
+                    * SMxsec
+                    / self_tree.nevents[strsample]
+                   )
 
-        if fortest:
-            assert False
-            #the same thing but without () on the getattr
-            #this can run on a tree, rather than a TreeWrapper
-
-        MC_weight_function.__name__ = self_sample.weightname()
+        MC_weight_function.__name__ = functionname
         return MC_weight_function
 
     def fai(self, productionmode, analysis, withdecay=False):
@@ -288,6 +342,15 @@ class ArbitraryCouplingsSample(SampleBase):
             self.__ghg2, self.__ghg4 = ghg2, ghg4
             if ghg2 is None or ghg4 is None:
                 raise ValueError("Have to set ghg2 and ghg4 for HJJ")
+        elif self.productionmode == "ggH":
+            if ghg2 is None:
+                ghg2 = 1
+            if ghg4 is None:
+                ghg4 = 0
+            if ghg2 != 1:
+                raise ValueError("ghg2 has to = 1 for {}".format(self.productionmode))
+            if ghg4 != 0:
+                raise ValueError("ghg4 has to = 0 for {}".format(self.productionmode))
         else:
             if ghg2 is not None or ghg4 is not None:
                 raise ValueError("Can't set ghg2 or ghg4 for {}".format(self.productionmode))
@@ -326,9 +389,10 @@ class ArbitraryCouplingsSample(SampleBase):
         return self.__kappa_tilde
 
     def __repr__(self):
-        couplings = ("g1", "g2", "g4", "g1prime2")
-        if self.productionmode == "HJJ": couplings += ("ghg2", "ghg4")
+        couplings = ()
+        if self.productionmode in ("ggH", "HJJ"): couplings += ("ghg2", "ghg4")
         if self.productionmode == "ttH": couplings += ("kappa", "kappa_tilde")
+        couplings = ("g1", "g2", "g4", "g1prime2")
         return "{}({}, {})".format(
                                    type(self).__name__,
                                    repr(self.productionmode.item.name),
@@ -593,6 +657,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                                    + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]
                                    + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
                                    + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
+                                   + ["g1{}".format(a) for a in ("g2", "g4", "g1prime2")]
                                   ):
                 return 1
             if self.hypothesis in ("a2", "0-", "L1"):
@@ -607,6 +672,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                                ["0+", "0-", "L1"]
                              + ["{}{}0.5".format(a, b) for a in ("fa3",) for b in ("dec", "prod", "proddec-")]
                              + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
+                             + ["g1{}".format(a) for a in ("g4", "g1prime2")]
                               ):
             return 0
         if self.hypothesis == "a2":
@@ -614,6 +680,10 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return constants.g2decay
             else:
                 return 1
+
+        if self.hypothesis == "g1g2":
+            return 1
+
         if self.hypothesis == "fa2dec0.5":
             return constants.g2decay
 
@@ -650,6 +720,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                              + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec", "prod", "proddec-")]
                              + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
                              + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
+                             + ["g1{}".format(a) for a in ("g2", "g1prime2")]
                               ):
             return 0
         if self.hypothesis == "0-":
@@ -657,6 +728,10 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return constants.g4decay
             else:
                 return 1
+
+        if self.hypothesis == "g1g4":
+            return 1
+
         if self.hypothesis == "fa3dec0.5":
             return constants.g4decay
 
@@ -688,13 +763,19 @@ class ReweightingSample(MultiEnum, SampleBase):
                                ["0+", "a2", "0-"]
                              + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]
                              + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
+                             + ["g1{}".format(a) for a in ("g2", "g4")]
                               ):
             return 0
+
         if self.hypothesis == "L1":
             if self.productionmode == "ggH":
                 return constants.g1prime2decay_gen
             else:
                 return 1
+
+        if self.hypothesis == "g1g1prime2":
+            return 1
+
         if self.hypothesis == "fL1dec0.5":
             return constants.g1prime2decay_gen
 
@@ -720,6 +801,8 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def ghg2(self):
+        if self.productionmode == "ggH":
+            return 1
         if self.productionmode == "HJJ":
             if self.hypothesis in ("0+", "fCP0.5"):
                 return 1
@@ -729,6 +812,8 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def ghg4(self):
+        if self.productionmode == "ggH":
+            return 0
         if self.productionmode == "HJJ":
             if self.hypothesis == "0+":
                 return 0
@@ -887,21 +972,3 @@ class SampleBasis(MultiEnum):
     @cache
     def invertedmatrix(self):
         return self.matrix.I
-
-
-if __name__ == "__main__":
-    for productionmode in "ggH", "VBF", "ZH":
-        for analysis in "fa3", "fa2", "fL1":
-            for fai in 0.5, -0.2:
-                assert abs(samplewithfai(productionmode, analysis, fai).fai(productionmode, analysis)/fai - 1) < 1e-15
-    f = ROOT.TFile(Sample("VBF", "0+", "160928").withdiscriminantsfile())
-    t = f.candTree
-    s = ReweightingSample("VBF", "fa2prod-0.5")
-    length = min(t.GetEntries(), 100)
-    for i, entry in enumerate(t, start=1):
-        if s.get_MC_weight_function(fortest=True)(t) < 0:
-            t.Show()
-            assert False
-        print i, "/", length
-        if i == length:
-            break
