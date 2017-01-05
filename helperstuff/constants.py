@@ -48,11 +48,16 @@ SMXSWmH  = (5.328E-01  #'YR4 SM 13TeV'!X24   (W-H cross section, m=125)
              *1000)    #                     (pb to fb)
 SMXSZH   = (8.839E-01  #'YR4 SM 13TeV'!AB24  (ZH cross section, m=125)
              *1000)    #                     (pb to fb)
+SMXSttH  = (5.071E-01  #'YR4 SM 13TeV'!AK24  (ttH cross section, m=125)
+             *1000)    #                     (pb to fb)
 
 SMXSggH2L2l = SMXSggH * SMBR2L2l
 SMXSVBF2L2l = SMXSVBF * SMBR2L2l
 SMXSZH2L2l = SMXSZH * SMBR2L2l
 SMXSWH2L2l = SMXSWH * SMBR2L2l
+SMXSWpH2L2l = SMXSWpH * SMBR2L2l
+SMXSWmH2L2l = SMXSWmH * SMBR2L2l
+SMXSttH2L2l = SMXSttH * SMBR2L2l
 
 
 JHUXSggH2L2la1   = 7.1517173;      JHUXSggH2L2la1err   = 0.23044650E-03
@@ -126,6 +131,7 @@ if __name__ == "__main__":
     print "    a1XS - g1prime2**2*L1XS    = {}%".format((JHUXSWHa1 - g1prime2WH_gen**2 * JHUXSWHL1     ) / JHUXSWHa1 * 100)
     print "    a1XS + g4**2*a3XS - a1a3XS = {}%".format((JHUXSWHa1 + g4WH**2 * JHUXSWHa3 - JHUXSWHa1a3 ) / JHUXSWHa1 * 100)
     print "    2*a1XS - a1a3XS            = {}%".format((2*JHUXSWHa1 - JHUXSWHa1a3                     ) / (2*JHUXSWHa1) * 100)
+    print "    WpHXS + WmHXS - WHXS       = {}%".format((SMXSWpH2L2l + SMXSWmH2L2l - SMXSWH2L2l        ) / SMXSWH2L2l * 100)
     print
     print "  HJJ:"
     print "    a2XS - g4**2*a3XS          = {}%".format((JHUXSHJJa2 - ghg4HJJ**2              * JHUXSHJJa3   ) / JHUXSHJJa2 * 100)

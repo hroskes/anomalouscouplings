@@ -8,7 +8,7 @@ from math import copysign, sqrt
 import numpy
 import os
 import ROOT
-from utilities import cache
+from utilities import cache, product
 from weightshelper import WeightsHelper
 
 
@@ -158,7 +158,7 @@ class SampleBase(object):
         if self.productionmode == "WminusH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWmH2L2l
         if self.productionmode == "HJJ":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSHJJ2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return 1
             return constants.SMXSHJJ2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
         if self.productionmode == "ttH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSttH2L2l
@@ -229,9 +229,9 @@ class SampleBase(object):
             prod = {}
             SMcoupling  = getattr(self, weightshelper.prodSMcoupling )
             BSMcoupling = getattr(self, weightshelper.prodBSMcoupling) / float(weightshelper.prodBSMcouplingvalue)
-            prod[weightshelper.prodweightSM]  = SMcoupling**2
+            prod[weightshelper.prodweightSM]  = SMcoupling**2            - SMcoupling * BSMcoupling
             prod[weightshelper.prodweightmix] = SMcoupling * BSMcoupling
-            prod[weightshelper.prodweightBSM] = BSMcoupling**2
+            prod[weightshelper.prodweightBSM] = BSMcoupling**2           - SMcoupling * BSMcoupling
             factors.append([
                             (weightname, couplingsq)
                                   for weightname, couplingsq in prod.iteritems()
@@ -242,9 +242,9 @@ class SampleBase(object):
             decay = {}
             SMcoupling  = getattr(self, weightshelper.decaySMcoupling )
             BSMcoupling = getattr(self, weightshelper.decayBSMcoupling) / float(weightshelper.decayBSMcouplingvalue)
-            decay[weightshelper.decayweightSM]  = SMcoupling**2
+            decay[weightshelper.decayweightSM]  = SMcoupling**2            - SMcoupling * BSMcoupling
             decay[weightshelper.decayweightmix] = SMcoupling * BSMcoupling
-            decay[weightshelper.decayweightBSM] = BSMcoupling**2
+            decay[weightshelper.decayweightBSM] = BSMcoupling**2           - SMcoupling * BSMcoupling
             factors.append([
                             (weightname, couplingsq)
                                   for weightname, couplingsq in decay.iteritems()
@@ -286,6 +286,10 @@ class SampleBase(object):
                 LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
                 return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
 
+        elif self_sample.productionmode == "VBF bkg":
+            def MC_weight_function(self_tree):
+                return self_tree.MC_weight * self_tree.xsec / self_tree.nevents
+
         elif self_sample.issignal():
 
             factors = self_sample.MC_weight_terms
@@ -318,6 +322,9 @@ class SampleBase(object):
                                / self_tree.nevents[strsample]
                               )
                 return result
+
+        else:
+            raise ValueError("No MC weight function defined for {}".format(self_sample))
 
         MC_weight_function.__name__ = functionname
         return MC_weight_function
@@ -915,15 +922,7 @@ class Sample(ReweightingSample):
                 if self.productionmode == "VBF": s = "VBFH"
                 if self.hypothesis == "0+": return "{}125".format(s)
             raise self.ValueError("CJLSTdirname")
-        if self.productionmode == "ggH" and self.production <= "160624":
-            if self.hypothesis == "0+": return "0PM"
-            if self.hypothesis == "a2": return "0PH"
-            if self.hypothesis == "0-": return "0M"
-            if self.hypothesis == "L1": return "0L1"
-            if self.hypothesis == "fa20.5": return "0PHf05ph0"
-            if self.hypothesis == "fa30.5": return "0Mf05ph0"
-            if self.hypothesis == "fL10.5": return "0L1f05ph0"
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH") and self.production >= "160714":
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH"):
             s = str(self.productionmode)
             if self.productionmode == "VBF": s = "VBFH"
             if self.hypothesis == "0+": return "{}0PM_M125".format(s)
@@ -934,10 +933,7 @@ class Sample(ReweightingSample):
             if self.hypothesis in ("fa30.5", "fa3prod0.5"): return "{}0Mf05ph0_M125".format(s)
             if self.hypothesis in ("fL10.5", "fL1prod0.5"): return "{}0L1f05ph0_M125".format(s)
         if self.productionmode == "ggZZ":
-            if self.production == "160714" and self.flavor in ("4e", "4mu", "4tau", "2mu2tau") or self.production >= "160720":
-                return "ggTo{}_Contin_MCFM701".format(self.flavor)
-            elif self.production <= "160714":
-                return "ggZZ{}".format(self.flavor)
+            return "ggTo{}_Contin_MCFM701".format(self.flavor)
         if self.productionmode == "VBF bkg":
             return "VBFTo{}JJ_Contin_phantom128".format(self.flavor)
         if self.productionmode == "qqZZ":

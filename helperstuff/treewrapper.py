@@ -4,9 +4,11 @@ import CJLSTscripts
 from collections import Counter, Iterator
 import config
 import constants
+import numpy
 import resource
 from samples import ReweightingSample
 import sys
+from utilities import callclassinitfunctions
 import ZX
 
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
@@ -15,10 +17,10 @@ sys.setrecursionlimit(10000)
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
 
-@initweightfunctions
+@callclassinitfunctions("initweightfunctions")
 class TreeWrapper(Iterator):
 
-    def __init__(self, tree, treesample, Counters, couplings, minevent=0, maxevent=None, isdummy=False):
+    def __init__(self, tree, treesample, Counters, minevent=0, maxevent=None, isdummy=False):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
@@ -69,7 +71,9 @@ class TreeWrapper(Iterator):
             self.xsec = tree.xsec * 1000 #pb to fb
 
         self.cconstantforDbkg = self.cconstantforD2jet = None
-        self.checkfunctions(couplings)
+        self.checkfunctions()
+
+        self.preliminaryloop()
 
     def __iter__(self):
         self.__i = 0                               #at the beginning of next self.__i and self.__treeentry are
@@ -86,7 +90,7 @@ class TreeWrapper(Iterator):
                 raise StopIteration
             if i % 10000 == 0 or i == len(self):
                 print i, "/", len(self)
-                #raise StopIteration
+                raise StopIteration
 
             if self.isdata:
                 self.overallEventWeight = 1
@@ -117,8 +121,6 @@ class TreeWrapper(Iterator):
         for a in "SIG", "BKG":
             for b in "Scale", "Res":
                 for c in "Up", "Down":
-                    attr = "p_m4l_{} {}{}".format(a, b, c)
-                    setattr(self, attr, getattr(t, attr))
                     attr = "p_m4l_{}_{}{}".format(a, b, c)
                     setattr(self, attr, getattr(t, attr))
 
@@ -130,7 +132,7 @@ class TreeWrapper(Iterator):
         self.M2g1g4_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen
         self.M2g2_decay         = t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
         self.M2g1g2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen
-        self.M2g1prime2_decay   = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_JHUGen / 1e4
+        self.M2g1prime2_decay   = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_JHUGen / 1e4**2
         self.M2g1g1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1E4_JHUGen / 1e4
 
         self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal = \
@@ -139,8 +141,8 @@ class TreeWrapper(Iterator):
         self.M2g1g4_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal
         self.M2g2_VBF         = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECNominal
         self.M2g1g2_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal
-        self.M2g1prime2_VBF   = t.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECNominal
-        self.M2g1g1prime2_VBF = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECNominal
+        self.M2g1prime2_VBF   = t.p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_JECNominal / 1e4**2
+        self.M2g1g1prime2_VBF = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECNominal / 1e4
 
         self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal = \
         self.M2g2_HJJ   = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal
@@ -153,17 +155,17 @@ class TreeWrapper(Iterator):
         self.M2g1g4_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal
         self.M2g2_HadZH         = t.p_HadZH_SIG_ghz2_1_JHUGen_JECNominal
         self.M2g1g2_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
-        self.M2g1prime2_HadZH   = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.M2g1prime2_HadZH   = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECNominal / 1e4**2
         self.M2g1g1prime2_HadZH = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
 
-        self.p_HadWH_SIG_ghz1_1_JHUGen_JECNominal = \
-        self.M2g1_HadWH         = t.p_HadWH_SIG_ghz1_1_JHUGen_JECNominal
-        self.M2g4_HadWH         = t.p_HadWH_SIG_ghz4_1_JHUGen_JECNominal
-        self.M2g1g4_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal
-        self.M2g2_HadWH         = t.p_HadWH_SIG_ghz2_1_JHUGen_JECNominal
-        self.M2g1g2_HadWH       = t.p_HadWH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
-        self.M2g1prime2_HadWH   = t.p_HadWH_SIG_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
-        self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal = \
+        self.M2g1_HadWH         = t.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal
+        self.M2g4_HadWH         = t.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal
+        self.M2g1g4_HadWH       = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal
+        self.M2g2_HadWH         = t.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal
+        self.M2g1g2_HadWH       = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal
+        self.M2g1prime2_HadWH   = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECNominal / 1e4**2
+        self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECNominal / 1e4
 
         #Gen MEs
         for weightname in genMEs:
@@ -1268,7 +1270,6 @@ class TreeWrapper(Iterator):
     def initweightfunctions(cls):
         for sample in cls.allsamples:
             setattr(cls, sample.weightname(), sample.get_MC_weight_function())
-        return cls
 
     def initlists(self):
         self.toaddtotree = [
@@ -1288,26 +1289,22 @@ class TreeWrapper(Iterator):
         ]
 
         self.exceptions = [
+            "allsamples",
             "cconstantforDbkg",
             "cconstantforD2jet",
             "checkfunctions",
+            "cutoffs",
             "exceptions",
+            "genMEs",
             "getweightfunction",
-            "getmainweightfunction",
             "hypothesis",
             "initlists",
+            "initweightfunctions",
             "isbkg",
             "isdata",
             "isdummy",
             "isPOWHEG",
             "isZX",
-            "MC_weight_ggH",
-            "MC_weight_VBF",
-            "MC_weight_VBF_linearcombination",
-            "MC_weight_WH",
-            "MC_weight_ZH",
-            "MC_weight_plain_xsec",
-            "MC_weight_plain_noxsec",
             "minevent",
             "nevents",
             "nevents2L2l",
@@ -1315,6 +1312,7 @@ class TreeWrapper(Iterator):
             "onlyweights",
             "passesblindcut",
             "productionmode",
+            "preliminaryloop",
             "toaddtotree",
             "toaddtotree_int",
             "tree",
@@ -1325,26 +1323,26 @@ class TreeWrapper(Iterator):
         ]
 
         proddiscriminants = [
-            "D_0minus_{prod}{suffix}",
-            "D_CP_{prod}{suffix}",
-            "D_g2_{prod}{suffix}",
-            "D_g1g2_{prod}{suffix}",
-            "D_g1prime2_{prod}{suffix}",
-            "D_g1g1prime2_{prod}{suffix}",
-            "D_0minus_{prod}decay{suffix}",
-            "D_g2_{prod}decay{suffix}",
-            "D_g1prime2_{prod}decay{suffix}",
+            "D_0minus_{prod}",
+            "D_CP_{prod}",
+            "D_g2_{prod}",
+            "D_g1g2_{prod}",
+            "D_g1prime2_{prod}",
+            "D_g1g1prime2_{prod}",
+            "D_0minus_{prod}decay",
+            "D_g2_{prod}decay",
+            "D_g1prime2_{prod}decay",
         ]
         prodcomponentdiscriminants = [
-            "D_g1{}_{}{}_{{prod}}decay{{suffix}}{}".format(i, gj, 4-i, prime)
+            "D_g1{}_{}{}_{{prod}}decay{}".format(i, gj, 4-i, prime)
                 for prime in ("", "_prime")
                 for gj in ("g4", "g2", "g1prime2")
                 for i in range(5)
         ]
-        for prod, suffix in (("VBF", ""), ("ZH", "_hadronic"), ("WH", "_hadronic"), ("VH", "_hadronic")):
-            self.toaddtotree += [_.format(prod=prod, suffix=suffix) for _ in proddiscriminants]
-            if prod != "VH":
-                self.exceptions += [_.format(prod=prod, suffix=suffix) for _ in prodcomponentdiscriminants]
+        for prod in ("VBF", "HadZH", "HadWH", "HadVH"):
+            self.toaddtotree += [_.format(prod=prod) for _ in proddiscriminants]
+            if prod != "HadVH":
+                self.exceptions += [_.format(prod=prod) for _ in prodcomponentdiscriminants]
 
         self.toaddtotree_int = [
             "category",
@@ -1405,7 +1403,7 @@ class TreeWrapper(Iterator):
         for variable in self.treesample.weightingredients():
             self.tree.SetBranchStatus(variable, 1)
 
-    def checkfunctions(self, couplings=None):
+    def checkfunctions(self):
 
         #some cross checking in case of stupid mistakes
         #if a function is added in the class but not added to toaddtotree
@@ -1437,7 +1435,7 @@ class TreeWrapper(Iterator):
         Do the initial loops through the tree to find, for each hypothesis,
         the cutoff and then the sum of weights for 2L2l
         """
-        if self.isbkg: continue
+        if self.isbkg: return
         print "Doing initial loop through tree"
         self.tree.SetBranchStatus("*", 0)
         for weightname in self.genMEs:
@@ -1452,12 +1450,13 @@ class TreeWrapper(Iterator):
         assert len(functionsandarrays) == len(self.treesample.reweightingsamples())
 
         length = self.tree.GetEntries()
-        for i, entry in enumerate(self.tree):
+        for i, entry in enumerate(self.tree, start=1):
             is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
             for function, array in values:
                 array.append(function(entry))
             if i % 10000 == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
+                break
 
         self.cutoffs = {}
         self.nevents2L2l = {}
@@ -1467,11 +1466,18 @@ class TreeWrapper(Iterator):
             cutoff = self.cutoffs[str(sample)] = numpy.percentile(array, 99.99)
             self.nevents2L2l[str(sample)] = sum(
                                                 weight if weight < cutoff else cutoff**2/weight
-                                                     for weight, isthis2L2l for weight, isthis2L2l in array, is2L2l
+                                                     for weight, isthis2L2l in zip(array, is2L2l)
                                                      if isthis2L2l
                                                )
 
         self.tree.SetBranchStatus("*", 1)
+
+        print "Cutoffs:"
+        for sample, cutoff in self.cutoffs.iteritems():
+             print "    {:15} {}".format(sample, cutoff)
+        print "nevents2L2l:"
+        for sample, nevents in self.nevents2L2l.iteritems():
+             print "    {:15} {}".format(sample, nevents)
 
     passesblindcut = config.blindcut
 

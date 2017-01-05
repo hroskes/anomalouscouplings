@@ -1,6 +1,7 @@
 import collections
 import contextlib
 from itertools import tee, izip
+import operator
 import json
 import os
 import ROOT
@@ -110,3 +111,13 @@ def pairwise(iterable):
     a, b = tee(iterable)
     next(b, None)
     return izip(a, b)
+
+def callclassinitfunctions(*names):
+    def callfunctions(cls):
+        for name in names:
+            getattr(cls, name)()
+        return cls
+    return callfunctions
+
+def product(iterable):
+    return reduce(operator.mul, iterable, 1)
