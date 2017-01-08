@@ -286,7 +286,8 @@ class SampleBase(object):
                 LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
                 return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
 
-        elif self_sample.productionmode == "VBF bkg":
+        elif (self_sample.productionmode == "VBF bkg"
+                   or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator == "POWHEG"):
             def MC_weight_function(self_tree):
                 return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
 
@@ -522,8 +523,10 @@ class ReweightingSample(MultiEnum, SampleBase):
         return ValueError("invalid sample {} in function {}".format(self, functionname))
 
     def reweightingsamples(self):
-        if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ttH", "HJJ") or self.alternategenerator == "POWHEG":
-            return [ReweightingSample(*(_ for _ in [self.productionmode, self.hypothesis, self.flavor] if _))]
+        if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX") or self.alternategenerator == "POWHEG":
+            return [self]
+        if self.productionmode in ("ttH", "HJJ"):
+            return [ReweightingSample(self.productionmode, self.hypothesis)]
         elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
         elif self.productionmode == "data":
@@ -955,6 +958,12 @@ class Sample(ReweightingSample):
         if self.productionmode == "data":
             return self.blindstatus == "unblind"
         raise self.ValueError("unblind")
+
+    def weightname(self):
+        result = super(Sample, self).weightname()
+        if self.alternategenerator:
+            result += "_" + str(self.alternategenerator)
+        return result
 
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]

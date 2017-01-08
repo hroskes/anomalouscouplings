@@ -6,7 +6,7 @@ import config
 import constants
 import numpy
 import resource
-from samples import ReweightingSample
+from samples import ReweightingSample, Sample
 import sys
 from utilities import callclassinitfunctions
 import ZX
@@ -1365,7 +1365,7 @@ class TreeWrapper(Iterator):
                 self.exceptions.append(sample.weightname())
 
         self.genMEs = []
-        if not self.isbkg:
+        if not self.isbkg and not self.isPOWHEG:
             for sample in self.treesample.reweightingsamples():
                 for factor in sample.MC_weight_terms:
                     for weightname, couplingsq in factor:
@@ -1439,7 +1439,7 @@ class TreeWrapper(Iterator):
         Do the initial loops through the tree to find, for each hypothesis,
         the cutoff and then the sum of weights for 2L2l
         """
-        if self.isbkg: return
+        if self.isbkg or self.isPOWHEG: return
         print "Doing initial loop through tree"
         self.tree.SetBranchStatus("*", 0)
         for weightname in self.genMEs:
@@ -1541,12 +1541,16 @@ class TreeWrapper(Iterator):
         ReweightingSample("HJJ", "0+"),
         ReweightingSample("HJJ", "0-"),
         ReweightingSample("HJJ", "fCP0.5"),
-        ReweightingSample("WplusH", "0+"),
-        ReweightingSample("WminusH", "0+"),
         ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
         ReweightingSample("qqZZ"),
         ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
         ReweightingSample("ZX"),
+
+        Sample("VBF", "0+", "POWHEG", config.productionsforcombine[0]),
+        Sample("ZH", "0+", "POWHEG", config.productionsforcombine[0]),
+        Sample("WplusH", "0+", "POWHEG", config.productionsforcombine[0]),
+        Sample("WminusH", "0+", "POWHEG", config.productionsforcombine[0]),
+        Sample("ttH", "0+", "POWHEG", config.productionsforcombine[0]),
     ]
 
 if __name__ == '__main__':
