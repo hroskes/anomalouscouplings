@@ -15,7 +15,7 @@ for script in scripts:
     downloader.add("AnalysisStep/interface/{}.h".format(script))
 
 downloader.add("AnalysisStep/test/Macros/ReducibleBackgroundAA_2015.C")
-for rootfile in "FakeRate_SS_2015.root", "FakeRate_SS_2016B.root", "FakeRate_SS_2016D.root":
+for rootfile in "FakeRate_SS_2016D.root",:
     downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile))
 
 with utilities.cd(CJLSTscriptsfolder):
@@ -23,14 +23,6 @@ with utilities.cd(CJLSTscriptsfolder):
 
 for script in scripts:
     ROOT.gROOT.LoadMacro(os.path.join(CJLSTscriptsfolder, script+".cc+"))
-ROOT.gROOT.LoadMacro(os.path.join(CJLSTscriptsfolder, "ReducibleBackground2015_adapted.C+"))
+ROOT.gROOT.LoadMacro(os.path.join(CJLSTscriptsfolder, "ReducibleBackgroundAA_2015_adapted.C+"))
 
 from ROOT import categoryIchep16, getDVBF2jetsConstant, getDVBF1jetConstant, getDbkgkinConstant, getDbkgConstant, UntaggedIchep16, VBF1jTaggedIchep16, VBF2jTaggedIchep16, VHLeptTaggedIchep16, VHHadrTaggedIchep16, ttHTaggedIchep16
-
-def fakeRate13TeV(*args, **kwargs):
-    raise ValueError("Have to call setup before fakeRate13TeV")
-
-def ZXsetup(production):
-    success = ROOT.ZXsetup(int(production), CJLSTscriptsfolder)
-    if not success:
-        raise ValueError("Bad production: {}".format(production))
