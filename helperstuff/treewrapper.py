@@ -40,8 +40,6 @@ class TreeWrapper(Iterator):
         else:
             self.unblind = True
 
-        self.weightfunctions = [self.getweightfunction(sample) for sample in treesample.reweightingsamples()]
-
         self.nevents = self.nevents2L2l = self.cutoffs = None
         if Counters is not None:
             self.nevents = Counters.GetBinContent(40)
@@ -1322,7 +1320,6 @@ class TreeWrapper(Iterator):
             "treesample",
             "Show",
             "unblind",
-            "weightfunctions",
             "xsec",
         ]
 
@@ -1535,12 +1532,32 @@ class TreeWrapper(Iterator):
         ReweightingSample("WH", "fa2proddec-0.5"),
         ReweightingSample("WH", "fa3proddec-0.5"),
         ReweightingSample("WH", "fL1proddec0.5"),
-        ReweightingSample("ttH", "0+"),
-        ReweightingSample("ttH", "0-"),
-        ReweightingSample("ttH", "fCP0.5"),
-        ReweightingSample("HJJ", "0+"),
-        ReweightingSample("HJJ", "0-"),
-        ReweightingSample("HJJ", "fCP0.5"),
+        ReweightingSample("ttH", "Hff0+", "0+"),
+        ReweightingSample("ttH", "Hff0-", "0+"),
+        ReweightingSample("ttH", "fCP0.5", "0+"),
+        ReweightingSample("ttH", "Hff0+", "0-"),
+        ReweightingSample("ttH", "Hff0-", "0-"),
+        ReweightingSample("ttH", "fCP0.5", "0-"),
+        ReweightingSample("ttH", "Hff0+", "fa30.5"),
+        ReweightingSample("ttH", "Hff0-", "fa30.5"),
+        ReweightingSample("ttH", "fCP0.5", "fa30.5"),
+        ReweightingSample("ttH", "Hff0+", "a2"),
+        ReweightingSample("ttH", "Hff0+", "fa20.5"),
+        ReweightingSample("ttH", "Hff0+", "L1"),
+        ReweightingSample("ttH", "Hff0+", "fL10.5"),
+        ReweightingSample("HJJ", "Hff0+", "0+"),
+        ReweightingSample("HJJ", "Hff0-", "0+"),
+        ReweightingSample("HJJ", "fCP0.5", "0+"),
+        ReweightingSample("HJJ", "Hff0+", "0-"),
+        ReweightingSample("HJJ", "Hff0-", "0-"),
+        ReweightingSample("HJJ", "fCP0.5", "0-"),
+        ReweightingSample("HJJ", "Hff0+", "fa30.5"),
+        ReweightingSample("HJJ", "Hff0-", "fa30.5"),
+        ReweightingSample("HJJ", "fCP0.5", "fa30.5"),
+        ReweightingSample("HJJ", "Hff0+", "a2"),
+        ReweightingSample("HJJ", "Hff0+", "fa20.5"),
+        ReweightingSample("HJJ", "Hff0+", "L1"),
+        ReweightingSample("HJJ", "Hff0+", "fL10.5"),
         ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
         ReweightingSample("qqZZ"),
         ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
@@ -1550,25 +1567,5 @@ class TreeWrapper(Iterator):
         Sample("ZH", "0+", "POWHEG", config.productionsforcombine[0]),
         Sample("WplusH", "0+", "POWHEG", config.productionsforcombine[0]),
         Sample("WminusH", "0+", "POWHEG", config.productionsforcombine[0]),
-        Sample("ttH", "0+", "POWHEG", config.productionsforcombine[0]),
+        Sample("ttH", "Hff0+", "0+", "POWHEG", config.productionsforcombine[0]),
     ]
-
-if __name__ == '__main__':
-    class DummyTree(object):
-        def GetEntries(self):
-            return 0
-        def GetEntry(self, entry): pass
-        xsec = 0
-    class DummySample(object):
-        productionmode = "graviton fusion"
-        hypothesis = "spin 3"
-        alternategenerator = "magic"
-        def isbkg(self): return False
-        def isdata(self): return False
-        def isZX(self): return False
-        def onlyweights(self): return False
-        def reweightingsamples(self): return []
-        def weightname(self): return "__init__"
-    TreeWrapper(DummyTree(), DummySample(), None, None, None)
-    print "You are good to go!"
-

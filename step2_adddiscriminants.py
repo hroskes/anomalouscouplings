@@ -99,14 +99,15 @@ if __name__ == '__main__':
             adddiscriminants("ZH", hypothesis, production)
             adddiscriminants("WH", hypothesis, production)
         for hypothesis in hffhypotheses:
-            adddiscriminants("HJJ", hypothesis, production)
-            adddiscriminants("ttH", hypothesis, production)
+            adddiscriminants("HJJ", hypothesis, "0+", production)
+            adddiscriminants("ttH", hypothesis, "0+", production)
         for flavor in flavors:
             adddiscriminants("ggZZ", flavor, production)
             if not flavor.hastaus:
                 adddiscriminants("VBF bkg", flavor, production)
-        for productionmode in "VBF", "ZH", "WplusH", "WminusH", "ttH":
+        for productionmode in "VBF", "ZH", "WplusH", "WminusH":
             adddiscriminants(productionmode, "0+", "POWHEG", production)
+        adddiscriminants("ttH", "Hff0+", "0+", "POWHEG", production)
         adddiscriminants("qqZZ", production)
         adddiscriminants("ZX", production)
         adddiscriminants("data", production, "unblind")

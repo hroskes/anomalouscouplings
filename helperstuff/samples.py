@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractproperty
 from collections import Counter
 import config
 import constants
-from enums import AlternateGenerator, Analysis, BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, purehypotheses, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
+from enums import AlternateGenerator, Analysis, BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
 from math import copysign, sqrt
 import numpy
 import os
@@ -295,7 +295,7 @@ class SampleBase(object):
 
             factors = self_sample.MC_weight_terms
 
-            SMxsec = ReweightingSample(self_sample.productionmode, "SM").xsec
+            SMxsec = ReweightingSample(self_sample.productionmode, "SM", self_sample.hffhypothesis).xsec
             strsample = str(self_sample)
 
             def MC_weight_function(self_tree):
@@ -477,7 +477,7 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
 class ReweightingSample(MultiEnum, SampleBase):
     __metaclass__ = MultiEnumABCMeta
     enumname = "reweightingsample"
-    enums = [ProductionMode, Hypothesis, Flavor]
+    enums = [ProductionMode, Hypothesis, HffHypothesis, Flavor]
 
     def __eq__(self, other):
         try:
@@ -504,9 +504,17 @@ class ReweightingSample(MultiEnum, SampleBase):
                 raise ValueError("{} hypothesis can't be {}\n{}".format(self.productionmode, self.hypothesis, args))
             if self.flavor is not None:
                 raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.productionmode in ("HJJ", "ttH"):
+                if self.hffhypothesis is None:
+                    raise ValueError("Hff hypothesis not provided for {} productionmode\n{}".format(self.productionmode, args))
+            else:
+                if self.hffhypothesis is not None:
+                    raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
         elif self.productionmode in ("ggZZ", "VBF bkg"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.hffhypothesis is not None:
+                raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.flavor is None:
                 raise ValueError("No flavor provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.productionmode == "VBF bkg" and self.flavor.hastaus:
@@ -514,6 +522,8 @@ class ReweightingSample(MultiEnum, SampleBase):
         elif self.productionmode in ("qqZZ", "ZX", "data"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.hffhypothesis is not None:
+                raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.flavor is not None:
                 raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
         else:
@@ -526,7 +536,11 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX") or self.alternategenerator == "POWHEG":
             return [self]
         if self.productionmode in ("ttH", "HJJ"):
-            return [ReweightingSample(self.productionmode, self.hypothesis)]
+            return [
+                    ReweightingSample(self.productionmode, hypothesis, hffhypothesis)
+                            for hypothesis in self.productionmode.validhypotheses
+                            for hffhypothesis in (hffhypotheses if hypothesis in ("0+", "0-", "fa30.5") else ("Hff0+",))
+                   ]
         elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
         elif self.productionmode == "data":
@@ -535,7 +549,7 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     def directreweightingsamples(self):
         if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ttH", "HJJ") or self.alternategenerator == "POWHEG":
-            return [self]
+            return self.reweightingsamples()
         elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.directlyreweightedhypotheses]
         elif self.productionmode == "data":
@@ -560,11 +574,6 @@ class ReweightingSample(MultiEnum, SampleBase):
         elif self.productionmode == "data":
             return True
         raise self.ValueError("isdata")
-
-    @property
-    def indexinreweightingweights(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
-           return ["0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec0.5"].index(self.hypothesis)
 
     def weightname(self):
         if self.productionmode == "ggH":
@@ -620,20 +629,37 @@ class ReweightingSample(MultiEnum, SampleBase):
             elif self.hypothesis == "fa2proddec0.5":
                 return "MC_weight_{}_g1g2_proddec".format(self.productionmode)
 
-        elif self.productionmode == "HJJ":
+        elif self.productionmode in ("HJJ", "ttH"):
+            if self.productionmode == "HJJ":
+                if self.hffhypothesis == "Hff0+":
+                    result = "MC_weight_HJJ_ghg2"
+                elif self.hffhypothesis == "Hff0-":
+                    result = "MC_weight_HJJ_ghg4"
+                elif self.hffhypothesis == "fCP0.5":
+                    result = "MC_weight_HJJ_ghg2ghg4"
+            elif self.productionmode == "ttH":
+                if self.hffhypothesis == "Hff0+":
+                    result = "MC_weight_ttH_kappa"
+                elif self.hffhypothesis == "Hff0-":
+                    result = "MC_weight_ttH_kappatilde"
+                elif self.hffhypothesis == "fCP0.5":
+                    result = "MC_weight_ttH_kappakappatilde"
+            result += "_"
             if self.hypothesis == "0+":
-                return "MC_weight_HJJ_g2"
+                return result + "g1"
+            elif self.hypothesis == "a2":
+                return result + "g2"
             elif self.hypothesis == "0-":
-                return "MC_weight_HJJ_g4"
-            elif self.hypothesis == "fCP0.5":
-                return "MC_weight_HJJ_g2g4"
-        elif self.productionmode == "ttH":
-            if self.hypothesis == "0+":
-                return "MC_weight_ttH_kappa"
-            elif self.hypothesis == "0-":
-                return "MC_weight_ttH_kappatilde"
-            elif self.hypothesis == "fCP0.5":
-                return "MC_weight_ttH_kappakappatilde"
+                return result + "g4"
+            elif self.hypothesis == "L1":
+                return result + "g1prime2"
+            elif self.hypothesis == "fa20.5":
+                return result + "g1g2"
+            elif self.hypothesis == "fa30.5":
+                return result + "g1g4"
+            elif self.hypothesis == "fL10.5":
+                return result + "g1g1prime2"
+            
         elif self.productionmode == "ggZZ":
             return "MC_weight_ggZZ"
         elif self.productionmode == "qqZZ":
@@ -686,9 +712,7 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def g1(self):
-        if self.productionmode in ("ttH", "HJJ"):
-            return 1
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
             if self.hypothesis in (
                                    ["0+"]
                                    + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]
@@ -703,8 +727,6 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def g2(self):
-        if self.productionmode in ("ttH", "HJJ"):
-            return 0
         if self.hypothesis in (
                                ["0+", "0-", "L1"]
                              + ["{}{}0.5".format(a, b) for a in ("fa3",) for b in ("dec", "prod", "proddec-")]
@@ -750,8 +772,6 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def g4(self):
-        if self.productionmode in ("ttH", "HJJ"):
-            return 0
         if self.hypothesis in (
                                ["0+", "a2", "L1"]
                              + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec", "prod", "proddec-")]
@@ -794,8 +814,6 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def g1prime2(self):
-        if self.productionmode in ("ttH", "HJJ"):
-            return 0
         if self.hypothesis in (
                                ["0+", "a2", "0-"]
                              + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]
@@ -841,9 +859,9 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode == "ggH":
             return 1
         if self.productionmode == "HJJ":
-            if self.hypothesis in ("0+", "fCP0.5"):
+            if self.hffhypothesis in ("Hff0+", "fCP0.5"):
                 return 1
-            if self.hypothesis == "0-":
+            if self.hffhypothesis == "Hff0-":
                 return 0
         raise self.ValueError("ghg2")
 
@@ -852,30 +870,30 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode == "ggH":
             return 0
         if self.productionmode == "HJJ":
-            if self.hypothesis == "0+":
+            if self.hffhypothesis == "Hff0+":
                 return 0
-            if self.hypothesis == "0-":
+            if self.hffhypothesis == "Hff0-":
                 return 1
-            if self.hypothesis == "fCP0.5":
+            if self.hffhypothesis == "fCP0.5":
                 return constants.ghg4HJJ
 
     @property
     def kappa(self):
         if self.productionmode == "ttH":
-            if self.hypothesis in ("0+", "fCP0.5"):
+            if self.hffhypothesis in ("Hff0+", "fCP0.5"):
                 return 1
-            if self.hypothesis == "0-":
+            if self.hffhypothesis == "Hff0-":
                 return 0
         raise self.ValueError("kappa")
 
     @property
     def kappa_tilde(self):
         if self.productionmode == "ttH":
-            if self.hypothesis == "0+":
+            if self.hffhypothesis == "Hff0+":
                 return 0
-            if self.hypothesis == "0-":
+            if self.hffhypothesis == "Hff0-":
                 return 1
-            if self.hypothesis == "fCP0.5":
+            if self.hffhypothesis == "fCP0.5":
                 return constants.kappa_tilde_ttH
 
 class Sample(ReweightingSample):
@@ -901,6 +919,15 @@ class Sample(ReweightingSample):
             and (
                  self.hypothesis != "0+"
                  or self.productionmode not in ("VBF", "ZH", "WplusH", "WminusH", "ttH")
+                )
+           ):
+            raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args))
+
+        if (
+            self.alternategenerator == "POWHEG"
+            and (
+                 self.hffhypothesis != "Hff0+"
+                 and self.hffhypothesis is not None
                 )
            ):
             raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args))

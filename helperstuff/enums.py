@@ -108,7 +108,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fa30.5", "fa3dec0.5"),
                  EnumItem("fL10.5", "fL1dec0.5"),
                  EnumItem("fa2prod0.5"),
-                 EnumItem("fa3prod0.5", "fCP0.5"),
+                 EnumItem("fa3prod0.5"),
                  EnumItem("fL1prod0.5"),
                  EnumItem("fa2proddec-0.5"),
                  EnumItem("fa3proddec-0.5"),
@@ -127,6 +127,14 @@ class Hypothesis(MyEnum):
         if self == "0-": return "g4"
         if self == "L1": return "g1prime2"
         assert False
+
+class HffHypothesis(MyEnum):
+    enumname = "hffhypothesis"
+    enumitems = (
+                 EnumItem("Hff0+"),
+                 EnumItem("Hff0-"),
+                 EnumItem("fCP0.5"),
+                )
 
 class ProductionMode(MyEnum):
     enumname = "productionmode"
@@ -179,7 +187,7 @@ class ProductionMode(MyEnum):
         assert False
     @property
     def validhypotheses(self):
-        if self == "ggH":
+        if self in ("ggH", "ttH", "HJJ"):
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
@@ -187,10 +195,6 @@ class ProductionMode(MyEnum):
             return Hypothesis.items(lambda x: x in proddechypotheses+0*["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
         if self == "WH":
             return Hypothesis.items(lambda x: x in proddechypotheses+0*["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
-        if self == "ttH":
-            return Hypothesis.items(lambda x: x in hffhypotheses)
-        if self == "HJJ":
-            return Hypothesis.items(lambda x: x in hffhypotheses)
         if self in ("WplusH", "WminusH"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
@@ -215,11 +219,7 @@ class ProductionMode(MyEnum):
             return Hypothesis.items(lambda x: x in prodonlyhypotheses)
         if self == "WH":
             return Hypothesis.items(lambda x: x in prodonlyhypotheses)
-        if self == "ttH":
-            return Hypothesis.items(lambda x: x in hffhypotheses)
-        if self == "HJJ":
-            return Hypothesis.items(lambda x: x in hffhypotheses)
-        if self in ("WplusH", "WminusH"):
+        if self in ("WplusH", "WminusH", "ttH", "HJJ"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
 
@@ -457,7 +457,7 @@ decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
 proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec0.5"))
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
-hffhypotheses = Hypothesis.items(lambda x: x in ("0+", "0-", "fCP0.5"))
+hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
 #productions = Production.items(lambda x: x in ("160225", "160729"))
