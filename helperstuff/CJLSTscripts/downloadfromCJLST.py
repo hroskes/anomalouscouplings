@@ -25,7 +25,10 @@ class CJLSTScript_base(object):
         if extension not in self.validextensions:
             raise self.WrongExtensionError("{} does not support {} which has extension {}".format(type(self).__name__, locationinZZAnalysis, extension))
 
-    def download(self, SHA1):
+    def download(self, SHA1, force=False):
+        if self.existsandishappy() and not force:
+            return
+
         url = os.path.join("https://github.com/CJLST/ZZAnalysis/raw/", SHA1, self.locationinZZAnalysis)
         tmpfilename, message = urllib.urlretrieve(url)
 
@@ -36,7 +39,7 @@ class CJLSTScript_base(object):
 
     @abstractmethod
     def fixandmove(self, tmpfilename):
-        shutil.move(tmpfilename, filename)
+        shutil.move(tmpfilename, self.filename)
 
     def existsandishappy(self):
         try:
@@ -61,9 +64,10 @@ class CJLSTScript_Cpp(CJLSTScript_base):
             for line in tmpf:
                 if line.startswith("#include "):
                     include = line.split("#include ")[1].strip()[1:-1]
-                    if "ZZAnalysis" in include:
-                        if "interface" in include:
+                    if "ZZAnalysis" in include or ".." in include:
+                        if include.split("/")[-2] in ("interface", "src"):
                             newinclude = include.split("/")[-1]
+                            newinclude = newinclude.replace(".cc", ".h")
                         try:
                             line = line.replace(include, newinclude).replace("<", '"').replace(">", '"')
                             del newinclude
@@ -118,7 +122,7 @@ class Downloader(object):
         filenames = contents.split("\n")[1:]
         for filename in filenames:
             if os.path.exists(os.path.basename(filename)):
-                os.remove(filename)
+                os.remove(os.path.basename(filename))
         return False
 
     def writedownloadinfo(self):
@@ -126,9 +130,8 @@ class Downloader(object):
             f.write(self.downloadinfo)
 
     def download(self):
-        if self.downloadinfocorrect(): return
         for _ in self.thingstodownload:
-            _.download(self.SHA1)
+            _.download(self.SHA1, force=not self.downloadinfocorrect())
         self.writedownloadinfo()
 
     @property
