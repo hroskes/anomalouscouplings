@@ -4,15 +4,18 @@ import os
 import ROOT
 
 CJLSTscriptsfolder = os.path.dirname(__file__)
+if CJLSTscriptsfolder == "": CJLSTscriptsfolder = "."
 CJLSTscriptsfile = os.path.join(CJLSTscriptsfolder, "CJLSTscripts.cc")
 
 #have to be in order of who includes whose header file
 scripts = ["cConstants", "Category"]
 
 with utilities.cd(CJLSTscriptsfolder):
+    downloader = downloadfromCJLST.Downloader("01316520484cc2c15443ab6f3419d59b20b1a715")
     for script in scripts:
-        downloadfromCJLST.download("AnalysisStep/src/{}.cc".format(script))
-        downloadfromCJLST.download("AnalysisStep/interface/{}.h".format(script))
+        downloader.add("AnalysisStep/src/{}.cc".format(script))
+        downloader.add("AnalysisStep/interface/{}.h".format(script))
+    downloader.download()
 
 for script in scripts:
     ROOT.gROOT.LoadMacro(os.path.join(CJLSTscriptsfolder, script+".cc+"))
