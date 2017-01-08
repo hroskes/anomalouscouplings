@@ -48,24 +48,41 @@ def adddiscriminants(*args):
     if os.path.exists(newfilename):
         return
 
-    newf = ROOT.TFile.Open(newfilename, "recreate")
-    newt = t.CloneTree(0)
+    failed = False
+    try:
+        newf = ROOT.TFile.Open(newfilename, "recreate")
+        newt = t.CloneTree(0)
 
-    discriminants = {}
-    for discriminant in treewrapper.toaddtotree:
-        discriminants[discriminant] = array('d', [0])
-        newt.Branch(discriminant, discriminants[discriminant], discriminant + "/D")
-    for discriminant in treewrapper.toaddtotree_int:
-        discriminants[discriminant] = array('i', [0])
-        newt.Branch(discriminant, discriminants[discriminant], discriminant + "/I")
+        discriminants = {}
+        for discriminant in treewrapper.toaddtotree:
+            discriminants[discriminant] = array('d', [0])
+            newt.Branch(discriminant, discriminants[discriminant], discriminant + "/D")
+        for discriminant in treewrapper.toaddtotree_int:
+            discriminants[discriminant] = array('i', [0])
+            newt.Branch(discriminant, discriminants[discriminant], discriminant + "/I")
 
-    for entry in treewrapper:
-        for discriminant in discriminants:
-            discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
-        newt.Fill()
-
-    newf.Write()
-    newf.Close()
+        try:
+            for entry in treewrapper:
+                for discriminant in discriminants:
+                    discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
+                newt.Fill()
+        except:
+            treewrapper.Show()
+            raise
+    except:
+        failed = True
+        raise
+    finally:
+        try:
+            newf.Write()
+            newf.Close()
+        except:
+            failed = True
+        if failed:
+            try:
+                os.remove(newfilename)
+            except:
+                pass
 
 if __name__ == '__main__':
     for production in productions:
