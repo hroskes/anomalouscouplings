@@ -168,7 +168,7 @@ class TreeWrapper(Iterator):
         self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECNominal / 1e4
 
         #Gen MEs
-        for weightname in genMEs:
+        for weightname in self.genMEs:
             setattr(self, weightname, getattr(t, weightname))
 
         #category variables
@@ -188,11 +188,14 @@ class TreeWrapper(Iterator):
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
 
-        self.notdijet = self.M2g1_VBF < 0 or self.M2g2_HJJ < 0
+        self.notdijet = self.M2g1_VBF == 0
         return self
 
     def __len__(self):
         return self.__length
+
+    def Show(self, *args, **kwargs):
+        self.tree.Show(*args, **kwargs)
 
 ##########################
 #background discriminants#
@@ -200,27 +203,27 @@ class TreeWrapper(Iterator):
 
     def D_bkg_0plus(self):
         try:
-            return self.p0plus_VAJHU*self.p_m4l_SIG / (self.p0plus_VAJHU*self.p_m4l_SIG  + self.M2qqZZ*self.p_m4l_BKG*self.cconstantforDbkg)
+            return self.M2g1_decay*self.p_m4l_SIG / (self.M2g1_decay*self.p_m4l_SIG  + self.M2qqZZ*self.p_m4l_BKG*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
     def D_bkg_0plus_ResUp(self):
         try:
-            return self.p0plus_VAJHU*self.p_m4l_SIG_ResUp / (self.p0plus_VAJHU*self.p_m4l_SIG_ResUp  + self.M2qqZZ*self.p_m4l_BKG_ResUp*self.cconstantforDbkg)
+            return self.M2g1_decay*self.p_m4l_SIG_ResUp / (self.M2g1_decay*self.p_m4l_SIG_ResUp  + self.M2qqZZ*self.p_m4l_BKG_ResUp*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
     def D_bkg_0plus_ResDown(self):
         try:
-            return self.p0plus_VAJHU*self.p_m4l_SIG_ResDown / (self.p0plus_VAJHU*self.p_m4l_SIG_ResDown  + self.M2qqZZ*self.p_m4l_BKG_ResDown*self.cconstantforDbkg)
+            return self.M2g1_decay*self.p_m4l_SIG_ResDown / (self.M2g1_decay*self.p_m4l_SIG_ResDown  + self.M2qqZZ*self.p_m4l_BKG_ResDown*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
     def D_bkg_0plus_ScaleUp(self):
         try:
-            return self.p0plus_VAJHU*self.p_m4l_SIG_ScaleUp / (self.p0plus_VAJHU*self.p_m4l_SIG_ScaleUp  + self.M2qqZZ*self.p_m4l_BKG_ScaleUp*self.cconstantforDbkg)
+            return self.M2g1_decay*self.p_m4l_SIG_ScaleUp / (self.M2g1_decay*self.p_m4l_SIG_ScaleUp  + self.M2qqZZ*self.p_m4l_BKG_ScaleUp*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
     def D_bkg_0plus_ScaleDown(self):
         try:
-            return self.p0plus_VAJHU*self.p_m4l_SIG_ScaleDown / (self.p0plus_VAJHU*self.p_m4l_SIG_ScaleDown  + self.M2qqZZ*self.p_m4l_BKG_ScaleDown*self.cconstantforDbkg)
+            return self.M2g1_decay*self.p_m4l_SIG_ScaleDown / (self.M2g1_decay*self.p_m4l_SIG_ScaleDown  + self.M2qqZZ*self.p_m4l_BKG_ScaleDown*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
 
@@ -1242,21 +1245,21 @@ class TreeWrapper(Iterator):
 
     def category(self):
         return CJLSTscripts.categoryIchep16(
-              nExtraLep,
-              nExtraZ,
-              nCleanedJetsPt30,
-              nCleanedJetsPt30BTagged,
-              jetQGLikelihood,
-              p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal,
-              p_JQCD_SIG_ghg2_1_JHUGen_JECNominal,
-              p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal,
-              p_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
-              pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
-              p_HadWH_SIG_ghv1_1_JHUGen_JECNominal,
-              p_HadZH_SIG_ghz1_1_JHUGen_JECNominal,
-              jetPhi,
-              ZZMass,
-              useQGTagging,
+              self.nExtraLep,
+              self.nExtraZ,
+              self.nCleanedJetsPt30,
+              self.nCleanedJetsPt30BTagged,
+              self.jetQGLikelihood,
+              self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal,
+              self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal,
+              self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal,
+              self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+              self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+              self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal,
+              self.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal,
+              self.jetPhi,
+              self.ZZMass,
+              config.useQGTagging,
              )
 
 #####################
@@ -1317,6 +1320,7 @@ class TreeWrapper(Iterator):
             "toaddtotree_int",
             "tree",
             "treesample",
+            "Show",
             "unblind",
             "weightfunctions",
             "xsec",
@@ -1361,10 +1365,11 @@ class TreeWrapper(Iterator):
                 self.exceptions.append(sample.weightname())
 
         self.genMEs = []
-        for sample in self.treesample.reweightingsamples():
-            for factor in sample.MC_weight_terms:
-                for weightname, couplingsq in factor:
-                    self.genMEs.append(weightname)
+        if not self.isbkg:
+            for sample in self.treesample.reweightingsamples():
+                for factor in sample.MC_weight_terms:
+                    for weightname, couplingsq in factor:
+                        self.genMEs.append(weightname)
 
     def onlyweights(self):
         """Call this to only add the weights and ZZMass to the new tree"""
@@ -1382,11 +1387,10 @@ class TreeWrapper(Iterator):
             "p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal",
             "p_JVBF_SIG_ghv1_1_JHUGen_JECNominal",
             "pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal",
-            "p_HadWH_SIG_ghv1_1_JHUGen_JECNominal",
+            "p_HadWH_SIG_ghw1_1_JHUGen_JECNominal",
             "p_HadZH_SIG_ghz1_1_JHUGen_JECNominal",
             "jetPhi",
             "ZZMass",
-            "useQGTagging",
         ]
 
         for lst in (self.toaddtotree, self.toaddtotree_int):

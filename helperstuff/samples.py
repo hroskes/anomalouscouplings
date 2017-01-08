@@ -273,12 +273,12 @@ class SampleBase(object):
         if self_sample.productionmode == "ggZZ":
             def MC_weight_function(self_tree):
                 KFactor = self_tree.tree.KFactor_QCD_ggZZ_Nominal
-                return self_tree.MC_weight * self_tree.xsec * KFactor / self_tree.nevents
+                return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
 
         elif self_sample.productionmode == "qqZZ":
             def MC_weight_function(self_tree):
                 KFactor = self_tree.tree.KFactor_EW_qqZZ * self_tree.tree.KFactor_QCD_qqZZ_M
-                return self_tree.MC_weight * self_tree.xsec * KFactor / self_tree.nevents
+                return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
 
         elif self_sample.productionmode == "ZX":
             import ZX
@@ -288,7 +288,7 @@ class SampleBase(object):
 
         elif self_sample.productionmode == "VBF bkg":
             def MC_weight_function(self_tree):
-                return self_tree.MC_weight * self_tree.xsec / self_tree.nevents
+                return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
 
         elif self_sample.issignal():
 
@@ -319,7 +319,7 @@ class SampleBase(object):
                     result *= (
                                  self_tree.overallEventWeight
                                * SMxsec
-                               / self_tree.nevents[strsample]
+                               / self_tree.nevents2L2l[strsample]
                               )
                 return result
 
@@ -523,7 +523,7 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     def reweightingsamples(self):
         if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "ttH", "HJJ") or self.alternategenerator == "POWHEG":
-            return [self]
+            return [ReweightingSample(*(_ for _ in [self.productionmode, self.hypothesis, self.flavor] if _))]
         elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
         elif self.productionmode == "data":
