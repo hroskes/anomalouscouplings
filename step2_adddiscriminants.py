@@ -11,8 +11,8 @@ import ROOT
 import sys
 
 definitelyexists = Sample("VBF", "0+", "161221")
-print definitelyexists.CJLSTfile()
-assert xrd.exists(definitelyexists.CJLSTfile())
+if not xrd.exists(definitelyexists.CJLSTfile()):
+    raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
 
 def adddiscriminants(*args):
 
@@ -30,12 +30,18 @@ def adddiscriminants(*args):
 
     isdummy = False
     if not xrd.exists(filename):
-        print filename
         isdummy = True
+    else:
+        f = ROOT.TFile.Open(filename)
+        if not f.Get("{}/candTree".format(sample.TDirectoryname())):
+            isdummy = True
+
+    if isdummy:
+        print "{} does not exist or is bad, using {}".format(filename, definitelyexists.CJLSTfile())
         #give it a tree so that it can get the format, but not fill any entries
         filename = definitelyexists.CJLSTfile()
+        f = ROOT.TFile.Open(filename)
 
-    f = ROOT.TFile.Open(filename)
     Counters = f.Get("{}/Counters".format(sample.TDirectoryname()))
     if not Counters:
         raise ValueError("No Counters in file "+filename)
