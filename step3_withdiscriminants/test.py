@@ -5,7 +5,6 @@ assert __name__ == "__main__"
 from helperstuff import config
 from helperstuff import constants
 from helperstuff import style
-from helperstuff.combinehelpers import gettemplate
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import *
 import helperstuff.rootoverloads.histogramfloor
@@ -17,16 +16,19 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "ZH"
-disc           = "D_CP_HadVH"
-weight         = ReweightingSample(productionmode, "fa3prod0.5")
+productionmode = "ggH"
+disc           = "D_CP_decay"
+weight         = ReweightingSample(productionmode, "0+")
 bins           = None
 min            = None
 max            = None
+
 enrich         = False
 masscut        = True
+normalizeto1   = False
+
 channel        = "2e2mu"
-category       = "VBFtagged"
+category       = None
 #========================
 
 if isinstance(weight, SampleBase):
@@ -106,6 +108,11 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
       h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
     h.Floor()
+    if normalizeto1:
+        try:
+            h.Scale(1/h.Integral())
+        except ZeroDivisionError:
+            pass
     hstack.Add(h)
     cache.append(h)
     legend.AddEntry(h, str(hypothesis), "l")

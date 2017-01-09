@@ -1073,6 +1073,6 @@ class SubtractDataTree(DataTree, MultiEnum):
     def passescut(self, t):
         return super(SubtractDataTree, self).passescut(t) and self.subtractproduction.passescut(t)
 
-for channel in channels:
-    if "160729" in productions:
-        datatrees.append(SubtractDataTree("160729", "subtract160720", channel))
+#for channel in channels:
+#    if "160729" in productions:
+#        datatrees.append(SubtractDataTree("160729", "subtract160720", channel))
