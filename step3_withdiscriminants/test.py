@@ -16,9 +16,9 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "ggH"
-disc           = "D_CP_decay"
-weight         = ReweightingSample(productionmode, "0+")
+productionmode = "VBF"
+disc           = "D_CP_VBF"
+weight         = None
 bins           = None
 min            = None
 max            = None
@@ -28,7 +28,7 @@ masscut        = True
 normalizeto1   = False
 
 channel        = "2e2mu"
-category       = None
+category       = "VBFtagged"
 #========================
 
 if isinstance(weight, SampleBase):

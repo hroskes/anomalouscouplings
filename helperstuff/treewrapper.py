@@ -90,7 +90,7 @@ class TreeWrapper(Iterator):
                 raise StopIteration
             if i % 10000 == 0 or i == len(self):
                 print i, "/", len(self)
-                #raise StopIteration
+                raise StopIteration
 
             if self.isdata:
                 self.overallEventWeight = 1
@@ -188,7 +188,7 @@ class TreeWrapper(Iterator):
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
 
-        self.notdijet = self.M2g1_VBF == 0
+        self.notdijet = self.M2g1_VBF <= 0
         return self
 
     def __len__(self):
@@ -1472,7 +1472,7 @@ class TreeWrapper(Iterator):
                 array.append(function(entry))
             if i % 10000 == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
-                #break
+                break
 
         self.cutoffs = {}
         self.nevents2L2l = {}
