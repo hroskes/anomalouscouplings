@@ -4,3 +4,6 @@
 *_C.so
 *_C_ACLiC_dict_rdict.pcm
 ~$*.xlsx
+*.root.tmp
+*.C.tmp
+*.cc.tmp
