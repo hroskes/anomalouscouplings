@@ -4,6 +4,7 @@ import CJLSTscripts
 from collections import Counter, Iterator
 import config
 import constants
+from itertools import chain
 import numpy
 import resource
 from samples import ReweightingSample, Sample
@@ -20,7 +21,7 @@ dummyfloatstar = array('f', [0])
 @callclassinitfunctions("initweightfunctions")
 class TreeWrapper(Iterator):
 
-    def __init__(self, tree, treesample, Counters, minevent=0, maxevent=None, isdummy=False):
+    def __init__(self, tree, treesample, Counters, failedtree=None, minevent=0, maxevent=None, isdummy=False):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
@@ -28,6 +29,7 @@ class TreeWrapper(Iterator):
         """
         self.tree = tree
         self.treesample = treesample
+        self.failedtree = failedtree
         self.productionmode = str(treesample.productionmode)
         self.hypothesis = str(treesample.hypothesis)
         self.isbkg = treesample.isbkg()
@@ -1296,6 +1298,7 @@ class TreeWrapper(Iterator):
             "checkfunctions",
             "cutoffs",
             "exceptions",
+            "failedtree",
             "genMEs",
             "getweightfunction",
             "hypothesis",
@@ -1438,10 +1441,20 @@ class TreeWrapper(Iterator):
         """
         if self.isbkg or self.isPOWHEG: return
         print "Doing initial loop through tree"
-        self.tree.SetBranchStatus("*", 0)
-        for weightname in self.genMEs:
-            self.tree.SetBranchStatus(weightname, 1)
-        self.tree.SetBranchStatus("GenZ*Flav", 1)
+        if self.failedtree is None: raise ValueError("No failedtree provided for {} which has reweighting!".format(self.treesample))
+
+        for tree in self.tree, self.failedtree:
+            tree.SetBranchStatus("*", 0)
+            for weightname in self.genMEs:
+                tree.SetBranchStatus(weightname, 1)
+            tree.SetBranchStatus("GenZ*Flav", 1)
+
+            from datetime import date
+            from utilities import product
+            if date.today() < date(2017, 1, 15):
+                tree.SetBranchStatus("LHEDaughterId")
+            else:
+                raise SyntaxError("delete this section and use GenZ*Flav below!")
 
         functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in self.treesample.reweightingsamples()}
         is2L2l = []
@@ -1450,9 +1463,11 @@ class TreeWrapper(Iterator):
         #will fail if multiple have the same str() which would make no sense
         assert len(functionsandarrays) == len(self.treesample.reweightingsamples())
 
-        length = self.tree.GetEntries()
-        for i, entry in enumerate(self.tree, start=1):
-            is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
+        length = self.tree.GetEntries() + self.failedtree.GetEntries()
+        for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
+            #is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
+            is2L2l.append(product(entry.LHEDaughterId))
+
             for function, array in values:
                 array.append(function(entry))
             if i % 10000 == 0 or i == length:

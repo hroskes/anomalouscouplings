@@ -49,7 +49,13 @@ def adddiscriminants(*args):
     t = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
     t.Add(filename)
 
-    treewrapper = TreeWrapper(t, sample, Counters=Counters, isdummy=isdummy)
+    if f.Get("{}/candTree_failed".format(sample.TDirectoryname())):
+        t_failed = ROOT.TChain("{}/candTree_failed".format(sample.TDirectoryname()))
+        t_failed.Add(filename)
+    else:
+        t_failed = None
+
+    treewrapper = TreeWrapper(t, sample, Counters=Counters, failedtree=t_failed, isdummy=isdummy)
 
     if os.path.exists(newfilename):
         return
