@@ -22,7 +22,7 @@ with utilities.cd(CJLSTscriptsfolder):
     downloader.download()
 
 for script in scripts:
-    ROOT.gROOT.LoadMacro(os.path.join(CJLSTscriptsfolder, script+".cc+"))
-ROOT.gROOT.LoadMacro(os.path.join(CJLSTscriptsfolder, "ReducibleBackgroundAA_2015_adapted.C+"))
+    utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, script+".cc+"))
+utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, "ReducibleBackgroundAA_2015_adapted.C+"))
 
 from ROOT import categoryIchep16, getDVBF2jetsConstant, getDVBF1jetConstant, getDbkgkinConstant, getDbkgConstant, UntaggedIchep16, VBF1jTaggedIchep16, VBF2jTaggedIchep16, VHLeptTaggedIchep16, VHHadrTaggedIchep16, ttHTaggedIchep16

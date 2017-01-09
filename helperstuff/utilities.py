@@ -5,6 +5,7 @@ import operator
 import json
 import os
 import ROOT
+import time
 
 class KeyDefaultDict(collections.defaultdict):
     """
@@ -121,3 +122,16 @@ def callclassinitfunctions(*names):
 
 def product(iterable):
     return reduce(operator.mul, iterable, 1)
+
+def LoadMacro(filename):
+    done = False
+    while not done:
+        with KeepWhileOpenFile(filename.rstrip("+")+".tmp") as kwof:
+            if not kwof:
+                print "Another process is already loading {}, waiting 5 seconds...".format(filename)
+                time.sleep(5)
+                continue
+            error = ROOT.gROOT.LoadMacro(filename)
+            if error:
+                raise IOError("Couldn't load "+filename+"!")
+            done = True
