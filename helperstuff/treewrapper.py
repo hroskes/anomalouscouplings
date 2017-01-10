@@ -1477,6 +1477,7 @@ class TreeWrapper(Iterator):
         self.cutoffs = {}
         self.nevents2L2l = {}
 
+        print "xcheck (should all be 1):"
         for sample, (function, array) in functionsandarrays.iteritems():
             array = numpy.array(array)
             cutoff = self.cutoffs[str(sample)] = numpy.percentile(array, 99.99)
@@ -1485,7 +1486,7 @@ class TreeWrapper(Iterator):
                                                      for weight, isthis2L2l in zip(array, is2L2l)
                                                      if isthis2L2l
                                                )
-
+            print "    {:15} {}".format(sample, sum(weight if weight < cutoff else cutoff**2/weight for weight in array) / self.nevents2L2l[str(sample)])
         self.tree.SetBranchStatus("*", 1)
 
         print "Cutoffs:"

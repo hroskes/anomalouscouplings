@@ -295,7 +295,9 @@ class SampleBase(object):
 
             factors = self_sample.MC_weight_terms
 
-            SMxsec = ReweightingSample(self_sample.productionmode, "SM", self_sample.hffhypothesis).xsec
+            hffhypothesis = "Hff0+" if self_sample.hffhypothesis else None
+            SMxsec = ReweightingSample(self_sample.productionmode, "SM", hffhypothesis).xsec
+
             strsample = str(self_sample)
 
             def MC_weight_function(self_tree):

@@ -16,8 +16,8 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "VBF"
-disc           = "D_CP_VBF"
+productionmode = "ggH"
+disc           = "D_CP_decay"
 weight         = None
 bins           = None
 min            = None
@@ -28,7 +28,7 @@ masscut        = True
 normalizeto1   = False
 
 channel        = "2e2mu"
-category       = "VBFtagged"
+category       = None
 #========================
 
 if isinstance(weight, SampleBase):
