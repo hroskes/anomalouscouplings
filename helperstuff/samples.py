@@ -159,11 +159,16 @@ class SampleBase(object):
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWmH2L2l
         if self.productionmode == "HJJ":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return 1
-            return constants.SMXSHJJ2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+            return constants.SMXSHJJ2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec
         if self.productionmode == "ttH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSttH2L2l
-            return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+            return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec
         assert False
+
+    @property
+    def SMxsec(self):
+        hffhypothesis = "Hff0+" if self.hffhypothesis else None
+        return ReweightingSample(self.productionmode, "SM", hffhypothesis).xsec
 
     def __eq__(self, other):
         return all((
@@ -221,6 +226,15 @@ class SampleBase(object):
                }
 
     @property
+    def MC_weight(self):
+        terms = self.linearcombinationofreweightingsamples("directlyreweighted")
+        result = "+".join(
+                          "({}*{})".format(reweightingsample.weightname(), factor)
+                                  for reweightingsample, factor in terms.iteritems()
+                         )
+        return result
+
+    @property
     def MC_weight_terms(self):
         factors = []
 
@@ -253,19 +267,6 @@ class SampleBase(object):
 
         return factors
 
-    @property
-    def MC_weight(self):
-        factors = self.MC_weight_terms
-        factorsstr = "*".join(
-                              "("+
-                              "+".join(
-                                       "({}*{})".format(weightname, couplingsq)
-                                                for weightname, couplingsq in factor
-                                      )
-                              +")" for factor in factors
-                             )
-        return factorsstr
-
     def get_MC_weight_function(self_sample, functionname=None, reweightingonly=False):
         if functionname is None:
             functionname = self_sample.weightname()
@@ -295,8 +296,7 @@ class SampleBase(object):
 
             factors = self_sample.MC_weight_terms
 
-            hffhypothesis = "Hff0+" if self_sample.hffhypothesis else None
-            SMxsec = ReweightingSample(self_sample.productionmode, "SM", hffhypothesis).xsec
+            SMxsec = self_sample.SMxsec
 
             strsample = str(self_sample)
 

@@ -18,7 +18,7 @@ import os
 #weight, bins, min, max, category can be None
 productionmode = "ggH"
 disc           = "D_CP_decay"
-weight         = None
+weight         = ReweightingSample("ggH", "0+")
 bins           = None
 min            = None
 max            = None
