@@ -16,9 +16,9 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "ggH"
+productionmode = "VBF"
 disc           = "D_CP_decay"
-weight         = ReweightingSample("ggH", "0+")
+weight         = ReweightingSample(productionmode, "fa2proddec0.5")
 bins           = None
 min            = None
 max            = None
