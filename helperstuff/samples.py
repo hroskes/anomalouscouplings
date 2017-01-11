@@ -537,6 +537,13 @@ class ReweightingSample(MultiEnum, SampleBase):
     def reweightingsamples(self):
         if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX") or self.alternategenerator == "POWHEG":
             return [self]
+        if self.productionmode == "ttH":  #ttH reweighting doesn't work unfortunately
+            return [
+                    ReweightingSample(self.productionmode, hypothesis, hffhypothesis)
+                            for hypothesis in self.productionmode.validhypotheses
+                            for hffhypothesis in (hffhypotheses if hypothesis in ("0+", "0-", "fa30.5") else ("Hff0+",))
+                            if hffhypothesis == self.hffhypothesis
+                   ]
         if self.productionmode in ("ttH", "HJJ"):
             return [
                     ReweightingSample(self.productionmode, hypothesis, hffhypothesis)

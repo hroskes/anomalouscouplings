@@ -30,6 +30,8 @@ class WeightsHelper(MultiEnum):
     def weightprodstring(self):
         if self.productionmode == "ggH":
             return None
+        if self.productionmode == "ttH": #production reweighting for ttH doesn't work unfortunately
+            return None
         if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ"):
             return str(self.productionmode)
 
