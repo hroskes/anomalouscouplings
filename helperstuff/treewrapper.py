@@ -1466,7 +1466,7 @@ class TreeWrapper(Iterator):
         length = self.tree.GetEntries() + self.failedtree.GetEntries()
         for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
             #is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
-            is2L2l.append(product(entry.LHEDaughterId))
+            is2L2l.append(product(entry.LHEDaughterId) in flavs2L2l)
 
             for function, array in values:
                 array.append(function(entry))
@@ -1486,7 +1486,7 @@ class TreeWrapper(Iterator):
                                                      for weight, isthis2L2l in zip(array, is2L2l)
                                                      if isthis2L2l
                                                )
-            print "    {:15} {}".format(sample, sum(weight if weight < cutoff else cutoff**2/weight for weight in array) / self.nevents2L2l[str(sample)])
+            print "    {:15} {}".format(sample, sum(weight if weight < cutoff else cutoff**2/weight for weight, nointerf in zip(array, is2L2l) if nointerf) / self.nevents2L2l[str(sample)])
         self.tree.SetBranchStatus("*", 1)
 
         print "Cutoffs:"
