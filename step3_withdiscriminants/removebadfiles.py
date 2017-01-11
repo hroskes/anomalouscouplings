@@ -6,6 +6,7 @@ delete = []
 
 for filename in os.listdir("."):
   if not filename.endswith(".root"): continue
+  if os.path.exists(filename+".tmp"): continue
   f = ROOT.TFile(filename)
   try:
     if f.candTree.GetEntries() == 0:

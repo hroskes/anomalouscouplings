@@ -7,3 +7,4 @@
 *.root.tmp
 *.C.tmp
 *.cc.tmp
+.__afs*
