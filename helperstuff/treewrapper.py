@@ -1439,7 +1439,7 @@ class TreeWrapper(Iterator):
         Do the initial loops through the tree to find, for each hypothesis,
         the cutoff and then the sum of weights for 2L2l
         """
-        if self.isbkg or self.isPOWHEG: return
+        if self.isbkg or self.isPOWHEG or self.isdummy: return
         print "Doing initial loop through tree"
         if self.failedtree is None: raise ValueError("No failedtree provided for {} which has reweighting!".format(self.treesample))
 
