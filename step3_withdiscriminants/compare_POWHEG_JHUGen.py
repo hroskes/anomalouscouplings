@@ -19,13 +19,19 @@ def category(discname):
     return result[0]
 
 def samples(productionmode):
-  for hypothesis in hffhypotheses:
-    yield Sample(productionmode, hypothesis, production)
+  if productionmode in ("HJJ", "ttH"):
+    for hffhypothesis in hffhypotheses:
+      yield Sample(productionmode, hffhypothesis, production, "0+")
+  else:
+    for hypothesis in ("0+", "0-", "fa3prod0.5"):
+      yield Sample(productionmode, hypothesis, production)
   if productionmode == "HJJ":
     yield Sample("ggH", "SM", production)
   elif productionmode == "WH":
     yield Sample("WplusH", "SM", production, "POWHEG")
     yield Sample("WminusH", "SM", production, "POWHEG")
+  elif productionmode == "ttH":
+    yield Sample(productionmode, "SM", "Hff0+", production, "POWHEG")
   else:
     yield Sample(productionmode, "SM", production, "POWHEG")
 
@@ -38,7 +44,7 @@ for discname, title, bins, min, max in discriminants:
     legend.SetBorderSize(0)
     legend.SetFillStyle(0)
     for color, sample in enumerate(samples(productionmode), start=1):
-      hname = "{}{}{}{}".format(discname, sample.productionmode, sample.hypothesis, sample.alternategenerator)
+      hname = "{}{}{}{}{}".format(discname, sample.productionmode, sample.hypothesis, sample.hffhypothesis, sample.alternategenerator)
       wt = "({}>-998)*({})*(category=={})".format(discname, sample.weightname(), category(discname))
       tfiles[sample.withdiscriminantsfile()].candTree.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
       h = cache[discname,sample] = getattr(ROOT, hname)

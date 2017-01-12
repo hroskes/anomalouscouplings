@@ -148,7 +148,8 @@ discriminants = {
         Discriminant("D_g2_HadVHdecay", "D_{0h+}^{VHdec}", defaultnbins, 0, 1),
         Discriminant("D_g1prime2_HadVHdecay", "D_{#Lambda1}^{VHdec}", defaultnbins, 0, 1),
     ] + [
-        Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500)
+        Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
+        Discriminant("D_2jet_0plus", "D_{2jet}^{0+}", defaultnbins, 0, 1),
     ]
 }
 

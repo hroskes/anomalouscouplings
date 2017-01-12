@@ -17,8 +17,8 @@ import os
 #inputs
 #weight, bins, min, max, category can be None
 productionmode = "VBF"
-disc           = "D_CP_decay"
-weight         = ReweightingSample(productionmode, "fa2proddec0.5")
+disc           = "D_2jet_0plus"
+weight         = ReweightingSample(productionmode, "0+")
 bins           = None
 min            = None
 max            = None
