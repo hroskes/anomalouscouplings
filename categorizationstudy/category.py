@@ -76,32 +76,44 @@ def count(desiredcategory, *sample):
     print sample
     sample = Sample(*sample)
     t = tfiles[sample.withdiscriminantsfile()].candTree
+    SM = Hypothesis("0+")
     counters = {hypothesis: Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in purehypotheses}
+    counters_or = {(SM, hypothesis): Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in purehypotheses}
     total = 0
     weightname = sample.weightname()
     countersitems = counters.items()
+    countersitems.sort(key=lambda x: x[0]!="0+")
     length = t.GetEntries()
+    tmpresult = {}
     for i, entry in enumerate(t, start=1):
         weight = getattr(t, weightname)
         for hypothesis, counter in countersitems:
             if not (t.nExtraLep==0 and (((t.nCleanedJetsPt30==2 or t.nCleanedJetsPt30==3) and t.nCleanedJetsPt30BTagged<=1) or (t.nCleanedJetsPt30>=4 and t.nCleanedJetsPt30BTagged==0))):
-                counter[-1] += weight
+                tmpresult[hypothesis] = -1
             else:
-                counter[category(t, hypothesis)==desiredcategory] += weight
+                tmpresult[hypothesis] = category(t, hypothesis)==desiredcategory
+            counter[tmpresult[hypothesis]] += weight
+
+            counters_or[SM, hypothesis][max(tmpresult[SM], tmpresult[hypothesis])] += weight
+
         total += weight
         if i % 10000 == 0 or i == length:
             print i, "/", length
 
-    for counter in counters.values():
+    for counter in counters.values() + counters_or.values():
         for k, v in counter.iteritems():
             counter[k] = v/total
 
+    counters.update(counters_or)
     return counters
 
 if __name__ == "__main__":
-    counters = count(VBF2jTaggedIchep16, "ggH", "a2", "161221")
+    counters = count(VBF2jTaggedIchep16, "ggH", "0+", "161221")
+    SM = Hypothesis("0+")
+    print "Not enough jets: {}%".format(counters[SM][-1])
+    print
+
     for hypothesis in purehypotheses:
-        print hypothesis
-        for category in range(-1, 2):
-            print "{}    {}%".format(category, counters[hypothesis][category]*100)
-        print
+        print "{:5}      {}%".format(hypothesis, counters[hypothesis][1]*100)
+        if hypothesis != "0+":
+            print "{:2} {:2}      {}%".format(SM, hypothesis, counters[SM, hypothesis][1]*100)
