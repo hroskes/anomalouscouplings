@@ -3,7 +3,7 @@ import abc
 import collections
 from helperstuff import config, constants, run1info
 from helperstuff.combinehelpers import getrate, gettemplate
-from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, Systematic, WhichProdDiscriminants, whichproddiscriminants
+from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic, WhichProdDiscriminants, whichproddiscriminants
 from helperstuff.samples import ReweightingSample, samplewithfai
 import helperstuff.rootoverloads.histogramaxisnumbers
 import helperstuff.style
@@ -196,7 +196,7 @@ class ComponentTemplateSum(TemplateSum):
         self.Scale(self.SMintegral / self.Integral())
 
 class Projections(MultiEnum):
-  enums = [Channel, Analysis, Normalization, Systematic, Production, EnrichStatus, Category, WhichProdDiscriminants]
+  enums = [Channel, Analysis, Normalization, ShapeSystematic, Production, EnrichStatus, Category, WhichProdDiscriminants]
   enumname = "projections"
 
   def applysynonyms(self, enumsdict):
@@ -208,8 +208,8 @@ class Projections(MultiEnum):
     dontcheck = []
     if self.normalization is None:
       self.normalization = Normalization("rescalemixtures")
-    if self.systematic is None:
-      self.systematic = Systematic("")
+    if self.shapesystematic is None:
+      self.shapesystematic = ShapeSystematic("")
     if self.analysis == "fL1":
       if self.whichproddiscriminants is not None:
         raise ValueError("Don't provide whichproddiscriminants for fL1\n{}".format(args))
@@ -278,19 +278,19 @@ class Projections(MultiEnum):
         gi_mix = 1/2**.25 * gi_VHBSM
         fainame = "{}^{{{}}}".format(self.analysis.title, "VHdec")
 
-    ggHSM     = self.TemplateFromFile(   0, "ggH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
-    ggHBSM    = self.TemplateFromFile(   0, "ggH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, BSMhypothesis)
-    ggHint    = self.IntTemplateFromFile(0, "ggH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g11gi1")
+    ggHSM     = self.TemplateFromFile(   0, "ggH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+    ggHBSM    = self.TemplateFromFile(   0, "ggH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, BSMhypothesis)
+    ggHint    = self.IntTemplateFromFile(0, "ggH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g11gi1")
 
     ggHmix_p  = ComponentTemplateSum("ggH {}=#plus0.5" .format(fainame), 0, ggHSM.Integral(), (ggHSM, g1_mix**2), (ggHBSM, (gi_mix/gi_ggHBSM)**2), (ggHint,  g1_mix*gi_mix/gi_ggHBSM))
     ggHmix_m  = ComponentTemplateSum("ggH {}=#minus0.5".format(fainame), 0, ggHSM.Integral(), (ggHSM, g1_mix**2), (ggHBSM, (gi_mix/gi_ggHBSM)**2), (ggHint,  -g1_mix*gi_mix/gi_ggHBSM))
 
     VBFSM = \
-    VBFg14gi0 = self.TemplateFromFile(   0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
-    VBFg13gi1 = self.IntTemplateFromFile(0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g13gi1")
-    VBFg12gi2 = self.IntTemplateFromFile(0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g12gi2")
-    VBFg11gi3 = self.IntTemplateFromFile(0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g11gi3")
-    VBFg10gi4 = self.TemplateFromFile(   0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, BSMhypothesis)
+    VBFg14gi0 = self.TemplateFromFile(   0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+    VBFg13gi1 = self.IntTemplateFromFile(0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g13gi1")
+    VBFg12gi2 = self.IntTemplateFromFile(0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g12gi2")
+    VBFg11gi3 = self.IntTemplateFromFile(0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g11gi3")
+    VBFg10gi4 = self.TemplateFromFile(   0, "VBF", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, BSMhypothesis)
 
     VBFpieces = [VBFg14gi0, VBFg13gi1, VBFg12gi2, VBFg11gi3, VBFg10gi4]
 
@@ -304,11 +304,11 @@ class Projections(MultiEnum):
                                     )
 
     ZHSM = \
-    ZHg14gi0 = self.TemplateFromFile(   0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
-    ZHg13gi1 = self.IntTemplateFromFile(0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g13gi1")
-    ZHg12gi2 = self.IntTemplateFromFile(0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g12gi2")
-    ZHg11gi3 = self.IntTemplateFromFile(0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g11gi3")
-    ZHg10gi4 = self.TemplateFromFile(   0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, BSMhypothesis)
+    ZHg14gi0 = self.TemplateFromFile(   0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+    ZHg13gi1 = self.IntTemplateFromFile(0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g13gi1")
+    ZHg12gi2 = self.IntTemplateFromFile(0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g12gi2")
+    ZHg11gi3 = self.IntTemplateFromFile(0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g11gi3")
+    ZHg10gi4 = self.TemplateFromFile(   0, "ZH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, BSMhypothesis)
 
     ZHpieces = [ZHg14gi0, ZHg13gi1, ZHg12gi2, ZHg11gi3, ZHg10gi4]
 
@@ -322,11 +322,11 @@ class Projections(MultiEnum):
                                    )
 
     WHSM = \
-    WHg14gi0 = self.TemplateFromFile(   0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, self.analysis.purehypotheses[0])
-    WHg13gi1 = self.IntTemplateFromFile(0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g13gi1")
-    WHg12gi2 = self.IntTemplateFromFile(0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g12gi2")
-    WHg11gi3 = self.IntTemplateFromFile(0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, "g11gi3")
-    WHg10gi4 = self.TemplateFromFile(   0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.systematic, self.analysis, BSMhypothesis)
+    WHg14gi0 = self.TemplateFromFile(   0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+    WHg13gi1 = self.IntTemplateFromFile(0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g13gi1")
+    WHg12gi2 = self.IntTemplateFromFile(0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g12gi2")
+    WHg11gi3 = self.IntTemplateFromFile(0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g11gi3")
+    WHg10gi4 = self.TemplateFromFile(   0, "WH", self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, BSMhypothesis)
 
     WHpieces = [WHg14gi0, WHg13gi1, WHg12gi2, WHg11gi3, WHg10gi4]
 
@@ -344,10 +344,10 @@ class Projections(MultiEnum):
     mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (ZHmix_p, VHfactor), (WHmix_p, VHfactor))
     mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (ZHmix_m, VHfactor), (WHmix_m, VHfactor))
 
-    qqZZ      = self.TemplateFromFile(6,              self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ",    self.systematic, self.production)
-    ggZZ      = self.TemplateFromFile(ROOT.kOrange+6, self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ",    self.systematic, self.production)
-    VBFbkg    = self.TemplateFromFile(ROOT.kViolet+7, self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "VBF bkg", self.systematic, self.production)
-    ZX        = self.TemplateFromFile(2,              self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ZX",      self.systematic, self.production)
+    qqZZ      = self.TemplateFromFile(6,              self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ",    self.shapesystematic, self.production)
+    ggZZ      = self.TemplateFromFile(ROOT.kOrange+6, self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ",    self.shapesystematic, self.production)
+    VBFbkg    = self.TemplateFromFile(ROOT.kViolet+7, self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "VBF bkg", self.shapesystematic, self.production)
+    ZX        = self.TemplateFromFile(2,              self.category, self.whichproddiscriminants, self.enrichstatus, self.normalization, self.analysis, self.channel, "ZX",      self.shapesystematic, self.production)
 
     templates = []
     if ggHfactor:
@@ -443,7 +443,7 @@ class Projections(MultiEnum):
 
   @property
   def discriminants(self):
-      return TemplatesFile(self.channel, self.systematic, "ggh", self.analysis, self.production, self.whichproddiscriminants, self.category).discriminants
+      return TemplatesFile(self.channel, self.shapesystematic, "ggh", self.analysis, self.production, self.whichproddiscriminants, self.category).discriminants
 
   class AnimationStep(object):
     def __init__(self, productionmodeforfai, analysis, fai, delay):

@@ -1,6 +1,6 @@
 import abc
 import config
-from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, Systematic, TemplateGroup, treesystematics, WhichProdDiscriminants, whichproddiscriminants
+from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics, WhichProdDiscriminants, whichproddiscriminants
 from itertools import product
 import json
 import numpy
@@ -10,7 +10,7 @@ from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, Systematic, TemplateGroup, Analysis, Production, BlindStatus, WhichProdDiscriminants, Category]
+    enums = [Channel, ShapeSystematic, TemplateGroup, Analysis, Production, BlindStatus, WhichProdDiscriminants, Category]
 
     def applysynonyms(self, enumsdict):
         if enumsdict[Production] is None and len(config.productionsforcombine) == 1:
@@ -22,8 +22,8 @@ class TemplatesFile(MultiEnum):
     def check(self, *args):
         dontcheck = []
 
-        if self.systematic is None:
-            self.systematic = Systematic("")
+        if self.shapesystematic is None:
+            self.shapesystematic = ShapeSystematic("")
 
         if self.category is None:
             self.category = Category("UntaggedIchep16")
@@ -50,15 +50,15 @@ class TemplatesFile(MultiEnum):
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
-        if not self.systematic.appliesto(self.templategroup):
-            raise ValueError("Systematic {} does not apply to {}\n{}".format(self.systematic, self.templategroup, args))
+        if not self.shapesystematic.appliesto(self.templategroup):
+            raise ValueError("ShapeSystematic {} does not apply to {}\n{}".format(self.shapesystematic, self.templategroup, args))
 
     def jsonfile(self, iteration=None):
         folder = os.path.join(config.repositorydir, "step5_json")
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic, self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.shapesystematic, self.production, self.blindnamepart]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".json")
@@ -72,7 +72,7 @@ class TemplatesFile(MultiEnum):
             if not os.path.exists(folder):
                 raise IOError("No folder {}".format(folder))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.systematic if config.applyshapesystematics else "", self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.shapesystematic if config.applyshapesystematics else "", self.production, self.blindnamepart]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
@@ -147,7 +147,7 @@ class TemplatesFile(MultiEnum):
 
     @property
     def bkgdiscriminant(self):
-        return self.systematic.D_bkg_0plus()
+        return self.shapesystematic.D_bkg_0plus()
 
     @property
     def purediscriminant(self):
@@ -294,7 +294,7 @@ def listfromiterator(function):
 
 @listfromiterator
 def templatesfiles():
-    for systematic in treesystematics:
+    for shapesystematic in treeshapesystematics:
         for channel in channels:
             for production in productions:
                 for analysis in analyses:
@@ -313,14 +313,14 @@ def templatesfiles():
                             else:
                                 if w != "D_int_prod":
                                     continue
-                            yield TemplatesFile(channel, systematic, "ggh", analysis, production, category, w)
-                            yield TemplatesFile(channel, systematic, "vbf", analysis, production, category, w)
-                            yield TemplatesFile(channel, systematic, "zh", analysis, production, category, w)
-                            yield TemplatesFile(channel, systematic, "wh", analysis, production, category, w)
-                            if systematic == "":
+                            yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category, w)
+                            yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category, w)
+                            yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category, w)
+                            yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category, w)
+                            if shapesystematic == "":
                                 yield TemplatesFile(channel, "bkg", analysis, production, category, w)
                             for blindstatus in blindstatuses:
-                                if systematic == "" and (blindstatus == "blind" or config.unblinddistributions) and config.usedata:
+                                if shapesystematic == "" and (blindstatus == "blind" or config.unblinddistributions) and config.usedata:
                                     yield TemplatesFile(channel, "DATA", analysis, production, blindstatus, category, w)
 
 class TemplateBase(object):
@@ -808,7 +808,7 @@ class Template(TemplateBase, MultiEnum):
               str(self.analysis),
               str(self.whichproddiscriminants),
               str(self.hypothesis),
-              str(self.systematic),
+              str(self.shapesystematic),
               str(self.production),
              )
       return getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])

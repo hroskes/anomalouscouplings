@@ -223,8 +223,8 @@ class ProductionMode(MyEnum):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
 
-class Systematic(MyEnum):
-    enumname = "systematic"
+class ShapeSystematic(MyEnum):
+    enumname = "shapesystematic"
     enumitems = (
                  EnumItem(""),
                  EnumItem("ResUp"),
@@ -447,10 +447,10 @@ class AlternateGenerator(MyEnum):
 
 channels = Channel.items()
 if config.applyshapesystematics:
-    systematics = Systematic.items()
-    treesystematics = Systematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
+    shapesystematics = ShapeSystematic.items()
+    treeshapesystematics = ShpaeSystematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
 else:
-    systematics = treesystematics = Systematic.items(lambda x: x == "")
+    shapesystematics = treeshapesystematics = ShapeSystematic.items(lambda x: x == "")
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
