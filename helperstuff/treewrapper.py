@@ -5,6 +5,7 @@ import CJLSTscripts
 from collections import Counter, Iterator
 import config
 import constants
+import enums
 from itertools import chain
 import numpy
 import resource
@@ -1244,18 +1245,20 @@ class TreeWrapper(Iterator):
 #Category#
 ##########
 
-    categorizations = [
-        SingleCategorizationFromSample(ReweightingSample("VBF", "SM")),
-        SingleCategorizationFromSample(ReweightingSample("VBF", "0-")),
-        SingleCategorizationFromSample(ReweightingSample("VBF", "a2")),
-        SingleCategorizationFromSample(ReweightingSample("VBF", "L1")),
-        SingleCategorizationFromSample(ReweightingSample("VBF", "fa2prod-0.5")),
-        SingleCategorizationFromSample(ReweightingSample("VBF", "fL1prod0.5")),
-    ]
-    categorizations += [
-        MultiCategorization("SM_or_{}".format(other.hypothesisname), categorizations[0], other)
-           for other in categorizations[1:]
-    ]
+    for JEC in enums.JECsystematics:
+        categorizations = [
+            SingleCategorizationFromSample(ReweightingSample("VBF", "SM"), JEC),
+            SingleCategorizationFromSample(ReweightingSample("VBF", "0-"), JEC),
+            SingleCategorizationFromSample(ReweightingSample("VBF", "a2"), JEC),
+            SingleCategorizationFromSample(ReweightingSample("VBF", "L1"), JEC),
+            SingleCategorizationFromSample(ReweightingSample("VBF", "fa2prod-0.5"), JEC),
+            SingleCategorizationFromSample(ReweightingSample("VBF", "fL1prod0.5"), JEC),
+        ]
+        categorizations += [
+            MultiCategorization("SM_or_{}".format(other.hypothesisname) + JEC.appendname, categorizations[0], other)
+               for other in categorizations[1:]
+        ]
+    del JEC, other
 
     def category(self):
         return CJLSTscripts.categoryIchep16(

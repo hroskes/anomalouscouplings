@@ -1,5 +1,5 @@
 from CJLSTscripts import categoryIchep16
-from enums import Category, categories, Hypothesis
+from enums import Category, categories, Hypothesis, JECSystematic
 
 class BaseCategorization(object):
     __metaclass__ = ABCMeta
@@ -14,6 +14,8 @@ class BaseCategorization(object):
     def __ne__(self, other): return not self == other
 
 class BaseSingleCategorization(BaseCategorization):
+    def __init__(self, JEC):
+        self.JEC = JECSystematic(JEC)
     @abstractproperty
     def g1(self): pass
     @abstractproperty
@@ -34,6 +36,12 @@ class BaseSingleCategorization(BaseCategorization):
     def pZH_function_name(self): pass
     @abstractproperty
     def pWH_function_name(self): pass
+    @property
+    def pHJ_function_name(self): return "p_JQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC)
+    @property
+    def pVBF1j_function_name(self): return "p_JVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC)
+    @property
+    def pAux_function_name(self): return "pAux_JVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC)
 
     @staticmethod
     def get_p_function(terms, multiplier, name):
@@ -44,9 +52,9 @@ class BaseSingleCategorization(BaseCategorization):
 
     def get_pHJJ_function(self):
         terms = {
-                 "p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal": self.ghg2**2,
-                 "p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal": self.ghg4**2,
-                 "p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECNominal": self.ghg2*self.ghg4,
+                 "p_JJQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC): self.ghg2**2,
+                 "p_JJQCD_SIG_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg4**2,
+                 "p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg2*self.ghg4,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = ReweightingSample("HJJ", 1, 0, 0, 0, 1, 0).xsec / ReweightingSample("HJJ", 1, 0, 0, 0, self.ghg2, self.ghg4).xsec
@@ -54,13 +62,13 @@ class BaseSingleCategorization(BaseCategorization):
 
     def get_pVBF_function(self):
         terms = {
-                 "p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal": self.g1**2,
-                 "p_JJVBF_SIG_ghv2_1_JHUGen_JECNominal": self.g2**2,
-                 "p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal": self.g4**2,
-                 "p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_JECNominal": self.g1prime2**2/1e8,
-                 "p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal": self.g1 * self.g2,
-                 "p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal": self.g1 * self.g4,
-                 "p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECNominal": self.g1 * self.g1prime2/1e4,
+                 "p_JJVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC): self.g1**2,
+                 "p_JJVBF_SIG_ghv2_1_JHUGen_{}".format(self.JEC): self.g2**2,
+                 "p_JJVBF_SIG_ghv4_1_JHUGen_{}".format(self.JEC): self.g4**2,
+                 "p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_{}".format(self.JEC): self.g1prime2**2/1e8,
+                 "p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
+                 "p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
+                 "p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2/1e4,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = ReweightingSample("VBF", 1, 0, 0, 0) / ReweightingSample("VBF", self.g1, self.g2, self.g4, self.g1prime2).xsec
@@ -68,13 +76,13 @@ class BaseSingleCategorization(BaseCategorization):
 
     def get_pZH_function(self):
         terms = {
-                 "p_HadZH_SIG_ghz1_1_JHUGen_JECNominal": self.g1**2,
-                 "p_HadZH_SIG_ghz2_1_JHUGen_JECNominal": self.g2**2,
-                 "p_HadZH_SIG_ghz4_1_JHUGen_JECNominal": self.g4**2,
-                 "p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECNominal": self.g1prime2**2/1e8,
-                 "p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal": self.g1 * self.g2,
-                 "p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal": self.g1 * self.g4,
-                 "p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal": self.g1 * self.g1prime2/1e4,
+                 "p_HadZH_SIG_ghz1_1_JHUGen_{}".format(self.JEC): self.g1**2,
+                 "p_HadZH_SIG_ghz2_1_JHUGen_{}".format(self.JEC): self.g2**2,
+                 "p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC): self.g4**2,
+                 "p_HadZH_SIG_ghz1prime2_1E4_JHUGen_{}".format(self.JEC): self.g1prime2**2/1e8,
+                 "p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
+                 "p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
+                 "p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2/1e4,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = ReweightingSample("ZH", 1, 0, 0, 0) / ReweightingSample("ZH", self.g1, self.g2, self.g4, self.g1prime2).xsec
@@ -82,13 +90,13 @@ class BaseSingleCategorization(BaseCategorization):
 
     def get_pWH_function(self):
         terms = {
-                 "p_HadWH_SIG_ghw1_1_JHUGen_JECNominal": self.g1**2,
-                 "p_HadWH_SIG_ghw2_1_JHUGen_JECNominal": self.g2**2,
-                 "p_HadWH_SIG_ghw4_1_JHUGen_JECNominal": self.g4**2,
-                 "p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECNominal": self.g1prime2**2/1e8,
-                 "p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal": self.g1 * self.g2,
-                 "p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal": self.g1 * self.g4,
-                 "p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECNominal": self.g1 * self.g1prime2/1e4,
+                 "p_HadWH_SIG_ghw1_1_JHUGen_{}".format(self.JEC): self.g1**2,
+                 "p_HadWH_SIG_ghw2_1_JHUGen_{}".format(self.JEC): self.g2**2,
+                 "p_HadWH_SIG_ghw4_1_JHUGen_{}".format(self.JEC): self.g4**2,
+                 "p_HadWH_SIG_ghw1prime2_1E4_JHUGen_{}".format(self.JEC): self.g1prime2**2/1e8,
+                 "p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
+                 "p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
+                 "p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2/1e4,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = ReweightingSample("WH", 1, 0, 0, 0) / ReweightingSample("WH", self.g1, self.g2, self.g4, self.g1prime2).xsec
@@ -108,10 +116,10 @@ class BaseSingleCategorization(BaseCategorization):
                 self_tree.nCleanedJetsPt30BTagged,
                 self_tree.jetQGLikelihood,
                   getattr(self_tree, pHJJ_function_name),
-                self_tree.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal,
+                  getattr(Self_tree, pHJ_function_name),
                   getattr(self_tree, pVBF_function_name),
-                self_tree.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
-                self_tree.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+                  getattr(self_tree, pVBF1j_function_name)
+                  getattr(self_tree, pAux_function_name)
                   getattr(self_tree, pWH_function_name),
                   getattr(self_tree, pZH_function_name),
                 self_tree.jetPhi,
@@ -123,7 +131,7 @@ class BaseSingleCategorization(BaseCategorization):
         return function
 
 class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
-    def __init__(self, g1, g2, g4, g1prime2, ghg2=1, ghg4=0):
+    def __init__(self, g1, g2, g4, g1prime2, ghg2=1, ghg4=0, JEC="Nominal"):
         self.__g1 = g1
         self.__g2 = g2
         self.__g4 = g4
@@ -132,6 +140,7 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
             raise ValueError("Can't use more than 1 of g2, g4, g1prime2")
         self.__ghg2 = ghg2
         self.__ghg4 = ghg4
+        super(ArbitraryCouplingsSingleCategorization, self).__init__(JEC)
 
     @property
     def g1(self): return self.__g1
@@ -147,20 +156,21 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
     def ghg4(self): return self.__ghg4
 
     @property
-    def pHJJ_function_name(self): return "category_p_JJQCD_SIG_{}_JHUGen_JECNominal".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4")))
+    def pHJJ_function_name(self): return "category_p_JJQCD_SIG_{}_JHUGen_{}".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4")), self.JEC)
     @property
-    def pVBF_function_name(self): return "category_p_JJVBF_SIG_{}_JHUGen_JECNominal".format("_".join("{}_{}".format(name.replace("g", "ghv"), getattr(self, name)) for name in ("g1", "g2", "g4", "g1prime2")))
+    def pVBF_function_name(self): return "category_p_JJVBF_SIG_{}_JHUGen_{}".format("_".join("{}_{}".format(name.replace("g", "ghv"), getattr(self, name)) for name in ("g1", "g2", "g4", "g1prime2")), self.JEC)
     @property
-    def pZH_function_name(self): return "category_p_HadZH_SIG_{}_JHUGen_JECNominal".format("_".join("{}_{}".format(name.replace("g", "ghz"), getattr(self, name)) for name in ("g1", "g2", "g4", "g1prime2")))
+    def pZH_function_name(self): return "category_p_HadZH_SIG_{}_JHUGen_{}".format("_".join("{}_{}".format(name.replace("g", "ghz"), getattr(self, name)) for name in ("g1", "g2", "g4", "g1prime2")), self.JEC)
     @property
-    def pWH_function_name(self): return "category_p_HadWH_SIG_{}_JHUGen_JECNominal".format("_".join("{}_{}".format(name.replace("g", "ghw"), getattr(self, name)) for name in ("g1", "g2", "g4", "g1prime2")))
+    def pWH_function_name(self): return "category_p_HadWH_SIG_{}_JHUGen_{}".format("_".join("{}_{}".format(name.replace("g", "ghw"), getattr(self, name)) for name in ("g1", "g2", "g4", "g1prime2")), self.JEC)
 
     @property
-    def category_function_name(self): return "category_{}".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4", "g1", "g2", "g4", "g1prime2")))
+    def category_function_name(self): return "category_{}".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4", "g1", "g2", "g4", "g1prime2"))) + self.JEC.appendname
 
 class SingleCategorizationFromSample(BaseSingleCategorization):
-    def __init__(self, sample):
+    def __init__(self, sample, JEC="Nominal"):
         self.sample = sample
+        super(ArbitraryCouplingsSingleCategorization, self).__init__(JEC)
 
     @property
     def g1(self): return self.sample.g1
@@ -187,17 +197,17 @@ class SingleCategorizationFromSample(BaseSingleCategorization):
         return result
 
     @property
-    def pHJJ_function_name(self): return "category_p_JJQCD_SIG_{}_JHUGen_JECNominal".format(self.sample.hffhypothesis)
+    def pHJJ_function_name(self): return "category_p_JJQCD_SIG_{}_JHUGen_{}".format(self.sample.hffhypothesis, self.JEC)
     @property
-    def pVBF_function_name(self): return "category_p_JJVBF_SIG_{}_JHUGen_JECNominal".format(self.hypothesisname)
+    def pVBF_function_name(self): return "category_p_JJVBF_SIG_{}_JHUGen_{}".format(self.hypothesisname, self.JEC)
     @property
-    def pZH_function_name(self): return "category_p_HadZH_SIG_{}_JHUGen_JECNominal".format(self.hypothesisname)
+    def pZH_function_name(self): return "category_p_HadZH_SIG_{}_JHUGen_{}".format(self.hypothesisname, self.JEC)
     @property
-    def pWH_function_name(self): return "category_p_HadWH_SIG_{}_JHUGen_JECNominal".format(self.hypothesisname)
+    def pWH_function_name(self): return "category_p_HadWH_SIG_{}_JHUGen_{}".format(self.hypothesisname, self.JEC)
 
     @property
     def category_function_name(self):
-        result = "category_{}".format(self.hypothesisname)
+        result = "category_{}".format(self.hypothesisname) + self.JEC.appendname
         if self.sample.hffhypothesis:
             result += "_" + self.hffhypothesisname
 

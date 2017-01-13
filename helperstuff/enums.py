@@ -251,6 +251,13 @@ class ShapeSystematic(MyEnum):
             return self in ("", )
         assert False
 
+class JECSystematic(MyEnum):
+    enumname = "jecsystematic"
+    enumitems = (
+                 EnumItem("JECNominal", "Nominal")
+                 EnumItem("JECUp", "Up"),
+                 EnumItem("JECDown", "Down")
+                )
 
 class TemplateGroup(MyEnum):
     enumname = "templategroup"
@@ -451,6 +458,7 @@ if config.applyshapesystematics:
     treeshapesystematics = ShpaeSystematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
 else:
     shapesystematics = treeshapesystematics = ShapeSystematic.items(lambda x: x == "")
+JECsystematics = JECSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "fa20.5", "fa30.5", "fL10.5"))
