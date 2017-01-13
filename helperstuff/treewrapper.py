@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from array import array
+import categorization
 import CJLSTscripts
 from collections import Counter, Iterator
 import config
@@ -18,7 +19,7 @@ sys.setrecursionlimit(10000)
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
 
-@callclassinitfunctions("initweightfunctions")
+@callclassinitfunctions("initweightfunctions", "initcategoryfunctions")
 class TreeWrapper(Iterator):
 
     def __init__(self, tree, treesample, Counters, failedtree=None, minevent=0, maxevent=None, isdummy=False):
@@ -1243,6 +1244,19 @@ class TreeWrapper(Iterator):
 #Category#
 ##########
 
+    categorizations = [
+        SingleCategorizationFromSample(ReweightingSample("VBF", "SM")),
+        SingleCategorizationFromSample(ReweightingSample("VBF", "0-")),
+        SingleCategorizationFromSample(ReweightingSample("VBF", "a2")),
+        SingleCategorizationFromSample(ReweightingSample("VBF", "L1")),
+        SingleCategorizationFromSample(ReweightingSample("VBF", "fa2prod-0.5")),
+        SingleCategorizationFromSample(ReweightingSample("VBF", "fL1prod0.5")),
+    ]
+    categorizations += [
+        MultiCategorization("SM_or_{}".format(other.hypothesisname), categorizations[0], other)
+           for other in categorizations[1:]
+    ]
+
     def category(self):
         return CJLSTscripts.categoryIchep16(
               self.nExtraLep,
@@ -1273,6 +1287,10 @@ class TreeWrapper(Iterator):
     def initweightfunctions(cls):
         for sample in cls.allsamples:
             setattr(cls, sample.weightname(), sample.get_MC_weight_function())
+    @classmethod
+    def initcategoryfunctions(cls):
+        for categorization in cls.categorizations:
+            setattr(cls, categorization.category_function_name, categorization.get_category_function())
 
     def initlists(self):
         self.toaddtotree = [
