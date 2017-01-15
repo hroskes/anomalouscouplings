@@ -4,7 +4,7 @@ from helperstuff import config
 from helperstuff import constants
 from helperstuff.CJLSTscripts import categoryIchep16, VBF2jTaggedIchep16, VHHadrTaggedIchep16
 from helperstuff.enums import Hypothesis, purehypotheses
-from helperstuff.samples import Sample
+from helperstuff.samples import ReweightingSample, Sample
 from helperstuff.treewrapper import dummyfloatstar
 from helperstuff.utilities import tfiles
 
@@ -72,61 +72,90 @@ def category(tree, hypothesis):
 
     return result
 
-def count(desiredcategory, *sample):
-    print sample
-    sample = Sample(*sample)
-    t = tfiles[sample.withdiscriminantsfile()].candTree
+def count(desiredcategory, sampleforfile, *samplehypotheses):
+    samplehypotheses = [Hypothesis(_) for _ in samplehypotheses]
+    assert len(samplehypotheses) == len(set(samplehypotheses))
+    productionmode = sampleforfile.productionmode
+    samples = [ReweightingSample(productionmode, hypothesis) for hypothesis in samplehypotheses]
+    t = tfiles[sampleforfile.withdiscriminantsfile()].candTree
     SM = Hypothesis("0+")
-    counters = {hypothesis: Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in purehypotheses}
-    counters_or = {(SM, hypothesis): Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in purehypotheses}
-    total = 0
-    weightname = sample.weightname()
-    countersitems = counters.items()
-    countersitems.sort(key=lambda x: x[0]!="0+")
+
+    categoryhypotheses = sorted(purehypotheses, key=lambda x: x != "0+")
+
+    counters = {(usehypothesis, hypothesis): Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in categoryhypotheses for usehypothesis in samplehypotheses}
+    counters_or = {(usehypothesis, (SM, hypothesis)): Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in categoryhypotheses for usehypothesis in samplehypotheses if hypothesis != SM}
+    total = Counter()
+    weightnames = {hypothesis: sample.weightname() for hypothesis, sample in zip(samplehypotheses, samples)}.items()
     length = t.GetEntries()
     tmpresult = {}
     for i, entry in enumerate(t, start=1):
-        weight = getattr(t, weightname)
-        for hypothesis, counter in countersitems:
+        for hypothesis in categoryhypotheses:
             if not (t.nExtraLep==0 and (((t.nCleanedJetsPt30==2 or t.nCleanedJetsPt30==3) and t.nCleanedJetsPt30BTagged<=1) or (t.nCleanedJetsPt30>=4 and t.nCleanedJetsPt30BTagged==0))):
                 tmpresult[hypothesis] = -1
             else:
                 tmpresult[hypothesis] = category(t, hypothesis)==desiredcategory
-            counter[tmpresult[hypothesis]] += weight
 
-            counters_or[SM, hypothesis][max(tmpresult[SM], tmpresult[hypothesis])] += weight
+        for usehypothesis, weightname in weightnames:
+            weight = getattr(t, weightname)
+            total[usehypothesis] += weight
 
-        total += weight
+            for hypothesis in categoryhypotheses:
+                counters[usehypothesis, hypothesis][tmpresult[hypothesis]] += weight
+                if hypothesis != SM:
+                    counters_or[usehypothesis, (SM, hypothesis)][max(tmpresult[SM], tmpresult[hypothesis])] += weight
+
         if i % 10000 == 0 or i == length:
             print i, "/", length
             #break
 
-    for counter in counters.values() + counters_or.values():
-        for k, v in counter.iteritems():
-            counter[k] = v/total
-
     counters.update(counters_or)
+    for usehypothesis in samplehypotheses:
+        for hypothesis in categoryhypotheses:
+            counter = counters[usehypothesis, hypothesis]
+            for k, v in counter.items():
+                counter[k] = v/total[usehypothesis]
+            if hypothesis != SM:
+                counter = counters[usehypothesis, (SM, hypothesis)]
+                for k, v in counter.items():
+                    counter[k] = v/total[usehypothesis]
+
     return counters
 
 if __name__ == "__main__":
-    counters = {}
-    for hypothesis in purehypotheses:
-        counters[hypothesis] = count(VBF2jTaggedIchep16, "VBF", hypothesis, "161221")
-
     SM = Hypothesis("0+")
 
-    fmt = "{:5} {:5.1%}"
+    samplehypotheses = [Hypothesis(_) for _ in ["0+", "0-", "a2", "L1", "fa2prod-0.5", "fL1prod0.5"]]
+
+    counters = None
+
+    fromhypotheses = "0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"
+
+    for hypothesis in fromhypotheses:
+        theupdate = count(VBF2jTaggedIchep16, Sample("VBF", hypothesis, config.productionsforcombine[0]), *samplehypotheses)
+        for counter in theupdate.values():
+            for k in counter.keys():
+                counter[k] /= len(fromhypotheses)
+
+        if counters is None:
+            counters = theupdate
+        else:
+            assert counters.keys() == theupdate.keys()
+            for key in counters.keys():
+                counters[key] += theupdate[key]
+
+    fmt = "{:11} {:5.1%}"
+    print
     print "Not enough jets:"
-    for hypothesis in purehypotheses:
-        print fmt.format(hypothesis, counters[hypothesis][SM][-1])
+    for hypothesis in samplehypotheses:
+        print fmt.format(hypothesis, counters[hypothesis, SM][-1])
     print
 
-    fmt = " ".join(["{:>7}"]*8)
-    print fmt.format(*[""] + [_ for _ in purehypotheses] + ["0+ {}".format(_) for _ in purehypotheses if _ != "0+"])
+    fmt = " ".join(["{:>11}"]*8)
+    print fmt.format(*[""] + [_ for _ in purehypotheses] + ["0+ or {}".format(_) for _ in purehypotheses if _ != "0+"])
 
-    fmt = " ".join(["{:7}"] + ["{:7.1%}"]*7)
-    for samplehypothesis in purehypotheses:
+    fmt = " ".join(["{:11}"] + ["{:11.1%}"]*7)
+    for samplehypothesis in samplehypotheses:
         print fmt.format(*[samplehypothesis]
-                        + [counters[samplehypothesis][hypothesis][1] for hypothesis in purehypotheses]
-                        + [counters[samplehypothesis][SM, hypothesis][1] for hypothesis in purehypotheses if hypothesis != SM]
+                        + [counters[samplehypothesis, hypothesis][1] for hypothesis in purehypotheses]
+                        + [counters[samplehypothesis, (SM, hypothesis)][1] for hypothesis in purehypotheses if hypothesis != SM]
                         )
