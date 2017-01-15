@@ -99,6 +99,7 @@ def count(desiredcategory, *sample):
         total += weight
         if i % 10000 == 0 or i == length:
             print i, "/", length
+            #break
 
     for counter in counters.values() + counters_or.values():
         for k, v in counter.iteritems():
@@ -108,12 +109,24 @@ def count(desiredcategory, *sample):
     return counters
 
 if __name__ == "__main__":
-    counters = count(VBF2jTaggedIchep16, "ggH", "0+", "161221")
+    counters = {}
+    for hypothesis in purehypotheses:
+        counters[hypothesis] = count(VBF2jTaggedIchep16, "VBF", hypothesis, "161221")
+
     SM = Hypothesis("0+")
-    print "Not enough jets: {}%".format(counters[SM][-1])
+
+    fmt = "{:5} {:5.1%}"
+    print "Not enough jets:"
+    for hypothesis in purehypotheses:
+        print fmt.format(hypothesis, counters[hypothesis][SM][-1])
     print
 
-    for hypothesis in purehypotheses:
-        print "{:5}      {}%".format(hypothesis, counters[hypothesis][1]*100)
-        if hypothesis != "0+":
-            print "{:2} {:2}      {}%".format(SM, hypothesis, counters[SM, hypothesis][1]*100)
+    fmt = " ".join(["{:>7}"]*8)
+    print fmt.format(*[""] + [_ for _ in purehypotheses] + ["0+ {}".format(_) for _ in purehypotheses if _ != "0+"])
+
+    fmt = " ".join(["{:7}"] + ["{:7.1%}"]*7)
+    for samplehypothesis in purehypotheses:
+        print fmt.format(*[samplehypothesis]
+                        + [counters[samplehypothesis][hypothesis][1] for hypothesis in purehypotheses]
+                        + [counters[samplehypothesis][SM, hypothesis][1] for hypothesis in purehypotheses if hypothesis != SM]
+                        )
