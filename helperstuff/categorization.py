@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-from CJLSTscripts import categoryIchep16
+from CJLSTscripts import categoryIchep16, VBF2jTaggedIchep16, VHHadrTaggedIchep16
 import config
 from enums import Category, categories, HffHypothesis, Hypothesis, JECSystematic
 from samples import ArbitraryCouplingsSample
@@ -116,7 +116,7 @@ class BaseSingleCategorization(BaseCategorization):
         pWH_function_name = self_categorization.pWH_function_name
 
         def function(self_tree):
-            result = self_categorization.lastresult = categoryIchep16(
+            result = self_categorization.lastvalue = categoryIchep16(
                 self_tree.nExtraLep,
                 self_tree.nExtraZ,
                 self_tree.nCleanedJetsPt30,

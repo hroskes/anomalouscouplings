@@ -1309,8 +1309,9 @@ class TreeWrapper(Iterator):
 #Category#
 ##########
 
+    categorizations = []
     for JEC in enums.JECsystematics:
-        categorizations = [
+        append = [
             categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "SM"), JEC),
             categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "0-"), JEC),
             categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "a2"), JEC),
@@ -1318,30 +1319,12 @@ class TreeWrapper(Iterator):
             #categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "fa2prod-0.5"), JEC),
             #categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "fL1prod0.5"), JEC),
         ]
-        categorizations += [
-            categorization.MultiCategorization("SM_or_{}".format(other.hypothesisname) + JEC.appendname, categorizations[0], other)
-               for other in categorizations[1:]
+        append += [
+            categorization.MultiCategorization("0P_or_{}".format(other.hypothesisname) + JEC.appendname, append[0], other)
+               for other in append[1:]
         ]
-    del JEC, other
-
-    def category(self):
-        return CJLSTscripts.categoryIchep16(
-              self.nExtraLep,
-              self.nExtraZ,
-              self.nCleanedJetsPt30,
-              self.nCleanedJetsPt30BTagged,
-              self.jetQGLikelihood,
-              self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal,
-              self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal,
-              self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal,
-              self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
-              self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
-              self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal,
-              self.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal,
-              self.jetPhi,
-              self.ZZMass,
-              config.useQGTagging,
-             )
+        categorizations += append
+    del append, JEC, other
 
 #####################
 #Reweighting weights#

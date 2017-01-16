@@ -77,7 +77,6 @@ def adddiscriminants(*args):
         try:
             for entry in treewrapper:
                 for discriminant in discriminants:
-                    print discriminant
                     discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
                 newt.Fill()
         except:
