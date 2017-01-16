@@ -75,7 +75,11 @@ class BaseSingleCategorization(BaseCategorization):
                  "p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = ArbitraryCouplingsSample("VBF", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("VBF", self.g1, self.g2, self.g4, self.g1prime2).xsec
+        multiplier = (
+                      (ArbitraryCouplingsSample("VBF", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("VBF", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                     /
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                     )
         return self.get_p_function(terms, multiplier, self.pVBF_function_name)
 
     def get_pZH_function(self):
@@ -89,7 +93,11 @@ class BaseSingleCategorization(BaseCategorization):
                  "p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = ArbitraryCouplingsSample("ZH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ZH", self.g1, self.g2, self.g4, self.g1prime2).xsec
+        multiplier = (
+                      (ArbitraryCouplingsSample("ZH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ZH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                     /
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                     )
         return self.get_p_function(terms, multiplier, self.pZH_function_name)
 
     def get_pWH_function(self):
@@ -103,7 +111,11 @@ class BaseSingleCategorization(BaseCategorization):
                  "p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = ArbitraryCouplingsSample("WH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("WH", self.g1, self.g2, self.g4, self.g1prime2).xsec
+        multiplier = (
+                      (ArbitraryCouplingsSample("WH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("WH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                     /
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                     )
         return self.get_p_function(terms, multiplier, self.pWH_function_name)
 
     def get_category_function(self_categorization):

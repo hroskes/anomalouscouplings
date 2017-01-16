@@ -43,7 +43,7 @@ def category(tree, hypothesis):
         p_HadZH_SIG_ghz1_1_JHUGen_JECNominal = tree.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECNominal * constants.g1prime2ZH_reco**2 / 1e8
     else: assert False
 
-    if hypothesis == "0-":
+    if hypothesis == "0-" and False:
         p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal = tree.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal
     else:
         p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal = tree.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal
@@ -66,10 +66,10 @@ def category(tree, hypothesis):
           config.useQGTagging,
          )
 
-    if hypothesis == "0+": assert result == tree.category_0P
-    if hypothesis == "0-": assert result == tree.category_0M
+    if hypothesis == "0+": assert result == tree.category_0P, "{} {} {}".format(result, tree.category_0P, tree.Show())
+    if hypothesis == "0-": assert result == tree.category_0M, "{} {} {}".format(result, tree.category_0M, tree.Show())
     if hypothesis == "a2": assert result == tree.category_a2, "{} {} {}".format(result, tree.category_a2, tree.Show())
-    if hypothesis == "L1": assert result == tree.category_L1
+    if hypothesis == "L1": assert result == tree.category_L1, "{} {} {}".format(result, tree.category_L1, tree.Show())
 
     return result
 
