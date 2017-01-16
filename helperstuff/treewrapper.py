@@ -1470,13 +1470,6 @@ class TreeWrapper(Iterator):
                 tree.SetBranchStatus(weightname, 1)
             tree.SetBranchStatus("GenZ*Flav", 1)
 
-            from datetime import date
-            from utilities import product
-            if date.today() < date(2017, 1, 15):
-                tree.SetBranchStatus("LHEDaughterId")
-            else:
-                raise SyntaxError("delete this section and use GenZ*Flav below!")
-
         functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in self.treesample.reweightingsamples()}
         is2L2l = []
         flavs2L2l = {11*11*13*13, 11*11*15*15, 13*13*15*15}
@@ -1486,8 +1479,7 @@ class TreeWrapper(Iterator):
 
         length = self.tree.GetEntries() + self.failedtree.GetEntries()
         for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
-            #is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
-            is2L2l.append(product(entry.LHEDaughterId) in flavs2L2l)
+            is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
 
             for function, array in values:
                 array.append(function(entry))
