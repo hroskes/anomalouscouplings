@@ -1429,9 +1429,7 @@ class TreeWrapper(Iterator):
             if prod != "HadVH":
                 self.exceptions += [_.format(prod=prod) for _ in prodcomponentdiscriminants]
 
-        self.toaddtotree_int = [
-            "category",
-        ]
+        self.toaddtotree_int = []
 
         for _ in self.categorizations:
             self.toaddtotree_int.append(_.category_function_name)

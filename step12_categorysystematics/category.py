@@ -47,7 +47,6 @@ def category(tree, hypothesis):
         p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal = tree.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal
     else:
         p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal = tree.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal
-    
 
     result = categoryIchep16(
           nExtraLep,
@@ -67,25 +66,27 @@ def category(tree, hypothesis):
           config.useQGTagging,
          )
 
-    if hypothesis == "0+":
-        assert result == tree.category
+    if hypothesis == "0+": assert result == tree.category_0P
+    if hypothesis == "0-": assert result == tree.category_0M
+    if hypothesis == "a2": assert result == tree.category_a2, "{} {} {}".format(result, tree.category_a2, tree.Show())
+    if hypothesis == "L1": assert result == tree.category_L1
 
     return result
 
-def count(desiredcategory, sampleforfile, *samplehypotheses):
-    samplehypotheses = [Hypothesis(_) for _ in samplehypotheses]
-    assert len(samplehypotheses) == len(set(samplehypotheses))
+def count(desiredcategory, sampleforfile, *tohypotheses):
+    tohypotheses = [Hypothesis(_) for _ in tohypotheses]
+    assert len(tohypotheses) == len(set(tohypotheses))
     productionmode = sampleforfile.productionmode
-    samples = [ReweightingSample(productionmode, hypothesis) for hypothesis in samplehypotheses]
+    samples = [ReweightingSample(productionmode, hypothesis) for hypothesis in tohypotheses]
     t = tfiles[sampleforfile.withdiscriminantsfile()].candTree
     SM = Hypothesis("0+")
 
     categoryhypotheses = sorted(purehypotheses, key=lambda x: x != "0+")
 
-    counters = {(usehypothesis, hypothesis): Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in categoryhypotheses for usehypothesis in samplehypotheses}
-    counters_or = {(usehypothesis, (SM, hypothesis)): Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in categoryhypotheses for usehypothesis in samplehypotheses if hypothesis != SM}
+    counters = {(usehypothesis, hypothesis): Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in categoryhypotheses for usehypothesis in tohypotheses}
+    counters_or = {(usehypothesis, (SM, hypothesis)): Counter({_: 0 for _ in range(-1, 2)}) for hypothesis in categoryhypotheses for usehypothesis in tohypotheses if hypothesis != SM}
     total = Counter()
-    weightnames = {hypothesis: sample.weightname() for hypothesis, sample in zip(samplehypotheses, samples)}.items()
+    weightnames = {hypothesis: sample.weightname() for hypothesis, sample in zip(tohypotheses, samples)}.items()
     length = t.GetEntries()
     tmpresult = {}
     for i, entry in enumerate(t, start=1):
@@ -109,7 +110,7 @@ def count(desiredcategory, sampleforfile, *samplehypotheses):
             #break
 
     counters.update(counters_or)
-    for usehypothesis in samplehypotheses:
+    for usehypothesis in tohypotheses:
         for hypothesis in categoryhypotheses:
             counter = counters[usehypothesis, hypothesis]
             for k, v in counter.items():
@@ -124,14 +125,14 @@ def count(desiredcategory, sampleforfile, *samplehypotheses):
 if __name__ == "__main__":
     SM = Hypothesis("0+")
 
-    samplehypotheses = [Hypothesis(_) for _ in ["0+", "0-", "a2", "L1", "fa2prod-0.5", "fL1prod0.5"]]
+    tohypotheses = [Hypothesis(_) for _ in ["0+", "0-", "a2", "L1", "fa2prod-0.5", "fL1prod0.5"]]
 
     counters = None
 
-    fromhypotheses = "0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"
+    fromhypotheses = "0+", #"0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"
 
-    for hypothesis in fromhypotheses:
-        theupdate = count(VBF2jTaggedIchep16, Sample("VBF", hypothesis, config.productionsforcombine[0]), *samplehypotheses)
+    for fromhypothesis in fromhypotheses:
+        theupdate = count(VBF2jTaggedIchep16, Sample("VBF", fromhypothesis, config.productionsforcombine[0]), *tohypotheses)
         for counter in theupdate.values():
             for k in counter.keys():
                 counter[k] /= len(fromhypotheses)
@@ -146,16 +147,16 @@ if __name__ == "__main__":
     fmt = "{:11} {:5.1%}"
     print
     print "Not enough jets:"
-    for hypothesis in samplehypotheses:
-        print fmt.format(hypothesis, counters[hypothesis, SM][-1])
+    for tohypothesis in tohypotheses:
+        print fmt.format(tohypothesis, counters[tohypothesis, SM][-1])
     print
 
     fmt = " ".join(["{:>11}"]*8)
     print fmt.format(*[""] + [_ for _ in purehypotheses] + ["0+ or {}".format(_) for _ in purehypotheses if _ != "0+"])
 
     fmt = " ".join(["{:11}"] + ["{:11.1%}"]*7)
-    for samplehypothesis in samplehypotheses:
-        print fmt.format(*[samplehypothesis]
-                        + [counters[samplehypothesis, hypothesis][1] for hypothesis in purehypotheses]
-                        + [counters[samplehypothesis, (SM, hypothesis)][1] for hypothesis in purehypotheses if hypothesis != SM]
+    for tohypothesis in tohypotheses:
+        print fmt.format(*[tohypothesis]
+                        + [counters[tohypothesis, hypothesis][1] for hypothesis in purehypotheses]
+                        + [counters[tohypothesis, (SM, hypothesis)][1] for hypothesis in purehypotheses if hypothesis != SM]
                         )
