@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from array import array
+from collections import OrderedDict
 from helperstuff import config
 from helperstuff import xrd
 from helperstuff.enums import flavors, decayonlyhypotheses, hffhypotheses, prodonlyhypotheses, productions
@@ -65,7 +66,7 @@ def adddiscriminants(*args):
         newf = ROOT.TFile.Open(newfilename, "recreate")
         newt = t.CloneTree(0)
 
-        discriminants = {}
+        discriminants = OrderedDict()
         for discriminant in treewrapper.toaddtotree:
             discriminants[discriminant] = array('d', [0])
             newt.Branch(discriminant, discriminants[discriminant], discriminant + "/D")
@@ -76,6 +77,7 @@ def adddiscriminants(*args):
         try:
             for entry in treewrapper:
                 for discriminant in discriminants:
+                    print discriminant
                     discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
                 newt.Fill()
         except:

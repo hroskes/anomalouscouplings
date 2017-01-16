@@ -412,9 +412,11 @@ class ArbitraryCouplingsSample(SampleBase):
         return self.__g1prime2
     @property
     def ghg2(self):
+        if self.__ghg2 is None: raise ValueError("{} doesn't have ghg2!".format(self))
         return self.__ghg2
     @property
     def ghg4(self):
+        if self.__ghg4 is None: raise ValueError("{} doesn't have ghg4!".format(self))
         return self.__ghg4
     @property
     def kappa(self):
@@ -885,6 +887,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return 1
             if self.hffhypothesis == "fCP0.5":
                 return constants.ghg4HJJ
+        raise self.ValueError("ghg4")
 
     @property
     def kappa(self):

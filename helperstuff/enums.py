@@ -254,10 +254,14 @@ class ShapeSystematic(MyEnum):
 class JECSystematic(MyEnum):
     enumname = "jecsystematic"
     enumitems = (
-                 EnumItem("JECNominal", "Nominal")
+                 EnumItem("JECNominal", "Nominal"),
                  EnumItem("JECUp", "Up"),
-                 EnumItem("JECDown", "Down")
+                 EnumItem("JECDn", "Down", "JecDown"),
                 )
+    @property
+    def appendname(self):
+        if self == "JECNominal": return ""
+        return "_" + str(self)
 
 class TemplateGroup(MyEnum):
     enumname = "templategroup"
