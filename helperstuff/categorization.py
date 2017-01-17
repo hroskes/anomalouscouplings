@@ -239,6 +239,10 @@ class SingleCategorizationFromSample(BaseSingleCategorization):
             result += "_" + self.hffhypothesisname
         return result
 
+    def __str__(self):
+        assert self.sample.hffhypothesis is None or self.sample.hffhypothesis == "Hff0+"
+        return self.hypothesisname
+
 class MultiCategorization(BaseCategorization):
     def __init__(self, name, *singles):
         self.name = name
@@ -259,6 +263,9 @@ class MultiCategorization(BaseCategorization):
         return self.singles < other.singles
     def __le__(self, other):
         return self.singles <= other.singles
+
+    def __str__(self):
+        return self.name.replace("_", " ")
 
     def get_category_function(self_categorization):
         singles = self_categorization.singles

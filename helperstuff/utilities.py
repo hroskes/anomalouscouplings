@@ -4,8 +4,9 @@ from itertools import tee, izip
 import operator
 import json
 import os
-import ROOT
 import time
+
+import ROOT
 
 class KeyDefaultDict(collections.defaultdict):
     """
@@ -26,6 +27,27 @@ class TFilesDict(KeyDefaultDict):
         return super(TFilesDict, self).__delitem__(key)
 
 tfiles = TFilesDict()
+
+class MultiplyCounter(collections.Counter):
+    def __add__(self, other):
+        return type(self)(super(MultiplyCounter, self).__add__(other))
+    def __sub__(self, other):
+        return type(self)(super(MultiplyCounter, self).__sub__(other))
+    def __mul__(self, other):
+        return type(self)({k: v*other for k, v in self.iteritems()})
+    def __rmul__(self, other):
+        return type(self)({k: other*v for k, v in self.iteritems()})
+    def __div__(self, other):
+        return type(self)({k: v/other for k, v in self.iteritems()})
+
+    def __imul__(self, other):
+        for key in self:
+            self[key] *= other
+        return self
+    def __idiv__(self, other):
+        for key in self:
+            self[key] /= other
+        return self
 
 def cache(function):
     cachename = "__cache_{}".format(function.__name__)
