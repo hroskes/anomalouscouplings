@@ -73,6 +73,8 @@ class TreeWrapper(Iterator):
             self.xsec = tree.xsec * 1000 #pb to fb
 
         self.cconstantforDbkg = self.cconstantforD2jet = None
+        self.cconstantforDHadWH = 1e-3
+        self.cconstantforDHadZH = 1e-4
         self.checkfunctions()
 
         self.preliminaryloop()
@@ -307,27 +309,27 @@ class TreeWrapper(Iterator):
 #background discriminants#
 ##########################
 
-    def D_bkg_0plus(self):
+    def D_bkg(self):
         try:
             return self.M2g1_decay*self.p_m4l_SIG / (self.M2g1_decay*self.p_m4l_SIG  + self.M2qqZZ*self.p_m4l_BKG*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
-    def D_bkg_0plus_ResUp(self):
+    def D_bkg_ResUp(self):
         try:
             return self.M2g1_decay*self.p_m4l_SIG_ResUp / (self.M2g1_decay*self.p_m4l_SIG_ResUp  + self.M2qqZZ*self.p_m4l_BKG_ResUp*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
-    def D_bkg_0plus_ResDown(self):
+    def D_bkg_ResDown(self):
         try:
             return self.M2g1_decay*self.p_m4l_SIG_ResDown / (self.M2g1_decay*self.p_m4l_SIG_ResDown  + self.M2qqZZ*self.p_m4l_BKG_ResDown*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
-    def D_bkg_0plus_ScaleUp(self):
+    def D_bkg_ScaleUp(self):
         try:
             return self.M2g1_decay*self.p_m4l_SIG_ScaleUp / (self.M2g1_decay*self.p_m4l_SIG_ScaleUp  + self.M2qqZZ*self.p_m4l_BKG_ScaleUp*self.cconstantforDbkg)
         except ZeroDivisionError:
             return 0
-    def D_bkg_0plus_ScaleDown(self):
+    def D_bkg_ScaleDown(self):
         try:
             return self.M2g1_decay*self.p_m4l_SIG_ScaleDown / (self.M2g1_decay*self.p_m4l_SIG_ScaleDown  + self.M2qqZZ*self.p_m4l_BKG_ScaleDown*self.cconstantforDbkg)
         except ZeroDivisionError:
@@ -338,7 +340,39 @@ class TreeWrapper(Iterator):
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_HJJ*self.cconstantforD2jet)
     def D_2jet_0minus(self):
         if self.notdijet: return -999
-        return self.M2g4_VBF / (self.M2g4_VBF + self.M2g2_HJJ*self.cconstantforD2jet)
+        return self.M2g4_VBF*constants.g4VBF**2 / (self.M2g4_VBF*constants.g4VBF**2 + self.M2g2_HJJ*self.cconstantforD2jet)
+    def D_2jet_a2(self):
+        if self.notdijet: return -999
+        return self.M2g2_VBF*constants.g2VBF**2 / (self.M2g2_VBF*constants.g2VBF**2 + self.M2g2_HJJ*self.cconstantforD2jet)
+    def D_2jet_L1(self):
+        if self.notdijet: return -999
+        return self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 / (self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 + self.M2g2_HJJ*self.cconstantforD2jet)
+
+    def D_HadWH_0plus(self):
+        if self.notdijet: return -999
+        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g2_HJJ*self.cconstantforDHadWH)
+    def D_HadWH_0minus(self):
+        if self.notdijet: return -999
+        return self.M2g4_HadWH*constants.g4WH**2 / (self.M2g4_HadWH*constants.g4WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+    def D_HadWH_a2(self):
+        if self.notdijet: return -999
+        return self.M2g2_HadWH*constants.g2WH**2 / (self.M2g2_HadWH*constants.g2WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+    def D_HadWH_L1(self):
+        if self.notdijet: return -999
+        return self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 / (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+
+    def D_HadZH_0plus(self):
+        if self.notdijet: return -999
+        return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2g2_HJJ*self.cconstantforDHadZH)
+    def D_HadZH_0minus(self):
+        if self.notdijet: return -999
+        return self.M2g4_HadZH*constants.g4ZH**2 / (self.M2g4_HadZH*constants.g4ZH**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
+    def D_HadZH_a2(self):
+        if self.notdijet: return -999
+        return self.M2g2_HadZH*constants.g2ZH**2 / (self.M2g2_HadZH*constants.g2ZH**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
+    def D_HadZH_L1(self):
+        if self.notdijet: return -999
+        return self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 / (self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
 
 ###################################
 #anomalous couplings discriminants#
@@ -1392,13 +1426,23 @@ class TreeWrapper(Iterator):
 
     def initlists(self):
         self.toaddtotree = [
-            "D_bkg_0plus",
-            "D_bkg_0plus_ResUp",
-            "D_bkg_0plus_ResDown",
-            "D_bkg_0plus_ScaleUp",
-            "D_bkg_0plus_ScaleDown",
+            "D_bkg",
+            "D_bkg_ResUp",
+            "D_bkg_ResDown",
+            "D_bkg_ScaleUp",
+            "D_bkg_ScaleDown",
             "D_2jet_0plus",
             "D_2jet_0minus",
+            "D_2jet_a2",
+            "D_2jet_L1",
+            "D_HadWH_0plus",
+            "D_HadWH_0minus",
+            "D_HadWH_a2",
+            "D_HadWH_L1",
+            "D_HadZH_0plus",
+            "D_HadZH_0minus",
+            "D_HadZH_a2",
+            "D_HadZH_L1",
             "D_0minus_decay",
             "D_CP_decay",
             "D_g2_decay",
@@ -1412,6 +1456,8 @@ class TreeWrapper(Iterator):
             "categorizations",
             "cconstantforDbkg",
             "cconstantforD2jet",
+            "cconstantforDHadWH",
+            "cconstantforDHadZH",
             "checkfunctions",
             "cutoffs",
             "exceptions",
