@@ -92,7 +92,7 @@ class TreeWrapper(Iterator):
                 raise StopIteration
             if i % 10000 == 0 or i == len(self):
                 print i, "/", len(self)
-                #raise StopIteration
+                raise StopIteration
 
             if self.isdata:
                 self.overallEventWeight = 1
@@ -243,13 +243,53 @@ class TreeWrapper(Iterator):
         #category variables
         self.nExtraLep = t.nExtraLep
         self.nExtraZ = t.nExtraZ
+
+        nCleanedJets = t.nCleanedJets
+
         self.nCleanedJetsPt30 = t.nCleanedJetsPt30
-        self.nCleanedJetsPt30BTagged = t.nCleanedJetsPt30BTagged
+        self.nCleanedJetsPt30BTagged_bTagSF = t.nCleanedJetsPt30BTagged_bTagSF
         self.jetQGLikelihood = t.JetQGLikelihood.data()
         self.jetPhi = t.JetPhi.data()
 
-        if self.nCleanedJetsPt30 == 0:
+        if nCleanedJets == 0:
             self.jetQGLikelihood = self.jetPhi = dummyfloatstar
+
+        self.nCleanedJetsPt30_jecUp = t.nCleanedJetsPt30_jecUp
+        if self.nCleanedJetsPt30 == self.nCleanedJetsPt30_jecUp:
+            self.nCleanedJetsPt30BTagged_bTagSF_jecUp = self.nCleanedJetsPt30BTagged_bTagSF
+            self.jetQGLikelihood_jecUp = self.jetQGLikelihood
+            self.jetPhi_jecUp = self.jetPhi
+            #note that this automatically takes care of the dummyfloatstar case, since if there are no jets
+            # nCleanedJetsPt30 will be the same as nCleanedJetsPt30_jecUp
+        else:
+            jecUpIndices = [i for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma)) if pt*(1+sigma)>30]
+            self.nCleanedJetsPt30BTagged_bTagSF_jecUp = int(sum(t.JetIsBtaggedWithSF[i] for i in jecUpIndices))
+            if jecUpIndices == range(self.nCleanedJetsPt30_jecUp):
+                #should happen almost always
+                self.jetQGLikelihood_jecUp = self.jetQGLikelihood
+                self.jetPhi_jecUp = self.jetPhi
+            else:
+                self.jetQGLikelihood_jecUp = array("f", [t.JetQGLikelihood[i] for i in jecUpIndices])
+                self.jetPhi_jecUp = array("f", [t.JetPhi[i] for i in jecUpIndices])
+
+        self.nCleanedJetsPt30_jecDn = t.nCleanedJetsPt30_jecDn
+        if self.nCleanedJetsPt30 == self.nCleanedJetsPt30_jecDn:
+            self.nCleanedJetsPt30BTagged_bTagSF_jecDn = self.nCleanedJetsPt30BTagged_bTagSF
+            self.jetQGLikelihood_jecDn = self.jetQGLikelihood
+            self.jetPhi_jecDn = self.jetPhi
+            #note that this automatically takes care of the dummyfloatstar case, since if there are no jets
+            # nCleanedJetsPt30 will be the same as nCleanedJetsPt30_jecDn
+        else:
+            jecDnIndices = [i for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma)) if pt*(1-sigma)>30]
+            self.nCleanedJetsPt30BTagged_bTagSF_jecDn = int(sum(t.JetIsBtaggedWithSF[i] for i in jecDnIndices))
+            if jecDnIndices == range(self.nCleanedJetsPt30_jecDn):
+                #should happen almost always
+                self.jetQGLikelihood_jecDn = self.jetQGLikelihood
+                self.jetPhi_jecDn = self.jetPhi
+            else:
+                self.jetQGLikelihood_jecDn = array("f", [t.JetQGLikelihood[i] for i in jecDnIndices])
+                self.jetPhi_jecDn = array("f", [t.JetPhi[i] for i in jecDnIndices])
+
 
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
@@ -1558,7 +1598,7 @@ class TreeWrapper(Iterator):
                 array.append(function(entry))
             if i % 10000 == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
-                #break
+                break
 
         self.cutoffs = {}
         self.nevents2L2l = {}

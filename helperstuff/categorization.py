@@ -40,12 +40,22 @@ class BaseSingleCategorization(BaseCategorization):
     def pZH_function_name(self): pass
     @abstractproperty
     def pWH_function_name(self): pass
+
     @property
-    def pHJ_function_name(self): return "p_JQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC)
+    def pHJ_variable_name(self): return "p_JQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC)
     @property
-    def pVBF1j_function_name(self): return "p_JVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC)
+    def pVBF1j_variable_name(self): return "p_JVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC)
     @property
-    def pAux_function_name(self): return "pAux_JVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC)
+    def pAux_variable_name(self): return "pAux_JVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC)
+
+    @property
+    def njets_variable_name(self): return "nCleanedJetsPt30" + self.JEC.appendname.replace("JEC", "jec")
+    @property
+    def nbtagged_variable_name(self): return "nCleanedJetsPt30BTagged_bTagSF" + self.JEC.appendname.replace("JEC", "jec")
+    @property
+    def phi_variable_name(self): return "jetPhi" + self.JEC.appendname.replace("JEC", "jec")
+    @property
+    def QGL_variable_name(self): return "jetQGLikelihood" + self.JEC.appendname.replace("JEC", "jec")
 
     @staticmethod
     def get_p_function(terms, multiplier, name):
@@ -120,28 +130,34 @@ class BaseSingleCategorization(BaseCategorization):
 
     def get_category_function(self_categorization):
         pHJJ_function_name = self_categorization.pHJJ_function_name
-        pHJ_function_name = self_categorization.pHJ_function_name
         pVBF_function_name = self_categorization.pVBF_function_name
-        pVBF1j_function_name = self_categorization.pVBF1j_function_name
-        pAux_function_name = self_categorization.pAux_function_name
         pZH_function_name = self_categorization.pZH_function_name
         pWH_function_name = self_categorization.pWH_function_name
+
+        pHJ_variable_name = self_categorization.pHJ_variable_name
+        pVBF1j_variable_name = self_categorization.pVBF1j_variable_name
+        pAux_variable_name = self_categorization.pAux_variable_name
+
+        njets_variable_name = self_categorization.njets_variable_name
+        nbtagged_variable_name = self_categorization.nbtagged_variable_name
+        phi_variable_name = self_categorization.phi_variable_name
+        QGL_variable_name = self_categorization.QGL_variable_name
 
         def function(self_tree):
             result = self_categorization.lastvalue = categoryIchep16(
                 self_tree.nExtraLep,
                 self_tree.nExtraZ,
-                self_tree.nCleanedJetsPt30,
-                self_tree.nCleanedJetsPt30BTagged,
-                self_tree.jetQGLikelihood,
+                  getattr(self_tree, njets_variable_name),
+                  getattr(self_tree, nbtagged_variable_name),
+                  getattr(self_tree, QGL_variable_name),
                   getattr(self_tree, pHJJ_function_name)(),
-                  getattr(self_tree, pHJ_function_name),
+                  getattr(self_tree, pHJ_variable_name),
                   getattr(self_tree, pVBF_function_name)(),
-                  getattr(self_tree, pVBF1j_function_name),
-                  getattr(self_tree, pAux_function_name),
+                  getattr(self_tree, pVBF1j_variable_name),
+                  getattr(self_tree, pAux_variable_name),
                   getattr(self_tree, pWH_function_name)(),
                   getattr(self_tree, pZH_function_name)(),
-                self_tree.jetPhi,
+                  getattr(self_tree, phi_variable_name),
                 self_tree.ZZMass,
                 config.useQGTagging,
             )
