@@ -6,6 +6,7 @@ import os
 import ROOT
 
 from helperstuff import config, style
+from helperstuff.CJLSTscripts import WP_VBF2j, WP_WHh, WP_ZHh
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, Analysis
 from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample, Sample
@@ -23,16 +24,18 @@ def makeplot(analysis, disc):
   analysis == Analysis(analysis)
   if "HadZH" in disc:
     productionmode = "ZH"
+    WP = WP_ZHh()
   elif "HadWH" in disc:
     productionmode = "WH"
+    WP = WP_WHh()
   elif "2jet" in disc:
     productionmode = "VBF"
+    WP = WP_VBF2j()
 
   fainame = "{}^{{{}}}".format(analysis.title, productionmode)
 
   mixplus = ReweightingSample(productionmode, analysis.mixprodhypothesis)
   mixminus = ArbitraryCouplingsSample(productionmode, mixplus.g1, -mixplus.g2, -mixplus.g4, -mixplus.g1prime2)
-  print mixminus
 
   lines = [
            Line(ReweightingSample(productionmode, "0+"), "{} SM".format(productionmode), 1),
@@ -64,6 +67,13 @@ def makeplot(analysis, disc):
   hstack.Draw("hist nostack")
   hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
   l.Draw()
+
+  c.Update()
+  line = ROOT.TLine(WP, ROOT.gPad.GetUymin(), WP, ROOT.gPad.GetUymax())
+  line.SetLineWidth(4)
+  line.SetLineColor(ROOT.kOrange+7)
+  line.Draw()
+
   saveasdir = os.path.join(config.plotsbasedir, "categorization", str(analysis))
   try:
     os.makedirs(saveasdir)
