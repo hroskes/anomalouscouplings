@@ -363,6 +363,14 @@ class Analysis(MyEnum):
             return "fa2dec0.5"
         if self == "fL1":
             return "fL1dec0.5"
+    @property
+    def mixprodhypothesis(self):
+        if self == "fa3":
+            return "fa3prod0.5"
+        if self == "fa2":
+            return "fa2prod0.5"
+        if self == "fL1":
+            return "fL1prod0.5"
 
 class Production(MyEnum):
     enumname = "production"

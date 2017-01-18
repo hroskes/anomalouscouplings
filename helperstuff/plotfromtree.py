@@ -1,11 +1,14 @@
+import re
+import random
+
+import ROOT
+
 from helperstuff import config
 from helperstuff import constants
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import Category, Channel
 import helperstuff.rootoverloads.histogramfloor
 from helperstuff.samples import Sample, SampleBase
-import re
-import ROOT
 
 class Options(dict):
   def __getattr__(self, attr):

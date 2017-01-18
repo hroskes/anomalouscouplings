@@ -14,15 +14,15 @@ import os
 #inputs
 #weight, bins, min, max, category can be None
 productionmode = "VBF"
-disc           = "D_2jet_0plus"
-weight         = ReweightingSample(productionmode, "0+")
+disc           = "D_CP_VBF"
+weight         = ArbitraryCouplingsSample('VBF', g1=1, g2=0, g4=-0.297979, g1prime2=0)
 bins           = None
 min            = None
 max            = None
 
 enrich         = False
 masscut        = True
-normalizeto1   = False
+normalizeto1   = True
 
 channel        = "2e2mu"
 category       = None
@@ -81,11 +81,13 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       os.makedirs(os.path.join(config.plotsbasedir, "TEST"))
     except OSError:
       pass
-    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}.png".format(hypothesis)))
+    for ext in "png eps root pdf".split():
+      c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}.{}".format(hypothesis, ext)))
 
 hstack.Draw("histnostack")
 hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
-c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "test.png"))
+for ext in "png eps root pdf".split():
+  c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "test.{}".format(ext)))
 
 """
 hint = hs["0+"].Clone("hint")

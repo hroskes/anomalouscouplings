@@ -67,11 +67,11 @@ minmax_g1jgik = {
 
 discriminants = {
     d.name: d for d in [
-        Discriminant("D_bkg_0plus", "D_{bkg}", defaultnbins, 0, 1),
-        Discriminant("D_bkg_0plus_ResUp", "D_{bkg}^{ResUp}", defaultnbins, 0, 1),
-        Discriminant("D_bkg_0plus_ResDown", "D_{bkg}^{ResDown}", defaultnbins, 0, 1),
-        Discriminant("D_bkg_0plus_ScaleUp", "D_{bkg}^{ScaleUp}", defaultnbins, 0, 1),
-        Discriminant("D_bkg_0plus_ScaleDown", "D_{bkg}^{ScaleDown}", defaultnbins, 0, 1),
+        Discriminant("D_bkg", "D_{bkg}", defaultnbins, 0, 1),
+        Discriminant("D_bkg_ResUp", "D_{bkg}^{ResUp}", defaultnbins, 0, 1),
+        Discriminant("D_bkg_ResDown", "D_{bkg}^{ResDown}", defaultnbins, 0, 1),
+        Discriminant("D_bkg_ScaleUp", "D_{bkg}^{ScaleUp}", defaultnbins, 0, 1),
+        Discriminant("D_bkg_ScaleDown", "D_{bkg}^{ScaleDown}", defaultnbins, 0, 1),
         Discriminant("D_0minus_decay", "D_{0-}^{dec}", defaultnbins, 0, 1),
         Discriminant("D_CP_decay", "D_{CP}^{dec}", defaultnbins, -0.5, 0.5),
         Discriminant("D_g2_decay", "D_{0h+}^{dec}", defaultnbins, 0, 1),
@@ -148,8 +148,20 @@ discriminants = {
         Discriminant("D_g2_HadVHdecay", "D_{0h+}^{VHdec}", defaultnbins, 0, 1),
         Discriminant("D_g1prime2_HadVHdecay", "D_{#Lambda1}^{VHdec}", defaultnbins, 0, 1),
     ] + [
-        Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
         Discriminant("D_2jet_0plus", "D_{2jet}^{0+}", defaultnbins, 0, 1),
+        Discriminant("D_2jet_0minus", "D_{2jet}^{0-}", defaultnbins, 0, 1),
+        Discriminant("D_2jet_a2", "D_{2jet}^{0h+}", defaultnbins, 0, 1),
+        Discriminant("D_2jet_L1", "D_{2jet}^{#Lambda1}", defaultnbins, 0, 1),
+        Discriminant("D_HadZH_0plus", "D_{ZH}^{0+}", defaultnbins, 0, 1),
+        Discriminant("D_HadZH_0minus", "D_{ZH}^{0-}", defaultnbins, 0, 1),
+        Discriminant("D_HadZH_a2", "D_{ZH}^{0h+}", defaultnbins, 0, 1),
+        Discriminant("D_HadZH_L1", "D_{ZH}^{#Lambda1}", defaultnbins, 0, 1),
+        Discriminant("D_HadWH_0plus", "D_{WH}^{0+}", defaultnbins, 0, 1),
+        Discriminant("D_HadWH_0minus", "D_{WH}^{0-}", defaultnbins, 0, 1),
+        Discriminant("D_HadWH_a2", "D_{WH}^{0h+}", defaultnbins, 0, 1),
+        Discriminant("D_HadWH_L1", "D_{WH}^{#Lambda1}", defaultnbins, 0, 1),
+    ] + [
+        Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
     ]
 }
 

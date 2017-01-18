@@ -226,15 +226,6 @@ class SampleBase(object):
                }
 
     @property
-    def MC_weight(self):
-        terms = self.linearcombinationofreweightingsamples("directlyreweighted")
-        result = "+".join(
-                          "({}*{})".format(reweightingsample.weightname(), factor)
-                                  for reweightingsample, factor in terms.iteritems()
-                         )
-        return result
-
-    @property
     def MC_weight_terms(self):
         factors = []
 
@@ -266,6 +257,17 @@ class SampleBase(object):
                            ])
 
         return factors
+
+    @property
+    def MC_weight(self):
+        return "*".join(
+                        "("+
+                        "+".join(
+                                 "({}*{})".format(weightname, couplingsq)
+                                       for weightname, couplingsq in factor
+                                )
+                        +")" for factor in self.MC_weight_terms
+                       )
 
     def get_MC_weight_function(self_sample, functionname=None, reweightingonly=False):
         if functionname is None:
@@ -680,6 +682,10 @@ class ReweightingSample(MultiEnum, SampleBase):
         elif self.productionmode == "ZX":
             return "MC_weight_ZX"
         raise self.ValueError("weightname")
+
+    @property
+    def MC_weight(self):
+        return self.weightname()
 
     def TDirectoryname(self):
         if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH") or self.productionmode == "ZX" and not config.usedata:
