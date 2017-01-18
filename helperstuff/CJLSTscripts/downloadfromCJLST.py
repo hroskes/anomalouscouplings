@@ -11,19 +11,17 @@ import urllib
 
 class CJLSTScript_base(object):
     __metaclass__ = ABCMeta
-    class WrongExtensionError(Exception): pass
+    class WrongFileError(Exception): pass
 
-    @abstractproperty
-    def validextensions(self):
-        """give file extensions supported by this class"""
-        return []
+    @abstractmethod
+    def filenameisvalid(self, filename):
+        """give filenames supported by this class"""
 
     def __init__(self, locationinZZAnalysis):
         self.locationinZZAnalysis = locationinZZAnalysis
         self.filename = os.path.basename(locationinZZAnalysis)
-        extension = os.path.splitext(self.filename)[1]
-        if extension not in self.validextensions:
-            raise self.WrongExtensionError("{} does not support {} which has extension {}".format(type(self).__name__, locationinZZAnalysis, extension))
+        if not self.filenameisvalid(self.filename):
+            raise self.WrongFileError("{} does not support {}".format(type(self).__name__, locationinZZAnalysis))
 
     def download(self, SHA1, force=False):
         if self.existsandishappy() and not force:
@@ -56,9 +54,9 @@ class CJLSTScript_base(object):
         return self.locationinZZAnalysis
 
 class CJLSTScript_Cpp(CJLSTScript_base):
-    @property
-    def validextensions(self):
-        return [".cc", ".C", ".h"]
+    def filenameisvalid(self, filename):
+        ext = os.path.splitext(filename)[1]
+        return ext in [".cc", ".C", ".h"] and filename != "Category.cc"
     def fixandmove(self, tmpfilename):
         with open(tmpfilename) as tmpf, open(self.filename, "w") as f:
             for line in tmpf:
@@ -77,11 +75,25 @@ class CJLSTScript_Cpp(CJLSTScript_base):
                 f.write(line)
 
 class CJLSTScript_other(CJLSTScript_base):
-    @property
-    def validextensions(self):
-        return [".root"]
+    def filenameisvalid(self, filename):
+        ext = os.path.splitext(filename)[1]
+        return ext in [".root"]
     def fixandmove(self, tmpfilename):
         super(CJLSTScript_other, self).fixandmove(tmpfilename)
+
+class CJLSTScript_category(CJLSTScript_Cpp, CJLSTScript_base):
+    def filenameisvalid(self, filename):
+        return filename == "Category.cc"
+    def fixandmove(self, tmpfilename):
+        with open(tmpfilename) as tmpf:
+            contents = tmpf.read()
+        tocomment = "|| ( nExtraLep==0 && nCleanedJetsPt30==2 && nCleanedJetsPt30BTagged==2 )"
+        if contents.count(tocomment) != 1:
+            raise IOError("Category code has changed!")
+        contents = contents.replace(tocomment, "/*"+tocomment+"*/")
+        with open(tmpfilename, "w") as f:
+            f.write(contents)
+        super(CJLSTScript_category, self).fixandmove(tmpfilename)
 
 def CJLSTScript(*args, **kwargs):
     result = []
@@ -89,12 +101,12 @@ def CJLSTScript(*args, **kwargs):
     for subclass in CJLSTScript_base.__subclasses__():
         try:
             result.append(subclass(*args, **kwargs))
-        except CJLSTScript_base.WrongExtensionError as e:
+        except CJLSTScript_base.WrongFileError as e:
             exceptions.append(e)
     if not result:
-        raise CJLSTScript_base.WrongExtensionError("\n".join(str(e) for e in exceptions))
+        raise CJLSTScript_base.WrongFileError("\n".join(str(e) for e in exceptions))
     if len(result) > 1:
-        raise TypeError("Multiple classes ({}) allow the same extension!!".format(", ".join(str(type(_)) for _ in result)))
+        raise TypeError("Multiple classes ({}) allow the same filename!!".format(", ".join(str(type(_)) for _ in result)))
     return result[0]
 
 class Downloader(object):
