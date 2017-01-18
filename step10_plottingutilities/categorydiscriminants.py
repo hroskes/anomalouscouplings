@@ -20,7 +20,7 @@ class Line(namedtuple("Line", "sample title color reweightfrom")):
             reweightfrom = Sample(reweightfrom, config.productionsforcombine[0])
         return super(Line, cls).__new__(cls, sample, title, color, reweightfrom)
 
-def makeplot(analysis, disc):
+def makeplot(analysis, disc, additionalcconstant=1, shiftWP=None):
   analysis == Analysis(analysis)
   if "HadZH" in disc:
     productionmode = "ZH"
@@ -31,6 +31,17 @@ def makeplot(analysis, disc):
   elif "2jet" in disc:
     productionmode = "VBF"
     WP = WP_VBF2j()
+
+  if shiftWP is not None:
+    if additionalcconstant != 1:
+      raise TypeError("Can't provide both arguments additionalcconstant and shiftWP!")
+    if not 0 < shiftWP < 1:
+      raise ValueError("Can't shift WP to {}!  Has to be between 0 and 1!".format(shiftWP))
+    additionalcconstant = WP / shiftWP * (shiftWP-1) / (WP-1)
+
+  WP = (additionalcconstant*(1/WP-1)+1)**-1
+  if shiftWP is not None:
+    assert abs(WP - shiftWP) < 1e-10, "{} {}".format(WP, shiftWP)
 
   fainame = "{}^{{{}}}".format(analysis.title, productionmode)
 
@@ -52,12 +63,18 @@ def makeplot(analysis, disc):
   l.SetFillStyle(0)
   c = ROOT.TCanvas()
 
+  xaxislabel = discriminant(disc).title
+  if additionalcconstant != 1:
+    xaxislabel += " (shifted)"
+
   for sample, title, color, reweightfrom in lines:
     h = hs[analysis,disc,sample] = plotfromtree(
       productionmode=reweightfrom.productionmode,
       hypothesis=reweightfrom.hypothesis,
       weight=sample,
       disc=disc,
+      transformation="1/({cprime}*(1/{{disc}}-1)+1)".format(cprime=additionalcconstant),
+      xaxislabel=xaxislabel,
       normalizeto1=True,
       color=color,
     )
@@ -65,14 +82,16 @@ def makeplot(analysis, disc):
     l.AddEntry(h, title, "l")
 
   hstack.Draw("hist nostack")
-  hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
   l.Draw()
 
-  c.Update()
-  line = ROOT.TLine(WP, ROOT.gPad.GetUymin(), WP, ROOT.gPad.GetUymax())
+  hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
+
+  line = ROOT.TLine(WP, ROOT.gPad.GetUymin(), WP, l.GetY1())
   line.SetLineWidth(4)
   line.SetLineColor(ROOT.kOrange+7)
+  line.SetLineStyle(9)
   line.Draw()
+  l.AddEntry(line, "cut", "l")
 
   saveasdir = os.path.join(config.plotsbasedir, "categorization", str(analysis))
   try:
@@ -86,4 +105,14 @@ if __name__ == "__main__":
   for analysis in analyses:
     for p in "HadWH", "HadZH", "2jet":
       for h in "0plus", "0minus", "a2", "L1":
-        makeplot(analysis, "D_{}_{}".format(p, h))
+        if (
+               analysis == "fa3" and h in ("a2", "L1")
+            or analysis == "fa2" and h in ("0minus", "L1")
+            or analysis == "fL1" and h in ("0minus", "a2")
+           ): continue
+
+        shiftWP = None
+        if "Had" in p:
+          shiftWP = .5
+
+        makeplot(analysis, "D_{}_{}".format(p, h), shiftWP=shiftWP)

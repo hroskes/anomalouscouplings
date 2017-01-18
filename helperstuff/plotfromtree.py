@@ -27,6 +27,8 @@ def plotfromtree(**kwargs):
     "min":            None,
     "max":            None,
 
+    "transformation": None,  #should be a string with {disc} in it
+
     "enrich":         False,
     "masscut":        True,
     "normalizeto1":   False,
@@ -36,6 +38,7 @@ def plotfromtree(**kwargs):
 
     "color":          1,
     "hname":          None,
+    "xaxislabel":     None,
   })
   for kw, kwarg in kwargs.iteritems():
     if kw in o:
@@ -44,6 +47,10 @@ def plotfromtree(**kwargs):
       raise ValueError("Unknown kwarg {}={}".format(kw, kwarg))
 
   discname, title, discbins, discmin, discmax = discriminant(o.disc)
+  if o.transformation is not None:
+    title = "f(" + title + ")"
+  if o.xaxislabel is not None:
+    title = o.xaxislabel
   if o.bins is None:
     o.bins = discbins
   if o.min is None:
@@ -60,7 +67,8 @@ def plotfromtree(**kwargs):
     except ValueError:
       continue
 
-    o.disc = re.sub(r"\b"+name+r"\b", value, o.disc)
+    if o.transformation is not None:
+      o.transformation = re.sub(r"\b"+name+r"\b", value, o.transformation)
     if o.weight is not None:
       o.weight = re.sub(r"\b"+name+r"\b", value, o.weight)
 
@@ -89,7 +97,12 @@ def plotfromtree(**kwargs):
 
   wt = "*".join("("+_+")" for _ in weightfactors)
 
-  t.Draw("{}>>{}({},{},{})".format(discname, o.hname, o.bins, o.min, o.max), wt, "hist")
+  if o.transformation is None:
+    formula = discname
+  else:
+    formula = o.transformation.format(disc=discname)
+
+  t.Draw("{}>>{}({},{},{})".format(formula, o.hname, o.bins, o.min, o.max), wt, "hist")
   h = getattr(ROOT, o.hname)
   h.GetXaxis().SetTitle(title)
   if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
