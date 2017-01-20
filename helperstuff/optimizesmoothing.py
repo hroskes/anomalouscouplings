@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 from abc import ABCMeta, abstractmethod, abstractproperty
 from collections import namedtuple
-from discriminants import discriminant
 import itertools
 from math import sqrt
 import numbers
-import numpy
 import os
+
+import numpy
 import ROOT
+
+import config
+from discriminants import discriminant
 from templates import Template
 from utilities import cache, tfiles
 
@@ -761,7 +764,8 @@ class TemplateIterate(Template):
         return None
 
 if __name__ == "__main__":
-    t = Template("background", "fa2", "D_int_prod", "4mu", "VHHadrtagged", "161221", "ggZZ")
+    assert len(config.productionsforcombine) == 1
+    t = Template("background", "fa2", "D_int_prod", "4mu", "VHHadrtagged", config.productionsforcombine[0], "ggZZ")
     print t
     print
     for d in t.discriminants:

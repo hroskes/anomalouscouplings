@@ -376,6 +376,7 @@ class Production(MyEnum):
     enumname = "production"
     enumitems = (
                  EnumItem("161221"),
+                 EnumItem("170119"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -383,6 +384,9 @@ class Production(MyEnum):
         if self == "161221":
             if config.host == "lxplus":
                 return "/afs/cern.ch/work/h/hroskes/public/reweighting_CJLST/CMSSW_8_0_24_patch1/src/ZZAnalysis/AnalysisStep/test/prod/anomalouscouplings/AAAOK"
+        if self == "170119":
+            if config.host == "lxplus":
+                return "/afs/cern.ch/work/h/hroskes/public/reweighting_CJLST/CMSSW_8_0_24_patch1/src/ZZAnalysis/AnalysisStep/test/prod/anomalouscouplings_Moriond/AAAOK"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -399,7 +403,7 @@ class Production(MyEnum):
         return int(str(self))
     @property
     def year(self):
-        if "161221" <= self:
+        if "170119" <= self:
             return 2016
         assert False
 

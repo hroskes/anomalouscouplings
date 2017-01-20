@@ -523,11 +523,11 @@ def projections(*args):
 
 if __name__ == "__main__":
   def projections():
-#    yield Projections("161221", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_decay")
-#    yield Projections("161221", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
-#    yield Projections("161221", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
-#    yield Projections("161221", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
-#    yield Projections("161221", "2e2mu", "fL1", "rescalemixtures", "fullrange", "VBFtagged")
+#    yield Projections("170119", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_decay")
+#    yield Projections("170119", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_decay")
+#    yield Projections("170119", "2e2mu", "fa3", "rescalemixtures", "enrich", "VBFtagged", "D_int_prod")
+#    yield Projections("170119", "2e2mu", "fa3", "rescalemixtures", "enrich", "VHHadrtagged", "D_int_prod")
+#    yield Projections("170119", "2e2mu", "fL1", "rescalemixtures", "fullrange", "VBFtagged")
 #    return
     for production in productions:
       for channel in channels:

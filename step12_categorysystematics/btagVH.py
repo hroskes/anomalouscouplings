@@ -7,7 +7,8 @@ from helperstuff.CJLSTscripts import VHHadrTaggedIchep16, VBF2jTaggedIchep16
 from helperstuff.samples import Sample
 from helperstuff.utilities import tfiles
 
-fromsample = Sample("ZH", "0+", "161221", "POWHEG")
+assert len(config.productionsforcombine) == 0
+fromsample = Sample("ZH", "0+", config.productionsforcombine[0], "POWHEG")
 tosample = fromsample
 categorization = "category_0P_or_0M"
 

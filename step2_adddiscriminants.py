@@ -11,7 +11,7 @@ import os
 import ROOT
 import sys
 
-definitelyexists = Sample("VBF", "0+", "161221")
+definitelyexists = Sample("VBF", "0+", config.productionsforcombine[0])
 if not xrd.exists(definitelyexists.CJLSTfile()):
     raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
 

@@ -7,7 +7,8 @@ import helperstuff.style
 ROOT.gStyle.SetCanvasDefW(678)
 ROOT.gStyle.SetPadRightMargin(0.115)
 
-fromsamples = [Sample("WH", hypothesis, "161221") for hypothesis in prodonlyhypotheses]
+assert len(config.productionsforcombine) == 1
+fromsamples = [Sample("WH", hypothesis, config.productionsforcombine[0]) for hypothesis in prodonlyhypotheses]
 tosamples = [ReweightingSample("WH", hypothesis) for hypothesis in proddechypotheses]
 cache = []
 """
