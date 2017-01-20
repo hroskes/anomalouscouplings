@@ -6,11 +6,8 @@ import socket
 if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and getpass.getuser() in ["hroskes","rbarr"] :
     host = "lxplus"
     if getpass.getuser() == "hroskes":
-        repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production"
+        repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production_runiteration/"
         plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/"
-    if getpass.getuser() == "rbarr":
-        repositorydir = "/afs/cern.ch/work/r/rbarr/anomalouscouplings"
-        plotsbasedir = "/afs/cern.ch/user/r/rbarr/www/anomalouscouplings_production/"
 
 elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname()) and getpass.getuser() == "jroskes1@jhu.edu":
     host = "MARCC"
