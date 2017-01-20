@@ -382,14 +382,18 @@ class TreeWrapper(Iterator):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g4_decay*constants.g4decay**2)
     def D_CP_decay(self):
         return self.M2g1g4_decay*constants.g4decay / (self.M2g1_decay + self.M2g4_decay*constants.g4decay**2)
-    def D_g2_decay(self):
+    def D_0hplus_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g2_decay*constants.g2decay**2)
-    def D_g1g2_decay(self):
+    def D_int_decay(self):
         return self.M2g1g2_decay*constants.g2decay / (self.M2g1_decay + self.M2g2_decay*constants.g2decay**2)
-    def D_g1prime2_decay(self):
+    def D_L1_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
-    def D_g1g1prime2_decay(self):
+    def D_L1int_decay(self):
         return self.M2g1g1prime2_decay*constants.g1prime2decay_reco / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+    def D_L1Zg_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
+    def D_L1Zgint_decay(self):
+        return self.M2g1ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
 
 #######################################
 #VBF anomalous couplings discriminants#
@@ -401,18 +405,24 @@ class TreeWrapper(Iterator):
     def D_CP_VBF(self):
         if self.notdijet: return -999
         return self.M2g1g4_VBF*constants.g4VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
-    def D_g2_VBF(self):
+    def D_0hplus_VBF(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
-    def D_g1g2_VBF(self):
+    def D_int_VBF(self):
         if self.notdijet: return -999
         return self.M2g1g2_VBF*constants.g2VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
-    def D_g1prime2_VBF(self):
+    def D_L1_VBF(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
-    def D_g1g1prime2_VBF(self):
+    def D_L1int_VBF(self):
         if self.notdijet: return -999
         return self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
+    def D_L1Zg_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2)
+    def D_L1Zgint_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2)
 
 ###############################################
 #ZH hadronic anomalous couplings discriminants#
@@ -424,18 +434,24 @@ class TreeWrapper(Iterator):
     def D_CP_HadZH(self):
         if self.notdijet: return -999
         return self.M2g1g4_HadZH*constants.g4ZH / (self.M2g1_HadZH + self.M2g4_HadZH*constants.g4ZH**2)
-    def D_g2_HadZH(self):
+    def D_0hplus_HadZH(self):
         if self.notdijet: return -999
         return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)
-    def D_g1g2_HadZH(self):
+    def D_int_HadZH(self):
         if self.notdijet: return -999
         return self.M2g1g2_HadZH*constants.g2ZH / (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)
-    def D_g1prime2_HadZH(self):
+    def D_L1_HadZH(self):
         if self.notdijet: return -999
         return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)
-    def D_g1g1prime2_HadZH(self):
+    def D_L1int_HadZH(self):
         if self.notdijet: return -999
         return self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco / (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)
+    def D_L1Zg_HadZH(self):
+        if self.notdijet: return -999
+        return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2)
+    def D_L1Zgint_HadZH(self):
+        if self.notdijet: return -999
+        return self.M2g1ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco / (self.M2g1_HadZH + self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2)
 
 ###############################################
 #WH hadronic anomalous couplings discriminants#
@@ -447,18 +463,24 @@ class TreeWrapper(Iterator):
     def D_CP_HadWH(self):
         if self.notdijet: return -999
         return self.M2g1g4_HadWH*constants.g4WH / (self.M2g1_HadWH + self.M2g4_HadWH*constants.g4WH**2)
-    def D_g2_HadWH(self):
+    def D_0hplus_HadWH(self):
         if self.notdijet: return -999
         return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g2_HadWH*constants.g2WH**2)
-    def D_g1g2_HadWH(self):
+    def D_int_HadWH(self):
         if self.notdijet: return -999
         return self.M2g1g2_HadWH*constants.g2WH / (self.M2g1_HadWH + self.M2g2_HadWH*constants.g2WH**2)
-    def D_g1prime2_HadWH(self):
+    def D_L1_HadWH(self):
         if self.notdijet: return -999
         return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)
-    def D_g1g1prime2_HadWH(self):
+    def D_L1int_HadWH(self):
         if self.notdijet: return -999
         return self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco / (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)
+    def D_L1Zg_HadWH(self):
+        if self.notdijet: return -999
+        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2)
+    def D_L1Zgint_HadWH(self):
+        if self.notdijet: return -999
+        return self.M2g1ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco / (self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2)
 
 ###############################################
 #VH hadronic anomalous couplings discriminants#
@@ -486,7 +508,7 @@ class TreeWrapper(Iterator):
                    (self.M2g1_HadZH + self.M2g4_HadZH*constants.g4ZH**2)*constants.JHUXSZHa1
                  )
                )
-    def D_g2_HadVH(self):
+    def D_0hplus_HadVH(self):
         if self.notdijet: return -999
         return (
                  (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
@@ -497,7 +519,7 @@ class TreeWrapper(Iterator):
                    (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)*constants.JHUXSZHa1
                  )
                )
-    def D_g1g2_HadVH(self):
+    def D_int_HadVH(self):
         if self.notdijet: return -999
         return (
                  (self.M2g1g2_HadWH*constants.g2WH*constants.JHUXSWHa1 + self.M2g1g2_HadZH*constants.g2ZH*constants.JHUXSZHa1)
@@ -508,7 +530,7 @@ class TreeWrapper(Iterator):
                    (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)*constants.JHUXSZHa1
                  )
                )
-    def D_g1prime2_HadVH(self):
+    def D_L1_HadVH(self):
         if self.notdijet: return -999
         return (
                  (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
@@ -519,7 +541,7 @@ class TreeWrapper(Iterator):
                    (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
                  )
                )
-    def D_g1g1prime2_HadVH(self):
+    def D_L1int_HadVH(self):
         if self.notdijet: return -999
         return (
                  (self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco*constants.JHUXSWHa1 + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco*constants.JHUXSZHa1)
@@ -530,6 +552,28 @@ class TreeWrapper(Iterator):
                    (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
                  )
                )
+    def D_L1Zg_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2)*constants.JHUXSWHa1
+                 +
+                   (self.M2g1_HadZH + self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2)*constants.JHUXSZHa1
+                 )
+               )
+    def D_L1Zgint_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco*constants.JHUXSWHa1 + self.M2g1ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco*constants.JHUXSZHa1)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2)*constants.JHUXSWHa1
+                 +
+                   (self.M2g1_HadZH + self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2)*constants.JHUXSZHa1
+                 )
+               )
 
 ############################################
 #VBFdecay anomalous couplings discriminants#
@@ -538,12 +582,15 @@ class TreeWrapper(Iterator):
     def D_0minus_VBFdecay(self):
         if self.notdijet: return -999
         return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4_VBF*self.M2g4_decay*(constants.g4VBF*constants.g4decay)**2)
-    def D_g2_VBFdecay(self):
+    def D_0hplus_VBFdecay(self):
         if self.notdijet: return -999
         return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2_VBF*self.M2g2_decay * (constants.g2VBF*constants.g2decay)**2)
-    def D_g1prime2_VBFdecay(self):
+    def D_L1_VBFdecay(self):
         if self.notdijet: return -999
         return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g1prime2_VBF*self.M2g1prime2_decay * (constants.g1prime2VBF_reco*constants.g1prime2decay_reco)**2)
+    def D_L1Zg_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2ghzgs1prime2_VBF*self.M2ghzgs1prime2_decay * (constants.ghzgs1prime2VBF_reco*constants.ghzgs1prime2decay_reco)**2)
 
 ####################################################
 #ZHdecay hadronic anomalous couplings discriminants#
@@ -552,12 +599,15 @@ class TreeWrapper(Iterator):
     def D_0minus_HadZHdecay(self):
         if self.notdijet: return -999
         return self.M2g1_HadZH*self.M2g1_decay / (self.M2g1_HadZH*self.M2g1_decay + self.M2g4_HadZH*self.M2g4_decay*(constants.g4ZH*constants.g4decay)**2)
-    def D_g2_HadZHdecay(self):
+    def D_0hplus_HadZHdecay(self):
         if self.notdijet: return -999
         return self.M2g1_HadZH*self.M2g1_decay / (self.M2g1_HadZH*self.M2g1_decay + self.M2g2_HadZH*self.M2g2_decay * (constants.g2ZH*constants.g2decay)**2)
-    def D_g1prime2_HadZHdecay(self):
+    def D_L1_HadZHdecay(self):
         if self.notdijet: return -999
         return self.M2g1_HadZH*self.M2g1_decay / (self.M2g1_HadZH*self.M2g1_decay + self.M2g1prime2_HadZH*self.M2g1prime2_decay * (constants.g1prime2ZH_reco*constants.g1prime2decay_reco)**2)
+    def D_L1Zg_HadZHdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_HadZH*self.M2g1_decay / (self.M2g1_HadZH*self.M2g1_decay + self.M2ghzgs1prime2_HadZH*self.M2ghzgs1prime2_decay * (constants.ghzgs1prime2ZH_reco*constants.ghzgs1prime2decay_reco)**2)
 
 ####################################################
 #WHdecay hadronic anomalous couplings discriminants#
@@ -566,12 +616,15 @@ class TreeWrapper(Iterator):
     def D_0minus_HadWHdecay(self):
         if self.notdijet: return -999
         return self.M2g1_HadWH*self.M2g1_decay / (self.M2g1_HadWH*self.M2g1_decay + self.M2g4_HadWH*self.M2g4_decay*(constants.g4WH*constants.g4decay)**2)
-    def D_g2_HadWHdecay(self):
+    def D_0hplus_HadWHdecay(self):
         if self.notdijet: return -999
         return self.M2g1_HadWH*self.M2g1_decay / (self.M2g1_HadWH*self.M2g1_decay + self.M2g2_HadWH*self.M2g2_decay * (constants.g2WH*constants.g2decay)**2)
-    def D_g1prime2_HadWHdecay(self):
+    def D_L1_HadWHdecay(self):
         if self.notdijet: return -999
         return self.M2g1_HadWH*self.M2g1_decay / (self.M2g1_HadWH*self.M2g1_decay + self.M2g1prime2_HadWH*self.M2g1prime2_decay * (constants.g1prime2WH_reco*constants.g1prime2decay_reco)**2)
+    def D_L1Zg_HadWHdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_HadWH*self.M2g1_decay / (self.M2g1_HadWH*self.M2g1_decay + self.M2ghzgs1prime2_HadWH*self.M2ghzgs1prime2_decay * (constants.ghzgs1prime2WH_reco*constants.ghzgs1prime2decay_reco)**2)
 
 ####################################################
 #VHdecay hadronic anomalous couplings discriminants#
@@ -590,7 +643,7 @@ class TreeWrapper(Iterator):
                         *self.M2g4_decay*constants.g4decay**2
                  )
                )
-    def D_g2_HadVHdecay(self):
+    def D_0hplus_HadVHdecay(self):
         if self.notdijet: return -999
         return (
                  ((self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
@@ -603,7 +656,7 @@ class TreeWrapper(Iterator):
                         *self.M2g2_decay*constants.g2decay**2
                  )
                )
-    def D_g1prime2_HadVHdecay(self):
+    def D_L1_HadVHdecay(self):
         if self.notdijet: return -999
         return (
                  ((self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
@@ -614,6 +667,19 @@ class TreeWrapper(Iterator):
                         *self.M2g1_decay
                  + (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2*constants.JHUXSWHa1+self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2*constants.JHUXSZHa1)
                         *self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                 )
+               )
+    def D_L1Zg_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_HadWH*constants.JHUXSWHa1+self.M2g1_HadZH*constants.JHUXSZHa1)
+                        *self.M2g1_decay
+                 + (self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2*constants.JHUXSWHa1+self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2*constants.JHUXSZHa1)
+                        *self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2
                  )
                )
 
@@ -1390,6 +1456,7 @@ class TreeWrapper(Iterator):
             categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "0-"), JEC),
             categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "a2"), JEC),
             categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "L1"), JEC),
+            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "L1Zgs"), JEC),
             #categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "fa2prod-0.5"), JEC),
             #categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "fL1prod0.5"), JEC),
         ]
@@ -1445,10 +1512,12 @@ class TreeWrapper(Iterator):
             "D_HadZH_L1",
             "D_0minus_decay",
             "D_CP_decay",
-            "D_g2_decay",
-            "D_g1g2_decay",
-            "D_g1prime2_decay",
-            "D_g1g1prime2_decay",
+            "D_0hplus_decay",
+            "D_int_decay",
+            "D_L1_decay",
+            "D_L1int_decay",
+            "D_L1Zg_decay",
+            "D_L1Zgint_decay",
         ]
 
         self.exceptions = [
@@ -1493,13 +1562,16 @@ class TreeWrapper(Iterator):
         proddiscriminants = [
             "D_0minus_{prod}",
             "D_CP_{prod}",
-            "D_g2_{prod}",
-            "D_g1g2_{prod}",
-            "D_g1prime2_{prod}",
-            "D_g1g1prime2_{prod}",
+            "D_0hplus_{prod}",
+            "D_int_{prod}",
+            "D_L1_{prod}",
+            "D_L1int_{prod}",
+            "D_L1Zg_{prod}",
+            "D_L1Zgint_{prod}",
             "D_0minus_{prod}decay",
-            "D_g2_{prod}decay",
-            "D_g1prime2_{prod}decay",
+            "D_0hplus_{prod}decay",
+            "D_L1_{prod}decay",
+            "D_L1Zg_{prod}decay",
         ]
         prodcomponentdiscriminants = [
             "D_g1{}_{}{}_{{prod}}decay{}".format(i, gj, 4-i, prime)
@@ -1675,22 +1747,28 @@ class TreeWrapper(Iterator):
         ReweightingSample("ggH", "a2"),
         ReweightingSample("ggH", "0-"),
         ReweightingSample("ggH", "L1"),
+        ReweightingSample("ggH", "L1Zg"),
         ReweightingSample("ggH", "fa20.5"),
         ReweightingSample("ggH", "fa30.5"),
         ReweightingSample("ggH", "fL10.5"),
+        ReweightingSample("ggH", "fLZg0.5"),
         ReweightingSample("VBF", "0+"),
         ReweightingSample("VBF", "a2"),
         ReweightingSample("VBF", "0-"),
         ReweightingSample("VBF", "L1"),
+        ReweightingSample("VBF", "L1Zg"),
         ReweightingSample("VBF", "fa2dec0.5"),
         ReweightingSample("VBF", "fa3dec0.5"),
         ReweightingSample("VBF", "fL1dec0.5"),
+        ReweightingSample("VBF", "fL1Zgdec0.5"),
         ReweightingSample("VBF", "fa2prod0.5"),
         ReweightingSample("VBF", "fa3prod0.5"),
         ReweightingSample("VBF", "fL1prod0.5"),
+        ReweightingSample("VBF", "fL1Zgprod0.5"),
         ReweightingSample("VBF", "fa2proddec-0.5"),
         ReweightingSample("VBF", "fa3proddec-0.5"),
         ReweightingSample("VBF", "fL1proddec0.5"),
+        ReweightingSample("VBF", "fL1Zgproddec0.5"),
         ReweightingSample("VBF", "fa2dec-0.5"),
         ReweightingSample("VBF", "fa2prod-0.5"),
         ReweightingSample("VBF", "fa2proddec0.5"),
@@ -1698,28 +1776,36 @@ class TreeWrapper(Iterator):
         ReweightingSample("ZH", "a2"),
         ReweightingSample("ZH", "0-"),
         ReweightingSample("ZH", "L1"),
+        ReweightingSample("ZH", "L1Zg"),
         ReweightingSample("ZH", "fa2dec0.5"),
         ReweightingSample("ZH", "fa3dec0.5"),
         ReweightingSample("ZH", "fL1dec0.5"),
+        ReweightingSample("ZH", "fL1Zgdec0.5"),
         ReweightingSample("ZH", "fa2prod0.5"),
         ReweightingSample("ZH", "fa3prod0.5"),
         ReweightingSample("ZH", "fL1prod0.5"),
+        ReweightingSample("ZH", "fL1Zgprod0.5"),
         ReweightingSample("ZH", "fa2proddec-0.5"),
         ReweightingSample("ZH", "fa3proddec-0.5"),
         ReweightingSample("ZH", "fL1proddec0.5"),
+        ReweightingSample("ZH", "fL1Zgproddec0.5"),
         ReweightingSample("WH", "0+"),
         ReweightingSample("WH", "a2"),
         ReweightingSample("WH", "0-"),
         ReweightingSample("WH", "L1"),
+        ReweightingSample("WH", "L1Zg"),
         ReweightingSample("WH", "fa2dec0.5"),
         ReweightingSample("WH", "fa3dec0.5"),
         ReweightingSample("WH", "fL1dec0.5"),
+        ReweightingSample("WH", "fL1Zgdec0.5"),
         ReweightingSample("WH", "fa2prod0.5"),
         ReweightingSample("WH", "fa3prod0.5"),
         ReweightingSample("WH", "fL1prod0.5"),
+        ReweightingSample("WH", "fL1Zgprod0.5"),
         ReweightingSample("WH", "fa2proddec-0.5"),
         ReweightingSample("WH", "fa3proddec-0.5"),
         ReweightingSample("WH", "fL1proddec0.5"),
+        ReweightingSample("WH", "fL1Zgproddec0.5"),
         ReweightingSample("ttH", "Hff0+", "0+"),
         ReweightingSample("ttH", "Hff0-", "0+"),
         ReweightingSample("ttH", "fCP0.5", "0+"),
@@ -1733,6 +1819,8 @@ class TreeWrapper(Iterator):
         ReweightingSample("ttH", "Hff0+", "fa20.5"),
         ReweightingSample("ttH", "Hff0+", "L1"),
         ReweightingSample("ttH", "Hff0+", "fL10.5"),
+        ReweightingSample("ttH", "Hff0+", "L1Zg"),
+        ReweightingSample("ttH", "Hff0+", "fL1Zg0.5"),
         ReweightingSample("HJJ", "Hff0+", "0+"),
         ReweightingSample("HJJ", "Hff0-", "0+"),
         ReweightingSample("HJJ", "fCP0.5", "0+"),
@@ -1746,6 +1834,8 @@ class TreeWrapper(Iterator):
         ReweightingSample("HJJ", "Hff0+", "fa20.5"),
         ReweightingSample("HJJ", "Hff0+", "L1"),
         ReweightingSample("HJJ", "Hff0+", "fL10.5"),
+        ReweightingSample("HJJ", "Hff0+", "L1Zg"),
+        ReweightingSample("HJJ", "Hff0+", "fL1Zg0.5"),
         ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
         ReweightingSample("qqZZ"),
         ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
