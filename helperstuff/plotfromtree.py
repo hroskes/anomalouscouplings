@@ -88,7 +88,7 @@ def plotfromtree(**kwargs):
   if o.category is not None:
     weightfactors.append(" || ".join("(category=={})".format(_) for _ in Category(o.category).idnumbers))
   if o.enrich:
-    weightfactors.append("D_bkg_0plus>0.5")
+    weightfactors.append("D_bkg>0.5")
   if o.channel is not None:
     weightfactors.append("Z1Flav*Z2Flav=={}".format(Channel(o.channel).ZZFlav))
   if o.masscut:

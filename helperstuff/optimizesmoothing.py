@@ -492,7 +492,7 @@ class ControlPlotOneBigRange(ControlPlotBase):
         if "reweight" in self.h:
             self.rangesthatshouldnotbereweighted  #might raise WrongControlPlotException
         t, d = self.template, self.disc
-        if d == discriminant("D_bkg_0plus"): return
+        if d == discriminant("D_bkg"): return
         if d == discriminant("D_0minus_VBFdecay"):
             if t.productionmode == "VBF" and t.hypothesis not in ("0+", "0-"):
                 raise WrongControlPlotException

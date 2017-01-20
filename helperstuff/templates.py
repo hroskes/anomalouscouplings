@@ -147,7 +147,7 @@ class TemplatesFile(MultiEnum):
 
     @property
     def bkgdiscriminant(self):
-        return self.shapesystematic.D_bkg_0plus()
+        return self.shapesystematic.D_bkg()
 
     @property
     def purediscriminant(self):

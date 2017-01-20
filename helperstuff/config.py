@@ -36,7 +36,7 @@ expectedscanluminosity = 40
 
 m4lmin, m4lmax = 105, 140
 
-blindcut = lambda self: self.D_bkg_0plus() < 0.5
+blindcut = lambda self: self.D_bkg() < 0.5
 
 productionsforcombine = ["170119"]
 

@@ -239,9 +239,9 @@ class ShapeSystematic(MyEnum):
     def appendname(self):
         if self == "": return ""
         return "_" + str(self)
-    def D_bkg_0plus(self, title=False):
+    def D_bkg(self, title=False):
         from discriminants import discriminant
-        return discriminant("D_bkg_0plus"+self.appendname())
+        return discriminant("D_bkg"+self.appendname())
     def appliesto(self, templategroup):
         if templategroup in ("ggh", "vbf", "zh", "wh"):
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
