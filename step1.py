@@ -37,7 +37,7 @@ else:
         shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_7_6_5/.gitignore")
 
     with utilities.cd("CMSSW_7_6_5/src"):
-        subprocess.check_call(["scram", "b"])
+        subprocess.check_call(["scram", "b", "-j", "10"])
 
     print """CMSSW area is set up"""
 
