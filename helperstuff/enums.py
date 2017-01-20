@@ -460,22 +460,6 @@ class Category(MyEnum):
         if self == "VBFtagged": return [ProductionMode("VBF")]
         if self == "VHHadrtagged": return [ProductionMode("ZH"), ProductionMode("WH")]
 
-class WhichProdDiscriminants(MyEnum):
-    """
-    D_bkg and D_(0minus/0hplus/L1)_VBFdecay, but which third one?
-    """
-    enumname = "whichproddiscriminants"
-    enumitems = (
-                 EnumItem("D_int_decay"),
-                 EnumItem("D_int_prod"),
-                 EnumItem("D_g11gi3"),
-                 EnumItem("D_g12gi2"),
-                 EnumItem("D_g13gi1"),
-                 EnumItem("D_g11gi3_prime"),
-                 EnumItem("D_g12gi2_prime"),
-                 EnumItem("D_g13gi1_prime"),
-                )
-
 class AlternateGenerator(MyEnum):
     enumname = "alternategenerator"
     enumitems = (
@@ -503,8 +487,6 @@ config.productionsforcombine = type(config.productionsforcombine)(Production(pro
 productions = Production.items(lambda x: x in config.productionsforcombine)
 blindstatuses = BlindStatus.items()
 categories = Category.items()
-whichproddiscriminants = WhichProdDiscriminants.items(lambda x: x == "D_int_prod")
-#whichproddiscriminants = WhichProdDiscriminants.items()
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):

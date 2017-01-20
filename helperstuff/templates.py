@@ -1,6 +1,6 @@
 import abc
 import config
-from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics, WhichProdDiscriminants, whichproddiscriminants
+from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
 from itertools import product
 import json
 import numpy
@@ -10,13 +10,11 @@ from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, ShapeSystematic, TemplateGroup, Analysis, Production, BlindStatus, WhichProdDiscriminants, Category]
+    enums = [Channel, ShapeSystematic, TemplateGroup, Analysis, Production, BlindStatus, Category]
 
     def applysynonyms(self, enumsdict):
         if enumsdict[Production] is None and len(config.productionsforcombine) == 1:
             enumsdict[Production] = config.productionsforcombine[0]
-        if enumsdict[WhichProdDiscriminants] is None and len(whichproddiscriminants) == 1:
-            enumsdict[WhichProdDiscriminants] = whichproddiscriminants[0]
         super(TemplatesFile, self).applysynonyms(enumsdict)
 
     def check(self, *args):
@@ -28,25 +26,10 @@ class TemplatesFile(MultiEnum):
         if self.category is None:
             self.category = Category("UntaggedIchep16")
 
-        if self.category == "UntaggedIchep16":
-            self.whichproddiscriminants = None
-
         if self.templategroup != "DATA":
             if self.blindstatus is not None:
                 raise ValueError("Can't blind MC!\n{}".format(args))
             dontcheck.append(BlindStatus)
-
-        if self.category == "UntaggedIchep16":
-            if len(whichproddiscriminants) == 1: self.whichproddiscriminants = None
-            if self.whichproddiscriminants is not None:
-                raise ValueError("Don't provide whichproddiscriminants for untagged category\n{}".format(args))
-            dontcheck.append(WhichProdDiscriminants)
-
-        if self.analysis == "fL1":
-            if len(whichproddiscriminants) == 1: self.whichproddiscriminants = None
-            if self.whichproddiscriminants is not None:
-                raise ValueError("Don't provide whichproddiscriminants for fL1\n{}".format(args))
-            dontcheck.append(WhichProdDiscriminants)
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
@@ -58,7 +41,7 @@ class TemplatesFile(MultiEnum):
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.shapesystematic, self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic, self.production, self.blindnamepart]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".json")
@@ -72,7 +55,7 @@ class TemplatesFile(MultiEnum):
             if not os.path.exists(folder):
                 raise IOError("No folder {}".format(folder))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.whichproddiscriminants, self.channel, self.categorynamepart, self.shapesystematic if config.applyshapesystematics else "", self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic if config.applyshapesystematics else "", self.production, self.blindnamepart]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
@@ -160,6 +143,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_decay")
             if self.analysis == "fL1":
                 return discriminant("D_L1_decay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1Zg_decay")
 
         if self.category == "VBF2jTaggedIchep16":
             if self.analysis == "fa3":
@@ -168,6 +153,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay")
             if self.analysis == "fL1":
                 return discriminant("D_L1_VBFdecay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1Zg_VBFdecay")
 
         if self.category == "VHHadrTaggedIchep16":
             if self.analysis == "fa3":
@@ -176,6 +163,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay")
             if self.analysis == "fL1":
                 return discriminant("D_L1_HadVHdecay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1Zg_HadVHdecay")
 
         assert False
 
@@ -183,52 +172,35 @@ class TemplatesFile(MultiEnum):
     def mixdiscriminant(self):
         from discriminants import discriminant
 
-        if self.category == "UntaggedIchep16" or self.whichproddiscriminants == "D_int_decay":
+        if self.category == "UntaggedIchep16":
             if self.analysis == "fa3":
                 return discriminant("D_CP_decay")
             if self.analysis == "fa2":
                 return discriminant("D_int_decay")
             if self.analysis == "fL1":
-                return discriminant("D_0hplus_decay")
+                return discriminant("D_L1Zg_decay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1_decay")
 
-        if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_int_prod":
+        if self.category == "VBF2jTaggedIchep16":
             if self.analysis == "fa3":
                 return discriminant("D_CP_VBF")
             if self.analysis == "fa2":
                 return discriminant("D_int_VBF")
             if self.analysis == "fL1":
-                return discriminant("D_0hplus_VBF")
+                return discriminant("D_L1Zg_VBFdecay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1_VBFdecay")
 
-        if self.category == "VHHadrTaggedIchep16" and self.whichproddiscriminants == "D_int_prod":
+        if self.category == "VHHadrTaggedIchep16":
             if self.analysis == "fa3":
                 return discriminant("D_CP_HadVH")
             if self.analysis == "fa2":
                 return discriminant("D_int_HadVH")
             if self.analysis == "fL1":
-                return discriminant("D_0hplus_HadVH")
-
-        if self.analysis == "fL1":
-            if self.category == "VBF2jTaggedIchep16":
-                return discriminant("D_0hplus_VBFdecay")
-            if self.category == "VHHadrTaggedIchep16":
-                return discriminant("D_0hplus_HadVHdecay")
-
-        for i, prime in product(range(1, 4), ("", "_prime")):
-            if self.category == "VBF2jTaggedIchep16" and self.whichproddiscriminants == "D_g1{}gi{}{}".format(i, 4-i, prime):
-                if self.analysis == "fa3":
-                    return discriminant("D_g1{}_g4{}_VBFdecay{}".format(i, 4-i, prime))
-                if self.analysis == "fa2":
-                    return discriminant("D_g1{}_g2{}_VBFdecay{}".format(i, 4-i, prime))
-                if self.analysis == "fL1":
-                    return discriminant("D_g1{}_g1prime2{}_VBFdecay{}".format(i, 4-i, prime))
-
-            if self.category == "VHHadrTaggedIchep16" and self.whichproddiscriminants == "D_g1{}gi{}{}".format(i, 4-i, prime):
-                if self.analysis == "fa3":
-                    return discriminant("D_g1{}_g4{}_HadZHdecay{}".format(i, 4-i, prime))
-                if self.analysis == "fa2":
-                    return discriminant("D_g1{}_g2{}_HadZHdecay{}".format(i, 4-i, prime))
-                if self.analysis == "fL1":
-                    return discriminant("D_g1{}_g1prime2{}_HadZHdecay{}".format(i, 4-i, prime))
+                return discriminant("D_L1Zg_HadVHdecay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1_HadVHdecay")
 
         assert False
 
@@ -299,29 +271,15 @@ def templatesfiles():
             for production in productions:
                 for analysis in analyses:
                     for category in categories:
-                        for w in whichproddiscriminants:
-                            if category == "UntaggedIchep16":
-                                if w == whichproddiscriminants[0]:
-                                    w = None
-                                else:
-                                    continue
-                            elif analysis == "fL1":
-                                if w == whichproddiscriminants[0]:
-                                    w = None
-                                else:
-                                    continue
-                            else:
-                                if w != "D_int_prod":
-                                    continue
-                            yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category, w)
-                            yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category, w)
-                            yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category, w)
-                            yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category, w)
-                            if shapesystematic == "":
-                                yield TemplatesFile(channel, "bkg", analysis, production, category, w)
-                            for blindstatus in blindstatuses:
-                                if shapesystematic == "" and (blindstatus == "blind" or config.unblinddistributions) and config.usedata:
-                                    yield TemplatesFile(channel, "DATA", analysis, production, blindstatus, category, w)
+                        yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
+                        yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
+                        yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
+                        yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
+                        if shapesystematic == "":
+                            yield TemplatesFile(channel, "bkg", analysis, production, category)
+                        for blindstatus in blindstatuses:
+                            if shapesystematic == "" and (blindstatus == "blind" or config.unblinddistributions) and config.usedata:
+                                yield TemplatesFile(channel, "DATA", analysis, production, blindstatus, category)
 
 class TemplateBase(object):
     __metaclass__ = abc.ABCMeta
@@ -774,7 +732,6 @@ class Template(TemplateBase, MultiEnum):
     def domirror(self):
         if self.analysis != "fa3": return False
         if self.productionmode == "data": return False
-        if self.whichproddiscriminants in ("D_g12gi2", "D_g12gi2_prime"): return False
 
         if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
         if self.hypothesis in ("0+", "0-"): return True
@@ -806,7 +763,6 @@ class Template(TemplateBase, MultiEnum):
               str(self.category),
               str(self.channel),
               str(self.analysis),
-              str(self.whichproddiscriminants),
               str(self.hypothesis),
               str(self.shapesystematic),
               str(self.production),
@@ -948,26 +904,17 @@ class IntTemplate(TemplateBase, MultiEnum):
     @property
     def mirrorjsn(self):
         if self.analysis != "fa3": return None
-        if self.whichproddiscriminants in ("D_g12gi2", "D_g12gi2_prime"): return None
 
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode == "ggH":
-            if self.whichproddiscriminants == "D_int_prod":
-                #ggH has no production information, so mirror symmetric
-                return {"type":"mirror", "antisymmetric":False, "axis":1}
-            elif self.whichproddiscriminants == "D_int_decay":
-                pass #continue to the end of the function
-            else:
-                #mix of production and decay information - can't mirror either way
-                return None
+            #ggH has no production information, so mirror symmetric
+            return {"type":"mirror", "antisymmetric":False, "axis":1}
 
         if (   self.category == "VBFtagged" and self.productionmode in ("ZH", "WH")
             or self.category == "VHHadrtagged" and self.productionmode == "VBF"
            ):
-            if self.whichproddiscriminants == "D_int_decay":
-                pass
-            elif self.interferencetype in ("g11gi3", "g13gi1"):
-                return None #Even for D_int_prod can't mirror, there is still CP violation even
+            if self.interferencetype in ("g11gi3", "g13gi1"):
+                return None #Even though it's D_int_prod can't mirror, there is still CP violation even
                             # though it's not the way this ME expects
             #but for g12gi2 can mirror, since there's no CP violation
 
