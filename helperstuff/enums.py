@@ -371,6 +371,12 @@ class Analysis(MyEnum):
             return "fa2prod0.5"
         if self == "fL1":
             return "fL1prod0.5"
+    @property
+    def categoryname(self):
+        if self == "fa3": return "0P_or_0M"
+        if self == "fa2": return "0P_or_a2"
+        if self == "fL1": return "0P_or_L1"
+        assert False
 
 class Production(MyEnum):
     enumname = "production"

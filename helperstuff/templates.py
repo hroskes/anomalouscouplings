@@ -210,7 +210,7 @@ class TemplatesFile(MultiEnum):
     @property
     def categorynamepart(self):
         if self.category == "UntaggedIchep16":
-            return ""
+            return "Untagged"
         if self.category == "VBF2jTaggedIchep16":
             return "VBFtag"
         if self.category == "VHHadrTaggedIchep16":
@@ -419,6 +419,16 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "data":
             return None
         return ReweightingSample(self.productionmode).weightname()
+
+    @property
+    def categoryname(self):
+        result = "category_"
+        result += self.analysis.categoryname
+
+        from treewrapper import TreeWrapper
+        for categorization in TreeWrapper.categorizations:
+            if categorization.category_function_name == result: return result
+        assert False, "{} does not exist in TreeWrapper".format(result)
 
     def reweightfrom(self):
         if self.productionmode == "ggH":
@@ -837,7 +847,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def selection(self):
         result = "ZZMass>{} && ZZMass<{} && Z1Flav*Z2Flav == {}".format(config.m4lmin, config.m4lmax, self.ZZFlav)
-        result += " && (" + " || ".join("category == {}".format(c) for c in self.category.idnumbers) + ")"
+        result += " && (" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")"
         return result
 
     @property
