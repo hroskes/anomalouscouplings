@@ -15,7 +15,7 @@ import os
 #weight, bins, min, max, category can be None
 productionmode = "VBF"
 disc           = "D_CP_VBF"
-weight         = ArbitraryCouplingsSample('VBF', g1=1, g2=0, g4=-0.297979, g1prime2=0)
+weight         = ArbitraryCouplingsSample('VBF', g1=1, g2=0, g4=-0.297979, g1prime2=0, ghzgs1prime2=0)
 bins           = None
 min            = None
 max            = None

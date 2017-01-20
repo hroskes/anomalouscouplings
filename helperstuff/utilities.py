@@ -157,3 +157,8 @@ def LoadMacro(filename):
             if error:
                 raise IOError("Couldn't load "+filename+"!")
             done = True
+
+def tlvfromptetaphim(pt, eta, phi, m):
+    result = ROOT.TLorentzVector()
+    result.SetPtEtaPhiM(pt, eta, phi, m)
+    return result

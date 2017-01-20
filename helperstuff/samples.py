@@ -691,8 +691,8 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_{}_g1g4_proddec_pi".format(self.productionmode)
             elif self.hypothesis == "fL1proddec0.5":
                 return "MC_weight_{}_g1g1prime2_proddec".format(self.productionmode)
-            elif self.hypothesis == "fL1Zgproddec0.5":
-                return "MC_weight_{}_g1ghzgs1prime2_proddec".format(self.productionmode)
+            elif self.hypothesis == "fL1Zgproddec-0.5":
+                return "MC_weight_{}_g1ghzgs1prime2_proddec_pi".format(self.productionmode)
 
             elif self.hypothesis == "fa2dec-0.5":
                 return "MC_weight_{}_g1g2_dec_pi".format(self.productionmode)
@@ -803,14 +803,14 @@ class ReweightingSample(MultiEnum, SampleBase):
                                    + ["g1{}".format(a) for a in ("g2", "g4", "g1prime2")]
                                   ):
                 return 1
-            if self.hypothesis in ("a2", "0-", "L1"):
+            if self.hypothesis in ("a2", "0-", "L1", "L1Zg"):
                 return 0
         raise self.ValueError("g1")
 
     @property
     def g2(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "0-", "L1"]
+                               ["0+", "0+_photoncut", "0-", "L1", "L1Zg"]
                              + ["{}{}0.5".format(a, b) for a in ("fa3", "fL1Zg") for b in ("dec", "prod", "proddec-")]
                              + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
                              + ["g1{}".format(a) for a in ("g4", "g1prime2")]
@@ -855,7 +855,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g4(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "a2", "L1"]
+                               ["0+", "0+_photoncut", "a2", "L1", "L1Zg"]
                              + ["{}{}0.5".format(a, b) for a in ("fa2", "fL1Zg") for b in ("dec", "prod", "proddec-")]
                              + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
                              + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
@@ -897,7 +897,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g1prime2(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "a2", "0-"]
+                               ["0+", "0+_photoncut", "a2", "0-", "L1Zg"]
                              + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3", "fL1Zg") for b in ("dec", "prod", "proddec-")]
                              + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]
                              + ["g1{}".format(a) for a in ("g2", "g4")]
@@ -939,7 +939,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def ghzgs1prime2(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "a2", "0-"]
+                               ["0+", "0+_photoncut", "a2", "0-", "L1"]
                              + ["{}{}0.5".format(a, b) for a in ("fa2", "fa3") for b in ("dec", "prod", "proddec-")]
                              + ["{}{}0.5".format(a, b) for a in ("fL1",) for b in ("dec", "prod", "proddec")]
                              + ["{}{}0.5".format(a, b) for a in ("fa2",) for b in ("dec-", "prod-", "proddec")]

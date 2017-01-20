@@ -8,9 +8,10 @@ class WeightsHelper(MultiEnum):
         from samples import SampleBase
         if len(args) == 1 and not kwargs and isinstance(args[0], SampleBase):
             sample = args[0]
-            if   sample.g2 == sample.g1prime2 == 0: args = (sample.productionmode, "fa3")
-            elif sample.g4 == sample.g1prime2 == 0: args = (sample.productionmode, "fa2")
-            elif sample.g2 == sample.g4       == 0: args = (sample.productionmode, "fL1")
+            if   sample.g2 == sample.g1prime2 == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fa3")
+            elif sample.g4 == sample.g1prime2 == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fa2")
+            elif sample.g2 == sample.g4       == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fL1")
+            elif sample.g2 == sample.g4       == sample.ghz1prime2   == 0: args = (sample.productionmode, "fL1Zgs")
             else: assert False
         return super(WeightsHelper, self).__init__(*args, **kwargs)
 
@@ -40,6 +41,7 @@ class WeightsHelper(MultiEnum):
         return "ghz1"
     @property
     def decayBSMcouplingname(self):
+        if self.analysis == "fL1Zg": return self.analysis.couplingname
         return self.analysis.couplingname.replace("g", "ghz")
     @property
     def decayBSMcouplingvalue(self):
@@ -58,12 +60,13 @@ class WeightsHelper(MultiEnum):
         if self.productionmode == "ttH": return "kappa_tilde"
         if self.productionmode == "HJJ": return "ghg4"
         if self.productionmode == "ggH": return None
+        if self.analysis == "fL1Zg": return self.analysis.couplingname
         if self.productionmode == "VBF": return self.analysis.couplingname.replace("g", "ghv")
         if self.productionmode == "WH": return self.analysis.couplingname.replace("g", "ghw")
         if self.productionmode == "ZH": return self.analysis.couplingname.replace("g", "ghz")
     @property
     def prodBSMcouplingvalue(self):
-        if self.analysis == "fL1" and self.productionmode in ("VBF", "WH", "ZH"): return "1E4"
+        if self.analysis in ["fL1", "fL1Zg"] and self.productionmode in ("VBF", "WH", "ZH"): return "1E4"
         else: return "1"
 
     @property
@@ -129,4 +132,4 @@ class WeightsHelper(MultiEnum):
 
 if __name__ == "__main__":
     from samples import ArbitraryCouplingsSample, ReweightingSample
-    print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, kappa=1, kappa_tilde=4).MC_weight
+    print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, kappa=1, kappa_tilde=4).MC_weight
