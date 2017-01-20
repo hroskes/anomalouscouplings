@@ -171,7 +171,7 @@ class SigmaIOverSigma1(MultiEnum):
         if self.productionmode in ("VBF", "ZH", "WH"):
             #for VBF, ZH, and WH, gi for the pure BSM sample is defined = 1
             sigmai = ReweightingSample(self.analysis.purehypotheses[1], self.productionmode).xsec
-            sigma1 = ReweightingSample("SM", self.productionmode).xsec
+            sigma1 = ReweightingSample(self.analysis.purehypotheses[0], self.productionmode).xsec
             return sigmai/sigma1
         assert False
 
@@ -180,7 +180,7 @@ class SigmaIOverSigma1_VH(MultiEnum):
     @property
     def result(self):
         sigmai = sum(ReweightingSample(self.analysis.purehypotheses[1], VH).xsec for VH in ("ZH", "WH"))
-        sigma1 = sum(ReweightingSample("SM", VH).xsec for VH in ("ZH", "WH"))
+        sigma1 = sum(ReweightingSample(self.analysis.purehypotheses[0], VH).xsec for VH in ("ZH", "WH"))
         return sigmai/sigma1
 
 def sigmaioversigma1(*args):

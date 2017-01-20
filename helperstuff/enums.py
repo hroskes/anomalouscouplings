@@ -98,6 +98,7 @@ class Hypothesis(MyEnum):
     enumname = "hypothesis"
     enumitems = (
                  EnumItem("0+", "SM", "scalar"),
+                 EnumItem("0+_photoncut", "SM_photoncut"),
                  EnumItem("a2", "0h+"),
                  EnumItem("0-", "a3", "PS", "pseudoscalar"),
                  EnumItem("L1", "Lambda1"),
@@ -123,15 +124,19 @@ class Hypothesis(MyEnum):
                 )
     @property
     def ispure(self):
-        return self in ("0+", "0-", "0h+", "L1", "L1Zg")
+        return self in ("0+", "0+_photoncut", "0-", "0h+", "L1", "L1Zg")
     @property
     def couplingname(self):
-        if self == "0+": return "g1"
+        if self in ("0+", "0+_photoncut"): return "g1"
         if self == "a2": return "g2"
         if self == "0-": return "g4"
         if self == "L1": return "g1prime2"
         if self == "L1Zg": return "ghzgs1prime2"
         assert False
+    @property
+    def photoncut(self):
+        if self in ("0+_photoncut", "L1Zg", "fL1Zgdec0.5", "fL1Zgprod0.5", "fL1Zgproddec-0.5"): return True
+        return False
 
 class HffHypothesis(MyEnum):
     enumname = "hffhypothesis"
@@ -204,26 +209,11 @@ class ProductionMode(MyEnum):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
     @property
-    def directlyreweightedhypotheses(self):
-        if self == "ggH":
-            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
-        if self == "VBF":
-            return Hypothesis.items(lambda x: x in proddechypotheses)
-        if self == "ZH":
-            return Hypothesis.items(lambda x: x in proddechypotheses)
-        if self == "WH":
-            return Hypothesis.items(lambda x: x in proddechypotheses)
-        assert False
-    @property
     def generatedhypotheses(self):
         if self == "ggH":
-            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
-        if self == "VBF":
-            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
-        if self == "ZH":
-            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
-        if self == "WH":
-            return Hypothesis.items(lambda x: x in prodonlyhypotheses)
+            return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5"))
+        if self in ("VBF", "ZH", "WH"):
+            return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"))
         if self in ("WplusH", "WminusH", "ttH", "HJJ"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
@@ -362,7 +352,7 @@ class Analysis(MyEnum):
         if self == "fL1":
             return Hypothesis("0+"), Hypothesis("L1")
         if self == "fL1Zg":
-            return Hypothesis("0+"), Hypothesis("L1Zg")
+            return Hypothesis("0+_photoncut"), Hypothesis("L1Zg")
     @property
     def mixdecayhypothesis(self):
         if self == "fa3":
@@ -384,6 +374,11 @@ class Analysis(MyEnum):
             return Hypothesis("fL1prod0.5")
         if self == "fL1Zg":
             return Hypothesis("fL1Zgprod0.5")
+        assert False
+    @property
+    def photoncut(self):
+        if self == "fL1Zg": return True
+        if self in ("fa2", "fa3", "fL1"): return False
         assert False
 
 class Production(MyEnum):
@@ -475,9 +470,9 @@ else:
 JECsystematics = JECSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
-decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "L1Zg", "fa20.5", "fa30.5", "fL10.5", "fL1Zg0.5"))
-prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
-proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec0.5", "fL1Zgproddec-0.5"))
+decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa20.5", "fa30.5", "fL10.5", "fL1Zg0.5"))
+prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
+proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec0.5", "fL1Zgproddec-0.5"))
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
