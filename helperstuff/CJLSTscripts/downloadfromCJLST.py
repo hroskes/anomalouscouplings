@@ -24,6 +24,7 @@ class CJLSTScript_base(object):
             raise self.WrongFileError("{} does not support {}".format(type(self).__name__, locationinZZAnalysis))
 
     def download(self, SHA1, force=False):
+        print self.existsandishappy(), force
         if self.existsandishappy() and not force:
             return
 
@@ -142,8 +143,9 @@ class Downloader(object):
             f.write(self.downloadinfo)
 
     def download(self):
+        force = not self.downloadinfocorrect()
         for _ in self.thingstodownload:
-            _.download(self.SHA1, force=not self.downloadinfocorrect())
+            _.download(self.SHA1, force=force)
         self.writedownloadinfo()
 
     @property

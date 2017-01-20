@@ -6,7 +6,7 @@ import os
 import ROOT
 
 from helperstuff import config, style
-from helperstuff.CJLSTscripts import WP_VBF2j, WP_WHh, WP_ZHh
+from helperstuff.CJLSTscripts import getDZHhWP, getDWHhWP, getDVBF2jetsWP
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, Analysis
 from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample, Sample
@@ -24,13 +24,13 @@ def makeplot(analysis, disc, additionalcconstant=1, shiftWP=None):
   analysis == Analysis(analysis)
   if "HadZH" in disc:
     productionmode = "ZH"
-    WP = WP_ZHh()
+    WP = getDZHhWP(125, config.useQGTagging)
   elif "HadWH" in disc:
     productionmode = "WH"
-    WP = WP_WHh()
+    WP = getDWHhWP(125, config.useQGTagging)
   elif "2jet" in disc:
     productionmode = "VBF"
-    WP = WP_VBF2j()
+    WP = getDVBF2jetsWP(125, config.useQGTagging)
 
   if shiftWP is not None:
     if additionalcconstant != 1:
