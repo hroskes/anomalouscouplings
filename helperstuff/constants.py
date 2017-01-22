@@ -66,6 +66,11 @@ SMXSWpH2L2l = SMXSWpH * SMBR2L2l
 SMXSWmH2L2l = SMXSWmH * SMBR2L2l
 SMXSttH2L2l = SMXSttH * SMBR2L2l
 
+#############
+from datetime import date
+if date.today() > date(2017, 1, 25):
+    raise ValueError("Update mix L1Zg xsecs!")
+#############
 
 JHUXSggH2L2la1           = 7.1517173;      JHUXSggH2L2la1err            = 0.23044650E-03
 JHUXSggH2L2la2           = 2.5849908;      JHUXSggH2L2la2err            = 0.77294379E-04
@@ -76,7 +81,7 @@ JHUXSggH2L2la1a3         = 14.278034;      JHUXSggH2L2la1a3err          = 0.4531
 JHUXSggH2L2la1L1         = 0.23727827;     JHUXSggH2L2la1L1err          = 0.15982277E-04    #using g1prime2 = -12100.42
 JHUXSggH2L2la1_photoncut = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27583899E-03    #This is bigger than the uncut xsec.  Fix below.
 JHUXSggH2L2lL1Zg         = 0.12338393E-06; JHUXSggH2L2lL1Zgerr          = 0.58002047E-11
-#JHUXSggH2L2la1L1Zg       = ;               JHUXSggH2L2la1L1Zgerr        = 
+JHUXSggH2L2la1L1Zg       = 13.169996;      JHUXSggH2L2la1L1Zgerr        = 0.18226318E-01
 
 JHUXSVBFa1           = 968.674284006;      JHUXSVBFa1err            = 0.075115702763
 JHUXSVBFa2           = 13102.7106117;      JHUXSVBFa2err            = 0.522399748272
@@ -87,7 +92,7 @@ JHUXSVBFa1a3         = 1937.20646111;      JHUXSVBFa1a3err          = 0.12261732
 JHUXSVBFa1L1         = 2861.21349769;      JHUXSVBFa1L1err          = 0.0771278408768
 JHUXSVBFa1_photoncut = 834.24595;          JHUXSVBFa1err_photoncut  = 0.41631690
 JHUXSVBFL1Zg         = 0.49845301E-04;     JHUXSVBFL1Zgerr          = 0.21806623E-07
-#JHUXSVBFa1L1Zg       = ;     JHUXSVBFa1L1Zgerr        =
+JHUXSVBFa1L1Zg       = 1394.3489;          JHUXSVBFa1L1Zgerr        = 10.828923
 
 JHUXSZHa1           = 9022.36;        JHUXSZHa1err            = 1.17
 JHUXSZHa2           = 713123;         JHUXSZHa2err            = 103
@@ -98,7 +103,7 @@ JHUXSZHa1a3         = 18040.66;       JHUXSZHa1a3err          = 2.73
 JHUXSZHa1L1         = 6852.307;       JHUXSZHa1L1err          = 0.929
 JHUXSZHa1_photoncut = 1437150.9;      JHUXSZHa1err_photoncut  = 289.72492
 JHUXSZHL1Zg         = 3.4592597;      JHUXSZHL1Zgerr          = 0.56602360E-03
-#JHUXSZHa1L1Zg       = ;     JHUXSZHa1L1Zgerr        =
+JHUXSZHa1L1Zg       = 3479155.1;      JHUXSZHa1L1Zgerr        = 6901.4960
 
 JHUXSWHa1           = 30998.54;       JHUXSWHa1err           = 2.50
 JHUXSWHa2           = 3106339;        JHUXSWHa2err           = 308
@@ -135,6 +140,8 @@ JHUXSttHkappakappatilde = 1.8231162489;   JHUXSttHkappakappatildeerr = 0.0025413
 if JHUXSggH2L2la1_photoncut > JHUXSggH2L2la1: JHUXSggH2L2la1_photoncut = JHUXSggH2L2la1; JHUXSggH2L2la1err_photoncut = JHUXSggH2L2la1err
 if JHUXSVBFa1_photoncut > JHUXSVBFa1: JHUXSVBFa1_photoncut = JHUXSVBFa1; JHUXSVBFa1err_photoncut = JHUXSVBFa1err
 if JHUXSZHa1_photoncut > JHUXSZHa1: JHUXSZHa1_photoncut = JHUXSZHa1; JHUXSZHa1err_photoncut = JHUXSZHa1err
+
+print JHUXSZHa1, JHUXSZHa1_photoncut, JHUXSZHa1L1Zg; assert False
 
 if __name__ == "__main__":
     print "All of the following should be 0:"
@@ -186,6 +193,7 @@ if __name__ == "__main__":
 
 #decay
 
+assert JHUXSggH2L2la1_photoncut == JHUXSggH2L2la1
 values = [JHUXSggH2L2la1, JHUXSggH2L2la2*g2decay**2, JHUXSggH2L2la3*g4decay**2, JHUXSggH2L2lL1*g1prime2decay_gen**2, JHUXSggH2L2lL1Zg*ghzgs1prime2decay_gen**2]
 errors = [JHUXSggH2L2la1err, JHUXSggH2L2la2err*g2decay**2, JHUXSggH2L2la3err*g4decay**2, JHUXSggH2L2lL1err*g1prime2decay_gen**2, JHUXSggH2L2lL1Zgerr*ghzgs1prime2decay_gen**2]
 
@@ -199,19 +207,25 @@ JHUXSggH2L2la1a3, JHUXSggH2L2la1a3err = JHUXSggH2L2la1*2, JHUXSggH2L2la1err*2
 
 #VBF
 
-values = [JHUXSVBFa1, JHUXSVBFa2*g2VBF**2, JHUXSVBFa3*g4VBF**2, JHUXSVBFL1*g1prime2VBF_gen**2, JHUXSVBFL1Zg*ghzgs1prime2VBF_gen**2]
-errors = [JHUXSVBFa1err, JHUXSVBFa2err*g2VBF**2, JHUXSVBFa3err*g4VBF**2, JHUXSVBFL1err*g1prime2VBF_gen**2, JHUXSVBFL1Zgerr*ghzgs1prime2VBF_gen**2]
+values = [JHUXSVBFa1, JHUXSVBFa2*g2VBF**2, JHUXSVBFa3*g4VBF**2, JHUXSVBFL1*g1prime2VBF_gen**2]
+errors = [JHUXSVBFa1err, JHUXSVBFa2err*g2VBF**2, JHUXSVBFa3err*g4VBF**2, JHUXSVBFL1err*g1prime2VBF_gen**2]
 
 JHUXSVBFa1, JHUXSVBFa1err = sum(value/error**2 for value, error in zip(values, errors)) / sum(1/error**2 for error in errors), sum(1/error**2 for error in errors)**-.5
 JHUXSVBFa2, JHUXSVBFa2err = JHUXSVBFa1 / g2VBF**2, JHUXSVBFa1err / g2VBF**2
 JHUXSVBFa3, JHUXSVBFa3err = JHUXSVBFa1 / g4VBF**2, JHUXSVBFa1err / g4VBF**2
 JHUXSVBFL1, JHUXSVBFL1err = JHUXSVBFa1 / g1prime2VBF_gen**2, JHUXSVBFa1err / g1prime2VBF_gen**2
-JHUXSVBFL1Zg, JHUXSVBFL1Zgerr = JHUXSVBFa1 / ghzgs1prime2VBF_gen**2, JHUXSVBFa1err / ghzgs1prime2VBF_gen**2
 
 JHUXSVBFa1a3, JHUXSVBFa1a3err = JHUXSVBFa1*2, JHUXSVBFa1err*2
 
+values = [JHUXSVBFa1_photoncut, JHUXSVBFL1Zg*ghzgs1prime2VBF_gen**2]
+errors = [JHUXSVBFa1err_photoncut, JHUXSVBFL1Zgerr*ghzgs1prime2VBF_gen**2]
+
+JHUXSVBFa1_photoncut, JHUXSVBFa1err_photonuct = sum(value/error**2 for value, error in zip(values, errors)) / sum(1/error**2 for error in errors), sum(1/error**2 for error in errors)**-.5
+JHUXSVBFL1Zg, JHUXSVBFL1Zgerr = JHUXSVBFa1_photoncut / ghzgs1prime2VBF_gen**2, JHUXSVBFa1err_photoncut / ghzgs1prime2VBF_gen**2
+
 #ZH
 
+assert JHUXSZHa1_photoncut == JHUXSZHa1
 values = [JHUXSZHa1, JHUXSZHa2*g2ZH**2, JHUXSZHa3*g4ZH**2, JHUXSZHL1*g1prime2ZH_gen**2, JHUXSZHL1Zg*ghzgs1prime2ZH_gen**2]
 errors = [JHUXSZHa1err, JHUXSZHa2err*g2ZH**2, JHUXSZHa3err*g4ZH**2, JHUXSZHL1Zgerr*g1prime2ZH_gen**2, JHUXSZHL1Zgerr*ghzgs1prime2ZH_gen**2]
 
@@ -286,4 +300,5 @@ JHUXSHJJa2a3, JHUXSHJJa2a3err = JHUXSHJJa2a3 - 2*JHUXSHJJa2, 0
 JHUXSttHkappakappatilde, JHUXSttHkappakappatildeerr = JHUXSttHkappakappatilde - 2*JHUXSttHkappa, 0
 
 #defined this way, just make sure
-assert JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == JHUXSZHa1a3 == JHUXSWHa1a3 == JHUXSHJJa2a3 == JHUXSttHkappakappatilde == 0
+assert (JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == JHUXSZHa1a3 == JHUXSWHa1a3 == JHUXSHJJa2a3 == JHUXSttHkappakappatilde
+              == JHUXSWHL1Zg == JHUXSWHa1L1Zg == 0)
