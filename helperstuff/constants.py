@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from math import sqrt
 
 #https://github.com/cms-analysis/HiggsAnalysis-ZZMatrixElement/blob/c6d45de/MELA/src/Mela.cc#L307
@@ -14,21 +15,27 @@ g2decay = 1.663195
 g4decay = 2.55502
 g1prime2decay_gen = -12110.20   #for the sample
 g1prime2decay_reco = 12110.20   #for discriminants
+ghzgs1prime2decay_gen = -7613.351302119843
+ghzgs1prime2decay_reco = 7613.351302119843
 
 g2VBF = 0.271965
 g4VBF = 0.297979
 g1prime2VBF_gen = -2158.21
 g1prime2VBF_reco = 2158.21
+ghzgs1prime2VBF_gen = -4091.051456694223
+ghzgs1prime2VBF_reco = 4091.051456694223
 
-g2ZH = 0.112481;
-g4ZH = 0.144057;
-g1prime2ZH_gen = -517.788;
-g1prime2ZH_reco = 517.788;
+g2ZH = 0.112481
+g4ZH = 0.144057
+g1prime2ZH_gen = -517.788
+g1prime2ZH_reco = 517.788
+ghzgs1prime2ZH_gen = -642.9534550379002
+ghzgs1prime2ZH_reco = 642.9534550379002
 
-g2WH = 0.0998956;
-g4WH = 0.1236136;
-g1prime2WH_gen = -525.274;
-g1prime2WH_reco = 525.274;
+g2WH = 0.0998956
+g4WH = 0.1236136
+g1prime2WH_gen = -525.274
+g1prime2WH_reco = 525.274
 
 ghg4HJJ = 1.0062
 kappa_tilde_ttH = 1.6
@@ -67,10 +74,9 @@ JHUXSggH2L2lL1           = 0.48754258E-07; JHUXSggH2L2lL1err            = 0.1511
 JHUXSggH2L2la1a2         = 26.073377;      JHUXSggH2L2la1a2err          = 0.74026916E-03
 JHUXSggH2L2la1a3         = 14.278034;      JHUXSggH2L2la1a3err          = 0.45318122E-03
 JHUXSggH2L2la1L1         = 0.23727827;     JHUXSggH2L2la1L1err          = 0.15982277E-04    #using g1prime2 = -12100.42
-JHUXSggH2L2la1_photoncut = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27583899E-03
+JHUXSggH2L2la1_photoncut = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27583899E-03    #This is bigger than the uncut xsec.  Fix below.
 JHUXSggH2L2lL1Zg         = 0.12338393E-06; JHUXSggH2L2lL1Zgerr          = 0.58002047E-11
 #JHUXSggH2L2la1L1Zg       = ;               JHUXSggH2L2la1L1Zgerr        = 
-
 
 JHUXSVBFa1           = 968.674284006;      JHUXSVBFa1err            = 0.075115702763
 JHUXSVBFa2           = 13102.7106117;      JHUXSVBFa2err            = 0.522399748272
@@ -83,7 +89,6 @@ JHUXSVBFa1_photoncut = 834.24595;          JHUXSVBFa1err_photoncut  = 0.41631690
 JHUXSVBFL1Zg         = 0.49845301E-04;     JHUXSVBFL1Zgerr          = 0.21806623E-07
 #JHUXSVBFa1L1Zg       = ;     JHUXSVBFa1L1Zgerr        =
 
-assert False, "Update the VH xsecs!"
 JHUXSZHa1           = 9022.36;        JHUXSZHa1err            = 1.17
 JHUXSZHa2           = 713123;         JHUXSZHa2err            = 103
 JHUXSZHa3           = 434763.7;       JHUXSZHa3err            = 62.2
@@ -106,6 +111,19 @@ JHUXSWHa1_photoncut = JHUXSWHa1;      JHUXSWHa1err_photoncut = JHUXSWHa1err
 JHUXSWHL1Zg         = 0;              JHUXSWHL1Zgerr         = 0
 JHUXSWHa1L1Zg       = JHUXSWHa1;      JHUXSWHa1L1Zgerr       = JHUXSWHa1err
 
+#VH cross sections changed somewhere between c85a387eaf3a8a92f5893e5293ed3c3d36107e16 and fbf449150f4df49f66b21c1638adb02b68a308d0
+#correct for that
+def fixVH():
+    VHxsecratio = 158.49737883504775; VHxsecratioerr = 0.39826108447619935
+    for V in "Z", "W":
+        for coupling in "a1", "a2", "a3", "L1", "a1a2", "a1a3", "a1L1":
+            name = "JHUXS{}H{}".format(V, coupling); errorname = name+"err"
+            newvalue = globals()[name] * VHxsecratio
+            newerror = sqrt(globals()[name] * VHxsecratioerr + VHxsecratio * globals()[errorname])
+            globals()[name] = newvalue
+            globals()[errorname] = newerror
+fixVH(); del fixVH
+
 JHUXSHJJa2       = 14583.61;       JHUXSHJJa2err       = 0.94
 JHUXSHJJa3       = 14397.13;       JHUXSHJJa3err       = 0.97
 JHUXSHJJa2a3     = 29169.2;        JHUXSHJJa2a3err     = 2.1
@@ -114,33 +132,37 @@ JHUXSttHkappa    = 0.912135589;    JHUXSttHkappaerr    = 0.00143032
 JHUXSttHkappatilde = 0.35609194;   JHUXSttHkappatildeerr = 0.000492662
 JHUXSttHkappakappatilde = 1.8231162489;   JHUXSttHkappakappatildeerr = 0.00254131
 
+if JHUXSggH2L2la1_photoncut > JHUXSggH2L2la1: JHUXSggH2L2la1_photoncut = JHUXSggH2L2la1; JHUXSggH2L2la1err_photoncut = JHUXSggH2L2la1err
+if JHUXSVBFa1_photoncut > JHUXSVBFa1: JHUXSVBFa1_photoncut = JHUXSVBFa1; JHUXSVBFa1err_photoncut = JHUXSVBFa1err
+if JHUXSZHa1_photoncut > JHUXSZHa1: JHUXSZHa1_photoncut = JHUXSZHa1; JHUXSZHa1err_photoncut = JHUXSZHa1err
+
 if __name__ == "__main__":
     print "All of the following should be 0:"
     print
     print "  decay:"
-    print "    a1XS - g2**2*a2XS          = {}%".format((JHUXSggH2L2la1 - g2decay**2           * JHUXSggH2L2la2          ) / JHUXSggH2L2la1 * 100)
-    print "    a1XS - g4**2*a3XS          = {}%".format((JHUXSggH2L2la1 - g4decay**2           * JHUXSggH2L2la3          ) / JHUXSggH2L2la1 * 100)
-    print "    a1XS - g1prime2**2*L1XS    = {}%".format((JHUXSggH2L2la1 - g1prime2decay_gen**2 * JHUXSggH2L2lL1          ) / JHUXSggH2L2la1 * 100)
-    print "    a1XS - ghzgs1prime2**2*L1ZgXS  = {}%".format((JHUXSggH2L2la1 - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg          ) / JHUXSggH2L2la1 * 100)
-    print "    a1XS + g4**2*a3XS - a1a3XS = {}%".format((JHUXSggH2L2la1 + g4decay**2 * JHUXSggH2L2la3 - JHUXSggH2L2la1a3 ) / JHUXSggH2L2la1 * 100)
-    print "    2*a1XS - a1a3XS            = {}%".format((2*JHUXSggH2L2la1 - JHUXSggH2L2la1a3                             ) / (2*JHUXSggH2L2la1) * 100)
+    print "    a1XS - g2**2*a2XS             = {}%".format((JHUXSggH2L2la1           - g2decay**2               * JHUXSggH2L2la2  ) / JHUXSggH2L2la1           * 100)
+    print "    a1XS - g4**2*a3XS             = {}%".format((JHUXSggH2L2la1           - g4decay**2               * JHUXSggH2L2la3  ) / JHUXSggH2L2la1           * 100)
+    print "    a1XS - g1prime2**2*L1XS       = {}%".format((JHUXSggH2L2la1           - g1prime2decay_gen**2     * JHUXSggH2L2lL1  ) / JHUXSggH2L2la1           * 100)
+    print "    a1XS - ghzgs1prime2**2*L1ZgXS = {}%".format((JHUXSggH2L2la1_photoncut - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg) / JHUXSggH2L2la1_photoncut * 100)
+    print "    a1XS + g4**2*a3XS - a1a3XS    = {}%".format((JHUXSggH2L2la1 + g4decay**2 * JHUXSggH2L2la3 - JHUXSggH2L2la1a3 ) / JHUXSggH2L2la1 * 100)
+    print "    2*a1XS - a1a3XS               = {}%".format((2*JHUXSggH2L2la1 - JHUXSggH2L2la1a3                             ) / (2*JHUXSggH2L2la1) * 100)
     print
     print "  VBF:"
-    print "    a1XS - g2**2*a2XS          = {}%".format((JHUXSVBFa1 - g2VBF**2           * JHUXSVBFa2      ) / JHUXSVBFa1 * 100)
-    print "    a1XS - g4**2*a3XS          = {}%".format((JHUXSVBFa1 - g4VBF**2           * JHUXSVBFa3      ) / JHUXSVBFa1 * 100)
-    print "    a1XS - g1prime2**2*L1XS    = {}%".format((JHUXSVBFa1 - g1prime2VBF_gen**2 * JHUXSVBFL1      ) / JHUXSVBFa1 * 100)
-    print "    a1XS - ghzgs1prime2**2*L1ZgXS    = {}%".format((JHUXSVBFa1 - ghzgs1prime2VBF_gen**2 * JHUXSVBFL1Zg      ) / JHUXSVBFa1 * 100)
-    print "    a1XS + g4**2*a3XS - a1a3XS = {}%".format((JHUXSVBFa1 + g4VBF**2 * JHUXSVBFa3 - JHUXSVBFa1a3 ) / JHUXSVBFa1 * 100)
-    print "    2*a1XS - a1a3XS            = {}%".format((2*JHUXSVBFa1 - JHUXSVBFa1a3                       ) / (2*JHUXSVBFa1) * 100)
-    print "    W+H + W-H - WH             = {}%".format((SMXSWpH + SMXSWmH - SMXSWH) / SMXSWH)
+    print "    a1XS - g2**2*a2XS             = {}%".format((JHUXSVBFa1           - g2VBF**2               * JHUXSVBFa2  ) / JHUXSVBFa1           * 100)
+    print "    a1XS - g4**2*a3XS             = {}%".format((JHUXSVBFa1           - g4VBF**2               * JHUXSVBFa3  ) / JHUXSVBFa1           * 100)
+    print "    a1XS - g1prime2**2*L1XS       = {}%".format((JHUXSVBFa1           - g1prime2VBF_gen**2     * JHUXSVBFL1  ) / JHUXSVBFa1           * 100)
+    print "    a1XS - ghzgs1prime2**2*L1ZgXS = {}%".format((JHUXSVBFa1_photoncut - ghzgs1prime2VBF_gen**2 * JHUXSVBFL1Zg) / JHUXSVBFa1_photoncut * 100)
+    print "    a1XS + g4**2*a3XS - a1a3XS    = {}%".format((JHUXSVBFa1 + g4VBF**2 * JHUXSVBFa3 - JHUXSVBFa1a3 ) / JHUXSVBFa1 * 100)
+    print "    2*a1XS - a1a3XS               = {}%".format((2*JHUXSVBFa1 - JHUXSVBFa1a3                       ) / (2*JHUXSVBFa1) * 100)
+    print "    W+H + W-H - WH                = {}%".format((SMXSWpH + SMXSWmH - SMXSWH) / SMXSWH)
     print
     print "  ZH:"
-    print "    a1XS - g2**2*a2XS          = {}%".format((JHUXSZHa1 - g2ZH**2           * JHUXSZHa2     ) / JHUXSZHa1 * 100)
-    print "    a1XS - g4**2*a3XS          = {}%".format((JHUXSZHa1 - g4ZH**2           * JHUXSZHa3     ) / JHUXSZHa1 * 100)
-    print "    a1XS - g1prime2**2*L1XS    = {}%".format((JHUXSZHa1 - g1prime2ZH_gen**2 * JHUXSZHL1     ) / JHUXSZHa1 * 100)
-    print "    a1XS - ghzgs1prime2**2*L1ZgXS    = {}%".format((JHUXSZHa1 - ghzgs1prime2ZH_gen**2 * JHUXSZHL1Zg     ) / JHUXSZHa1 * 100)
-    print "    a1XS + g4**2*a3XS - a1a3XS = {}%".format((JHUXSZHa1 + g4ZH**2 * JHUXSZHa3 - JHUXSZHa1a3 ) / JHUXSZHa1 * 100)
-    print "    2*a1XS - a1a3XS            = {}%".format((2*JHUXSZHa1 - JHUXSZHa1a3                     ) / (2*JHUXSZHa1) * 100)
+    print "    a1XS - g2**2*a2XS             = {}%".format((JHUXSZHa1           - g2ZH**2               * JHUXSZHa2  ) / JHUXSZHa1 * 100)
+    print "    a1XS - g4**2*a3XS             = {}%".format((JHUXSZHa1           - g4ZH**2               * JHUXSZHa3  ) / JHUXSZHa1 * 100)
+    print "    a1XS - g1prime2**2*L1XS       = {}%".format((JHUXSZHa1           - g1prime2ZH_gen**2     * JHUXSZHL1  ) / JHUXSZHa1 * 100)
+    print "    a1XS - ghzgs1prime2**2*L1ZgXS = {}%".format((JHUXSZHa1_photoncut - ghzgs1prime2ZH_gen**2 * JHUXSZHL1Zg) / JHUXSZHa1 * 100)
+    print "    a1XS + g4**2*a3XS - a1a3XS    = {}%".format((JHUXSZHa1 + g4ZH**2 * JHUXSZHa3 - JHUXSZHa1a3 ) / JHUXSZHa1 * 100)
+    print "    2*a1XS - a1a3XS               = {}%".format((2*JHUXSZHa1 - JHUXSZHa1a3                     ) / (2*JHUXSZHa1) * 100)
     print
     print "  WH:"
     print "    a1XS - g2**2*a2XS          = {}%".format((JHUXSWHa1 - g2WH**2           * JHUXSWHa2     ) / JHUXSWHa1 * 100)
