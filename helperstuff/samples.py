@@ -342,7 +342,7 @@ class SampleBase(object):
                 if photoncut_decay:
                     leptons = [(id, tlvfromptetaphim(pt, eta, phi, m)) for id, pt, eta, phi, m in zip(self_tree.LHEDaughterId, self_tree.LHEDaughterPt, self_tree.LHEDaughterEta, self_tree.LHEDaughterPhi, self_tree.LHEDaughterMass)]
                     for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
-                        if id1 == id2 and (p1+p2).M() < 4: return 0
+                        if id1 == -id2 and (p1+p2).M() < 4: return 0
                 if photoncut_ZH:
                     Zdecay = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
                     assert len(Zdecay) == 2
