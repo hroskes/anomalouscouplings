@@ -361,7 +361,7 @@ class SampleBase(object):
                                     ) for factor in factors
                                 )
 
-                if not reweightingonly:
+                if not reweightingonly and result != 0:
                     cutoff = self_tree.cutoffs[strsample]
                     if result > cutoff:
                         result = cutoff**2 / result
