@@ -261,6 +261,8 @@ class TreeWrapper(Iterator):
         #Gen MEs
         for weightname in self.genMEs:
             setattr(self, weightname, getattr(t, weightname))
+        self.p_Gen_WH_SIG_ghza1prime2_1E4_JHUGen = 0
+        self.p_Gen_WH_SIG_ghw1_1_ghza1prime2_1E4_JHUGen = self.p_Gen_WH_SIG_ghw1_1_JHUGen
 
         #category variables
         self.nExtraLep = t.nExtraLep
@@ -1663,6 +1665,7 @@ class TreeWrapper(Iterator):
             for sample in self.treesample.reweightingsamples():
                 for factor in sample.MC_weight_terms:
                     for weightname, couplingsq in factor:
+                        if "WH" in weightname and "ghza" in weightname: continue
                         self.genMEs.append(weightname)
 
     def onlyweights(self):

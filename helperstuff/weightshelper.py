@@ -115,9 +115,11 @@ class WeightsHelper(MultiEnum):
         return "p_Gen_{prod}_SIG_{prodSM}_1_JHUGen".format(**self.formatdict)
     @property
     def prodweightBSM(self):
+        if self.productionmode == "WH" and self.analysis == "fL1Zg": return None
         return "p_Gen_{prod}_SIG_{prodBSM}_{prodBSMvalue}_JHUGen".format(**self.formatdict)
     @property
     def prodweightmix(self):
+        if self.productionmode == "WH" and self.analysis == "fL1Zg": return self.prodweightSM
         return "p_Gen_{prod}_SIG_{prodSM}_1_{prodBSM}_{prodBSMvalue}_JHUGen".format(**self.formatdict)
     @property
     def prodSMcoupling(self):

@@ -258,29 +258,32 @@ class SampleBase(object):
 
         weightshelper = WeightsHelper(self)
         if weightshelper.weightprodstring is not None:
-            prod = {}
+            prod = Counter()
             SMcoupling  = getattr(self, weightshelper.prodSMcoupling )
             BSMcoupling = getattr(self, weightshelper.prodBSMcoupling) / float(weightshelper.prodBSMcouplingvalue)
-            prod[weightshelper.prodweightSM]  = SMcoupling**2            - SMcoupling * BSMcoupling
-            prod[weightshelper.prodweightmix] = SMcoupling * BSMcoupling
-            prod[weightshelper.prodweightBSM] = BSMcoupling**2           - SMcoupling * BSMcoupling
+            prod[weightshelper.prodweightSM]  += SMcoupling**2            - SMcoupling * BSMcoupling
+            prod[weightshelper.prodweightmix] += SMcoupling * BSMcoupling
+            prod[weightshelper.prodweightBSM] += BSMcoupling**2           - SMcoupling * BSMcoupling
             factors.append([
                             (weightname, couplingsq)
                                   for weightname, couplingsq in prod.iteritems()
                                    if couplingsq
+                                         and weightname is not None
                            ])
+            print self, prod
 
         if weightshelper.weightdecaystring is not None:
-            decay = {}
+            decay = Counter()
             SMcoupling  = getattr(self, weightshelper.decaySMcoupling )
             BSMcoupling = getattr(self, weightshelper.decayBSMcoupling) / float(weightshelper.decayBSMcouplingvalue)
-            decay[weightshelper.decayweightSM]  = SMcoupling**2            - SMcoupling * BSMcoupling
-            decay[weightshelper.decayweightmix] = SMcoupling * BSMcoupling
-            decay[weightshelper.decayweightBSM] = BSMcoupling**2           - SMcoupling * BSMcoupling
+            decay[weightshelper.decayweightSM]  += SMcoupling**2            - SMcoupling * BSMcoupling
+            decay[weightshelper.decayweightmix] += SMcoupling * BSMcoupling
+            decay[weightshelper.decayweightBSM] += BSMcoupling**2           - SMcoupling * BSMcoupling
             factors.append([
                             (weightname, couplingsq)
                                   for weightname, couplingsq in decay.iteritems()
                                    if couplingsq
+                                         and weightname is not None
                            ])
 
         return factors
@@ -968,11 +971,11 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fL1Zgproddec-0.5":
                 return sqrt(constants.ghzgs1prime2ZH_gen*constants.ghzgs1prime2decay_gen)
 
-        if self.productionmode == "WH":
+        if self.productionmode == "WH":        #use the ZH numbers.  Shouldn't matter whatever we use.
             if self.hypothesis == "fL1Zgprod0.5":
-                return 0
+                return constants.ghzgs1prime2ZH_gen
             if self.hypothesis == "fL1Zgproddec-0.5":
-                return 0
+                return sqrt(constants.ghzgs1prime2ZH_gen*constants.ghzgs1prime2decay_gen)
 
         raise self.ValueError("ghzgs1prime2")
 
