@@ -94,7 +94,7 @@ class TreeWrapper(Iterator):
                 raise StopIteration
             if i % 10000 == 0 or i == len(self):
                 print i, "/", len(self)
-                raise StopIteration
+                #raise StopIteration
 
             if self.isdata:
                 self.overallEventWeight = 1
@@ -261,8 +261,6 @@ class TreeWrapper(Iterator):
         #Gen MEs
         for weightname in self.genMEs:
             setattr(self, weightname, getattr(t, weightname))
-        self.p_Gen_WH_SIG_ghza1prime2_1E4_JHUGen = 0
-        self.p_Gen_WH_SIG_ghw1_1_ghza1prime2_1E4_JHUGen = self.p_Gen_WH_SIG_ghw1_1_JHUGen
 
         #category variables
         self.nExtraLep = t.nExtraLep
@@ -1767,7 +1765,7 @@ class TreeWrapper(Iterator):
                 array.append(function(entry))
             if i % 10000 == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
-                break
+                #break
 
         self.cutoffs = {}
         self.nevents2L2l = {}
