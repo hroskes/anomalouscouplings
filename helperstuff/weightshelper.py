@@ -11,7 +11,7 @@ class WeightsHelper(MultiEnum):
             if   sample.g2 == sample.g1prime2 == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fa3")
             elif sample.g4 == sample.g1prime2 == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fa2")
             elif sample.g2 == sample.g4       == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fL1")
-            elif sample.g2 == sample.g4       == sample.ghz1prime2   == 0: args = (sample.productionmode, "fL1Zgs")
+            elif sample.g2 == sample.g4       == sample.g1prime2     == 0: args = (sample.productionmode, "fL1Zg")
             else: assert False
         return super(WeightsHelper, self).__init__(*args, **kwargs)
 

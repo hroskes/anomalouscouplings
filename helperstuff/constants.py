@@ -36,6 +36,8 @@ g2WH = 0.0998956
 g4WH = 0.1236136
 g1prime2WH_gen = -525.274
 g1prime2WH_reco = 525.274
+ghzgs1prime2WH_gen = -1
+ghzgs1prime2WH_reco = 1
 
 ghg4HJJ = 1.0062
 kappa_tilde_ttH = 1.6
@@ -112,9 +114,9 @@ JHUXSWHL1           = 11234.91e-5;    JHUXSWHL1err           = 1.10e-5
 JHUXSWHa1a2         = 16486.68;       JHUXSWHa1a2err         = 2.01
 JHUXSWHa1a3         = 62001.57;       JHUXSWHa1a3err         = 5.54
 JHUXSWHa1L1         = 25302.37;       JHUXSWHa1L1err         = 2.67
-JHUXSWHa1_photoncut = JHUXSWHa1;      JHUXSWHa1err_photoncut = JHUXSWHa1err
+JHUXSWHa1_photoncut = None;           JHUXSWHa1err_photoncut = None
 JHUXSWHL1Zg         = 0;              JHUXSWHL1Zgerr         = 0
-JHUXSWHa1L1Zg       = None;           JHUXSWHL1Zgerr         = None  #set to 0 later
+JHUXSWHa1L1Zg       = None;           JHUXSWHa1errL1Zg       = None
 
 #VH cross sections changed somewhere between c85a387eaf3a8a92f5893e5293ed3c3d36107e16 and fbf449150f4df49f66b21c1638adb02b68a308d0
 #correct for that
@@ -128,6 +130,9 @@ def fixVH():
             globals()[name] = newvalue
             globals()[errorname] = newerror
 fixVH(); del fixVH
+JHUXSWHa1_photoncut = JHUXSWHa1;      JHUXSWHa1err_photoncut = JHUXSWHa1err
+JHUXSWHa1L1Zg       = JHUXSWHa1;      JHUXSWHa1errL1Zg       = JHUXSWHa1err
+
 
 JHUXSHJJa2       = 14583.61;       JHUXSHJJa2err       = 0.94
 JHUXSHJJa3       = 14397.13;       JHUXSHJJa3err       = 0.97
@@ -300,3 +305,7 @@ JHUXSttHkappakappatilde, JHUXSttHkappakappatildeerr = JHUXSttHkappakappatilde - 
 #defined this way, just make sure
 assert (JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == JHUXSZHa1a3 == JHUXSWHa1a3 == JHUXSHJJa2a3 == JHUXSttHkappakappatilde
               == JHUXSWHL1Zg == JHUXSWHa1L1Zg == 0)
+for k, v in globals().items():
+    if "__" in k: continue
+    assert v is not None, k
+del k, v
