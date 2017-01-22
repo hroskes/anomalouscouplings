@@ -318,6 +318,10 @@ class TreeWrapper(Iterator):
         self.LHEDaughterEta = t.LHEDaughterEta
         self.LHEDaughterPhi = t.LHEDaughterPhi
         self.LHEDaughterMass = t.LHEDaughterMass
+        self.LHEAssociatedParticlePt = t.LHEAssociatedParticlePt
+        self.LHEAssociatedParticleEta = t.LHEAssociatedParticleEta
+        self.LHEAssociatedParticlePhi = t.LHEAssociatedParticlePhi
+        self.LHEAssociatedParticleMass = t.LHEAssociatedParticleMass
 
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
@@ -1738,6 +1742,8 @@ class TreeWrapper(Iterator):
             for weightname in self.genMEs:
                 tree.SetBranchStatus(weightname, 1)
             tree.SetBranchStatus("GenZ*Flav", 1)
+            tree.SetBranchStatus("LHEDaughter*", 1)
+            tree.SetBranchStatus("LHEAssociated*", 1)
 
         functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in self.treesample.reweightingsamples()}
         is2L2l = []
