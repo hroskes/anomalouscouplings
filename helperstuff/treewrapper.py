@@ -131,112 +131,132 @@ class TreeWrapper(Iterator):
         #express in terms of |M|^2, this will make life easier
         self.M2qqZZ = t.p_QQB_BKG_MCFM
 
-        self.M2g1_decay         = t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
-        self.M2g4_decay         = t.p_GG_SIG_ghg2_1_ghz4_1_JHUGen
-        self.M2g1g4_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen
-        self.M2g2_decay         = t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
-        self.M2g1g2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen
-        self.M2g1prime2_decay   = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_JHUGen / 1e4**2
-        self.M2g1g1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1E4_JHUGen / 1e4
+        self.M2g1_decay             = t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
+        self.M2g4_decay             = t.p_GG_SIG_ghg2_1_ghz4_1_JHUGen
+        self.M2g1g4_decay           = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen
+        self.M2g2_decay             = t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
+        self.M2g1g2_decay           = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen
+        self.M2g1prime2_decay       = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_JHUGen / 1e4**2
+        self.M2g1g1prime2_decay     = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1E4_JHUGen / 1e4
+        self.M2ghzgs1prime2_decay   = t.p_GG_SIG_ghg2_1_ghza1prime2_1E4_JHUGen / 1e4**2
+        self.M2g1ghzgs1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghza1prime2_1E4_JHUGen / 1e4
 
         #JECNominal
-        self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal              = self.M2g1_VBF           = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal
-        self.p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal              = self.M2g4_VBF           = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal
-        self.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal       = self.M2g1g4_VBF         = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal
-        self.p_JJVBF_SIG_ghv2_1_JHUGen_JECNominal              = self.M2g2_VBF           = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECNominal
-        self.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal       = self.M2g1g2_VBF         = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal
-        self.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECNominal        = self.M2g1prime2_VBF     = t.p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_JECNominal / 1e4**2
-        self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECNominal = self.M2g1g1prime2_VBF   = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal               = self.M2g1_VBF               = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal               = self.M2g4_VBF               = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal        = self.M2g1g4_VBF             = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv2_1_JHUGen_JECNominal               = self.M2g2_VBF               = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal        = self.M2g1g2_VBF             = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECNominal         = self.M2g1prime2_VBF         = t.p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_JECNominal / 1e4**2
+        self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECNominal  = self.M2g1g1prime2_VBF       = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_JJVBF_SIG_ghza1prime2_1_JHUGen_JECNominal        = self.M2ghzgs1prime2_VBF     = t.p_JJVBF_SIG_ghza1prime2_1E4_JHUGen_JECNominal / 1e4**2
+        self.p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_VBF   = t.p_JJVBF_SIG_ghv1_1_ghza1prime2_1E4_JHUGen_JECNominal / 1e4
 
-        self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal              = self.M2g2_HJJ           = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal
-        self.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal              = self.M2g4_HJJ           = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal
-        self.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECNominal       = self.M2g2g4_HJJ         = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECNominal
+        self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal               = self.M2g2_HJJ               = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal
+        self.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal               = self.M2g4_HJJ               = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal
+        self.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECNominal        = self.M2g2g4_HJJ             = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECNominal
 
-        self.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal              = self.M2g1_HadZH         = t.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal
-        self.p_HadZH_SIG_ghz4_1_JHUGen_JECNominal              = self.M2g4_HadZH         = t.p_HadZH_SIG_ghz4_1_JHUGen_JECNominal
-        self.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal       = self.M2g1g4_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal
-        self.p_HadZH_SIG_ghz2_1_JHUGen_JECNominal              = self.M2g2_HadZH         = t.p_HadZH_SIG_ghz2_1_JHUGen_JECNominal
-        self.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal       = self.M2g1g2_HadZH       = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
-        self.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECNominal        = self.M2g1prime2_HadZH   = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECNominal / 1e4**2
-        self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal = self.M2g1g1prime2_HadZH = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal               = self.M2g1_HadZH             = t.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz4_1_JHUGen_JECNominal               = self.M2g4_HadZH             = t.p_HadZH_SIG_ghz4_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal        = self.M2g1g4_HadZH           = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz2_1_JHUGen_JECNominal               = self.M2g2_HadZH             = t.p_HadZH_SIG_ghz2_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal        = self.M2g1g2_HadZH           = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECNominal         = self.M2g1prime2_HadZH       = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECNominal / 1e4**2
+        self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal  = self.M2g1g1prime2_HadZH     = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECNominal        = self.M2ghzgs1prime2_HadZH   = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECNominal / 1e4**2
+        self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_HadZH = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECNominal / 1e4
 
-        self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal              = self.M2g1_HadWH         = t.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal              = self.M2g4_HadWH         = t.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal       = self.M2g1g4_HadWH       = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal              = self.M2g2_HadWH         = t.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal       = self.M2g1g2_HadWH       = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECNominal        = self.M2g1prime2_HadWH   = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECNominal / 1e4**2
-        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECNominal = self.M2g1g1prime2_HadWH = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal               = self.M2g1_HadWH             = t.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal               = self.M2g4_HadWH             = t.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal        = self.M2g1g4_HadWH           = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal               = self.M2g2_HadWH             = t.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal        = self.M2g1g2_HadWH           = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECNominal         = self.M2g1prime2_HadWH       = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECNominal / 1e4**2
+        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECNominal  = self.M2g1g1prime2_HadWH     = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECNominal        = self.M2ghzgs1prime2_HadWH   = 0
+        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_HadWH = 0
 
-        self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal                                         = t.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal
-        self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal                                         = t.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal
-        self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal                                      = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal
+        self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal                                              = t.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal
+        self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal                                              = t.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal
+        self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal                                           = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal
 
         #JECUp
-        self.p_JJVBF_SIG_ghv1_1_JHUGen_JECUp                                             = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECUp
-        self.p_JJVBF_SIG_ghv4_1_JHUGen_JECUp                                             = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECUp
-        self.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECUp                                      = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECUp
-        self.p_JJVBF_SIG_ghv2_1_JHUGen_JECUp                                             = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECUp
-        self.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECUp                                      = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECUp
-        self.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECUp                                       = t.p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_JECUp / 1e4**2
-        self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECUp                                = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECUp / 1e4
+        self.p_JJVBF_SIG_ghv1_1_JHUGen_JECUp                                                  = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECUp
+        self.p_JJVBF_SIG_ghv4_1_JHUGen_JECUp                                                  = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECUp
+        self.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECUp                                           = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECUp
+        self.p_JJVBF_SIG_ghv2_1_JHUGen_JECUp                                                  = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECUp
+        self.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECUp                                           = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECUp
+        self.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECUp                                            = t.p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_JECUp / 1e4**2
+        self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECUp                                     = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECUp / 1e4
+        self.p_JJVBF_SIG_ghza1prime2_1_JHUGen_JECUp                                           = t.p_JJVBF_SIG_ghza1prime2_1E4_JHUGen_JECUp / 1e4**2
+        self.p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_JECUp                                    = t.p_JJVBF_SIG_ghv1_1_ghza1prime2_1E4_JHUGen_JECUp / 1e4
 
-        self.p_JJQCD_SIG_ghg2_1_JHUGen_JECUp                                             = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECUp
-        self.p_JJQCD_SIG_ghg4_1_JHUGen_JECUp                                             = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECUp
-        self.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECUp                                      = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECUp
+        self.p_JJQCD_SIG_ghg2_1_JHUGen_JECUp                                                  = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECUp
+        self.p_JJQCD_SIG_ghg4_1_JHUGen_JECUp                                                  = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECUp
+        self.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECUp                                           = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECUp
 
-        self.p_HadZH_SIG_ghz1_1_JHUGen_JECUp                                             = t.p_HadZH_SIG_ghz1_1_JHUGen_JECUp
-        self.p_HadZH_SIG_ghz4_1_JHUGen_JECUp                                             = t.p_HadZH_SIG_ghz4_1_JHUGen_JECUp
-        self.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECUp                                      = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECUp
-        self.p_HadZH_SIG_ghz2_1_JHUGen_JECUp                                             = t.p_HadZH_SIG_ghz2_1_JHUGen_JECUp
-        self.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECUp                                      = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECUp
-        self.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECUp                                       = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECUp / 1e4**2
-        self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECUp                                = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECUp / 1e4
+        self.p_HadZH_SIG_ghz1_1_JHUGen_JECUp                                                  = t.p_HadZH_SIG_ghz1_1_JHUGen_JECUp
+        self.p_HadZH_SIG_ghz4_1_JHUGen_JECUp                                                  = t.p_HadZH_SIG_ghz4_1_JHUGen_JECUp
+        self.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECUp                                           = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECUp
+        self.p_HadZH_SIG_ghz2_1_JHUGen_JECUp                                                  = t.p_HadZH_SIG_ghz2_1_JHUGen_JECUp
+        self.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECUp                                           = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECUp
+        self.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECUp                                            = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECUp / 1e4**2
+        self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECUp                                     = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECUp / 1e4
+        self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECUp                                           = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECUp / 1e4**2
+        self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECUp                                    = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECUp / 1e4
 
-        self.p_HadWH_SIG_ghw1_1_JHUGen_JECUp                                             = t.p_HadWH_SIG_ghw1_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw4_1_JHUGen_JECUp                                             = t.p_HadWH_SIG_ghw4_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp                                      = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw2_1_JHUGen_JECUp                                             = t.p_HadWH_SIG_ghw2_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp                                      = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECUp                                       = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECUp / 1e4**2
-        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECUp                                = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECUp / 1e4
+        self.p_HadWH_SIG_ghw1_1_JHUGen_JECUp                                                  = t.p_HadWH_SIG_ghw1_1_JHUGen_JECUp
+        self.p_HadWH_SIG_ghw4_1_JHUGen_JECUp                                                  = t.p_HadWH_SIG_ghw4_1_JHUGen_JECUp
+        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp                                           = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp
+        self.p_HadWH_SIG_ghw2_1_JHUGen_JECUp                                                  = t.p_HadWH_SIG_ghw2_1_JHUGen_JECUp
+        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp                                           = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp
+        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECUp                                            = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECUp / 1e4**2
+        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECUp                                     = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECUp / 1e4
+        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECUp                                           = 0
+        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECUp                                    = 0
 
-        self.p_JQCD_SIG_ghg2_1_JHUGen_JECUp                                              = t.p_JQCD_SIG_ghg2_1_JHUGen_JECUp
-        self.p_JVBF_SIG_ghv1_1_JHUGen_JECUp                                              = t.p_JVBF_SIG_ghv1_1_JHUGen_JECUp
-        self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECUp                                           = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECUp
+        self.p_JQCD_SIG_ghg2_1_JHUGen_JECUp                                                   = t.p_JQCD_SIG_ghg2_1_JHUGen_JECUp
+        self.p_JVBF_SIG_ghv1_1_JHUGen_JECUp                                                   = t.p_JVBF_SIG_ghv1_1_JHUGen_JECUp
+        self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECUp                                                = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECUp
 
         #JECDn
-        self.p_JJVBF_SIG_ghv1_1_JHUGen_JECDn                                             = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECDn
-        self.p_JJVBF_SIG_ghv4_1_JHUGen_JECDn                                             = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECDn
-        self.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECDn                                      = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECDn
-        self.p_JJVBF_SIG_ghv2_1_JHUGen_JECDn                                             = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECDn
-        self.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECDn                                      = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECDn
-        self.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECDn                                       = t.p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_JECDn / 1e4**2
-        self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECDn                                = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECDn / 1e4
+        self.p_JJVBF_SIG_ghv1_1_JHUGen_JECDn                                                  = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECDn
+        self.p_JJVBF_SIG_ghv4_1_JHUGen_JECDn                                                  = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECDn
+        self.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECDn                                           = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECDn
+        self.p_JJVBF_SIG_ghv2_1_JHUGen_JECDn                                                  = t.p_JJVBF_SIG_ghv2_1_JHUGen_JECDn
+        self.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECDn                                           = t.p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_JECDn
+        self.p_JJVBF_SIG_ghv1prime2_1_JHUGen_JECDn                                            = t.p_JJVBF_SIG_ghv1prime2_1E4_JHUGen_JECDn / 1e4**2
+        self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECDn                                     = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECDn / 1e4
+        self.p_JJVBF_SIG_ghza1prime2_1_JHUGen_JECDn                                           = t.p_JJVBF_SIG_ghza1prime2_1E4_JHUGen_JECDn / 1e4**2
+        self.p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_JECDn                                    = t.p_JJVBF_SIG_ghv1_1_ghza1prime2_1E4_JHUGen_JECDn / 1e4
 
-        self.p_JJQCD_SIG_ghg2_1_JHUGen_JECDn                                             = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECDn
-        self.p_JJQCD_SIG_ghg4_1_JHUGen_JECDn                                             = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECDn
-        self.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECDn                                      = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECDn
+        self.p_JJQCD_SIG_ghg2_1_JHUGen_JECDn                                                  = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECDn
+        self.p_JJQCD_SIG_ghg4_1_JHUGen_JECDn                                                  = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECDn
+        self.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECDn                                           = t.p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_JECDn
 
-        self.p_HadZH_SIG_ghz1_1_JHUGen_JECDn                                             = t.p_HadZH_SIG_ghz1_1_JHUGen_JECDn
-        self.p_HadZH_SIG_ghz4_1_JHUGen_JECDn                                             = t.p_HadZH_SIG_ghz4_1_JHUGen_JECDn
-        self.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECDn                                      = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECDn
-        self.p_HadZH_SIG_ghz2_1_JHUGen_JECDn                                             = t.p_HadZH_SIG_ghz2_1_JHUGen_JECDn
-        self.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECDn                                      = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECDn
-        self.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECDn                                       = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECDn / 1e4**2
-        self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECDn                                = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECDn / 1e4
+        self.p_HadZH_SIG_ghz1_1_JHUGen_JECDn                                                  = t.p_HadZH_SIG_ghz1_1_JHUGen_JECDn
+        self.p_HadZH_SIG_ghz4_1_JHUGen_JECDn                                                  = t.p_HadZH_SIG_ghz4_1_JHUGen_JECDn
+        self.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECDn                                           = t.p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_JECDn
+        self.p_HadZH_SIG_ghz2_1_JHUGen_JECDn                                                  = t.p_HadZH_SIG_ghz2_1_JHUGen_JECDn
+        self.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECDn                                           = t.p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_JECDn
+        self.p_HadZH_SIG_ghz1prime2_1_JHUGen_JECDn                                            = t.p_HadZH_SIG_ghz1prime2_1E4_JHUGen_JECDn / 1e4**2
+        self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECDn                                     = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECDn / 1e4
+        self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECDn                                           = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECDn / 1e4**2
+        self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn                                    = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECDn / 1e4
 
-        self.p_HadWH_SIG_ghw1_1_JHUGen_JECDn                                             = t.p_HadWH_SIG_ghw1_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw4_1_JHUGen_JECDn                                             = t.p_HadWH_SIG_ghw4_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn                                      = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw2_1_JHUGen_JECDn                                             = t.p_HadWH_SIG_ghw2_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn                                      = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECDn                                       = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECDn / 1e4**2
-        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECDn                                = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECDn / 1e4
+        self.p_HadWH_SIG_ghw1_1_JHUGen_JECDn                                                  = t.p_HadWH_SIG_ghw1_1_JHUGen_JECDn
+        self.p_HadWH_SIG_ghw4_1_JHUGen_JECDn                                                  = t.p_HadWH_SIG_ghw4_1_JHUGen_JECDn
+        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn                                           = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn
+        self.p_HadWH_SIG_ghw2_1_JHUGen_JECDn                                                  = t.p_HadWH_SIG_ghw2_1_JHUGen_JECDn
+        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn                                           = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn
+        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECDn                                            = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECDn / 1e4**2
+        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECDn                                     = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECDn / 1e4
+        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECDn                                           = 0
+        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn                                    = 0
 
-        self.p_JQCD_SIG_ghg2_1_JHUGen_JECDn                                              = t.p_JQCD_SIG_ghg2_1_JHUGen_JECDn
-        self.p_JVBF_SIG_ghv1_1_JHUGen_JECDn                                              = t.p_JVBF_SIG_ghv1_1_JHUGen_JECDn
-        self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECDn                                           = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECDn
+        self.p_JQCD_SIG_ghg2_1_JHUGen_JECDn                                                   = t.p_JQCD_SIG_ghg2_1_JHUGen_JECDn
+        self.p_JVBF_SIG_ghv1_1_JHUGen_JECDn                                                   = t.p_JVBF_SIG_ghv1_1_JHUGen_JECDn
+        self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECDn                                                = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECDn
 
         #Gen MEs
         for weightname in self.genMEs:
@@ -292,6 +312,12 @@ class TreeWrapper(Iterator):
                 self.jetQGLikelihood_jecDn = array("f", [t.JetQGLikelihood[i] for i in jecDnIndices])
                 self.jetPhi_jecDn = array("f", [t.JetPhi[i] for i in jecDnIndices])
 
+        #LHE info, needed for photon cut
+        self.LHEDaughterId = t.LHEDaughterId
+        self.LHEDaughterPt = t.LHEDaughterPt
+        self.LHEDaughterEta = t.LHEDaughterEta
+        self.LHEDaughterPhi = t.LHEDaughterPhi
+        self.LHEDaughterMass = t.LHEDaughterMass
 
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
@@ -477,10 +503,10 @@ class TreeWrapper(Iterator):
         return self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco / (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)
     def D_L1Zg_HadWH(self):
         if self.notdijet: return -999
-        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2)
+        return 1
     def D_L1Zgint_HadWH(self):
         if self.notdijet: return -999
-        return self.M2g1ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco / (self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2)
+        return 1
 
 ###############################################
 #VH hadronic anomalous couplings discriminants#
@@ -489,89 +515,101 @@ class TreeWrapper(Iterator):
     def D_0minus_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
-                   (self.M2g1_HadWH + self.M2g4_HadWH*constants.g4WH**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1_HadZH + self.M2g4_HadZH*constants.g4ZH**2)*constants.JHUXSZHa1
+                   (self.M2g4_HadWH + self.M2g4_HadZH)
+                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa3+constants.JHUXSZHa3)
                  )
                )
     def D_CP_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g4_HadWH*constants.g4WH*constants.JHUXSWHa1 + self.M2g1g4_HadZH*constants.g4ZH*constants.JHUXSZHa1)
+                 (self.M2g1g4_HadWH + self.M2g1g4_HadZH)
+                     * ((constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa3+constants.JHUXSZHa3))**.5
                /
                  (
-                   (self.M2g1_HadWH + self.M2g4_HadWH*constants.g4WH**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1_HadZH + self.M2g4_HadZH*constants.g4ZH**2)*constants.JHUXSZHa1
+                   (self.M2g4_HadWH + self.M2g4_HadZH)
+                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa3+constants.JHUXSZHa3)
                  )
                )
     def D_0hplus_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
-                   (self.M2g1_HadWH + self.M2g2_HadWH*constants.g2WH**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)*constants.JHUXSZHa1
+                   (self.M2g2_HadWH + self.M2g2_HadZH)
+                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa2+constants.JHUXSZHa2)
                  )
                )
     def D_int_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g2_HadWH*constants.g2WH*constants.JHUXSWHa1 + self.M2g1g2_HadZH*constants.g2ZH*constants.JHUXSZHa1)
+                 (self.M2g1g2_HadWH + self.M2g1g2_HadZH)
+                     * ((constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa2+constants.JHUXSZHa2))**.5
                /
                  (
-                   (self.M2g1_HadWH + self.M2g2_HadWH*constants.g2WH**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1_HadZH + self.M2g2_HadZH*constants.g2ZH**2)*constants.JHUXSZHa1
+                   (self.M2g2_HadWH + self.M2g2_HadZH)
+                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa2+constants.JHUXSZHa2)
                  )
                )
     def D_L1_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
-                   (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
+                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)
+                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1+constants.JHUXSZHL1)
                  )
                )
     def D_L1int_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g1prime2_HadWH*constants.g1prime2WH_reco*constants.JHUXSWHa1 + self.M2g1g1prime2_HadZH*constants.g1prime2ZH_reco*constants.JHUXSZHa1)
+                 (self.M2g1g1prime2_HadWH + self.M2g1g1prime2_HadZH)
+                     * ((constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1+constants.JHUXSZHL1))**.5
                /
                  (
-                   (self.M2g1_HadWH + self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1_HadZH + self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2)*constants.JHUXSZHa1
+                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)
+                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1+constants.JHUXSZHL1)
                  )
                )
     def D_L1Zg_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1_HadWH*constants.JHUXSWHa1 + self.M2g1_HadZH*constants.JHUXSZHa1)
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
-                   (self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1_HadZH + self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2)*constants.JHUXSZHa1
+                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)
+                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1Zg+constants.JHUXSZHL1Zg)
                  )
                )
     def D_L1Zgint_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco*constants.JHUXSWHa1 + self.M2g1ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco*constants.JHUXSZHa1)
+                 (self.M2g1ghzgs1prime2_HadWH + self.M2g1ghzgs1prime2_HadZH)
+                     * ((constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1Zg+constants.JHUXSZHL1Zg))**.5
                /
                  (
-                   (self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2)*constants.JHUXSWHa1
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1_HadZH + self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2)*constants.JHUXSZHa1
+                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)
+                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1Zg+constants.JHUXSZHL1Zg)
                  )
                )
 

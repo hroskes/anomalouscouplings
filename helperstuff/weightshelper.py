@@ -41,11 +41,11 @@ class WeightsHelper(MultiEnum):
         return "ghz1"
     @property
     def decayBSMcouplingname(self):
-        if self.analysis == "fL1Zg": return self.analysis.couplingname
+        if self.analysis == "fL1Zg": return self.analysis.couplingname.replace("ghzgs", "ghza")
         return self.analysis.couplingname.replace("g", "ghz")
     @property
     def decayBSMcouplingvalue(self):
-        if self.analysis == "fL1": return "1E4"
+        if self.analysis in ("fL1", "fL1Zg"): return "1E4"
         else: return "1"
 
     @property
@@ -60,7 +60,7 @@ class WeightsHelper(MultiEnum):
         if self.productionmode == "ttH": return "kappa_tilde"
         if self.productionmode == "HJJ": return "ghg4"
         if self.productionmode == "ggH": return None
-        if self.analysis == "fL1Zg": return self.analysis.couplingname
+        if self.analysis == "fL1Zg": return self.analysis.couplingname.replace("ghzgs", "ghza")
         if self.productionmode == "VBF": return self.analysis.couplingname.replace("g", "ghv")
         if self.productionmode == "WH": return self.analysis.couplingname.replace("g", "ghw")
         if self.productionmode == "ZH": return self.analysis.couplingname.replace("g", "ghz")

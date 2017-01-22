@@ -82,11 +82,11 @@ class BaseSingleCategorization(BaseCategorization):
                  "p_JJVBF_SIG_ghv2_1_JHUGen_{}".format(self.JEC): self.g2**2,
                  "p_JJVBF_SIG_ghv4_1_JHUGen_{}".format(self.JEC): self.g4**2,
                  "p_JJVBF_SIG_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
-                 "p_JJVBF_SIG_ghzgs1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
+                 "p_JJVBF_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
                  "p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
                  "p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
                  "p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
-                 "p_JJVBF_SIG_ghv1_1_ghzgs1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
+                 "p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = (
@@ -102,11 +102,11 @@ class BaseSingleCategorization(BaseCategorization):
                  "p_HadZH_SIG_ghz2_1_JHUGen_{}".format(self.JEC): self.g2**2,
                  "p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC): self.g4**2,
                  "p_HadZH_SIG_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
-                 "p_HadZH_SIG_ghzgs1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
+                 "p_HadZH_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
                  "p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
                  "p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
                  "p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
-                 "p_HadZH_SIG_ghz1_1_ghzgs1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
+                 "p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = (
