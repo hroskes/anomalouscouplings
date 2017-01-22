@@ -313,15 +313,18 @@ class TreeWrapper(Iterator):
                 self.jetPhi_jecDn = array("f", [t.JetPhi[i] for i in jecDnIndices])
 
         #LHE info, needed for photon cut
-        self.LHEDaughterId = t.LHEDaughterId
-        self.LHEDaughterPt = t.LHEDaughterPt
-        self.LHEDaughterEta = t.LHEDaughterEta
-        self.LHEDaughterPhi = t.LHEDaughterPhi
-        self.LHEDaughterMass = t.LHEDaughterMass
-        self.LHEAssociatedParticlePt = t.LHEAssociatedParticlePt
-        self.LHEAssociatedParticleEta = t.LHEAssociatedParticleEta
-        self.LHEAssociatedParticlePhi = t.LHEAssociatedParticlePhi
-        self.LHEAssociatedParticleMass = t.LHEAssociatedParticleMass
+        try:
+            self.LHEDaughterId = t.LHEDaughterId
+            self.LHEDaughterPt = t.LHEDaughterPt
+            self.LHEDaughterEta = t.LHEDaughterEta
+            self.LHEDaughterPhi = t.LHEDaughterPhi
+            self.LHEDaughterMass = t.LHEDaughterMass
+            self.LHEAssociatedParticlePt = t.LHEAssociatedParticlePt
+            self.LHEAssociatedParticleEta = t.LHEAssociatedParticleEta
+            self.LHEAssociatedParticlePhi = t.LHEAssociatedParticlePhi
+            self.LHEAssociatedParticleMass = t.LHEAssociatedParticleMass
+        except AttributeError:
+            pass
 
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
