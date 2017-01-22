@@ -67,8 +67,8 @@ JHUXSggH2L2lL1           = 0.48754258E-07; JHUXSggH2L2lL1err            = 0.1511
 JHUXSggH2L2la1a2         = 26.073377;      JHUXSggH2L2la1a2err          = 0.74026916E-03
 JHUXSggH2L2la1a3         = 14.278034;      JHUXSggH2L2la1a3err          = 0.45318122E-03
 JHUXSggH2L2la1L1         = 0.23727827;     JHUXSggH2L2la1L1err          = 0.15982277E-04    #using g1prime2 = -12100.42
-#JHUXSggH2L2la1_photoncut = ;               JHUXSggH2L2la1err_photoncut  = 
-#JHUXSggH2L2lL1Zg         = ;               JHUXSggH2L2lL1Zgerr          = 
+JHUXSggH2L2la1_photoncut = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27583899E-03
+JHUXSggH2L2lL1Zg         = 0.12338393E-06; JHUXSggH2L2lL1Zgerr          = 0.58002047E-11
 #JHUXSggH2L2la1L1Zg       = ;               JHUXSggH2L2la1L1Zgerr        = 
 
 
