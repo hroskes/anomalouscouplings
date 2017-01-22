@@ -270,7 +270,6 @@ class SampleBase(object):
                                    if couplingsq
                                          and weightname is not None
                            ])
-            print self, prod
 
         if weightshelper.weightdecaystring is not None:
             decay = Counter()
