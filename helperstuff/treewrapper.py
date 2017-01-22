@@ -94,7 +94,7 @@ class TreeWrapper(Iterator):
                 raise StopIteration
             if i % 10000 == 0 or i == len(self):
                 print i, "/", len(self)
-                #raise StopIteration
+                raise StopIteration
 
             if self.isdata:
                 self.overallEventWeight = 1
@@ -1716,7 +1716,7 @@ class TreeWrapper(Iterator):
                 array.append(function(entry))
             if i % 10000 == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
-                #break
+                break
 
         self.cutoffs = {}
         self.nevents2L2l = {}

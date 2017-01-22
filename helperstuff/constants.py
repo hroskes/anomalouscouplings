@@ -114,7 +114,7 @@ JHUXSWHa1a3         = 62001.57;       JHUXSWHa1a3err         = 5.54
 JHUXSWHa1L1         = 25302.37;       JHUXSWHa1L1err         = 2.67
 JHUXSWHa1_photoncut = JHUXSWHa1;      JHUXSWHa1err_photoncut = JHUXSWHa1err
 JHUXSWHL1Zg         = 0;              JHUXSWHL1Zgerr         = 0
-JHUXSWHa1L1Zg       = JHUXSWHa1;      JHUXSWHa1L1Zgerr       = JHUXSWHa1err
+JHUXSWHa1L1Zg       = None;           JHUXSWHL1Zgerr         = None  #set to 0 later
 
 #VH cross sections changed somewhere between c85a387eaf3a8a92f5893e5293ed3c3d36107e16 and fbf449150f4df49f66b21c1638adb02b68a308d0
 #correct for that
@@ -140,8 +140,6 @@ JHUXSttHkappakappatilde = 1.8231162489;   JHUXSttHkappakappatildeerr = 0.0025413
 if JHUXSggH2L2la1_photoncut > JHUXSggH2L2la1: JHUXSggH2L2la1_photoncut = JHUXSggH2L2la1; JHUXSggH2L2la1err_photoncut = JHUXSggH2L2la1err
 if JHUXSVBFa1_photoncut > JHUXSVBFa1: JHUXSVBFa1_photoncut = JHUXSVBFa1; JHUXSVBFa1err_photoncut = JHUXSVBFa1err
 if JHUXSZHa1_photoncut > JHUXSZHa1: JHUXSZHa1_photoncut = JHUXSZHa1; JHUXSZHa1err_photoncut = JHUXSZHa1err
-
-print JHUXSZHa1, JHUXSZHa1_photoncut, JHUXSZHa1L1Zg; assert False
 
 if __name__ == "__main__":
     print "All of the following should be 0:"
@@ -294,7 +292,7 @@ JHUXSZHa1L1Zg, JHUXSZHa1L1Zgerr = JHUXSZHa1L1Zg - 2*JHUXSZHa1, sqrt(JHUXSZHa1L1Z
 JHUXSWHa1a2,   JHUXSWHa1a2err   = JHUXSWHa1a2   - 2*JHUXSWHa1, sqrt(JHUXSWHa1a2err  **2 + 4*JHUXSWHa1err**2)
 JHUXSWHa1a3,   JHUXSWHa1a3err   = JHUXSWHa1a3   - 2*JHUXSWHa1, 0
 JHUXSWHa1L1,   JHUXSWHa1L1err   = JHUXSWHa1L1   - 2*JHUXSWHa1, sqrt(JHUXSWHa1L1err  **2 + 4*JHUXSWHa1err**2)
-JHUXSWHa1L1Zg, JHUXSWHa1L1Zgerr = JHUXSWHa1L1Zg - 2*JHUXSWHa1, sqrt(JHUXSWHa1L1Zgerr**2 + 4*JHUXSWHa1err**2)
+JHUXSWHa1L1Zg, JHUXSWHa1L1Zgerr = 0, 0
 
 JHUXSHJJa2a3, JHUXSHJJa2a3err = JHUXSHJJa2a3 - 2*JHUXSHJJa2, 0
 JHUXSttHkappakappatilde, JHUXSttHkappakappatildeerr = JHUXSttHkappakappatilde - 2*JHUXSttHkappa, 0
