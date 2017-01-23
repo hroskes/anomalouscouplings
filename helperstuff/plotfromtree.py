@@ -10,6 +10,8 @@ from helperstuff.enums import Category, Channel
 import helperstuff.rootoverloads.histogramfloor
 from helperstuff.samples import Sample, SampleBase
 
+mandatory = object()
+
 class Options(dict):
   def __getattr__(self, attr):
     return self[attr]
@@ -18,14 +20,19 @@ class Options(dict):
 
 def plotfromtree(**kwargs):
   o = Options({
-    "productionmode": None,
-    "hypothesis":     None,
+    "productionmode": mandatory,
+    "hypothesis":     mandatory,
     "weight":         None,
 
-    "disc":           None,
+    "disc":           mandatory,
     "bins":           None,
     "min":            None,
     "max":            None,
+
+    "disc2":          None,
+    "bins2":           None,
+    "min2":            None,
+    "max2":            None,
 
     "transformation": None,  #should be a string with {disc} in it
 
@@ -44,7 +51,10 @@ def plotfromtree(**kwargs):
     if kw in o:
       o[kw] = kwarg
     else:
-      raise ValueError("Unknown kwarg {}={}".format(kw, kwarg))
+      raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+  for kw, kwarg in o.iteritems():
+    if kwarg is mandatory:
+      raise TypeError("kwarg {} is mandatory!".format(kw))
 
   discname, title, discbins, discmin, discmax = discriminant(o.disc)
   if o.transformation is not None:
@@ -57,6 +67,15 @@ def plotfromtree(**kwargs):
     o.min = discmin
   if o.max is None:
     o.max = discmax
+
+  if o.disc2 is not None:
+    disc2name, disc2title, disc2bins, disc2min, disc2max = discriminant(o.disc2)
+    if o.bins2 is None:
+      o.bins2 = disc2bins
+    if o.min2 is None:
+      o.min2 = disc2min
+    if o.max2 is None:
+      o.max2 = disc2max
 
   if isinstance(o.weight, SampleBase):
     o.weight = o.weight.MC_weight
@@ -83,7 +102,7 @@ def plotfromtree(**kwargs):
 
   weightfactors = [
                    weightname,
-                   "{}>-998".format(discname),
+                   "{}>-98".format(discname),
                   ]
   if o.category is not None:
     weightfactors.append(" || ".join("(category=={})".format(_) for _ in Category(o.category).idnumbers))
@@ -94,6 +113,8 @@ def plotfromtree(**kwargs):
   if o.masscut:
     weightfactors.append("ZZMass > {}".format(config.m4lmin))
     weightfactors.append("ZZMass < {}".format(config.m4lmax))
+  if o.disc2 is not None:
+    weightfactors.append("{}>-98".format(disc2name))
 
   wt = "*".join("("+_+")" for _ in weightfactors)
 
@@ -102,12 +123,25 @@ def plotfromtree(**kwargs):
   else:
     formula = o.transformation.format(disc=discname)
 
-  t.Draw("{}>>{}({},{},{})".format(formula, o.hname, o.bins, o.min, o.max), wt, "hist")
+  todraw = ""
+  if o.disc2 is not None:
+    todraw += "{}:".format(disc2name)
+  todraw += "{}".format(formula)
+  todraw += ">>{}".format(o.hname)
+  if o.bins != 0:
+    todraw += "({},{},{}".format(o.bins, o.min, o.max)
+    if o.disc2 is not None:
+      todraw += ",{},{},{}".format(o.bins2, o.min2, o.max2)
+    todraw += ")"
+
+  t.Draw(todraw, wt, "hist")
   h = getattr(ROOT, o.hname)
   h.GetXaxis().SetTitle(title)
   if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
     h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
     h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
+  if o.disc2 is not None:
+    h.GetYaxis().SetTitle(disc2title)
   h.Floor()
   if o.normalizeto1:
     try:
