@@ -341,6 +341,12 @@ class Analysis(MyEnum):
             return Hypothesis("fL1Zgprod0.5")
         assert False
     @property
+    def categoryname(self):
+        if self == "fa3": return "0P_or_0M"
+        if self == "fa2": return "0P_or_a2"
+        if self == "fL1": return "0P_or_L1"
+        assert False
+    @property
     def photoncut(self):
         if self == "fL1Zg": return True
         if self in ("fa2", "fa3", "fL1"): return False

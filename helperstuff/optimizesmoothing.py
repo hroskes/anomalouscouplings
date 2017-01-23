@@ -702,8 +702,11 @@ class TemplateIterate(Template):
             #                    200 bins if possible, as in the TemplateBuilder examples
             #                    but maximum of 4 bins in the template
             neffectiveentries = self.controlplots[0].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
-            entriesperbin = min(neffectiveentries/4, 200)
-            nbins = neffectiveentries / entriesperbin
+            try:
+                entriesperbin = min(neffectiveentries/4, 200)
+                nbins = neffectiveentries / entriesperbin
+            except ZeroDivisionError:
+                return [None, None, None], "no entries"
             message += "First iteration-->{} entries per bin ({} bins), ".format(entriesperbin, nbins)
             message += "reweight on all axes with JB's automatic binning procedure."
             return [entriesperbin, [0, 1, 2], None], message

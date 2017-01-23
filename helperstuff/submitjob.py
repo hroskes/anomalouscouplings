@@ -16,8 +16,7 @@ if config.host == "lxplus":
         run = """
                  echo .oO[jobtext]Oo. | bsub .oO[options]Oo.
               """
-        if interactive and queue != "cmsinter":
-            raise ValueError("Interactive jobs have to be submitted to cmsinter")
+        if interactive: queue = "cmsinter"
         optionsdict = {
                        "-q": queue,
                        "-J": jobname,
