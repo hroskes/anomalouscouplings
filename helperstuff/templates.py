@@ -190,7 +190,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 return discriminant("D_L1Zg_VBFdecay")
             if self.analysis == "fL1Zg":
-                return discriminant("D_L1_VBFdecay")
+                return discriminant("D_a2_VBFdecay")
 
         if self.category == "VHHadrTaggedIchep16":
             if self.analysis == "fa3":
@@ -200,7 +200,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 return discriminant("D_L1Zg_HadVHdecay")
             if self.analysis == "fL1Zg":
-                return discriminant("D_L1_HadVHdecay")
+                return discriminant("D_a2_HadVHdecay")
 
         assert False
 

@@ -302,41 +302,6 @@ class Analysis(MyEnum):
     @property
     def phi_lower(self):
         return self.phi.replace("{", "{#lower[-0.25]{").replace("}", "}}")
-    def purediscriminant(self, title=False):
-        from discriminants import discriminant
-        if title:
-            return discriminant(self.purediscriminant(title=False)).title
-        if self == "fa3":
-            return "D_0minus_decay"
-        if self == "fa2":
-            return "D_0hplus_decay"
-        if self == "fL1":
-            return "D_L1_decay"
-        if self == "fL1Zg":
-            return "D_L1Zg_decay"
-        assert False
-    def mixdiscriminant(self, title=False):
-        if title:
-            return discriminant(self.mixdiscriminant(title=False)).title
-        if self == "fa3":
-            return "D_CP_decay"
-        if self == "fa2":
-            return "D_int_decay"
-        if self == "fL1":
-            return "D_L1Zg_decay"
-        if self == "fL1Zg":
-            return "D_L1_decay"
-        assert False
-    def interfxsec(self):
-        if self == "fa3":
-            return constants.JHUXSggH2L2la1a3
-        elif self == "fa2":
-            return constants.JHUXSggH2L2la1a2
-        elif self == "fL1":
-            return constants.JHUXSggH2L2la1L1
-        elif self == "fL1Zg":
-            return constants.JHUXSggH2L2la1L1Zg
-        assert False
     @property
     def couplingname(self):
         if self == "fa3": return "g4"
