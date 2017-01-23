@@ -178,9 +178,9 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa2":
                 return discriminant("D_int_decay")
             if self.analysis == "fL1":
-                return discriminant("D_L1Zg_decay")
+                return discriminant("D_0hplus_decay")
             if self.analysis == "fL1Zg":
-                return discriminant("D_L1_decay")
+                return discriminant("D_0hplus_decay")
 
         if self.category == "VBF2jTaggedIchep16":
             if self.analysis == "fa3":
@@ -188,9 +188,9 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa2":
                 return discriminant("D_int_VBF")
             if self.analysis == "fL1":
-                return discriminant("D_L1Zg_VBFdecay")
+                return discriminant("D_0hplus_VBFdecay")
             if self.analysis == "fL1Zg":
-                return discriminant("D_a2_VBFdecay")
+                return discriminant("D_0hplus_VBFdecay")
 
         if self.category == "VHHadrTaggedIchep16":
             if self.analysis == "fa3":
@@ -198,9 +198,9 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa2":
                 return discriminant("D_int_HadVH")
             if self.analysis == "fL1":
-                return discriminant("D_L1Zg_HadVHdecay")
+                return discriminant("D_0hplus_HadVHdecay")
             if self.analysis == "fL1Zg":
-                return discriminant("D_a2_HadVHdecay")
+                return discriminant("D_0hplus_HadVHdecay")
 
         assert False
 
