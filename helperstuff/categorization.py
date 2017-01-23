@@ -29,6 +29,8 @@ class BaseSingleCategorization(BaseCategorization):
     @abstractproperty
     def g1prime2(self): pass
     @abstractproperty
+    def ghzgs1prime2(self): pass
+    @abstractproperty
     def ghg2(self): pass
     @abstractproperty
     def ghg4(self): pass
@@ -71,7 +73,7 @@ class BaseSingleCategorization(BaseCategorization):
                  "p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg2*self.ghg4,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 1, 0).JHUxsec / ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, self.ghg2, self.ghg4).JHUxsec
+        multiplier = ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=1, ghg4=0).JHUxsec / ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=self.ghg2, ghg4=self.ghg4).JHUxsec
         return self.get_p_function(terms, multiplier, self.pHJJ_function_name)
 
     def get_pVBF_function(self):
@@ -80,15 +82,17 @@ class BaseSingleCategorization(BaseCategorization):
                  "p_JJVBF_SIG_ghv2_1_JHUGen_{}".format(self.JEC): self.g2**2,
                  "p_JJVBF_SIG_ghv4_1_JHUGen_{}".format(self.JEC): self.g4**2,
                  "p_JJVBF_SIG_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
+                 "p_JJVBF_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
                  "p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
                  "p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
                  "p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
+                 "p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = (
-                      (ArbitraryCouplingsSample("VBF", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("VBF", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                      (ArbitraryCouplingsSample("VBF", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("VBF", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      )
         return self.get_p_function(terms, multiplier, self.pVBF_function_name)
 
@@ -98,19 +102,25 @@ class BaseSingleCategorization(BaseCategorization):
                  "p_HadZH_SIG_ghz2_1_JHUGen_{}".format(self.JEC): self.g2**2,
                  "p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC): self.g4**2,
                  "p_HadZH_SIG_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
+                 "p_HadZH_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
                  "p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
                  "p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
                  "p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
+                 "p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = (
-                      (ArbitraryCouplingsSample("ZH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ZH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                      (ArbitraryCouplingsSample("ZH", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("ZH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      )
         return self.get_p_function(terms, multiplier, self.pZH_function_name)
 
     def get_pWH_function(self):
+        if self.ghzgs1prime2 != 0:
+            def result(self_tree): return 0
+            result.__name__ = self.pWH_function_name
+            return result
         terms = {
                  "p_HadWH_SIG_ghw1_1_JHUGen_{}".format(self.JEC): self.g1**2,
                  "p_HadWH_SIG_ghw2_1_JHUGen_{}".format(self.JEC): self.g2**2,
@@ -122,9 +132,9 @@ class BaseSingleCategorization(BaseCategorization):
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = (
-                      (ArbitraryCouplingsSample("WH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("WH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                      (ArbitraryCouplingsSample("WH", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("WH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2).xsec)
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      )
         return self.get_p_function(terms, multiplier, self.pWH_function_name)
 
@@ -171,8 +181,9 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
         self.__g2 = g2
         self.__g4 = g4
         self.__g1prime2 = g1prime2
-        if len(x for x in (g2, g4, g1prime2) if x) > w:
-            raise ValueError("Can't use more than 1 of g2, g4, g1prime2")
+        self.__ghzgs1prime2 = ghzgs1prime2
+        if len(x for x in (g2, g4, g1prime2, ghzgs1prime2) if x) > w:
+            raise ValueError("Can't use more than 1 of g2, g4, g1prime2, ghzgs1prime2")
         self.__ghg2 = ghg2
         self.__ghg4 = ghg4
         super(ArbitraryCouplingsSingleCategorization, self).__init__(JEC)
@@ -185,6 +196,8 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
     def g4(self): return self.__g4
     @property
     def g1prime2(self): return self.__g1prime2
+    @property
+    def g1prime2(self): return self.__ghzgs1prime2
     @property
     def ghg2(self): return self.__ghg2
     @property
@@ -215,6 +228,8 @@ class SingleCategorizationFromSample(BaseSingleCategorization):
     def g4(self): return self.sample.g4
     @property
     def g1prime2(self): return self.sample.g1prime2
+    @property
+    def ghzgs1prime2(self): return self.sample.ghzgs1prime2
     @property
     def ghg2(self):
         try:

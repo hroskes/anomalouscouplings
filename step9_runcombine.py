@@ -2,7 +2,7 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff import config, utilities
 from helperstuff.combinehelpers import datacardprocessline, getrates, Luminosity
-from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode, WhichProdDiscriminants
+from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
 from itertools import product
@@ -15,7 +15,7 @@ import sys
 
 makeworkspacestemplate = """
 eval $(scram ru -sh) &&
-python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo. -C .oO[category]Oo. -m .oO[model]Oo. -W .oO[whichproddiscriminants]Oo.
+python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo. -C .oO[category]Oo. -m .oO[model]Oo.
 """
 
 createworkspacetemplate = r"""
@@ -54,7 +54,6 @@ def runcombine(analysis, foldername, **kwargs):
     legendposition = (.2, .7, .6, .9)
     CLtextposition = "left"
     productions = config.productionsforcombine
-    whichproddiscriminants = WhichProdDiscriminants("D_int_prod")#None
     usesystematics = True
     subdirectory = ""
     defaultscanrange = scanrange = (-1.0, 1.0)
@@ -90,8 +89,6 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("legendposition has to contain 4 floats separated by commas!")
         elif kw == "productions":
             productions = [Production(p) for p in kwarg.split(",")]
-        elif kw == "whichproddiscriminants":
-            whichproddiscriminants = WhichProdDiscriminants(kwarg)
         elif kw == "usesystematics":
             usesystematics = bool(int(kwarg))
         elif kw == "scanrange":
@@ -120,10 +117,6 @@ def runcombine(analysis, foldername, **kwargs):
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
-    if whichproddiscriminants is None:
-        raise TypeError("Need to provide whichproddiscriminants kwarg.")
-    if whichproddiscriminants != "D_int_prod":
-        raise TypeError("Has to be D_int_prod at the moment (otherwise need to revert part of fcdaf0e)")
     if len(productions) > 1 and lumitype != "fordata":
         raise TypeError("If there's >1 production, have to use lumitype == 'fordata'")
 
@@ -159,7 +152,6 @@ def runcombine(analysis, foldername, **kwargs):
     repmap = {
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
-              "whichproddiscriminants": str(whichproddiscriminants),
               "model": "VBFHZZ4l",
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
               "workspacefile": "floatMu.oO[workspacefileappend]Oo..root",

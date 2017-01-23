@@ -46,7 +46,7 @@ def makeplot(analysis, disc, additionalcconstant=1, shiftWP=None):
   fainame = "{}^{{{}}}".format(analysis.title, productionmode)
 
   mixplus = ReweightingSample(productionmode, analysis.mixprodhypothesis)
-  mixminus = ArbitraryCouplingsSample(productionmode, mixplus.g1, -mixplus.g2, -mixplus.g4, -mixplus.g1prime2)
+  mixminus = ArbitraryCouplingsSample(productionmode, mixplus.g1, -mixplus.g2, -mixplus.g4, -mixplus.g1prime2, -mixplus.ghzgs1prime2)
 
   lines = [
            Line(ReweightingSample(productionmode, "0+"), "{} SM".format(productionmode), 1),
