@@ -20,7 +20,7 @@ class Line(namedtuple("Line", "sample title color reweightfrom")):
             reweightfrom = Sample(reweightfrom, config.productionsforcombine[0])
         return super(Line, cls).__new__(cls, sample, title, color, reweightfrom)
 
-def makeplot(productionmode, disc):
+def makeplot(productionmode, disc, disc2=None):
   analysis = Analysis("fL1Zg")
   productionmode = ProductionMode(productionmode)
   if productionmode == "ZH":
@@ -48,19 +48,23 @@ def makeplot(productionmode, disc):
                  Line(ReweightingSample("WH", "0+"),            "WH SM", 2),
                 )
 
+  hstackname = disc
+  if disc2 is not None: hstackname += "_"+disc2
+
   hs = {}
-  hstack = ROOT.THStack(disc, "")
+  hstack = ROOT.THStack(hstackname, "")
   l = ROOT.TLegend(.4, .6, .9, .9)
   l.SetBorderSize(0)
   l.SetFillStyle(0)
   c = ROOT.TCanvas()
 
   for sample, title, color, reweightfrom in lines:
-    h = hs[analysis,disc,sample] = plotfromtree(
+    h = hs[analysis,disc,disc2,sample] = plotfromtree(
       productionmode=reweightfrom.productionmode,
       hypothesis=reweightfrom.hypothesis,
       weight=sample,
       disc=disc,
+      disc2=disc2,
       normalizeto1=True,
       color=color,
     )
@@ -77,8 +81,12 @@ def makeplot(productionmode, disc):
     os.makedirs(saveasdir)
   except OSError:
     pass
+  if disc2 is None:
+    saveasname = disc
+  else:
+    saveasname = "2D_{}_{}".format(disc, disc2)
   for ext in "png eps root pdf".split():
-    c.SaveAs(os.path.join(saveasdir, "{}.{}".format(disc, ext)))
+    c.SaveAs(os.path.join(saveasdir, "{}.{}".format(saveasname, ext)))
 
 if __name__ == "__main__":
   makeplot("VBF", "D_L1Zg_VBFdecay")
@@ -89,3 +97,7 @@ if __name__ == "__main__":
   makeplot("ZH", "D_L1Zgint_HadVH")
   makeplot("ggH", "D_L1Zg_decay")
   makeplot("ggH", "D_L1Zgint_decay")
+
+  makeplot("VBF", "D_L1Zg_VBF", "D_L1Zgint_VBF")
+  makeplot("ZH", "D_L1Zg_HadVH", "D_L1Zgint_HadVH")
+  makeplot("ggH", "D_L1Zg_decay", "D_L1Zgint_decay")
