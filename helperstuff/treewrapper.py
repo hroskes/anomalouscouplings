@@ -527,21 +527,18 @@ class TreeWrapper(Iterator):
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g4_HadWH + self.M2g4_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa3+constants.JHUXSZHa3)
+                   (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
                  )
                )
     def D_CP_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g4_HadWH + self.M2g1g4_HadZH)
-                     * ((constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa3+constants.JHUXSZHa3))**.5
+                 (self.M2g1g4_HadWH + self.M2g1g4_HadZH)*constants.g4VH
                /
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g4_HadWH + self.M2g4_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa3+constants.JHUXSZHa3)
+                   (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
                  )
                )
     def D_0hplus_HadVH(self):
@@ -552,21 +549,18 @@ class TreeWrapper(Iterator):
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g2_HadWH + self.M2g2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa2+constants.JHUXSZHa2)
+                   (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                  )
                )
     def D_int_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g2_HadWH + self.M2g1g2_HadZH)
-                     * ((constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa2+constants.JHUXSZHa2))**.5
+                 (self.M2g1g2_HadWH + self.M2g1g2_HadZH)*constants.g2VH
                /
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g2_HadWH + self.M2g2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa2+constants.JHUXSZHa2)
+                   (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                  )
                )
     def D_L1_HadVH(self):
@@ -577,21 +571,18 @@ class TreeWrapper(Iterator):
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1+constants.JHUXSZHL1)
+                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
                  )
                )
     def D_L1int_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1g1prime2_HadWH + self.M2g1g1prime2_HadZH)
-                     * ((constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1+constants.JHUXSZHL1))**.5
+                 (self.M2g1g1prime2_HadWH + self.M2g1g1prime2_HadZH)*constants.g1prime2VH_reco
                /
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1+constants.JHUXSZHL1)
+                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
                  )
                )
     def D_L1Zg_HadVH(self):
@@ -603,20 +594,18 @@ class TreeWrapper(Iterator):
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
                    (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1Zg+constants.JHUXSZHL1Zg)
+                          * constants.ghzgs1prime2VH_reco**2
                  )
                )
     def D_L1Zgint_HadVH(self):
         if self.notdijet: return -999
         return (
-                 (self.M2g1ghzgs1prime2_HadWH + self.M2g1ghzgs1prime2_HadZH)
-                     * ((constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1Zg+constants.JHUXSZHL1Zg))**.5
+                 (self.M2g1ghzgs1prime2_HadWH + self.M2g1ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco
                /
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
-                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1Zg+constants.JHUXSZHL1Zg)
+                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco**2
                  )
                )
 
@@ -678,42 +667,36 @@ class TreeWrapper(Iterator):
     def D_0minus_HadVHdecay(self):
         if self.notdijet: return -999
         return (
-                 ((self.M2g1_HadWH + self.M2g1_HadZH)
-                    *self.M2g1_decay)
+                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
                /
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                         *self.M2g1_decay
-                 + (self.M2g4_HadWH + self.M2g4_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa3+constants.JHUXSZHa3)
+                 + (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
                         *self.M2g4_decay*constants.g4decay**2
                  )
                )
     def D_0hplus_HadVHdecay(self):
         if self.notdijet: return -999
         return (
-                 ((self.M2g1_HadWH + self.M2g1_HadZH)
-                    *self.M2g1_decay)
+                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
                /
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                         *self.M2g1_decay
-                 + (self.M2g2_HadWH + self.M2g2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHa2+constants.JHUXSZHa2)
+                 + (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                         *self.M2g2_decay*constants.g2decay**2
                  )
                )
     def D_L1_HadVHdecay(self):
         if self.notdijet: return -999
         return (
-                 ((self.M2g1_HadWH + self.M2g1_HadZH)
-                    *self.M2g1_decay)
+                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
                /
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                         *self.M2g1_decay
-                 + (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1+constants.JHUXSZHL1)
+                 + (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
                         *self.M2g1prime2_decay*constants.g1prime2decay_reco**2
                  )
                )
@@ -726,8 +709,7 @@ class TreeWrapper(Iterator):
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                         *self.M2g1_decay
-                 + (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)
-                          * (constants.JHUXSWHa1+constants.JHUXSZHa1) / (constants.JHUXSWHL1Zg+constants.JHUXSZHL1Zg)
+                 + (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco**2
                         *self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2
                  )
                )

@@ -302,6 +302,13 @@ JHUXSWHa1L1Zg, JHUXSWHa1L1Zgerr = 0, 0
 JHUXSHJJa2a3, JHUXSHJJa2a3err = JHUXSHJJa2a3 - 2*JHUXSHJJa2, 0
 JHUXSttHkappakappatilde, JHUXSttHkappakappatildeerr = JHUXSttHkappakappatilde - 2*JHUXSttHkappa, 0
 
+g2VH = sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHa2 + JHUXSWHa2))
+g4VH = sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHa3 + JHUXSWHa3))
+g1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHL1 + JHUXSWHL1))
+g1prime2VH_reco = -g1prime2VH_gen
+ghzgs1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHL1Zg + JHUXSWHL1Zg))
+ghzgs1prime2VH_reco = -ghzgs1prime2VH_gen
+
 #defined this way, just make sure
 assert (JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == JHUXSZHa1a3 == JHUXSWHa1a3 == JHUXSHJJa2a3 == JHUXSttHkappakappatilde
               == JHUXSWHL1Zg == JHUXSWHa1L1Zg == 0)
