@@ -140,25 +140,31 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 return discriminant("D_0minus_decay")
             if self.analysis == "fa2":
-                return discriminant("D_g2_decay")
+                return discriminant("D_0hplus_decay")
             if self.analysis == "fL1":
-                return discriminant("D_g1prime2_decay")
+                return discriminant("D_L1_decay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1Zg_decay")
 
         if self.category == "VBF2jTaggedIchep16":
             if self.analysis == "fa3":
                 return discriminant("D_0minus_VBFdecay")
             if self.analysis == "fa2":
-                return discriminant("D_g2_VBFdecay")
+                return discriminant("D_0hplus_VBFdecay")
             if self.analysis == "fL1":
-                return discriminant("D_g1prime2_VBFdecay")
+                return discriminant("D_L1_VBFdecay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1Zg_VBFdecay")
 
         if self.category == "VHHadrTaggedIchep16":
             if self.analysis == "fa3":
                 return discriminant("D_0minus_HadVHdecay")
             if self.analysis == "fa2":
-                return discriminant("D_g2_HadVHdecay")
+                return discriminant("D_0hplus_HadVHdecay")
             if self.analysis == "fL1":
-                return discriminant("D_g1prime2_HadVHdecay")
+                return discriminant("D_L1_HadVHdecay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_L1Zg_HadVHdecay")
 
         assert False
 
@@ -170,25 +176,31 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 return discriminant("D_CP_decay")
             if self.analysis == "fa2":
-                return discriminant("D_g1g2_decay")
+                return discriminant("D_int_decay")
             if self.analysis == "fL1":
-                return discriminant("D_g2_decay")
+                return discriminant("D_0hplus_decay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_0hplus_decay")
 
         if self.category == "VBF2jTaggedIchep16":
             if self.analysis == "fa3":
                 return discriminant("D_CP_VBF")
             if self.analysis == "fa2":
-                return discriminant("D_g1g2_VBF")
+                return discriminant("D_int_VBF")
             if self.analysis == "fL1":
-                return discriminant("D_g2_VBF")
+                return discriminant("D_0hplus_VBFdecay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_0hplus_VBFdecay")
 
         if self.category == "VHHadrTaggedIchep16":
             if self.analysis == "fa3":
                 return discriminant("D_CP_HadVH")
             if self.analysis == "fa2":
-                return discriminant("D_g1g2_HadVH")
+                return discriminant("D_int_HadVH")
             if self.analysis == "fL1":
-                return discriminant("D_g2_HadVH")
+                return discriminant("D_0hplus_HadVHdecay")
+            if self.analysis == "fL1Zg":
+                return discriminant("D_0hplus_HadVHdecay")
 
         assert False
 
