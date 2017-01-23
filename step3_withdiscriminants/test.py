@@ -13,19 +13,21 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "VBF"
-disc           = "D_CP_VBF"
-weight         = ArbitraryCouplingsSample('VBF', g1=1, g2=0, g4=-0.297979, g1prime2=0, ghzgs1prime2=0)
+productionmode = "WH"
+disc           = "D_L1Zgint_VBF"
+weight         = ReweightingSample(productionmode, "fL1proddec0.5")
 bins           = None
 min            = None
 max            = None
 
 enrich         = False
 masscut        = True
-normalizeto1   = True
+normalizeto1   = False
 
 channel        = "2e2mu"
 category       = None
+
+skip           = []
 #========================
 
 hstack = ROOT.THStack()
@@ -37,17 +39,19 @@ ROOT.gErrorIgnoreLevel = ROOT.kError
 c = ROOT.TCanvas()
 hs = {}
 
+productionmode = ProductionMode(productionmode)
+
 def hypothesestouse():
     for hypothesis in hypotheses:
-        if productionmode == "ggH" and hypothesis not in decayonlyhypotheses: continue
-        if productionmode in ["VBF", "ZH", "WH"] and hypothesis not in prodonlyhypotheses: continue
-        if productionmode in ["HJJ", "ttH"] and hypothesis not in hffhypotheses: continue
+        if hypothesis not in productionmode.generatedhypotheses: continue
+        if productionmode == "ggH" and hypothesis == "L1": continue
+        if skip is not None and hypothesis in skip: continue
         yield hypothesis
 
 for hypothesis in hypotheses:
     if hypothesis not in hypothesestouse():
         try:
-            os.remove(os.path.join(config.plotsbasedir, "TEST", "{}.png".format(hypothesis)))
+            os.remove(os.path.join(config.plotsbasedir, "TEST", "reweighting", "{}.png".format(hypothesis)))
         except OSError:
             pass
 
@@ -76,25 +80,16 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     hstack.Add(h)
     cache.append(h)
     legend.AddEntry(h, str(hypothesis), "l")
-    print "{:10} {:.3g}".format(hypothesis, h.Integral())
+    print "{:10} {:8.3g}      {:8.3g}".format(hypothesis, h.Integral(), h.GetEffectiveEntries())
     try:
-      os.makedirs(os.path.join(config.plotsbasedir, "TEST"))
+      os.makedirs(os.path.join(config.plotsbasedir, "TEST", "reweighting"))
     except OSError:
       pass
     for ext in "png eps root pdf".split():
-      c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}.{}".format(hypothesis, ext)))
+      c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "reweighting", "{}.{}".format(hypothesis, ext)))
 
-hstack.Draw("histnostack")
+hstack.Draw("hist")
 hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
 for ext in "png eps root pdf".split():
-  c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "test.{}".format(ext)))
+  c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "reweighting", "test.{}".format(ext)))
 
-"""
-hint = hs["0+"].Clone("hint")
-hint.Add(hs["0-"])
-hint.Scale(-.5)
-hint.Add(hs["fa3prod0.5"])
-
-hint.Draw("hist")
-#c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "a1a3int.png"))
-"""
