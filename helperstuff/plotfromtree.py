@@ -30,6 +30,9 @@ def plotfromtree(**kwargs):
     "max":            None,
 
     "disc2":          None,
+    "bins2":           None,
+    "min2":            None,
+    "max2":            None,
 
     "transformation": None,  #should be a string with {disc} in it
 
@@ -67,6 +70,12 @@ def plotfromtree(**kwargs):
 
   if o.disc2 is not None:
     disc2name, disc2title, disc2bins, disc2min, disc2max = discriminant(o.disc2)
+    if o.bins2 is None:
+      o.bins2 = disc2bins
+    if o.min2 is None:
+      o.min2 = disc2min
+    if o.max2 is None:
+      o.max2 = disc2max
 
   if isinstance(o.weight, SampleBase):
     o.weight = o.weight.MC_weight
@@ -118,10 +127,12 @@ def plotfromtree(**kwargs):
   if o.disc2 is not None:
     todraw += "{}:".format(disc2name)
   todraw += "{}".format(formula)
-  todraw += ">>{}({},{},{}".format(o.hname, o.bins, o.min, o.max)
-  if o.disc2 is not None:
-    todraw += ",{},{},{}".format(disc2bins, disc2min, disc2max)
-  todraw += ")"
+  todraw += ">>{}".format(o.hname)
+  if o.bins != 0:
+    todraw += "({},{},{}".format(o.bins, o.min, o.max)
+    if o.disc2 is not None:
+      todraw += ",{},{},{}".format(o.bins2, o.min2, o.max2)
+    todraw += ")"
 
   t.Draw(todraw, wt, "hist")
   h = getattr(ROOT, o.hname)

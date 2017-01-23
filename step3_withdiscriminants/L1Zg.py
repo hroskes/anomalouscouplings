@@ -58,6 +58,10 @@ def makeplot(productionmode, disc, disc2=None):
   l.SetFillStyle(0)
   c = ROOT.TCanvas()
 
+  bins = None #use default from discriminants.py
+  if disc2 is not None:
+    bins = 0  #allow ROOT to pick
+
   for sample, title, color, reweightfrom in lines:
     h = hs[analysis,disc,disc2,sample] = plotfromtree(
       productionmode=reweightfrom.productionmode,
@@ -67,14 +71,18 @@ def makeplot(productionmode, disc, disc2=None):
       disc2=disc2,
       normalizeto1=True,
       color=color,
+      bins=bins,
     )
     hstack.Add(h)
     l.AddEntry(h, title, "l")
+    if disc2 is not None: break
 
   hstack.Draw("hist nostack")
-  l.Draw()
+  if disc2 is None:
+    l.Draw()
 
   hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
+  hstack.GetYaxis().SetTitle(h.GetYaxis().GetTitle())
 
   saveasdir = os.path.join(config.plotsbasedir, "TEST")
   try:
@@ -101,3 +109,8 @@ if __name__ == "__main__":
   makeplot("VBF", "D_L1Zg_VBF", "D_L1Zgint_VBF")
   makeplot("ZH", "D_L1Zg_HadVH", "D_L1Zgint_HadVH")
   makeplot("ggH", "D_L1Zg_decay", "D_L1Zgint_decay")
+
+  makeplot("VBF", "D_L1Zg_VBF", "D_L1_VBF")
+  makeplot("ZH", "D_L1Zg_HadVH", "D_L1_HadVH")
+  makeplot("ggH", "D_L1Zg_decay", "D_L1_decay")
+
