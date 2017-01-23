@@ -13,9 +13,9 @@ import os
 #========================
 #inputs
 #weight, bins, min, max, category can be None
-productionmode = "WH"
-disc           = "D_L1Zgint_VBF"
-weight         = ReweightingSample(productionmode, "fL1proddec0.5")
+productionmode = "ZH"
+disc           = "DiJetMass"
+weight         = ReweightingSample(productionmode, "L1Zg")
 bins           = None
 min            = None
 max            = None

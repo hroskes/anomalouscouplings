@@ -102,7 +102,7 @@ def plotfromtree(**kwargs):
 
   weightfactors = [
                    weightname,
-                   "{}>-998".format(discname),
+                   "{}>-98".format(discname),
                   ]
   if o.category is not None:
     weightfactors.append(" || ".join("(category=={})".format(_) for _ in Category(o.category).idnumbers))
@@ -114,7 +114,7 @@ def plotfromtree(**kwargs):
     weightfactors.append("ZZMass > {}".format(config.m4lmin))
     weightfactors.append("ZZMass < {}".format(config.m4lmax))
   if o.disc2 is not None:
-    weightfactors.append("{}>-998".format(disc2name))
+    weightfactors.append("{}>-98".format(disc2name))
 
   wt = "*".join("("+_+")" for _ in weightfactors)
 

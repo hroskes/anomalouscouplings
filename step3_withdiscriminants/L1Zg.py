@@ -109,8 +109,24 @@ if __name__ == "__main__":
   makeplot("VBF", "D_L1Zg_VBF", "D_L1Zgint_VBF")
   makeplot("ZH", "D_L1Zg_HadVH", "D_L1Zgint_HadVH")
   makeplot("ggH", "D_L1Zg_decay", "D_L1Zgint_decay")
+  makeplot("VBF", "D_L1Zg_VBFdecay", "D_L1Zgint_VBF")
+  makeplot("ZH", "D_L1Zg_HadVHdecay", "D_L1Zgint_HadVH")
 
   makeplot("VBF", "D_L1Zg_VBF", "D_L1_VBF")
   makeplot("ZH", "D_L1Zg_HadVH", "D_L1_HadVH")
   makeplot("ggH", "D_L1Zg_decay", "D_L1_decay")
+  makeplot("VBF", "D_L1Zg_VBFdecay", "D_L1_VBFdecay")
+  makeplot("ZH", "D_L1Zg_HadVHdecay", "D_L1_HadVHdecay")
+
+  makeplot("VBF", "D_L1Zg_VBF", "D_0hplus_VBF")
+  makeplot("ZH", "D_L1Zg_HadVH", "D_0hplus_HadVH")
+  makeplot("ggH", "D_L1Zg_decay", "D_0hplus_decay")
+  makeplot("VBF", "D_L1Zg_VBFdecay", "D_0hplus_VBFdecay")
+  makeplot("ZH", "D_L1Zg_HadVHdecay", "D_0hplus_HadVHdecay")
+
+  makeplot("VBF", "D_L1_VBF", "D_0hplus_VBF")
+  makeplot("ZH", "D_L1_HadVH", "D_0hplus_HadVH")
+  makeplot("ggH", "D_L1_decay", "D_0hplus_decay")
+  makeplot("VBF", "D_L1_VBFdecay", "D_0hplus_VBFdecay")
+  makeplot("ZH", "D_L1_HadVHdecay", "D_0hplus_HadVHdecay")
 

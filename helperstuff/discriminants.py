@@ -173,6 +173,7 @@ discriminants = {
         Discriminant("D_HadWH_L1", "D_{WH}^{#Lambda1}", defaultnbins, 0, 1),
     ] + [
         Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
+        Discriminant("DiJetMass", "m_{JJ}", defaultnbins, 4, 110),
     ]
 }
 
