@@ -1,6 +1,6 @@
 [submodule "TemplateBuilder"]
 	path = TemplateBuilder
-	url = git@github.com:jbsauvan/TemplateBuilder
+	url = git@github.com:hroskes/TemplateBuilder
 	branch = master
 [submodule "CMSSW_7_6_5/src/HiggsAnalysis/CombinedLimit"]
 	path = CMSSW_7_6_5/src/HiggsAnalysis/CombinedLimit
