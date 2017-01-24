@@ -165,8 +165,7 @@ class ProductionMode(MyEnum):
                 )
     @property
     def combinename(self):
-        import combinehelpers
-        for name in combinehelpers.datacardprocessline.split():
+        for name in "ggH", "qqH", "ZH", "WH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets":
             if self == name:
                 return name
         assert False
