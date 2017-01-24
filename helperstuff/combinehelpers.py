@@ -5,7 +5,7 @@ from math import copysign
 import os
 import ROOT
 from samples import ReweightingSample, Sample
-from templates import DataTree, IntTemplate, Template
+from templates import DataTree, IntTemplate, Template, TemplatesFile
 from utilities import tfiles
 import yaml
 
@@ -76,7 +76,7 @@ class __Rate(MultiEnum):
             return self.yamlrate()
 
         if self.productionmode.issignal:
-            hypothesis = "SM"
+            hypothesis = self.analysis.purehypotheses[0]
         else:
             hypothesis = None
         return gettemplate(self.analysis, self.category, self.productionmode, self.channel, self.production, hypothesis).Integral()*float(self.luminosity)
@@ -173,7 +173,9 @@ def getnobserved(*args):
 def discriminants(*args):
     theset = set()
     for production in config.productionsforcombine:
-        result = tuple(d for d in Template("ggH", "0+", "2e2mu", production, *args).discriminants)
+        templatesfile = TemplatesFile("ggh", "2e2mu", production, *args)
+        SM = templatesfile.analysis.purehypotheses[0]
+        result = tuple(d for d in Template("ggH", SM, "2e2mu", production, *args).discriminants)
         theset.add(result)
     assert len(theset) == 1  #sanity check
     return result
