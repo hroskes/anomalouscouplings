@@ -1,7 +1,7 @@
 import collections
 import config
 from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode
-from math import copysign
+from math import copysign, isnan
 import os
 import ROOT
 from samples import ReweightingSample, Sample
@@ -138,10 +138,6 @@ def getrates(*args, **kwargs):
     return result
 
 def gettemplate(*args):
-    #############
-    from datetime import date
-    if date.today() > date(2017, 1, 25):
-        raise ValueError("VBF bkg 4mu??!")
     try:
         try:
             t = Template(*args)
@@ -149,16 +145,20 @@ def gettemplate(*args):
             t = IntTemplate(*args)
     except ValueError as e2:
         raise ValueError("Can't gettemplate using args:\n{}\n\nTrying to make a regular template:\n{}\n\nTrying to make an interference template:\n{}".format(args, e1.message, e2.message))
+
+    #############
+    from datetime import date
+    if date.today() > date(2017, 1, 25):
+        raise ValueError("VBF bkg 4mu??!")
     if t.channel == "4mu" and t.productionmode == "VBFbkg":
         return gettemplate(t.analysis, t.category, t.productionmode, t.production, "4e")
     #############
-    try:
-        try:
-            return Template(*args).gettemplate()
-        except ValueError as e1:
-            return IntTemplate(*args).gettemplate()
-    except ValueError as e2:
-        raise ValueError("Can't gettemplate using args:\n{}\n\nTrying to make a regular template:\n{}\n\nTrying to make an interference template:\n{}".format(args, e1.message, e2.message))
+
+    result = t.gettemplate()
+    if isnan(result.Integral()):
+        raise ValueError("{!r} has integral of nan!".format(t))
+
+    return result
 
 def getdatatree(*args):
     return tfiles[DataTree(*args).treefile].candTree
