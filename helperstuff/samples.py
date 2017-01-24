@@ -394,7 +394,8 @@ class SampleBase(object):
         numerator = None
         denominator = 0
         for h in purehypotheses:
-            kwargs = {_.couplingname: 1 if _ == h else 0 for _ in purehypotheses}
+            kwargs = {_.couplingname: 0 for _ in purehypotheses}
+            kwargs[h.couplingname] = 1
             kwargs["photoncut"] = analysis.photoncut
             term = 0
             for productionmode in productionmodes:
@@ -514,7 +515,7 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
     else:
         productionmodeforfai = ProductionMode(productionmodeforfai)
 
-    kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2", "ghz1prime2")}
+    kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2", "ghzgs1prime2")}
     kwargs["photoncut"] = analysis.photoncut
     power = (.25 if productionmodeforfai != "ggH" and withdecay else .5)
     kwargs["g1"] = (1-abs(fai))**power

@@ -101,11 +101,11 @@ class BaseTemplateFromFile(TemplateForProjection):
         self.h = self.template.gettemplate().Clone()
 
         if self.productionmode in ["ggH", "VBF", "ZH", "WH"]:
-            scalefactor = getrate("2e2mu", self.category, self.productionmode, "fordata", self.production) / Template(self.production, self.category, self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
+            scalefactor = getrate("2e2mu", self.category, self.productionmode, "fordata", self.production, self.analysis) / Template(self.production, self.category, self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
         elif self.productionmode == "data":
             scalefactor = 1
         else:
-            scalefactor = getrate(self.channel, self.category, self.productionmode, "fordata", self.production) / self.Integral()
+            scalefactor = getrate(self.channel, self.category, self.productionmode, "fordata", self.production, self.analysis) / self.Integral()
 
         for x, y, z in itertools.product(range(1, self.h.GetNbinsX()+1), range(1, self.h.GetNbinsY()+1), range(1, self.h.GetNbinsZ()+1)):
             if (self.enrichstatus == "impoverish" and self.h.GetZaxis().GetBinLowEdge(z) >= .5 \
@@ -433,7 +433,8 @@ class Projections(MultiEnum):
 
   @property
   def saveasdir(self):
-      return os.path.join(config.plotsbasedir, "templateprojections", self.enrichstatus.dirname(), str(self.normalization), "{}_{}/{}/{}".format(self.analysis, self.production, self.category, self.channel))
+      assert self.normalization == "rescalemixtures"
+      return os.path.join(config.plotsbasedir, "templateprojections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, self.category, self.channel))
 
   @property
   def discriminants(self):
