@@ -325,7 +325,7 @@ class SampleBase(object):
             def MC_weight_function(self_tree):
                 return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
 
-        elif self_sample.issignal():
+        elif self_sample.issignal:
 
             factors = self_sample.MC_weight_terms
 
@@ -614,10 +614,12 @@ class ReweightingSample(MultiEnum, SampleBase):
             return []
         raise self.ValueError("reweightingsamples")
 
+    @property
     def isbkg(self):
         return self.productionmode.isbkg
+    @property
     def issignal(self):
-        return not self.isbkg()
+        return not self.isbkg
 
     def isZX(self):
         if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH"):

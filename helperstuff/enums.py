@@ -189,11 +189,14 @@ class ProductionMode(MyEnum):
         return str(self)
     @property
     def isbkg(self):
-        if self in ("ggH", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH"):
+        if self in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH"):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
         assert False
+    @property
+    def issignal(self):
+        return not self.isbkg
     @property
     def validhypotheses(self):
         if self in ("ggH", "ttH", "HJJ"):

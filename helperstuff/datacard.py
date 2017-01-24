@@ -1,8 +1,9 @@
 from collections import Counter
 import os
 
-from combinehelpers import Luminosity
-from enums import Analysis, Category, Channel, MultiEnum, Production
+from combinehelpers import getnobserved, getrate, Luminosity
+import config
+from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode
 
 class Section(object):
     def __init__(self, *labels):
@@ -20,7 +21,7 @@ class Section(object):
 
 class SystematicsSection(Section):
     def getlines(self, obj, objtype):
-        result = super(SystematicsSection, self).__get__(obj, objtype)
+        result = super(SystematicsSection, self).getlines(obj, objtype)
         for line in result[:]:
             if all(systematicvalue == "-" for systematicvalue in line.split()[1:]):
                 result.remove(line)
@@ -33,10 +34,10 @@ class Datacard(MultiEnum):
         return self.production.year
     @property
     def txtfile(self):
-        return "hzz4l_{}S_{}_{}.lumi{:f}.txt".format(self.channel, self.category, self.year, self.luminosity)
+        return "hzz4l_{}S_{}_{}.lumi{}.txt".format(self.channel, self.category, self.year, float(self.luminosity))
     @property
     def rootfile(self):
-        return "hzz4l_{}S_{}_{}.lumi{:f}.input.root".format(self.channel, self.category, self.year, self.luminosity)
+        return "hzz4l_{}S_{}_{}.lumi{}.input.root".format(self.channel, self.category, self.year, float(self.luminosity))
 
     @property
     def productionmodes(self):
@@ -64,12 +65,12 @@ class Datacard(MultiEnum):
     def bin(self, counter=Counter()):
         counter[self] += 1
 
-        bin = len(channels) * channels.index(self.channel) + categories.index(self.category)
+        bin = "a{}".format(len(channels) * channels.index(self.channel) + categories.index(self.category))
 
         if counter[self] == 1:
             return bin
         elif counter[self] == 2:
-            return " ".join([str(bin)]*len(productionmodes))
+            return " ".join([str(bin)]*len(self.productionmodes))
         assert False
 
     @property
@@ -78,18 +79,16 @@ class Datacard(MultiEnum):
 
     section3 = Section("bin", "observation")
 
-    masswindowcomment = "## mass window [{},{}]".format(config.m4lmin, config.m4lmax)
-
     @property
     def process(self, counter=Counter()):
         counter[self] += 1
  
         if counter[self] == 1:
-            return " ".join(_.name for _ in self.productionmodes)
+            return " ".join(_.combinename for _ in self.productionmodes)
 
         if counter[self] == 2:
-            nsignal = len(_ for _ in self.productionmodes if _.issignal())
-            nbkg = len(_ for _ in self.productionmodes if _.isbkg())
+            nsignal = sum(_.issignal for _ in self.productionmodes)
+            nbkg = sum(_.isbkg for _ in self.productionmodes)
             assert nsignal+nbkg == len(self.productionmodes)
 
             return " ".join(str(_) for _ in range(-nsignal+1, nbkg+1))
@@ -100,7 +99,8 @@ class Datacard(MultiEnum):
     def rate(self):
         return " ".join(str(getrate(p, self.channel, self.category, self.analysis, self.luminosity)) for p in self.productionmodes)
 
-    section4 = Section("masswindowcomment", "bin", "process", "process", "rate")
+    section4 = Section("## mass window [{},{}]".format(config.m4lmin, config.m4lmax),
+                       "bin", "process", "process", "rate")
 
     #just one dummy systematic for now
     @property

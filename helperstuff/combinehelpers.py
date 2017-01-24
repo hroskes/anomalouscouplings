@@ -75,11 +75,11 @@ class __Rate(MultiEnum):
         if False:
             return self.yamlrate()
 
-        if self.productionmode.issignal():
+        if self.productionmode.issignal:
             hypothesis = "SM"
         else:
             hypothesis = None
-        return Template(self.analysis, self.category, self.productionmode, self.channel, self.production, hypothesis).gettemplate().Integral()*float(self.luminosity)
+        return gettemplate(self.analysis, self.category, self.productionmode, self.channel, self.production, hypothesis).Integral()*float(self.luminosity)
 
     def yamlrate(self):
         if self.production.year == 2016:
@@ -138,6 +138,20 @@ def getrates(*args, **kwargs):
     return result
 
 def gettemplate(*args):
+    #############
+    from datetime import date
+    if date.today() > date(2017, 1, 25):
+        raise ValueError("VBF bkg 4mu??!")
+    try:
+        try:
+            t = Template(*args)
+        except ValueError as e1:
+            t = IntTemplate(*args)
+    except ValueError as e2:
+        raise ValueError("Can't gettemplate using args:\n{}\n\nTrying to make a regular template:\n{}\n\nTrying to make an interference template:\n{}".format(args, e1.message, e2.message))
+    if t.channel == "4mu" and t.productionmode == "VBFbkg":
+        return gettemplate(t.analysis, t.category, t.productionmode, t.production, "4e")
+    #############
     try:
         try:
             return Template(*args).gettemplate()
