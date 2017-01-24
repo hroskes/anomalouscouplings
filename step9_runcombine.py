@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff import config, utilities
-from helperstuff.combinehelpers import datacardprocessline, getrates, Luminosity
+from helperstuff.combinehelpers import Luminosity
+from helperstuff.datacard import writedatacard
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
@@ -195,27 +196,10 @@ def runcombine(analysis, foldername, **kwargs):
                 luminosity = float(Luminosity(lumitype, production))
                 if not os.path.exists("hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity)):
                     os.symlink("hzz4l_{}S_{}_{}.input.root".format(channel, category, production.year), "hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity))
-                    shutil.copy("hzz4l_{}S_{}_{}.txt".format(channel, category, production.year), "hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, luminosity))
             #replace rates
             for channel, category, production in product(channels, categories, productions):
                 if channel in usechannels and category in usecategories:
-                    luminosity = float(Luminosity(lumitype, production))
-                    with open("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, luminosity)) as f:
-                        contents = f.read()
-                        if "\n#rate" in contents: continue #already did this
-                    foundprocessline = False
-                    contents = contents.replace("hzz4l_{}S_{}_{}.input.root".format(channel, category, production.year), "hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity))
-                    for line in contents.split("\n"):
-                        if line.startswith("process") and not foundprocessline:
-                            foundprocessline = True
-                            if line.strip() != "process "+datacardprocessline:
-                                raise ValueError("process line is not consistent!  check the one in combinehelpers.py\n{}\n{}".format(line.strip(), "process "+datacardprocessline))
-                        if line.startswith("rate"):
-                            rates = getrates(channel, lumitype, production, category)
-                            contents = contents.replace(line, "#"+line+"\n"+rates)
-                            break
-                    with open("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, luminosity), "w") as f:
-                        f.write(contents)
+                    writedatacard(channel, category, lumitype, production, analysis)
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 for channel, production, category in product(usechannels, productions, usecategories):
                     replacesystematics(channel, production, category, float(Luminosity(lumitype, production)))

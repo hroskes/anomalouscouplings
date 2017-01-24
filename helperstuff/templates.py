@@ -1036,22 +1036,23 @@ class IntTemplate(TemplateBase, MultiEnum):
 
 
 class DataTree(MultiEnum):
-    enums = [Channel, Production, Category]
+    enums = [Channel, Production, Category, Analysis]
     enumname = "datatree"
     @property
     def originaltreefile(self):
         return Sample("data", self.production, "unblind").withdiscriminantsfile()
     @property
     def treefile(self):
-        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}.root".format(self.production, self.channel, self.category))
+        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
     def passescut(self, t):
-        return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblindscans and t.category in self.category
+        return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblindscans and getattr(t, self.analysis.categoryname) in self.category
 
 datatrees = []
 for channel in channels:
     for production in productions:
         for category in categories:
-            datatrees.append(DataTree(channel, production, category))
+            for analysis in analyses:
+                datatrees.append(DataTree(channel, production, category, analysis))
 
 
 

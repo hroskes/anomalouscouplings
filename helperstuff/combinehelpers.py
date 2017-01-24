@@ -69,13 +69,17 @@ class Luminosity(MultiEnum):
         if self.luminositytype == "customluminosity": return float(self.luminositytype)
 
 class __Rate(MultiEnum):
-    enums = [ProductionMode, Channel, Luminosity, Production, Category]
+    enums = [ProductionMode, Channel, Luminosity, Production, Category, Analysis]
 
     def getrate(self):
-        if self.productionmode != "VBF bkg":
+        if False:
             return self.yamlrate()
 
-        return Template("fa2", "D_int_prod", self.category, self.productionmode, self.channel, self.production).gettemplate().Integral()*float(self.luminosity)
+        if self.productionmode.issignal():
+            hypothesis = "SM"
+        else:
+            hypothesis = None
+        return Template(self.analysis, self.category, self.productionmode, self.channel, self.production, hypothesis).gettemplate().Integral()*float(self.luminosity)
 
     def yamlrate(self):
         if self.production.year == 2016:
@@ -144,10 +148,13 @@ def gettemplate(*args):
 
 def getdatatree(*args):
     return tfiles[DataTree(*args).treefile].candTree
-    #it's empty if we don't actually unblind
+    #it's empty if we don't unblind
 
 def getsubtractdatatree(*args):
     return tfiles[SubtractDataTree(*args).treefile].candTree
+
+def getnobserved(*args):
+    return getdatatree(*args).GetEntries()
 
 def discriminants(*args):
     theset = set()

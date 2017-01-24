@@ -1,4 +1,5 @@
 from collections import Counter
+import os
 
 from combinehelpers import Luminosity
 from enums import Analysis, Category, Channel, MultiEnum, Production
@@ -13,10 +14,6 @@ class Section(object):
         for label in self.labels:
             if label.startswith("#"):
                 result.append(label)
-#            elif "," in label:
-#                name, args = label.split(",", 1)
-#                args = args.split(",")
-#                result += "{} {}".format(name, getattr(obj, name)(*args))
             else:
                 result.append("{} {}".format(label, getattr(obj, label)))
         return result
@@ -48,8 +45,10 @@ class Datacard(MultiEnum):
     @property
     def imax(self):
         return 1
+    @property
     def jmax(self):
         return len(self.productionmodes)-1
+    @property
     def kmax(self):
         return "*"
 
@@ -75,11 +74,11 @@ class Datacard(MultiEnum):
 
     @property
     def observation(self):
-        raise NotImplementedError
+        return getnobserved(self.channel, self.production, self.category, self.analysis)
 
     section3 = Section("bin", "observation")
 
-    masswindowcomment = "## mass window [105.0,140.0]"
+    masswindowcomment = "## mass window [{},{}]".format(config.m4lmin, config.m4lmax)
 
     @property
     def process(self, counter=Counter()):
@@ -99,15 +98,25 @@ class Datacard(MultiEnum):
 
     @property
     def rate(self):
-        raise NotImplementedError
+        return " ".join(str(getrate(p, self.channel, self.category, self.analysis, self.luminosity)) for p in self.productionmodes)
 
     section4 = Section("masswindowcomment", "bin", "process", "process", "rate")
 
-    section5 = SystematicsSection()
+    #just one dummy systematic for now
+    @property
+    def lumi_13TeV_common(self):
+        return " ".join(["lnN"] + ["1.023" for p in self.productionmodes])
+
+    section5 = SystematicsSection("lumi_13TeV_common")
 
     divider = "\n------------\n"
 
     def writedatacard(self):
         sections = self.section1, self.section2, self.section3, self.section4, self.section5
+        if not os.path.exists(self.rootfile):
+            raise IOError("workspace file {} should exist first!".format(self.rootfile))
         with open(self.txtfile, "w") as f:
             f.write(self.divider.join(sections)+"\n")
+
+def writedatacard(*args):
+    return Datacard(*args).writedatacard()
