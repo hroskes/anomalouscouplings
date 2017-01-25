@@ -17,6 +17,7 @@ def makeplot(analysis, disc, additionalcconstant=1, shiftWP=None):
     productionmode = "ZH"
     WP = getDZHhWP(125, config.useQGTagging)
   elif "HadWH" in disc:
+    if analysis == "fL1Zg": return
     productionmode = "WH"
     WP = getDWHhWP(125, config.useQGTagging)
   elif "2jet" in disc:
@@ -36,16 +37,18 @@ def makeplot(analysis, disc, additionalcconstant=1, shiftWP=None):
 
   fainame = "{}^{{{}}}".format(analysis.title, productionmode)
 
+  SM, BSM = (ReweightingSample(productionmode, _) for _ in analysis.purehypotheses)
   mixplus = ReweightingSample(productionmode, analysis.mixprodhypothesis)
   mixminus = ArbitraryCouplingsSample(productionmode, mixplus.g1, -mixplus.g2, -mixplus.g4, -mixplus.g1prime2, -mixplus.ghzgs1prime2)
 
   lines = [
-           Line(ReweightingSample(productionmode, "0+"), "{} SM".format(productionmode), 1),
-           Line(ReweightingSample(productionmode, "0-"), "{} {}=1".format(productionmode, fainame), ROOT.kViolet+7),
-           Line(mixplus,                                 "{} {}=#plus0.5".format(productionmode, fainame), ROOT.kGreen+3),
-           Line(mixminus,                                "{} {}=#minus0.5".format(productionmode, fainame), 4, mixplus),
-           Line(ReweightingSample("ggH", "0+"),          "ggH", 2),
+           Line(SM, "{} SM".format(productionmode), 1, bkpreweightfrom=ReweightingSample(productionmode, "0+")),
+           Line(BSM,                            "{} {}=1".format(productionmode, fainame), ROOT.kViolet+7, bkpreweightfrom=ReweightingSample(productionmode, "L1")),
+           Line(mixplus,                        "{} {}=#plus0.5".format(productionmode, fainame), ROOT.kGreen+3, bkpreweightfrom=ReweightingSample(productionmode, "L1")),
+           Line(mixminus,                       "{} {}=#minus0.5".format(productionmode, fainame), 4, mixplus, bkpreweightfrom=ReweightingSample(productionmode, "L1")),
+           Line(ReweightingSample("ggH", "0+"), "ggH", 2),
           ]
+  if analysis == "fL1Zg": del lines[3]
 
   hs = {}
   hstack = ROOT.THStack(disc, "")
@@ -60,9 +63,8 @@ def makeplot(analysis, disc, additionalcconstant=1, shiftWP=None):
 
   for sample, title, color, reweightfrom in lines:
     h = hs[analysis,disc,sample] = plotfromtree(
-      productionmode=reweightfrom.productionmode,
-      hypothesis=reweightfrom.hypothesis,
-      weight=sample,
+      reweightfrom=reweightfrom,
+      reweightto=sample,
       disc=disc,
       transformation="1/({cprime}*(1/{{disc}}-1)+1)".format(cprime=additionalcconstant),
       xaxislabel=xaxislabel,

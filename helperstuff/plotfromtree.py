@@ -82,6 +82,8 @@ def plotfromtree(**kwargs):
     if o.max2 is None:
       o.max2 = disc2max
 
+  if o.reweightto is None:
+    o.reweightto = o.reweightfrom
   if isinstance(o.reweightto, SampleBase):
     o.reweightto = o.reweightto.MC_weight
 
@@ -167,9 +169,13 @@ def plotfromtree(**kwargs):
 
 class Line(namedtuple("Line", "sample title color reweightfrom")):
     """useful namedtuple, no special interaction with anything else here"""
-    def __new__(cls, sample, title, color, reweightfrom=None):
+    def __new__(cls, sample, title, color, reweightfrom=None, bkpreweightfrom=None):
         if reweightfrom is None: reweightfrom = sample
         if not isinstance(reweightfrom, Sample):
             assert len(config.productionsforcombine) == 1
-            reweightfrom = Sample(reweightfrom, config.productionsforcombine[0])
+            try:
+              reweightfrom = Sample(reweightfrom, config.productionsforcombine[0])
+            except ValueError:
+              if bkpreweightfrom is None: raise
+              reweightfrom = Sample(bkpreweightfrom, config.productionsforcombine[0])
         return super(Line, cls).__new__(cls, sample, title, color, reweightfrom)
