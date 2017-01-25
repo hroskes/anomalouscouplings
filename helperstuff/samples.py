@@ -1128,7 +1128,7 @@ class Sample(ReweightingSample):
     @staticmethod
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
-        f = tfiles[reweightfrom.withdiscriminantsfile]
+        f = tfiles[reweightfrom.withdiscriminantsfile()]
         t = f.effectiveentries
         assert t.GetEntries() == 1, "{}???".format(t.GetEntries())
         t.GetEntry(0)
