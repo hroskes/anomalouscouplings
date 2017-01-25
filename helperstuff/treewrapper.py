@@ -35,8 +35,8 @@ class TreeWrapper(Iterator):
         self.failedtree = failedtree
         self.productionmode = str(treesample.productionmode)
         self.hypothesis = str(treesample.hypothesis)
-        self.isbkg = treesample.isbkg
         self.isdata = treesample.isdata()
+        self.isbkg = not self.isdata and treesample.isbkg
         self.isZX = treesample.isZX()
         self.isPOWHEG = treesample.alternategenerator == "POWHEG"
         self.isdummy = isdummy
