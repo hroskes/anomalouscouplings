@@ -32,7 +32,7 @@ eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
         --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
         .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. --saveSpecifiedNuis=r_VVH,r_ggH |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo...oO[exporobs]Oo.
+        -S .oO[usesystematics]Oo. --saveSpecifiedFunc=r_VVH,r_ggH |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo...oO[exporobs]Oo.
 """
 
 def check_call_test(*args, **kwargs):
