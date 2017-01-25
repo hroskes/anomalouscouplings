@@ -31,15 +31,8 @@ runcombinetemplate = r"""
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
         --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
-        -t -1 --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. |& tee log_.oO[expectfai]Oo..oO[moreappend]Oo..exp
-"""
-observationcombinetemplate = r"""
-eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
-              --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. |& tee log.oO[moreappend]Oo..obs
+        .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
+        -S .oO[usesystematics]Oo. --saveSpecifiedNuis=r_VVH,r_ggH |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo...oO[exporobs]Oo.
 """
 
 def check_call_test(*args, **kwargs):
@@ -209,8 +202,11 @@ def runcombine(analysis, foldername, **kwargs):
                 repmap_obs = repmap.copy()
                 repmap_obs["expectfai"] = "0.0"  #starting point
                 repmap_obs["append"] = ".oO[observedappend]Oo."
+                repmap_obs["expectfaiappend"] = ""
+                repmap_obs["exporobs"] = "obs"
+                repmap_obs["-t -1"] = ""
                 if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
-                    subprocess.check_call(replaceByMap(observationcombinetemplate, repmap_obs), shell=True)
+                    subprocess.check_call(replaceByMap(runcombinetemplate, repmap_obs), shell=True)
                 f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
                 minimum = (float("nan"), float("inf"))
                 for entry in f.limit:
@@ -225,6 +221,9 @@ def runcombine(analysis, foldername, **kwargs):
                     expectfai = minimum
                 repmap_exp["expectfai"] = str(expectfai)
                 repmap_exp["append"] = ".oO[expectedappend]Oo."
+                repmap_exp["expectfaiappend"] = "_.oO[expectfai]Oo."
+                repmap_exp["exporobs"] = "exp"
+                repmap_exp["-t -1"] = "-t -1"
                 if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
                     subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
 
