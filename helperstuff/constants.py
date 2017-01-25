@@ -196,7 +196,8 @@ if __name__ == "__main__":
 
 #decay
 
-assert JHUXSggH2L2la1_photoncut == JHUXSggH2L2la1
+photoncutsame = (JHUXSggH2L2la1_photoncut == JHUXSggH2L2la1)
+assert photoncutsame
 values = [JHUXSggH2L2la1, JHUXSggH2L2la2*g2decay**2, JHUXSggH2L2la3*g4decay**2, JHUXSggH2L2lL1*g1prime2decay_gen**2, JHUXSggH2L2lL1Zg*ghzgs1prime2decay_gen**2]
 errors = [JHUXSggH2L2la1err, JHUXSggH2L2la2err*g2decay**2, JHUXSggH2L2la3err*g4decay**2, JHUXSggH2L2lL1err*g1prime2decay_gen**2, JHUXSggH2L2lL1Zgerr*ghzgs1prime2decay_gen**2]
 
@@ -208,7 +209,14 @@ JHUXSggH2L2lL1Zg, JHUXSggH2L2lL1Zgerr = JHUXSggH2L2la1 / ghzgs1prime2decay_gen**
 
 JHUXSggH2L2la1a3, JHUXSggH2L2la1a3err = JHUXSggH2L2la1*2, JHUXSggH2L2la1err*2
 
+if photoncutsame:
+    JHUXSggH2L2la1_photoncut = JHUXSggH2L2la1
+    JHUXSggH2L2la1err_photoncut = JHUXSggH2L2la1err
+
 #VBF
+
+photoncutsame = (JHUXSVBFa1_photoncut == JHUXSVBFa1)
+assert not photoncutsame
 
 values = [JHUXSVBFa1, JHUXSVBFa2*g2VBF**2, JHUXSVBFa3*g4VBF**2, JHUXSVBFL1*g1prime2VBF_gen**2]
 errors = [JHUXSVBFa1err, JHUXSVBFa2err*g2VBF**2, JHUXSVBFa3err*g4VBF**2, JHUXSVBFL1err*g1prime2VBF_gen**2]
@@ -226,9 +234,15 @@ errors = [JHUXSVBFa1err_photoncut, JHUXSVBFL1Zgerr*ghzgs1prime2VBF_gen**2]
 JHUXSVBFa1_photoncut, JHUXSVBFa1err_photonuct = sum(value/error**2 for value, error in zip(values, errors)) / sum(1/error**2 for error in errors), sum(1/error**2 for error in errors)**-.5
 JHUXSVBFL1Zg, JHUXSVBFL1Zgerr = JHUXSVBFa1_photoncut / ghzgs1prime2VBF_gen**2, JHUXSVBFa1err_photoncut / ghzgs1prime2VBF_gen**2
 
+if photoncutsame:
+    JHUXSVBFa1_photoncut = JHUXSVBFa1
+    JHUXSVBFa1err_photoncut = JHUXSVBFa1err
+
 #ZH
 
-assert JHUXSZHa1_photoncut == JHUXSZHa1
+photoncutsame = (JHUXSZHa1_photoncut == JHUXSZHa1)
+assert photoncutsame
+
 values = [JHUXSZHa1, JHUXSZHa2*g2ZH**2, JHUXSZHa3*g4ZH**2, JHUXSZHL1*g1prime2ZH_gen**2, JHUXSZHL1Zg*ghzgs1prime2ZH_gen**2]
 errors = [JHUXSZHa1err, JHUXSZHa2err*g2ZH**2, JHUXSZHa3err*g4ZH**2, JHUXSZHL1Zgerr*g1prime2ZH_gen**2, JHUXSZHL1Zgerr*ghzgs1prime2ZH_gen**2]
 
@@ -239,6 +253,11 @@ JHUXSZHL1, JHUXSZHL1err = JHUXSZHa1 / g1prime2ZH_gen**2, JHUXSZHa1err / g1prime2
 JHUXSZHL1Zg, JHUXSZHL1Zgerr = JHUXSZHa1 / ghzgs1prime2ZH_gen**2, JHUXSZHa1err / ghzgs1prime2ZH_gen**2
 
 JHUXSZHa1a3, JHUXSZHa1a3err = JHUXSZHa1*2, JHUXSZHa1err*2
+
+if photoncutsame:
+    JHUXSZHa1_photoncut = JHUXSZHa1
+    JHUXSZHa1err_photoncut = JHUXSZHa1err
+del photoncutsame
 
 #WH
 
