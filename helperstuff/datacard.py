@@ -106,8 +106,14 @@ class Datacard(MultiEnum):
     @property
     def lumi_13TeV_common(self):
         return " ".join(["lnN"] + ["1.023" for p in self.productionmodes])
+    @property
+    def r_ggH(self):
+        return "flatParam"
+    @property
+    def r_VVH(self):
+        return "flatParam"
 
-    section5 = SystematicsSection("lumi_13TeV_common")
+    section5 = SystematicsSection("lumi_13TeV_common", "r_ggH", "r_VVH")
 
     divider = "\n------------\n"
 

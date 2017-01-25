@@ -22,9 +22,9 @@ python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[ana
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l_lumi.oO[totallumi]Oo..txt &&
-text2workspace.py -m 125 hzz4l_4l_lumi.oO[totallumi]Oo..txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
-                  --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
-                  |& tee log.text2workspace &&
+unbuffer text2workspace.py -m 125 hzz4l_4l_lumi.oO[totallumi]Oo..txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
+                           --PO verbose --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
+                           |& tee log.text2workspace &&
 exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = r"""

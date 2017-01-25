@@ -50,7 +50,7 @@ class SampleBase(object):
             JHUXSVBFa1 = constants.JHUXSVBFa1_photoncut
             JHUXSZHa1 = constants.JHUXSZHa1_photoncut
             JHUXSWHa1 = constants.JHUXSWHa1_photoncut
-            assert self.g2 == self.g4 == self.g1prime2 == 0
+            assert self.g2 == self.g4 == self.g1prime2 == 0, self
         else:
             JHUXSggH2L2la1 = constants.JHUXSggH2L2la1
             JHUXSVBFa1 = constants.JHUXSVBFa1
@@ -394,6 +394,7 @@ class SampleBase(object):
         numerator = None
         denominator = 0
         for h in purehypotheses:
+            if not getattr(self, h.couplingname) and h != hypothesis: continue
             kwargs = {_.couplingname: 0 for _ in purehypotheses}
             kwargs[h.couplingname] = 1
             kwargs["photoncut"] = analysis.photoncut

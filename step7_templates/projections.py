@@ -101,8 +101,8 @@ class BaseTemplateFromFile(TemplateForProjection):
         self.h = self.template.gettemplate().Clone()
 
         if self.productionmode in ["ggH", "VBF", "ZH", "WH"]:
-            scalefactor = getrate("2e2mu", self.category, self.productionmode, "fordata", self.production, self.analysis) / Template(self.production, self.category, self.analysis, "2e2mu", self.productionmode, "0+").gettemplate().Integral()
-        elif self.productionmode == "data":
+            scalefactor = getrate("2e2mu", self.category, self.productionmode, "fordata", self.production, self.analysis) / Template(self.production, self.category, self.analysis, "2e2mu", self.productionmode, self.analysis.purehypotheses[0]).gettemplate().Integral()
+        elif self.productionmode == "data" or self.Integral() == 0:
             scalefactor = 1
         else:
             scalefactor = getrate(self.channel, self.category, self.productionmode, "fordata", self.production, self.analysis) / self.Integral()
@@ -193,7 +193,8 @@ class ComponentTemplateSum(TemplateSum):
 
     def inithistogram(self):
         super(ComponentTemplateSum, self).inithistogram()
-        self.Scale(self.SMintegral / self.Integral())
+        if self.Integral():
+            self.Scale(self.SMintegral / self.Integral())
 
 class Projections(MultiEnum):
   enums = [Channel, Analysis, Normalization, ShapeSystematic, Production, EnrichStatus, Category]
@@ -256,9 +257,10 @@ class Projections(MultiEnum):
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
+    SMhypothesis = self.analysis.purehypotheses[0]
     gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
-    gi_VBFBSM = copysign((ReweightingSample("VBF", "SM").xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25, gi_ggHBSM)
-    gi_VHBSM = copysign(((ReweightingSample("WH", "SM").xsec + ReweightingSample("ZH", "SM").xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
+    gi_VBFBSM = copysign((ReweightingSample("VBF", SMhypothesis).xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25, gi_ggHBSM)
+    gi_VHBSM = copysign(((ReweightingSample("WH", SMhypothesis).xsec + ReweightingSample("ZH", SMhypothesis).xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
     if self.category == "UntaggedIchep16":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
