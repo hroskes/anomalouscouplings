@@ -1,3 +1,4 @@
+from collections import namedtuple
 import re
 import random
 
@@ -8,7 +9,7 @@ from helperstuff import constants
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import Category, Channel
 import helperstuff.rootoverloads.histogramfloor
-from helperstuff.samples import Sample, SampleBase
+from helperstuff.samples import ReweightingSample, Sample, SampleBase
 
 mandatory = object()
 
@@ -20,9 +21,8 @@ class Options(dict):
 
 def plotfromtree(**kwargs):
   o = Options({
-    "productionmode": mandatory,
-    "hypothesis":     mandatory,
-    "weight":         None,
+    "reweightfrom":   mandatory,
+    "reweightto":     None,
 
     "disc":           mandatory,
     "bins":           None,
@@ -42,6 +42,7 @@ def plotfromtree(**kwargs):
 
     "channel":        None,
     "category":       None,
+    "analysis":       None,  #for which categorization to use
 
     "color":          1,
     "hname":          None,
@@ -52,6 +53,10 @@ def plotfromtree(**kwargs):
       o[kw] = kwarg
     else:
       raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+  if not isinstance(o.reweightfrom, Sample):
+    o.reweightfrom = Sample(o.reweightfrom, config.productionsforcombine[0])
+
   for kw, kwarg in o.iteritems():
     if kwarg is mandatory:
       raise TypeError("kwarg {} is mandatory!".format(kw))
@@ -77,8 +82,8 @@ def plotfromtree(**kwargs):
     if o.max2 is None:
       o.max2 = disc2max
 
-  if isinstance(o.weight, SampleBase):
-    o.weight = o.weight.MC_weight
+  if isinstance(o.reweightto, SampleBase):
+    o.reweightto = o.reweightto.MC_weight
 
   for name, value in constants.__dict__.iteritems():
     try:
@@ -88,24 +93,24 @@ def plotfromtree(**kwargs):
 
     if o.transformation is not None:
       o.transformation = re.sub(r"\b"+name+r"\b", value, o.transformation)
-    if o.weight is not None:
-      o.weight = re.sub(r"\b"+name+r"\b", value, o.weight)
+    if o.reweightto is not None:
+      o.reweightto = re.sub(r"\b"+name+r"\b", value, o.reweightto)
 
   t = ROOT.TChain("candTree", "candTree")
   assert len(config.productionsforcombine) == 1
-  sample = Sample(o.productionmode, o.hypothesis, config.productionsforcombine[0])
 
-  t.Add(sample.withdiscriminantsfile())
+  t.Add(o.reweightfrom.withdiscriminantsfile())
   if o.hname is None:
     o.hname = "h{}".format(random.getrandbits(100))
-  weightname = o.weight if o.weight is not None else sample.weightname()
+  weightname = o.reweightto if o.reweightto is not None else o.reweightfrom.weightname()
 
   weightfactors = [
                    weightname,
                    "{}>-98".format(discname),
                   ]
   if o.category is not None:
-    weightfactors.append(" || ".join("(category=={})".format(_) for _ in Category(o.category).idnumbers))
+    if o.analysis is None: raise TypeError("analysis is mandatory if category is provided!")
+    weightfactors.append(" || ".join("(category_{}=={})".format(o.analysis.categoryname, _) for _ in Category(o.category).idnumbers))
   if o.enrich:
     weightfactors.append("D_bkg>0.5")
   if o.channel is not None:
@@ -135,7 +140,14 @@ def plotfromtree(**kwargs):
     todraw += ")"
 
   t.Draw(todraw, wt, "hist")
-  h = getattr(ROOT, o.hname)
+  try:
+    h = getattr(ROOT, o.hname)
+  except:
+    print
+    print "using file:"
+    print o.reweightfrom.withdiscriminantsfile()
+    print
+    raise
   h.GetXaxis().SetTitle(title)
   if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
     h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
@@ -152,3 +164,12 @@ def plotfromtree(**kwargs):
   h.SetMarkerStyle(1)
 
   return h
+
+class Line(namedtuple("Line", "sample title color reweightfrom")):
+    """useful namedtuple, no special interaction with anything else here"""
+    def __new__(cls, sample, title, color, reweightfrom=None):
+        if reweightfrom is None: reweightfrom = sample
+        if not isinstance(reweightfrom, Sample):
+            assert len(config.productionsforcombine) == 1
+            reweightfrom = Sample(reweightfrom, config.productionsforcombine[0])
+        return super(Line, cls).__new__(cls, sample, title, color, reweightfrom)

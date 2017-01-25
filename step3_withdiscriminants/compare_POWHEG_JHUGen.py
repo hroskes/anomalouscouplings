@@ -8,29 +8,56 @@ import ROOT
 from helperstuff import config, style
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, categories, Category, hffhypotheses
-from helperstuff.samples import Sample
+from helperstuff.samples import ReweightingSample, Sample
+from helperstuff.plotfromtree import Line, plotfromtree
 from helperstuff.templates import TemplatesFile
 from helperstuff.utilities import tfiles
 
 assert len(config.productionsforcombine) == 1
 production = config.productionsforcombine[0]
+color = 0
+def makeline(sample, title, reweightfrom=None):
+  global color
+  color += 1
+  thecolor = color
+  assert thecolor < 6
+  if thecolor == 5: thecolor = 6
+  return Line(sample, title, thecolor, reweightfrom)
 
-def samples(productionmode):
-  if productionmode in ("HJJ", "ttH"):
-    for hffhypothesis in hffhypotheses:
-      yield Sample(productionmode, hffhypothesis, production, "0+")
-  else:
-    for hypothesis in ("0+", "0-", "fa3prod0.5"):
-      yield Sample(productionmode, hypothesis, production)
+def lines(productionmode, analysis):
+  global color
+  color = 0
   if productionmode == "HJJ":
-    yield Sample("ggH", "SM", production)
-  elif productionmode == "WH":
-    yield Sample("WplusH", "SM", production, "POWHEG")
-    yield Sample("WminusH", "SM", production, "POWHEG")
+    yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ggH SM JHUGen H+jj")
+    yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ggH 0^{-} JHUGen H+jj")
+    yield makeline(ReweightingSample(productionmode, "0+", "fCP0.5"), "ggH f_{CP}=0.5 JHUGen H+jj")
   elif productionmode == "ttH":
-    yield Sample(productionmode, "SM", "Hff0+", production, "POWHEG")
+    yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ttH SM JHUGen")
+    yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ttH 0^{-} JHUGen")
+    yield makeline(ReweightingSample(productionmode, "0+", "fCP0.5"), "ttH f_{CP}=0.5 JHUGen")
   else:
-    yield Sample(productionmode, "SM", production, "POWHEG")
+    reweightfrom = None
+    if analysis == "fL1Zg": reweightfrom = ReweightingSample(productionmode, "0+")
+
+    yield makeline(ReweightingSample(productionmode, analysis.purehypotheses[0]), "{} SM JHUGen".format(productionmode), reweightfrom)
+
+    if analysis == "fL1Zg":
+      reweightfrom = ReweightingSample(productionmode, "L1")
+    if analysis == "fL1Zg" and productionmode == "WH":
+      color += 2
+    else:
+      yield makeline(ReweightingSample(productionmode, analysis.purehypotheses[1]), "{} {}=1 JHUGen".format(productionmode, analysis.title), reweightfrom)
+      yield makeline(ReweightingSample(productionmode, analysis.mixprodhypothesis), "{} {}=0.5 JHUGen".format(productionmode, analysis.title), reweightfrom)
+
+  if productionmode == "HJJ":
+    yield makeline(ReweightingSample("ggH", "SM"), "ggH POWHEG")
+  elif productionmode == "WH":
+    yield makeline(Sample("WplusH", "SM", "POWHEG", production), "W^{+}H SM POWHEG")
+    yield makeline(Sample("WminusH", "SM", "POWHEG", production), "W^{-}H SM POWHEG")
+  elif productionmode == "ttH":
+    yield makeline(Sample(productionmode, "SM", "Hff0+", "POWHEG", production), "ttH SM POWHEG")
+  else:
+    yield makeline(Sample(productionmode, "SM", "POWHEG", production), "{} SM POWHEG".format(productionmode))
 
 cache = {}
 
@@ -45,21 +72,16 @@ for analysis, category in product(analyses, categories):
       legend = ROOT.TLegend(.6, .7, .9, .9)
       legend.SetBorderSize(0)
       legend.SetFillStyle(0)
-      for color, sample in enumerate(samples(productionmode), start=1):
-        if color == 5: color = ROOT.kYellow+3
-        hname = "{}{}{}{}{}{}".format(discname, sample.productionmode, sample.hypothesis, sample.hffhypothesis, sample.alternategenerator, analysis)
-        wt = "({}>-998)*({})*({}=={})".format(discname, sample.weightname(), categoryname, categoryid)
-        tfiles[sample.withdiscriminantsfile()].candTree.Draw("{}>>{}({},{},{})".format(discname, hname, bins, min, max), wt, "hist")
-        h = cache[analysis,discname,sample] = getattr(ROOT, hname)
-        print h
-        h.Scale(1/h.Integral())
-        h.SetLineColor(color)
+      for sample, title, color, reweightfrom in lines(productionmode, analysis):
+        hffhypothesis = None
+        if productionmode in ("HJJ", "ttH"): hffhypothesis = reweightfrom.hffhypothesis
+        h = cache[analysis,discname,sample] = plotfromtree(disc=discname, color=color, reweightto=sample, reweightfrom=reweightfrom, normalizeto1=True, category=category, analysis=analysis)
         hstack.Add(h)
-        legend.AddEntry(h, str(sample).replace(" "+str(sample.production), ""), "l")
+        legend.AddEntry(h, title, "l")
 
       c = ROOT.TCanvas()
       hstack.Draw("hist nostack")
-      hstack.GetXaxis().SetTitle(title)
+      hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
       legend.Draw()
 
       directory = os.path.join(config.plotsbasedir, "templateprojections", "compare_POWHEG_JHUGen", str(analysis), str(productionmode))
@@ -68,4 +90,4 @@ for analysis, category in product(analyses, categories):
       except OSError:
         pass
       for ext in "png eps root pdf".split():
-        c.SaveAs(os.path.join(directory, "{}_{}.{}".format(discname, productionmode, ext)))
+        c.SaveAs(os.path.join(directory, "{}.{}".format(discname, ext)))

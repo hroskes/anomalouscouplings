@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from collections import namedtuple
 import os
 
 import ROOT
@@ -9,16 +8,8 @@ from helperstuff import config, style
 from helperstuff.CJLSTscripts import getDZHhWP, getDWHhWP, getDVBF2jetsWP
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, Analysis
-from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample, Sample
-from helperstuff.plotfromtree import plotfromtree
-
-class Line(namedtuple("Line", "sample title color reweightfrom")):
-    def __new__(cls, sample, title, color, reweightfrom=None):
-        if reweightfrom is None: reweightfrom = sample
-        if not isinstance(reweightfrom, Sample):
-            assert len(config.productionsforcombine) == 1
-            reweightfrom = Sample(reweightfrom, config.productionsforcombine[0])
-        return super(Line, cls).__new__(cls, sample, title, color, reweightfrom)
+from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample
+from helperstuff.plotfromtree import Line, plotfromtree
 
 def makeplot(analysis, disc, additionalcconstant=1, shiftWP=None):
   analysis == Analysis(analysis)

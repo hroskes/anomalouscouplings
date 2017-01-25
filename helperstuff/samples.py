@@ -1080,7 +1080,7 @@ class Sample(ReweightingSample):
                 if self.productionmode == "VBF": s = "VBFH"
                 if self.hypothesis == "0+": return "{}125".format(s)
             raise self.ValueError("CJLSTdirname")
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             s = str(self.productionmode)
             if self.productionmode == "VBF": s = "VBFH"
             if self.hypothesis == "0+": return "{}0PM_M125".format(s)
@@ -1090,6 +1090,11 @@ class Sample(ReweightingSample):
             if self.hypothesis in ("fa20.5", "fa2prod0.5"): return "{}0PHf05ph0_M125".format(s)
             if self.hypothesis in ("fa30.5", "fa3prod0.5"): return "{}0Mf05ph0_M125".format(s)
             if self.hypothesis in ("fL10.5", "fL1prod0.5"): return "{}0L1f05ph0_M125".format(s)
+        if self.productionmode in ("HJJ", "ttH"):
+            s = str(self.productionmode)
+            if self.hffhypothesis == "Hff0+": return "{}0PM_M125".format(s)
+            if self.hffhypothesis == "Hff0-": return "{}0M_M125".format(s)
+            if self.hffhypothesis == "fCP0.5": return "{}0Mf05ph0_M125".format(s)
         if self.productionmode == "ggZZ":
             return "ggTo{}_Contin_MCFM701".format(self.flavor)
         if self.productionmode == "VBF bkg":
