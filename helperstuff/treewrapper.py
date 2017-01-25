@@ -9,6 +9,7 @@ import enums
 from itertools import chain
 import numpy
 import resource
+import ROOT
 from samples import ReweightingSample, Sample
 import sys
 from utilities import callclassinitfunctions
@@ -76,6 +77,7 @@ class TreeWrapper(Iterator):
         self.cconstantforDHadWH = 1e-3
         self.cconstantforDHadZH = 1e-4
         self.checkfunctions()
+        self.effectiveentriestree = None
 
         self.preliminaryloop()
 
@@ -1746,32 +1748,49 @@ class TreeWrapper(Iterator):
         for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
             is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
 
-            for function, array in values:
-                array.append(function(entry))
+            for function, weightarray in values:
+                weightarray.append(function(entry))
             if i % 10000 == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
                 #break
 
         self.cutoffs = {}
         self.nevents2L2l = {}
+        self.effectiveentries = {}
+        self.multiplyweight = {}
 
-        print "xcheck (should all be 1):"
-        for sample, (function, array) in functionsandarrays.iteritems():
-            array = numpy.array(array)
-            cutoff = self.cutoffs[str(sample)] = numpy.percentile(array, 99.99)
+        self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
+        self.branches = []
+
+        for sample, (function, weightarray) in functionsandarrays.iteritems():
+            weightarray = numpy.array(weightarray)
+            cutoff = self.cutoffs[str(sample)] = numpy.percentile(weightarray, 99.99)
+            weightarray[weightarray>cutoff] = cutoff**2/weightarray[weightarray>cutoff]
             self.nevents2L2l[str(sample)] = sum(
-                                                weight if weight < cutoff else cutoff**2/weight
-                                                     for weight, isthis2L2l in zip(array, is2L2l)
+                                                weight
+                                                     for weight, isthis2L2l in zip(weightarray, is2L2l)
                                                      if isthis2L2l
                                                )
-            print "    {:15} {}".format(sample, sum(weight if weight < cutoff else cutoff**2/weight for weight, nointerf in zip(array, is2L2l) if nointerf) / self.nevents2L2l[str(sample)])
+            #https://root.cern.ch/doc/master/classTH1.html#a79f9811dc6c4b9e68e683342bfc96f5e
+            self.effectiveentries[str(sample)] = sum(weightarray)**2 / sum(weightarray**2)
+            self.multiplyweight[str(sample)] = sample.SMxsec / self.nevents2L2l[str(sample)] * self.effectiveentries[str(sample)]
+
+            branch = array('d', [self.effectiveentries[str(sample)]])
+            self.branches.append(branch) #so it stays alive until we do Fill()
+            self.effectiveentriestree.Branch(sample.weightname(), branch, sample.weightname()+"/D")
+
+        self.effectiveentriestree.Fill()  #will be written when newf.Write() is called in step2.py
+
         self.tree.SetBranchStatus("*", 1)
 
         print "Cutoffs:"
         for sample, cutoff in self.cutoffs.iteritems():
              print "    {:15} {}".format(sample, cutoff)
-        print "nevents2L2l:"
+        print "nevents 2L2l:"
         for sample, nevents in self.nevents2L2l.iteritems():
+             print "    {:15} {}".format(sample, nevents)
+        print "effective entries:"
+        for sample, nevents in self.effectiveentries.iteritems():
              print "    {:15} {}".format(sample, nevents)
 
     passesblindcut = config.blindcut

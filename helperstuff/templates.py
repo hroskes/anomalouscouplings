@@ -786,7 +786,13 @@ class Template(TemplateBase, MultiEnum):
         if self.templategroup in ("bkg", "DATA"): return 1
         if self.productionmode in ("VBF", "ggH", "ZH", "WH"):
             result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
-        result /= len(self.reweightfrom())
+        result /= sum(
+                      Sample.effectiveentries(
+                                              reweightfrom=reweightfrom,
+                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis)
+                                             )
+                       for reweightfrom in self.reweightfrom
+                     )
         return result
 
     @property

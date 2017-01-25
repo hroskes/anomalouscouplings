@@ -366,8 +366,7 @@ class SampleBase(object):
                         result = cutoff**2 / result
                     result *= (
                                  self_tree.overallEventWeight
-                               * SMxsec
-                               / self_tree.nevents2L2l[strsample]
+                               * self_tree.multiplyweight[strsample]
                               )
                 return result
 
@@ -1120,6 +1119,19 @@ class Sample(ReweightingSample):
         if self.alternategenerator:
             result += "_" + str(self.alternategenerator)
         return result
+
+    @staticmethod
+    def effectiveentries(reweightfrom, reweightto):
+        from utilities import tfiles
+        f = tfiles[reweightfrom.withdiscriminantsfile]
+        t = f.effectiveentries
+        assert t.GetEntries() == 1, "{}???".format(t.GetEntries()
+        t.GetEntry(0)
+        try:
+            return getattr(t, reweightto.weightname())
+        except:
+            t.Show()
+            raise
 
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]
