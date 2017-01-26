@@ -3,6 +3,7 @@ import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
 from itertools import product
 import json
+from math import isnan
 import numpy
 import os
 from samples import ReweightingSample, Sample, SampleBasis
@@ -489,6 +490,7 @@ class Template(TemplateBase, MultiEnum):
                                              )
                        for reweightfrom in self.reweightfrom()
                      )
+        if isnan(result): result = 0
         return result
 
     @property

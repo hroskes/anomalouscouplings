@@ -93,8 +93,13 @@ class KeepWhileOpenFile(object):
     def __exit__(self, *args):
         if self:
             self.f.close()
-            with cd(self.pwd):
-                os.remove(self.filename)
+            try:
+                with cd(self.pwd):
+                    os.remove(self.filename)
+            except OSError:
+                if os.path.exists(self.filename):
+                    raise
+                #else ignore it
             self.fd = self.f = None
     def __nonzero__(self):
         return bool(self.f)
