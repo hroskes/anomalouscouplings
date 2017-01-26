@@ -1,8 +1,10 @@
 import abc
 from collections import OrderedDict
+import os
+
 import config
 import constants
-import os
+from utilities import generatortolist
 
 class EnumItem(object):
     def __init__(self, name, *other):
@@ -219,6 +221,20 @@ class ProductionMode(MyEnum):
         if self in ("WplusH", "WminusH", "ttH", "HJJ"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
+    @generatortolist
+    def allsamples(self, production):
+        from samples import Sample
+        if self == "VBF bkg":
+            for flavor in "2e2mu", "4e", "4mu":
+                yield Sample(self, flavor, production)
+        elif self == "ggZZ":
+            for flavor in flavors:
+                yield Sample(self, flavor, production)
+        elif self.isbkg:
+            yield Sample(self, production)
+        else:
+            for h in self.generatedhypotheses:
+                yield Sample(self, h)
 
 class ShapeSystematic(MyEnum):
     enumname = "shapesystematic"

@@ -12,26 +12,10 @@ import ROOT
 import config
 from discriminants import discriminant
 from templates import Template
-from utilities import cache, tfiles
+from utilities import cache, generatortolist, pairwise, sign, tfiles
 
 Bin = namedtuple("Bin", "low hi contents error")
 Derivative = namedtuple("Derivative", "center difference differror")
-
-#http://stackoverflow.com/a/5434936/5228524
-def pairwise(iterable):
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
-    a, b = itertools.tee(iterable)
-    next(b, None)
-    return itertools.izip(a, b)
-
-def sign(x):
-    return cmp(x, 0)
-
-def generatortolist(function):
-    def newfunction(*args, **kwargs):
-        return list(function(*args, **kwargs))
-    newfunction.__name__ = function.__name__
-    return newfunction
 
 class Interval(namedtuple("Interval", "low hi tolerance")):
     def __init__(self, *args, **kwargs):

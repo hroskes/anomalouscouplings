@@ -167,3 +167,12 @@ def tlvfromptetaphim(pt, eta, phi, m):
     result = ROOT.TLorentzVector()
     result.SetPtEtaPhiM(pt, eta, phi, m)
     return result
+
+def sign(x):
+    return cmp(x, 0)
+
+def generatortolist(function):
+    def newfunction(*args, **kwargs):
+        return list(function(*args, **kwargs))
+    newfunction.__name__ = function.__name__
+    return newfunction
