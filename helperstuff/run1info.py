@@ -20,6 +20,10 @@ def allowedintervals2sigma(analysis):
                 AllowedInterval(-.66, -.57), AllowedInterval(-.15, 1)]
     if analysis == "fa3":
         return [AllowedInterval(-.4, .43)]
+    if analysis == "fL1Zg":
+        return [AllowedInterval(-1, 1)]
+
+    assert False, analysis
 
 def isallowed2sigma(analysis, fai):
     if not -1 <= fai <= 1:

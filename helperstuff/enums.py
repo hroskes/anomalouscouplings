@@ -1,8 +1,10 @@
 import abc
 from collections import OrderedDict
+import os
+
 import config
 import constants
-import os
+from utilities import generatortolist
 
 class EnumItem(object):
     def __init__(self, name, *other):
@@ -204,9 +206,9 @@ class ProductionMode(MyEnum):
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
         if self == "ZH":
-            return Hypothesis.items(lambda x: x in proddechypotheses+0*["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
         if self == "WH":
-            return Hypothesis.items(lambda x: x in proddechypotheses+0*["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
         if self in ("WplusH", "WminusH"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
@@ -219,6 +221,20 @@ class ProductionMode(MyEnum):
         if self in ("WplusH", "WminusH", "ttH", "HJJ"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
+    @generatortolist
+    def allsamples(self, production):
+        from samples import Sample
+        if self == "VBF bkg":
+            for flavor in "2e2mu", "4e", "4mu":
+                yield Sample(self, flavor, production)
+        elif self == "ggZZ":
+            for flavor in flavors:
+                yield Sample(self, flavor, production)
+        elif self.isbkg:
+            yield Sample(self, production)
+        else:
+            for h in self.generatedhypotheses:
+                yield Sample(self, h)
 
 class ShapeSystematic(MyEnum):
     enumname = "shapesystematic"
@@ -381,6 +397,10 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
+        from datetime import date
+        if date.today() > date(2017, 1, 28):
+            raise ValueError("luminosity??!!")
+        if self == "170119": return 40
         assert False
     def __int__(self):
         return int(str(self))

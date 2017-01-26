@@ -65,6 +65,8 @@ def adddiscriminants(*args):
     try:
         newf = ROOT.TFile.Open(newfilename, "recreate")
         newt = t.CloneTree(0)
+        if treewrapper.effectiveentriestree is not None:
+            treewrapper.effectiveentriestree.SetDirectory(newf)
 
         discriminants = OrderedDict()
         for discriminant in treewrapper.toaddtotree:

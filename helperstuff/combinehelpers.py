@@ -72,7 +72,7 @@ class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production, Category, Analysis]
 
     def getrate(self):
-        if False:
+        if self.productionmode == "ZX" and not config.usedata:
             return self.yamlrate()
 
         if self.productionmode.issignal:
@@ -148,7 +148,7 @@ def gettemplate(*args):
 
     #############
     from datetime import date
-    if date.today() > date(2017, 1, 25):
+    if date.today() > date(2017, 1, 26):
         raise ValueError("VBF bkg 4mu??!")
     if t.channel == "4mu" and t.productionmode == "VBFbkg":
         return gettemplate(t.analysis, t.category, t.productionmode, t.production, "4e")

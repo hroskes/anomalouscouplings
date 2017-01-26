@@ -3,6 +3,7 @@ import config
 from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
 from itertools import product
 import json
+from math import isnan
 import numpy
 import os
 from samples import ReweightingSample, Sample, SampleBasis
@@ -82,7 +83,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "0-"), ReweightingSample("VBF", "fa3prod0.5"), ReweightingSample("VBF", "fa3dec0.5"), ReweightingSample("VBF", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod0.5"), ReweightingSample("VBF", "fa2dec0.5"), ReweightingSample("VBF", "fa2proddec-0.5")]
+                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod0.5"), ReweightingSample("VBF", "fa2dec-0.5"), ReweightingSample("VBF", "fa2proddec-0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1"), ReweightingSample("VBF", "fL1prod0.5"), ReweightingSample("VBF", "fL1dec0.5"), ReweightingSample("VBF", "fL1proddec0.5")]
             if self.analysis == "fL1Zg":
@@ -92,7 +93,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "0-"), ReweightingSample("ZH", "fa3prod0.5"), ReweightingSample("ZH", "fa3dec0.5"), ReweightingSample("ZH", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod0.5"), ReweightingSample("ZH", "fa2dec0.5"), ReweightingSample("ZH", "fa2proddec-0.5")]
+                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod0.5"), ReweightingSample("ZH", "fa2dec-0.5"), ReweightingSample("ZH", "fa2proddec-0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "L1"), ReweightingSample("ZH", "fL1prod0.5"), ReweightingSample("ZH", "fL1dec0.5"), ReweightingSample("ZH", "fL1proddec0.5")]
             if self.analysis == "fL1Zg":
@@ -102,7 +103,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "0-"), ReweightingSample("WH", "fa3prod0.5"), ReweightingSample("WH", "fa3dec0.5"), ReweightingSample("WH", "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod0.5"), ReweightingSample("WH", "fa2dec0.5"), ReweightingSample("WH", "fa2proddec-0.5")]
+                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod0.5"), ReweightingSample("WH", "fa2dec-0.5"), ReweightingSample("WH", "fa2proddec-0.5")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "L1"), ReweightingSample("WH", "fL1prod0.5"), ReweightingSample("WH", "fL1dec0.5"), ReweightingSample("WH", "fL1proddec0.5")]
             if self.analysis == "fL1Zg":
@@ -456,319 +457,15 @@ class Template(TemplateBase, MultiEnum):
 
     def reweightfrom(self):
         if self.productionmode == "ggH":
-            if self.hypothesis in ("0+", "0+_photoncut", "0-", "a2", "L1", "L1Zg", "fa30.5", "fa20.5", "fL1Zg0.5"):
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5")
-                       }
-            elif self.hypothesis == "fL1dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5")
-                       }
-        if self.productionmode == "VBF":
-            if self.hypothesis in ("0+", "0+_photoncut"):
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "a2":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "0-":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "L1":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("L1", "fL1prod0.5", "0-", "fa3prod0.5", "a2", "fa2prod0.5")
-                       }
-            if self.hypothesis == "L1Zg":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "fa3prod0.5", "L1", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa3dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "L1", "fa2prod0.5", "fL1prod0.5", "fa3prod0.5")
-                       }
-            if self.hypothesis == "fL1Zgdec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fL1prod0.5", "fa3prod0.5")
-                       }
-            if self.hypothesis == "fa2prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa3prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")  #0- and a2 are borderline
-                       }
-            if self.hypothesis == "fL1prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5") #????
-                       }
-            if self.hypothesis == "fL1Zgprod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2proddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "0-", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa3proddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1proddec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fL1prod0.5", "fa3prod0.5")
-                       }
-            if self.hypothesis == "fL1Zgproddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fL1prod0.5", "fa3prod0.5")
-                       }
-            if self.hypothesis == "fa2dec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2prod-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2proddec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fL1prod0.5", "fa3prod0.5")
-                       }
-        if self.productionmode == "ZH":
-            if self.hypothesis in ("0+", "0+_photoncut"):
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "a2":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "0-":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "L1":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "L1Zg":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa3dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("L1", "0-", "a2", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")  #not great
-                       }
-            if self.hypothesis == "fL1Zgdec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa3prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1Zgprod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2proddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5")
-                       }
-            if self.hypothesis == "fa3proddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5")
-                       }
-            if self.hypothesis == "fL1proddec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1Zgproddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2dec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
-                       }
-            if self.hypothesis == "fa2prod-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
-                       }
-            if self.hypothesis == "fa2proddec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
-                       }
-        if self.productionmode == "WH":
-            if self.hypothesis in ("0+", "0+_photoncut"):
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "L1", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "a2":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a2", "0+", "L1", "a3", "fa3prod0.5")
-                       }
-            if self.hypothesis == "0-":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "fa3prod0.5", "a2", "fa2prod0.5", "L1", "fL1prod0.5")
-                       }
-            if self.hypothesis == "L1":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "fa2prod0.5", "L1", "fL1prod0.5", "0-", "fa3prod0.5")
-                       }
-            if self.hypothesis == "L1Zg":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+",)  #doesn't matter, flat at 0
-                       }
-            if self.hypothesis == "fa2dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "L1", "0-", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa3dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "fa2prod0.5", "0-", "fa3prod0.5", "L1", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1dec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "fa2prod0.5", "0-", "fa3prod0.5", "L1", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1Zgdec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "L1", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("a3", "fa3prod0.5", "a2", "fa2prod0.5", "L1")
-                       }
-            if self.hypothesis == "fa3prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "fa3prod0.5", "a2", "0+", "L1")
-                       }
-            if self.hypothesis == "fL1prod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("fa2prod0.5", "a3", "fa3prod0.5", "fL1prod0.5", "a2", "L1")
-                       }
-            if self.hypothesis == "fL1Zgprod0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "L1", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2proddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "fa3prod0.5", "a2", "L1")
-                       }
-            if self.hypothesis == "fa3proddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "fa3prod0.5", "a2", "fa2prod0.5", "L1")
-                       }
-            if self.hypothesis == "fL1proddec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0-", "fa3prod0.5", "a2", "L1", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fL1Zgproddec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "a2", "L1", "fa3prod0.5", "fL1prod0.5")
-                       }
-            if self.hypothesis == "fa2dec-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
-                       }
-            if self.hypothesis == "fa2prod-0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
-                       }
-            if self.hypothesis == "fa2proddec0.5":
-                result={
-                        Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ()
-                       }
+            result={
+                    Sample(self.production, self.productionmode, hypothesis)
+                        for hypothesis in ("0+", "0-", "a2", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5")
+                   }
+        if self.productionmode in ["VBF", "ZH", "WH"]:
+            result={
+                    Sample(self.production, self.productionmode, hypothesis)
+                        for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
+                   }
         if self.productionmode in ("qqZZ", "ZX"):
             result = {Sample(self.production, self.productionmode)}
         if self.productionmode == "ggZZ":
@@ -786,7 +483,14 @@ class Template(TemplateBase, MultiEnum):
         if self.templategroup in ("bkg", "DATA"): return 1
         if self.productionmode in ("VBF", "ggH", "ZH", "WH"):
             result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
-        result /= len(self.reweightfrom())
+        result /= sum(
+                      Sample.effectiveentries(
+                                              reweightfrom=reweightfrom,
+                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis)
+                                             )
+                       for reweightfrom in self.reweightfrom()
+                     )
+        if isnan(result): result = 0
         return result
 
     @property

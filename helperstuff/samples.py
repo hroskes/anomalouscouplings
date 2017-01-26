@@ -50,7 +50,7 @@ class SampleBase(object):
             JHUXSVBFa1 = constants.JHUXSVBFa1_photoncut
             JHUXSZHa1 = constants.JHUXSZHa1_photoncut
             JHUXSWHa1 = constants.JHUXSWHa1_photoncut
-            assert self.g2 == self.g4 == self.g1prime2 == 0
+            assert self.g2 == self.g4 == self.g1prime2 == 0, self
         else:
             JHUXSggH2L2la1 = constants.JHUXSggH2L2la1
             JHUXSVBFa1 = constants.JHUXSVBFa1
@@ -366,8 +366,7 @@ class SampleBase(object):
                         result = cutoff**2 / result
                     result *= (
                                  self_tree.overallEventWeight
-                               * SMxsec
-                               / self_tree.nevents2L2l[strsample]
+                               * self_tree.multiplyweight[strsample]
                               )
                 return result
 
@@ -394,7 +393,9 @@ class SampleBase(object):
         numerator = None
         denominator = 0
         for h in purehypotheses:
-            kwargs = {_.couplingname: 1 if _ == h else 0 for _ in purehypotheses}
+            if not getattr(self, h.couplingname) and h != hypothesis: continue
+            kwargs = {_.couplingname: 0 for _ in purehypotheses}
+            kwargs[h.couplingname] = 1
             kwargs["photoncut"] = analysis.photoncut
             term = 0
             for productionmode in productionmodes:
@@ -514,7 +515,7 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
     else:
         productionmodeforfai = ProductionMode(productionmodeforfai)
 
-    kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2", "ghz1prime2")}
+    kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2", "ghzgs1prime2")}
     kwargs["photoncut"] = analysis.photoncut
     power = (.25 if productionmodeforfai != "ggH" and withdecay else .5)
     kwargs["g1"] = (1-abs(fai))**power
@@ -1079,7 +1080,7 @@ class Sample(ReweightingSample):
                 if self.productionmode == "VBF": s = "VBFH"
                 if self.hypothesis == "0+": return "{}125".format(s)
             raise self.ValueError("CJLSTdirname")
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             s = str(self.productionmode)
             if self.productionmode == "VBF": s = "VBFH"
             if self.hypothesis == "0+": return "{}0PM_M125".format(s)
@@ -1089,6 +1090,11 @@ class Sample(ReweightingSample):
             if self.hypothesis in ("fa20.5", "fa2prod0.5"): return "{}0PHf05ph0_M125".format(s)
             if self.hypothesis in ("fa30.5", "fa3prod0.5"): return "{}0Mf05ph0_M125".format(s)
             if self.hypothesis in ("fL10.5", "fL1prod0.5"): return "{}0L1f05ph0_M125".format(s)
+        if self.productionmode in ("HJJ", "ttH"):
+            s = str(self.productionmode)
+            if self.hffhypothesis == "Hff0+": return "{}0PM_M125".format(s)
+            if self.hffhypothesis == "Hff0-": return "{}0M_M125".format(s)
+            if self.hffhypothesis == "fCP0.5": return "{}0Mf05ph0_M125".format(s)
         if self.productionmode == "ggZZ":
             return "ggTo{}_Contin_MCFM701".format(self.flavor)
         if self.productionmode == "VBF bkg":
@@ -1118,6 +1124,19 @@ class Sample(ReweightingSample):
         if self.alternategenerator:
             result += "_" + str(self.alternategenerator)
         return result
+
+    @staticmethod
+    def effectiveentries(reweightfrom, reweightto):
+        from utilities import tfiles
+        f = tfiles[reweightfrom.withdiscriminantsfile()]
+        t = f.effectiveentries
+        assert t.GetEntries() == 1, "{}???".format(t.GetEntries())
+        t.GetEntry(0)
+        try:
+            return getattr(t, reweightto.weightname())
+        except:
+            t.Show()
+            raise
 
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]

@@ -12,10 +12,9 @@ import os
 
 #========================
 #inputs
-#weight, bins, min, max, category can be None
-productionmode = "ZH"
-disc           = "DiJetMass"
-weight         = ReweightingSample(productionmode, "L1Zg")
+productionmode = "VBF"
+disc           = "D_CP_VBF"
+reweightto     = ReweightingSample(productionmode, "0-")
 bins           = None
 min            = None
 max            = None
@@ -61,9 +60,8 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     hname = "h{}".format(hypothesis)
 
     h = hs[hypothesis] = plotfromtree(
-      productionmode=productionmode,
-      hypothesis=hypothesis,
-      weight=weight,
+      reweightfrom=ReweightingSample(productionmode, hypothesis),
+      reweightto=reweightto,
       disc=disc,
       bins=bins,
       min=min,
@@ -76,6 +74,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       color=color,
       hname=hname,
     )
+    h.SetMinimum(0)
 
     hstack.Add(h)
     cache.append(h)
