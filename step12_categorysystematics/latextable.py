@@ -20,7 +20,7 @@ categories = list(Category(_) for _ in ("VBFtagged", "VHHadrtagged", "Untagged")
 
 def categoryname(category):
   if category == "VBFtagged": return "VBF jets"
-  if category == "VHHadrtagged": return "\V\PH jets"
+  if category == "VHHadrtagged": return "$\V\PH$ jets"
   if category == "Untagged": return "Inclusive"
 
 def gettree(productionmode):
