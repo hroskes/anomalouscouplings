@@ -4,7 +4,7 @@ import os
 
 import config
 import constants
-from utilities import generatortolist
+from utilities import generatortolist_condition, tfiles
 
 class EnumItem(object):
     def __init__(self, name, *other):
@@ -221,9 +221,10 @@ class ProductionMode(MyEnum):
         if self in ("WplusH", "WminusH", "ttH", "HJJ"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
-    @generatortolist
+    @generatortolist_condition(lambda x: tfiles[x.withdiscriminantsfile()].candTree.GetEntries())
     def allsamples(self, production):
         from samples import Sample
+        from utilities import tfiles
         if self == "VBF bkg":
             for flavor in "2e2mu", "4e", "4mu":
                 yield Sample(self, flavor, production)
@@ -233,8 +234,10 @@ class ProductionMode(MyEnum):
         elif self.isbkg:
             yield Sample(self, production)
         else:
+            hff = None
+            if self in ("HJJ", "ttH"): hff = "Hff0+"
             for h in self.generatedhypotheses:
-                yield Sample(self, h)
+                yield Sample(self, h, hff, production)
 
 class ShapeSystematic(MyEnum):
     enumname = "shapesystematic"
@@ -448,6 +451,13 @@ class Category(MyEnum):
         if self == "Untagged": return [ProductionMode("ggH")]
         if self == "VBFtagged": return [ProductionMode("VBF")]
         if self == "VHHadrtagged": return [ProductionMode("ZH"), ProductionMode("WH")]
+
+    @classmethod
+    def fromid(cls, number):
+        for category in cls.items():
+            if number in category.idnumbers:
+                return category
+        raise ValueError("Invalid id {}".format(number))
 
 class AlternateGenerator(MyEnum):
     enumname = "alternategenerator"

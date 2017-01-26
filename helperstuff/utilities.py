@@ -172,7 +172,12 @@ def sign(x):
     return cmp(x, 0)
 
 def generatortolist(function):
-    def newfunction(*args, **kwargs):
-        return list(function(*args, **kwargs))
-    newfunction.__name__ = function.__name__
-    return newfunction
+    return generatortolist_condition(lambda x: True)(function)
+
+def generatortolist_condition(condition):
+    def generatortolist(function):
+        def newfunction(*args, **kwargs):
+            return [_ for _ in function(*args, **kwargs) if condition(_)]
+        newfunction.__name__ = function.__name__
+        return newfunction
+    return generatortolist
