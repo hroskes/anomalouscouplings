@@ -102,9 +102,8 @@ class Row(MultiEnum):
       for channel in "2e2mu", "4e", "4mu":
         channel = Channel(channel)
         total += categorydistribution[channel, category]
-        result += "{:.2f}/".format(categorydistribution[channel, category])
-      result += "{:.2f}".format(total)
-    result += r"\\"
+        result += "{:.1f}/".format(categorydistribution[channel, category])
+      result += "{:.1f}".format(total)
     return result
 
 class RowChannel(Row, MultiEnum):
@@ -146,7 +145,7 @@ class Section(object):
     self.rows = rows
   def getlatex(self):
     result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
-    result += "\n".join(_.getlatex() for _ in self.rows)
+    result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex() for _ in self.rows)
     return result
 
 def maketable(analysis):
@@ -154,29 +153,30 @@ def maketable(analysis):
   sections = [
     Section("SM",
       Row(analysis, "VBF", analysis.purehypotheses[0]),
-      Row(analysis, "ZH", analysis.purehypotheses[0], title=r"\Z\PH"),
-      Row(analysis, "WH", analysis.purehypotheses[0], title=r"\W\PH"),
-      Row(analysis, "ggH", analysis.purehypotheses[0], title=r"\Pg\Pg\to\H"),
-      Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"\ttbar\PH"),
+      Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
+      Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
+      Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
+      Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
     ),
-    Section("{}=1".format(analysis.title),
+    Section("${}=1$".format(analysis.title),
       Row(analysis, "VBF", analysis.purehypotheses[1]),
-      Row(analysis, "ZH", analysis.purehypotheses[1], title=r"\Z\PH"),
-      Row(analysis, "WH", analysis.purehypotheses[1], title=r"\W\PH"),
-      Row(analysis, "ggH", analysis.purehypotheses[1], title=r"\Pg\Pg\to\H"),
-      Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"\ttbar\PH"),
+      Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
+      Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),
+      Row(analysis, "ggH", analysis.purehypotheses[1], title=r"$\Pg\Pg\to\PH$"),
+      Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"$\ttbar\PH$"),
     ),
     Section("bkg",
-      Row(analysis, "qqZZ", title=r"\qqbar\to\Z\Z"),
-      Row(analysis, "ggZZ", title=r"\Pg\Pg\to\Z\Z"),
-      Row(analysis, "VBFbkg", title=r"VBF/\V\V\V bkg"),
-      Row(analysis, "ZX", title=r"Z+X"),
+      Row(analysis, "qqZZ", title=r"$\qqbar\to\Z\Z$"),
+      Row(analysis, "ggZZ", title=r"$\Pg\Pg\to\Z\Z$"),
+      Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$ bkg"),
+      Row(analysis, "ZX", title=r"$\Z+\X$"),
     )
   ]
   print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")
-  print " & & " + " & ".join(categoryname(_) for _ in categories)
-  for section in sections:
-    print section.getlatex()
+  print r"\hline"
+  print " & & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline\hline"
+  print (r"\\\hline"+"\n").join(section.getlatex() for section in sections)
+  print r"\\\hline"
   print r"\end{tabular}"
 
 if __name__ == "__main__":
