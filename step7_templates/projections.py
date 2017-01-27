@@ -308,15 +308,6 @@ class Projections(MultiEnum):
 
     ZHpieces = [ZHg14gi0, ZHg13gi1, ZHg12gi2, ZHg11gi3, ZHg10gi4]
 
-    ZHBSM    = ComponentTemplateSum(ZHg10gi4.title,                                0, ZHSM.Integral(), (ZHg10gi4, gi_VHBSM**4))
-
-    ZHmix_p  = ComponentTemplateSum("ZH {}=#plus0.5" .format(fainame), 0, ZHSM.Integral(),
-                                    *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(ZHpieces))
-                                   )
-    ZHmix_m  = ComponentTemplateSum("ZH {}=#minus0.5".format(fainame), 0, ZHSM.Integral(),
-                                    *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces))
-                                   )
-
     WHSM = \
     WHg14gi0 = self.TemplateFromFile(   0, "WH", self.category, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
     WHg13gi1 = self.IntTemplateFromFile(0, "WH", self.category, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g13gi1")
@@ -326,19 +317,27 @@ class Projections(MultiEnum):
 
     WHpieces = [WHg14gi0, WHg13gi1, WHg12gi2, WHg11gi3, WHg10gi4]
 
-    WHBSM    = ComponentTemplateSum(WHg10gi4.title,                                0, WHSM.Integral(), (WHg10gi4, gi_VHBSM**4))
+    VHSM     = ComponentTemplateSum(WHSM.title.replace("W", "V"),      0, WHSM.Integral()+ZHSM.Integral(), (ZHSM, 1), (WHSM, 1))
 
-    WHmix_p  = ComponentTemplateSum("WH {}=#plus0.5" .format(fainame), 0, WHSM.Integral(),
-                                    *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(WHpieces))
+    VHBSM    = ComponentTemplateSum(WHg10gi4.title.replace("W", "V"),  0, WHSM.Integral()+ZHSM.Integral(), (WHg10gi4, gi_VHBSM**4), (ZHg10gi4, gi_VHBSM**4))
+
+    VHmix_p  = ComponentTemplateSum("VH {}=#plus0.5" .format(fainame), 0, WHSM.Integral()+ZHSM.Integral(),
+                                    *(
+                                        [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(WHpieces)]
+                                      + [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(ZHpieces)]
+                                     )
                                    )
-    WHmix_m  = ComponentTemplateSum("WH {}=#minus0.5".format(fainame), 0, WHSM.Integral(),
-                                    *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces))
+    VHmix_m  = ComponentTemplateSum("VH {}=#minus0.5" .format(fainame), 0, WHSM.Integral()+ZHSM.Integral(),
+                                    *(
+                                        [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces)]
+                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces)]
+                                     )
                                    )
 
-    SM    = TemplateSum("SM",                                1,             (ggHSM,    ggHfactor), (VBFSM,    VBFfactor), (ZHSM,    VHfactor), (WHSM,    VHfactor))
-    BSM   = TemplateSum("{}=1".format(self.analysis.title),  ROOT.kCyan,    (ggHBSM,   ggHfactor), (VBFBSM,   VBFfactor), (ZHBSM,   VHfactor), (WHBSM,   VHfactor))
-    mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (ZHmix_p, VHfactor), (WHmix_p, VHfactor))
-    mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (ZHmix_m, VHfactor), (WHmix_m, VHfactor))
+    SM    = TemplateSum("SM",                                1,             (ggHSM,    ggHfactor), (VBFSM,    VBFfactor), (VHSM,    VHfactor))
+    BSM   = TemplateSum("{}=1".format(self.analysis.title),  ROOT.kCyan,    (ggHBSM,   ggHfactor), (VBFBSM,   VBFfactor), (VHBSM,   VHfactor))
+    mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (VHmix_p, VHfactor))
+    mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (VHmix_m, VHfactor))
 
     qqZZ      = self.TemplateFromFile(6,              self.category, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ",    self.shapesystematic, self.production)
     ggZZ      = self.TemplateFromFile(ROOT.kOrange+6, self.category, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ",    self.shapesystematic, self.production)
@@ -356,13 +355,9 @@ class Projections(MultiEnum):
                       VBFBSM, VBFmix_p, VBFmix_m,
                      ]
     if VHfactor:
-        templates += ZHpieces
+        templates += ZHpieces+WHpieces
         templates += [
-                      ZHBSM, ZHmix_p, ZHmix_m,
-                     ]
-        templates += WHpieces
-        templates += [
-                      WHBSM, WHmix_p, WHmix_m,
+                      VHBSM, VHmix_p, VHmix_m,
                      ]
     if not animation:
         templates += [
@@ -377,18 +372,17 @@ class Projections(MultiEnum):
         VBFcustom = ComponentTemplateSum("VBF ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VBF", plusminus, abs(customsample.fai("VBF", self.analysis))), 2, VBFSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces))
                                         )
-        ZHcustom  = ComponentTemplateSum("", 0, ZHSM.Integral(),
-                                         *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces))
+        VHcustom  = ComponentTemplateSum("VH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", self.analysis))), 4, ZHSM.Integral()+WHSM.Integral(),
+                                         *(
+                                             [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces)]
+                                           + [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces)]
+                                          )
                                         )
-        WHcustom  = ComponentTemplateSum("", 0, WHSM.Integral(),
-                                         *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces))
-                                        )
-        VHcustom = TemplateSum("VH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", self.analysis))), 4, (ZHcustom, 1), (WHcustom, 1))
         for t in ggHcustom, VBFcustom, VHcustom:
             t.Scale(1.0/t.Integral())
 
         templates += [
-                      ggHcustom, VBFcustom, ZHcustom, WHcustom, VHcustom
+                      ggHcustom, VBFcustom, VHcustom
                      ]
 
     if ggHfactor == VBFfactor == VHfactor == 1 and not animation:
@@ -520,9 +514,8 @@ def projections(*args):
 
 if __name__ == "__main__":
   def projections():
-    #yield Projections("170119", "2e2mu", "fa3", "rescalemixtures", "fullrange", "Untagged")
-    #yield Projections("170119", "2e2mu", "fa3", "rescalemixtures", "fullrange", "VBFtagged")
-    #yield Projections("170119", "2e2mu", "fa3", "rescalemixtures", "fullrange", "VHHadrtagged")
+    #yield Projections("170119", "4e", "fL1Zg", "rescalemixtures", "fullrange", "Untagged")
+    #yield Projections("170119", "4mu", "fL1Zg", "rescalemixtures", "fullrange", "Untagged")
     #return
     for production in productions:
       for channel in channels:
