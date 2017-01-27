@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractproperty
 from collections import Counter
 import config
 import constants
-from enums import AlternateGenerator, Analysis, BlindStatus, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
+from enums import AlternateGenerator, Analysis, Flavor, decayonlyhypotheses, prodonlyhypotheses, proddechypotheses, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
 from math import copysign, sqrt
 import numpy
 import os
@@ -1025,16 +1025,11 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return constants.kappa_tilde_ttH
 
 class Sample(ReweightingSample):
-    enums = [ReweightingSample, Production, BlindStatus, AlternateGenerator]
+    enums = [ReweightingSample, Production, AlternateGenerator]
 
     def check(self, *args):
         if self.production is None:
             raise ValueError("No option provided for production\n{}".format(args))
-
-        if self.blindstatus is None and self.productionmode == "data":
-            raise ValueError("No blindstatus provided for data sample!\n{}".format(args))
-        if self.blindstatus is not None and self.productionmode != "data":
-            raise ValueError("blindstatus provided for MC sample!\n{}".format(args))
 
         if self.hypothesis is not None and self.hypothesis not in self.productionmode.generatedhypotheses:
             raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
@@ -1112,12 +1107,6 @@ class Sample(ReweightingSample):
         result = os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
         return result
         raise self.ValueError("withdiscriminantsfile")
-
-    @property
-    def unblind(self):
-        if self.productionmode == "data":
-            return self.blindstatus == "unblind"
-        raise self.ValueError("unblind")
 
     def weightname(self):
         result = super(Sample, self).weightname()

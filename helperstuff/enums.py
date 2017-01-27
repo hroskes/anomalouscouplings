@@ -413,13 +413,6 @@ class Production(MyEnum):
             return 2016
         assert False
 
-class BlindStatus(MyEnum):
-    enumname = "blindstatus"
-    enumitems = (
-                 EnumItem("unblind"),
-                 EnumItem("blind"),
-                )
-
 class Category(MyEnum):
     """
     For now just 3 categories, VBF2j, VH hadronic, and dump everything else into untagged
@@ -484,7 +477,6 @@ analyses = Analysis.items()
 #productions = Production.items(lambda x: x in ("160225", "160729"))
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 productions = Production.items(lambda x: x in config.productionsforcombine)
-blindstatuses = BlindStatus.items()
 categories = Category.items()
 
 class MetaclassForMultiEnums(type):

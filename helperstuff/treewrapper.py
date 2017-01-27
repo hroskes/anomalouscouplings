@@ -41,7 +41,7 @@ class TreeWrapper(Iterator):
         self.isPOWHEG = treesample.alternategenerator == "POWHEG"
         self.isdummy = isdummy
         if self.isdata:
-            self.unblind = treesample.unblind
+            self.unblind = config.unblinddistributions
         else:
             self.unblind = True
 
@@ -51,8 +51,8 @@ class TreeWrapper(Iterator):
 
         self.minevent = minevent
         if (
-               self.isdata and (self.unblind and not config.unblinddistributions or not config.usedata)
-            or self.isZX and not config.usedata
+               self.isZX and not config.usedata
+            or self.isdata and not config.showblinddistributions
             or self.isdummy
            ):
             self.__length = 0

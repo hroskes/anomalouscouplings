@@ -116,5 +116,4 @@ if __name__ == '__main__':
         adddiscriminants("ttH", "Hff0+", "0+", "POWHEG", production)
         adddiscriminants("qqZZ", production)
         adddiscriminants("ZX", production)
-        adddiscriminants("data", production, "unblind")
-        adddiscriminants("data", production, "blind")
+        adddiscriminants("data", production)

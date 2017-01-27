@@ -1,6 +1,6 @@
 import abc
 import config
-from enums import Analysis, analyses, BlindStatus, blindstatuses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
+from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
 from itertools import product
 import json
 from math import isnan
@@ -11,7 +11,7 @@ from utilities import cache, getnesteddictvalue, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
-    enums = [Channel, ShapeSystematic, TemplateGroup, Analysis, Production, BlindStatus, Category]
+    enums = [Channel, ShapeSystematic, TemplateGroup, Analysis, Production, Category]
 
     def applysynonyms(self, enumsdict):
         if enumsdict[Production] is None and len(config.productionsforcombine) == 1:
@@ -27,11 +27,6 @@ class TemplatesFile(MultiEnum):
         if self.category is None:
             self.category = Category("UntaggedIchep16")
 
-        if self.templategroup != "DATA":
-            if self.blindstatus is not None:
-                raise ValueError("Can't blind MC!\n{}".format(args))
-            dontcheck.append(BlindStatus)
-
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
         if not self.shapesystematic.appliesto(self.templategroup):
@@ -42,7 +37,7 @@ class TemplatesFile(MultiEnum):
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic, self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic, self.production]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".json")
@@ -56,7 +51,7 @@ class TemplatesFile(MultiEnum):
             if not os.path.exists(folder):
                 raise IOError("No folder {}".format(folder))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic if config.applyshapesystematics else "", self.production, self.blindnamepart]
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic if config.applyshapesystematics else "", self.production]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
@@ -218,17 +213,6 @@ class TemplatesFile(MultiEnum):
         return (self.purediscriminant, self.mixdiscriminant, self.bkgdiscriminant)
 
     @property
-    def blind(self):
-        assert self.templategroup == "DATA"
-        return self.blindstatus == "blind"
-
-    @property
-    def blindnamepart(self):
-        if self.templategroup != "DATA": return ""
-        if self.blind: return "blind"
-        return ""
-
-    @property
     def categorynamepart(self):
         if self.category == "UntaggedIchep16":
             return "Untagged"
@@ -286,9 +270,8 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         if shapesystematic == "":
                             yield TemplatesFile(channel, "bkg", analysis, production, category)
-                        for blindstatus in blindstatuses:
-                            if shapesystematic == "" and (blindstatus == "blind" or config.unblinddistributions) and config.usedata:
-                                yield TemplatesFile(channel, "DATA", analysis, production, blindstatus, category)
+                        if shapesystematic == "" and config.usedata:
+                            yield TemplatesFile(channel, "DATA", analysis, production, category)
 
 class TemplateBase(object):
     __metaclass__ = abc.ABCMeta
@@ -473,7 +456,7 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "VBF bkg":
             result = {Sample(self.production, self.productionmode, flavor) for flavor in flavors if not flavor.hastaus}
         if self.productionmode == "data":
-            result = {Sample(self.production, self.productionmode, self.blindstatus)}
+            result = {Sample(self.production, self.productionmode)}
         result = {sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0}
         assert result
         return result
@@ -605,11 +588,6 @@ class Template(TemplateBase, MultiEnum):
             del jsn["templates"][0]["weight"]
 
         return jsn
-
-    @property
-    def blind(self):
-        if self.templategroup != "DATA": assert False
-        return self.templatesfile.blind
 
     @property
     def selection(self):
@@ -744,7 +722,7 @@ class DataTree(MultiEnum):
     enumname = "datatree"
     @property
     def originaltreefile(self):
-        return Sample("data", self.production, "unblind").withdiscriminantsfile()
+        return Sample("data", self.production).withdiscriminantsfile()
     @property
     def treefile(self):
         return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
@@ -768,7 +746,7 @@ class SubtractProduction(MyEnum):
     subtracttree = None
     def passescut(self, t):
         if self.subtracttree is None:
-            self.subtracttree = tfiles[Sample("data", "unblind", str(self).replace("subtract", "")).withdiscriminantsfile()].candTree
+            self.subtracttree = tfiles[Sample("data", str(self).replace("subtract", "")).withdiscriminantsfile()].candTree
         run, event, lumi = t.RunNumber, t.EventNumber, t.LumiNumber
         for t2 in self.subtracttree:
             if (run, event, lumi) == (t2.RunNumber, t2.EventNumber, t2.LumiNumber):

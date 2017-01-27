@@ -396,9 +396,9 @@ class Projections(MultiEnum):
                       qqZZ, ggZZ, VBFbkg, ZX,
                      ]
 
-    if self.enrichstatus == "impoverish" and config.usedata or config.unblinddistributions:
+    if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
         templates += [
-                      TemplateFromFile(1, self.category, self.enrichstatus, self.normalization, self.analysis, self.channel, "data", self.production, "unblind" if config.unblinddistributions else "blind")
+                      TemplateFromFile(1, self.category, self.enrichstatus, self.normalization, self.analysis, self.channel, "data", self.production)
                      ]
 
     c1 = ROOT.TCanvas()
