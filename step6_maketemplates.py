@@ -1,12 +1,16 @@
 #!/usr/bin/env python
-from helperstuff import config
-from helperstuff.samples import Sample
-from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
-from helperstuff.utilities import KeepWhileOpenFile
+
+from array import array
 import os
 import ROOT
 import subprocess
 from time import sleep
+
+from helperstuff import config
+from helperstuff.discriminants import discriminants
+from helperstuff.samples import Sample
+from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
+from helperstuff.utilities import KeepWhileOpenFile
 
 cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
 if cmssw[0] == 8:
@@ -30,11 +34,21 @@ def copydata(*args):
     print datatree
     f = ROOT.TFile(datatree.originaltreefile)
     t = f.candTree
+
+    discriminants_forcerange = {d: array('d', [0]) for d in discriminants if hasattr(d, d.name)}
+    for (dname, dtitle, dbins, dmin, dmax), branchaddress in discriminants_forcerange.iteritems():
+        t.SetBranchAddress(dname, branchaddress)
+
     newfilename = datatree.treefile
     if os.path.exists(newfilename): f.Close(); return
+
     newf = ROOT.TFile(newfilename, "recreate")
     newt = t.CloneTree(0)
     for entry in t:
+        for (dname, dtitle, dbins, dmin, dmax), branchaddress in discriminants_forcerange.iteritems():
+            branchaddress[0] = min(branchaddress[0], dmax)
+            branchaddress[0] = max(branchaddress[0], dmin)
+            assert dmin <= branchaddress[0] <= dmax
         if datatree.passescut(t):
             newt.Fill()
     print newt.GetEntries()

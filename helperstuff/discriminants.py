@@ -171,14 +171,24 @@ discriminants = {
         Discriminant("D_HadWH_0minus", "D_{WH}^{0-}", defaultnbins, 0, 1),
         Discriminant("D_HadWH_a2", "D_{WH}^{0h+}", defaultnbins, 0, 1),
         Discriminant("D_HadWH_L1", "D_{WH}^{#Lambda1}", defaultnbins, 0, 1),
-    ] + [
-        Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
-        Discriminant("DiJetMass", "m_{JJ}", defaultnbins, 4, 110),
     ]
 }
 
 del minmax_g1jgik
 
+otherplottablethings = {
+    d.name: d for d in [
+        Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
+        Discriminant("DiJetMass", "m_{JJ}", defaultnbins, 4, 110),
+    ]
+}
+
 def discriminant(name):
     if isinstance(name, Discriminant): return name
-    return discriminants[name]
+    if name in discriminants:
+        return discriminants[name]
+    if name in otherplottablethings:
+        return otherplottablethings[name]
+    raise KeyError("Unknown discriminants {}".format(name))
+
+assert not any(_ in otherplottablethings for _ in discriminants)
