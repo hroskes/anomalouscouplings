@@ -70,7 +70,7 @@ SMXSttH2L2l = SMXSttH * SMBR2L2l
 
 #############
 from datetime import date
-if date.today() > date(2017, 1, 26):
+if date.today() > date(2017, 1, 27):
     raise ValueError("Update mix L1Zg xsecs!")
 #############
 

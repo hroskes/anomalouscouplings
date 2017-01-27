@@ -8,6 +8,8 @@ import os
 import shutil
 import urllib
 
+from utilities import rreplace
+
 
 class CJLSTScript_base(object):
     __metaclass__ = ABCMeta
@@ -87,10 +89,17 @@ class CJLSTScript_category(CJLSTScript_Cpp, CJLSTScript_base):
     def fixandmove(self, tmpfilename):
         with open(tmpfilename) as tmpf:
             contents = tmpf.read()
-        tocomment = "|| ( nExtraLep==0 && nCleanedJetsPt30==2 && nCleanedJetsPt30BTagged==2 )"
+
+        tocomment = "|| ( nExtraLep==0 && (nCleanedJetsPt30==2||nCleanedJetsPt30==3) && nCleanedJetsPt30BTagged>=2 )"
         if contents.count(tocomment) != 1:
             raise IOError("Category code has changed!")
         contents = contents.replace(tocomment, "/*"+tocomment+"*/")
+
+        tocomment = "&&nCleanedJetsPt30BTagged<=1"
+        if contents.count(tocomment) != 2:
+            raise IOError("Category code has changed!")
+        contents = rreplace(contents, tocomment, "/*"+tocomment+"*/", 1) #note rreplace, not replace!
+
         with open(tmpfilename, "w") as f:
             f.write(contents)
         super(CJLSTScript_category, self).fixandmove(tmpfilename)

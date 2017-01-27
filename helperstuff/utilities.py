@@ -181,3 +181,9 @@ def generatortolist_condition(condition):
         newfunction.__name__ = function.__name__
         return newfunction
     return generatortolist
+
+
+def rreplace(s, old, new, occurrence):
+    """http://stackoverflow.com/a/2556252/5228524"""
+    li = s.rsplit(old, occurrence)
+    return new.join(li)
