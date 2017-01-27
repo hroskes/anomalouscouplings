@@ -166,9 +166,9 @@ def maketable(analysis):
       Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"$\ttbar\PH$"),
     ),
     Section("bkg",
-      Row(analysis, "qqZZ", title=r"$\qqbar\to\Z\Z$"),
-      Row(analysis, "ggZZ", title=r"$\Pg\Pg\to\Z\Z$"),
-      Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$ bkg"),
+      Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$"),
+      Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$"),
+      Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$"),
       Row(analysis, "ZX", title=r"$\Z+\X$"),
     )
   ]
