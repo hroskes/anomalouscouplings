@@ -13,8 +13,8 @@ import os
 #========================
 #inputs
 productionmode = "VBF"
-disc           = "D_CP_VBF"
-reweightto     = ReweightingSample(productionmode, "0-")
+disc           = "D_CP_HadVH"
+reweightto     = ReweightingSample(productionmode, "0+")
 bins           = None
 min            = None
 max            = None
@@ -24,7 +24,9 @@ masscut        = True
 normalizeto1   = False
 
 channel        = "2e2mu"
-category       = None
+
+category       = "VHHadrtagged"
+analysis       = "fa3"
 
 skip           = []
 #========================
@@ -71,6 +73,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       normalizeto1=normalizeto1,
       channel=channel,
       category=category,
+      analysis=analysis,
       color=color,
       hname=hname,
     )

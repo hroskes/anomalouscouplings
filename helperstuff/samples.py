@@ -394,6 +394,8 @@ class SampleBase(object):
         denominator = 0
         for h in purehypotheses:
             if not getattr(self, h.couplingname) and h != hypothesis: continue
+            if analysis.photoncut and h == "0+": continue
+            if not analysis.photoncut and h == "0+_photoncut": continue
             kwargs = {_.couplingname: 0 for _ in purehypotheses}
             kwargs[h.couplingname] = 1
             kwargs["photoncut"] = analysis.photoncut

@@ -7,7 +7,7 @@ import ROOT
 from helperstuff import config
 from helperstuff import constants
 from helperstuff.discriminants import discriminant
-from helperstuff.enums import Category, Channel
+from helperstuff.enums import Analysis, Category, Channel
 import helperstuff.rootoverloads.histogramfloor
 from helperstuff.samples import ReweightingSample, Sample, SampleBase
 
@@ -30,9 +30,9 @@ def plotfromtree(**kwargs):
     "max":            None,
 
     "disc2":          None,
-    "bins2":           None,
-    "min2":            None,
-    "max2":            None,
+    "bins2":          None,
+    "min2":           None,
+    "max2":           None,
 
     "transformation": None,  #should be a string with {disc} in it
 
@@ -111,7 +111,9 @@ def plotfromtree(**kwargs):
                    "{}>-98".format(discname),
                   ]
   if o.category is not None:
+    o.category = Category(o.category)
     if o.analysis is None: raise TypeError("analysis is mandatory if category is provided!")
+    o.analysis = Analysis(o.analysis)
     weightfactors.append(" || ".join("(category_{}=={})".format(o.analysis.categoryname, _) for _ in Category(o.category).idnumbers))
   if o.enrich:
     weightfactors.append("D_bkg>0.5")
