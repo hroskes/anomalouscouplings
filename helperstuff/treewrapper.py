@@ -1,17 +1,21 @@
 #!/usr/bin/env python
 from array import array
+from collections import Counter, Iterator
+import inspect
+from itertools import chain
+import re
+import resource
+import sys
+
+import numpy
+import ROOT
+
 import categorization
 import CJLSTscripts
-from collections import Counter, Iterator
 import config
 import constants
 import enums
-from itertools import chain
-import numpy
-import resource
-import ROOT
 from samples import ReweightingSample, Sample
-import sys
 from utilities import callclassinitfunctions
 import ZX
 
@@ -21,7 +25,44 @@ sys.setrecursionlimit(10000)
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
 
-@callclassinitfunctions("initweightfunctions", "initcategoryfunctions")
+class MakeJECSystematics(object):
+    def __init__(self, function):
+        self.function = function
+        self.name = function.__name__
+        self.JECUpname = self.name+"_JECUp"
+        self.JECDnname = self.name+"_JECDn"
+    def getJECNominal(self):
+        return self.function
+    def getJECUpDn(self):
+        #python is magic!
+        sourcelines = inspect.getsourcelines(self.function)[0]
+        lookfordecorator = "@"+type(self).__name__
+        lookfor = "def "+self.name+"("
+        replacewith = "def "+self.name+"_JEC{UpDn}("
+        if lookfordecorator not in sourcelines[0] or lookfor not in sourcelines[1]:
+            raise ValueError("function '{}' is defined with weird syntax:\n\n{}\n\nWant to have '{}' in the first line and '{}' in the second".format(self.name, "".join(sourcelines), lookfordecorator, lookfor))
+        del sourcelines[0]
+        sourcelines[0] = sourcelines[0].replace(lookfor, replacewith)
+
+        code = "".join(sourcelines) #they already have '\n' in them
+        for thing in (
+            r"(self[.]M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))",
+            r"(self[.]notdijet)",
+        ):
+            code = re.sub(thing, r"\1_JEC{UpDn}", code)
+        result = re.findall("(self[.][\w]*)[^\w{]", code)
+        for variable in result:
+            raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
+
+        code = re.sub("^ *(def )", r"\1", code) #so that we don't get IndentationError in exec
+
+        class DummyClass(object):
+            exec code.format(UpDn="Up")
+            exec code.format(UpDn="Dn")
+
+        return getattr(DummyClass, self.JECUpname), getattr(DummyClass, self.JECDnname)
+
+@callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initJECsystematics")
 class TreeWrapper(Iterator):
 
     def __init__(self, tree, treesample, Counters, failedtree=None, minevent=0, maxevent=None, isdummy=False):
@@ -332,6 +373,8 @@ class TreeWrapper(Iterator):
             return next(self)
 
         self.notdijet = self.M2g1_VBF <= 0
+        self.notdijet_JECUp = self.M2g1_VBF_JECUp <= 0
+        self.notdijet_JECDn = self.M2g1_VBF_JECDn <= 0
         return self
 
     def __len__(self):
@@ -434,27 +477,35 @@ class TreeWrapper(Iterator):
 #VBF anomalous couplings discriminants#
 #######################################
 
+    @MakeJECSystematics
     def D_0minus_VBF(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
+    @MakeJECSystematics
     def D_CP_VBF(self):
         if self.notdijet: return -999
         return self.M2g1g4_VBF*constants.g4VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
+    @MakeJECSystematics
     def D_0hplus_VBF(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
+    @MakeJECSystematics
     def D_int_VBF(self):
         if self.notdijet: return -999
         return self.M2g1g2_VBF*constants.g2VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
+    @MakeJECSystematics
     def D_L1_VBF(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
+    @MakeJECSystematics
     def D_L1int_VBF(self):
         if self.notdijet: return -999
         return self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
+    @MakeJECSystematics
     def D_L1Zg_VBF(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2)
+    @MakeJECSystematics
     def D_L1Zgint_VBF(self):
         if self.notdijet: return -999
         return self.M2g1ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2)
@@ -463,6 +514,7 @@ class TreeWrapper(Iterator):
 #VH hadronic anomalous couplings discriminants#
 ###############################################
 
+    @MakeJECSystematics
     def D_0minus_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -474,6 +526,7 @@ class TreeWrapper(Iterator):
                    (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
                  )
                )
+    @MakeJECSystematics
     def D_CP_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -485,6 +538,7 @@ class TreeWrapper(Iterator):
                    (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
                  )
                )
+    @MakeJECSystematics
     def D_0hplus_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -496,6 +550,7 @@ class TreeWrapper(Iterator):
                    (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                  )
                )
+    @MakeJECSystematics
     def D_int_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -507,6 +562,7 @@ class TreeWrapper(Iterator):
                    (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                  )
                )
+    @MakeJECSystematics
     def D_L1_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -518,6 +574,7 @@ class TreeWrapper(Iterator):
                    (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
                  )
                )
+    @MakeJECSystematics
     def D_L1int_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -529,6 +586,7 @@ class TreeWrapper(Iterator):
                    (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
                  )
                )
+    @MakeJECSystematics
     def D_L1Zg_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -541,6 +599,7 @@ class TreeWrapper(Iterator):
                           * constants.ghzgs1prime2VH_reco**2
                  )
                )
+    @MakeJECSystematics
     def D_L1Zgint_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -557,15 +616,19 @@ class TreeWrapper(Iterator):
 #VBFdecay anomalous couplings discriminants#
 ############################################
 
+    @MakeJECSystematics
     def D_0minus_VBFdecay(self):
         if self.notdijet: return -999
         return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4_VBF*self.M2g4_decay*(constants.g4VBF*constants.g4decay)**2)
+    @MakeJECSystematics
     def D_0hplus_VBFdecay(self):
         if self.notdijet: return -999
         return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2_VBF*self.M2g2_decay * (constants.g2VBF*constants.g2decay)**2)
+    @MakeJECSystematics
     def D_L1_VBFdecay(self):
         if self.notdijet: return -999
         return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g1prime2_VBF*self.M2g1prime2_decay * (constants.g1prime2VBF_reco*constants.g1prime2decay_reco)**2)
+    @MakeJECSystematics
     def D_L1Zg_VBFdecay(self):
         if self.notdijet: return -999
         return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2ghzgs1prime2_VBF*self.M2ghzgs1prime2_decay * (constants.ghzgs1prime2VBF_reco*constants.ghzgs1prime2decay_reco)**2)
@@ -574,6 +637,7 @@ class TreeWrapper(Iterator):
 #VHdecay hadronic anomalous couplings discriminants#
 ####################################################
 
+    @MakeJECSystematics
     def D_0minus_HadVHdecay(self):
         if self.notdijet: return -999
         return (
@@ -586,6 +650,7 @@ class TreeWrapper(Iterator):
                         *self.M2g4_decay*constants.g4decay**2
                  )
                )
+    @MakeJECSystematics
     def D_0hplus_HadVHdecay(self):
         if self.notdijet: return -999
         return (
@@ -598,6 +663,7 @@ class TreeWrapper(Iterator):
                         *self.M2g2_decay*constants.g2decay**2
                  )
                )
+    @MakeJECSystematics
     def D_L1_HadVHdecay(self):
         if self.notdijet: return -999
         return (
@@ -610,6 +676,7 @@ class TreeWrapper(Iterator):
                         *self.M2g1prime2_decay*constants.g1prime2decay_reco**2
                  )
                )
+    @MakeJECSystematics
     def D_L1Zg_HadVHdecay(self):
         if self.notdijet: return -999
         return (
@@ -646,9 +713,9 @@ class TreeWrapper(Iterator):
         categorizations += append
     del append, JEC, other
 
-#####################
-#Reweighting weights#
-#####################
+#############
+#Init things#
+#############
 
     def getweightfunction(self, sample):
         return getattr(self, sample.weightname())
@@ -669,6 +736,15 @@ class TreeWrapper(Iterator):
                 #setattr(cls, _.pHJ_function_name, _.get_pHJ_function())
                 #setattr(cls, _.pVBF1j_function_name, _.get_pVBF1j_function())
                 #setattr(cls, _.pAux_function_name, _.get_pAux_function())
+
+    @classmethod
+    def initJECsystematics(cls):
+        for name, discriminant in inspect.getmembers(cls, predicate=lambda x: isinstance(x, MakeJECSystematics)):
+            JECNominal = discriminant.getJECNominal()
+            JECUp, JECDn = discriminant.getJECUpDn()
+            setattr(cls, discriminant.name, JECNominal)
+            setattr(cls, discriminant.JECUpname, JECNominal)
+            setattr(cls, discriminant.JECDnname, JECNominal)
 
     def initlists(self):
         self.toaddtotree = [
@@ -714,6 +790,7 @@ class TreeWrapper(Iterator):
             "getweightfunction",
             "hypothesis",
             "initcategoryfunctions",
+            "initJECsystematics",
             "initlists",
             "initweightfunctions",
             "isbkg",
@@ -753,7 +830,8 @@ class TreeWrapper(Iterator):
             "D_L1Zg_{prod}decay",
         ]
         for prod in ("VBF", "HadVH"):
-            self.toaddtotree += [_.format(prod=prod) for _ in proddiscriminants]
+            for JEC in "", "_JECUp", "JECDn":
+                self.toaddtotree += [_.format(prod=prod)+JEC for _ in proddiscriminants]
 
         self.toaddtotree_int = []
 
