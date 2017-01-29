@@ -38,7 +38,7 @@ class MakeJECSystematics(object):
         sourcelines = inspect.getsourcelines(self.function)[0]
         lookfordecorator = "@"+type(self).__name__
         lookfor = "def "+self.name+"("
-        replacewith = "def "+self.name+"_JEC{UpDn}("
+        replacewith = "def {UpDn}("
         if lookfordecorator not in sourcelines[0] or lookfor not in sourcelines[1]:
             raise ValueError("function '{}' is defined with weird syntax:\n\n{}\n\nWant to have '{}' in the first line and '{}' in the second".format(self.name, "".join(sourcelines), lookfordecorator, lookfor))
         del sourcelines[0]
@@ -57,11 +57,13 @@ class MakeJECSystematics(object):
 
         code = re.sub("^ *(def )", r"\1", code) #so that we don't get IndentationError in exec
 
-        class DummyClass(object):
-            exec code.format(UpDn="Up")
-            exec code.format(UpDn="Dn")
+        exec code.format(UpDn="Up")
+        exec code.format(UpDn="Dn")
 
-        return getattr(DummyClass, self.JECUpname), getattr(DummyClass, self.JECDnname)
+        Up.__name__ = self.name+"_JECUp"
+        Dn.__name__ = self.name+"_JECDn"
+
+        return Up, Dn
 
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initJECsystematics")
 class TreeWrapper(Iterator):
@@ -481,6 +483,8 @@ class TreeWrapper(Iterator):
     @MakeJECSystematics
     def D_0minus_VBF(self):
         if self.notdijet: return -999
+        print "self.M2g1_VBF", self.M2g1_VBF
+        print "self.M2g4_VBF", self.M2g4_VBF
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
     @MakeJECSystematics
     def D_CP_VBF(self):
@@ -744,8 +748,8 @@ class TreeWrapper(Iterator):
             JECNominal = discriminant.getJECNominal()
             JECUp, JECDn = discriminant.getJECUpDn()
             setattr(cls, discriminant.name, JECNominal)
-            setattr(cls, discriminant.JECUpname, JECNominal)
-            setattr(cls, discriminant.JECDnname, JECNominal)
+            setattr(cls, discriminant.JECUpname, JECUp)
+            setattr(cls, discriminant.JECDnname, JECDn)
 
     def initlists(self):
         self.toaddtotree = [
