@@ -21,8 +21,8 @@ python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[ana
 
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
-combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l_lumi.oO[totallumi]Oo..txt &&
-unbuffer text2workspace.py -m 125 hzz4l_4l_lumi.oO[totallumi]Oo..txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
+combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo. &&
+unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
                            --PO verbose --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
                            |& tee log.text2workspace &&
 exit ${PIPESTATUS[0]}
@@ -118,21 +118,19 @@ def runcombine(analysis, foldername, **kwargs):
     if len(set(years)) != len(years):
         raise ValueError("Some of your productions are from the same year!")
 
-    moreappend = workspacefileappend = "_lumi.oO[totallumi]Oo."
+    combinecardsappend = "_lumi.oO[totallumi]Oo."
+    workspacefileappend = ".oO[combinecardsappend]Oo."
+    moreappend = ".oO[workspacefileappend]Oo."
     turnoff = []
     if usesignalproductionmodes != defaultusesignalproductionmodes:
-        moreappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         workspacefileappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
         turnoff.append("--PO turnoff={}".format(",".join(p.combinename for p in disableproductionmodes)))
     if set(usechannels) != set(channels):
-        moreappend += "_" + ",".join(sorted(str(c) for c in usechannels))
-        workspacefileappend += "_" + ",".join(sorted(str(c) for c in usechannels))
+        combinecardsappend += "_" + ",".join(sorted(str(c) for c in usechannels))
     if set(usecategories) != set(categories):
-        moreappend += "_" + ",".join(sorted(str(c) for c in usecategories))
-        workspacefileappend += "_" + ",".join(sorted(str(c) for c in usecategories))
+        combinecardsappend += "_" + ",".join(sorted(str(c) for c in usecategories))
     if not usebkg:
-        moreappend += "_nobkg"
         workspacefileappend += "_nobkg"
         turnoff.append("--PO nobkg")
     if not usesystematics:
@@ -148,6 +146,7 @@ def runcombine(analysis, foldername, **kwargs):
               "analysis": str(analysis),
               "model": "VBFHZZ4l",
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
+              "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
               "workspacefile": "floatMu.oO[workspacefileappend]Oo..root",
               "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
@@ -160,6 +159,7 @@ def runcombine(analysis, foldername, **kwargs):
               "scanrange": "{},{}".format(*scanrange),
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
+              "combinecardsappend": combinecardsappend,
               "expectrs": "r_ggH=1,r_VVH=1",
              }
     with utilities.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
