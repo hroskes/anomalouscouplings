@@ -1,9 +1,13 @@
 from collections import Counter
 import os
 
-from combinehelpers import getnobserved, getrate, Luminosity
+import combineinclude
+from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1
 import config
 from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode
+from utilities import cd, mkdir_p
+
+import ROOT
 
 class Section(object):
     def __init__(self, *labels):
@@ -38,6 +42,9 @@ class Datacard(MultiEnum):
     @property
     def rootfile(self):
         return "hzz4l_{}S_{}_{}.lumi{}.input.root".format(self.channel, self.category, self.year, float(self.luminosity))
+    @property
+    def rootfile_base(self):
+        return "hzz4l_{}S_{}_{}.input.root".format(self.channel, self.category, self.year)
 
     @property
     def productionmodes(self):
@@ -118,5 +125,268 @@ class Datacard(MultiEnum):
         with open(self.txtfile, "w") as f:
             f.write(self.divider.join(sections)+"\n")
 
-def writedatacard(*args):
-    return Datacard(*args).writedatacard()
+    def writeworkspace(self):
+
+        if os.path.exists(self.rootfile_base): return
+
+        ## -------------------------- SIGNAL SHAPE ----------------------------------- ##
+
+        bins = 1000
+
+        x_name = "CMS_zz4l_fai1"
+
+        x = ROOT.RooRealVar(x_name,x_name,-1.,1.)
+        mixturesign_constvar = ROOT.RooConstVar("mixturesign", "mixturesign", mixturesign(self.analysis))
+        sigmaioversigma1_constvar = ROOT.RooConstVar("sigmaioversigma1", "sigmaioversigma1", sigmaioversigma1(self.analysis, "ggH"))
+        a1 = ROOT.RooFormulaVar("a1", "a1", "sqrt(1-abs(@0))", ROOT.RooArgList(x))
+        ai = ROOT.RooFormulaVar("ai", "ai", "@2 * (@0>0 ? 1 : -1) * sqrt(abs(@0)/@1)", ROOT.RooArgList(x, sigmaioversigma1_constvar, mixturesign_constvar))
+        x.setBins(bins)
+
+        #add category name in case the same discriminant is used in multiple categories
+        discs = discriminants(self.analysis, self.category)
+        D1Name, D2Name, D3Name = ("{}_{}".format(d.name, self.category) for d in discs)
+        dBinsX, dBinsY, dBinsZ = (d.bins for d in discs)
+        dLowX, dLowY, dLowZ = (d.min for d in discs)
+        dHighX, dHighY, dHighZ = (d.max for d in discs)
+
+        D1 = ROOT.RooRealVar(D1Name,D1Name,dLowX,dHighX)
+        D2 = ROOT.RooRealVar(D2Name,D2Name,dLowY,dHighY)
+        D3 = ROOT.RooRealVar(D3Name,D3Name,dLowZ,dHighZ)
+        D1.setBins(dBinsX)
+        D2.setBins(dBinsY)
+        D3.setBins(dBinsZ)
+
+        T = {}
+        T_ScaleResUp = {}
+        T_ScaleResDown = {}
+        T_integral = {}
+        T_hist = {}
+        T_ScaleResUp_hist = {}
+        T_ScaleResDown_hist = {}
+        T_ScaleResDown_hist = {}
+        T_histfunc = {}
+        T_ScaleResUp_histfunc = {}
+        T_ScaleResDown_histfunc = {}
+        pdf = {}
+        pdf_syst1Up = {}
+        pdf_syst1Down = {}
+        norm = {}
+
+        for p in "qqH", "ZH", "WH":
+            #for prod+dec the order is a1^4 a1^3ai a1^2ai^2 a1ai^3 ai^4
+            T[p] = [
+                    gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel),
+                    gettemplate(p, self.analysis, self.production, self.category, "g13gi1", self.channel),
+                    gettemplate(p, self.analysis, self.production, self.category, "g12gi2", self.channel),
+                    gettemplate(p, self.analysis, self.production, self.category, "g11gi3", self.channel),
+                    gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel),
+                   ]
+            for i, t in enumerate(T[p], start=1):
+                t.SetName("{}_T_ZZ_{}_{}_3D_{}".format(p, self.production.year,self.channel, i))
+
+            T_ScaleResUp[p] = [
+                               gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, "ScaleResUp"),
+                               gettemplate(p, self.analysis, self.production, self.category, "g13gi1", self.channel, "ScaleResUp"),
+                               gettemplate(p, self.analysis, self.production, self.category, "g12gi2", self.channel, "ScaleResUp"),
+                               gettemplate(p, self.analysis, self.production, self.category, "g11gi3", self.channel, "ScaleResUp"),
+                               gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, "ScaleResUp"),
+                              ]
+            for i, t in enumerate(T_ScaleResUp[p], start=1):
+                t.SetName("{}_T_ZZ_{}_{}_3D_{}_ScaleResUp".format(p, self.production.year,self.channel, i))
+
+            T_ScaleResDown[p] = [
+                                 gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, "ScaleResDown"),
+                                 gettemplate(p, self.analysis, self.production, self.category, "g13gi1", self.channel, "ScaleResDown"),
+                                 gettemplate(p, self.analysis, self.production, self.category, "g12gi2", self.channel, "ScaleResDown"),
+                                 gettemplate(p, self.analysis, self.production, self.category, "g11gi3", self.channel, "ScaleResDown"),
+                                 gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, "ScaleResDown"),
+                                ]
+            for i, t in enumerate(T_ScaleResDown[p], start=1):
+                t.SetName("{}_T_ZZ_{}_{}_3D_{}_ScaleResDown".format(p, self.production.year,self.channel, i))
+
+            T_integralName = ["{}_normt{}_{}_{}".format(p, i, self.channel,self.production.year) for i in range(1, 6)]
+            T_integral[p] = [ROOT.RooConstVar(T_integralName[i], T_integralName[i], t.Integral()) for i, t in enumerate(T[p])]
+            for i, integral in enumerate(T_integral[p], start=1):
+                print "{} T{}".format(p, i), integral.getVal()
+
+            normname = "{}_norm".format(p)
+            formula = " + ".join("@0**{}*@1**{}*@{}".format(4-i, i, i+2) for i in range(5))
+            formula = "("+formula+") / @2"
+            norm[p] = ROOT.RooFormulaVar(normname, formula, ROOT.RooArgList(a1, ai, *T_integral[p]))
+
+            T_hist[p] = [ROOT.RooDataHist ("{}_T_{}_hist".format(p, i), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T[p], start=1)]
+            T_ScaleResUp_hist[p] = [ROOT.RooDataHist ("{}_T_{}_ScaleResUp_hist".format(p, i), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResUp[p], start=1)]
+            T_ScaleResDown_hist[p] = [ROOT.RooDataHist ("{}_T_{}_ScaleResDown_hist".format(p, i), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResDown[p], start=1)]
+
+            T_histfunc[p] = [ROOT.RooHistFunc ("{}_T_{}_histfunc".format(p, i), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_hist[p], start=1)]
+            T_ScaleResUp_histfunc[p] = [ROOT.RooHistFunc ("{}_T_{}_histfunc_ScaleResUp".format(p, i), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResUp_hist[p], start=1)]
+            T_ScaleResDown_histfunc[p] = [ROOT.RooHistFunc ("{}_T_{}_histfunc_ScaleResDown".format(p, i), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResDown_hist[p], start=1)]
+
+            pdf[p] = ROOT.VBFHZZ4L_RooSpinZeroPdf(p, p, D1, D2, D3, a1, ai, ROOT.RooArgList(*T_histfunc[p]))
+
+            pdfName_syst1Up = "{}_ScaleRes{}Up".format(p, self.channel)
+            pdfName_syst1Down = "{}_ScaleRes{}Down".format(p, self.channel)
+            pdf_syst1Up[p] = ROOT.VBFHZZ4L_RooSpinZeroPdf(pdfName_syst1Up, pdfName_syst1Up, D1, D2, D3, a1, ai, ROOT.RooArgList(*T_ScaleResUp_histfunc[p]))
+            pdf_syst1Down[p] = ROOT.VBFHZZ4L_RooSpinZeroPdf(pdfName_syst1Down, pdfName_syst1Down, D1, D2, D3, a1, ai, ROOT.RooArgList(*T_ScaleResDown_histfunc[p]))
+
+        #for ggH, the order is SM, BSM, int
+        T["ggH"] = [
+                    gettemplate("ggH", self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel),
+                    gettemplate("ggH", self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel),
+                    gettemplate("ggH", self.analysis, self.production, self.category, "g11gi1", self.channel),
+                   ]
+        for i, t in enumerate(T["ggH"], start=1):
+            t.SetName("ggH_T_ZZ_{}_{}_3D_{}".format(self.production.year,self.channel, i))
+
+        T_ScaleResUp["ggH"] = [
+                               gettemplate("ggH", self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, "ScaleResUp"),
+                               gettemplate("ggH", self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, "ScaleResUp"),
+                               gettemplate("ggH", self.analysis, self.production, self.category, "g11gi1", self.channel, "ScaleResUp"),
+                              ]
+        for i, t in enumerate(T_ScaleResUp["ggH"], start=1):
+            t.SetName("ggH_T_ZZ_{}_{}_3D_{}_ScaleResUp".format(self.production.year,self.channel, i))
+
+        T_ScaleResDown["ggH"] = [
+                                 gettemplate("ggH", self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, "ScaleResDown"),
+                                 gettemplate("ggH", self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, "ScaleResDown"),
+                                 gettemplate("ggH", self.analysis, self.production, self.category, "g11gi1", self.channel, "ScaleResDown"),
+                                ]
+        for i, t in enumerate(T_ScaleResDown["ggH"], start=1):
+            t.SetName("ggH_T_ZZ_{}_{}_3D_{}_ScaleResDown".format(self.production.year,self.channel, i))
+
+        T_integralName = ["ggH_normt{}_{}_{}".format(i, self.channel,self.production.year) for i in range(1, 4)]
+        T_integral["ggH"] = [ROOT.RooConstVar(integralName, integralName, t.Integral()) for t, integralName in zip(T["ggH"], T_integralName)]
+        for i, integral in enumerate(T_integral["ggH"], start=1):
+            print "ggH T{}".format(i), integral.getVal()
+
+        r_fai_pures_norm_Name = "ggH_PuresNorm_{}_{}".format(self.channel,self.production.year)
+        r_fai_realints_norm_Name = "ggH_RealIntsNorm_{}_{}".format(self.channel,self.production.year)
+        r_fai_pures_norm = ROOT.RooFormulaVar(r_fai_pures_norm_Name,r_fai_pures_norm_Name,"( (1-abs(@0))*@1+abs(@0)*@2 )/@1",ROOT.RooArgList(x,T_integral["ggH"][0],T_integral["ggH"][1]))
+        r_fai_realints_norm = ROOT.RooFormulaVar(r_fai_realints_norm_Name,r_fai_realints_norm_Name,"( sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1 )/@2",ROOT.RooArgList(x,T_integral["ggH"][2],T_integral["ggH"][0]))
+        norm["ggH"] = ROOT.RooFormulaVar("ggH_norm","ggH_norm","(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)",ROOT.RooArgList(r_fai_pures_norm,r_fai_realints_norm,x))
+
+        T_hist["ggH"] = [ROOT.RooDataHist ("ggH_T_{}_hist".format(i), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T["ggH"], start=1)]
+        T_ScaleResUp_hist["ggH"] = [ROOT.RooDataHist ("ggH_T_{}_ScaleResUp_hist".format(i), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResUp["ggH"], start=1)]
+        T_ScaleResDown_hist["ggH"] = [ROOT.RooDataHist ("ggH_T_{}_ScaleResDown_hist".format(i), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResDown["ggH"], start=1)]
+
+        T_histfunc["ggH"] = [ROOT.RooHistFunc ("ggH_T_{}_histfunc".format(i), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_hist["ggH"], start=1)]
+        T_ScaleResUp_histfunc["ggH"] = [ROOT.RooHistFunc ("ggH_T_{}_histfunc_ScaleResUp".format(i), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResUp_hist["ggH"], start=1)]
+        T_ScaleResDown_histfunc["ggH"] = [ROOT.RooHistFunc ("ggH_T_{}_histfunc_ScaleResDown".format(i), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResDown_hist["ggH"], start=1)]
+
+        pdf["ggH"] = ROOT.HZZ4L_RooSpinZeroPdf("ggH", "ggH", D1, D2, D3, x, ROOT.RooArgList(*T_histfunc["ggH"]))
+
+        pdfName_syst1Up = "ggH_ScaleRes{}Up".format(self.channel)
+        pdfName_syst1Down = "ggH_ScaleRes{}Down".format(self.channel)
+        pdf_syst1Up["ggH"] = ROOT.HZZ4L_RooSpinZeroPdf(pdfName_syst1Up, pdfName_syst1Up, D1, D2, D3, x, ROOT.RooArgList(*T_ScaleResUp_histfunc["ggH"]))
+        pdf_syst1Down["ggH"] = ROOT.HZZ4L_RooSpinZeroPdf(pdfName_syst1Down, pdfName_syst1Down, D1, D2, D3, x, ROOT.RooArgList(*T_ScaleResDown_histfunc["ggH"]))
+
+
+        ## ------------------ END 2D SIGNAL SHAPES FOR PROPERTIES ------------------------ ##
+
+
+        ## ------------------ 2D BACKGROUND SHAPES FOR PROPERTIES ------------------- ##
+
+        qqZZTemplate = gettemplate(self.analysis, self.production, self.category, "qqZZ", self.channel)
+
+        TemplateName = "qqZZTempDataHist_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        qqZZTempDataHist = ROOT.RooDataHist(TemplateName,TemplateName,ROOT.RooArgList(D1,D2,D3),qqZZTemplate)
+        PdfName = "bkg_qqzz"
+        qqZZTemplatePdf = ROOT.RooHistPdf(PdfName,PdfName,ROOT.RooArgSet(D1,D2,D3),qqZZTempDataHist)
+
+        ggZZTemplate = gettemplate(self.analysis, self.production, self.category, "ggZZ", self.channel)
+
+        TemplateName = "ggZZTempDataHist_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        ggZZTempDataHist = ROOT.RooDataHist(TemplateName,TemplateName,ROOT.RooArgList(D1,D2,D3),ggZZTemplate)
+        PdfName = "bkg_ggzz"
+        ggZZTemplatePdf = ROOT.RooHistPdf(PdfName,PdfName,ROOT.RooArgSet(D1,D2,D3),ggZZTempDataHist)
+
+        VBFbkgTemplate = gettemplate(self.analysis, self.production, self.category, "VBFbkg", self.channel)
+
+        TemplateName = "VBFbkgTempDataHist_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        VBFbkgTempDataHist = ROOT.RooDataHist(TemplateName,TemplateName,ROOT.RooArgList(D1,D2,D3),VBFbkgTemplate)
+        PdfName = "bkg_vbf"
+        VBFbkgTemplatePdf = ROOT.RooHistPdf(PdfName,PdfName,ROOT.RooArgSet(D1,D2,D3),VBFbkgTempDataHist)
+
+        ZjetsTemplate = gettemplate(self.analysis, self.production, self.category, "ZX", self.channel)
+        TemplateName = "ZjetsTempDataHist_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        ZjetsTempDataHist = ROOT.RooDataHist(TemplateName,TemplateName,ROOT.RooArgList(D1,D2,D3),ZjetsTemplate)
+        PdfName = "Zjets_TemplatePdf_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        ZjetsTemplatePdf = ROOT.RooHistPdf(PdfName,PdfName,ROOT.RooArgSet(D1,D2,D3),ZjetsTempDataHist)
+
+        ZjetsTemplateDown = gettemplate(self.analysis, self.production, self.category, "ZX", self.channel, "ZXDown")
+        TemplateName = "ZjetsTempDownDataHist_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        ZjetsTempDataHistDown = ROOT.RooDataHist(TemplateName,TemplateName,ROOT.RooArgList(D1,D2,D3),ZjetsTemplateDown)
+        PdfName = "Zjets_TemplateDownPdf_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        ZjetsTemplatePdfDown = ROOT.RooHistPdf(PdfName,PdfName,ROOT.RooArgSet(D1,D2,D3),ZjetsTempDataHistDown)
+
+        ZjetsTemplateUp = gettemplate(self.analysis, self.production, self.category, "ZX", self.channel, "ZXUp")
+        TemplateName = "ZjetsTempUpDataHist_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        ZjetsTempDataHistUp = ROOT.RooDataHist(TemplateName,TemplateName,ROOT.RooArgList(D1,D2,D3),ZjetsTemplateUp)
+        PdfName = "Zjets_TemplateUpPdf_{}_{}_{}".format(self.channel,self.category,self.production.year)
+        ZjetsTemplatePdfUp = ROOT.RooHistPdf(PdfName,PdfName,ROOT.RooArgSet(D1,D2,D3),ZjetsTempDataHistUp)
+
+        funcList_zjets = ROOT.RooArgList()
+        morphBkgVarName =  "CMS_zz4l_smd_zjets_bkg_{}".format(self.channel)
+        alphaMorphBkg = ROOT.RooRealVar(morphBkgVarName,morphBkgVarName,0,-20,20)
+        morphVarListBkg = ROOT.RooArgList()
+
+        funcList_zjets.add(ZjetsTemplatePdf)
+        funcList_zjets.add(ZjetsTemplatePdfUp)
+        funcList_zjets.add(ZjetsTemplatePdfDown)
+        alphaMorphBkg.setConstant(False)
+        morphVarListBkg.add(alphaMorphBkg)
+
+        MorphName = "bkg_zjets"
+        ZjetsTemplateMorphPdf = ROOT.FastVerticalInterpHistPdf3D(MorphName,MorphName,D1,D2,D3,False,funcList_zjets,morphVarListBkg,1.0,1)
+
+
+        ## ---------------- END 2D BACKGROUND SHAPES FOR PROPERTIES ----------------- ##
+
+        ## --------------------------- DATASET --------------------------- ##
+
+        data_obs_tree = getdatatree(self.channel, self.production, self.category, self.analysis)
+        data_obs = ROOT.RooDataSet()
+        datasetName = "data_obs_{}".format(self.channel)
+
+
+        data_obs = ROOT.RooDataSet(datasetName,datasetName,data_obs_tree,ROOT.RooArgSet(D1,D2,D3))
+
+
+        ## --------------------------- WORKSPACE -------------------------- ##
+
+        w = ROOT.RooWorkspace("w","w")
+
+        w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf.Class(),True)
+        w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf.Class(),True)
+
+        getattr(w,'import')(data_obs,ROOT.RooFit.Rename("data_obs")) ### Should this be renamed?
+        #getattr(w,'import')(r_fai_norm) ### Should this be renamed?
+
+
+        for p in ("ggH", "qqH", "ZH", "WH"):
+            getattr(w,'import')(pdf[p], ROOT.RooFit.RecycleConflictNodes())
+            getattr(w,'import')(norm[p], ROOT.RooFit.RecycleConflictNodes())
+            getattr(w,'import')(pdf_syst1Up[p], ROOT.RooFit.RecycleConflictNodes())
+            getattr(w,'import')(pdf_syst1Down[p], ROOT.RooFit.RecycleConflictNodes())
+
+        getattr(w,'import')(qqZZTemplatePdf, ROOT.RooFit.RecycleConflictNodes())
+        getattr(w,'import')(ggZZTemplatePdf, ROOT.RooFit.RecycleConflictNodes())
+        getattr(w,'import')(VBFbkgTemplatePdf, ROOT.RooFit.RecycleConflictNodes())
+        getattr(w,'import')(ZjetsTemplateMorphPdf, ROOT.RooFit.RecycleConflictNodes())
+
+
+        w.writeToFile(self.rootfile_base)
+
+    def makeworkspace(self):
+        self.writeworkspace()
+        if not os.path.exists(self.rootfile):
+            os.symlink(self.rootfile_base, self.rootfile)
+
+    def makeCardsWorkspaces(self, outdir="."):
+        mkdir_p(outdir)
+        with cd(outdir):
+            self.makeworkspace()
+            self.writedatacard()
+
+def makeDCandWS(*args, **kwargs):
+    Datacard(*args).makeCardsWorkspaces(**kwargs)

@@ -1,5 +1,6 @@
 import collections
 import contextlib
+import errno
 from itertools import tee, izip
 import operator
 import json
@@ -187,3 +188,13 @@ def rreplace(s, old, new, occurrence):
     """http://stackoverflow.com/a/2556252/5228524"""
     li = s.rsplit(old, occurrence)
     return new.join(li)
+
+def mkdir_p(path):
+    """http://stackoverflow.com/a/600612/5228524"""
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise

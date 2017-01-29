@@ -2,7 +2,7 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff import config, utilities
 from helperstuff.combinehelpers import Luminosity
-from helperstuff.datacard import writedatacard
+from helperstuff.datacard import makeDCandWS
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
@@ -13,11 +13,6 @@ import ROOT
 import shutil
 import subprocess
 import sys
-
-makeworkspacestemplate = """
-eval $(scram ru -sh) &&
-python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo. -C .oO[category]Oo. -m .oO[model]Oo.
-"""
 
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
@@ -142,9 +137,6 @@ def runcombine(analysis, foldername, **kwargs):
     foldername = "{}_{}".format(analysis, foldername)
 
     repmap = {
-              "foldername": pipes.quote(foldername),
-              "analysis": str(analysis),
-              "model": "VBFHZZ4l",
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
               "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
               "workspacefile": "floatMu.oO[workspacefileappend]Oo..root",
@@ -162,96 +154,70 @@ def runcombine(analysis, foldername, **kwargs):
               "combinecardsappend": combinecardsappend,
               "expectrs": "r_ggH=1,r_VVH=1",
              }
-    with utilities.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
-        if subdirectory:
-            try:
-                os.makedirs(subdirectory)
-            except OSError:
-                pass
-        if subdirectory:
-            cardsdir = os.path.join(subdirectory, "cards_{}".format(foldername))
-            if os.path.exists(cardsdir):
-                shutil.move(cardsdir, ".")
-        for production, category in product(productions, usecategories):
-            production = Production(production)
-            category = Category(category)
-            if not all(os.path.exists(os.path.join("cards_{}".format(foldername), "HCG", "125", "hzz4l_{}S_{}_{}.input.root".format(channel, category, production.year))) for channel in usechannels):
-                makeworkspacesmap = repmap.copy()
-                makeworkspacesmap["production"] = str(production)
-                makeworkspacesmap["category"] = str(category)
-                subprocess.check_call(replaceByMap(makeworkspacestemplate, makeworkspacesmap), shell=True)
-        if subdirectory:
-            shutil.move("cards_{}".format(foldername), subdirectory)
-        with open(os.path.join(subdirectory, "cards_{}".format(foldername), ".gitignore"), "w") as f:
+    folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
+    utilities.mkdir_p(folder)
+    with utilities.cd(folder):
+        for production, category, channel in product(productions, usecategories, usechannels):
+            makeDCandWS(production, category, channel, analysis, lumitype)
+        with open(".gitignore", "w") as f:
             f.write("*")
-        with utilities.cd(os.path.join(subdirectory, "cards_{}".format(foldername), "HCG", "125")):
-            for channel, category, production in product(usechannels, usecategories, productions):
-                luminosity = float(Luminosity(lumitype, production))
-                if not os.path.exists("hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity)):
-                    os.symlink("hzz4l_{}S_{}_{}.input.root".format(channel, category, production.year), "hzz4l_{}S_{}_{}.lumi{}.input.root".format(channel, category, production.year, luminosity))
-            #replace rates
-            for channel, category, production in product(channels, categories, productions):
-                if channel in usechannels and category in usecategories:
-                    writedatacard(channel, category, lumitype, production, analysis)
-            if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
-                for channel, production, category in product(usechannels, productions, usecategories):
-                    replacesystematics(channel, production, category, float(Luminosity(lumitype, production)))
-                subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
+        if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
+            subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
-            if config.unblindscans:
-                repmap_obs = repmap.copy()
-                repmap_obs["expectfai"] = "0.0"  #starting point
-                repmap_obs["append"] = ".oO[observedappend]Oo."
-                repmap_obs["expectfaiappend"] = ""
-                repmap_obs["exporobs"] = "obs"
-                repmap_obs["-t -1"] = ""
-                if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
-                    subprocess.check_call(replaceByMap(runcombinetemplate, repmap_obs), shell=True)
-                f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
-                minimum = (float("nan"), float("inf"))
-                for entry in f.limit:
-                    if f.limit.deltaNLL < minimum[1]:
-                        minimum = (f.limit.CMS_zz4l_fai1, f.limit.deltaNLL)
-                minimum = minimum[0]
-                del f
+        if config.unblindscans:
+            repmap_obs = repmap.copy()
+            repmap_obs["expectfai"] = "0.0"  #starting point
+            repmap_obs["append"] = ".oO[observedappend]Oo."
+            repmap_obs["expectfaiappend"] = ""
+            repmap_obs["exporobs"] = "obs"
+            repmap_obs["-t -1"] = ""
+            if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
+                subprocess.check_call(replaceByMap(runcombinetemplate, repmap_obs), shell=True)
+            f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
+            minimum = (float("nan"), float("inf"))
+            for entry in f.limit:
+                if f.limit.deltaNLL < minimum[1]:
+                    minimum = (f.limit.CMS_zz4l_fai1, f.limit.deltaNLL)
+            minimum = minimum[0]
+            del f
 
-            for expectfai in expectvalues:
-                repmap_exp = repmap.copy()
-                if expectfai == "minimum":
-                    expectfai = minimum
-                repmap_exp["expectfai"] = str(expectfai)
-                repmap_exp["append"] = ".oO[expectedappend]Oo."
-                repmap_exp["expectfaiappend"] = "_.oO[expectfai]Oo."
-                repmap_exp["exporobs"] = "exp"
-                repmap_exp["-t -1"] = "-t -1"
-                if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
-                    subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
+        for expectfai in expectvalues:
+            repmap_exp = repmap.copy()
+            if expectfai == "minimum":
+                expectfai = minimum
+            repmap_exp["expectfai"] = str(expectfai)
+            repmap_exp["append"] = ".oO[expectedappend]Oo."
+            repmap_exp["expectfaiappend"] = "_.oO[expectfai]Oo."
+            repmap_exp["exporobs"] = "exp"
+            repmap_exp["-t -1"] = "-t -1"
+            if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
+                subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
 
-            saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
-            try:
-                os.makedirs(saveasdir)
-            except OSError:
-                pass
-            plotscans = []
-            if config.unblindscans:
-                plotscans.append("obs")
-            for expectfai in expectvalues:
-                if expectfai == "minimum":
-                    expectfai = minimum
-                plotscans.append(expectfai)
-            for ext in "png eps root pdf".split():
-                plotname = plotname.replace("."+ext, "")
-            plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
-            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=luminosity)
-            with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
-                f.write(" ".join(["python"]+sys.argv))
-                f.write("\n\n\n")
-                f.write("python limits.py ")
-                for arg in sys.argv[1:]:
-                    if "=" in arg and "subdirectory=" not in arg: continue
-                    f.write(arg+" ")
-                f.write("plotname="+plotname+" ")
-                f.write("\n")
+        saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
+        try:
+            os.makedirs(saveasdir)
+        except OSError:
+            pass
+        plotscans = []
+        if config.unblindscans:
+            plotscans.append("obs")
+        for expectfai in expectvalues:
+            if expectfai == "minimum":
+                expectfai = minimum
+            plotscans.append(expectfai)
+        for ext in "png eps root pdf".split():
+            plotname = plotname.replace("."+ext, "")
+        plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
+        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=luminosity)
+        with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
+            f.write(" ".join(["python"]+sys.argv))
+            f.write("\n\n\n")
+            f.write("python limits.py ")
+            for arg in sys.argv[1:]:
+                if "=" in arg and "subdirectory=" not in arg: continue
+                f.write(arg+" ")
+            f.write("plotname="+plotname+" ")
+            f.write("\n")
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])
