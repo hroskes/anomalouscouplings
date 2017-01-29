@@ -135,6 +135,7 @@ def runcombine(analysis, foldername, **kwargs):
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
+    totallumi = sum(float(Luminosity(p, lumitype)) for p in productions)
 
     repmap = {
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
@@ -142,7 +143,7 @@ def runcombine(analysis, foldername, **kwargs):
               "workspacefile": "floatMu.oO[workspacefileappend]Oo..root",
               "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
-              "totallumi": str(sum(float(Luminosity(p, lumitype)) for p in productions)),
+              "totallumi": str(totallumi),
               "observedappend": "obs",
               "setphysicsmodelparameters": ".oO[expectrs]Oo.,CMS_zz4l_fai1=.oO[expectfai]Oo.",
               "usesystematics": str(int(usesystematics)),
@@ -208,7 +209,7 @@ def runcombine(analysis, foldername, **kwargs):
         for ext in "png eps root pdf".split():
             plotname = plotname.replace("."+ext, "")
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
-        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=luminosity)
+        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi)
         with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
             f.write(" ".join(["python"]+sys.argv))
             f.write("\n\n\n")
