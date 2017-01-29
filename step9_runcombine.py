@@ -19,7 +19,7 @@ eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo. &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
                            --PO verbose --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
-                           |& tee log.text2workspace &&
+                           |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
 exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = r"""
