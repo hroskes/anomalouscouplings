@@ -401,9 +401,7 @@ class Production(MyEnum):
     @property
     def dataluminosity(self):
         from datetime import date
-        if date.today() > date(2017, 1, 28):
-            raise ValueError("luminosity??!!")
-        if self == "170119": return 40
+        if self == "170119": return 36.8
         assert False
     def __int__(self):
         return int(str(self))
