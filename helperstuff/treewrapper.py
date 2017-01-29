@@ -483,8 +483,6 @@ class TreeWrapper(Iterator):
     @MakeJECSystematics
     def D_0minus_VBF(self):
         if self.notdijet: return -999
-        print "self.M2g1_VBF", self.M2g1_VBF
-        print "self.M2g4_VBF", self.M2g4_VBF
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
     @MakeJECSystematics
     def D_CP_VBF(self):
