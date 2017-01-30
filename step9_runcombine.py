@@ -49,6 +49,7 @@ def runcombine(analysis, foldername, **kwargs):
     defaultnpoints = npoints = 100
     defaultusesignalproductionmodes = usesignalproductionmodes = (ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH"))
     usebkg = True
+    expectmuggH = expectmuVVH = 1
     if config.unblindscans:
         lumitype = "fordata"
     else:
@@ -103,6 +104,10 @@ def runcombine(analysis, foldername, **kwargs):
             if config.unblindscans:
                 raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
             lumitype = float(kwarg)
+        elif kw == "expectmuggH":
+            expectmuggH = float(kwarg)
+        elif kw == "expectmuVVH":
+            expectmuVVH = float(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -117,6 +122,10 @@ def runcombine(analysis, foldername, **kwargs):
     workspacefileappend = ".oO[combinecardsappend]Oo."
     moreappend = ".oO[workspacefileappend]Oo."
     turnoff = []
+    if expectmuggH != 1:
+        moreappend += "_muggH{}".format(expectmuggH)
+    if expectmuVVH != 1:
+        moreappend += "_muVVH{}".format(expectmuVVH)
     if usesignalproductionmodes != defaultusesignalproductionmodes:
         workspacefileappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
@@ -153,7 +162,9 @@ def runcombine(analysis, foldername, **kwargs):
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
-              "expectrs": "r_ggH=1,r_VVH=1",
+              "expectrs": "r_ggH=.oO[expectmuggH]Oo.,r_VVH=.oO[expectmuVVH]Oo.",
+              "expectmuggH": str(expectmuggH),
+              "expectmuVVH": str(expectmuVVH),
              }
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
