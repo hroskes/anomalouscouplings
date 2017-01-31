@@ -221,15 +221,22 @@ def runcombine(analysis, foldername, **kwargs):
             plotname = plotname.replace("."+ext, "")
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
         plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi)
-        with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
-            f.write(" ".join(["python"]+sys.argv))
-            f.write("\n\n\n")
-            f.write("python limits.py ")
-            for arg in sys.argv[1:]:
-                if "=" in arg and "subdirectory=" not in arg: continue
-                f.write(arg+" ")
-            f.write("plotname="+plotname+" ")
-            f.write("\n")
+
+    with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
+        f.write(" ".join(["python"]+sys.argv))
+        f.write("\n\n\n")
+        f.write("python limits.py ")
+        for arg in sys.argv[1:]:
+            if "=" in arg and "subdirectory=" not in arg: continue
+            f.write(arg+" ")
+        f.write("plotname="+plotname+" ")
+        f.write("\n\n\n\n\n\ngit info:\n\n")
+        f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
+        f.write("\n")
+        f.write(subprocess.check_output(["git", "status"]))
+        f.write("\n")
+        f.write(subprocess.check_output(["git", "diff"]))
+            
 
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])
