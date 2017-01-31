@@ -114,19 +114,7 @@ class Datacard(MultiEnum):
     def lumi_13TeV_common(self):
         return " ".join(["lnN"] + ["1.023" for p in self.productionmodes])
 
-    @property
-    def Untagged2e2mu(self):
-        return " ".join(["shape1"] + ["1" if p in ("qqH", "ZH", "WH") and self.channel == "2e2mu" and self.category == "Untagged" else "-" for p in self.productionmodes])
-
-    @property
-    def Untagged4e(self):
-        return " ".join(["shape1"] + ["1" if p in ("qqH", "ZH", "WH") and self.channel == "4e" and self.category == "Untagged" else "-" for p in self.productionmodes])
-
-    @property
-    def Untagged4mu(self):
-        return " ".join(["shape1"] + ["1" if p in ("qqH", "ZH", "WH") and self.channel == "4mu" and self.category == "Untagged" else "-" for p in self.productionmodes])
-
-    section5 = SystematicsSection("lumi_13TeV_common", "Untagged2e2mu", "Untagged4e", "Untagged4mu")
+    section5 = SystematicsSection("lumi_13TeV_common")
 
     divider = "\n------------\n"
 
@@ -183,8 +171,6 @@ class Datacard(MultiEnum):
         pdf_syst1Up = {}
         pdf_syst1Down = {}
         norm = {}
-        pdf_untagged_systematic_up = {}
-        pdf_untagged_systematic_dn = {}
 
 
         #for ggH, the order is SM, BSM, int
@@ -295,14 +281,6 @@ class Datacard(MultiEnum):
             pdf_syst1Up[p] = ROOT.VBFHZZ4L_RooSpinZeroPdf(pdfName_syst1Up, pdfName_syst1Up, D1, D2, D3, a1, ai, ROOT.RooArgList(*T_ScaleResUp_histfunc[p]))
             pdf_syst1Down[p] = ROOT.VBFHZZ4L_RooSpinZeroPdf(pdfName_syst1Down, pdfName_syst1Down, D1, D2, D3, a1, ai, ROOT.RooArgList(*T_ScaleResDown_histfunc[p]))
 
-            if self.category == "Untagged":
-                name = "{}_Untagged{}Up".format(p, self.channel)
-                pdf_untagged_systematic_up[p] = pdf["ggH"].clone(name)#ROOT.VBFHZZ4L_RooSpinZeroPdf(p, p, D1, D2, D3, a1, ai, ROOT.RooArgList(*T_histfunc[p]), pdf["ggH"], 1)
-                name = "{}_Untagged{}Down".format(p, self.channel)
-                pdf_untagged_systematic_dn[p] = ROOT.RooGenericPdf(name, name, "@0*@0/@1", ROOT.RooArgList(pdf[p], pdf_untagged_systematic_up[p]))
-                #pdf_untagged_systematic_dn[p] = #pdf["ggH"].clone(name)#ROOT.VBFHZZ4L_RooSpinZeroPdf(p, p, D1, D2, D3, a1, ai, ROOT.RooArgList(*T_histfunc[p]), pdf["ggH"], -1)
-
-
         ## ------------------ END 2D SIGNAL SHAPES FOR PROPERTIES ------------------------ ##
 
 
@@ -390,10 +368,6 @@ class Datacard(MultiEnum):
             getattr(w,'import')(norm[p], ROOT.RooFit.RecycleConflictNodes())
             getattr(w,'import')(pdf_syst1Up[p], ROOT.RooFit.RecycleConflictNodes())
             getattr(w,'import')(pdf_syst1Down[p], ROOT.RooFit.RecycleConflictNodes())
-
-            if p in pdf_untagged_systematic_up or p in pdf_untagged_systematic_dn:
-                getattr(w,'import')(pdf_untagged_systematic_up[p], ROOT.RooFit.RecycleConflictNodes())
-                getattr(w,'import')(pdf_untagged_systematic_dn[p], ROOT.RooFit.RecycleConflictNodes())
 
         getattr(w,'import')(qqZZTemplatePdf, ROOT.RooFit.RecycleConflictNodes())
         getattr(w,'import')(ggZZTemplatePdf, ROOT.RooFit.RecycleConflictNodes())
