@@ -322,6 +322,17 @@ class Analysis(MyEnum):
             return "f_{#Lambda1}^{Z#gamma}"
         assert False
     @property
+    def title_latex(self):
+        if self == "fa3":
+            return "f_{a3}"
+        if self == "fa2":
+            return "f_{a2}"
+        if self == "fL1":
+            return "f_{\Lambda1}"
+        if self == "fL1Zg":
+            return "f_{\Lambda1}^{\Z\gamma}"
+        assert False
+    @property
     def phi(self):
         if self == "fa3":
             return "#phi_{a3}"

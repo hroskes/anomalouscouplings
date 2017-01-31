@@ -428,6 +428,9 @@ class TreeWrapper(Iterator):
     def D_2jet_L1(self):
         if self.notdijet: return -999
         return self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 / (self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 + self.M2g2_HJJ*self.cconstantforD2jet)
+    def D_2jet_L1Zg(self):
+        if self.notdijet: return -999
+        return self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2 / (self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2 + self.M2g2_HJJ*self.cconstantforD2jet)
 
     def D_HadWH_0plus(self):
         if self.notdijet: return -999
@@ -441,6 +444,9 @@ class TreeWrapper(Iterator):
     def D_HadWH_L1(self):
         if self.notdijet: return -999
         return self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 / (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+    def D_HadWH_L1Zg(self):
+        if self.notdijet: return -999
+        return self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 / (self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
 
     def D_HadZH_0plus(self):
         if self.notdijet: return -999
@@ -454,6 +460,9 @@ class TreeWrapper(Iterator):
     def D_HadZH_L1(self):
         if self.notdijet: return -999
         return self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 / (self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
+    def D_HadZH_L1Zg(self):
+        if self.notdijet: return -999
+        return self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2 / (self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
 
 ###################################
 #anomalous couplings discriminants#

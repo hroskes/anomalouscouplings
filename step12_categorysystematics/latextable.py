@@ -8,7 +8,7 @@ import ROOT
 from helperstuff import config
 
 from helperstuff.combinehelpers import getrate
-from helperstuff.enums import analyses, Analysis, Category, Channel, channels, flavors, HffHypothesis, Hypothesis, JECSystematic, MultiEnum, ProductionMode
+from helperstuff.enums import analyses, Analysis, Category, Channel, flavors, HffHypothesis, Hypothesis, JECSystematic, MultiEnum, ProductionMode
 from helperstuff.samples import ReweightingSample, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import KeyDefaultDict, MultiplyCounter, tfiles
@@ -17,6 +17,7 @@ assert len(config.productionsforcombine) == 1
 production = config.productionsforcombine[0]
 
 categories = list(Category(_) for _ in ("VBFtagged", "VHHadrtagged", "Untagged"))
+channels = list(Channel(_) for _ in ("4e", "4mu", "2e2mu"))
 
 def categoryname(category):
   if category == "VBFtagged": return "VBF jets"
@@ -99,7 +100,7 @@ class Row(MultiEnum):
     for category in categories:
       result += " & "
       total = 0
-      for channel in "2e2mu", "4e", "4mu":
+      for channel in channels:
         channel = Channel(channel)
         total += categorydistribution[channel, category]
         result += "{:.1f}/".format(categorydistribution[channel, category])
@@ -158,7 +159,7 @@ def maketable(analysis):
       Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
       Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
     ),
-    Section("${}=1$".format(analysis.title),
+    Section("${}=1$".format(analysis.title_latex),
       Row(analysis, "VBF", analysis.purehypotheses[1]),
       Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
       Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),
@@ -180,4 +181,4 @@ def maketable(analysis):
   print r"\end{tabular}"
 
 if __name__ == "__main__":
-  maketable("fa3")
+  maketable("fL1")
