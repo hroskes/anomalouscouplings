@@ -33,7 +33,6 @@ subprocess.check_call(["tar", "-cvzf", "POWHEGvsJHUGen.tar.gz", "-C", tmpdir] + 
 
 tmpdir = tempfile.mkdtemp()
 for a in analyses:
-    if a == "fL1Zg": continue
     for h in a.purehypotheses:
         h = str(h).replace("0+", "0plus").replace("0-", "0minus").replace("_photoncut", "")
         for p in "2jet", "HadWH", "HadZH":
