@@ -30,3 +30,14 @@ for analysis in analyses:
              shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(analysis, productionmode, os.path.basename(filename))))
 
 subprocess.check_call(["tar", "-cvzf", "POWHEGvsJHUGen.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
+
+tmpdir = tempfile.mkdtemp()
+for a in analyses:
+    if a == "fL1Zg": continue
+    for h in a.purehypotheses:
+        h = str(h).replace("0+", "0plus").replace("0-", "0minus").replace("_photoncut", "")
+        for p in "2jet", "HadWH", "HadZH":
+            filename = os.path.join(config.plotsbasedir, "categorization", str(a), "D_{}_{}.pdf".format(p, h))
+            shutil.copy(filename, os.path.join(tmpdir, "{}_{}".format(a, os.path.basename(filename))))
+
+subprocess.check_call(["tar", "-cvzf", "categorydiscriminants.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
