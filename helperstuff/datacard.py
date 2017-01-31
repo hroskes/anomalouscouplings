@@ -20,7 +20,9 @@ class Section(object):
             if label.startswith("#"):
                 result.append(label)
             else:
-                result.append("{} {}".format(label, getattr(obj, label)))
+                value = getattr(obj, label)
+                if value is None: continue
+                result.append("{} {}".format(label, value))
         return result
 
 class SystematicsSection(Section):
@@ -114,7 +116,70 @@ class Datacard(MultiEnum):
     def lumi_13TeV_common(self):
         return " ".join(["lnN"] + ["1.023" for p in self.productionmodes])
 
-    section5 = SystematicsSection("lumi_13TeV_common")
+    @property
+    def CMS_zz4l_smd_zjets_bkg_2e2mu_Untagged(self):
+        channel, category = "2e2mu", "Untagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    @property
+    def CMS_zz4l_smd_zjets_bkg_2e2mu_VBFtagged(self):
+        channel, category = "2e2mu", "VBFtagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    @property
+    def CMS_zz4l_smd_zjets_bkg_2e2mu_VHHadrtagged(self):
+        channel, category = "2e2mu", "VHHadrtagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    @property
+    def CMS_zz4l_smd_zjets_bkg_4e_Untagged(self):
+        channel, category = "4e", "Untagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    @property
+    def CMS_zz4l_smd_zjets_bkg_4e_VBFtagged(self):
+        channel, category = "4e", "VBFtagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    @property
+    def CMS_zz4l_smd_zjets_bkg_4e_VHHadrtagged(self):
+        channel, category = "4e", "VHHadrtagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    @property
+    def CMS_zz4l_smd_zjets_bkg_4mu_Untagged(self):
+        channel, category = "4mu", "Untagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    @property
+    def CMS_zz4l_smd_zjets_bkg_4mu_VBFtagged(self):
+        channel, category = "4mu", "VBFtagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    @property
+    def CMS_zz4l_smd_zjets_bkg_4mu_VHHadrtagged(self):
+        channel, category = "4mu", "VHHadrtagged"
+        if self.channel == channel and self.category == category:
+            return "param 0 1 [-3,3]"
+        return None
+
+    section5 = SystematicsSection(*["lumi_13TeV_common"] + ["CMS_zz4l_smd_zjets_bkg_{}_{}".format(channel, category) for channel in channels for category in categories])
 
     divider = "\n------------\n"
 
