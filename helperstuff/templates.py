@@ -384,13 +384,13 @@ class Template(TemplateBase, MultiEnum):
                 name = "templateMixDecayAdapSmooth"
             elif self.hypothesis in ("fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5"):
                 name = "templateMixProdAdapSmooth"
-            elif self.hypothesis in ("fa2proddec-0.5", "fa3proddec-0.5", "fL1Zgproddec-0.5"):
+            elif self.hypothesis in ("fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5", "fL1Zgproddec-0.5"):
                 name = "templateMixProdDecPiAdapSmooth"
-            elif self.hypothesis in ("fa2dec-0.5",):
+            elif self.hypothesis in ("fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5"):
                 name = "templateMixDecayPiAdapSmooth"
-            elif self.hypothesis in ("fa2prod-0.5",):
+            elif self.hypothesis in ("fa2prod-0.5", "fa3prod-0.5", "fL1prod-0.5", "fL1Zgprod-0.5"):
                 name = "templateMixProdPiAdapSmooth"
-            elif self.hypothesis in ("fa2proddec0.5", "fL1proddec0.5"):
+            elif self.hypothesis in ("fa2proddec0.5", "fa3proddec0.5", "fL1proddec0.5", "fL1Zgproddec0.5"):
                 name = "templateMixProdDecAdapSmooth"
         elif self.productionmode == "ZX" and not config.usedata:
             name = "templateqqZZAdapSmooth"
