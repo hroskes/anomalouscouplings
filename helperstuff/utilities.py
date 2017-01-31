@@ -83,11 +83,8 @@ class KeepWhileOpenFile(object):
         with cd(self.pwd):
             try:
                 self.fd = os.open(self.filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            except OSError, e:
-                if e.errno == 17:
-                    return None
-                else:
-                    raise
+            except OSError as e:
+                return None
             else:
                 self.f = os.fdopen(self.fd, 'w')
                 return self.f
