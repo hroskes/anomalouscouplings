@@ -101,6 +101,7 @@ def adddiscriminants(*args):
 
 if __name__ == '__main__':
     for production in productions:
+        adddiscriminants("ggZZ", "4tau", "170119")  #to catch bugs early
         for productionmode in "ggH", "VBF", "ZH", "WH":
             for hypothesis in ProductionMode(productionmode).generatedhypotheses:
                 adddiscriminants(productionmode, hypothesis, production)

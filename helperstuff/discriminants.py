@@ -163,14 +163,17 @@ discriminants = {
         Discriminant("D_2jet_0minus", "D_{2jet}^{0-}", defaultnbins, 0, 1),
         Discriminant("D_2jet_a2", "D_{2jet}^{0h+}", defaultnbins, 0, 1),
         Discriminant("D_2jet_L1", "D_{2jet}^{#Lambda1}", defaultnbins, 0, 1),
+        Discriminant("D_2jet_L1Zg", "D_{2jet}^{#Lambda1Z#gamma}", defaultnbins, 0, 1),
         Discriminant("D_HadZH_0plus", "D_{ZH}^{0+}", defaultnbins, 0, 1),
         Discriminant("D_HadZH_0minus", "D_{ZH}^{0-}", defaultnbins, 0, 1),
         Discriminant("D_HadZH_a2", "D_{ZH}^{0h+}", defaultnbins, 0, 1),
         Discriminant("D_HadZH_L1", "D_{ZH}^{#Lambda1}", defaultnbins, 0, 1),
+        Discriminant("D_HadZH_L1Zg", "D_{ZH}^{#Lambda1Z#gamma}", defaultnbins, 0, 1),
         Discriminant("D_HadWH_0plus", "D_{WH}^{0+}", defaultnbins, 0, 1),
         Discriminant("D_HadWH_0minus", "D_{WH}^{0-}", defaultnbins, 0, 1),
         Discriminant("D_HadWH_a2", "D_{WH}^{0h+}", defaultnbins, 0, 1),
         Discriminant("D_HadWH_L1", "D_{WH}^{#Lambda1}", defaultnbins, 0, 1),
+        Discriminant("D_HadWH_L1Zg", "D_{WH}^{#Lambda1Z#gamma}", defaultnbins, 0, 1),
     ]
 }
 

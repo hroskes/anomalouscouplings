@@ -50,7 +50,6 @@ def makeplot(analysis, disc):
       reweightfrom=reweightfrom,
       reweightto=sample,
       disc=disc,
-      transformation="1/({cprime}*(1/{{disc}}-1)+1)".format(cprime=additionalcconstant),
       xaxislabel=xaxislabel,
       normalizeto1=True,
       color=color,
@@ -81,12 +80,8 @@ def makeplot(analysis, disc):
 if __name__ == "__main__":
   for analysis in analyses:
     for p in "HadWH", "HadZH", "2jet":
-      for h in "0plus", "0minus", "a2", "L1":
+      for h in "0plus", "0minus", "a2", "L1", "L1Zg":
         if h.replace("plus", "+").replace("minus", "-") not in analysis.purehypotheses and h != "0plus":
            continue
 
-        shiftWP = None
-        if "Had" in p:
-          shiftWP = .5
-
-        makeplot(analysis, "D_{}_{}".format(p, h), shiftWP=shiftWP)
+        makeplot(analysis, "D_{}_{}".format(p, h))

@@ -117,9 +117,7 @@ class TreeWrapper(Iterator):
         else:
             self.xsec = tree.xsec * 1000 #pb to fb
 
-        self.cconstantforDbkg = self.cconstantforD2jet = None
-        self.cconstantforDHadWH = 1e-3
-        self.cconstantforDHadZH = 1e-4
+        self.cconstantforDbkg = self.cconstantforD2jet = self.cconstantforDHadWH = self.cconstantforDHadZH = None
         self.checkfunctions()
         self.effectiveentriestree = None
 
@@ -163,7 +161,9 @@ class TreeWrapper(Iterator):
 
         #self.cconstantforDbkgkin = CJLSTscripts.getDbkgkinConstant(self.flavor, self.ZZMass)
         self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.flavor, self.ZZMass)
-        self.cconstantforD2jet = CJLSTscripts.getDVBF2jetsConstant(self.ZZMass)
+        self.cconstantforD2jet = CJLSTscripts.getDVBF2jetsConstant_shiftWP(self.ZZMass, config.useQGTagging, 0.5)
+        self.cconstantforDHadWH = CJLSTscripts.getDWHhConstant_shiftWP(self.ZZMass, config.useQGTagging, 0.5)
+        self.cconstantforDHadZH = CJLSTscripts.getDZHhConstant_shiftWP(self.ZZMass, config.useQGTagging, 0.5)
 
         self.p_m4l_BKG = t.p_m4l_BKG
         self.p_m4l_SIG = t.p_m4l_SIG
@@ -769,14 +769,17 @@ class TreeWrapper(Iterator):
             "D_2jet_0minus",
             "D_2jet_a2",
             "D_2jet_L1",
+            "D_2jet_L1Zg",
             "D_HadWH_0plus",
             "D_HadWH_0minus",
             "D_HadWH_a2",
             "D_HadWH_L1",
+            "D_HadWH_L1Zg",
             "D_HadZH_0plus",
             "D_HadZH_0minus",
             "D_HadZH_a2",
             "D_HadZH_L1",
+            "D_HadZH_L1Zg",
             "D_0minus_decay",
             "D_CP_decay",
             "D_0hplus_decay",
