@@ -1,11 +1,13 @@
 from collections import Counter
+import inspect
+import itertools
 import os
 
 import combineinclude
 from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1
 import config
 from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode
-from utilities import cd, mkdir_p
+from utilities import callclassinitfunctions, cd, generatortolist, mkdir_p
 
 import ROOT
 
@@ -19,7 +21,13 @@ def makename(name):
 
 class Section(object):
     def __init__(self, *labels):
-        self.labels = labels
+        self.labels = []
+        for label in labels:
+             if isinstance(label, SystematicFromEnums_BaseClass):
+                 self.labels += label.allnames
+             else:
+                 self.labels.append(label)
+
     def __get__(self, obj, objtype):
         return "\n".join(self.getlines(obj, objtype))
     def getlines(self, obj, objtype):
@@ -41,6 +49,60 @@ class SystematicsSection(Section):
                 result.remove(line)
         return result
 
+class SystematicFromEnums_BaseClass(object):
+    pass
+
+def MakeSystematicFromEnums(*theenums):
+    class SystematicFromEnums(SystematicFromEnums_BaseClass):
+        def __init__(self, function):
+            self.name = self.origname = function.__name__
+            for enum in theenums:
+                self.name = self.name.replace(enum.enumname, "{"+enum.enumname+"}")
+
+            class SystematicFromEnumsWithValues(MultiEnum):
+                enums = theenums
+
+                def __get__(self_systematic, self_datacard, objtype):
+                    for enum in theenums:
+                        if getattr(self_systematic, enum.enumname) != getattr(self_datacard, enum.enumname):
+                            return None
+
+                    return function(self_datacard)
+
+            SystematicFromEnumsWithValues.__name__ = self.name
+
+            self.systematicfromenumswithvalues = SystematicFromEnumsWithValues
+
+        @property
+        @generatortolist
+        def allnames(self):
+            cartesianproduct = itertools.product(*(enum.items() for enum in theenums))
+            for enumvalues in cartesianproduct:
+                formatdict = {enum.enumname: enumvalue for enum, enumvalue in zip(theenums, enumvalues)}
+                yield self.name.format(**formatdict)
+
+
+        def applyallfunctions(self, datacardcls):
+            cartesianproduct = itertools.product(*(enum.items() for enum in theenums))
+            for enumvalues in cartesianproduct:
+                formatdict = {enum.enumname: enumvalue for enum, enumvalue in zip(theenums, enumvalues)}
+                name = self.name.format(**formatdict)
+                setattr(datacardcls, name, self.systematicfromenumswithvalues(*enumvalues))
+
+            """
+            @property
+            def mainfunction(self_datacard):
+                formatdict = {enum.enumname: getattr(self_datacard, enum) for enum in theenums}
+                return getattr(self_datacard, self.name.format(**formatdict))
+
+            setattr(datacardcls, self.origname, mainfunction)
+            """
+            delattr(datacardcls, self.origname)
+
+    return SystematicFromEnums
+
+
+@callclassinitfunctions("initsystematicsfromenums")
 class Datacard(MultiEnum):
     enums = (Analysis, Category, Channel, Production, Luminosity)
     @property
@@ -99,7 +161,7 @@ class Datacard(MultiEnum):
     @property
     def process(self, counter=Counter()):
         counter[self] += 1
- 
+
         if counter[self] == 1:
             return " ".join(_.combinename for _ in self.productionmodes)
 
@@ -124,72 +186,18 @@ class Datacard(MultiEnum):
     def lumi_13TeV_common(self):
         return " ".join(["lnN"] + ["1.023" for p in self.productionmodes])
 
-    @property
-    def CMS_zz4l_smd_zjets_bkg_2e2mu_Untagged(self):
-        channel, category = "2e2mu", "Untagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
+    @MakeSystematicFromEnums(Channel, Category)
+    def CMS_zz4l_smd_zjets_bkg_channel_category(self):
+        return "param 0 1 [-3,3]"
 
-    @property
-    def CMS_zz4l_smd_zjets_bkg_2e2mu_VBFtagged(self):
-        channel, category = "2e2mu", "VBFtagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
-
-    @property
-    def CMS_zz4l_smd_zjets_bkg_2e2mu_VHHadrtagged(self):
-        channel, category = "2e2mu", "VHHadrtagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
-
-    @property
-    def CMS_zz4l_smd_zjets_bkg_4e_Untagged(self):
-        channel, category = "4e", "Untagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
-
-    @property
-    def CMS_zz4l_smd_zjets_bkg_4e_VBFtagged(self):
-        channel, category = "4e", "VBFtagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
-
-    @property
-    def CMS_zz4l_smd_zjets_bkg_4e_VHHadrtagged(self):
-        channel, category = "4e", "VHHadrtagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
-
-    @property
-    def CMS_zz4l_smd_zjets_bkg_4mu_Untagged(self):
-        channel, category = "4mu", "Untagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
-
-    @property
-    def CMS_zz4l_smd_zjets_bkg_4mu_VBFtagged(self):
-        channel, category = "4mu", "VBFtagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
-
-    @property
-    def CMS_zz4l_smd_zjets_bkg_4mu_VHHadrtagged(self):
-        channel, category = "4mu", "VHHadrtagged"
-        if self.channel == channel and self.category == category:
-            return "param 0 1 [-3,3]"
-        return None
-
-    section5 = SystematicsSection(*["lumi_13TeV_common"] + ["CMS_zz4l_smd_zjets_bkg_{}_{}".format(channel, category) for channel in channels for category in categories])
+    section5 = SystematicsSection("lumi_13TeV_common", CMS_zz4l_smd_zjets_bkg_channel_category)
 
     divider = "\n------------\n"
+
+    @classmethod
+    def initsystematicsfromenums(cls):
+        for name, systematic in inspect.getmembers(cls, predicate=lambda x: isinstance(x, SystematicFromEnums_BaseClass)):
+            systematic.applyallfunctions(cls)
 
     def writedatacard(self):
         sections = self.section1, self.section2, self.section3, self.section4, self.section5
