@@ -253,7 +253,7 @@ class Datacard(MultiEnum):
                     gettemplate("ggH", self.analysis, self.production, self.category, "g11gi1", self.channel),
                    ]
         for i, t in enumerate(T["ggH"], start=1):
-            t.SetName(makename("ggH_T_ZZ_{}_{}_3D_{}".format(self.production.year,self.channel, i)))
+            t.SetName(makename("ggH_T_ZZ_{}_{}_{}_3D_{}".format(self.production.year, self.channel, self.category, i)))
 
         T_ScaleResUp["ggH"] = [
                                gettemplate("ggH", self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, "ScaleResUp"),
@@ -261,7 +261,7 @@ class Datacard(MultiEnum):
                                gettemplate("ggH", self.analysis, self.production, self.category, "g11gi1", self.channel, "ScaleResUp"),
                               ]
         for i, t in enumerate(T_ScaleResUp["ggH"], start=1):
-            t.SetName(makename("ggH_T_ZZ_{}_{}_3D_{}_ScaleResUp".format(self.production.year,self.channel, i)))
+            t.SetName(makename("ggH_T_ZZ_{}_{}_{}_3D_{}_ScaleResUp".format(self.production.year, self.channel, self.category, i)))
 
         T_ScaleResDown["ggH"] = [
                                  gettemplate("ggH", self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, "ScaleResDown"),
@@ -269,7 +269,7 @@ class Datacard(MultiEnum):
                                  gettemplate("ggH", self.analysis, self.production, self.category, "g11gi1", self.channel, "ScaleResDown"),
                                 ]
         for i, t in enumerate(T_ScaleResDown["ggH"], start=1):
-            t.SetName(makename("ggH_T_ZZ_{}_{}_3D_{}_ScaleResDown".format(self.production.year,self.channel, i)))
+            t.SetName(makename("ggH_T_ZZ_{}_{}_{}_3D_{}_ScaleResDown".format(self.production.year, self.channel, self.category, i)))
 
         T_integralName = [makename("ggH_normt{}_{}_{}_{}".format(i, self.channel, self.category, self.production.year)) for i in range(1, 4)]
         T_integral["ggH"] = [ROOT.RooConstVar(integralName, integralName, t.Integral()) for t, integralName in zip(T["ggH"], T_integralName)]
@@ -282,13 +282,13 @@ class Datacard(MultiEnum):
         r_fai_realints_norm = ROOT.RooFormulaVar(r_fai_realints_norm_Name,r_fai_realints_norm_Name,"( sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1 )/@2",ROOT.RooArgList(x,T_integral["ggH"][2],T_integral["ggH"][0]))
         norm["ggH"] = ROOT.RooFormulaVar("ggH_norm","ggH_norm","(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)",ROOT.RooArgList(r_fai_pures_norm,r_fai_realints_norm,x))
 
-        T_hist["ggH"] = [ROOT.RooDataHist(makename("ggH_T_{}_hist".format(i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T["ggH"], start=1)]
-        T_ScaleResUp_hist["ggH"] = [ROOT.RooDataHist(makename("ggH_T_{}_ScaleResUp_hist".format(i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResUp["ggH"], start=1)]
-        T_ScaleResDown_hist["ggH"] = [ROOT.RooDataHist(makename("ggH_T_{}_ScaleResDown_hist".format(i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResDown["ggH"], start=1)]
+        T_hist["ggH"] = [ROOT.RooDataHist(makename("ggH_T_{}_{}_{}_hist".format(self.channel, self.category, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T["ggH"], start=1)]
+        T_ScaleResUp_hist["ggH"] = [ROOT.RooDataHist(makename("ggH_T_{}_{}_{}_ScaleResUp_hist".format(self.channel, self.category, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResUp["ggH"], start=1)]
+        T_ScaleResDown_hist["ggH"] = [ROOT.RooDataHist(makename("ggH_T_{}_{}_{}_ScaleResDown_hist".format(self.channel, self.category, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResDown["ggH"], start=1)]
 
-        T_histfunc["ggH"] = [ROOT.RooHistFunc(makename("ggH_T_{}_histfunc".format(i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_hist["ggH"], start=1)]
-        T_ScaleResUp_histfunc["ggH"] = [ROOT.RooHistFunc(makename("ggH_T_{}_histfunc_ScaleResUp".format(i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResUp_hist["ggH"], start=1)]
-        T_ScaleResDown_histfunc["ggH"] = [ROOT.RooHistFunc(makename("ggH_T_{}_histfunc_ScaleResDown".format(i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResDown_hist["ggH"], start=1)]
+        T_histfunc["ggH"] = [ROOT.RooHistFunc(makename("ggH_T_{}_{}_{}_histfunc".format(self.channel, self.category, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_hist["ggH"], start=1)]
+        T_ScaleResUp_histfunc["ggH"] = [ROOT.RooHistFunc(makename("ggH_T_{}_{}_{}_histfunc_ScaleResUp".format(self.channel, self.category, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResUp_hist["ggH"], start=1)]
+        T_ScaleResDown_histfunc["ggH"] = [ROOT.RooHistFunc(makename("ggH_T_{}_{}_{}_histfunc_ScaleResDown".format(self.channel, self.category, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResDown_hist["ggH"], start=1)]
 
         pdf["ggH"] = ROOT.HZZ4L_RooSpinZeroPdf("ggH", "ggH", D1, D2, D3, x, ROOT.RooArgList(*T_histfunc["ggH"]))
 
@@ -339,13 +339,13 @@ class Datacard(MultiEnum):
             formula = "("+formula+") / @2"
             norm[p] = ROOT.RooFormulaVar(normname, formula, ROOT.RooArgList(a1, ai, *T_integral[p]))
 
-            T_hist[p] = [ROOT.RooDataHist(makename("{}_T_{}_hist".format(p, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T[p], start=1)]
-            T_ScaleResUp_hist[p] = [makename(ROOT.RooDataHist("{}_T_{}_ScaleResUp_hist".format(p, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResUp[p], start=1)]
-            T_ScaleResDown_hist[p] = [makename(ROOT.RooDataHist("{}_T_{}_ScaleResDown_hist".format(p, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResDown[p], start=1)]
+            T_hist[p] = [ROOT.RooDataHist(makename("{}_T_{}_{}_{}_hist".format(p, self.channel, self.category, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T[p], start=1)]
+            T_ScaleResUp_hist[p] = [ROOT.RooDataHist(makename("{}_T_{}_{}_{}_ScaleResUp_hist".format(p, self.channel, self.category, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResUp[p], start=1)]
+            T_ScaleResDown_hist[p] = [ROOT.RooDataHist(makename("{}_T_{}_{}_{}_ScaleResDown_hist".format(p, self.channel, self.category, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResDown[p], start=1)]
 
-            T_histfunc[p] = [ROOT.RooHistFunc(makename("{}_T_{}_histfunc".format(p, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_hist[p], start=1)]
-            T_ScaleResUp_histfunc[p] = [makename(ROOT.RooHistFunc("{}_T_{}_histfunc_ScaleResUp".format(p, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResUp_hist[p], start=1)]
-            T_ScaleResDown_histfunc[p] = [makename(ROOT.RooHistFunc("{}_T_{}_histfunc_ScaleResDown".format(p, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResDown_hist[p], start=1)]
+            T_histfunc[p] = [ROOT.RooHistFunc(makename("{}_T_{}_{}_{}_histfunc".format(p, self.channel, self.category, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_hist[p], start=1)]
+            T_ScaleResUp_histfunc[p] = [ROOT.RooHistFunc(makename("{}_T_{}_{}_{}_histfunc_ScaleResUp".format(p, self.channel, self.category, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResUp_hist[p], start=1)]
+            T_ScaleResDown_histfunc[p] = [ROOT.RooHistFunc(makename("{}_T_{}_{}_{}_histfunc_ScaleResDown".format(p, self.channel, self.category, i)), "", ROOT.RooArgSet(D1,D2,D3), datahist) for i, datahist in enumerate(T_ScaleResDown_hist[p], start=1)]
 
             pdf[p] = ROOT.VBFHZZ4L_RooSpinZeroPdf(p, p, D1, D2, D3, a1, ai, ROOT.RooArgList(*T_histfunc[p]))
 
