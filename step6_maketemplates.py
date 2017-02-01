@@ -35,7 +35,7 @@ def copydata(*args):
     f = ROOT.TFile(datatree.originaltreefile)
     t = f.candTree
 
-    discriminants_forcerange = {d: array('d', [0]) for d in discriminants if hasattr(d, d.name)}
+    discriminants_forcerange = {d: array('d', [0]) for d in discriminants.values() if hasattr(t, d.name)}
     for (dname, dtitle, dbins, dmin, dmax), branchaddress in discriminants_forcerange.iteritems():
         t.SetBranchAddress(dname, branchaddress)
 
