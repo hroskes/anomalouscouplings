@@ -68,12 +68,6 @@ SMXSWpH2L2l = SMXSWpH * SMBR2L2l
 SMXSWmH2L2l = SMXSWmH * SMBR2L2l
 SMXSttH2L2l = SMXSttH * SMBR2L2l
 
-#############
-from datetime import date
-if date.today() > date(2017, 1, 31):
-    raise ValueError("Update ZH mix L1Zg xsec!  /work-zfs/lhc/heshy/JHUGen/xsecs/JHUGen_interference/JHUGenerator jobs 10890823-10890827.")
-#############
-
 JHUXSggH2L2la1           = 7.1517173;      JHUXSggH2L2la1err            = 0.23044650E-03
 JHUXSggH2L2la2           = 2.5849908;      JHUXSggH2L2la2err            = 0.77294379E-04
 JHUXSggH2L2la3           = 1.0954288;      JHUXSggH2L2la3err            = 0.43443941E-04
@@ -105,7 +99,7 @@ JHUXSZHa1a3         = 18040.66;       JHUXSZHa1a3err          = 2.73
 JHUXSZHa1L1         = 6852.307;       JHUXSZHa1L1err          = 0.929
 JHUXSZHa1_photoncut = 1437150.9;      JHUXSZHa1err_photoncut  = 289.72492
 JHUXSZHL1Zg         = 3.4592597;      JHUXSZHL1Zgerr          = 0.56602360E-03
-JHUXSZHa1L1Zg       = 3480937.7;      JHUXSZHa1L1Zgerr        = 458.17791
+JHUXSZHa1L1Zg       = 3479412.2;      JHUXSZHa1L1Zgerr        = 486.4
 
 JHUXSWHa1           = 30998.54;       JHUXSWHa1err           = 2.50
 JHUXSWHa2           = 3106339;        JHUXSWHa2err           = 308
