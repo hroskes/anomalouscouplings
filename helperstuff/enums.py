@@ -271,7 +271,7 @@ class ShapeSystematic(MyEnum):
         from discriminants import discriminant
         return discriminant("D_bkg"+self.appendname())
     def appliesto(self, templategroup):
-        if templategroup in ("ggh", "vbf", "zh", "wh"):
+        if templategroup in ("ggh", "vbf", "zh", "wh", "tth"):
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
         elif templategroup == "bkg":
             return self in ("", "ZXUp", "ZXDown")
@@ -298,6 +298,7 @@ class TemplateGroup(MyEnum):
                  EnumItem("vbf"),
                  EnumItem("zh"),
                  EnumItem("wh"),
+                 EnumItem("tth"),
                  EnumItem("background", "bkg"),
                  EnumItem("DATA"),
                 )
