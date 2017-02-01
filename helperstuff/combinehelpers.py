@@ -148,7 +148,7 @@ def gettemplate(*args):
 
     #############
     from datetime import date
-    if date.today() > date(2017, 1, 31):
+    if date.today() > date(2017, 2, 3):
         raise ValueError("VBF bkg 4mu??!")
     if t.channel == "4mu" and t.productionmode == "VBFbkg":
         return gettemplate(t.analysis, t.category, t.productionmode, t.production, "4e")
