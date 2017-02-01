@@ -695,6 +695,8 @@ class TemplateIterate(Template):
             message += "reweight on all axes with JB's automatic binning procedure."
             return [entriesperbin, [0, 1, 2], None], message
 
+        return None
+
         baddiscriminants = ", ".join(
                                      disc.name for disc, controlplot in zip(self.discriminants, self.controlplots)
                                        if not controlplot.sufficientsmoothing
