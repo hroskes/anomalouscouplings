@@ -95,9 +95,7 @@ class KeepWhileOpenFile(object):
                 with cd(self.pwd):
                     os.remove(self.filename)
             except OSError:
-                if os.path.exists(self.filename):
-                    raise
-                #else ignore it
+                pass #ignore it
             self.fd = self.f = None
     def __nonzero__(self):
         return bool(self.f)
