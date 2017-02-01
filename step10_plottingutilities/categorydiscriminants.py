@@ -40,7 +40,7 @@ def makeplot(analysis, disc):
 
   hs = {}
   hstack = ROOT.THStack(disc, "")
-  l = ROOT.TLegend(.4, .6, .9, .9)
+  l = ROOT.TLegend(.4, .5, .85, .9)
   l.SetBorderSize(0)
   l.SetFillStyle(0)
   c = ROOT.TCanvas()
