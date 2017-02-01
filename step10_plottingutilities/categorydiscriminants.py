@@ -17,7 +17,7 @@ def makeplot(analysis, disc):
   if "HadZH" in disc:
     productionmode = "ZH"
   elif "HadWH" in disc:
-    if analysis == "fL1Zg": return
+    if analysis == "fL1Zg" and "L1Zg" in disc: return
     productionmode = "WH"
   elif "2jet" in disc:
     productionmode = "VBF"
@@ -35,6 +35,8 @@ def makeplot(analysis, disc):
            Line(mixminus,                       "{} {}=#minus0.5".format(productionmode, fainame), 4, mixplus, bkpreweightfrom=ReweightingSample(productionmode, "L1")),
            Line(ReweightingSample("ggH", "0+"), "ggH", 2),
           ]
+
+  if productionmode == "WH" and analysis == "fL1Zg": del lines[1:4]
 
   hs = {}
   hstack = ROOT.THStack(disc, "")
