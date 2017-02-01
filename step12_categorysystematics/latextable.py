@@ -159,7 +159,7 @@ def maketable(analysis):
       Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
       Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
     ),
-    Section("${}=1$".format(analysis.title_latex),
+    Section("${}=1$".format(analysis.title(latex=True)),
       Row(analysis, "VBF", analysis.purehypotheses[1]),
       Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
       Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),

@@ -264,15 +264,15 @@ class Projections(MultiEnum):
     if self.category == "UntaggedIchep16":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
-        fainame = "{}^{{{}}}".format(self.analysis.title, "dec")
+        fainame = self.analysis.title(superscript="dec")
     elif self.category == "VBF2jTaggedIchep16":
         g1_mix = 1/2**.25
         gi_mix = 1/2**.25 * gi_VBFBSM
-        fainame = "{}^{{{}}}".format(self.analysis.title, "VBFdec")
+        fainame = self.analysis.title(superscript="VBFdec")
     elif self.category == "VHHadrTaggedIchep16":
         g1_mix = 1/2**.25
         gi_mix = 1/2**.25 * gi_VHBSM
-        fainame = "{}^{{{}}}".format(self.analysis.title, "VHdec")
+        fainame = self.analysis.title(superscript="VHdec")
 
     ggHSM     = self.TemplateFromFile(   0, "ggH", self.category, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
     ggHBSM    = self.TemplateFromFile(   0, "ggH", self.category, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, BSMhypothesis)
@@ -334,10 +334,10 @@ class Projections(MultiEnum):
                                      )
                                    )
 
-    SM    = TemplateSum("SM",                                1,             (ggHSM,    ggHfactor), (VBFSM,    VBFfactor), (VHSM,    VHfactor))
-    BSM   = TemplateSum("{}=1".format(self.analysis.title),  ROOT.kCyan,    (ggHBSM,   ggHfactor), (VBFBSM,   VBFfactor), (VHBSM,   VHfactor))
-    mix_p = TemplateSum("{}=#plus0.5".format(fainame),       ROOT.kGreen+3, (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (VHmix_p, VHfactor))
-    mix_m = TemplateSum("{}=#minus0.5".format(fainame),      4,             (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (VHmix_m, VHfactor))
+    SM    = TemplateSum("SM",                                 1,             (ggHSM,    ggHfactor), (VBFSM,    VBFfactor), (VHSM,    VHfactor))
+    BSM   = TemplateSum("{}=1".format(self.analysis.title()), ROOT.kCyan,    (ggHBSM,   ggHfactor), (VBFBSM,   VBFfactor), (VHBSM,   VHfactor))
+    mix_p = TemplateSum("{}=#plus0.5".format(fainame),        ROOT.kGreen+3, (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (VHmix_p, VHfactor))
+    mix_m = TemplateSum("{}=#minus0.5".format(fainame),       4,             (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (VHmix_m, VHfactor))
 
     qqZZ      = self.TemplateFromFile(6,              self.category, self.enrichstatus, self.normalization, self.analysis, self.channel, "qqZZ",    self.shapesystematic, self.production)
     ggZZ      = self.TemplateFromFile(ROOT.kOrange+6, self.category, self.enrichstatus, self.normalization, self.analysis, self.channel, "ggZZ",    self.shapesystematic, self.production)
@@ -368,11 +368,11 @@ class Projections(MultiEnum):
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
         if customfai  > 0: plusminus = "#plus"
-        ggHcustom = ComponentTemplateSum("ggH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "dec", plusminus, abs(customsample.fai("ggH", self.analysis))), 1, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
-        VBFcustom = ComponentTemplateSum("VBF ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VBF", plusminus, abs(customsample.fai("VBF", self.analysis))), 2, VBFSM.Integral(),
+        ggHcustom = ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHint,  g1_custom*gi_custom/gi_ggHBSM))
+        VBFcustom = ComponentTemplateSum("VBF ({}={}{:.2f})".format(self.analysis.title(superscript="VBF"), plusminus, abs(customsample.fai("VBF", self.analysis))), 2, VBFSM.Integral(),
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces))
                                         )
-        VHcustom  = ComponentTemplateSum("VH ({}^{{{}}}={}{:.2f})".format(self.analysis.title, "VH", plusminus, abs(customsample.fai("VH", self.analysis))), 4, ZHSM.Integral()+WHSM.Integral(),
+        VHcustom  = ComponentTemplateSum("VH ({}={}{:.2f})".format(self.analysis.title(superscript="VH"), plusminus, abs(customsample.fai("VH", self.analysis))), 4, ZHSM.Integral()+WHSM.Integral(),
                                          *(
                                              [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces)]
                                            + [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces)]

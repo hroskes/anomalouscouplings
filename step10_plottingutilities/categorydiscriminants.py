@@ -22,7 +22,7 @@ def makeplot(analysis, disc):
   elif "2jet" in disc:
     productionmode = "VBF"
 
-  fainame = "{}^{{{}}}".format(analysis.title, productionmode)
+  fainame = analysis.title(superscript=productionmode)
 
   SM, BSM = (ReweightingSample(productionmode, _) for _ in analysis.purehypotheses)
   mixplus = ReweightingSample(productionmode, analysis.mixprodhypothesis)

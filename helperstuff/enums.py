@@ -310,28 +310,32 @@ class Analysis(MyEnum):
                  EnumItem("fL1"),
                  EnumItem("fL1Zg"),
                 )
-    @property
-    def title(self):
+    def title(self, latex=False, superscript=None):
         if self == "fa3":
-            return "f_{a3}"
-        if self == "fa2":
-            return "f_{a2}"
-        if self == "fL1":
-            return "f_{#Lambda1}"
-        if self == "fL1Zg":
-            return "f_{#Lambda1}^{Z#gamma}"
-        assert False
-    @property
-    def title_latex(self):
-        if self == "fa3":
-            return "f_{a3}"
-        if self == "fa2":
-            return "f_{a2}"
-        if self == "fL1":
-            return "f_{\Lambda1}"
-        if self == "fL1Zg":
-            return "f_{\Lambda1}^{\Z\gamma}"
-        assert False
+            result = "f_{{a3}}"
+        elif self == "fa2":
+            result = "f_{{a2}}"
+        elif self == "fL1":
+            result = "f_{{{Lambda}1}}"
+        elif self == "fL1Zg":
+            result = "f_{{{Lambda}1}}^{{{Z}{gamma}}}"
+        else:
+            assert False
+
+        if latex:
+            repmap = {"Lambda": r"\Lambda", "Z": r"\Z", "gamma": r"\gamma"}
+        else:
+            repmap = {"Lambda": "#Lambda", "Z": "Z", "gamma": r"#gamma"}
+        result = result.format(**repmap)
+
+        if superscript is not None:
+            if "^" in result:
+                result = result.rstrip("}") + ", " + str(superscript) + "}"
+            else:
+                result += "^{" + str(superscript) + "}"
+
+        return result
+
     @property
     def phi(self):
         if self == "fa3":

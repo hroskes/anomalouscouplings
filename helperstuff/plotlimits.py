@@ -49,7 +49,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             if arg == 0:
                 scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = 0 or #pi".format(analysis.phi), uptocolor, 2))
             else:
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title, arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title(), arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
     if luminosity is None:
@@ -89,7 +89,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         l.AddEntry(g, scan.title, "l")
 
     mg.Draw("AC")
-    mg.GetXaxis().SetTitle("{} cos({})".format(analysis.title, analysis.phi_lower))
+    mg.GetXaxis().SetTitle("{} cos({})".format(analysis.title(), analysis.phi_lower))
     mg.GetXaxis().SetRangeUser(-1, 1)
     mg.GetYaxis().SetTitle("-2#Deltaln L")
     l.Draw()

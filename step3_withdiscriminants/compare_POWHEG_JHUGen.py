@@ -46,8 +46,8 @@ def lines(productionmode, analysis):
     if analysis == "fL1Zg" and productionmode == "WH":
       color += 2
     else:
-      yield makeline(ReweightingSample(productionmode, analysis.purehypotheses[1]), "{0} {1}^{{{0}}}=1 JHUGen".format(productionmode, analysis.title), reweightfrom)
-      yield makeline(ReweightingSample(productionmode, analysis.mixprodhypothesis), "{0} {1}^{{{0}}}=0.5 JHUGen".format(productionmode, analysis.title), reweightfrom)
+      yield makeline(ReweightingSample(productionmode, analysis.purehypotheses[1]), "{} {}=1 JHUGen".format(productionmode, analysis.title(superscript=productionmode)), reweightfrom)
+      yield makeline(ReweightingSample(productionmode, analysis.mixprodhypothesis), "{} {}=0.5 JHUGen".format(productionmode, analysis.title(superscript=productionmode)), reweightfrom)
 
   if productionmode == "HJJ":
     yield makeline(ReweightingSample("ggH", "SM"), "ggH POWHEG")
