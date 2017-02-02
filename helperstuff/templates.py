@@ -545,6 +545,13 @@ class Template(TemplateBase, MultiEnum):
         globals.smoothingparametersdict_cache = json.loads(jsonstring)
       return globals.smoothingparametersdict_cache
 
+    @classmethod
+    def writesmoothingparametersdict(cls):
+      dct = cls.getsmoothingparametersdict()
+      jsonstring = json.dumps(jsonstring)
+      with open(smoothingparametersfile, "w") as f:
+        f.write(jsonstring)
+
     @property
     def smoothingparameters(self):
       keys = (

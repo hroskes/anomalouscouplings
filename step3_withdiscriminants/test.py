@@ -12,9 +12,9 @@ import os
 
 #========================
 #inputs
-productionmode = "VBF"
-disc           = "D_CP_HadVH"
-reweightto     = ReweightingSample(productionmode, "0+")
+productionmode = "ggH"
+disc           = "D_CP_VBF"
+reweightto     = ReweightingSample(productionmode, "fa30.5")
 bins           = None
 min            = None
 max            = None
@@ -25,7 +25,7 @@ normalizeto1   = False
 
 channel        = "2e2mu"
 
-category       = "VHHadrtagged"
+category       = "VBFtagged"
 analysis       = "fa3"
 
 skip           = []
