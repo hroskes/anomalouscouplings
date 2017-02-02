@@ -261,6 +261,7 @@ class Projections(MultiEnum):
     gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
     gi_VBFBSM = copysign((ReweightingSample("VBF", SMhypothesis).xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25, gi_ggHBSM)
     gi_VHBSM = copysign(((ReweightingSample("WH", SMhypothesis).xsec + ReweightingSample("ZH", SMhypothesis).xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
+    gi_VVHBSM = copysign(((ReweightingSample("VBF", SMhypothesis).xsec + ReweightingSample("WH", SMhypothesis).xsec + ReweightingSample("ZH", SMhypothesis).xsec) / (ReweightingSample("VBF", BSMhypothesis).xsec + ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
     if self.category == "UntaggedIchep16":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
@@ -290,15 +291,6 @@ class Projections(MultiEnum):
 
     VBFpieces = [VBFg14gi0, VBFg13gi1, VBFg12gi2, VBFg11gi3, VBFg10gi4]
 
-    VBFBSM    = ComponentTemplateSum(VBFg10gi4.title,                                0, VBFSM.Integral(), (VBFg10gi4, gi_VBFBSM**4))
-
-    VBFmix_p  = ComponentTemplateSum("VBF {}=#plus0.5" .format(fainame), 0, VBFSM.Integral(),
-                                     *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(VBFpieces))
-                                    )
-    VBFmix_m  = ComponentTemplateSum("VBF {}=#minus0.5".format(fainame), 0, VBFSM.Integral(),
-                                     *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces))
-                                    )
-
     ZHSM = \
     ZHg14gi0 = self.TemplateFromFile(   0, "ZH", self.category, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
     ZHg13gi1 = self.IntTemplateFromFile(0, "ZH", self.category, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g13gi1")
@@ -315,11 +307,20 @@ class Projections(MultiEnum):
     WHg11gi3 = self.IntTemplateFromFile(0, "WH", self.category, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, "g11gi3")
     WHg10gi4 = self.TemplateFromFile(   0, "WH", self.category, self.enrichstatus, self.normalization, self.production, self.channel, self.shapesystematic, self.analysis, BSMhypothesis)
 
+    VBFBSM    = ComponentTemplateSum(VBFg10gi4.title,                                0, VBFSM.Integral(), (VBFg10gi4, gi_VVHBSM**4))
+
+    VBFmix_p  = ComponentTemplateSum("VBF {}=#plus0.5" .format(fainame), 0, VBFSM.Integral(),
+                                     *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(VBFpieces))
+                                    )
+    VBFmix_m  = ComponentTemplateSum("VBF {}=#minus0.5".format(fainame), 0, VBFSM.Integral(),
+                                     *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces))
+                                    )
+
     WHpieces = [WHg14gi0, WHg13gi1, WHg12gi2, WHg11gi3, WHg10gi4]
 
     VHSM     = ComponentTemplateSum(WHSM.title.replace("W", "V"),      0, WHSM.Integral()+ZHSM.Integral(), (ZHSM, 1), (WHSM, 1))
 
-    VHBSM    = ComponentTemplateSum(WHg10gi4.title.replace("W", "V"),  0, WHSM.Integral()+ZHSM.Integral(), (WHg10gi4, gi_VHBSM**4), (ZHg10gi4, gi_VHBSM**4))
+    VHBSM    = ComponentTemplateSum(WHg10gi4.title.replace("W", "V"),  0, WHSM.Integral()+ZHSM.Integral(), (WHg10gi4, gi_VVHBSM**4), (ZHg10gi4, gi_VVHBSM**4))
 
     VHmix_p  = ComponentTemplateSum("VH {}=#plus0.5" .format(fainame), 0, WHSM.Integral()+ZHSM.Integral(),
                                     *(
