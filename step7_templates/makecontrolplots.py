@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+import glob
+import os
+import sys
+
+import ROOT
+
 from helperstuff import config, style  #style needed to remove the statbox and title and adjust the axis label size
 from helperstuff.templates import TemplatesFile, templatesfiles
-import os
-import ROOT
-import sys
 
 def makecontrolplots(*args, **kwargs):
     templatesfile = TemplatesFile(*args)
@@ -17,6 +20,10 @@ def makecontrolplots(*args, **kwargs):
         pass
 
     exts = "png", "eps", "root", "pdf"
+
+    for ext in exts:
+        for filename in glob.glob(os.path.join(saveasdir, "*."+ext)):
+            os.remove(filename)
 
     axistitles = [_.name for _ in templatesfile.discriminants]
 
