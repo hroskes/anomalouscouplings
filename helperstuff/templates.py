@@ -72,7 +72,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL1Zg0.5")]
+                reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL1Zg-0.5")]
 
         elif self.templategroup == "vbf":
             if self.analysis == "fa3":
@@ -400,6 +400,8 @@ class Template(TemplateBase, MultiEnum):
                 name = "template0L1ZgAdapSmooth"
             elif self.hypothesis in ("fa20.5", "fa30.5", "fL10.5", "fL1Zg0.5"):
                 name = "templateMixAdapSmooth"
+            elif self.hypothesis in ("fa2-0.5", "fa3-0.5", "fL1-0.5", "fL1Zg-0.5"):
+                name = "templateMixPiAdapSmooth"
         elif self.productionmode in ("VBF", "ZH", "WH"):
             if self.hypothesis in ("0+", "0+_photoncut"):
                 name = "template0PlusAdapSmooth"
