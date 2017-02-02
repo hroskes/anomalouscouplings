@@ -826,7 +826,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                               ):
             return 0
         if self.hypothesis == "a2":
-            if self.productionmode == "ggH":
+            if self.productionmode in ("ggH", "ttH"):
                 return constants.g2decay
             else:
                 return 1
@@ -866,7 +866,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                               ):
             return 0
         if self.hypothesis == "0-":
-            if self.productionmode == "ggH":
+            if self.productionmode in ("ggH", "ttH"):
                 return constants.g4decay
             else:
                 return 1
@@ -907,7 +907,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             return 0
 
         if self.hypothesis == "L1":
-            if self.productionmode == "ggH":
+            if self.productionmode in ("ggH", "ttH"):
                 return constants.g1prime2decay_gen
             else:
                 return 1
@@ -948,7 +948,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             return 0
 
         if self.hypothesis == "L1Zg":
-            if self.productionmode == "ggH":
+            if self.productionmode in ("ggH", "ttH"):
                 return constants.ghzgs1prime2decay_gen
             else:
                 return 1
@@ -1134,7 +1134,7 @@ class SampleBasis(MultiEnum):
 
     def check(self, *args):
         args = (self.hypotheses,)+args
-        if self.productionmode == "ggH":
+        if self.productionmode in ("ggH", "ttH"):
             dimension = 3
         elif self.productionmode in ("VBF", "WH", "ZH"):
             dimension = 5
@@ -1149,9 +1149,11 @@ class SampleBasis(MultiEnum):
     @property
     @cache
     def matrix(self):
+        hffhypothesis = None
+        if self.productionmode == "ttH": hffhypothesis = "Hff0+"
         dimension = len(self.hypotheses)
         maxpower = dimension-1
-        samples = [ReweightingSample(self.productionmode, _) for _ in self.hypotheses]
+        samples = [ReweightingSample(self.productionmode, _, hffhypothesis) for _ in self.hypotheses]
         return numpy.matrix(
                             [
                              [

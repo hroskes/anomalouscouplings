@@ -238,7 +238,7 @@ class TemplatesFile(MultiEnum):
     @cache
     def invertedmatrix(self):
         ganomalous = self.analysis.couplingname
-        productionmode = str(self.templategroup).upper()
+        productionmode = str(self.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH")
         basis = SampleBasis([template.hypothesis for template in self.templates()], productionmode, self.analysis)
         invertedmatrix = basis.invertedmatrix
         if self.templategroup in ("vbf", "zh", "wh"):
@@ -726,42 +726,31 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     def getjson(self):
         if self.interferencetype == "g11gi1":
-            puretemplates = [Template(self.templatesfile, self.productionmode, h) for h in self.analysis.purehypotheses]
-            mixtemplate = Template(self.templatesfile, self.productionmode, self.analysis.mixdecayhypothesis)
-            intjsn = {
-                       "templates":[
-                         {
-                           "name": self.templatename(),
-                           "templatesum":[
-                             {"name":mixtemplate.templatename(final=False),"factor":1.0},
-                           ] + [
-                             {"name":t.templatename(final=False),"factor":-1.0} for t in puretemplates
-                           ],
-                           "postprocessing":[],
-                         },
-                       ],
-                     }
-
+            g1exp = giexp = 1
+            hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
+            multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.couplingname)
         if self.interferencetype in ("g11gi3", "g12gi2", "g13gi1"):
             g1exp, giexp = (int(i) for i in str(self.interferencetype).replace("g1", "").replace("gi", ""))
-            invertedmatrix = self.templatesfile.invertedmatrix
-            vectoroftemplates = self.templatesfile.templates()  #ok technically it's a list not a vector
-            rowofinvertedmatrix = giexp  #first row is labeled 0
-            templatesum = []
-            for j, template in enumerate(vectoroftemplates):
-                templatesum.append({
-                                    "name": template.templatename(final=False),
-                                    "factor": invertedmatrix[rowofinvertedmatrix,j],
-                                   })
-            intjsn = {
-                       "templates":[
-                         {
-                           "name": self.templatename(),
-                           "templatesum":templatesum,
-                           "postprocessing":[],
-                         },
-                       ],
-                     }
+            multiplyby = 1
+
+        invertedmatrix = self.templatesfile.invertedmatrix
+        vectoroftemplates = self.templatesfile.templates()  #ok technically it's a list not a vector
+        rowofinvertedmatrix = giexp  #first row is labeled 0
+        templatesum = []
+        for j, template in enumerate(vectoroftemplates):
+            templatesum.append({
+                                "name": template.templatename(final=False),
+                                "factor": invertedmatrix[rowofinvertedmatrix,j] * multiplyby,
+                               })
+        intjsn = {
+                   "templates":[
+                     {
+                       "name": self.templatename(),
+                       "templatesum":templatesum,
+                       "postprocessing":[],
+                     },
+                   ],
+                 }
 
         if self.domirror:
             intjsn["templates"][0]["postprocessing"].append(self.mirrorjsn)
