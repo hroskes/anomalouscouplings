@@ -548,7 +548,7 @@ class Template(TemplateBase, MultiEnum):
     @classmethod
     def writesmoothingparametersdict(cls):
       dct = cls.getsmoothingparametersdict()
-      jsonstring = json.dumps(jsonstring)
+      jsonstring = json.dumps(dct, sort_keys=True, indent=4, separators=(',', ': '))
       with open(smoothingparametersfile, "w") as f:
         f.write(jsonstring)
 
