@@ -182,7 +182,7 @@ del minmax_g1jgik
 otherplottablethings = {
     d.name: d for d in [
         Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
-        Discriminant("DiJetMass", "m_{JJ}", defaultnbins, 4, 110),
+        Discriminant("DiJetMass", "m_{JJ}", 50, 0, 150),
     ]
 }
 

@@ -42,7 +42,8 @@ def plotfromtree(**kwargs):
 
     "channel":        None,
     "category":       None,
-    "analysis":       None,  #for which categorization to use
+    "categorization": None,  #for which categorization to use, or set the next argument
+    "analysis":       None,  #for which categorization to use, or set the previous argument
 
     "color":          1,
     "hname":          None,
@@ -112,9 +113,11 @@ def plotfromtree(**kwargs):
                   ]
   if o.category is not None:
     o.category = Category(o.category)
-    if o.analysis is None: raise TypeError("analysis is mandatory if category is provided!")
-    o.analysis = Analysis(o.analysis)
-    weightfactors.append(" || ".join("(category_{}=={})".format(o.analysis.categoryname, _) for _ in Category(o.category).idnumbers))
+    if o.analysis is o.categorization is None: raise TypeError("analysis or categorization is mandatory if category is provided!")
+    if o.analysis is not None is not o.categorization: raise TypeError("Can't provide both analysis and categorization!")
+    if o.analysis is not None: categoryname = Analysis(o.analysis).categoryname
+    else:                      categoryname = o.categorization
+    weightfactors.append(" || ".join("(category_{}=={})".format(categoryname, _) for _ in Category(o.category).idnumbers))
   if o.enrich:
     weightfactors.append("D_bkg>0.5")
   if o.channel is not None:
