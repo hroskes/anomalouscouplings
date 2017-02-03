@@ -193,3 +193,8 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+def is_almost_integer(flt):
+    if isinstance(flt, (int, long)) or flt.is_integer(): return True
+    if float("{:.8g}".format(flt)).is_integer(): return True
+    return False

@@ -7,7 +7,7 @@ from math import isnan
 import numpy
 import os
 from samples import ReweightingSample, Sample, SampleBasis
-from utilities import cache, getnesteddictvalue, jsonloads, tfiles
+from utilities import cache, getnesteddictvalue, is_almost_integer, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
@@ -575,7 +575,24 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def reweightrebin(self):
-      return self.smoothingparameters[2]
+      result = self.smoothingparameters[2]
+      #validation
+      if result is not None:
+        if len(result) != 3:
+          raise ValueError("len(reweightrebin) for {!r} != 3!\n{}".format(self, reweightrebin))
+        for axis, (_, disc) in enumerate(zip(result, self.discriminants)):
+          if _ is not None:
+            if _ != sorted(_):
+              raise ValueError("reweightrebin for {!r} axis {} is not sorted!\n{}".format(self, axis, _))
+            if min(_) != disc.min:
+              raise ValueError("first entry {} of reweightrebin for {!r} axis {} is not the same as the discriminant minimum {}!\n{}".format(min(_), self, axis, disc.min, _))
+            if max(_) != disc.max:
+              raise ValueError("last entry {} of reweightrebin for {!r} axis {} is not the same as the discriminant maximum {}!\n{}".format(max(_), self, axis, disc.max, _))
+            for bin_ in _:
+              shouldbeint = (bin_-disc.min) * disc.bins / (disc.max-disc.min)
+              if not is_almost_integer(shouldbeint):
+                raise ValueError("({bin}-{min}) * {bins} / ({max}-{min}) = {!r} in reweightrebin for {!r} axis {} is not an integer\n{}".format(shouldbeint, self, axis, _, bin=bin_, min=disc.min, max=disc.max, bins=disc.bins))
+      return result
 
     @property
     def postprocessingjson(self):
