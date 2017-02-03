@@ -584,6 +584,8 @@ class Template(TemplateBase, MultiEnum):
           if _ is not None:
             if _ != sorted(_):
               raise ValueError("reweightrebin for {!r} axis {} is not sorted!\n{}".format(self, axis, _))
+            if len(_) != len(set(_)):
+              raise ValueError("reweightrebin for {!r} axis {} has duplicates!\n{}".format(self, axis, _))
             if min(_) != disc.min:
               raise ValueError("first entry {} of reweightrebin for {!r} axis {} is not the same as the discriminant minimum {}!\n{}".format(min(_), self, axis, disc.min, _))
             if max(_) != disc.max:

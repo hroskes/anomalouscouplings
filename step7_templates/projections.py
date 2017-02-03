@@ -5,7 +5,7 @@ from helperstuff import config, constants, run1info
 from helperstuff.combinehelpers import getrate, gettemplate
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic
 from helperstuff.samples import ReweightingSample, samplewithfai
-import helperstuff.rootoverloads.histogramaxisnumbers
+import helperstuff.rootoverloads.histogramaxisnumbers, helperstuff.rootoverloads.histogramfloor
 import helperstuff.style
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import cache, tfiles, pairwise
@@ -48,6 +48,9 @@ class TemplateForProjection(object):
 
     def Integral(self, *args, **kwargs):
         return self.h.Integral(*args, **kwargs)
+
+    def Floor(self, *args, **kwargs):
+        self.h.Floor(*args, **kwargs)
 
     @abc.abstractproperty
     def discriminants(self):
@@ -515,9 +518,8 @@ def projections(*args):
 
 if __name__ == "__main__":
   def projections():
-    #yield Projections("170119", "4e", "fL1Zg", "rescalemixtures", "fullrange", "Untagged")
-    #yield Projections("170119", "4mu", "fL1Zg", "rescalemixtures", "fullrange", "Untagged")
-    #return
+#    yield Projections("170119", "2e2mu", "fa3", "rescalemixtures", "fullrange", "VHHadrtagged")
+#    return
     for production in productions:
       for channel in channels:
         for analysis in analyses:

@@ -52,7 +52,7 @@ def makecontrolplots(*args, **kwargs):
 
 if __name__ == "__main__":
     def thetemplatesfiles():
-#        yield TemplatesFile("vbf", "Untagged", "2e2mu", "fa3")
+#        yield TemplatesFile("vbf", "VHHadrtagged", "2e2mu", "fa3")
 #        return
         for templatesfile in templatesfiles:
              yield templatesfile
