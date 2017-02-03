@@ -233,6 +233,7 @@ class Projections(MultiEnum):
     saveasappend = ""
     exts = "png", "eps", "root", "pdf"
     otherthingstodraw = []
+    floor = False
     for kw, kwarg in kwargs.iteritems():
        if kw == "ggHfactor":
            ggHfactor = float(kwarg)
@@ -257,6 +258,8 @@ class Projections(MultiEnum):
            exts = "gif",
        elif kw == "otherthingstodraw":
            otherthingstodraw += kwarg
+       elif kw == "floor":
+           floor = bool(int(kwarg))
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -410,6 +413,8 @@ class Projections(MultiEnum):
                     template.Scale(1/template.Integral())
                 except ZeroDivisionError:
                     pass
+            if floor:
+                template.Floor()
             if template.title:
                 template.AddToLegend(legend)
 
@@ -465,7 +470,7 @@ class Projections(MultiEnum):
         text.SetTextColor(2)
         return pt
 
-  def animation(self):
+  def animation(self, floor=False):
       tmpdir = mkdtemp()
 
       nsteps = 200
@@ -490,6 +495,7 @@ class Projections(MultiEnum):
 
       kwargs_base = {
                      "saveasdir": tmpdir,
+                     "floor": floor,
                     }
 
       for i, step in enumerate(animation):
