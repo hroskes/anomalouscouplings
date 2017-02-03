@@ -94,7 +94,7 @@ class Row(MultiEnum):
     if self.productionmode.isbkg: return ReweightingSample(self.productionmode).weightname()
     return self.reweightingsample.weightname()
 
-  def getlatex(self):
+  def getlatex(self, dochannels=True):
     categorydistribution = self.getcategorydistribution()
     result = " & {}".format(self.title)
     for category in categories:
@@ -103,7 +103,8 @@ class Row(MultiEnum):
       for channel in channels:
         channel = Channel(channel)
         total += categorydistribution[channel, category]
-        result += "{:.1f}/".format(categorydistribution[channel, category])
+        if dochannels:
+          result += "{:.1f}/".format(categorydistribution[channel, category])
       result += "{:.1f}".format(total)
     return result
 
@@ -144,12 +145,12 @@ class Section(object):
     self.c = ROOT.TCanvas()
     self.title = title
     self.rows = rows
-  def getlatex(self):
+  def getlatex(self, dochannels=True):
     result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
-    result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex() for _ in self.rows)
+    result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex(dochannels=dochannels) for _ in self.rows)
     return result
 
-def maketable(analysis):
+def maketable(analysis, dochannels=True):
   analysis = Analysis(analysis)
   sections = [
     Section("SM",
@@ -176,9 +177,9 @@ def maketable(analysis):
   print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")
   print r"\hline"
   print " & & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline\hline"
-  print (r"\\\hline"+"\n").join(section.getlatex() for section in sections)
+  print (r"\\\hline"+"\n").join(section.getlatex(dochannels=dochannels) for section in sections)
   print r"\\\hline"
   print r"\end{tabular}"
 
 if __name__ == "__main__":
-  maketable("fL1")
+  maketable("fa3", dochannels=False)
