@@ -732,15 +732,11 @@ class IntTemplate(TemplateBase, MultiEnum):
             #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
             return {"type":"mirror", "antisymmetric":False, "axis":1}
 
-        if (   self.category == "VBFtagged" and self.productionmode in ("ZH", "WH")
-            or self.category == "VHHadrtagged" and self.productionmode == "VBF"
-           ):
-            if self.interferencetype in ("g11gi3", "g13gi1"):
-                return None #Even though it's D_int_prod can't mirror, there is still CP violation even
-                            # though it's not the way this ME expects
-            #but for g12gi2 can mirror, since there's no CP violation
+        #Mirror antisymmetric for VH in VBF category and VBF in VH category
+        #the interference templates are 0 to within error bars anyway,
+        #except for some effects in ZH g13g41 D_CP_VBF which are antisymmetric
 
-        #cross talk to the untagged category is ok, since the decay is the same
+        #cross talk to the untagged category is exactly correct, since the decay is the same
 
         if self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
             return {"type":"mirror", "antisymmetric":True, "axis":1}
