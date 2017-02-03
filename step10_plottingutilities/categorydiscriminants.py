@@ -40,7 +40,7 @@ def makeplot(analysis, disc):
 
   hs = {}
   hstack = ROOT.THStack(disc, "")
-  l = ROOT.TLegend(.4, .5, .85, .9)
+  l = ROOT.TLegend(.4, .5, .85 if analysis == "fL1Zg" else .78, .9)
   l.SetBorderSize(0)
   l.SetFillStyle(0)
   c = ROOT.TCanvas()
@@ -56,6 +56,7 @@ def makeplot(analysis, disc):
       normalizeto1=True,
       color=color,
     )
+    h.SetLineWidth(2)
     hstack.Add(h)
     l.AddEntry(h, title, "l")
 
