@@ -27,8 +27,8 @@ if __name__ == "__main__":
         print "Total signal:   {:.2f}".format(sum(exp[p,flavor,category] for p in productionmodes if not p.isbkg))
         print "Total bkg:      {:.2f}".format(sum(exp[p,flavor,category] for p in productionmodes if p.isbkg))
         print "Total expected: {:.2f}".format(sum(exp[p,flavor,category] for p in productionmodes))
-        print "Observed:", tfiles[DataTree(production, flavor, category).treefile].candTree.GetEntries()
-        totalobs += tfiles[DataTree(production, flavor, category).treefile].candTree.GetEntries()
+        print "Observed:", tfiles[DataTree(production, flavor, category, *sys.argv[1:]).treefile].candTree.GetEntries()
+        totalobs += tfiles[DataTree(production, flavor, category, *sys.argv[1:]).treefile].candTree.GetEntries()
         print
     print
 
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     print
     print fmt.format(*(["bkg"] + ["{:.2f}".format(totalbkg[f]) for f in flavors] + ["{:.2f}".format(sum(totalbkg[f] for f in flavors))]))
     print fmt.format(*(["signal"] + ["{:.2f}".format(totalsig[f]) for f in flavors] + ["{:.2f}".format(sum(totalsig[f] for f in flavors))]))
-    print fmt.format(*(["observed"] + [sum(tfiles[DataTree(production, flavor, category).treefile].candTree.GetEntries() for production in config.productionsforcombine) for flavor in flavors] + [""]))
+    print fmt.format(*(["observed"] + [sum(tfiles[DataTree(production, flavor, category, *sys.argv[1:]).treefile].candTree.GetEntries() for production in config.productionsforcombine) for flavor in flavors] + [""]))
     print
     print
   print "Total:"

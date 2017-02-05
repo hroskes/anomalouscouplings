@@ -266,6 +266,14 @@ class TemplatesFile(MultiEnum):
 
         return invertedmatrix
 
+    def getjson(self):
+        return {
+                "inputDirectory": "step3_withdiscriminants/",
+                "outputFile": self.templatesfile(),
+                "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
+               }
+
+
 def listfromiterator(function):
     return list(function())
 
@@ -610,48 +618,44 @@ class Template(TemplateBase, MultiEnum):
       return result
 
     def getjson(self):
-        jsn = {
-               "templates": [
-                 {
-                   "name": self.templatename(final=False),
-                   "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
-                   "tree": "candTree",
-                   "variables": [d.name for d in self.discriminants],
-                   "weight": self.weightname(),
-                   "selection": self.selection,
-                   "binning": {
-                     "type": "fixed",
-                     "bins": self.binning,
-                   },
-                   "conserveSumOfWeights": True,
-                   "postprocessing": self.postprocessingjson,
-                   "filloverflows": True,
-                  },
-                ],
-              }
+        jsn = [
+               {
+                "name": self.templatename(final=False),
+                "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
+                "tree": "candTree",
+                "variables": [d.name for d in self.discriminants],
+                "weight": self.weightname(),
+                "selection": self.selection,
+                "binning": {
+                  "type": "fixed",
+                  "bins": self.binning,
+                },
+                "conserveSumOfWeights": True,
+                "postprocessing": self.postprocessingjson,
+                "filloverflows": True,
+               },
+              ]
 
         if self.domirror:
-            mirrorjsn = {
-                          "templates":[
-                            {
-                              "name":self.templatename(final=True),
-                              "templatesum":[
-                                {"name":self.templatename(final=False),"factor":1.0},
-                              ],
-                              "postprocessing":[
-                                {"type":"mirror", "axis":1},
-                                {"type":"floor"},
-                              ],
-                            },
+            mirrorjsn = [
+                         {
+                          "name":self.templatename(final=True),
+                          "templatesum":[
+                            {"name":self.templatename(final=False),"factor":1.0},
                           ],
-                        }
-            jsn["templates"] += mirrorjsn["templates"]
+                          "postprocessing":[
+                            {"type":"mirror", "axis":1},
+                            {"type":"floor"},
+                          ],
+                         },
+                        ]
+            jsn += mirrorjsn
         else:
-            jsn["templates"][0]["postprocessing"].append({"type": "floor"})
+            jsn[0]["postprocessing"].append({"type": "floor"})
 
         if self.productionmode == "data":
-            del jsn["templates"][0]["postprocessing"]
-            del jsn["templates"][0]["weight"]
+            del jsn[0]["postprocessing"]
+            del jsn[0]["weight"]
 
         return jsn
 
@@ -766,18 +770,16 @@ class IntTemplate(TemplateBase, MultiEnum):
                                 "name": template.templatename(final=False),
                                 "factor": invertedmatrix[rowofinvertedmatrix,j] * multiplyby,
                                })
-        intjsn = {
-                   "templates":[
-                     {
-                       "name": self.templatename(),
-                       "templatesum":templatesum,
-                       "postprocessing":[],
-                     },
-                   ],
-                 }
+        intjsn = [
+                  {
+                   "name": self.templatename(),
+                   "templatesum":templatesum,
+                   "postprocessing":[],
+                  },
+                 ]
 
         if self.domirror:
-            intjsn["templates"][0]["postprocessing"].append(self.mirrorjsn)
+            intjsn[0]["postprocessing"].append(self.mirrorjsn)
         return intjsn
 
 
