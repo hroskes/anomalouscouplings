@@ -17,7 +17,7 @@ class PrintFormat(MyEnum):
     @property
     def printformat(self):
         if self == "latex":
-            return "${min:.2g}^{{{pluscl:+.2g}}}_{{{minuscl:+.2g}}}$ $ {95%}$"
+            return "${min:.2g}^{{{pluscl:+.2g}}}_{{{minuscl:+.2g}}}$ ${95%}$"
         if self == "ppt":
             return "{min:.2g}^({pluscl:+.2g})_({minuscl:+.2g}) {95%}"
         assert False
