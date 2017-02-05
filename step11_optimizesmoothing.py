@@ -36,12 +36,12 @@ def iterate(smoothingparametersdict, iternumber):
             if nextiteration is None:
                 continue
             nextiteration, message = nextiteration
-            previousparameters = deepcopy(template.smoothingparameters)
+            previousparameters = deepcopy(template.smoothingparameters[0])
             if nextiteration == previousparameters and os.path.exists(template.templatefile()):  #shouldn't be able to happen, but just in case
                 continue
             anychange = True
 
-            template.smoothingparameters[:] = nextiteration
+            template.smoothingparameters[0][:] = nextiteration
 
             messages[template] = message
 
@@ -121,7 +121,7 @@ def runiteration(iternumber):
             return
     elif smoothingparametersdict["iteration"] == iternumber-1:
         if any(
-               any(_2.smoothingparameters != [None, None, None] for _2 in _.templates())
+               any(_2.smoothingparameters[0] != [None, None, None] for _2 in _.templates())
                  and not os.path.exists(_.templatesfile()) for _ in templatesfiles
               ):
             raise IOError("Some templates have smoothing parameters defined but do not exist.  Please run the {}th iteration again.".format(iternumber-1))

@@ -571,19 +571,22 @@ class Template(TemplateBase, MultiEnum):
               str(self.shapesystematic),
               str(self.production),
              )
-      return getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])
+      result = getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])
+      if len(result) == 3:
+          result = (result, None)
+      return result
 
     @property
     def smoothentriesperbin(self):
-      return self.smoothingparameters[0]
+      return self.smoothingparameters[0][0]
 
     @property
     def reweightaxes(self):
-      return self.smoothingparameters[1]
+      return self.smoothingparameters[0][1]
 
     @property
     def reweightrebin(self):
-      result = self.smoothingparameters[2]
+      result = self.smoothingparameters[0][2]
       #validation
       if result is not None:
         if len(result) != 3:
@@ -603,6 +606,10 @@ class Template(TemplateBase, MultiEnum):
               if not is_almost_integer(shouldbeint):
                 raise ValueError("({bin}-{min}) * {bins} / ({max}-{min}) = {!r} in reweightrebin for {!r} axis {} is not an integer\n{}".format(shouldbeint, self, axis, _, bin=bin_, min=disc.min, max=disc.max, bins=disc.bins))
       return result
+
+    @property
+    def customsmoothingkwargs(self):
+      return self.smoothingparameters[1]
 
     @property
     def postprocessingjson(self):

@@ -681,7 +681,7 @@ class TemplateIterate(Template):
         if not os.path.exists(self.templatefile()):
             return [None, None, None], "0th iteration-->run with no smoothing"
 
-        if self.smoothingparameters[0] is None:
+        if self.smoothingparameters[0][0] is None:
             #first iteration --> try smoothing with reweight on all axes, with no rebinning
             #                    200 bins if possible, as in the TemplateBuilder examples
             #                    but maximum of 4 bins in the template
@@ -703,7 +703,7 @@ class TemplateIterate(Template):
                                     )
         if baddiscriminants:
             cansmoothmore = True
-            entriesperbin = self.smoothingparameters[0]
+            entriesperbin = self.smoothingparameters[0][0]
             neffectiveentries = self.controlplots[0].GetEffectiveEntries("raw")  #effective entries should be the same for any axis
             nbins = neffectiveentries / entriesperbin
             if nbins >= 20:
@@ -728,14 +728,14 @@ class TemplateIterate(Template):
                 return [entriesperbin, [0, 1, 2], None], message
 
         #find increasing/decreasing ranges that were not properly smoothed away
-        if self.smoothingparameters[2] is None:
-            self.smoothingparameters[2] = [None, None, None]
+        if self.smoothingparameters[0][2] is None:
+            self.smoothingparameters[0][2] = [None, None, None]
         reweightbinnings = [
                             ReweightBinning(axis, disc.bins)
                               if axis is not None
                               else
                             ReweightBinning([], disc.bins, disc.min, disc.max)
-                              for axis, disc in zip(self.smoothingparameters[2], self.discriminants)
+                              for axis, disc in zip(self.smoothingparameters[0][2], self.discriminants)
                            ]
         for controlplot, binning in zip(self.controlplots, reweightbinnings):
             for range in controlplot.rangesthatshouldnotbereweighted:
@@ -743,12 +743,12 @@ class TemplateIterate(Template):
 
         newreweightbinning = [binning.reweightbinning for binning in reweightbinnings]
         baddiscriminants = ", ".join(
-                                     disc.name for disc, oldbinning, newbinning in zip(self.discriminants, self.smoothingparameters[2], newreweightbinning)
+                                     disc.name for disc, oldbinning, newbinning in zip(self.discriminants, self.smoothingparameters[0][2], newreweightbinning)
                                        if oldbinning != newbinning
                                     )
         if baddiscriminants:
             message += "Reweighting with automatic rebinning did not work for {}.  Removing the bad ranges.".format(baddiscriminants)
-            return [self.smoothingparameters[0], self.smoothingparameters[1], newreweightbinning], message
+            return [self.smoothingparameters[0][0], self.smoothingparameters[0][1], newreweightbinning], message
 
         return None
 
