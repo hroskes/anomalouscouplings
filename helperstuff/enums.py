@@ -428,7 +428,6 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        from datetime import date
         if self == "170119": return 36.8
         assert False
     def __int__(self):
