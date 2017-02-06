@@ -14,6 +14,7 @@ def callfunction(hsmooth, rawprojections, **kwargs):
         name = kwargs["name"].lower()
         del kwargs["name"]
     else:
+        if kwargs: raise ValueError("No function name given! {}".format(kwargs))
         name = "donothing"
     return functions[name](hsmooth, rawprojections, **kwargs)
 
