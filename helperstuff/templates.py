@@ -288,7 +288,7 @@ class TemplatesFile(MultiEnum):
     def docustomsmoothing(self):
         if not self.hascustomsmoothing: return
         newf = ROOT.TFile(self.templatesfile(), "RECREATE")
-        oldf = ROOT.TFile(self.templatesfile(firststep=True)
+        oldf = ROOT.TFile(self.templatesfile(firststep=True))
         for template in self.templates()+self.oldtemplates():
             getattr(oldf, template.templatename()).SetDirectory(newf)
         controlplotsdir = newf.mkdir("controlPlots")
@@ -603,7 +603,7 @@ class Template(TemplateBase, MultiEnum):
              )
       result = getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])
       if len(result) == 3:
-          result = (result, None)
+          result = [result, None]
       return result
 
     @property
@@ -643,7 +643,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def hascustomsmoothing(self):
-        return bool(self.hascustomsmoothingkwargs)
+        return bool(self.customsmoothingkwargs)
 
     @property
     def postprocessingjson(self):

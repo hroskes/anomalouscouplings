@@ -23,6 +23,9 @@ def buildtemplates(*args):
         if f:
             if not os.path.exists(templatesfile.templatesfile()):
                 subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
+            if not os.path.exists(templatesfile.templatesfile(firststep=True)):
+                raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile(firststep=True)))
+            templatesfile.docustomsmoothing()
             if not os.path.exists(templatesfile.templatesfile()):
                 raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))
 

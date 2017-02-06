@@ -17,7 +17,7 @@ def customsmoothing(hsmooth, rawprojections, **kwargs):
     newcontrolplots = []
     for i, rawprojection in enumerate(rawprojections):
         smoothprojection = hsmooth.Projection(i)
-        plotname = "control_{}_projAxis{}_after{}".format(hsmooth.GetName(), i, kwargs["name"])
+        plotname = "control_{}_projAxis{}_afterCustomSmoothing".format(hsmooth.GetName(), i)
         rawname = plotname+"_raw"
         projname = plotname+"_proj"
 
