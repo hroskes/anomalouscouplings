@@ -1,3 +1,6 @@
+from collections import OrderedDict
+from itertools import izip
+
 import ROOT
 
 def Integral(hist3d, binx1, binx2, biny1, biny2, binz1, binz2, option=""):
@@ -8,9 +11,7 @@ def SetBinContent(hist3d, binx, biny, binz, content):
     return hist3d.SetBinContent(binx, biny, binz, content)
 
 def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], axesright=[]):
-    newh = h.Clone("h_reweightthingwithobviouspeak")
-
-    for axis in axesleft, axesright:
+    for axis in axesleft+axesright:
         if axis not in axes:
             raise ValueError("{} in axesleft or axesright but not in axes".format(axis))
 
@@ -20,15 +21,16 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
         if not leftpeak and not rightpeak: raise ValueError("{} in axes but not in axesleft or axesright".format(axis))
 
         proj = hsmooth.Projection(abs(axis))
-        raw = rawprojections
+        raw = rawprojections[axis]
 
         content = raw.GetBinContent
         error = raw.GetBinError
 
-        nbins = h.GetNbinsX()
+        nbins = raw.GetNbinsX()
+        assert nbins == proj.GetNbinsX()
 
-        if leftpeak and content(1) < 2*content(2): raise ValueError("Histogram does not have an obvious left peak! {} {}".format(content(1), content(2)))
-        if rightpeak and content(nbins) < 2*content(nbins-1): raise ValueError("Histogram does not have an obvious right peak! {} {}".format(content(nbins), content(nbins-1)))
+        if leftpeak and content(1) < 1.5*content(2): raise ValueError("Histogram does not have an obvious left peak! {} {}".format(content(1), content(2)))
+        if rightpeak and content(nbins) < 1.5*content(nbins-1): raise ValueError("Histogram does not have an obvious right peak! {} {}".format(content(nbins), content(nbins-1)))
 
         tailrange = [1, nbins]
 
@@ -58,28 +60,29 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
         for i in range(tailrange[1]+1, nbins+1):
             setcontent[i] = raw.GetBinContent(i)
 
-        thisaxis = "xyz".index(axis)
-        otheraxes = [axisname for axisname in "xyz" if otheraxis != thisaxis]
+        thisaxis = "xyz"[axis]
+        otheraxes = [axisname for axisname in "xyz" if axisname != thisaxis]
         assert len(otheraxes) == 2
 
-        for otheraxisbins in izip(xrange(getattr(h, "GetNbins{}".format(_.upper()))) for _ in otheraxes):
-            integralkwargs = {}
-            setbincontentkwargs = {}
-            for otheraxis, otheraxisbin in zip(otheraxes, otheraxisbins):
-                integralkwargs["bin{}1".format(otheraxis)] = \
-                integralkwargs["bin{}2".format(otheraxis)] = \
-                setbincontentkwargs["bin{}".format(otheraxis)] = otheraxisbin
+        otheraxisbins = [None, None]
+
+        for otheraxisbins[0] in xrange(getattr(hsmooth, "GetNbins{}".format(otheraxes[0].upper()))()):
+            for otheraxisbins[1] in xrange(getattr(hsmooth, "GetNbins{}".format(otheraxes[1].upper()))()):
+                integralkwargs = {}
+                setbincontentkwargs = {}
+                for otheraxis, otheraxisbin in zip(otheraxes, otheraxisbins):
+                    integralkwargs["bin{}1".format(otheraxis)] = \
+                    integralkwargs["bin{}2".format(otheraxis)] = \
+                    setbincontentkwargs["bin{}".format(otheraxis)] = otheraxisbin
 
                 integralkwargs["bin{}1".format(thisaxis)] = integralkwargs["bin{}2".format(thisaxis)] = 0
 
-                sliceintegral = Integral(h, **integralkwargs)
+                sliceintegral = Integral(hsmooth, **integralkwargs)
                 sliceintegral_beforenormalization = sum(setcontent.values())
                 ratio = sliceintegral / sliceintegral_beforenormalization
 
                 for binnumber, value in setcontent.iteritems():
-                     setbincontentkwargs["bin{}".format(thisaxis)] = binnumber
-                     setbincontentkwargs["content"] = value*ratio
+                    setbincontentkwargs["bin{}".format(thisaxis)] = binnumber
+                    setbincontentkwargs["content"] = value*ratio
 
-                     SetBinContent(newh, **setbincontentkwargs)
-
-    return newh
+                    SetBinContent(hsmooth, **setbincontentkwargs)

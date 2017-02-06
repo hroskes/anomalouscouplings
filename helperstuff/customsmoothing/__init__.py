@@ -1,3 +1,5 @@
+import ROOT
+
 from rootoverloads import histogramaxisnumbers
 
 from reweightthingwithobviouspeak import reweightthingwithobviouspeak
@@ -7,13 +9,14 @@ functions = {_.__name__: _ for _ in [reweightthingwithobviouspeak]}
 def callfunction(hsmooth, rawprojections, **kwargs):
     name = kwargs["name"].lower()
     del kwargs["name"]
-    return functions[name](*args, **kwargs)
+    return functions[name](hsmooth, rawprojections, **kwargs)
 
 cache = []
 
 def customsmoothing(hsmooth, rawprojections, **kwargs):
-    newh = callfunction(**kwargs)
-    cache.append(newh)
+    print "customsmoothing({!r}, {!r}, **{!r})".format(hsmooth, rawprojections, kwargs)
+    callfunction(hsmooth, rawprojections, **kwargs)
+    cache.append(hsmooth)
     newcontrolplots = []
     for i, rawprojection in enumerate(rawprojections):
         smoothprojection = hsmooth.Projection(i)
@@ -34,8 +37,10 @@ def customsmoothing(hsmooth, rawprojections, **kwargs):
         rawprojection.Draw()
         smoothprojection.Draw("hist same")
 
-        newcontrolplots.Append(c)
+        newcontrolplots.append(c)
+        cache.append(c)
         cache.append(rawprojection)
         cache.append(smoothprojection)
 
-    return newh, newcontrolplots
+    for _ in cache: print _.GetName()
+    return newcontrolplots

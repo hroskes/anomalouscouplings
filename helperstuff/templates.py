@@ -289,20 +289,26 @@ class TemplatesFile(MultiEnum):
         if not self.hascustomsmoothing: return
         newf = ROOT.TFile(self.templatesfile(), "RECREATE")
         oldf = ROOT.TFile(self.templatesfile(firststep=True))
-        for template in self.templates()+self.oldtemplates():
-            getattr(oldf, template.templatename()).SetDirectory(newf)
+        newf.cd()
+
+        thetemplates = {template: {getattr(oldf, template.templatename(final=False)), getattr(oldf, template.templatename(final=True))} for template in self.templates()+self.inttemplates()}
+
         controlplotsdir = newf.mkdir("controlPlots")
+        controlplotsdir.cd()
         for key in oldf.controlPlots.GetListOfKeys():
-            key.ReadObj().SetDirectory(controlplotsdir)
+            key.ReadObj().Write()
 
         for template in self.templates()+self.inttemplates():
-            if not template.hascustomsmoothing: continue
-            for newh, newcontrolplots in template.docustomsmoothing():
-                newh.SetDirectory(newf)
-                for controlplot in newcontrolplots:
-                    newcontrolplots.SetDirectory(controlplotsdir)
-
-        newf.Write()
+            print "=================="
+            print template
+            print "=================="
+            newcontrolplots = template.docustomsmoothing()
+            newf.cd()
+            for t in thetemplates[template]:
+                t.Write()
+            for newcontrolplot in newcontrolplots:
+                controlplotsdir.cd()
+                newcontrolplot.Write()
 
 def listfromiterator(function):
     return list(function())
@@ -717,16 +723,27 @@ class Template(TemplateBase, MultiEnum):
         return ReweightingSample(self.hypothesis, self.productionmode)
 
     def docustomsmoothing(self):
-        if not self.hascustomsmoothing: return
+        if not self.hascustomsmoothing: return []
+
         f = ROOT.TFile(self.templatesfile.templatesfile(firststep=True))
         h = getattr(f, self.templatename(final=False))
-        rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterFill".format(self.name, i)).GetListOfPrimitives()[0]
+        rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterFill".format(self.templatename(final=False), i)).GetListOfPrimitives()[0]
                               for i in range(3)]
-        result = [customsmoothing.customsmoothing(h, rawprojections, **self.customsmoothingkwargs)]
+        try:
+            result = customsmoothing.customsmoothing(h, rawprojections, **self.customsmoothingkwargs)
+        except:
+            print "Error while smoothing {}:".format(self.templatename(final=False))
+            raise
         if self.domirror:
-            assert 1 not in self.customsmoothingargs["axes"]
-            hmirror = getattr(f, self.templatename(final=False))
-            result += [customsmoothing.customsmoothing(hmirror, rawprojections, **self.customsmoothingkwargs)]
+            assert 1 not in self.customsmoothingkwargs["axes"]
+            hmirror = getattr(f, self.templatename(final=True))
+            try:
+                result += customsmoothing.customsmoothing(hmirror, rawprojections, **self.customsmoothingkwargs)
+            except:
+                print "Error while custom smoothing {}:".format(self.templatename(final=True))
+                raise
+
+        return result
 
 class IntTemplate(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta

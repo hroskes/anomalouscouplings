@@ -46,6 +46,7 @@ def makecontrolplots(*args, **kwargs):
                                      .replace("afterFloor", "after4Floor")
                                      .replace("afterNormalization", "after5Normalization")
                                      .replace("afterMirror", "after6Mirror")
+                                     .replace("afterCustomSmoothing", "after7CustomSmoothing")
              )
       for ext in exts:
         c1.SaveAs("{}/{}.{}".format(saveasdir, name, ext))
