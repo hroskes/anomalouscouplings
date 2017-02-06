@@ -1,7 +1,5 @@
 import ROOT
 
-from rootoverloads import histogramaxisnumbers
-
 def Integral(hist3d, binx1, binx2, biny1, biny2, binz1, binz2, option=""):
     #wrapper to allow kwargs
     return hist3d.Integral(binx1, binx2, biny1, biny2, binz1, binz2, option)

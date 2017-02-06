@@ -1,11 +1,15 @@
 import abc
-import config
-from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
 from itertools import product
 import json
 from math import isnan
-import numpy
 import os
+import ROOT
+
+import numpy
+
+import config
+import customsmoothing
+from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
 from samples import ReweightingSample, Sample, SampleBasis
 from utilities import cache, getnesteddictvalue, is_almost_integer, jsonloads, tfiles
 
@@ -44,7 +48,7 @@ class TemplatesFile(MultiEnum):
 
         return result
 
-    def templatesfile(self, iteration=None):
+    def templatesfile(self, iteration=None, firststep=False):
         folder = os.path.join(config.repositorydir, "step7_templates")
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
@@ -52,6 +56,7 @@ class TemplatesFile(MultiEnum):
                 raise IOError("No folder {}".format(folder))
 
         nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic if config.applyshapesystematics else "", self.production]
+        if firststep: nameparts.append("firststep")
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
@@ -269,10 +274,35 @@ class TemplatesFile(MultiEnum):
     def getjson(self):
         return {
                 "inputDirectory": "step3_withdiscriminants/",
-                "outputFile": self.templatesfile(),
+                "outputFile": self.templatesfile(firststep=self.hascustomsmoothing),
                 "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
                }
 
+    @property
+    def hascustomsmoothing(self):
+        result = any(_.hascustomsmoothing for _ in self.templates() + self.inttemplates())
+        if self.inttemplates():
+            assert not result, self
+        return result
+
+    def docustomsmoothing(self):
+        if not self.hascustomsmoothing: return
+        newf = ROOT.TFile(self.templatesfile(), "RECREATE")
+        oldf = ROOT.TFile(self.templatesfile(firststep=True)
+        for template in self.templates()+self.oldtemplates():
+            getattr(oldf, template.templatename()).SetDirectory(newf)
+        controlplotsdir = newf.mkdir("controlPlots")
+        for key in oldf.controlPlots.GetListOfKeys():
+            key.ReadObj().SetDirectory(controlplotsdir)
+
+        for template in self.templates()+self.inttemplates():
+            if not template.hascustomsmoothing: continue
+            newh, newcontrolplots = template.docustomsmoothing()
+            newh.SetDirectory(newf)
+            for controlplot in newcontrolplots:
+                newcontrolplots.SetDirectory(controlplotsdir)
+
+        newf.Write()
 
 def listfromiterator(function):
     return list(function())
@@ -612,6 +642,10 @@ class Template(TemplateBase, MultiEnum):
       return self.smoothingparameters[1]
 
     @property
+    def hascustomsmoothing(self):
+        return bool(self.hascustomsmoothingkwargs)
+
+    @property
     def postprocessingjson(self):
       result = []
       if self.smoothentriesperbin:
@@ -681,6 +715,15 @@ class Template(TemplateBase, MultiEnum):
     @property
     def sample(self):
         return ReweightingSample(self.hypothesis, self.productionmode)
+
+    def docustomsmoothing(self):
+        if not self.hascustomsmoothing: return
+        assert not self.domirror
+        f = ROOT.TFile(self.templatesfile.templatesfile(firststep=True))
+        h = getattr(f, self.templatename)
+        rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterFill".format(self.name, i)).GetListOfPrimitives()[0]
+                              for i in range(3)]
+        return customsmoothing.customsmoothing(h, rawprojections, **self.customsmoothingkwargs)
 
 class IntTemplate(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
@@ -789,6 +832,13 @@ class IntTemplate(TemplateBase, MultiEnum):
             intjsn[0]["postprocessing"].append(self.mirrorjsn)
         return intjsn
 
+    @property
+    def hascustomsmoothing(self):
+        return False
+
+    def docustomsmoothing(self):
+        if not self.hascustomsmoothing: return
+        assert False
 
 class DataTree(MultiEnum):
     enums = [Channel, Production, Category, Analysis]
