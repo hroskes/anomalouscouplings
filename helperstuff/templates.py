@@ -718,7 +718,7 @@ class Template(TemplateBase, MultiEnum):
     def docustomsmoothing(self, newf, controlplotsdir):
         f = ROOT.TFile(self.templatesfile.templatesfile(firststep=True))
         h = getattr(f, self.templatename(final=False))
-        rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterFill".format(self.templatename(final=False), i)).GetListOfPrimitives()[0]
+        rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterNormalization".format(self.templatename(final=False), i)).GetListOfPrimitives()[0]
                               for i in range(3)]
         try:
             customsmoothing.customsmoothing(h, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)

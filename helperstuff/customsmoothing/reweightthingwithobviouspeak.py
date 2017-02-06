@@ -44,19 +44,25 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
             while content(tailrange[1])-error(tailrange[1]) > content(tailrange[1]-1)+error(tailrange[1]-1):
                 tailrange[1] -= 1
 
-        leftpeakintegral = rightpeakintegral = 0
+        rawleftpeakintegral = rawrightpeakintegral = smoothleftpeakintegral = smoothrightpeakintegral = 0
         if leftpeak:
-            leftpeakintegral = raw.Integral(1, tailrange[0]-1)
-        tailintegral = raw.Integral(*tailrange)
+            rawleftpeakintegral = raw.Integral(1, tailrange[0]-1)
+            smoothleftpeakintegral = proj.Integral(1, tailrange[0]-1)
+        rawtailintegral = raw.Integral(*tailrange)
         smoothtailintegral = proj.Integral(*tailrange)
         if rightpeak:
-            leftpeakintegral = raw.Integral(tailrange[1]+1, nbins)
+            rawrightpeakintegral = raw.Integral(tailrange[1]+1, nbins)
+            smoothrightpeakintegral = raw.Integral(tailrange[1]+1, nbins)
 
         setcontent = OrderedDict()
         for i in range(1, tailrange[0]):
             setcontent[i] = raw.GetBinContent(i)
         for i in range(tailrange[0], tailrange[1]+1):
-            setcontent[i] = proj.GetBinContent(i) * tailintegral / smoothtailintegral
+            setcontent[i] = (
+                             proj.GetBinContent(i)
+                                    * rawtailintegral / (rawleftpeakintegral + rawtailintegral + rawrightpeakintegral)
+                                    / (smoothtailintegral / (smoothleftpeakintegral + smoothtailintegral + smoothrightpeakintegral))
+                            )
         for i in range(tailrange[1]+1, nbins+1):
             setcontent[i] = raw.GetBinContent(i)
 
@@ -66,8 +72,8 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
 
         otheraxisbins = [None, None]
 
-        for otheraxisbins[0] in xrange(getattr(hsmooth, "GetNbins{}".format(otheraxes[0].upper()))()):
-            for otheraxisbins[1] in xrange(getattr(hsmooth, "GetNbins{}".format(otheraxes[1].upper()))()):
+        for otheraxisbins[0] in xrange(1, getattr(hsmooth, "GetNbins{}".format(otheraxes[0].upper()))()+1):
+            for otheraxisbins[1] in xrange(1, getattr(hsmooth, "GetNbins{}".format(otheraxes[1].upper()))()+1):
                 integralkwargs = {}
                 setbincontentkwargs = {}
                 for otheraxis, otheraxisbin in zip(otheraxes, otheraxisbins):
@@ -75,7 +81,7 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
                     integralkwargs["bin{}2".format(otheraxis)] = \
                     setbincontentkwargs["bin{}".format(otheraxis)] = otheraxisbin
 
-                integralkwargs["bin{}1".format(thisaxis)] = integralkwargs["bin{}2".format(thisaxis)] = 0
+                integralkwargs["bin{}1".format(thisaxis)] = integralkwargs["bin{}2".format(thisaxis)] = -1
 
                 sliceintegral = Integral(hsmooth, **integralkwargs)
                 sliceintegral_beforenormalization = sum(setcontent.values())
