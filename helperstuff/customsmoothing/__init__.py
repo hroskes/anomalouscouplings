@@ -4,20 +4,24 @@ from rootoverloads import histogramaxisnumbers
 
 from reweightthingwithobviouspeak import reweightthingwithobviouspeak
 
-functions = {_.__name__: _ for _ in [reweightthingwithobviouspeak]}
+def donothing(hsmooth, rawprojections, **kwargs):
+   """do nothing"""
+
+functions = {_.__name__: _ for _ in [reweightthingwithobviouspeak, donothing]}
 
 def callfunction(hsmooth, rawprojections, **kwargs):
-    name = kwargs["name"].lower()
-    del kwargs["name"]
+    if "name" in kwargs:
+        name = kwargs["name"].lower()
+        del kwargs["name"]
+    else:
+        name = "donothing"
     return functions[name](hsmooth, rawprojections, **kwargs)
 
-cache = []
-
-def customsmoothing(hsmooth, rawprojections, **kwargs):
-    print "customsmoothing({!r}, {!r}, **{!r})".format(hsmooth, rawprojections, kwargs)
+def customsmoothing(hsmooth, rawprojections, templatedirectory, controlplotsdirectory, **kwargs):
     callfunction(hsmooth, rawprojections, **kwargs)
-    cache.append(hsmooth)
     newcontrolplots = []
+    templatedirectory.cd()
+    hsmooth.Write()
     for i, rawprojection in enumerate(rawprojections):
         smoothprojection = hsmooth.Projection(i)
         plotname = "control_{}_projAxis{}_afterCustomSmoothing".format(hsmooth.GetName(), i)
@@ -37,10 +41,5 @@ def customsmoothing(hsmooth, rawprojections, **kwargs):
         rawprojection.Draw()
         smoothprojection.Draw("hist same")
 
-        newcontrolplots.append(c)
-        cache.append(c)
-        cache.append(rawprojection)
-        cache.append(smoothprojection)
-
-    for _ in cache: print _.GetName()
-    return newcontrolplots
+        controlplotsdirectory.cd()
+        c.Write()

@@ -299,16 +299,7 @@ class TemplatesFile(MultiEnum):
             key.ReadObj().Write()
 
         for template in self.templates()+self.inttemplates():
-            print "=================="
-            print template
-            print "=================="
-            newcontrolplots = template.docustomsmoothing()
-            newf.cd()
-            for t in thetemplates[template]:
-                t.Write()
-            for newcontrolplot in newcontrolplots:
-                controlplotsdir.cd()
-                newcontrolplot.Write()
+            newcontrolplots = template.docustomsmoothing(newf, controlplotsdir)
 
 def listfromiterator(function):
     return list(function())
@@ -610,6 +601,8 @@ class Template(TemplateBase, MultiEnum):
       result = getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])
       if len(result) == 3:
           result = [result, None]
+      if result[1] is None:
+          result[1] = {}
       return result
 
     @property
@@ -722,28 +715,24 @@ class Template(TemplateBase, MultiEnum):
     def sample(self):
         return ReweightingSample(self.hypothesis, self.productionmode)
 
-    def docustomsmoothing(self):
-        if not self.hascustomsmoothing: return []
-
+    def docustomsmoothing(self, newf, controlplotsdir):
         f = ROOT.TFile(self.templatesfile.templatesfile(firststep=True))
         h = getattr(f, self.templatename(final=False))
         rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterFill".format(self.templatename(final=False), i)).GetListOfPrimitives()[0]
                               for i in range(3)]
         try:
-            result = customsmoothing.customsmoothing(h, rawprojections, **self.customsmoothingkwargs)
+            customsmoothing.customsmoothing(h, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)
         except:
             print "Error while smoothing {}:".format(self.templatename(final=False))
             raise
         if self.domirror:
-            assert 1 not in self.customsmoothingkwargs["axes"]
+            assert "axes" not in self.customsmoothingkwargs or 1 not in self.customsmoothingkwargs["axes"]
             hmirror = getattr(f, self.templatename(final=True))
             try:
-                result += customsmoothing.customsmoothing(hmirror, rawprojections, **self.customsmoothingkwargs)
+                customsmoothing.customsmoothing(hmirror, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)
             except:
                 print "Error while custom smoothing {}:".format(self.templatename(final=True))
                 raise
-
-        return result
 
 class IntTemplate(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
