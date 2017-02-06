@@ -22,9 +22,11 @@ def buildtemplates(*args):
     with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
         if f:
             if not os.path.exists(templatesfile.templatesfile()):
-                subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
-            if not os.path.exists(templatesfile.templatesfile(firststep=True)):
+                if not os.path.exists(templatesfile.templatesfile(firststep=True)):
+                    subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
+            if templatesfile.hascustomsmoothing and not os.path.exists(templatesfile.templatesfile(firststep=True)):
                 raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile(firststep=True)))
+
             templatesfile.docustomsmoothing()
             if not os.path.exists(templatesfile.templatesfile()):
                 raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))

@@ -297,10 +297,10 @@ class TemplatesFile(MultiEnum):
 
         for template in self.templates()+self.inttemplates():
             if not template.hascustomsmoothing: continue
-            newh, newcontrolplots = template.docustomsmoothing()
-            newh.SetDirectory(newf)
-            for controlplot in newcontrolplots:
-                newcontrolplots.SetDirectory(controlplotsdir)
+            for newh, newcontrolplots in template.docustomsmoothing():
+                newh.SetDirectory(newf)
+                for controlplot in newcontrolplots:
+                    newcontrolplots.SetDirectory(controlplotsdir)
 
         newf.Write()
 
@@ -718,12 +718,15 @@ class Template(TemplateBase, MultiEnum):
 
     def docustomsmoothing(self):
         if not self.hascustomsmoothing: return
-        assert not self.domirror
         f = ROOT.TFile(self.templatesfile.templatesfile(firststep=True))
-        h = getattr(f, self.templatename)
+        h = getattr(f, self.templatename(final=False))
         rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterFill".format(self.name, i)).GetListOfPrimitives()[0]
                               for i in range(3)]
-        return customsmoothing.customsmoothing(h, rawprojections, **self.customsmoothingkwargs)
+        result = [customsmoothing.customsmoothing(h, rawprojections, **self.customsmoothingkwargs)]
+        if self.domirror:
+            assert 1 not in self.customsmoothingargs["axes"]
+            hmirror = getattr(f, self.templatename(final=False))
+            result += [customsmoothing.customsmoothing(hmirror, rawprojections, **self.customsmoothingkwargs)]
 
 class IntTemplate(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
