@@ -20,9 +20,9 @@ categories = list(Category(_) for _ in ("VBFtagged", "VHHadrtagged", "Untagged")
 channels = list(Channel(_) for _ in ("4e", "4mu", "2e2mu"))
 
 def categoryname(category):
-  if category == "VBFtagged": return "VBF jets"
-  if category == "VHHadrtagged": return "$\V\PH$ jets"
-  if category == "Untagged": return "Inclusive"
+  if category == "VBFtagged": return "VBF-jets"
+  if category == "VHHadrtagged": return "$\V\PH$-jets"
+  if category == "Untagged": return "untagged"
 
 def gettree(productionmode):
   t = ROOT.TChain("candTree")
