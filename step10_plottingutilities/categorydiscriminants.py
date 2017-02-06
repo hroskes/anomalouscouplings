@@ -4,7 +4,7 @@ import os
 
 import ROOT
 
-from helperstuff import config, style
+from helperstuff import config, stylefunctions
 from helperstuff.CJLSTscripts import getDZHhWP, getDWHhWP, getDVBF2jetsWP
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, Analysis
@@ -30,7 +30,7 @@ def makeplot(analysis, disc):
 
   lines = [
            Line(SM, "{} SM".format(productionmode), 1, bkpreweightfrom=ReweightingSample(productionmode, "0+")),
-           Line(BSM,                            "{} {}=1".format(productionmode, fainame), ROOT.kViolet+7, bkpreweightfrom=ReweightingSample(productionmode, "L1")),
+           Line(BSM,                            "{} {}=1".format(productionmode, analysis.title()), ROOT.kViolet+7, bkpreweightfrom=ReweightingSample(productionmode, "L1")),
            Line(mixplus,                        "{} {}=#plus0.5".format(productionmode, fainame), ROOT.kGreen+3, bkpreweightfrom=ReweightingSample(productionmode, "L1")),
            Line(mixminus,                       "{} {}=#minus0.5".format(productionmode, fainame), 4, mixplus, bkpreweightfrom=ReweightingSample(productionmode, "L1")),
            Line(ReweightingSample("ggH", "0+"), "ggH", 2),
@@ -43,7 +43,9 @@ def makeplot(analysis, disc):
   l = ROOT.TLegend(.4, .5, .85 if analysis == "fL1Zg" else .78, .9)
   l.SetBorderSize(0)
   l.SetFillStyle(0)
-  c = ROOT.TCanvas()
+  stylefunctions.applylegendstyle(l)
+  c = ROOT.TCanvas("c", "", 8, 30, 800, 800)
+  stylefunctions.applycanvasstyle(c)
 
   xaxislabel = discriminant(disc).title
 
@@ -61,7 +63,9 @@ def makeplot(analysis, disc):
     l.AddEntry(h, title, "l")
 
   hstack.Draw("hist nostack")
+  stylefunctions.applyaxesstyle(hstack)
   l.Draw()
+  c.Update()
 
   hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
 
