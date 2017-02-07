@@ -21,14 +21,14 @@ try:
 except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
-usedata = False
+usedata = True
 showblinddistributions = False
 unblinddistributions = False
 unblindscans = False
 applyshapesystematics = False
 useQGTagging = False
 
-assert unblindscans >= unblinddistributions >= showblinddistributions >= usedata
+assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
 expectedscanluminosity = 36.8
 

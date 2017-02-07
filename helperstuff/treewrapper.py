@@ -962,7 +962,7 @@ class TreeWrapper(Iterator):
         if self.isZX: return
         if self.treesample.productionmode == "ggZZ": return
 
-        if self.treesample.prorductionmode == "qqZZ":
+        if self.treesample.productionmode == "qqZZ":
             self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
             branch = array('d', [self.nevents])
             self.branches.append(branch) #so it stays alive until we do Fill()
@@ -982,12 +982,12 @@ class TreeWrapper(Iterator):
             tree.SetBranchStatus("LHEAssociated*", 1)
 
         reweightingsamples = self.treesample.reweightingsamples()
-        if self.treesample.prorductionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
+        if self.treesample.productionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
 
         functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in reweightingsamples}
         is2L2l = []
         flavs2L2l = {11*11*13*13, 11*11*15*15, 13*13*15*15}
-        if self.treesample.prorductionmode == "VBFbkg":
+        if self.treesample.productionmode == "VBFbkg":
             flavs2L2l |= {11**4, 13**4, 15**4}
 
         values = functionsandarrays.values()
