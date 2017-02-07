@@ -886,7 +886,7 @@ class TreeWrapper(Iterator):
                     for weightname, couplingsq in factor:
                         if "WH" in weightname and "ghza" in weightname: continue
                         self.genMEs.append(weightname)
-        if self.productionmode == "VBFbkg":
+        if self.treesample.productionmode == "VBFbkg":
             self.genMEs.append("p_Gen_JJQCD_BKG_MCFM")
 
     def onlyweights(self):
@@ -957,7 +957,19 @@ class TreeWrapper(Iterator):
         Do the initial loops through the tree to find, for each hypothesis,
         the cutoff and then the sum of weights for 2L2l
         """
-        if (self.isbkg and self.productionmode != "VBFbkg") or self.isPOWHEG or self.isdummy: return
+        if self.isPOWHEG: return
+        if self.isdummy: return
+        if self.isZX: return
+        if self.treesample.productionmode == "ggZZ": return
+
+        if self.treesample.prorductionmode == "qqZZ":
+            self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
+            branch = array('d', [self.nevents])
+            self.branches.append(branch) #so it stays alive until we do Fill()
+            self.effectiveentriestree.Branch(sample.weightname(), branch, sample.weightname()+"/D")
+            self.effectiveentriestree.Fill()
+            return
+
         print "Doing initial loop through tree"
         if self.failedtree is None: raise ValueError("No failedtree provided for {} which has reweighting!".format(self.treesample))
 
@@ -970,12 +982,12 @@ class TreeWrapper(Iterator):
             tree.SetBranchStatus("LHEAssociated*", 1)
 
         reweightingsamples = self.treesample.reweightingsamples()
-        if self.productionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
+        if self.treesample.prorductionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
 
         functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in reweightingsamples}
         is2L2l = []
         flavs2L2l = {11*11*13*13, 11*11*15*15, 13*13*15*15}
-        if self.productionmode == "VBFbkg":
+        if self.treesample.prorductionmode == "VBFbkg":
             flavs2L2l |= {11**4, 13**4, 15**4}
 
         values = functionsandarrays.values()

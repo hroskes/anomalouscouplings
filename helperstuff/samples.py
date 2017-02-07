@@ -315,7 +315,10 @@ class SampleBase(object):
             def MC_weight_function(self_tree):
                 if hasattr(self_tree, "KFactor_EW_qqZZ"): #qqZZ->itself
                     KFactor = self_tree.tree.KFactor_EW_qqZZ * self_tree.tree.KFactor_QCD_qqZZ_M
-                    return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
+                    return self_tree.overallEventWeight * self_tree.xsec * KFactor #/ self_tree.nevents
+                                                                                   #Do NOT divide by nevents.  This will happen
+                                                                                   #in creating the templates when we divide by
+                                                                                   #sum(effectiveentries[==nevents])
                 else:                                     #VBFbkg->qqZZ
                     result = self_tree.p_Gen_JJQCD_BKG_MCFM
                     if not reweightingonly and result != 0:
@@ -1141,6 +1144,9 @@ class Sample(ReweightingSample):
     @staticmethod
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
+        if reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data"):
+            assert reweightfrom == reweightto
+            return 1
         f = tfiles[reweightfrom.withdiscriminantsfile()]
         t = f.effectiveentries
         assert t.GetEntries() == 1, "{}???".format(t.GetEntries())

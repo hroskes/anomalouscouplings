@@ -537,11 +537,14 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def scalefactor(self):
-        if self.templategroup in ("bkg", "DATA"): return 1
         if self.productionmode in ("VBF", "ggH", "ZH", "WH"):
             result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
-        if self.productionmode == "ttH":
+        elif self.productionmode == "ttH":
             result = ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis).xsec / ReweightingSample(self.productionmode, "SM", "Hff0+").xsec
+        elif self.productionmode in ("VBF bkg", "ggZZ", "ZX", "data"):
+            result = len(self.reweightfrom())
+        elif self.productionmode == "qqZZ":
+            result = 1
         result /= sum(
                       Sample.effectiveentries(
                                               reweightfrom=reweightfrom,
@@ -550,6 +553,8 @@ class Template(TemplateBase, MultiEnum):
                        for reweightfrom in self.reweightfrom()
                      )
         if isnan(result): result = 0
+        if self.productionmode in ("VBF bkg", "ggZZ", "ZX", "data"):
+            assert result == 1
         return result
 
     @property
