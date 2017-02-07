@@ -412,18 +412,14 @@ class Analysis(MyEnum):
 class Production(MyEnum):
     enumname = "production"
     enumitems = (
-                 EnumItem("161221"),
-                 EnumItem("170119"),
+                 EnumItem("170203"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
-        if self == "161221":
+        if self == "170203":
             if config.host == "lxplus":
-                return "/afs/cern.ch/work/h/hroskes/public/reweighting_CJLST/CMSSW_8_0_24_patch1/src/ZZAnalysis/AnalysisStep/test/prod/anomalouscouplings/AAAOK"
-        if self == "170119":
-            if config.host == "lxplus":
-                return "/afs/cern.ch/work/h/hroskes/public/reweighting_CJLST/CMSSW_8_0_24_patch1/src/ZZAnalysis/AnalysisStep/test/prod/anomalouscouplings_Moriond/AAAOK"
+                return "root://lxcms03//data3/Higgs/170203"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -435,13 +431,13 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self == "170119": return 36.8
+        if self == "170203": return 36.8
         assert False
     def __int__(self):
         return int(str(self))
     @property
     def year(self):
-        if "170119" <= self:
+        if "170203" <= self:
             return 2016
         assert False
 

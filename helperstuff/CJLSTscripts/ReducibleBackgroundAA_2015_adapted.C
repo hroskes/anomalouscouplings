@@ -7,7 +7,7 @@ bool ZXsetup(int production, TString dir) {
   if (didsetup == production) return true;
   didsetup = production;
   delete fFakeRates;
-  if (production == 161221 || production == 170119) {
+  if (production == 170203) {
     fFakeRates = TFile::Open(dir+"/FakeRate_SS_2016D_hists.root");
     h1D_FRel_EB = (TH1F*)fFakeRates->Get("FR_SS_electron_EB");
     h1D_FRel_EE = (TH1F*)fFakeRates->Get("FR_SS_electron_EE");

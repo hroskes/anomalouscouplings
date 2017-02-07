@@ -146,14 +146,6 @@ def gettemplate(*args):
     except ValueError as e2:
         raise ValueError("Can't gettemplate using args:\n{}\n\nTrying to make a regular template:\n{}\n\nTrying to make an interference template:\n{}".format(args, e1.message, e2.message))
 
-    #############
-    from datetime import date
-    if date.today() > date(2017, 2, 8):
-        raise ValueError("VBF bkg 4mu??!")
-    if t.channel == "4mu" and t.productionmode == "VBFbkg":
-        return gettemplate(t.analysis, t.category, t.productionmode, t.production, "4e")
-    #############
-
     result = t.gettemplate()
     if isnan(result.Integral()):
         raise ValueError("{!r} has integral of nan!".format(t))
