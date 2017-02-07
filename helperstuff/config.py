@@ -21,7 +21,7 @@ try:
 except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
-usedata = True
+usedata = False
 showblinddistributions = False
 unblinddistributions = False
 unblindscans = False
