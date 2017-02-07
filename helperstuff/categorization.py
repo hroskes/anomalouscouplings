@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from CJLSTscripts import categoryIchep16, VBF2jTaggedIchep16, VHHadrTaggedIchep16
 import config
-from enums import Category, categories, HffHypothesis, Hypothesis, JECSystematic
+from enums import BTagSystematic, Category, categories, HffHypothesis, Hypothesis, JECSystematic
 from samples import ArbitraryCouplingsSample
 import re
 
@@ -18,8 +18,11 @@ class BaseCategorization(object):
     def __ne__(self, other): return not self == other
 
 class BaseSingleCategorization(BaseCategorization):
-    def __init__(self, JEC):
+    def __init__(self, JEC, btag):
         self.JEC = JECSystematic(JEC)
+        self.btag = BTagSystematic(btag)
+        if self.btag != "Nominal" and self.JEC != "Nominal":
+            raise ValueError("Can't have systematics on both btag and JEC at the same time! {}, {}".format(self.btag, self.JEC))
     @abstractproperty
     def g1(self): pass
     @abstractproperty
@@ -51,13 +54,13 @@ class BaseSingleCategorization(BaseCategorization):
     def pAux_variable_name(self): return "pAux_JVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC)
 
     @property
-    def njets_variable_name(self): return "nCleanedJetsPt30" + self.JEC.appendname.replace("JEC", "jec")
+    def njets_variable_name(self): return "nCleanedJetsPt30" + self.JEC.njetsappendname
     @property
-    def nbtagged_variable_name(self): return "nCleanedJetsPt30BTagged_bTagSF" + self.JEC.appendname.replace("JEC", "jec")
+    def nbtagged_variable_name(self): return "nCleanedJetsPt30BTagged" + self.btag.njetsappendname + self.JEC.njetsappendname
     @property
-    def phi_variable_name(self): return "jetPhi" + self.JEC.appendname.replace("JEC", "jec")
+    def phi_variable_name(self): return "jetPhi" + self.JEC.njetsappendname
     @property
-    def QGL_variable_name(self): return "jetQGLikelihood" + self.JEC.appendname.replace("JEC", "jec")
+    def QGL_variable_name(self): return "jetQGLikelihood" + self.JEC.njetsappendname
 
     @staticmethod
     def get_p_function(terms, multiplier, name):
@@ -176,7 +179,7 @@ class BaseSingleCategorization(BaseCategorization):
         return function
 
 class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
-    def __init__(self, g1, g2, g4, g1prime2, ghg2=1, ghg4=0, JEC="Nominal"):
+    def __init__(self, g1, g2, g4, g1prime2, ghg2=1, ghg4=0, JEC="Nominal", btag="Nominal"):
         self.__g1 = g1
         self.__g2 = g2
         self.__g4 = g4
@@ -186,7 +189,7 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
             raise ValueError("Can't use more than 1 of g2, g4, g1prime2, ghzgs1prime2")
         self.__ghg2 = ghg2
         self.__ghg4 = ghg4
-        super(ArbitraryCouplingsSingleCategorization, self).__init__(JEC)
+        super(ArbitraryCouplingsSingleCategorization, self).__init__(JEC=JEC, btag=btag)
 
     @property
     def g1(self): return self.__g1
@@ -213,12 +216,12 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
     def pWH_function_name(self): return "category_p_HadWH_SIG_{}_JHUGen_{}".format("_".join("{}_{}".format(name.replace("g", "ghw"), getattr(self, name)) for name in ("g1", "g2", "g4", "g1prime2")), self.JEC)
 
     @property
-    def category_function_name(self): return "category_{}".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4", "g1", "g2", "g4", "g1prime2"))) + self.JEC.appendname
+    def category_function_name(self): return "category_{}".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4", "g1", "g2", "g4", "g1prime2"))) + self.btag.appendname + self.JEC.appendname
 
 class SingleCategorizationFromSample(BaseSingleCategorization):
-    def __init__(self, sample, JEC="Nominal"):
+    def __init__(self, sample, JEC="Nominal", btag="Nominal"):
         self.sample = sample
-        super(SingleCategorizationFromSample, self).__init__(JEC)
+        super(SingleCategorizationFromSample, self).__init__(JEC=JEC, btag=btag)
 
     @property
     def g1(self): return self.sample.g1
@@ -265,7 +268,7 @@ class SingleCategorizationFromSample(BaseSingleCategorization):
 
     @property
     def category_function_name(self):
-        result = "category_{}".format(self.hypothesisname) + self.JEC.appendname
+        result = "category_{}".format(self.hypothesisname) + self.btag.appendname + self.JEC.appendname
         if self.sample.hffhypothesis:
             result += "_" + self.hffhypothesisname
         return result

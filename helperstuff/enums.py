@@ -297,6 +297,24 @@ class JECSystematic(MyEnum):
     def appendname(self):
         if self == "JECNominal": return ""
         return "_" + str(self)
+    @property
+    def njetsappendname(self):
+        return self.appendname.replace("JEC", "jec")
+
+class BTagSystematic(MyEnum):
+    enumname = "btagsystematic"
+    enumitems = (
+                 EnumItem("bTagSFNominal", "Nominal"),
+                 EnumItem("bTagSFUp", "Up"),
+                 EnumItem("bTagSFDn", "Dn"),
+                )
+    @property
+    def appendname(self):
+        if self == "bTagSFNominal": return ""
+        return "_" + str(self)
+    @property
+    def njetsappendname(self):
+        return "_"+str(self).replace("Nominal", "")
 
 class TemplateGroup(MyEnum):
     enumname = "templategroup"
@@ -493,6 +511,7 @@ if config.applyshapesystematics:
 else:
     shapesystematics = treeshapesystematics = ShapeSystematic.items(lambda x: x == "")
 JECsystematics = JECSystematic.items()
+btagsystematics = BTagSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5"))

@@ -162,7 +162,7 @@ class TreeWrapper(Iterator):
             t.GetEntry(self.__treeentry)
             if i > len(self):
                 raise StopIteration
-            if i % 10000 == 0 or i == len(self):
+            if i % 10000 == 0 or i == len(self) or True:
                 print i, "/", len(self)
                 #raise StopIteration
 
@@ -346,6 +346,8 @@ class TreeWrapper(Iterator):
 
         self.nCleanedJetsPt30 = t.nCleanedJetsPt30
         self.nCleanedJetsPt30BTagged_bTagSF = t.nCleanedJetsPt30BTagged_bTagSF
+        self.nCleanedJetsPt30BTagged_bTagSFUp = t.nCleanedJetsPt30BTagged_bTagSFUp
+        self.nCleanedJetsPt30BTagged_bTagSFDn = t.nCleanedJetsPt30BTagged_bTagSFDn
         self.jetQGLikelihood = t.JetQGLikelihood.data()
         self.jetPhi = t.JetPhi.data()
 
@@ -739,21 +741,23 @@ class TreeWrapper(Iterator):
 
     categorizations = []
     for JEC in enums.JECsystematics:
+      for btag in enums.btagsystematics:
+        if JEC != "Nominal" and btag != "Nominal": continue
         append = [
-            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "SM"), JEC),
-            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "0-"), JEC),
-            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "a2"), JEC),
-            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "L1"), JEC),
-            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "L1Zg"), JEC),
-            #categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "fa2prod-0.5"), JEC),
-            #categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "fL1prod0.5"), JEC),
+            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "SM"), JEC, btag),
+            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "0-"), JEC, btag),
+            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "a2"), JEC, btag),
+            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "L1"), JEC, btag),
+            categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "L1Zg"), JEC, btag),
+            #categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "fa2prod-0.5"), JEC, btag),
+            #categorization.SingleCategorizationFromSample(ReweightingSample("VBF", "fL1prod0.5"), JEC, btag),
         ]
         append += [
-            categorization.MultiCategorization("0P_or_{}".format(other.hypothesisname) + JEC.appendname, append[0], other)
+            categorization.MultiCategorization("0P_or_{}".format(other.hypothesisname) + btag.appendname + JEC.appendname, append[0], other)
                for other in append[1:]
         ]
         categorizations += append
-    del append, JEC, other
+    del append, btag, JEC, other
 
 #############
 #Init things#
