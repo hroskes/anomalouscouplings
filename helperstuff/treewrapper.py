@@ -886,6 +886,8 @@ class TreeWrapper(Iterator):
                     for weightname, couplingsq in factor:
                         if "WH" in weightname and "ghza" in weightname: continue
                         self.genMEs.append(weightname)
+        if self.productionmode == "VBFbkg":
+            self.genMEs.append("p_Gen_JJQCD_BKG_MCFM")
 
     def onlyweights(self):
         """Call this to only add the weights and ZZMass to the new tree"""
@@ -955,7 +957,7 @@ class TreeWrapper(Iterator):
         Do the initial loops through the tree to find, for each hypothesis,
         the cutoff and then the sum of weights for 2L2l
         """
-        if self.isbkg or self.isPOWHEG or self.isdummy: return
+        if (self.isbkg and self.productionmode != "VBFbkg") or self.isPOWHEG or self.isdummy: return
         print "Doing initial loop through tree"
         if self.failedtree is None: raise ValueError("No failedtree provided for {} which has reweighting!".format(self.treesample))
 
@@ -967,12 +969,18 @@ class TreeWrapper(Iterator):
             tree.SetBranchStatus("LHEDaughter*", 1)
             tree.SetBranchStatus("LHEAssociated*", 1)
 
-        functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in self.treesample.reweightingsamples()}
+        reweightingsamples = self.treesample.reweightingsamples()
+        if self.productionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
+
+        functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in reweightingsamples}
         is2L2l = []
         flavs2L2l = {11*11*13*13, 11*11*15*15, 13*13*15*15}
+        if self.productionmode == "VBFbkg":
+            flavs2L2l |= {11**4, 13**4, 15**4}
+
         values = functionsandarrays.values()
         #will fail if multiple have the same str() which would make no sense
-        assert len(functionsandarrays) == len(self.treesample.reweightingsamples())
+        assert len(functionsandarrays) == len(reweightingsamples)
 
         length = self.tree.GetEntries() + self.failedtree.GetEntries()
         for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
@@ -993,19 +1001,34 @@ class TreeWrapper(Iterator):
         self.branches = []
 
         for sample, (function, weightarray) in functionsandarrays.iteritems():
+            if sample.productionmode == "qqZZ":
+                from utilities import tfiles
+                f = tfiles[Sample(sample.productionmode, self.treesample.production).CJLSTfile()]
+                t = f.Get("ZZTree/candTree")
+                t.GetEntry(0)
+                counters = f.Get("ZZTree/Counters")
+                SMxsec = t.xsec * counters.GetBinContent(self.treesample.flavor.countersbin)
+            else:
+                SMxsec = sample.SMxsec
+
+            strsample = str(sample)
+            if sample.flavor is not None: strsample = strsample.replace(" {}".format(sample.flavor), "")
+
+            percentile = 99.99
+
             weightarray = numpy.array(weightarray)
-            cutoff = self.cutoffs[str(sample)] = numpy.percentile(weightarray, 99.99)
+            cutoff = self.cutoffs[strsample] = numpy.percentile(weightarray, percentile)
             weightarray[weightarray>cutoff] = cutoff**2/weightarray[weightarray>cutoff]
-            self.nevents2L2l[str(sample)] = sum(
+            self.nevents2L2l[strsample] = sum(
                                                 weight
                                                      for weight, isthis2L2l in zip(weightarray, is2L2l)
                                                      if isthis2L2l
                                                )
             #https://root.cern.ch/doc/master/classTH1.html#a79f9811dc6c4b9e68e683342bfc96f5e
-            self.effectiveentries[str(sample)] = sum(weightarray)**2 / sum(weightarray**2)
-            self.multiplyweight[str(sample)] = sample.SMxsec / self.nevents2L2l[str(sample)] * self.effectiveentries[str(sample)]
+            self.effectiveentries[strsample] = sum(weightarray)**2 / sum(weightarray**2)
+            self.multiplyweight[strsample] = SMxsec / self.nevents2L2l[strsample] * self.effectiveentries[strsample]
 
-            branch = array('d', [self.effectiveentries[str(sample)]])
+            branch = array('d', [self.effectiveentries[strsample]])
             self.branches.append(branch) #so it stays alive until we do Fill()
             self.effectiveentriestree.Branch(sample.weightname(), branch, sample.weightname()+"/D")
 

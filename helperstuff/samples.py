@@ -304,6 +304,8 @@ class SampleBase(object):
         if functionname is None:
             functionname = self_sample.weightname()
 
+        strsample = str(self_sample)
+
         if self_sample.productionmode == "ggZZ":
             def MC_weight_function(self_tree):
                 KFactor = self_tree.tree.KFactor_QCD_ggZZ_Nominal
@@ -311,8 +313,21 @@ class SampleBase(object):
 
         elif self_sample.productionmode == "qqZZ":
             def MC_weight_function(self_tree):
-                KFactor = self_tree.tree.KFactor_EW_qqZZ * self_tree.tree.KFactor_QCD_qqZZ_M
-                return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
+                if hasattr(self_tree, "KFactor_EW_qqZZ"): #qqZZ->itself
+                    KFactor = self_tree.tree.KFactor_EW_qqZZ * self_tree.tree.KFactor_QCD_qqZZ_M
+                    return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
+                else:                                     #VBFbkg->qqZZ
+                    result = self_tree.p_Gen_JJQCD_BKG_MCFM
+                    if not reweightingonly and result != 0:
+                        cutoff = self_tree.cutoffs[strsample]
+                        if result > cutoff:
+                            result = cutoff**2 / result
+                        result *= (
+                                     self_tree.overallEventWeight
+                                   * self_tree.multiplyweight[strsample]
+                                  )
+                    return result
+
 
         elif self_sample.productionmode == "ZX":
             import ZX
@@ -328,10 +343,6 @@ class SampleBase(object):
         elif self_sample.issignal:
 
             factors = self_sample.MC_weight_terms
-
-            SMxsec = self_sample.SMxsec
-
-            strsample = str(self_sample)
 
             photoncut_decay = self_sample.photoncut
             photoncut_ZH = self_sample.photoncut and self_sample.productionmode == "ZH"
@@ -577,7 +588,14 @@ class ReweightingSample(MultiEnum, SampleBase):
                 raise ValueError("No flavor provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.productionmode == "VBF bkg" and self.flavor.hastaus:
                 raise ValueError("No {} samples with taus\n{}".format(self.productionmode, args))
-        elif self.productionmode in ("qqZZ", "ZX", "data"):
+        elif self.productionmode == "qqZZ":
+            if self.hypothesis is not None:
+                raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.hffhypothesis is not None:
+                raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.flavor is not None and self.flavor.hastaus:
+                raise ValueError("No {} samples with taus\n{}".format(self.productionmode, args))
+        elif self.productionmode in ("ZX", "data"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
@@ -596,8 +614,12 @@ class ReweightingSample(MultiEnum, SampleBase):
         return self.hypothesis.photoncut
 
     def reweightingsamples(self):
-        if self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX") or self.alternategenerator == "POWHEG":
+        if self.productionmode == "qqZZ" and self.flavor is not None:
             return [self]
+        if self.productionmode in ("ggZZ", "qqZZ", "ZX") or self.alternategenerator == "POWHEG":
+            return [self]
+        if self.productionmode == "VBF bkg":
+            return [self, ReweightingSample("qqZZ", self.flavor)]
         if self.productionmode == "ttH":  #ttH reweighting doesn't work unfortunately
             return [
                     ReweightingSample(self.productionmode, hypothesis, hffhypothesis)
@@ -1032,6 +1054,9 @@ class Sample(ReweightingSample):
 
         if self.hypothesis is not None and self.hypothesis not in self.productionmode.generatedhypotheses:
             raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
+
+        if self.productionmode == "qqZZ" and self.flavor is not None:
+            raise ValueError("No {} sample produced with separate flavors!\n{}".format(self.productionmode, args))
 
         if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
             raise ValueError("Separate {} sample is produced with POWHEG.  Maybe you meant to specify POWHEG, or WH?\n{}".format(self.productionmode, args))

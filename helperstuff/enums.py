@@ -95,6 +95,13 @@ class Flavor(MyEnum):
     @property
     def hastaus(self):
         return self in ("2e2tau", "2mu2tau", "4tau")
+    @property
+    def countersbin(self):
+        if self == "4mu": return 2
+        if self == "4e": return 3
+        if self == "2e2mu": return 4
+        if self == "4tau": return 9
+        assert False
 
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
