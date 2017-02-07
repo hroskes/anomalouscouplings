@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from abc import ABCMeta, abstractmethod, abstractproperty
 from array import array
 from collections import Counter, Iterator
 import inspect
@@ -25,26 +26,59 @@ sys.setrecursionlimit(10000)
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
 
-class MakeJECSystematics(object):
+class MakeSystematics(object):
+    __metaclass__ = ABCMeta
     def __init__(self, function):
+        while isinstance(function, MakeSystematics):
+            function = function.function
         self.function = function
-        self.name = function.__name__
-        self.JECUpname = self.name+"_JECUp"
-        self.JECDnname = self.name+"_JECDn"
-    def getJECNominal(self):
-        return self.function
-    def getJECUpDn(self):
+
+    @property
+    def name(self): return self.function.__name__
+    @abstractproperty
+    def upname(self): pass
+    @abstractproperty
+    def dnname(self): pass
+
+    def getnominal(self): return self.function
+
+    def getupdn(self):
         #python is magic!
         sourcelines = inspect.getsourcelines(self.function)[0]
-        lookfordecorator = "@"+type(self).__name__
+        for i, line in enumerate(sourcelines):
+            if "@" not in line:
+                break
+        del sourcelines[0:i]
         lookfor = "def "+self.name+"("
         replacewith = "def {UpDn}("
-        if lookfordecorator not in sourcelines[0] or lookfor not in sourcelines[1]:
+        if lookfor not in sourcelines[0]:
             raise ValueError("function '{}' is defined with weird syntax:\n\n{}\n\nWant to have '{}' in the first line and '{}' in the second".format(self.name, "".join(sourcelines), lookfordecorator, lookfor))
-        del sourcelines[0]
         sourcelines[0] = sourcelines[0].replace(lookfor, replacewith)
-
         code = "".join(sourcelines) #they already have '\n' in them
+
+        code = self.doreplacements(code)
+
+        code = re.sub("^ *(def )", r"\1", code) #so that we don't get IndentationError in exec
+
+        exec code.format(UpDn="Up")
+        exec code.format(UpDn="Dn")
+
+        Up.__name__ = self.upname
+        Dn.__name__ = self.dnname
+
+        return Up, Dn
+
+    @abstractmethod
+    def doreplacements(self, code):
+        return code
+
+class MakeJECSystematics(MakeSystematics):
+    @property
+    def upname(self): return self.name+"_JECUp"
+    @property
+    def dnname(self): return self.name+"_JECDn"
+
+    def doreplacements(self, code):
         for thing in (
             r"(self[.]M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))",
             r"(self[.]notdijet)",
@@ -55,17 +89,9 @@ class MakeJECSystematics(object):
             if re.match("self[.]M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay", variable): continue
             raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
 
-        code = re.sub("^ *(def )", r"\1", code) #so that we don't get IndentationError in exec
+        return code
 
-        exec code.format(UpDn="Up")
-        exec code.format(UpDn="Dn")
-
-        Up.__name__ = self.name+"_JECUp"
-        Dn.__name__ = self.name+"_JECDn"
-
-        return Up, Dn
-
-@callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initJECsystematics")
+@callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(Iterator):
 
     def __init__(self, tree, treesample, Counters, failedtree=None, minevent=0, maxevent=None, isdummy=False):
@@ -754,13 +780,13 @@ class TreeWrapper(Iterator):
                 #setattr(cls, _.pAux_function_name, _.get_pAux_function())
 
     @classmethod
-    def initJECsystematics(cls):
-        for name, discriminant in inspect.getmembers(cls, predicate=lambda x: isinstance(x, MakeJECSystematics)):
-            JECNominal = discriminant.getJECNominal()
-            JECUp, JECDn = discriminant.getJECUpDn()
-            setattr(cls, discriminant.name, JECNominal)
-            setattr(cls, discriminant.JECUpname, JECUp)
-            setattr(cls, discriminant.JECDnname, JECDn)
+    def initsystematics(cls):
+        for name, discriminant in inspect.getmembers(cls, predicate=lambda x: isinstance(x, MakeSystematics)):
+            nominal = discriminant.getnominal()
+            up, dn = discriminant.getupdn()
+            setattr(cls, discriminant.name, nominal)
+            setattr(cls, discriminant.upname, up)
+            setattr(cls, discriminant.dnname, dn)
 
     def initlists(self):
         self.toaddtotree = [
@@ -809,8 +835,8 @@ class TreeWrapper(Iterator):
             "getweightfunction",
             "hypothesis",
             "initcategoryfunctions",
-            "initJECsystematics",
             "initlists",
+            "initsystematics",
             "initweightfunctions",
             "isbkg",
             "isdata",
