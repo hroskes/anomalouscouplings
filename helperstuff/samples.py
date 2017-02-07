@@ -308,13 +308,13 @@ class SampleBase(object):
 
         if self_sample.productionmode == "ggZZ":
             def MC_weight_function(self_tree):
-                KFactor = self_tree.tree.KFactor_QCD_ggZZ_Nominal
+                KFactor = self_tree.KFactor_QCD_ggZZ_Nominal
                 return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
 
         elif self_sample.productionmode == "qqZZ":
             def MC_weight_function(self_tree):
                 if hasattr(self_tree, "KFactor_EW_qqZZ"): #qqZZ->itself
-                    KFactor = self_tree.tree.KFactor_EW_qqZZ * self_tree.tree.KFactor_QCD_qqZZ_M
+                    KFactor = self_tree.KFactor_EW_qqZZ * self_tree.KFactor_QCD_qqZZ_M
                     return self_tree.overallEventWeight * self_tree.xsec * KFactor #/ self_tree.nevents
                                                                                    #Do NOT divide by nevents.  This will happen
                                                                                    #in creating the templates when we divide by

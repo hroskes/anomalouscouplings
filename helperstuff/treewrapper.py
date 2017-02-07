@@ -89,16 +89,16 @@ class TreeWrapper(Iterator):
         else:
             self.unblind = True
 
+        if self.isZX and not config.usedata: self.isdummy = True
+        if self.isdata and not config.showblinddistributions: self.isdummy = True
+
         self.nevents = self.nevents2L2l = self.cutoffs = None
         if Counters is not None:
             self.nevents = Counters.GetBinContent(40)
 
         self.minevent = minevent
-        if (
-               self.isZX and not config.usedata
-            or self.isdata and not config.showblinddistributions
-            or self.isdummy
-           ):
+
+        if self.isdummy:
             self.__length = 0
         elif maxevent is None or maxevent >= self.tree.GetEntries():
             self.__length = self.tree.GetEntries() - minevent
@@ -307,6 +307,10 @@ class TreeWrapper(Iterator):
         #Gen MEs
         for weightname in self.genMEs:
             setattr(self, weightname, getattr(t, weightname))
+
+        #Gen MEs
+        for kfactor in self.kfactors:
+            setattr(self, kfactor, getattr(t, kfactor))
 
         #category variables
         self.nExtraLep = t.nExtraLep
@@ -813,6 +817,7 @@ class TreeWrapper(Iterator):
             "isdummy",
             "isPOWHEG",
             "isZX",
+            "kfactors",
             "minevent",
             "nevents",
             "nevents2L2l",
@@ -888,6 +893,10 @@ class TreeWrapper(Iterator):
                         self.genMEs.append(weightname)
         if self.treesample.productionmode == "VBFbkg":
             self.genMEs.append("p_Gen_JJQCD_BKG_MCFM")
+
+        self.kfactors = []
+        if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
+        if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
 
     def onlyweights(self):
         """Call this to only add the weights and ZZMass to the new tree"""
@@ -965,8 +974,7 @@ class TreeWrapper(Iterator):
         if self.treesample.productionmode == "qqZZ":
             self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
             branch = array('d', [self.nevents])
-            self.branches.append(branch) #so it stays alive until we do Fill()
-            self.effectiveentriestree.Branch(sample.weightname(), branch, sample.weightname()+"/D")
+            self.effectiveentriestree.Branch(self.treesample.weightname(), branch, self.treesample.weightname()+"/D")
             self.effectiveentriestree.Fill()
             return
 
