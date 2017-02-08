@@ -162,7 +162,7 @@ class TreeWrapper(Iterator):
             t.GetEntry(self.__treeentry)
             if i > len(self):
                 raise StopIteration
-            if i % 10000 == 0 or i == len(self) or True:
+            if i % 10000 == 0 or i == len(self):
                 print i, "/", len(self)
                 #raise StopIteration
 

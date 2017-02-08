@@ -548,7 +548,7 @@ class Template(TemplateBase, MultiEnum):
         result /= sum(
                       Sample.effectiveentries(
                                               reweightfrom=reweightfrom,
-                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis)
+                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis, reweightfrom.flavor)
                                              )
                        for reweightfrom in self.reweightfrom()
                      )

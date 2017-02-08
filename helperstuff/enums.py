@@ -494,7 +494,7 @@ class Category(MyEnum):
     @classmethod
     def fromid(cls, number):
         for category in cls.items():
-            if number in category.idnumbers:
+            if number in category:
                 return category
         raise ValueError("Invalid id {}".format(number))
 

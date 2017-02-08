@@ -1145,7 +1145,7 @@ class Sample(ReweightingSample):
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
         if reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data"):
-            assert reweightfrom == reweightto
+            assert reweightfrom.reweightingsample == reweightto
             return 1
         f = tfiles[reweightfrom.withdiscriminantsfile()]
         t = f.effectiveentries
