@@ -2,7 +2,7 @@
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 from helperstuff import config, utilities
 from helperstuff.combinehelpers import Luminosity
-from helperstuff.datacard import makeDCandWS
+from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits
 from helperstuff.replacesystematics import replacesystematics
@@ -169,8 +169,7 @@ def runcombine(analysis, foldername, **kwargs):
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
     with utilities.cd(folder):
-        for production, category, channel in product(productions, usecategories, usechannels):
-            makeDCandWS(production, category, channel, analysis, lumitype)
+        makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
         with open(".gitignore", "w") as f:
             f.write("*")
         if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):

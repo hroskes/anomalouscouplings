@@ -2,14 +2,15 @@ from collections import Counter
 import inspect
 import itertools
 import os
+import time
+
+import ROOT
 
 import combineinclude
 from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1
 import config
 from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode
-from utilities import callclassinitfunctions, cd, generatortolist, mkdir_p
-
-import ROOT
+from utilities import callclassinitfunctions, cd, generatortolist, KeepWhileOpenFile, mkdir_p
 
 names = set()
 
@@ -207,7 +208,6 @@ class Datacard(MultiEnum):
             f.write(self.divider.join(sections)+"\n")
 
     def writeworkspace(self):
-
         if os.path.exists(self.rootfile_base): return
 
         ## -------------------------- SIGNAL SHAPE ----------------------------------- ##
@@ -469,5 +469,24 @@ class Datacard(MultiEnum):
             self.makeworkspace()
             self.writedatacard()
 
-def makeDCandWS(*args, **kwargs):
-    Datacard(*args).makeCardsWorkspaces(**kwargs)
+def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
+    done = {(production, channel, category): False for production, channel, category in itertools.product(productions, channels, categories)}
+    while not all(done.values()):
+        anychanged = False
+        for production, channel, category in itertools.product(productions, channels, categories):
+            if done[production,channel,category]: continue
+            dc = Datacard(production, channel, category, *otherargs)
+            with KeepWhileOpenFile(dc.txtfile+".tmp") as f:
+                if not f:
+                    continue
+                if os.path.exists(dc.rootfile_base) and os.path.exists(dc.rootfile) and os.path.exists(dc.txtfile):
+                    done[production,channel,category] = True
+                    continue
+                dc.makeCardsWorkspaces(**kwargs)
+                for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
+                    if not os.path.exists(thing):
+                        raise ValueError("{} was not created.  Something is wrong.".format(thing))
+                anychanged = done[production,channel,category] = True
+        if not anychanged and not all(done.values()):
+            print "Some datacards are being created by other processes.  Waiting 30 seconds..."
+            time.sleep(30)
