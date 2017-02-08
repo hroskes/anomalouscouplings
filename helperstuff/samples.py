@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 from abc import ABCMeta, abstractproperty
 from collections import Counter
-import config
-import constants
-from enums import AlternateGenerator, analyses, Analysis, Flavor, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, ProductionMode, Production
+import itertools
 from math import copysign, sqrt
 import numpy
 import os
+
 import ROOT
+
+import config
+import constants
+from enums import AlternateGenerator, analyses, Analysis, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
 from utilities import cache, product
 from weightshelper import WeightsHelper
 
@@ -1049,7 +1052,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return constants.kappa_tilde_ttH
 
 class Sample(ReweightingSample):
-    enums = [ReweightingSample, Production, AlternateGenerator]
+    enums = [ReweightingSample, Production, AlternateGenerator, PythiaSystematic]
 
     def check(self, *args):
         if self.production is None:
@@ -1070,6 +1073,12 @@ class Sample(ReweightingSample):
                  self.hypothesis != "0+"
                  or self.productionmode not in ("VBF", "ZH", "WplusH", "WminusH", "ttH")
                 )
+           ) or (
+            self.alternategenerator == "MINLO"
+            and (
+                 self.hypothesis != "0+"
+                 or self.productionmode != "ggH"
+                )
            ):
             raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args))
 
@@ -1080,7 +1089,19 @@ class Sample(ReweightingSample):
                  and self.hffhypothesis is not None
                 )
            ):
-            raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args))
+            raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hffhypothesis, self.alternategenerator, args))
+
+        if self.pythiasystematic is not None:
+            if (
+                self.hypothesis != "0+"
+                or self.productionmode not in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH")
+               ):
+                raise ValueError("No {} {} sample produced with pythia {}\n{}".format(self.productionmode, self.hypothesis, self.pythiasystematic, args))
+            if self.productionmode != "ggH" and self.alternategenerator != "POWHEG":
+                raise ValueError("{} sample with pythia {} is produced with POWHEG\n{}".format(self.productionmode, self.pythiasystematic, args))
+
+        if self.pythiasystematic is None and self.alternategenerator == "MINLO":
+            raise ValueError("MINLO nominal sample is not ready yet :(\n{}".format(args))
 
         super(Sample, self).check(*args)
 
@@ -1096,22 +1117,35 @@ class Sample(ReweightingSample):
         return self.production.CJLSTdir()
 
     def CJLSTdirname(self):
-        if self.alternategenerator == "POWHEG":
-            if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
-                s = str(self.productionmode)
-                if self.productionmode == "VBF": s = "VBFH"
-                if self.hypothesis == "0+": return "{}125".format(s)
-            raise self.ValueError("CJLSTdirname")
+        if self.alternategenerator is not None:
+            if self.alternategenerator == "POWHEG":
+                if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
+                    s = str(self.productionmode)
+                    if self.productionmode == "VBF": s = "VBFH"
+                    if self.hypothesis == "0+": result = "{}125".format(s)
+                if self.pythiasystematic is not None:
+                    result += self.pythiasystematic.appendname
+                return result
+        if self.alternategenerator == "MINLO":
+            if self.productionmode == "ggH":
+                result = "ggH125"
+                if self.pythiasystematic:
+                    result += self.pythiasystematic.appendname
+                result += "_minloHJJ"
+                return result
         if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             s = str(self.productionmode)
             if self.productionmode == "VBF": s = "VBFH"
-            if self.hypothesis == "0+": return "{}0PM_M125".format(s)
-            if self.hypothesis == "a2": return "{}0PH_M125".format(s)
-            if self.hypothesis == "0-": return "{}0M_M125".format(s)
-            if self.hypothesis == "L1": return "{}0L1_M125".format(s)
-            if self.hypothesis in ("fa20.5", "fa2prod0.5"): return "{}0PHf05ph0_M125".format(s)
-            if self.hypothesis in ("fa30.5", "fa3prod0.5"): return "{}0Mf05ph0_M125".format(s)
-            if self.hypothesis in ("fL10.5", "fL1prod0.5"): return "{}0L1f05ph0_M125".format(s)
+            if self.hypothesis == "0+": result = "{}0PM_M125".format(s)
+            if self.hypothesis == "a2": result = "{}0PH_M125".format(s)
+            if self.hypothesis == "0-": result = "{}0M_M125".format(s)
+            if self.hypothesis == "L1": result = "{}0L1_M125".format(s)
+            if self.hypothesis in ("fa20.5", "fa2prod0.5"): result = "{}0PHf05ph0_M125".format(s)
+            if self.hypothesis in ("fa30.5", "fa3prod0.5"): result = "{}0Mf05ph0_M125".format(s)
+            if self.hypothesis in ("fL10.5", "fL1prod0.5"): result = "{}0L1f05ph0_M125".format(s)
+            if self.pythiasystematic is not None:
+                result += self.pythiasystematic.appendname
+            return result
         if self.productionmode in ("HJJ", "ttH"):
             s = str(self.productionmode)
             if self.hffhypothesis == "Hff0+": return "{}0PM_M125".format(s)
@@ -1139,6 +1173,8 @@ class Sample(ReweightingSample):
         result = super(Sample, self).weightname()
         if self.alternategenerator:
             result += "_" + str(self.alternategenerator)
+        if self.pythiasystematic:
+            result += "_" + str(self.pythiasystematic)
         return result
 
     @staticmethod
@@ -1198,3 +1234,43 @@ class SampleBasis(MultiEnum):
     @cache
     def invertedmatrix(self):
         return self.matrix.I
+
+def allsamples():
+    for production in productions:
+        for productionmode in "ggH", "VBF", "ZH", "WH":
+            for hypothesis in ProductionMode(productionmode).generatedhypotheses:
+                yield Sample(productionmode, hypothesis, production)
+        for hypothesis in hffhypotheses:
+            yield Sample("HJJ", hypothesis, "0+", production)
+            yield Sample("ttH", hypothesis, "0+", production)
+        for flavor in flavors:
+            yield Sample("ggZZ", flavor, production)
+            if not flavor.hastaus:
+                yield Sample("VBF bkg", flavor, production)
+        for productionmode in "VBF", "ZH", "WplusH", "WminusH":
+            yield Sample(productionmode, "0+", "POWHEG", production)
+        for systematic in pythiasystematics:
+            for productionmode in "VBF", "ZH", "WplusH", "WminusH":
+                yield Sample(productionmode, "0+", "POWHEG", production, systematic)
+            yield Sample("ggH", "0+", production, systematic)
+            yield Sample("ggH", "0+", "MINLO", production, systematic)
+        yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
+        yield Sample("qqZZ", production)
+        yield Sample("ZX", production)
+        yield Sample("data", production)
+
+def xcheck():
+    CJLST = {_: _.CJLSTfile() for _ in allsamples()}
+    withdiscs = {_: _.withdiscriminantsfile() for _ in allsamples()}
+
+    for (k1, v1), (k2, v2) in itertools.product(CJLST.iteritems(), CJLST.iteritems()):
+        if k1.productionmode == "ZX" and k2.productionmode == "data" or k2.productionmode == "ZX" and k1.productionmode == "data": continue
+        if k1 != k2 and v1 == v2:
+            raise ValueError("CJLST files for {} and {} are the same:\n{}".format(k1, k2, v1))
+
+    for (k1, v1), (k2, v2) in itertools.product(withdiscs.iteritems(), withdiscs.iteritems()):
+        if k1 != k2 and v1 == v2:
+            raise ValueError("with discriminants files for {} and {} are the same:\n{}".format(k1, k2, v1))
+
+xcheck()
+del xcheck

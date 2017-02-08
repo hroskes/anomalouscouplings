@@ -1257,4 +1257,12 @@ class TreeWrapper(Iterator):
         Sample("WplusH", "0+", "POWHEG", config.productionsforcombine[0]),
         Sample("WminusH", "0+", "POWHEG", config.productionsforcombine[0]),
         Sample("ttH", "Hff0+", "0+", "POWHEG", config.productionsforcombine[0]),
-    ]
+    ] + sum(([
+        Sample("ggH", "0+", config.productionsforcombine[0], _),
+        Sample("ggH", "0+", "MINLO", config.productionsforcombine[0], _),
+        Sample("VBF", "0+", "POWHEG", config.productionsforcombine[0], _),
+        Sample("ZH", "0+", "POWHEG", config.productionsforcombine[0], _),
+        Sample("WplusH", "0+", "POWHEG", config.productionsforcombine[0], _),
+        Sample("WminusH", "0+", "POWHEG", config.productionsforcombine[0], _),
+        Sample("ttH", "Hff0+", "0+", "POWHEG", config.productionsforcombine[0], _),
+    ] for _ in enums.pythiasystematics), [])

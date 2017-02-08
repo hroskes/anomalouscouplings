@@ -502,7 +502,21 @@ class AlternateGenerator(MyEnum):
     enumname = "alternategenerator"
     enumitems = (
                  EnumItem("POWHEG"),
+                 EnumItem("MINLO"),
                 )
+
+class PythiaSystematic(MyEnum):
+    enumname = "pythiasystematic"
+    enumitems = (
+                 EnumItem("ScaleUp"),
+                 EnumItem("ScaleDn"),
+                 EnumItem("TuneUp"),
+                 EnumItem("TuneDn"),
+                )
+
+    @property
+    def appendname(self):
+        return "_" + str(self).replace("Up", "up").replace("Dn", "down").replace("Scale", "scale")
 
 channels = Channel.items()
 if config.applyshapesystematics:
@@ -512,6 +526,7 @@ else:
     shapesystematics = treeshapesystematics = ShapeSystematic.items(lambda x: x == "")
 JECsystematics = JECSystematic.items()
 btagsystematics = BTagSystematic.items()
+pythiasystematics = PythiaSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5"))

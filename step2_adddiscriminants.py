@@ -3,8 +3,8 @@ from array import array
 from collections import OrderedDict
 from helperstuff import config
 from helperstuff import xrd
-from helperstuff.enums import flavors, hffhypotheses, ProductionMode, productions
-from helperstuff.samples import Sample
+from helperstuff.enums import flavors, hffhypotheses, ProductionMode, productions, pythiasystematics
+from helperstuff.samples import allsamples, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import KeepWhileOpenFile
 import os
@@ -102,19 +102,5 @@ def adddiscriminants(*args):
 if __name__ == '__main__':
     for production in productions:
         adddiscriminants("ggZZ", "4tau", production)  #to catch bugs early
-        for productionmode in "ggH", "VBF", "ZH", "WH":
-            for hypothesis in ProductionMode(productionmode).generatedhypotheses:
-                adddiscriminants(productionmode, hypothesis, production)
-        for hypothesis in hffhypotheses:
-            adddiscriminants("HJJ", hypothesis, "0+", production)
-            adddiscriminants("ttH", hypothesis, "0+", production)
-        for flavor in flavors:
-            adddiscriminants("ggZZ", flavor, production)
-            if not flavor.hastaus:
-                adddiscriminants("VBF bkg", flavor, production)
-        for productionmode in "VBF", "ZH", "WplusH", "WminusH":
-            adddiscriminants(productionmode, "0+", "POWHEG", production)
-        adddiscriminants("ttH", "Hff0+", "0+", "POWHEG", production)
-        adddiscriminants("qqZZ", production)
-        adddiscriminants("ZX", production)
-        adddiscriminants("data", production)
+    for sample in allsamples():
+        adddiscriminants(sample)
