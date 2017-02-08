@@ -318,7 +318,7 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
                         if shapesystematic == "":
                             yield TemplatesFile(channel, "bkg", analysis, production, category)
-                        if shapesystematic == "" and config.usedata:
+                        if shapesystematic == "" and config.showblinddistributions:
                             yield TemplatesFile(channel, "DATA", analysis, production, category)
 
 class TemplateBase(object):
