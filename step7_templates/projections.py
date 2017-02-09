@@ -92,7 +92,7 @@ enrichstatuses = EnrichStatus.items()
 
 class BaseTemplateFromFile(TemplateForProjection):
     def __init__(self, color, *args, **kwargs):
-        super(BaseTemplateFromFile, self).__init__(*args)
+        super(BaseTemplateFromFile, self).__init__(*args, **kwargs)
         self.color = color
         #I don't know what the following line accomplishes
         # but it fixes the WH interference templates.

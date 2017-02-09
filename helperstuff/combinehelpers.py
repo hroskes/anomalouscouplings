@@ -72,7 +72,7 @@ class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production, Category, Analysis]
 
     def getrate(self):
-        if self.productionmode == "ZX" and not config.usedata:
+        if self.productionmode == "ZX":
             return self.yamlrate()
 
         if self.productionmode.issignal:
