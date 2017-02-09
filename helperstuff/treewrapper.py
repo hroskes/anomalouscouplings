@@ -16,7 +16,7 @@ import CJLSTscripts
 import config
 import constants
 import enums
-from samples import ReweightingSample, Sample
+from samples import ReweightingSample, ReweightingSamplePlus
 from utilities import callclassinitfunctions
 import ZX
 
@@ -1252,17 +1252,17 @@ class TreeWrapper(Iterator):
         ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
         ReweightingSample("ZX"),
 
-        Sample("VBF", "0+", "POWHEG", config.productionsforcombine[0]),
-        Sample("ZH", "0+", "POWHEG", config.productionsforcombine[0]),
-        Sample("WplusH", "0+", "POWHEG", config.productionsforcombine[0]),
-        Sample("WminusH", "0+", "POWHEG", config.productionsforcombine[0]),
-        Sample("ttH", "Hff0+", "0+", "POWHEG", config.productionsforcombine[0]),
+        ReweightingSamplePlus("VBF", "0+", "POWHEG"),
+        ReweightingSamplePlus("ZH", "0+", "POWHEG"),
+        ReweightingSamplePlus("WplusH", "0+", "POWHEG"),
+        ReweightingSamplePlus("WminusH", "0+", "POWHEG"),
+        ReweightingSamplePlus("ttH", "Hff0+", "0+", "POWHEG"),
     ] + sum(([
-        Sample("ggH", "0+", config.productionsforcombine[0], _),
-        Sample("ggH", "0+", "MINLO", config.productionsforcombine[0], _),
-        Sample("VBF", "0+", "POWHEG", config.productionsforcombine[0], _),
-        Sample("ZH", "0+", "POWHEG", config.productionsforcombine[0], _),
-        Sample("WplusH", "0+", "POWHEG", config.productionsforcombine[0], _),
-        Sample("WminusH", "0+", "POWHEG", config.productionsforcombine[0], _),
-        Sample("ttH", "Hff0+", "0+", "POWHEG", config.productionsforcombine[0], _),
+        ReweightingSamplePlus("ggH", "0+", _),
+        ReweightingSamplePlus("ggH", "0+", "MINLO", _),
+        ReweightingSamplePlus("VBF", "0+", "POWHEG", _),
+        ReweightingSamplePlus("ZH", "0+", "POWHEG", _),
+        ReweightingSamplePlus("WplusH", "0+", "POWHEG", _),
+        ReweightingSamplePlus("WminusH", "0+", "POWHEG", _),
+        ReweightingSamplePlus("ttH", "Hff0+", "0+", "POWHEG", _),
     ] for _ in enums.pythiasystematics), [])

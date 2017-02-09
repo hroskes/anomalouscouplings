@@ -1052,22 +1052,11 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hffhypothesis == "fCP0.5":
                 return constants.kappa_tilde_ttH
 
-class Sample(ReweightingSample):
-    enums = [ReweightingSample, Production, AlternateGenerator, PythiaSystematic]
+class ReweightingSamplePlus(ReweightingSample):
+    enums = [ReweightingSample, AlternateGenerator, PythiaSystematic]
+    enumname = "reweightingsampleplus"
 
     def check(self, *args):
-        if self.production is None:
-            raise ValueError("No option provided for production\n{}".format(args))
-
-        if self.hypothesis is not None and self.hypothesis not in self.productionmode.generatedhypotheses:
-            raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
-
-        if self.productionmode == "qqZZ" and self.flavor is not None:
-            raise ValueError("No {} sample produced with separate flavors!\n{}".format(self.productionmode, args))
-
-        if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
-            raise ValueError("Separate {} sample is produced with POWHEG.  Maybe you meant to specify POWHEG, or WH?\n{}".format(self.productionmode, args))
-
         if (
             self.alternategenerator == "POWHEG"
             and (
@@ -1100,6 +1089,32 @@ class Sample(ReweightingSample):
                 raise ValueError("No {} {} sample produced with pythia {}\n{}".format(self.productionmode, self.hypothesis, self.pythiasystematic, args))
             if self.productionmode != "ggH" and self.alternategenerator != "POWHEG":
                 raise ValueError("{} sample with pythia {} is produced with POWHEG\n{}".format(self.productionmode, self.pythiasystematic, args))
+
+        super(ReweightingSamplePlus, self).check(*args)
+
+    def weightname(self):
+        result = super(ReweightingSamplePlus, self).weightname()
+        if self.alternategenerator:
+            result += "_" + str(self.alternategenerator)
+        if self.pythiasystematic:
+            result += "_" + str(self.pythiasystematic)
+        return result
+
+class Sample(ReweightingSamplePlus):
+    enums = [ReweightingSamplePlus, Production]
+
+    def check(self, *args):
+        if self.production is None:
+            raise ValueError("No option provided for production\n{}".format(args))
+
+        if self.hypothesis is not None and self.hypothesis not in self.productionmode.generatedhypotheses:
+            raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
+
+        if self.productionmode == "qqZZ" and self.flavor is not None:
+            raise ValueError("No {} sample produced with separate flavors!\n{}".format(self.productionmode, args))
+
+        if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
+            raise ValueError("Separate {} sample is produced with POWHEG.  Maybe you meant to specify POWHEG, or WH?\n{}".format(self.productionmode, args))
 
         if self.pythiasystematic is None and self.alternategenerator == "MINLO":
             raise ValueError("MINLO nominal sample is not ready yet :(\n{}".format(args))
@@ -1169,14 +1184,6 @@ class Sample(ReweightingSample):
         result = os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
         return result
         raise self.ValueError("withdiscriminantsfile")
-
-    def weightname(self):
-        result = super(Sample, self).weightname()
-        if self.alternategenerator:
-            result += "_" + str(self.alternategenerator)
-        if self.pythiasystematic:
-            result += "_" + str(self.pythiasystematic)
-        return result
 
     @staticmethod
     def effectiveentries(reweightfrom, reweightto):
@@ -1250,12 +1257,13 @@ def allsamples():
                 yield Sample("VBF bkg", flavor, production)
         for productionmode in "VBF", "ZH", "WplusH", "WminusH":
             yield Sample(productionmode, "0+", "POWHEG", production)
+        yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
         for systematic in pythiasystematics:
             for productionmode in "VBF", "ZH", "WplusH", "WminusH":
                 yield Sample(productionmode, "0+", "POWHEG", production, systematic)
+            yield Sample("ttH", "Hff0+", "0+", "POWHEG", production, systematic)
             yield Sample("ggH", "0+", production, systematic)
             yield Sample("ggH", "0+", "MINLO", production, systematic)
-        yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
         yield Sample("qqZZ", production)
         yield Sample("ZX", production)
         yield Sample("data", production)
