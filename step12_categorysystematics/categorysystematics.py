@@ -24,6 +24,7 @@ def count(fromsamples, tosamples, categorizations):
 
     c = ROOT.TCanvas()
     for tosample, categorization in product(tosamples, categorizations):
+        if tosample == ReweightingSample("WH", "L1Zg"): continue
         t.Draw(categorization.category_function_name, tosample.weightname())
         h = c.GetListOfPrimitives()[0]
         for i in range(6):
@@ -78,8 +79,6 @@ def maketable(analysis):
                                                            if isinstance(_, ReweightingSamplePlus) or _.productionmode == "ggH" and _.hypothesis == "0+"
                      ]
 
-    if ReweightingSample("WH", "L1Zg") in tosamples: tosamples.remove(ReweightingSample("WH", "L1Zg"))
-
     result = MultiplyCounter()
 
     for tosample in tosamples+othertosamples:
@@ -127,9 +126,13 @@ def maketable(analysis):
 
     tablerows.append(line)
     tablerows.append(headerfmt.format(analysis, *sum(([category, "JEC up", "JEC down", "btag SF up", "btag SF dn", "scale up", "scale dn", "tune up", "tune dn"] for category in categories), [])))
-    tablerows.append(line)
+
+    lasthypothesis = None
 
     for tosample in tosamples:
+        if lasthypothesis != tosample.hypothesis:
+            tablerows.append(line)
+        lasthypothesis = tosample.hypothesis
         ####################################
         if isinstance(tosample, ReweightingSamplePlus) and tosample.alternategenerator == "MINLO" and tosample.pythiasystematic is None:
             try:
@@ -144,6 +147,10 @@ def maketable(analysis):
                        for _ in pythiasystematics
                 )
         ####################################
+
+        if tosample == ReweightingSample("WH", "L1Zg"):
+            for ctgrztn, category in product(categorizations, categories):
+                result[tosample, ctgrztn, category] = float("nan")
 
         thisrowfmt = rowfmt
         fmtargs = [str(tosample).replace(" 2e2mu", "")]
@@ -175,7 +182,11 @@ def maketable(analysis):
                 ScaleUp = ScaleDn = TuneUp = TuneDn = float("nan")
 
             fmtargs += [nominal, JECUp, JECDn, btSFUp, btSFDn, ScaleUp, ScaleDn, TuneUp, TuneDn]
-        tablerows.append(thisrowfmt.format(*fmtargs).replace("+nan%", "     "))
+        tablerows.append(thisrowfmt.format(*fmtargs)
+                                                    .replace("+nan%",  "     ")
+                                                    .replace("-nan%",  "     ")
+                                                    .replace( "nan%",   "    ")
+                                                                               )
 
     tablerows.append(line)
 
