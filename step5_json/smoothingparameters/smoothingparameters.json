@@ -11668,13 +11668,24 @@
                     "None": {
                         "": {
                             "170203": [
-                                6.640814782582147,
                                 [
-                                    0,
-                                    1,
-                                    2
+                                    6.640814782582147,
+                                    null,
+                                    null
                                 ],
-                                null
+                                {
+                                    "axes": [
+                                        0,
+                                        2
+                                    ],
+                                    "axesleft": [
+                                        2
+                                    ],
+                                    "axesright": [
+                                        0
+                                    ],
+                                    "name": "ReweightThingWithObviousPeak"
+                                }
                             ]
                         }
                     }
@@ -11730,13 +11741,24 @@
                     "None": {
                         "": {
                             "170203": [
-                                10.538387255242364,
                                 [
-                                    0,
-                                    1,
-                                    2
+                                    6.640814782582147,
+                                    null,
+                                    null
                                 ],
-                                null
+                                {
+                                    "axes": [
+                                        0,
+                                        2
+                                    ],
+                                    "axesleft": [
+                                        2
+                                    ],
+                                    "axesright": [
+                                        0
+                                    ],
+                                    "name": "ReweightThingWithObviousPeak"
+                                }
                             ]
                         }
                     }
