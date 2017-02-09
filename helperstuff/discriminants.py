@@ -147,7 +147,7 @@ discriminants = {
 #            for i in range(1, 4)
     ] + [
         Discriminant("D_0minus_HadVH", "D_{0-}^{VH}", defaultnbins, 0, 1),
-        Discriminant("D_CP_HadVH", "D_{CP}^{VH}", defaultnbins, -.4, .4),
+        Discriminant("D_CP_HadVH", "D_{CP}^{VH}", defaultnbins, -.35, .35),
         Discriminant("D_0hplus_HadVH", "D_{0h+}^{VH}", defaultnbins, 0, 1),
         Discriminant("D_int_HadVH", "D_{int}^{VH}", defaultnbins, -1, .05),
         Discriminant("D_L1_HadVH", "D_{#Lambda1}^{VH}", defaultnbins, 0, 1),
