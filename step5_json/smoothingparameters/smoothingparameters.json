@@ -11549,13 +11549,26 @@
                     "None": {
                         "": {
                             "170203": [
-                                10.864703672317294,
                                 [
-                                    0,
-                                    1,
-                                    2
+                                    10.864703672317294,
+                                    null,
+                                    null
                                 ],
-                                null
+                                {
+                                    "axes": [
+                                        0,
+                                        1,
+                                        2
+                                    ],
+                                    "axesleft": [
+                                        2
+                                    ],
+                                    "axesright": [
+                                        0,
+                                        1
+                                    ],
+                                    "name": "ReweightThingWithObviousPeak"
+                                }
                             ]
                         }
                     }
@@ -11564,13 +11577,24 @@
                     "None": {
                         "": {
                             "170203": [
-                                10.626631655448758,
                                 [
-                                    0,
-                                    1,
-                                    2
+                                    7.4386421588141305,
+                                    null,
+                                    null
                                 ],
-                                null
+                                {
+                                    "axes": [
+                                        1,
+                                        2
+                                    ],
+                                    "axesleft": [
+                                        2
+                                    ],
+                                    "axesright": [
+                                        1
+                                    ],
+                                    "name": "ReweightThingWithObviousPeak"
+                                }
                             ]
                         }
                     }
@@ -11579,13 +11603,24 @@
                     "None": {
                         "": {
                             "170203": [
-                                12.825060135062417,
                                 [
-                                    0,
-                                    1,
-                                    2
+                                    12.825060135062417,
+                                    null,
+                                    null
                                 ],
-                                null
+                                {
+                                    "axes": [
+                                        0,
+                                        2
+                                    ],
+                                    "axesleft": [
+                                        2
+                                    ],
+                                    "axesright": [
+                                        0
+                                    ],
+                                    "name": "ReweightThingWithObviousPeak"
+                                }
                             ]
                         }
                     }
@@ -11623,13 +11658,26 @@
                     "None": {
                         "": {
                             "170203": [
-                                5.2492404944913496,
                                 [
-                                    0,
-                                    1,
-                                    2
+                                    5.2492404944913496,
+                                    null,
+                                    null
                                 ],
-                                null
+                                {
+                                    "axes": [
+                                        0,
+                                        1,
+                                        2
+                                    ],
+                                    "axesleft": [
+                                        2
+                                    ],
+                                    "axesright": [
+                                        0,
+                                        1
+                                    ],
+                                    "name": "ReweightThingWithObviousPeak"
+                                }
                             ]
                         }
                     }
@@ -11638,13 +11686,24 @@
                     "None": {
                         "": {
                             "170203": [
-                                5.2492404944913496,
                                 [
-                                    0,
-                                    1,
-                                    2
+                                    5.2492404944913496,
+                                    null,
+                                    null
                                 ],
-                                null
+                                {
+                                    "axes": [
+                                        1,
+                                        2
+                                    ],
+                                    "axesleft": [
+                                        2
+                                    ],
+                                    "axesright": [
+                                        1
+                                    ],
+                                    "name": "ReweightThingWithObviousPeak"
+                                }
                             ]
                         }
                     }
@@ -11653,13 +11712,24 @@
                     "None": {
                         "": {
                             "170203": [
-                                5.995903333158022,
                                 [
-                                    0,
-                                    1,
-                                    2
+                                    5.995903333158022,
+                                    null,
+                                    null
                                 ],
-                                null
+                                {
+                                    "axes": [
+                                        0,
+                                        2
+                                    ],
+                                    "axesleft": [
+                                        2
+                                    ],
+                                    "axesright": [
+                                        0
+                                    ],
+                                    "name": "ReweightThingWithObviousPeak"
+                                }
                             ]
                         }
                     }
