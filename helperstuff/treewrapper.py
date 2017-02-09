@@ -108,7 +108,7 @@ class TreeWrapper(Iterator):
         self.isdata = treesample.isdata()
         self.isbkg = not self.isdata and treesample.isbkg
         self.isZX = treesample.isZX()
-        self.isPOWHEG = treesample.alternategenerator == "POWHEG"
+        self.isalternate = treesample.alternategenerator in ("POWHEG", "MINLO") or treesample.pythiasystematic is not None
         self.isdummy = isdummy
         if self.isdata:
             self.unblind = config.unblinddistributions
@@ -842,10 +842,10 @@ class TreeWrapper(Iterator):
             "initlists",
             "initsystematics",
             "initweightfunctions",
+            "isalternate",
             "isbkg",
             "isdata",
             "isdummy",
-            "isPOWHEG",
             "isZX",
             "kfactors",
             "minevent",
@@ -915,7 +915,7 @@ class TreeWrapper(Iterator):
                 self.exceptions.append(sample.weightname())
 
         self.genMEs = []
-        if not self.isbkg and not self.isPOWHEG:
+        if not self.isbkg and not self.isalternate:
             for sample in self.treesample.reweightingsamples():
                 for factor in sample.MC_weight_terms:
                     for weightname, couplingsq in factor:
@@ -996,7 +996,7 @@ class TreeWrapper(Iterator):
         Do the initial loops through the tree to find, for each hypothesis,
         the cutoff and then the sum of weights for 2L2l
         """
-        if self.isPOWHEG: return
+        if self.isalternate: return
         if self.isdummy: return
         if self.isZX: return
         if self.treesample.productionmode == "ggZZ": return

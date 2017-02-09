@@ -342,7 +342,8 @@ class SampleBase(object):
                 return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
 
         elif (self_sample.productionmode == "VBF bkg"
-                   or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator == "POWHEG"):
+                   or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO")
+                   or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
             def MC_weight_function(self_tree):
                 return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
 
@@ -622,7 +623,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     def reweightingsamples(self):
         if self.productionmode == "qqZZ" and self.flavor is not None:
             return [self]
-        if self.productionmode in ("ggZZ", "qqZZ", "ZX") or self.alternategenerator == "POWHEG":
+        if self.productionmode in ("ggZZ", "qqZZ", "ZX") or self.alternategenerator in ("POWHEG", "MINLO") or self.pythiasystematic is not None:
             return [self]
         if self.productionmode == "VBF bkg":
             return [self, ReweightingSample("qqZZ", self.flavor)]
@@ -1126,13 +1127,15 @@ class Sample(ReweightingSample):
                 if self.pythiasystematic is not None:
                     result += self.pythiasystematic.appendname
                 return result
-        if self.alternategenerator == "MINLO":
+        if self.alternategenerator == "MINLO" or self.pythiasystematic is not None:
             if self.productionmode == "ggH":
                 result = "ggH125"
-                if self.pythiasystematic:
+                if self.pythiasystematic is not None:
                     result += self.pythiasystematic.appendname
-                result += "_minloHJJ"
+                if self.alternategenerator == "MINLO":
+                    result += "_minloHJJ"
                 return result
+            raise self.ValueError("CJLSTdirname")
         if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             s = str(self.productionmode)
             if self.productionmode == "VBF": s = "VBFH"
@@ -1143,8 +1146,6 @@ class Sample(ReweightingSample):
             if self.hypothesis in ("fa20.5", "fa2prod0.5"): result = "{}0PHf05ph0_M125".format(s)
             if self.hypothesis in ("fa30.5", "fa3prod0.5"): result = "{}0Mf05ph0_M125".format(s)
             if self.hypothesis in ("fL10.5", "fL1prod0.5"): result = "{}0L1f05ph0_M125".format(s)
-            if self.pythiasystematic is not None:
-                result += self.pythiasystematic.appendname
             return result
         if self.productionmode in ("HJJ", "ttH"):
             s = str(self.productionmode)

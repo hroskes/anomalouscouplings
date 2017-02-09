@@ -516,7 +516,7 @@ class PythiaSystematic(MyEnum):
 
     @property
     def appendname(self):
-        return "_" + str(self).replace("Up", "up").replace("Dn", "down").replace("Scale", "scale")
+        return "_" + str(self).lower().replace("dn", "down")
 
 channels = Channel.items()
 if config.applyshapesystematics:
