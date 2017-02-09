@@ -24,10 +24,13 @@ def buildtemplates(*args):
             if not os.path.exists(templatesfile.templatesfile()):
                 if not os.path.exists(templatesfile.templatesfile(firststep=True)):
                     subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
-            if templatesfile.hascustomsmoothing and not os.path.exists(templatesfile.templatesfile(firststep=True)):
-                raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile(firststep=True)))
+            if (
+                templatesfile.hascustomsmoothing
+                 and os.path.exists(templatesfile.templatesfile(firststep=True))
+                 and not os.path.exists(templatesfile.templatesfile())
+               ):
+                templatesfile.docustomsmoothing()
 
-            templatesfile.docustomsmoothing()
             if not os.path.exists(templatesfile.templatesfile()):
                 raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))
 

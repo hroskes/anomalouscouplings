@@ -36,15 +36,21 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
 
         if leftpeak:
             tailrange[0] = 2
-            while content(tailrange[0])-error(tailrange[0]) > content(tailrange[0]+1)+error(tailrange[0]+1):
+            while (content(tailrange[0])-error(tailrange[0]) > content(tailrange[0]+1)+error(tailrange[0]+1)
+                   or content(tailrange[0]) > content(tailrange[0]+1) > content(tailrange[0]+2) > content(tailrange[0]+3)
+                  ) and content(tailrange[0]+1) > content(1) / 4:
                 tailrange[0] += 1
 
         if rightpeak:
             tailrange[1] = nbins-1
-            while content(tailrange[1])-error(tailrange[1]) > content(tailrange[1]-1)+error(tailrange[1]-1):
+            while (content(tailrange[1])-error(tailrange[1]) > content(tailrange[1]-1)+error(tailrange[1]-1)
+                   or content(tailrange[1]) > content(tailrange[1]-1) > content(tailrange[1]-2) > content(tailrange[1]-3)
+                  ) and content(tailrange[1]-1) > content(nbins) / 4:
                 tailrange[1] -= 1
 
         rawleftpeakintegral = rawrightpeakintegral = smoothleftpeakintegral = smoothrightpeakintegral = 0
+        rawintegral = raw.Integral()
+        smoothintegral = proj.Integral()
         if leftpeak:
             rawleftpeakintegral = raw.Integral(1, tailrange[0]-1)
             smoothleftpeakintegral = proj.Integral(1, tailrange[0]-1)
@@ -60,8 +66,7 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
         for i in range(tailrange[0], tailrange[1]+1):
             setcontent[i] = (
                              proj.GetBinContent(i)
-                                    * rawtailintegral / (rawleftpeakintegral + rawtailintegral + rawrightpeakintegral)
-                                    / (smoothtailintegral / (smoothleftpeakintegral + smoothtailintegral + smoothrightpeakintegral))
+                                    * rawtailintegral / smoothtailintegral
                             )
         for i in range(tailrange[1]+1, nbins+1):
             setcontent[i] = raw.GetBinContent(i)
