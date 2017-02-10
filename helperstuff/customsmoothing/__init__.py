@@ -6,6 +6,7 @@ from reweightthingwithobviouspeak import reweightthingwithobviouspeak
 
 def donothing(hsmooth, rawprojections, **kwargs):
    """do nothing"""
+   return False #don't make new control plots
 
 functions = {_.__name__: _ for _ in [reweightthingwithobviouspeak, donothing]}
 
@@ -19,10 +20,14 @@ def callfunction(hsmooth, rawprojections, **kwargs):
     return functions[name](hsmooth, rawprojections, **kwargs)
 
 def customsmoothing(hsmooth, rawprojections, templatedirectory, controlplotsdirectory, **kwargs):
-    callfunction(hsmooth, rawprojections, **kwargs)
-    newcontrolplots = []
+    makenewcontrolplots = callfunction(hsmooth, rawprojections, **kwargs)
     templatedirectory.cd()
     hsmooth.Write()
+
+    if not makenewcontrolplots: return
+
+    newcontrolplots = []
+
     for i, rawprojection in enumerate(rawprojections):
         smoothprojection = hsmooth.Projection(i)
         plotname = "control_{}_projAxis{}_afterCustomSmoothing".format(hsmooth.GetName(), i)

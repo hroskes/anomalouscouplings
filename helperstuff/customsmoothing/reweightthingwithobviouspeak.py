@@ -103,3 +103,5 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
                     setbincontentkwargs["content"] = value*ratio
 
                     SetBinContent(hsmooth, **setbincontentkwargs)
+
+    return True #do make new control plots
