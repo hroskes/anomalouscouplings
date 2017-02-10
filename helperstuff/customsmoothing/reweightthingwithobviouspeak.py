@@ -29,8 +29,14 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
         nbins = raw.GetNbinsX()
         assert nbins == proj.GetNbinsX()
 
-        if leftpeak and content(1) < 1.5*content(2): raise ValueError("Histogram does not have an obvious left peak! {} {}".format(content(1), content(2)))
-        if rightpeak and content(nbins) < 1.5*content(nbins-1): raise ValueError("Histogram does not have an obvious right peak! {} {}".format(content(nbins), content(nbins-1)))
+        if leftpeak and (
+                         content(1) < 1.5*content(2)
+                         and (content(1) < content(2) or content(2) < 1.5*content(3))
+                        ): raise ValueError("Histogram does not have an obvious left peak! {} {} {}".format(content(1), content(2), content(3)))
+        if rightpeak and (
+                          content(nbins) < 1.5*content(nbins-1)
+                          and (content(nbins) < content(nbins-1) or content(nbins-1) < 1.5*content(nbins-2))
+                         ): raise ValueError("Histogram does not have an obvious right peak! {} {} {}".format(content(nbins), content(nbins-1), content(nbins-2)))
 
         tailrange = [1, nbins]
 
