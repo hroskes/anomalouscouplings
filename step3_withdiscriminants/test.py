@@ -45,7 +45,6 @@ productionmode = ProductionMode(productionmode)
 def hypothesestouse():
     for hypothesis in hypotheses:
         if hypothesis not in productionmode.generatedhypotheses: continue
-        if productionmode == "ggH" and hypothesis == "L1": continue
         if skip is not None and hypothesis in skip: continue
         yield hypothesis
 
