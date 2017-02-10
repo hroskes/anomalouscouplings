@@ -100,6 +100,23 @@ class KeepWhileOpenFile(object):
     def __nonzero__(self):
         return bool(self.f)
 
+class OneAtATime(KeepWhileOpenFile):
+    def __init__(self, name, delay, message=None, task="doing this"):
+        super(OneAtATime, self).__init__(name)
+        self.delay = delay
+        if message is None:
+            message = "Another process is already {task}!  Waiting {delay} seconds."
+        message = message.format(delay=delay, task=task)
+        self.message = message
+
+    def __enter__(self):
+        while True:
+            result = super(OneAtATime, self).__enter__()
+            if result:
+                return result
+            print self.message
+            time.sleep(self.delay)
+
 def jsonloads(jsonstring):
     try:
         return json.loads(jsonstring)

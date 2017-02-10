@@ -14,9 +14,13 @@ import shutil
 import subprocess
 import sys
 
+combinecardstemplate = r"""
+eval $(scram ru -sh) &&
+combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
+"""
+
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
-combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo. &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
                            --PO verbose --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
                            |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
@@ -126,7 +130,7 @@ def runcombine(analysis, foldername, **kwargs):
         moreappend += "_muggH{}".format(expectmuggH)
     if expectmuVVH != 1:
         moreappend += "_muVVH{}".format(expectmuVVH)
-    if usesignalproductionmodes != defaultusesignalproductionmodes:
+    if set(usesignalproductionmodes) != set(defaultusesignalproductionmodes):
         workspacefileappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
         turnoff.append("--PO turnoff={}".format(",".join(p.combinename for p in disableproductionmodes)))
@@ -172,8 +176,12 @@ def runcombine(analysis, foldername, **kwargs):
         makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
         with open(".gitignore", "w") as f:
             f.write("*")
-        if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
-            subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
+        with utilities.OneAtATime(replaceByMap(".oO[combinecardsfile]Oo..tmp", repmap), 5, task="running combineCards"):
+            if not os.path.exists(replaceByMap(".oO[combinecardsfile]Oo.", repmap)):
+                subprocess.check_call(replaceByMap(combinecardstemplate, repmap), shell=True)
+        with utilities.OneAtATime(replaceByMap(".oO[workspacefile]Oo..tmp", repmap), 5, task="running text2workspace"):
+            if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
+                subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
         if config.unblindscans:
             repmap_obs = repmap.copy()
