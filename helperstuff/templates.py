@@ -291,8 +291,6 @@ class TemplatesFile(MultiEnum):
         oldf = ROOT.TFile(self.templatesfile(firststep=True))
         newf.cd()
 
-        thetemplates = {template: {getattr(oldf, template.templatename(final=False)), getattr(oldf, template.templatename(final=True))} for template in self.templates()+self.inttemplates()}
-
         controlplotsdir = newf.mkdir("controlPlots")
         controlplotsdir.cd()
         for key in oldf.controlPlots.GetListOfKeys():
