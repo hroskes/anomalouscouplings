@@ -127,6 +127,24 @@ def getnesteddictvalue(thedict, *keys, **kwargs):
 
     return getnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
 
+def setnesteddictvalue(thedict, *keys, **kwargs):
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "value":
+            value = kwarg
+        else:
+            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    try:
+        value
+    except NameError:
+        raise TypeError("Didn't provide value kwarg!")
+
+    if len(keys) == 1:
+        thedict[keys[0]] = value
+        return
+
+    return setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
 def pairwise(iterable):
     """
     https://docs.python.org/2/library/itertools.html#recipes
