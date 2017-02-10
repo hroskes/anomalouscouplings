@@ -602,6 +602,8 @@ class Template(TemplateBase, MultiEnum):
               str(self.production),
              )
       result = getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])
+      if self.shapesystematic != "" and result == [None, None, None]:
+          return Template(self.productionmode, self.category, self.channel, self.analysis, self.hypothesis, self.production).smoothingparameters
       if len(result) == 3:
           result = [result, None]
       if result[1] is None:
