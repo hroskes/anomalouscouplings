@@ -136,6 +136,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fa3proddec-0.5"),
                  EnumItem("fL1proddec-0.5"),
                  EnumItem("fL1Zgproddec-0.5"),
+                 EnumItem("fa2dec-0.9", "fa2-0.9"),
                 )
     @property
     def ispure(self):
@@ -157,6 +158,7 @@ class Hypothesis(MyEnum):
                 for a in "fa2", "fa3", "fL1":
                     if self == "{}{}{}0.5".format(a, b, c): return False
                 if self == "{}{}{}0.5".format("fL1Zg", b, c): return True
+        if self == "fa2dec-0.9": return False
         assert False
 
 class HffHypothesis(MyEnum):
@@ -529,7 +531,7 @@ btagsystematics = BTagSystematic.items()
 pythiasystematics = PythiaSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
-decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5"))
+decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5", "fa2dec-0.9"))
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5", "fa2prod-0.5", "fa3prod-0.5", "fL1prod-0.5", "fL1Zgprod-0.5"))
 proddechypotheses = Hypothesis.items()
 purehypotheses = Hypothesis.items(lambda x: x.ispure)

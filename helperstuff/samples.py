@@ -683,6 +683,8 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_ggH_ghzgs1prime2"
             elif self.hypothesis == "fa20.5":
                 return "MC_weight_ggH_g1g2"
+            elif self.hypothesis == "fa2dec-0.9":
+                return "MC_weight_ggH_g1g2_minuspoint9"
             elif self.hypothesis == "fa30.5":
                 return "MC_weight_ggH_g1g4"
             elif self.hypothesis == "fL10.5":
@@ -733,6 +735,9 @@ class ReweightingSample(MultiEnum, SampleBase):
             elif self.hypothesis == "fL1Zgproddec0.5":
                 return "MC_weight_{}_g1ghzgs1prime2_proddec".format(self.productionmode)
 
+            elif self.hypothesis == "fa2dec-0.9":
+                return "MC_weight_{}_g1g2_dec_minuspoint9".format(self.productionmode)
+
             for a in analyses:
                 for b in "prod", "dec", "proddec":
                     if self.hypothesis == "{}{}-0.5".format(a, b):
@@ -774,6 +779,8 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return result + "g1g1prime2"
             elif self.hypothesis == "fL1Zg0.5":
                 return result + "g1ghzgs1prime2"
+            elif self.hypothesis == "fa2dec-0.9":
+                return result + "g1g2_minuspoint9"
             for a in analyses:
                 if self.hypothesis == "{}-0.5".format(a):
                     return ReweightingSample(self.productionmode, self.hffhypothesis, "{}0.5".format(a)).weightname()+"_pi"
@@ -837,10 +844,11 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
             if self.hypothesis in (
                                    ["0+", "0+_photoncut"]
-                                   + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1", "fL1Zg")
+                                   + [
+                                      "{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1", "fL1Zg")
                                                                   for b in ("dec", "prod", "proddec")
                                                                   for c in ("+", "-")
-                                     ]
+                                     ] + ["fa2dec-0.9"]
                                   ):
                 return 1
             if self.hypothesis in ("a2", "0-", "L1", "L1Zg"):
@@ -862,6 +870,9 @@ class ReweightingSample(MultiEnum, SampleBase):
 
         if self.hypothesis == "fa2dec0.5":
             return constants.g2decay
+
+        if self.hypothesis == "fa2dec-0.9":
+            return -constants.g2decay * 3
 
         if self.productionmode == "VBF":
             if self.hypothesis == "fa2prod0.5":
@@ -892,6 +903,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.hypothesis in (
                                ["0+", "0+_photoncut", "a2", "L1", "L1Zg"]
                              + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fL1", "fL1Zg") for b in ("dec", "prod", "proddec") for c in "+-"]
+                             + ["fa2dec-0.9"]
                               ):
             return 0
         if self.hypothesis == "0-":
@@ -932,6 +944,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.hypothesis in (
                                ["0+", "0+_photoncut", "a2", "0-", "L1Zg"]
                              + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1Zg") for b in ("dec", "prod", "proddec") for c in "+-"]
+                             + ["fa2dec-0.9"]
                               ):
             return 0
 
@@ -973,6 +986,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.hypothesis in (
                                ["0+", "0+_photoncut", "a2", "0-", "L1"]
                              + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1") for b in ("dec", "prod", "proddec") for c in "+-"]
+                             + ["fa2dec-0.9"]
                               ):
             return 0
 
