@@ -7,9 +7,12 @@ import ROOT
 from helperstuff import config, style
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, Analysis
-from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample
+from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample, Sample
 from helperstuff.plotfromtree import Line, plotfromtree
+from helperstuff.rootoverloads import histogramadd
 
+assert len(config.productionsforcombine) == 1
+production = config.productionsforcombine[0]
 
 def makeplot(disc, channel):
   lines = (
@@ -28,31 +31,37 @@ def makeplot(disc, channel):
 
   for sample, title, color, reweightfrom in lines:
     for linestyle, cut in enumerate((None, "ZZPt<200", "ZZPt>200"), start=1):
-#      color=linestyle
-#      if cut is None: continue
-      if cut is not None: continue
-      linestyle=1
+      color=color*2-2+linestyle
+      if cut is None: continue
 #      if cut is not None: continue
-      h = hs[disc,sample,style] = plotfromtree(
-        reweightfrom=reweightfrom,
-        reweightto=sample,
-        disc=disc,
-        normalizeto1=True,
-        color=color,
-        cut=cut,
-        linestyle=linestyle,
-        channel=channel,
-        category="VBFtagged",
-        analysis="fa2",
-        bins=20,
-      )
-      h.SetLineWidth(2)
-      hstack.Add(h)
+
+      htotal = hs[disc,sample,style] = None
+      for hypothesis in sample.productionmode.generatedhypotheses:
+        reweightfrom = Sample(hypothesis, sample.productionmode, production)
+        h = hs[disc,sample,style,reweightfrom] = plotfromtree(
+          reweightfrom=reweightfrom,
+          reweightto=sample,
+          disc=disc,
+          normalizeto1=False,
+          color=color,
+          cut=cut,
+#          linestyle=linestyle,
+          channel=channel,
+          category="VBFtagged",
+          analysis="fa2",
+          bins=20,
+        )
+        if htotal is None: htotal = h
+        else: htotal += h
+      htotal.Scale(1/htotal.Integral())
+      htotal.SetLineWidth(2)
+      htotal.SetMarkerStyle(20+linestyle)
+      hstack.Add(htotal)
       usetitle = title
       if cut: usetitle += " ("+cut.replace("ZZP", "p")+")"
-      l.AddEntry(h, usetitle, "l")
+      l.AddEntry(htotal, usetitle, "l")
 
-  hstack.Draw("hist nostack")
+  hstack.Draw("PEnostack")
   l.Draw()
 
   saveasdir = os.path.join(config.plotsbasedir, "fa2_pTeffect", str(channel))
