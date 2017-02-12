@@ -12,9 +12,9 @@ import os
 
 #========================
 #inputs
-productionmode = "ggH"
-disc           = "D_CP_VBF"
-reweightto     = ReweightingSample(productionmode, "fa30.5")
+productionmode = "VBF"
+disc           = "D_0hplus_decay"
+reweightto     = ReweightingSample(productionmode, "fa2-0.5")
 bins           = None
 min            = None
 max            = None
@@ -25,8 +25,10 @@ normalizeto1   = False
 
 channel        = "2e2mu"
 
-category       = "VBFtagged"
-analysis       = "fa3"
+category       = None
+analysis       = "fa2"
+
+cut            = "ZZPt>100"
 
 skip           = []
 #========================
@@ -75,6 +77,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       analysis=analysis,
       color=color,
       hname=hname,
+      cut=cut
     )
     h.SetMinimum(0)
 

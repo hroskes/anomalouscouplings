@@ -44,8 +44,10 @@ def plotfromtree(**kwargs):
     "category":       None,
     "categorization": None,  #for which categorization to use, or set the next argument
     "analysis":       None,  #for which categorization to use, or set the previous argument
+    "cut":            None,
 
     "color":          1,
+    "linestyle":      1,
     "hname":          None,
     "xaxislabel":     None,
   })
@@ -127,6 +129,8 @@ def plotfromtree(**kwargs):
     weightfactors.append("ZZMass < {}".format(config.m4lmax))
   if o.disc2 is not None:
     weightfactors.append("{}>-98".format(disc2name))
+  if o.cut is not None:
+    weightfactors.append(o.cut)
 
   wt = "*".join("("+_+")" for _ in weightfactors)
 
@@ -168,6 +172,8 @@ def plotfromtree(**kwargs):
     except ZeroDivisionError:
       pass
   h.SetLineColor(o.color)
+  h.SetLineStyle(o.linestyle)
+  h.SetMarkerColor(o.color)
   h.SetMarkerStyle(1)
 
   return h
