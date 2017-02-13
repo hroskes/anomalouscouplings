@@ -22,7 +22,7 @@ combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
-                           --PO verbose --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
+                           --PO verbose --PO allowPMF .oO[fixmu]Oo. -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
                            |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
 exit ${PIPESTATUS[0]}
 """
@@ -31,7 +31,7 @@ eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
         --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
         .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. --saveSpecifiedFunc=r_VVH,r_ggH |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo...oO[exporobs]Oo.
+        -S .oO[usesystematics]Oo. .oO[savemu]Oo. |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo...oO[exporobs]Oo.
 """
 
 def check_call_test(*args, **kwargs):
@@ -54,6 +54,7 @@ def runcombine(analysis, foldername, **kwargs):
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH")}
     usebkg = True
     expectmuggH = expectmuVVH = 1
+    fixmu = False
     if config.unblindscans:
         lumitype = "fordata"
     else:
@@ -112,6 +113,8 @@ def runcombine(analysis, foldername, **kwargs):
             expectmuggH = float(kwarg)
         elif kw == "expectmuVVH":
             expectmuVVH = float(kwarg)
+        elif kw == "fixmu":
+            fixmu = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -126,6 +129,8 @@ def runcombine(analysis, foldername, **kwargs):
     workspacefileappend = ".oO[combinecardsappend]Oo."
     moreappend = ".oO[workspacefileappend]Oo."
     turnoff = []
+    if fixmu:
+        workspacefileappend += "_fixmu"
     if expectmuggH != 1:
         moreappend += "_muggH{}".format(expectmuggH)
     if expectmuVVH != 1:
@@ -153,12 +158,12 @@ def runcombine(analysis, foldername, **kwargs):
     repmap = {
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
               "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
-              "workspacefile": "floatMu.oO[workspacefileappend]Oo..root",
+              "workspacefile": "workspace.oO[workspacefileappend]Oo..root",
               "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": str(totallumi),
               "observedappend": "obs",
-              "setphysicsmodelparameters": ".oO[expectrs]Oo.,CMS_zz4l_fai1=.oO[expectfai]Oo.",
+              "setphysicsmodelparameters": ".oO[expectrs,]Oo.CMS_zz4l_fai1=.oO[expectfai]Oo.",
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "npoints": str(npoints),
@@ -166,9 +171,11 @@ def runcombine(analysis, foldername, **kwargs):
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
-              "expectrs": "r_ggH=.oO[expectmuggH]Oo.,r_VVH=.oO[expectmuVVH]Oo.",
+              "expectrs,": "" if fixmu else "r_ggH=.oO[expectmuggH]Oo.,r_VVH=.oO[expectmuVVH]Oo.,",
               "expectmuggH": str(expectmuggH),
               "expectmuVVH": str(expectmuVVH),
+              "fixmu": "--PO muFixed" if fixmu else "",
+              "savemu": "" if fixmu else "--saveSpecifiedFunc=r_VVH,r_ggH"
              }
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
