@@ -54,6 +54,7 @@ def copydata(*args):
     discriminants_forcerange = {d: array('d', [0]) for d in discriminants.values() if hasattr(t, d.name)}
     for (dname, dtitle, dbins, dmin, dmax), branchaddress in discriminants_forcerange.iteritems():
         t.SetBranchAddress(dname, branchaddress)
+    epsilon = (dmax-dmin)/dbins/1000
 
     newfilename = datatree.treefile
     if os.path.exists(newfilename): f.Close(); return
@@ -62,9 +63,9 @@ def copydata(*args):
     newt = t.CloneTree(0)
     for entry in t:
         for (dname, dtitle, dbins, dmin, dmax), branchaddress in discriminants_forcerange.iteritems():
-            branchaddress[0] = min(branchaddress[0], dmax)
+            branchaddress[0] = min(branchaddress[0], dmax-epsilon)
             branchaddress[0] = max(branchaddress[0], dmin)
-            assert dmin <= branchaddress[0] <= dmax
+            assert dmin <= branchaddress[0] <= dmax-epsilon
         if datatree.passescut(t):
             newt.Fill()
     print newt.GetEntries()
