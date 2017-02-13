@@ -51,7 +51,7 @@ def runcombine(analysis, foldername, **kwargs):
     subdirectory = ""
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
-    defaultusesignalproductionmodes = usesignalproductionmodes = (ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH"))
+    defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH")}
     usebkg = True
     expectmuggH = expectmuVVH = 1
     if config.unblindscans:
