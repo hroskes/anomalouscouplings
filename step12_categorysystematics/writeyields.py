@@ -132,10 +132,13 @@ def writeyields():
       #same for all channels
       for category in categories:
         nominal = sum(result[tosample, categorization, category] for tosample in samples)
-        JECUp = sum(result[tosample, findsystematic(categorizations, categorization, "JECUp", "Nominal"), category] for tosample in samples) / nominal
-        JECDn = sum(result[tosample, findsystematic(categorizations, categorization, "JECDn", "Nominal"), category] for tosample in samples) / nominal
-        btSFUp = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFUp"), category] for tosample in samples) / nominal
-        btSFDn = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), category] for tosample in samples) / nominal
+        if productionmode == "ZX":
+          JECUp = JECDn = btSFUp = btSFDn = 1
+        else:
+          JECUp = sum(result[tosample, findsystematic(categorizations, categorization, "JECUp", "Nominal"), category] for tosample in samples) / nominal
+          JECDn = sum(result[tosample, findsystematic(categorizations, categorization, "JECDn", "Nominal"), category] for tosample in samples) / nominal
+          btSFUp = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFUp"), category] for tosample in samples) / nominal
+          btSFDn = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), category] for tosample in samples) / nominal
         for channel in channels:
           YieldSystematicValue(channel, category, analysis, productionmode, "JEC").value = (JECUp, JECDn)
           YieldSystematicValue(channel, category, analysis, productionmode, "BTag").value = (btSFUp, btSFDn)
