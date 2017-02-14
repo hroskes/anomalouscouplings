@@ -118,20 +118,36 @@ class YieldSystematicValue(MultiEnum):
 
     @value.setter
     def value(self, value):
+        if hasattr(value, "__len__"):
+          if len(self.value) != 2:
+            raise ValueError("value '{!r}' is a list or similar, but has length {} instead of 2!".format(value, len(value)))
+          if not all(isinstance(_, Number) for _ in value):
+            raise ValueError("value '{!r}' doesn't contain only numbers!".format(value))
+
+          if list(value) == [1, 1]: value = None
+          elif 1 in list(value):
+            value = list(value)
+            value.remove(1)
+            assert len(value) == 1
+            value = value[0]
+
+        elif isinstance(value, Number) or value is None:
+          pass
+        else:
+          raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
+
+        if value == 1: value = None
         setnesteddictvalue(self.getyieldsystematicsdict(), *self.keys, value=value)
         assert self.value == value
 
     def __str__(self):
-        if self.value is None or self.value == 0:
+        if self.value is None or self.value == 1:
             return "-"
         if isinstance(self.value, Number):
-            if not -1 < self.value < 1: raise ValueError("{!r} value {} should be between 0 and 1!".format(self, self.value))
             return str(self.value)
-        if not (hasattr(self.value, __len__) and len(self.value) == 2):
+        if not (hasattr(self.value, "__len__") and len(self.value) == 2):
             raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
-        if not all(-1 < _ < 1 for _ in self.value):
-            raise ValueError("Both elements of {!r} value {} should be between -1 and 1!".format(self, self.value))
-        return "{}/{}".format(1+self.value[0], 1+self.value[1])
+        return "{}/{}".format(self.value[0], self.value[1])
 
 class __TotalRate(MultiEnum):
   enums = [ProductionMode, Luminosity]

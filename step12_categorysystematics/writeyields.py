@@ -8,7 +8,9 @@ from helperstuff.enums import analyses, categories, channels, flavors, Productio
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import MultiplyCounter
-from helperstuff.yields import count, totalrate, YieldValue
+from helperstuff.yields import count, totalrate, YieldSystematicValue, YieldValue
+
+from categorysystematics import findsystematic
 
 assert len(config.productionsforcombine) == 1
 production = config.productionsforcombine[0]
@@ -102,7 +104,19 @@ def writeyields():
       for channel, category in itertools.product(channels, categories):
         YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, category, channel] for tosample in samples)
 
+      #same for all channels
+      for category in categories:
+        nominal = sum(result[tosample, categorization, category] for tosample in samples)
+        JECUp = sum(result[tosample, findsystematic(categorizations, categorization, "JECUp", "Nominal"), category] for tosample in samples) / nominal
+        JECDn = sum(result[tosample, findsystematic(categorizations, categorization, "JECDn", "Nominal"), category] for tosample in samples) / nominal
+        btSFUp = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFUp"), category] for tosample in samples) / nominal
+        btSFDn = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), category] for tosample in samples) / nominal
+        for channel in channels:
+          YieldSystematicValue(channel, category, analysis, productionmode, "JEC").value = (JECUp, JECDn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "BTag").value = (btSFUp, btSFDn)
+
     YieldValue.writeyieldsdict()
+    YieldSystematicValue.writeyieldsystematicsdict()
 
 if __name__ == "__main__":
   writeyields()
