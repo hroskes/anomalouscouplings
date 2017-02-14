@@ -8,7 +8,7 @@ import ROOT
 from helperstuff import config, style
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, categories, Category, hffhypotheses
-from helperstuff.samples import ReweightingSample, Sample
+from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, Sample
 from helperstuff.plotfromtree import Line, plotfromtree
 from helperstuff.templates import TemplatesFile
 from helperstuff.utilities import tfiles
@@ -31,6 +31,13 @@ def lines(productionmode, analysis):
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ggH SM JHUGen H+jj")
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ggH 0^{-} JHUGen H+jj")
     yield makeline(ReweightingSample(productionmode, "0+", "fCP0.5"), "ggH f_{CP}=0.5 JHUGen H+jj")
+    try:
+      Sample("ggH", "0+", "MINLO", production)
+    except ValueError:
+      pass
+    else:
+      raise ValueError("Use nominal!")
+    yield makeline(ReweightingSamplePlus("ggH", "0+", "MINLO", "ScaleUp"), "ggH SM MINLO")
   elif productionmode == "ttH":
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ttH SM JHUGen")
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ttH 0^{-} JHUGen")
