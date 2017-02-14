@@ -6,7 +6,7 @@ import yaml
 import ROOT
 
 import config
-from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode
+from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode, shapesystematics
 from samples import ReweightingSample, Sample
 from templates import DataTree, IntTemplate, Template, TemplatesFile
 from utilities import tfiles
@@ -115,6 +115,12 @@ def gettemplate(*args):
             t = IntTemplate(*args)
     except ValueError as e2:
         raise ValueError("Can't gettemplate using args:\n{}\n\nTrying to make a regular template:\n{}\n\nTrying to make an interference template:\n{}".format(args, e1.message, e2.message))
+
+    if t.shapesystematic not in shapesystematics:
+        kwargs = {enum.enumname: getattr(t, enum.enumname) for enum in type(t).needenums}
+        kwargs["shapesystematic"] = ""
+        print kwargs
+        t = type(t)(*kwargs.values())  #can't use actual kwargs
 
     result = t.gettemplate()
     if isnan(result.Integral()):

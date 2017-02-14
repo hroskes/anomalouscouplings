@@ -55,7 +55,7 @@ class TemplatesFile(MultiEnum):
             if not os.path.exists(folder):
                 raise IOError("No folder {}".format(folder))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic if config.applyshapesystematics else "", self.production]
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic, self.production]
         if firststep: nameparts.append("firststep")
 
         nameparts = [str(x) for x in nameparts if x]

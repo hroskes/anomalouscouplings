@@ -517,11 +517,6 @@ class PythiaSystematic(MyEnum):
         return "_" + str(self).lower().replace("dn", "down")
 
 channels = Channel.items()
-if config.applyshapesystematics:
-    shapesystematics = ShapeSystematic.items()
-    treeshapesystematics = ShpaeSystematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
-else:
-    shapesystematics = treeshapesystematics = ShapeSystematic.items(lambda x: x == "")
 JECsystematics = JECSystematic.items()
 btagsystematics = BTagSystematic.items()
 pythiasystematics = PythiaSystematic.items()
@@ -538,6 +533,15 @@ analyses = Analysis.items()
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
+
+_ = [""]
+if config.applym4lshapesystematics:
+    _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"]
+if config.applyZXshapesystematics:
+    _ += ["ZXUp", "ZXDown"]
+shapesystematics = ShapeSystematic.items(lambda x: x in _)
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("ResUp", "ResDown", "ScaleUp", "ScaleDown"))
+del _
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):

@@ -25,8 +25,11 @@ usedata = True
 showblinddistributions = False
 unblinddistributions = False
 unblindscans = False
-applyshapesystematics = False
 useQGTagging = False
+
+applym4lshapesystematics = False
+applyZXshapesystematics = True
+applyJECshapesystematics = False
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
