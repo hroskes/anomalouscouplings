@@ -107,12 +107,23 @@ def writeyields():
         YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, category, channel] for tosample in samples)
 
       #same for all categories and channels
-      with open(os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_theory_13TeV.yaml")) as f:
-        y = yaml.load(f)
       for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_Higgs_qq", "BRhiggs_hzz4l", "QCDscale_ggZH", "QCDscale_ggVV_bonly", "lumi_13TeV":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           values = syst.yieldsystematic.getfromyaml()
+          if productionmode.yamlsystname in values:
+            syst.value = values[productionmode.yamlsystname]
+          else:
+            syst.value = None
+
+      #same for all categories
+      for systname in "CMS_eff_e", "CMS_eff_m":
+        for category, channel in itertools.product(categories, channels):
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
+          if channel == "4e" and systname == "CMS_eff_m" or channel == "4mu" and systname == "CMS_eff_e":
+            values = {}
+          else:
+            values = syst.yieldsystematic.getfromyaml(channel=channel)
           if productionmode.yamlsystname in values:
             syst.value = values[productionmode.yamlsystname]
           else:

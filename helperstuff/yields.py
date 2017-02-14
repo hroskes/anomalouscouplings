@@ -25,26 +25,32 @@ class YieldSystematic(MyEnum):
                  EnumItem("QCDscale_ggZH"),
                  EnumItem("QCDscale_ggVV_bonly"),
                  EnumItem("lumi_13TeV"),
+                 EnumItem("CMS_eff_e"),
+                 EnumItem("CMS_eff_m"),
                 )
-    @property
-    def yamlfilename(self):
+    def yamlfilename(self, channel=None):
       if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_Higgs_qq", "BRhiggs_hzz4l", "QCDscale_ggZH", "QCDscale_ggVV_bonly"):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
       if self in ("lumi_13TeV",):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_expt_13TeV.yaml")
+      if self in ("CMS_eff_e", "CMS_eff_m"):
+        if channel is None:
+          raise ValueError("Need to give channel for {}".format(self))
+        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_13TeV_{}.yaml".format(Channel(channel)))
       raise ValueError("{} is not from yaml!".format(self))
 
-    def getfromyaml(self):
+    def getfromyaml(self, channel=None):
       systname = str(self)
-      with open(self.yamlfilename) as f:
+      filename = self.yamlfilename(channel=channel)
+      with open(filename) as f:
         y = yaml.load(f)
-      if systname not in y: raise ValueError("{} not in {}!".format(systname, self.yamlfilename))
+      if systname not in y: raise ValueError("{} not in {}!".format(systname, filename))
       if "Any" in y[systname]:
         values = y[systname]["Any"]
       elif "UnTagged" in y[systname] and all(y[systname][k] == y[systname]["UnTagged"] for k in y[systname]):
         values = y[systname]["UnTagged"]
       else:
-        raise ValueError("Any not in {} in {}, and not all categories are the same!".format(systname, self.yamlfilename))
+        raise ValueError("Any not in {} in {}, and not all categories are the same!".format(systname, filename))
       return values
 
 
