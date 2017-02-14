@@ -33,22 +33,37 @@ def writeyields():
   for productionmode, samples in tosamples_foryields:
     print productionmode
     result = MultiplyCounter()
-    usesamples = samples.copy()
+    samplegroups = [samples]
     if productionmode.issignal:
-      usesamples |= {ReweightingSamplePlus(s, systematic) for systematic in pythiasystematics for s in samples}
+      samplegroups += [{ReweightingSamplePlus(s, systematic) for s in samples} for systematic in pythiasystematics]
 
-    for tosample in usesamples:
-      ####################################
-      if isinstance(tosample, ReweightingSamplePlus) and tosample.alternategenerator == "MINLO" and tosample.pythiasystematic is None:
-        try:
-          Sample(tosample, production)
-        except ValueError:
-          pass
-        else:
-          assert False, "Delete this section!"
-        continue
-      ####################################
-      result += count({Sample(tosample, production)}, {tosample}, TreeWrapper.categorizations)
+    for usesamples in samplegroups:
+      tmpresult = MultiplyCounter()
+      for tosample in usesamples:
+        ####################################
+        if isinstance(tosample, ReweightingSamplePlus) and tosample.alternategenerator == "MINLO" and tosample.pythiasystematic is None:
+          try:
+            Sample(tosample, production)
+          except ValueError:
+            pass
+          else:
+            assert False, "Delete this section!"
+          continue
+        ####################################
+        tmpresult += count({Sample(tosample, production)}, {tosample}, TreeWrapper.categorizations)
+
+      for key in tmpresult:
+        if isinstance(key, ReweightingSample): continue
+        elif isinstance(key, tuple):
+#          try:
+            assert key[0] in usesamples
+            tmpresult[key] /= sum(tmpresult[tosample] for tosample in usesamples)
+#          except ZeroDivisionError:
+#            pass
+        else: assert False
+
+      result += tmpresult
+
 
     ####################################
     if productionmode == "ggH":
@@ -85,11 +100,7 @@ def writeyields():
 
       total = totalrate(productionmode, production, 1.0)
       for channel, category in itertools.product(channels, categories):
-        if len(samples) == 1:
-          tosample = list(samples)[0]
-          YieldValue(channel, category, analysis, productionmode).value = total*result[tosample, categorization, category, channel]
-        else:
-          YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, category, channel]*Sample(tosample, production).xsec for tosample in samples) / sum(Sample(tosample, production).xsec for tosample in samples)
+        YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, category, channel] for tosample in samples)
 
     YieldValue.writeyieldsdict()
 

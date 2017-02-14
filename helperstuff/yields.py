@@ -210,20 +210,11 @@ def count(fromsamples, tosamples, categorizations):
         h = c.FindObject("htemp")
         for i in range(6):
             for channel in channels:
-                toadd = h.GetBinContent(h.Fill(channel.ZZFlav, i, 0))
+                toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
                 result[tosample, categorization, Category.fromid(i), channel] += toadd
                 result[tosample, categorization, Category.fromid(i)] += toadd
 
         if tosample not in result:
             result[tosample] = h.Integral()
-
-    for key in result:
-        if isinstance(key, ReweightingSample): continue
-        elif isinstance(key, tuple):
-            try:
-                result[key] /= result[key[0]]
-            except ZeroDivisionError:
-                pass
-        else: assert False
 
     return result

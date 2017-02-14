@@ -83,6 +83,15 @@ def maketable(analysis):
 
         result += count(fromsamples, usetosamples, categorizations)
 
+    for key in result:
+        if isinstance(key, ReweightingSample): continue
+        elif isinstance(key, tuple):
+            try:
+                result[key] /= result[key[0]]
+            except ZeroDivisionError:
+                pass
+        else: assert False
+
     rowfmt = "| {:20} | " + " | ".join("{:12.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%}" for category in categories) + " |"
     headerfmt = rowfmt.replace(".1%", "").replace("+", "").replace(":10", ":^10").replace(":12", ":^12")
     line = "-"*len(headerfmt.format(*[""]*headerfmt.count("{")))
