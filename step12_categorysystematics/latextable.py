@@ -36,6 +36,7 @@ class Row(MultiEnum):
   enums = (ProductionMode, Hypothesis, Analysis, HffHypothesis)
   enumname = "Row"
   def __init__(self, *args, **kwargs):
+    self.__categorydistribution = None
     self.title = None
     if "title" in kwargs:
       self.title = kwargs["title"]
@@ -94,24 +95,32 @@ class Row(MultiEnum):
     if self.productionmode.isbkg: return ReweightingSample(self.productionmode).weightname()
     return self.reweightingsample.weightname()
 
+  @property
+  def categorydistribution(self):
+    if self.__categorydistribution is None:
+      self.__categorydistribution = self.getcategorydistribution()
+    return self.__categorydistribution
+
+  def scale(self, scaleby):
+    self.__categorydistribution *= scaleby
+
   def getlatex(self, dochannels=True):
-    categorydistribution = self.getcategorydistribution()
     result = " & {}".format(self.title)
     for category in categories:
       result += " & "
       total = 0
       for channel in channels:
         channel = Channel(channel)
-        total += categorydistribution[channel, category]
+        total += self.categorydistribution[channel, category]
         if dochannels:
-          result += "{:.1f}/".format(categorydistribution[channel, category])
+          result += "{:.1f}/".format(self.categorydistribution[channel, category])
       result += "{:.1f}".format(total)
     return result
 
 class RowChannel(Row, MultiEnum):
   enums = (Row, Channel)
   def getcategorydistribution(self):
-    if self.productionmode.isbkg or (self.productionmode != "ttH" and self.hypothesis == "SM"):
+    if self.productionmode.isbkg or self.hypothesis == "SM":
       result = MultiplyCounter({(self.channel, category): getrate(self.channel, category, production, "forexpectedscan", self.analysis, self.productionmode) for category in categories})
     else:
       t = self.tree
@@ -149,6 +158,16 @@ class Section(object):
     result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
     result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex(dochannels=dochannels) for _ in self.rows)
     return result
+  def findrow(self, productionmode):
+    result = [row for row in self.rows if row.productionmode == productionmode]
+    assert len(result) == 1
+    return result.pop()
+
+def scalerows(scalethese, tothese):
+  wanttotal = sum(row.categorydistribution[channel, category] for row in tothese for channel in channels for category in categories)
+  previoustotal = sum(row.categorydistribution[channel, category] for row in scalethese for channel in channels for category in categories)
+  for row in scalethese:
+    row.scale(wanttotal / previoustotal)
 
 def maketable(analysis, dochannels=True):
   analysis = Analysis(analysis)
@@ -174,6 +193,10 @@ def maketable(analysis, dochannels=True):
       Row(analysis, "ZX", title=r"$\Z+\X$"),
     )
   ]
+
+  scalerows([sections[1].findrow(p) for p in ("VBF", "ZH", "WH")], [sections[0].findrow(p) for p in ("VBF", "ZH", "WH")])
+  scalerows([sections[1].findrow(p) for p in ("ggH", "ttH")], [sections[0].findrow(p) for p in ("ggH", "ttH")])
+
   print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")
   print r"\hline"
   print " & & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline\hline"
@@ -182,4 +205,4 @@ def maketable(analysis, dochannels=True):
   print r"\end{tabular}"
 
 if __name__ == "__main__":
-  maketable("fa3", dochannels=False)
+  maketable("fL1Zg", dochannels=True)
