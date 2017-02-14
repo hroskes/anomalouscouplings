@@ -119,7 +119,6 @@ def gettemplate(*args):
     if t.shapesystematic not in shapesystematics:
         kwargs = {enum.enumname: getattr(t, enum.enumname) for enum in type(t).needenums}
         kwargs["shapesystematic"] = ""
-        print kwargs
         t = type(t)(*kwargs.values())  #can't use actual kwargs
 
     result = t.gettemplate()
