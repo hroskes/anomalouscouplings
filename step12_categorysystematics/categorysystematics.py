@@ -11,29 +11,7 @@ from helperstuff.enums import analyses, Analysis, BTagSystematic, categories, Ca
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import MultiplyCounter
-
-def count(fromsamples, tosamples, categorizations):
-    t = ROOT.TChain("candTree")
-    for fromsample in fromsamples:
-        t.Add(fromsample.withdiscriminantsfile())
-    length = t.GetEntries()
-    result = MultiplyCounter()
-    t.SetBranchStatus("*", 0)
-    t.SetBranchStatus("category_*", 1)
-    t.SetBranchStatus("MC_weight_*", 1)
-
-    c = ROOT.TCanvas()
-    for tosample, categorization in product(tosamples, categorizations):
-        if tosample == ReweightingSample("WH", "L1Zg"): continue
-        t.Draw(categorization.category_function_name, tosample.weightname())
-        h = c.GetListOfPrimitives()[0]
-        for i in range(6):
-            result[tosample, categorization, Category.fromid(i)] += h.GetBinContent(i+1)
-
-        if tosample not in result:
-            result[tosample] = sum(h.GetBinContent(i+1) for i in range(6))
-
-    return result
+from helperstuff.yields import count
 
 def findsystematic(categorizations, categorization, JEC, btag):
     name = categorization.category_function_name.replace("_JECUp", "").replace("_JECDn", "").replace("_btagSFUp", "").replace("_btagSFDn", "")
@@ -104,15 +82,6 @@ def maketable(analysis):
             usetosamples = [_ for _ in tosamples if _.productionmode == tosample.productionmode and not isinstance(_, ReweightingSamplePlus)]
 
         result += count(fromsamples, usetosamples, categorizations)
-
-    for key in result:
-        if isinstance(key, ReweightingSample): continue
-        elif isinstance(key, tuple):
-            try:
-                result[key] /= result[key[0]]
-            except ZeroDivisionError:
-                pass
-        else: assert False
 
     rowfmt = "| {:20} | " + " | ".join("{:12.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%} {:+10.1%}" for category in categories) + " |"
     headerfmt = rowfmt.replace(".1%", "").replace("+", "").replace(":10", ":^10").replace(":12", ":^12")

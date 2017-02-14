@@ -46,6 +46,9 @@ class SampleBase(object):
     def kappa_tilde(self):
         pass
 
+    def ValueError(self, functionname):
+        return ValueError("invalid sample {} in function {}".format(self, functionname))
+
     @property
     def JHUxsec(self):
         if self.photoncut:
@@ -199,7 +202,7 @@ class SampleBase(object):
         if self.productionmode == "ttH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSttH2L2l
             return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec
-        assert False
+        raise self.ValueError("xsec")
 
     @property
     def SMxsec(self):
@@ -611,9 +614,6 @@ class ReweightingSample(MultiEnum, SampleBase):
                 raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
         else:
             raise ValueError("Bad productionmode {}\n{}".format(self.productionmode, args))
-
-    def ValueError(self, functionname):
-        return ValueError("invalid sample {} in function {}".format(self, functionname))
 
     @property
     def photoncut(self):
@@ -1214,6 +1214,19 @@ class Sample(ReweightingSamplePlus):
         except:
             t.Show()
             raise
+
+    @property
+    def xsec(self):
+        try:
+            return super(Sample, self).xsec
+        except ValueError:
+            t = ROOT.TChain("candTree")
+            t.Add(self.withdiscriminantsfile())
+            t.GetEntry(1)
+            result = t.xsec
+            if t.xsec <= 0:
+                raise ValueError("Can't get xsec for {!r}".format(self))
+            return result
 
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]

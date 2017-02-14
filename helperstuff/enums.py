@@ -193,22 +193,11 @@ class ProductionMode(MyEnum):
                 return name
         assert False
     @property
-    def yamlratenames(self):
+    def yamlratename(self):
         if self == "VBF":
-            return ["qqH"]
-        elif self == "ZX":
-            return ["zjets"]
-        return [str(self)]
-    @property
-    def yamlsystematicsname(self):
-        if self == "ggH":
-            return "ggH"
-        elif self == "VBF":
             return "qqH"
         elif self == "ZX":
             return "zjets"
-        elif self == "VBF bkg":
-            return "qqZZ"
         return str(self)
     @property
     def isbkg(self):

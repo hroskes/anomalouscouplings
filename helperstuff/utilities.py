@@ -160,6 +160,9 @@ def setnesteddictvalue(thedict, *keys, **kwargs):
         thedict[keys[0]] = value
         return
 
+    if keys[0] not in thedict:
+        thedict[keys[0]] = {}
+
     return setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
 
 def pairwise(iterable):
