@@ -200,6 +200,13 @@ class ProductionMode(MyEnum):
             return "zjets"
         return str(self)
     @property
+    def yamlsystname(self):
+        if self in ("VBF", "VBF bkg"):
+            return "qqH"
+        elif self == "ZX":
+            return "zjets"
+        return str(self)
+    @property
     def isbkg(self):
         if self in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH"):
             return False
