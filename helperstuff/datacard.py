@@ -11,6 +11,7 @@ from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved
 import config
 from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode
 from utilities import callclassinitfunctions, cd, generatortolist, KeepWhileOpenFile, mkdir_p
+from yields import YieldSystematic, YieldSystematicValue
 
 names = set()
 
@@ -64,11 +65,11 @@ def MakeSystematicFromEnums(*theenums):
                 enums = theenums
 
                 def __get__(self_systematic, self_datacard, objtype):
-                    for enum in theenums:
-                        if getattr(self_systematic, enum.enumname) != getattr(self_datacard, enum.enumname):
-                            return None
-
-                    return function(self_datacard)
+                    return function(
+                                    self_datacard,
+                                    **{enum.enumname: getattr(self_systematic, enum.enumname)
+                                             for enum in theenums}
+                                   )
 
             SystematicFromEnumsWithValues.__name__ = self.name
 
@@ -182,16 +183,20 @@ class Datacard(MultiEnum):
     section4 = Section("## mass window [{},{}]".format(config.m4lmin, config.m4lmax),
                        "bin", "process", "process", "rate")
 
-    #just one dummy systematic for now
-    @property
-    def lumi_13TeV_common(self):
-        return " ".join(["lnN"] + ["1.023" for p in self.productionmodes])
+    @MakeSystematicFromEnums(YieldSystematic)
+    def yieldsystematic(self, yieldsystematic):
+        return " ".join(
+                        ["lnN"] +
+                        [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, p))
+                            for p in self.productionmodes]
+                       )
 
     @MakeSystematicFromEnums(Channel, Category)
-    def CMS_zz4l_smd_zjets_bkg_channel_category(self):
-        return "param 0 1 [-3,3]"
+    def CMS_zz4l_smd_zjets_bkg_channel_category(self, channel, category):
+        if channel == self.channel and category == self.category:
+            return "param 0 1 [-3,3]"
 
-    section5 = SystematicsSection("lumi_13TeV_common", CMS_zz4l_smd_zjets_bkg_channel_category)
+    section5 = SystematicsSection(CMS_zz4l_smd_zjets_bkg_channel_category, yieldsystematic)
 
     divider = "\n------------\n"
 
