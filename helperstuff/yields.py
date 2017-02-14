@@ -22,6 +22,8 @@ class YieldSystematic(MyEnum):
                  EnumItem("pdf_Higgs_ttH"),
                  EnumItem("pdf_Higgs_qq"),
                  EnumItem("BRhiggs_hzz4l"),
+                 EnumItem("QCDscale_ggZH"),
+                 EnumItem("QCDscale_ggVV_bonly"),
                 )
 
 class YieldValue(MultiEnum):

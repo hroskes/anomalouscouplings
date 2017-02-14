@@ -109,13 +109,18 @@ def writeyields():
       #same for all categories and channels
       with open(os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_theory_13TeV.yaml")) as f:
         y = yaml.load(f)
-      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_Higgs_qq", "BRhiggs_hzz4l":
+      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_Higgs_qq", "BRhiggs_hzz4l", "QCDscale_ggZH", "QCDscale_ggVV_bonly":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           if systname not in y: raise ValueError("{} not in systematics_theory_13TeV.yaml!".format(systname))
-          if "Any" not in y[systname]: raise ValueError("Any not in {} in systematics_theory_13TeV.yaml!".format(systname))
-          if productionmode.yamlratename in y[systname]["Any"]:
-            syst.value = y[systname]["Any"][productionmode.yamlratename]
+          if "Any" in y[systname]:
+            values = y[systname]["Any"]
+          elif "UnTagged" in y[systname] and all(y[systname][k] == y[systname]["UnTagged"] for k in y[systname]):
+            values = y[systname]["UnTagged"]
+          else:
+            raise ValueError("Any not in {} in systematics_theory_13TeV.yaml, and not all categories are the same!".format(systname))
+          if productionmode.yamlratename in values:
+            syst.value = values[productionmode.yamlratename]
           else:
             syst.value = None
 
