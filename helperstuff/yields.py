@@ -17,6 +17,11 @@ class YieldSystematic(MyEnum):
     enumitems = (
                  EnumItem("BTag"),
                  EnumItem("JEC"),
+                 EnumItem("pdf_Higgs_gg"),
+                 EnumItem("pdf_Higgs_qq"),
+                 EnumItem("pdf_Higgs_ttH"),
+                 EnumItem("pdf_Higgs_qq"),
+                 EnumItem("BRhiggs_hzz4l"),
                 )
 
 class YieldValue(MultiEnum):
@@ -118,11 +123,22 @@ class YieldSystematicValue(MultiEnum):
 
     @value.setter
     def value(self, value):
+        origvalue = value
+        if isinstance(value, basestring):
+          try:
+            value = float(value)
+          except ValueError:
+            if value.count("/") == 1:
+              try:
+                value = [float(_) for _ in value.split("/")]
+              except ValueError:
+                raise ValueError("string value {!r} can't be parsed as a number or 2 numbers with / in between".format(origvalue))
+
         if hasattr(value, "__len__"):
-          if len(self.value) != 2:
-            raise ValueError("value '{!r}' is a list or similar, but has length {} instead of 2!".format(value, len(value)))
+          if len(value) != 2:
+            raise ValueError("value '{!r}' is a list or similar, but has length {} instead of 2!".format(origvalue, len(value)))
           if not all(isinstance(_, Number) for _ in value):
-            raise ValueError("value '{!r}' doesn't contain only numbers!".format(value))
+            raise ValueError("value '{!r}' doesn't contain only numbers!".format(origvalue))
 
           if list(value) == [1, 1]: value = None
           elif 1 in list(value):
@@ -134,7 +150,7 @@ class YieldSystematicValue(MultiEnum):
         elif isinstance(value, Number) or value is None:
           pass
         else:
-          raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
+          raise ValueError("value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, origvalue))
 
         if value == 1: value = None
         setnesteddictvalue(self.getyieldsystematicsdict(), *self.keys, value=value)

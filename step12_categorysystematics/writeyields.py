@@ -2,6 +2,8 @@
 
 from collections import namedtuple
 import itertools
+import os
+import yaml
 
 from helperstuff import config
 from helperstuff.enums import analyses, categories, channels, flavors, ProductionMode, pythiasystematics
@@ -103,6 +105,19 @@ def writeyields():
       total = totalrate(productionmode, production, 1.0)
       for channel, category in itertools.product(channels, categories):
         YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, category, channel] for tosample in samples)
+
+      #same for all categories and channels
+      with open(os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_theory_13TeV.yaml")) as f:
+        y = yaml.load(f)
+      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_Higgs_qq", "BRhiggs_hzz4l":
+        for category, channel in itertools.product(categories, channels):
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
+          if systname not in y: raise ValueError("{} not in systematics_theory_13TeV.yaml!".format(systname))
+          if "Any" not in y[systname]: raise ValueError("Any not in {} in systematics_theory_13TeV.yaml!".format(systname))
+          if productionmode.yamlratename in y[systname]["Any"]:
+            syst.value = y[systname]["Any"][productionmode.yamlratename]
+          else:
+            syst.value = None
 
       #same for all channels
       for category in categories:
