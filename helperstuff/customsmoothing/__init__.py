@@ -3,12 +3,13 @@ import ROOT
 from rootoverloads import histogramaxisnumbers
 
 from reweightthingwithobviouspeak import reweightthingwithobviouspeak
+from setbinstozero import setbinstozero
 
 def donothing(hsmooth, rawprojections, **kwargs):
    """do nothing"""
    return False #don't make new control plots
 
-functions = {_.__name__: _ for _ in [reweightthingwithobviouspeak, donothing]}
+functions = {_.__name__: _ for _ in [reweightthingwithobviouspeak, donothing, setbinstozero]}
 
 def callfunction(hsmooth, rawprojections, **kwargs):
     if "name" in kwargs:

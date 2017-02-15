@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from itertools import izip
 
 import ROOT
 
