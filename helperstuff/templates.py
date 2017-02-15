@@ -113,11 +113,11 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "0-", "Hff0+"), ReweightingSample("ttH", "fa30.5", "Hff0+")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "a2", "Hff0+"), ReweightingSample("ttH", "fa20.5", "Hff0+")]
+                reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "a2", "Hff0+"), ReweightingSample("ttH", "fa2-0.5", "Hff0+")]
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "L1", "Hff0+"), ReweightingSample("ttH", "fL10.5", "Hff0+")]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("ttH", "0+_photoncut", "Hff0+"), ReweightingSample("ttH", "L1Zg", "Hff0+"), ReweightingSample("ttH", "fL1Zg0.5", "Hff0+")]
+                reweightingsamples = [ReweightingSample("ttH", "0+_photoncut", "Hff0+"), ReweightingSample("ttH", "L1Zg", "Hff0+"), ReweightingSample("ttH", "fL1Zg-0.5", "Hff0+")]
 
         return reweightingsamples
 
