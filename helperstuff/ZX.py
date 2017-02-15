@@ -12,6 +12,6 @@ def setup(production):
         raise ValueError("Bad production: {}".format(production))
     from ROOT import fakeRate13TeV
 
-convertTGraphstoTH1Fs.convertTGraphstoTH1Fs(os.path.join(CJLSTscriptsfolder, "FakeRate_SS_2016D.root"))
+convertTGraphstoTH1Fs.convertTGraphstoTH1Fs(os.path.join(CJLSTscriptsfolder, "FakeRate_SS_Moriond368.root"))
 
 from ROOT import CRZLLss, test_bit

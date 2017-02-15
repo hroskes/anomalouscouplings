@@ -14,7 +14,7 @@ for script in scripts:
     downloader.add("AnalysisStep/interface/{}.h".format(script))
 
 downloader.add("AnalysisStep/test/Macros/ReducibleBackgroundAA_2015.C")
-for rootfile in "FakeRate_SS_2016D.root",:
+for rootfile in "FakeRate_SS_Moriond368.root",:
     downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile))
 
 with utilities.cd(CJLSTscriptsfolder):
@@ -22,6 +22,7 @@ with utilities.cd(CJLSTscriptsfolder):
 
 for script in scripts:
     utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, script+".cc+"))
+utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, "PyException.C+"))
 utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, "ReducibleBackgroundAA_2015_adapted.C+"))
 
 from ROOT import categoryMor17, UntaggedMor17, VBF1jTaggedMor17, VBF2jTaggedMor17, VHLeptTaggedMor17, VHHadrTaggedMor17, ttHTaggedMor17
