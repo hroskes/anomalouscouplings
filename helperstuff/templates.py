@@ -641,6 +641,10 @@ class Template(TemplateBase, MultiEnum):
                 raise ValueError("({bin}-{min}) * {bins} / ({max}-{min}) = {!r} in reweightrebin for {!r} axis {} is not an integer\n{}".format(shouldbeint, self, axis, _, bin=bin_, min=disc.min, max=disc.max, bins=disc.bins))
       return result
 
+    @reweightrebin.setter
+    def reweightrebin(self, value):
+        self.smoothingparameters[0][2] = value
+
     @property
     def customsmoothingkwargs(self):
       return self.smoothingparameters[1]
