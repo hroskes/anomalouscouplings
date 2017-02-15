@@ -22,7 +22,6 @@ with utilities.cd(CJLSTscriptsfolder):
 
 for script in scripts:
     utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, script+".cc+"))
-utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, "PyException.C+"))
 utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, "ReducibleBackgroundAA_2015_adapted.C+"))
 
 from ROOT import categoryMor17, UntaggedMor17, VBF1jTaggedMor17, VBF2jTaggedMor17, VHLeptTaggedMor17, VHHadrTaggedMor17, ttHTaggedMor17

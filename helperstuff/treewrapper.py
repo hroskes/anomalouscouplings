@@ -147,6 +147,10 @@ class TreeWrapper(Iterator):
         self.checkfunctions()
         self.effectiveentriestree = None
 
+        self.printevery = 10000
+        if self.isZX:
+            self.printevery = 1000
+
         self.preliminaryloop()
 
     def __iter__(self):
@@ -162,7 +166,7 @@ class TreeWrapper(Iterator):
             t.GetEntry(self.__treeentry)
             if i > len(self):
                 raise StopIteration
-            if i % 10000 == 0 or i == len(self):
+            if i % self.printevery == 0 or i == len(self):
                 print i, "/", len(self)
                 #raise StopIteration
 
@@ -1039,7 +1043,7 @@ class TreeWrapper(Iterator):
 
             for function, weightarray in values:
                 weightarray.append(function(entry))
-            if i % 10000 == 0 or i == length:
+            if i % self.printevery == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
                 #break
 
