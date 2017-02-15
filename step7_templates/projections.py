@@ -268,15 +268,15 @@ class Projections(MultiEnum):
     gi_VBFBSM = copysign((ReweightingSample("VBF", SMhypothesis).xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25, gi_ggHBSM)
     gi_VHBSM = copysign(((ReweightingSample("WH", SMhypothesis).xsec + ReweightingSample("ZH", SMhypothesis).xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
     gi_VVHBSM = copysign(((ReweightingSample("VBF", SMhypothesis).xsec + ReweightingSample("WH", SMhypothesis).xsec + ReweightingSample("ZH", SMhypothesis).xsec) / (ReweightingSample("VBF", BSMhypothesis).xsec + ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
-    if self.category == "UntaggedIchep16":
+    if self.category == "UntaggedMor17":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
         fainame = self.analysis.title(superscript="dec")
-    elif self.category == "VBF2jTaggedIchep16":
+    elif self.category == "VBF2jTaggedMor17":
         g1_mix = 1/2**.25
         gi_mix = 1/2**.25 * gi_VBFBSM
         fainame = self.analysis.title(superscript="VBFdec")
-    elif self.category == "VHHadrTaggedIchep16":
+    elif self.category == "VHHadrTaggedMor17":
         g1_mix = 1/2**.25
         gi_mix = 1/2**.25 * gi_VHBSM
         fainame = self.analysis.title(superscript="VHdec")

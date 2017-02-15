@@ -27,6 +27,7 @@ showblinddistributions = False
 unblinddistributions = False
 unblindscans = False
 useQGTagging = False
+useVHMETTagged = True
 
 applym4lshapesystematics = False
 applyZXshapesystematics = True

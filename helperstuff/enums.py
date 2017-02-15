@@ -463,9 +463,9 @@ class Category(MyEnum):
     """
     enumname = "category"
     enumitems = (
-                 EnumItem("Untagged", "UntaggedIchep16", "VBF1jTaggedIchep16", "VHLeptTaggedIchep16", "ttHTaggedIchep16"),
-                 EnumItem("VHHadrtagged", "VHHadrTaggedIchep16"),
-                 EnumItem("VBFtagged", "VBF2jTaggedIchep16"),
+                 EnumItem("Untagged", "UntaggedMor17", "VBF1jTaggedMor17", "VHLeptTaggedMor17", "ttHTaggedMor17", "VHMETTaggedMor17"),
+                 EnumItem("VHHadrtagged", "VHHadrTaggedMor17"),
+                 EnumItem("VBFtagged", "VBF2jTaggedMor17"),
                 )
     @property
     def idnumbers(self):
@@ -474,7 +474,7 @@ class Category(MyEnum):
         (defined in Category.h)
         """
         import CJLSTscripts
-        return [getattr(CJLSTscripts, name) for name in self.item.names if "Ichep16" in name]
+        return [getattr(CJLSTscripts, name) for name in self.item.names if "Mor17" in name]
 
     @property
     def yamlname(self):

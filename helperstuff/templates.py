@@ -29,7 +29,7 @@ class TemplatesFile(MultiEnum):
             self.shapesystematic = ShapeSystematic("")
 
         if self.category is None:
-            self.category = Category("UntaggedIchep16")
+            self.category = Category("Untagged")
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
@@ -157,7 +157,7 @@ class TemplatesFile(MultiEnum):
     def purediscriminant(self):
         from discriminants import discriminant
 
-        if self.category == "UntaggedIchep16":
+        if self.category == "Untagged":
             if self.analysis == "fa3":
                 return discriminant("D_0minus_decay")
             if self.analysis == "fa2":
@@ -167,7 +167,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_decay")
 
-        if self.category == "VBF2jTaggedIchep16":
+        if self.category == "VBFtagged":
             if self.analysis == "fa3":
                 return discriminant("D_0minus_VBFdecay")
             if self.analysis == "fa2":
@@ -177,7 +177,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_VBFdecay")
 
-        if self.category == "VHHadrTaggedIchep16":
+        if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
                 return discriminant("D_0minus_HadVHdecay")
             if self.analysis == "fa2":
@@ -193,7 +193,7 @@ class TemplatesFile(MultiEnum):
     def mixdiscriminant(self):
         from discriminants import discriminant
 
-        if self.category == "UntaggedIchep16":
+        if self.category == "Untagged":
             if self.analysis == "fa3":
                 return discriminant("D_CP_decay")
             if self.analysis == "fa2":
@@ -203,7 +203,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_decay")
 
-        if self.category == "VBF2jTaggedIchep16":
+        if self.category == "VBFtagged":
             if self.analysis == "fa3":
                 return discriminant("D_CP_VBF")
             if self.analysis == "fa2":
@@ -213,7 +213,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_VBFdecay")
 
-        if self.category == "VHHadrTaggedIchep16":
+        if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
                 return discriminant("D_CP_HadVH")
             if self.analysis == "fa2":
@@ -231,11 +231,11 @@ class TemplatesFile(MultiEnum):
 
     @property
     def categorynamepart(self):
-        if self.category == "UntaggedIchep16":
+        if self.category == "Untagged":
             return "Untagged"
-        if self.category == "VBF2jTaggedIchep16":
+        if self.category == "VBFtagged":
             return "VBFtag"
-        if self.category == "VHHadrTaggedIchep16":
+        if self.category == "VHHadrtagged":
             return "VHhadrtag"
         assert False
 

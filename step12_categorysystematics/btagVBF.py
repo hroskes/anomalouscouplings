@@ -3,7 +3,7 @@
 import ROOT
 
 from helperstuff import config
-from helperstuff.CJLSTscripts import VHHadrTaggedIchep16, VBF2jTaggedIchep16, getDVBF2jetsConstant, getDVBF2jetsWP
+from helperstuff.CJLSTscripts import VHHadrTaggedMor17, VBF2jTaggedMor17, getDVBF2jetsConstant, getDVBF2jetsWP
 from helperstuff.samples import Sample
 from helperstuff.utilities import tfiles
 
@@ -23,7 +23,7 @@ for i, entry in enumerate(t):
         continue
     weight = 1
     n_total += weight
-    if getattr(t, categorization) != VBF2jTaggedIchep16 and t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal > 0 and 1/(1+getDVBF2jetsConstant(ZZMass)*t.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal/t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal) > getDVBF2jetsWP(ZZMass, 0) and t.nExtraLep == 0:
+    if getattr(t, categorization) != VBF2jTaggedMor17 and t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal > 0 and 1/(1+getDVBF2jetsConstant(ZZMass)*t.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal/t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal) > getDVBF2jetsWP(ZZMass, 0) and t.nExtraLep == 0:
         n += weight
     if i % 10000 == 0 or i == length:
         print i, "/", length

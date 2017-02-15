@@ -58,7 +58,7 @@ class CJLSTScript_base(object):
 class CJLSTScript_Cpp(CJLSTScript_base):
     def filenameisvalid(self, filename):
         ext = os.path.splitext(filename)[1]
-        return ext in [".cc", ".C", ".h"] and filename != "Category.cc"
+        return ext in [".cc", ".C", ".h"]
     def fixandmove(self, tmpfilename):
         with open(tmpfilename) as tmpf, open(self.filename, "w") as f:
             for line in tmpf:
@@ -82,27 +82,6 @@ class CJLSTScript_other(CJLSTScript_base):
         return ext in [".root"]
     def fixandmove(self, tmpfilename):
         super(CJLSTScript_other, self).fixandmove(tmpfilename)
-
-class CJLSTScript_category(CJLSTScript_Cpp, CJLSTScript_base):
-    def filenameisvalid(self, filename):
-        return filename == "Category.cc"
-    def fixandmove(self, tmpfilename):
-        with open(tmpfilename) as tmpf:
-            contents = tmpf.read()
-
-        tocomment = "|| ( nExtraLep==0 && (nCleanedJetsPt30==2||nCleanedJetsPt30==3) && nCleanedJetsPt30BTagged>=2 )"
-        if contents.count(tocomment) != 1:
-            raise IOError("Category code has changed!")
-        contents = contents.replace(tocomment, "/*"+tocomment+"*/")
-
-        tocomment = "&&nCleanedJetsPt30BTagged<=1"
-        if contents.count(tocomment) != 2:
-            raise IOError("Category code has changed!")
-        contents = rreplace(contents, tocomment, "/*"+tocomment+"*/", 1) #note rreplace, not replace!
-
-        with open(tmpfilename, "w") as f:
-            f.write(contents)
-        super(CJLSTScript_category, self).fixandmove(tmpfilename)
 
 def CJLSTScript(*args, **kwargs):
     result = []

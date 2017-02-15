@@ -201,7 +201,7 @@ class __TotalRate(MultiEnum):
   def yamlrate(self):
     lumi = None
     result = 0
-    tags = [tag.replace("Ichep16", "").replace("tagged", "Tagged") for category in categories for tag in category.names if "Ichep16" in tag]
+    tags = [tag.replace("Mor17", "").replace("tagged", "Tagged") for category in categories for tag in category.names if "Mor17" in tag]
     for channel in channels:
       filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(channel))
       with open(filename) as f:
@@ -270,7 +270,7 @@ def count(fromsamples, tosamples, categorizations):
         if tosample == ReweightingSample("WH", "L1Zg"): continue
         t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "{}*(ZZMass>{} && ZZMass<{})".format(tosample.weightname(), config.m4lmin, config.m4lmax), "LEGO")
         h = c.FindObject("htemp")
-        for i in range(6):
+        for i in range(h.GetNbinsY()):
             for channel in channels:
                 toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
                 result[tosample, categorization, Category.fromid(i), channel] += toadd

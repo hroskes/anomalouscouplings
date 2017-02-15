@@ -16,7 +16,7 @@ import CJLSTscripts
 import config
 import constants
 import enums
-from samples import ReweightingSample, ReweightingSamplePlus
+from samples import ReweightingSample, ReweightingSamplePlus, Sample
 from utilities import callclassinitfunctions
 import ZX
 
@@ -341,6 +341,7 @@ class TreeWrapper(Iterator):
         #category variables
         self.nExtraLep = t.nExtraLep
         self.nExtraZ = t.nExtraZ
+        self.PFMET = t.PFMET
 
         nCleanedJets = t.nCleanedJets
 

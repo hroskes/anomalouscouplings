@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-from CJLSTscripts import categoryIchep16, VBF2jTaggedIchep16, VHHadrTaggedIchep16
+from CJLSTscripts import categoryMor17, VBF2jTaggedMor17, VHHadrTaggedMor17
 import config
 from enums import BTagSystematic, Category, categories, HffHypothesis, Hypothesis, JECSystematic
 from samples import ArbitraryCouplingsSample
@@ -157,7 +157,7 @@ class BaseSingleCategorization(BaseCategorization):
         QGL_variable_name = self_categorization.QGL_variable_name
 
         def function(self_tree):
-            result = self_categorization.lastvalue = categoryIchep16(
+            result = self_categorization.lastvalue = categoryMor17(
                 self_tree.nExtraLep,
                 self_tree.nExtraZ,
                   getattr(self_tree, njets_variable_name),
@@ -172,6 +172,8 @@ class BaseSingleCategorization(BaseCategorization):
                   getattr(self_tree, pZH_function_name)(),
                   getattr(self_tree, phi_variable_name),
                 self_tree.ZZMass,
+                self_tree.PFMET,
+                config.useVHMETTagged,
                 config.useQGTagging,
             )
             return result
@@ -305,10 +307,10 @@ class MultiCategorization(BaseCategorization):
         singles = self_categorization.singles
         def function(self_tree):
             lastvalues = {single.lastvalue for single in singles}
-            if any(_ == VBF2jTaggedIchep16 for _ in lastvalues):
-                return VBF2jTaggedIchep16
-            if any(_ == VHHadrTaggedIchep16 for _ in lastvalues):
-                return VHHadrTaggedIchep16
+            if any(_ == VBF2jTaggedMor17 for _ in lastvalues):
+                return VBF2jTaggedMor17
+            if any(_ == VHHadrTaggedMor17 for _ in lastvalues):
+                return VHHadrTaggedMor17
             assert len(lastvalues) == 1
             return lastvalues.pop()
         function.__name__ = self_categorization.category_function_name

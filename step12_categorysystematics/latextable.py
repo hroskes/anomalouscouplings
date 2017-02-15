@@ -137,9 +137,8 @@ class RowChannel(Row, MultiEnum):
       if success == 0: return MultiplyCounter()
       h = getattr(ROOT, hname)
       result = MultiplyCounter()
-      for i in range(6):
-        if i+1 <= h.GetNbinsX():
-          result[self.channel, Category.fromid(i)] += h.GetBinContent(i+1)
+      for i in range(h.GetNbinsX()):
+        result[self.channel, Category.fromid(i)] += h.GetBinContent(i+1)
       result *= self.scalefactor
     return result
 
