@@ -25,6 +25,6 @@ def setbinstozero(hsmooth, rawprojections, nbinsonleft, nbinsonright):
                 for kwargs["bin"+thisaxis] in binsto0:
                     hsmooth.SetBinContent(hsmooth, **kwargs)
 
-    hsmooth.Scale(integral / hsmooth.Integral()
+    hsmooth.Scale(integral / hsmooth.Integral())
 
     return True #do make new control plots
