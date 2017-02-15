@@ -345,7 +345,7 @@ class SampleBase(object):
                 return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
 
         elif (self_sample.productionmode == "VBF bkg"
-                   or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO")
+                   or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS")
                    or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
             def MC_weight_function(self_tree):
                 return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
@@ -623,7 +623,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     def reweightingsamples(self):
         if self.productionmode == "qqZZ" and self.flavor is not None:
             return [self]
-        if self.productionmode in ("ggZZ", "qqZZ", "ZX") or self.alternategenerator in ("POWHEG", "MINLO") or self.pythiasystematic is not None:
+        if self.productionmode in ("ggZZ", "qqZZ", "ZX") or self.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.pythiasystematic is not None:
             return [self]
         if self.productionmode == "VBF bkg":
             return [self, ReweightingSample("qqZZ", self.flavor)]
@@ -1078,7 +1078,7 @@ class ReweightingSamplePlus(ReweightingSample):
                  or self.productionmode not in ("VBF", "ZH", "WplusH", "WminusH", "ttH")
                 )
            ) or (
-            self.alternategenerator == "MINLO"
+            self.alternategenerator in ("MINLO", "NNLOPS")
             and (
                  self.hypothesis != "0+"
                  or self.productionmode != "ggH"
@@ -1133,6 +1133,9 @@ class Sample(ReweightingSamplePlus):
         if self.pythiasystematic is None and self.alternategenerator == "MINLO":
             raise ValueError("MINLO nominal sample is not ready yet :(\n{}".format(args))
 
+        if self.pythiasystematic is not None and self.alternategenerator == "NNLOPS":
+            raise ValueError("No NNLOPS samples with systematics!\n{}".format(args))
+
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
@@ -1156,7 +1159,7 @@ class Sample(ReweightingSamplePlus):
                 if self.pythiasystematic is not None:
                     result += self.pythiasystematic.appendname
                 return result
-        if self.alternategenerator == "MINLO" or self.pythiasystematic is not None:
+        if self.alternategenerator in ("MINLO", "NNLOPS") or self.pythiasystematic is not None:
             if self.productionmode == "ggH":
                 result = "ggH125"
                 if self.pythiasystematic is not None:
@@ -1282,6 +1285,7 @@ def allsamples():
             yield Sample("ggZZ", flavor, production)
             if not flavor.hastaus:
                 yield Sample("VBF bkg", flavor, production)
+        yield Sample("ggH", "0+", "NNLOPS", production)
         for productionmode in "VBF", "ZH", "WplusH", "WminusH":
             yield Sample(productionmode, "0+", "POWHEG", production)
         yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)

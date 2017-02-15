@@ -108,7 +108,7 @@ class TreeWrapper(Iterator):
         self.isdata = treesample.isdata()
         self.isbkg = not self.isdata and treesample.isbkg
         self.isZX = treesample.isZX()
-        self.isalternate = treesample.alternategenerator in ("POWHEG", "MINLO") or treesample.pythiasystematic is not None
+        self.isalternate = treesample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or treesample.pythiasystematic is not None
         self.isdummy = isdummy
         if self.isdata:
             self.unblind = config.unblinddistributions
@@ -1258,6 +1258,7 @@ class TreeWrapper(Iterator):
         ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
         ReweightingSample("ZX"),
 
+        ReweightingSamplePlus("ggH", "0+", "NNLOPS"),
         ReweightingSamplePlus("VBF", "0+", "POWHEG"),
         ReweightingSamplePlus("ZH", "0+", "POWHEG"),
         ReweightingSamplePlus("WplusH", "0+", "POWHEG"),

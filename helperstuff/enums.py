@@ -501,6 +501,7 @@ class AlternateGenerator(MyEnum):
     enumitems = (
                  EnumItem("POWHEG"),
                  EnumItem("MINLO"),
+                 EnumItem("NNLOPS"),
                 )
 
 class PythiaSystematic(MyEnum):
