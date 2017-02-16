@@ -129,6 +129,15 @@ def writeyields():
           else:
             syst.value = None
 
+      #Z+X, for now
+      for systname in "CMS_zz2e2mu_zjets", "CMS_zz4e_zjets", "CMS_zz4mu_zjets":
+        for category, channel in itertools.product(categories, channels):
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
+          if str(channel) in systname and productionmode == "ZX":
+            syst.value = .4
+          else:
+            syst.value = None
+
       #same for all channels
       for category in categories:
         nominal = sum(result[tosample, categorization, category] for tosample in samples)
@@ -143,8 +152,8 @@ def writeyields():
           YieldSystematicValue(channel, category, analysis, productionmode, "JEC").value = (JECUp, JECDn)
           YieldSystematicValue(channel, category, analysis, productionmode, "BTag").value = (btSFUp, btSFDn)
 
-    YieldValue.writeyieldsdict()
-    YieldSystematicValue.writeyieldsystematicsdict()
+    YieldValue.writedict()
+    YieldSystematicValue.writedict()
 
 if __name__ == "__main__":
   writeyields()

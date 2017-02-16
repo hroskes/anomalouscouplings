@@ -8,7 +8,7 @@ import ROOT
 
 from combinehelpers import Luminosity
 import config
-from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MyEnum, ProductionMode
+from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, ProductionMode
 from samples import ReweightingSample, Sample
 from utilities import JsonDict, MultiplyCounter
 
@@ -26,6 +26,9 @@ class YieldSystematic(MyEnum):
                  EnumItem("lumi_13TeV"),
                  EnumItem("CMS_eff_e"),
                  EnumItem("CMS_eff_m"),
+                 EnumItem("CMS_zz4e_zjets"),
+                 EnumItem("CMS_zz4mu_zjets"),
+                 EnumItem("CMS_zz2e2mu_zjets"),
                 )
     def yamlfilename(self, channel=None):
       if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_Higgs_qq", "BRhiggs_hzz4l", "QCDscale_ggZH", "QCDscale_ggVV_bonly"):
@@ -55,6 +58,7 @@ class YieldSystematic(MyEnum):
 
 
 class YieldValue(MultiEnum, JsonDict):
+    __metaclass__ = MultiEnumABCMeta
     enumname = "yieldvalue"
     enums = (Analysis, Category, Channel, ProductionMode)
 
@@ -73,6 +77,7 @@ class YieldValue(MultiEnum, JsonDict):
         return self.__value
 
 class YieldSystematicValue(MultiEnum, JsonDict):
+    __metaclass__ = MultiEnumABCMeta
     enumname = "yieldsystematicvalue"
     enums = (YieldSystematic, Analysis, Category, Channel, ProductionMode)
 
@@ -156,6 +161,9 @@ class __TotalRate(MultiEnum):
       p = self.productionmode.yamlratename
 
       for tag in tags:
+        if tag == "VHMETTagged":
+          if tag in y: raise NotImplementedError("Check MET!")
+          continue
         try:
           result += float(y[tag][p]) * float(self.luminosity) / lumi
         except ValueError:
