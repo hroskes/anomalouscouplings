@@ -1,3 +1,4 @@
+import abc
 import collections
 import contextlib
 import errno
@@ -124,47 +125,6 @@ def jsonloads(jsonstring):
         print jsonstring
         raise
 
-def getnesteddictvalue(thedict, *keys, **kwargs):
-    hasdefault = False
-    for kw, kwarg in kwargs.iteritems():
-       if kw == "default":
-           hasdefault = True
-           default = kwarg
-       else:
-           raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
-
-    if len(keys) == 0:
-        return thedict
-
-    if hasdefault and keys[0] not in thedict:
-        if len(keys) == 1:
-            thedict[keys[0]] = default
-        else:
-            thedict[keys[0]] = {}
-
-    return getnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
-
-def setnesteddictvalue(thedict, *keys, **kwargs):
-    for kw, kwarg in kwargs.iteritems():
-        if kw == "value":
-            value = kwarg
-        else:
-            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
-
-    try:
-        value
-    except NameError:
-        raise TypeError("Didn't provide value kwarg!")
-
-    if len(keys) == 1:
-        thedict[keys[0]] = value
-        return
-
-    if keys[0] not in thedict:
-        thedict[keys[0]] = {}
-
-    return setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
-
 def pairwise(iterable):
     """
     https://docs.python.org/2/library/itertools.html#recipes
@@ -236,3 +196,108 @@ def is_almost_integer(flt):
     if isinstance(flt, (int, long)) or flt.is_integer(): return True
     if float("{:.8g}".format(flt)).is_integer(): return True
     return False
+
+class JsonDict(object):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractproperty
+    def keys(self): pass
+
+    @property
+    def dictdefault(self):
+        return JsonDict.__nodefault
+
+    @abc.abstractmethod
+    def dictfile(self):
+        """should be a member, not a method"""
+
+
+
+
+
+    __nodefault = object()
+    __dictscache = collections.defaultdict(lambda: None)
+
+    def setvalue(self, value):
+        self.setnesteddictvalue(self.getdict(), *self.keys, value=value)
+        assert self.value == value
+
+    def getvalue(self):
+        return self.getnesteddictvalue(self.getdict(), *self.keys)
+
+    @property
+    def value(self):
+        return self.getvalue()
+
+    @value.setter
+    def value(self, value):
+        self.setvalue(value)
+
+    @classmethod
+    def getdict(cls, trycache=True):
+      import globals
+      if cls.__dictscache[cls] is None or not trycache:
+        try:
+          with open(cls.dictfile) as f:
+            jsonstring = f.read()
+        except IOError:
+          try:
+            os.makedirs(os.path.dirname(cls.dictfile))
+          except OSError:
+            pass
+          with open(cls.dictfile, "w") as f:
+            f.write("{}\n")
+            jsonstring = "{}"
+        cls.__dictscache[cls] = json.loads(jsonstring)
+      return cls.__dictscache[cls]
+
+    @classmethod
+    def writedict(cls):
+      dct = cls.getdict()
+      jsonstring = json.dumps(dct, sort_keys=True, indent=4, separators=(',', ': '))
+      with open(cls.dictfile, "w") as f:
+        f.write(jsonstring)
+
+    @classmethod
+    def getnesteddictvalue(cls, thedict, *keys, **kwargs):
+        hasdefault = False
+        for kw, kwarg in kwargs.iteritems():
+           if kw == "default":
+               if default is not JsonDict.nodefault:
+                   hasdefault = True
+                   default = kwarg
+           else:
+               raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+        if len(keys) == 0:
+            return thedict
+
+        if hasdefault and keys[0] not in thedict:
+            if len(keys) == 1:
+                thedict[keys[0]] = default
+            else:
+                thedict[keys[0]] = {}
+
+        return cls.getnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
+    @classmethod
+    def setnesteddictvalue(cls, thedict, *keys, **kwargs):
+        for kw, kwarg in kwargs.iteritems():
+            if kw == "value":
+                value = kwarg
+            else:
+                raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+        try:
+            value
+        except NameError:
+            raise TypeError("Didn't provide value kwarg!")
+
+        if len(keys) == 1:
+            thedict[keys[0]] = value
+            return
+
+        if keys[0] not in thedict:
+            thedict[keys[0]] = {}
+
+        return cls.setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)

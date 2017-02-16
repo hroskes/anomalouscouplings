@@ -11,7 +11,7 @@ import config
 import customsmoothing
 from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
 from samples import ReweightingSample, Sample, SampleBasis
-from utilities import cache, getnesteddictvalue, is_almost_integer, jsonloads, tfiles
+from utilities import cache, is_almost_integer, JsonDict, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
@@ -403,12 +403,19 @@ class TemplateBase(object):
                 print "Error while custom smoothing {}:".format(self.templatename(final=True))
                 raise
 
-smoothingparametersfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
-
 class Template(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
     enums = [TemplatesFile, ProductionMode, Hypothesis, HffHypothesis]
     enumname = "template"
+
+    def __init__(self, *args, **kwargs):
+        super(Template, self).__init__(*args, **kwargs)
+        self.__smoothingparameters = None
+        self.args = args
+
+    def initsmoothingparameters(self):
+        if self.__smoothingparameters is None:
+            self.__smoothingparameters = SmoothingParameters(*self.args)
 
     def check(self, *args):
         if self.productionmode is None:
@@ -590,50 +597,10 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
         assert False
 
-    @staticmethod
-    def getsmoothingparametersdict(trycache=True):
-      import globals
-      if globals.smoothingparametersdict_cache is None or not trycache:
-        try:
-          with open(smoothingparametersfile) as f:
-            jsonstring = f.read()
-        except IOError:
-          try:
-            os.makedirs(os.path.dirname(smoothingparametersfile))
-          except OSError:
-            pass
-          with open(smoothingparametersfile, "w") as f:
-            f.write("{}\n")
-            jsonstring = "{}"
-        globals.smoothingparametersdict_cache = json.loads(jsonstring)
-      return globals.smoothingparametersdict_cache
-
-    @classmethod
-    def writesmoothingparametersdict(cls):
-      dct = cls.getsmoothingparametersdict()
-      jsonstring = json.dumps(dct, sort_keys=True, indent=4, separators=(',', ': '))
-      with open(smoothingparametersfile, "w") as f:
-        f.write(jsonstring)
-
     @property
     def smoothingparameters(self):
-      keys = (
-              str(self.productionmode),
-              str(self.category),
-              str(self.channel),
-              str(self.analysis),
-              str(self.hypothesis),
-              str(self.shapesystematic),
-              str(self.production),
-             )
-      result = getnesteddictvalue(self.getsmoothingparametersdict(), *keys, default=[None, None, None])
-      if self.shapesystematic != "" and result == [None, None, None]:
-          return Template(self.productionmode, self.category, self.channel, self.analysis, self.hypothesis, self.production).smoothingparameters
-      if len(result) == 3:
-          result = [result, None]
-      if result[1] is None:
-          result[1] = {}
-      return result
+      self.initsmoothingparameters()
+      return self.__smoothingparameters.value
 
     @property
     def smoothentriesperbin(self):
@@ -748,6 +715,41 @@ class Template(TemplateBase, MultiEnum):
     @property
     def sample(self):
         return ReweightingSample(self.hypothesis, self.productionmode)
+
+class SmoothingParameters(MultiEnum, JsonDict):
+      __metaclass__ = MultiEnumABCMeta
+      enums = Template.enums
+      enumname = "smoothingparameters"
+      dictfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
+      def check(self, *args):
+          Template(*args)
+      @property
+      def keys(self):
+        return (
+                str(self.productionmode),
+                str(self.category),
+                str(self.channel),
+                str(self.analysis),
+                str(self.hypothesis),
+                str(self.shapesystematic),
+                str(self.production),
+               )
+      @property
+      def default(self):
+        return [None, None, None]
+      def getvalue(self):
+        result = super(SmoothingParameters, self).getvalue()
+
+        if self.shapesystematic != "" and result == [None, None, None]:
+          kwargs = {enum.enumname: getattr(t, enum.enumname) for enum in type(t).needenums}
+          kwargs["shapesystematic"] = ""
+          return type(self)(*kwargs.values()).getvalue()  #can't use actual kwargs
+
+        if len(result) == 3:
+          result = [result, None]
+        if result[1] is None:
+          result[1] = {}
+        return result
 
 class IntTemplate(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
