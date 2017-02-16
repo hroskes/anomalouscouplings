@@ -281,8 +281,6 @@ class TemplatesFile(MultiEnum):
     @property
     def hascustomsmoothing(self):
         result = any(_.hascustomsmoothing for _ in self.templates() + self.inttemplates())
-        if self.inttemplates():
-            assert not result, self
         return result
 
     def docustomsmoothing(self):
@@ -297,7 +295,7 @@ class TemplatesFile(MultiEnum):
             key.ReadObj().Write()
 
         for template in self.templates()+self.inttemplates():
-            newcontrolplots = template.docustomsmoothing(newf, controlplotsdir)
+            template.docustomsmoothing(newf, controlplotsdir)
 
 def listfromiterator(function):
     return list(function())
@@ -377,6 +375,33 @@ class TemplateBase(object):
     @abc.abstractmethod
     def getjson(self):
         pass
+
+    @abc.abstractproperty
+    def customsmoothingkwargs(self):
+        pass
+
+    @abc.abstractmethod
+    def hascustomsmoothing(self):
+        pass
+
+    def docustomsmoothing(self, newf, controlplotsdir):
+        f = ROOT.TFile(self.templatesfile.templatesfile(firststep=True))
+        h = getattr(f, self.templatename(final=False))
+        rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterNormalization".format(self.templatename(final=False), i)).GetListOfPrimitives()[0]
+                              for i in range(3)]
+        try:
+            customsmoothing.customsmoothing(h, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)
+        except:
+            print "Error while smoothing {}:".format(self.templatename(final=False))
+            raise
+        if self.domirror and not isinstance(self, IntTemplate):
+            assert "axes" not in self.customsmoothingkwargs or 1 not in self.customsmoothingkwargs["axes"]
+            hmirror = getattr(f, self.templatename(final=True))
+            try:
+                customsmoothing.customsmoothing(hmirror, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)
+            except:
+                print "Error while custom smoothing {}:".format(self.templatename(final=True))
+                raise
 
 smoothingparametersfile = os.path.join(config.repositorydir, "step5_json", "smoothingparameters", "smoothingparameters.json")
 
@@ -651,10 +676,6 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def hascustomsmoothing(self):
-        if self.productionmode == "ttH" and self.channel == "4mu" and self.category == "Untagged" and self.analysis == "fL1":
-            import datetime
-            if datetime.date.today() > datetime.date(2017, 2, 20): assert 0, datetime.date.today()
-            return False
         return bool(self.customsmoothingkwargs)
 
     @property
@@ -728,25 +749,6 @@ class Template(TemplateBase, MultiEnum):
     def sample(self):
         return ReweightingSample(self.hypothesis, self.productionmode)
 
-    def docustomsmoothing(self, newf, controlplotsdir):
-        f = ROOT.TFile(self.templatesfile.templatesfile(firststep=True))
-        h = getattr(f, self.templatename(final=False))
-        rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterNormalization".format(self.templatename(final=False), i)).GetListOfPrimitives()[0]
-                              for i in range(3)]
-        try:
-            customsmoothing.customsmoothing(h, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)
-        except:
-            print "Error while smoothing {}:".format(self.templatename(final=False))
-            raise
-        if self.domirror:
-            assert "axes" not in self.customsmoothingkwargs or 1 not in self.customsmoothingkwargs["axes"]
-            hmirror = getattr(f, self.templatename(final=True))
-            try:
-                customsmoothing.customsmoothing(hmirror, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)
-            except:
-                print "Error while custom smoothing {}:".format(self.templatename(final=True))
-                raise
-
 class IntTemplate(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
     enumname = "inttemplate"
@@ -783,7 +785,7 @@ class IntTemplate(TemplateBase, MultiEnum):
 
         super(IntTemplate, self).check(*args, dontcheck=dontcheck)
 
-    def templatename(self):
+    def templatename(self, final=True):
         if self.productionmode in ("ggH", "ttH"):
             if self.interferencetype == "g11gi1":
                 result = "templateIntAdapSmooth"
@@ -824,7 +826,9 @@ class IntTemplate(TemplateBase, MultiEnum):
     def domirror(self):
         return bool(self.mirrorjsn)
 
-    def getjson(self):
+    @property
+    @cache
+    def templatesandfactors(self):
         if self.interferencetype == "g11gi1":
             g1exp = giexp = 1
             hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
@@ -836,12 +840,18 @@ class IntTemplate(TemplateBase, MultiEnum):
         invertedmatrix = self.templatesfile.invertedmatrix
         vectoroftemplates = self.templatesfile.templates()  #ok technically it's a list not a vector
         rowofinvertedmatrix = giexp  #first row is labeled 0
-        templatesum = []
+        templatesandfactors = []
+
         for j, template in enumerate(vectoroftemplates):
-            templatesum.append({
-                                "name": template.templatename(final=False),
-                                "factor": invertedmatrix[rowofinvertedmatrix,j] * multiplyby,
-                               })
+            templatesandfactors.append((template, invertedmatrix[rowofinvertedmatrix,j] * multiplyby))
+
+        return templatesandfactors
+
+    def getjson(self):
+        templatesum = [{
+                        "name": template.templatename(final=False),
+                        "factor": factor,
+                       } for template, factor in self.templatesandfactors]
         intjsn = [
                   {
                    "name": self.templatename(),
@@ -856,11 +866,24 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     @property
     def hascustomsmoothing(self):
-        return False
+        return any(template.hascustomsmoothing for template, factor in self.templatesandfactors if factor)
 
-    def docustomsmoothing(self):
-        if not self.hascustomsmoothing: return
-        assert False
+    @property
+    def customsmoothingkwargs(self):
+        return {
+                "name": "redointerference",
+                "newf": self.customsmoothing_newf,
+                "templatesandfactors": self.templatesandfactors,
+                "mirrorjsn": self.mirrorjsn,
+               }
+
+    def docustomsmoothing(self, newf, controlplotsdir):
+        self.customsmoothing_newf = newf
+        try:
+            return super(IntTemplate, self).docustomsmoothing(newf, controlplotsdir)
+        finally:
+            del self.customsmoothing_newf
+
 
 class DataTree(MultiEnum):
     enums = [Channel, Production, Category, Analysis]

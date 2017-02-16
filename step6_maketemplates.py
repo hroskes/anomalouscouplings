@@ -81,6 +81,8 @@ def copydata(*args):
     newf.Close()
 
 if __name__ == "__main__":
+    buildtemplates("tth", "4mu", "170203", "Untagged", "fL1")
+if False:
     for templatesfile in templatesfiles:
         buildtemplates(templatesfile)
         #and copy data
