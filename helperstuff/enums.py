@@ -541,7 +541,7 @@ if config.applym4lshapesystematics:
 if config.applyZXshapesystematics:
     _ += ["ZXUp", "ZXDown"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
-treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("ResUp", "ResDown", "ScaleUp", "ScaleDown"))
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
 del _
 
 class MetaclassForMultiEnums(type):
