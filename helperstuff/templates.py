@@ -651,6 +651,10 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def hascustomsmoothing(self):
+        if self.productionmode == "ttH" and self.channel == "4mu" and self.category == "Untagged" and self.analysis == "fL1":
+            import datetime
+            if datetime.date.today() > datetime.date(2017, 2, 20): assert 0, datetime.date.today()
+            return False
         return bool(self.customsmoothingkwargs)
 
     @property
