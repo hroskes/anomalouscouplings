@@ -23,7 +23,14 @@ def buildtemplates(*args):
         if f:
             if not os.path.exists(templatesfile.templatesfile()):
                 if not os.path.exists(templatesfile.templatesfile(firststep=True)):
-                    subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
+                    try:
+                        subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
+                    except:
+                        try:
+                            os.remove(templatesfile.templatesfile(firststep=True))
+                        except:
+                            pass
+                        raise
             if (
                 templatesfile.hascustomsmoothing
                  and os.path.exists(templatesfile.templatesfile(firststep=True))
