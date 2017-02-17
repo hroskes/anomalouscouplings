@@ -601,16 +601,30 @@ class Template(TemplateBase, MultiEnum):
       self.initsmoothingparameters()
       return self.__smoothingparameters.value
 
-    def writedict(self):
-      self.smoothingparameters.writedict()
+    @smoothingparameters.setter
+    def smoothingparameters(self, value):
+      self.initsmoothingparameters()
+      self.__smoothingparameters.value = value
+
+    @staticmethod
+    def writedict():
+      SmoothingParameters.writedict()
 
     @property
     def smoothentriesperbin(self):
       return self.smoothingparameters[0][0]
 
+    @smoothentriesperbin.setter
+    def smoothentriesperbin(self, value):
+      self.smoothingparameters[0][0] = value
+
     @property
     def reweightaxes(self):
       return self.smoothingparameters[0][1]
+
+    @reweightaxes.setter
+    def reweightaxes(self, value):
+      self.smoothingparameters[0][1] = value
 
     @property
     def reweightrebin(self):
@@ -739,8 +753,13 @@ class SmoothingParameters(MultiEnum, JsonDict):
       @property
       def default(self):
         return [None, None, None]
+
+      @property
+      def rawvalue(self):
+        return super(SmoothingParameters, self).getvalue()
+
       def getvalue(self):
-        result = super(SmoothingParameters, self).getvalue()
+        result = self.rawvalue
 
         if self.shapesystematic != "" and result == [None, None, None]:
           kwargs = {enum.enumname: getattr(t, enum.enumname) for enum in type(t).needenums}
