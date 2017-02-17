@@ -411,11 +411,10 @@ class Template(TemplateBase, MultiEnum):
     def __init__(self, *args, **kwargs):
         super(Template, self).__init__(*args, **kwargs)
         self.__smoothingparameters = None
-        self.args = args
 
     def initsmoothingparameters(self):
         if self.__smoothingparameters is None:
-            self.__smoothingparameters = SmoothingParameters(*self.args)
+            self.__smoothingparameters = SmoothingParameters(self)
 
     def check(self, *args):
         if self.productionmode is None:
@@ -601,6 +600,9 @@ class Template(TemplateBase, MultiEnum):
     def smoothingparameters(self):
       self.initsmoothingparameters()
       return self.__smoothingparameters.value
+
+    def writedict(self):
+      self.smoothingparameters.writedict()
 
     @property
     def smoothentriesperbin(self):
