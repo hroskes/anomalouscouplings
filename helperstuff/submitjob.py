@@ -1,35 +1,55 @@
-from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
-import config
+from datetime import datetime, timedelta
 import os
 from pipes import quote
+import re
 import stat
 import subprocess
 import tempfile
 import textwrap
 
+from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
+
+import config
+
 if config.host == "lxplus":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue="1nd", interactive=False, waitids=[], outputfile=None, errorfile=None):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], waitsuccessids=[], outputfile=None, errorfile=None):
         if outputfile is not None:
             outputfile = outputfile.format(jobid="%J")
         if errorfile is not None:
             errorfile = errorfile.format(jobid="%J")
+        if interactive: queue = "cmsinter"
+        if queue is None:
+            if jobtime is None:
+                raise ValueError("Have to provide either queue or jobtime (or set interactive=True)!")
+            #http://stackoverflow.com/a/4628148/5228524
+            match = re.match(r'((?P<days>\d+?)-)?((?P<hours>\d+?):)?((?P<minutes>\d+?):)?((?P<seconds>\d+?))?', jobtime)
+            if not match: raise ValueError("Bad time string {}".format(jobtime))
+            kwargs = {key: int(value) for key, value in match.groupdict().iteritems() if value is not None}
+            delta = timedelta(**kwargs)
+            if not delta: raise ValueError("Job takes no time! {}".format(jobtime))
+            if delta <= timedelta(minutes=8): queue = "8nm"
+            elif delta <= timedelta(hours=1): queue = "1nh"
+            elif delta <= timedelta(hours=8): queue = "8nh"
+            elif delta <= timedelta(days=1): queue = "1nd"
+            elif delta <= timedelta(days=2): queue = "2nd"
+            elif delta <= timedelta(weeks=1): queue = "1nw"
+            elif delta <= timedelta(weeks=2): queue = "2nw"
+            else: raise ValueError("time {} is more than 2 weeks!".format(jobtime))
         run = """
                  echo .oO[jobtext]Oo. | bsub .oO[options]Oo.
               """
-        if interactive: queue = "cmsinter"
         optionsdict = {
                        "-q": queue,
                        "-J": jobname,
                        "-o": outputfile,
                        "-e": errorfile,
+                       "-w": " && ".join(["ended({:d})".format(id) for id in waitids]+["done({:d})".format(id) for id in waitsuccessids])
                       }
-        if waitids:
-            optionsdict["-w"] = " && ".join("ended({:d})".format(id) for id in waitids)
         repmap = {
                   "jobtext": quote("cd .oO[CMSSW_BASE]Oo. && eval $(scram ru -sh) && cd .oO[pwd]Oo. && "+jobtext),
                   "CMSSW_BASE": os.environ["CMSSW_BASE"],
                   "pwd": os.getcwd(),
-                  "options": " ".join("{} {}".format(key, quote(value)) for key, value in optionsdict.iteritems() if value is not None),
+                  "options": " ".join("{} {}".format(key, quote(value)) for key, value in optionsdict.iteritems() if value),
                  }
         if interactive:
             repmap["options"] += " -I"

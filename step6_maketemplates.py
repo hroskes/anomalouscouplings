@@ -4,11 +4,13 @@ from array import array
 import os
 import ROOT
 import subprocess
+import sys
 from time import sleep
 
 from helperstuff import config
 from helperstuff.discriminants import discriminants
 from helperstuff.samples import Sample
+from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
 from helperstuff.utilities import KeepWhileOpenFile
 
@@ -80,9 +82,25 @@ def copydata(*args):
     f.Close()
     newf.Close()
 
-if __name__ == "__main__":
+def submitjobs():
+    njobs = 0
     for templatesfile in templatesfiles:
-        buildtemplates(templatesfile)
-        #and copy data
-    for datatree in datatrees:
-        copydata(datatree)
+        if not os.path.exists(templatesfile.templatesfile()) and not os.path.exists(templatesfile.templatesfile() + ".tmp"):
+            njobs += 1
+    if not njobs: return
+    jsonid = submitjob("./step4_makejson.py", jobname="json", jobtime="0:20:0")
+    for i in range(njobs):
+        submitjob("./step6_maketemplates.py", jobname=str(i), jobtime="1-0:0:0", waitsuccessids=[jsonid])
+
+if __name__ == "__main__":
+    if sys.argv[1:]:
+        if sys.argv[1].lower() == "submitjobs" and not sys.argv[2:]:
+            submitjobs()
+        else:
+            raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
+    else:
+        for templatesfile in templatesfiles:
+            buildtemplates(templatesfile)
+            #and copy data
+        for datatree in datatrees:
+            copydata(datatree)
