@@ -12,9 +12,9 @@ import os
 
 #========================
 #inputs
-productionmode = "VBF"
-disc           = "D_0hplus_decay"
-reweightto     = ReweightingSample(productionmode, "fa2-0.5")
+productionmode = "ttH"
+disc           = "D_CP_VBF"
+reweightto     = ReweightingSample(productionmode, "0+", "Hff0+")
 bins           = None
 min            = None
 max            = None
@@ -23,12 +23,12 @@ enrich         = False
 masscut        = True
 normalizeto1   = False
 
-channel        = "2e2mu"
+channel        = None
 
-category       = None
-analysis       = "fa2"
+category       = "VBFtagged"
+analysis       = "fa3"
 
-cut            = "ZZPt>100"
+cut            = "D_bkg<1./40"
 
 skip           = []
 #========================
@@ -50,6 +50,12 @@ def hypothesestouse():
         if skip is not None and hypothesis in skip: continue
         yield hypothesis
 
+def hffhypothesistouse():
+    if productionmode == "ttH":
+        return "Hff0+"
+    else:
+        return None
+
 for hypothesis in hypotheses:
     if hypothesis not in hypothesestouse():
         try:
@@ -63,7 +69,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     hname = "h{}".format(hypothesis)
 
     h = hs[hypothesis] = plotfromtree(
-      reweightfrom=ReweightingSample(productionmode, hypothesis),
+      reweightfrom=ReweightingSample(productionmode, hypothesis, hffhypothesistouse()),
       reweightto=reweightto,
       disc=disc,
       bins=bins,

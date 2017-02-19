@@ -657,6 +657,12 @@ class Template(TemplateBase, MultiEnum):
     def customsmoothingkwargs(self):
       return self.smoothingparameters[1]
 
+    @customsmoothingkwargs.setter
+    def customsmoothingkwargs(self, value):
+      result = self.smoothingparameters
+      result[1] = value
+      self.smoothingparameters = result
+
     @property
     def hascustomsmoothing(self):
         return bool(self.customsmoothingkwargs)
