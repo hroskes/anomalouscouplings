@@ -13109,10 +13109,10 @@
                                         1
                                     ],
                                     "name": "setbinstozero",
-                                    "nbinsleft": {
+                                    "nbinsonleft": {
                                         "1": 9
                                     },
-                                    "nbinsright": {}
+                                    "nbinsonright": {}
                                 }
                             ]
                         }
