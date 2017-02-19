@@ -52,16 +52,30 @@ class MultiplyCounter(collections.Counter):
         return self
 
 def cache(function):
-    cachename = "__cache_{}".format(function.__name__)
-    def newfunction(self, *args):
+    cache = {}
+    def newfunction(*args, **kwargs):
         try:
-            return getattr(self, cachename)[args]
+            return cache[args, tuple(sorted(kwargs.iteritems()))]
+        except KeyError:
+            cache[args, tuple(sorted(kwargs.iteritems()))] = function(*args, **kwargs)
+            return newfunction(*args, **kwargs)
+    newfunction.__name__ = function.__name__
+    return newfunction
+
+def cache_instancemethod(function):
+    """
+    for when self doesn't support __hash__
+    """
+    cachename = "__cache_{}".format(function.__name__)
+    def newfunction(self, *args, **kwargs):
+        try:
+            return getattr(self, cachename)[args, tuple(sorted(kwargs.iteritems()))]
         except AttributeError:
             setattr(self, cachename, {})
-            return newfunction(self, *args)
+            return newfunction(self, *args, **kwargs)
         except KeyError:
-            getattr(self, cachename)[args] = function(self, *args)
-            return newfunction(self, *args)
+            getattr(self, cachename)[args, tuple(sorted(kwargs.iteritems()))] = function(self, *args, **kwargs)
+            return newfunction(self, *args, **kwargs)
     newfunction.__name__ = function.__name__
     return newfunction
 

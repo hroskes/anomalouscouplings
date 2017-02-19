@@ -1203,6 +1203,7 @@ class Sample(ReweightingSamplePlus):
         raise self.ValueError("withdiscriminantsfile")
 
     @staticmethod
+    @cache
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
         if reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data"):
