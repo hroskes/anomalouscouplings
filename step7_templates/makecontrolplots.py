@@ -56,7 +56,7 @@ if __name__ == "__main__":
 #        yield TemplatesFile("tth", "VBFtagged", "4mu", "fa3")
 #        return
         for templatesfile in templatesfiles:
-           if templatesfile.templategroup == "tth" and templatesfile.category == "VBFtagged":
+           if templatesfile.templategroup == "tth" and templatesfile.category == "Untagged" and templatesfile.channel == "4mu":
              yield templatesfile
     length = len(list(thetemplatesfiles()))
 
