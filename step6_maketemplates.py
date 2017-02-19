@@ -12,7 +12,7 @@ from helperstuff.discriminants import discriminants
 from helperstuff.samples import Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
-from helperstuff.utilities import KeepWhileOpenFile
+from helperstuff.utilities import cd, KeepWhileOpenFile
 
 cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
 if cmssw[0] == 8:
@@ -82,20 +82,40 @@ def copydata(*args):
     f.Close()
     newf.Close()
 
-def submitjobs():
+def submitjobs(*args):
+    remove = {}
+    for arg in args:
+        filename = os.path.join(config.repositorydir, "step7_templates", arg)
+        if not os.path.exists(filename):
+            raise ValueError("{} does not exist!".format(filename))
+        remove[filename] = False
+
     njobs = 0
     for templatesfile in templatesfiles:
-        if not os.path.exists(templatesfile.templatesfile()) and not os.path.exists(templatesfile.templatesfile() + ".tmp"):
+        if templatesfile.templatesfile() in remove:
+            remove[templatesfile.templatesfile()] = True
+            remove[templatesfile.templatesfile(firststep=True)] = True
+            njobs += 1
+        elif os.path.exists(templatesfile.templatesfile()) or os.path.exists(templatesfile.templatesfile() + ".tmp"):
+            pass
+        else:
             njobs += 1
     if not njobs: return
-    jsonid = submitjob("./step4_makejson.py", jobname="json", jobtime="0:20:0")
-    for i in range(njobs):
-        submitjob("./step6_maketemplates.py", jobname=str(i), jobtime="1-0:0:0", waitsuccessids=[jsonid])
+    for filename, found in remove.iteritems():
+        if not found:
+            raise IOError("{} is not a templatesfile!".format(filename))
+    with cd(config.repositorydir):
+        subprocess.check_call(["./step4_makejson.py"])
+        for filename in remove:
+            if os.path.exists(filename):
+                os.remove(filename)
+        for i in range(njobs):
+            submitjob("./step6_maketemplates.py", jobname=str(i), jobtime="1-0:0:0")
 
 if __name__ == "__main__":
     if sys.argv[1:]:
-        if sys.argv[1].lower() == "submitjobs" and not sys.argv[2:]:
-            submitjobs()
+        if sys.argv[1].lower() == "submitjobs":
+            submitjobs(*sys.argv[2:])
         else:
             raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
     else:

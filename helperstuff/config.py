@@ -1,19 +1,21 @@
 import getpass
+import os
 import re
 import socket
 
 
-if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and getpass.getuser() in ["hroskes","rbarr"] :
+if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and getpass.getuser() == "hroskes":
     host = "lxplus"
-    if getpass.getuser() == "hroskes":
-        repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production/"
-        plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/"
-        svndir = "/afs/cern.ch/work/h/hroskes/AN/notes"
+    repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production/"
+    plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/"
+    svndir = "/afs/cern.ch/work/h/hroskes/AN/notes"
 
 elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname()) and getpass.getuser() == "jroskes1@jhu.edu":
     host = "MARCC"
     repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/"
     plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/"
+
+repositorydir = os.path.realpath(repositorydir)
 
 try:
     repositorydir

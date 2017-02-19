@@ -30,7 +30,7 @@ def reweightthingwithobviouspeak(hsmooth, rawprojections, axes=[], axesleft=[], 
 
         if leftpeak and not (
                              content(1) > 1.5*content(2)
-                             or (content(1) > .8*content(2) and content(2) > 3*content(3))
+                             or (content(1) > .8*content(2) and content(2) > 2.5*content(3))
                             ): raise ValueError("Histogram does not have an obvious left peak! {} {} {}".format(content(1), content(2), content(3)))
         if rightpeak and (
                           content(nbins) < 1.5*content(nbins-1)
