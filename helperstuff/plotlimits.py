@@ -20,6 +20,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     legendposition = (.2, .7, .6, .9)
     moreappend = ""
     luminosity = None
+    xmin, xmax = -1, 1
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -31,6 +32,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             moreappend = kwarg
         elif kw == "luminosity":
             luminosity = kwarg
+        elif kw == "scanrange":
+            xmin, xmax = kwarg
         else:
             assert False
 
@@ -98,7 +101,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     style.applyaxesstyle(mg)
     style.CMS("Preliminary", luminosity)
 
-    drawlines(CLtextposition)
+    drawlines(CLtextposition, xmin=xmin, xmax=xmax)
     for ext in "png eps root pdf".split():
         outputfilename = outputfilename.replace("."+ext, "")
     for ext in "png eps root pdf".split():
@@ -158,16 +161,16 @@ class XPos(MyEnum):
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
-def drawlines(xpostext="left"):
+def drawlines(xpostext="left", xmin=-1, xmax=1):
     xpostext = XPos(xpostext)
 
     line68 = ROOT.TLine()
     line68.SetLineStyle(9)
-    line68.DrawLine(-1,1,1,1)
+    line68.DrawLine(xmin,1,xmax,1)
     cache.append(line68)
     line95 = ROOT.TLine()
     line95.SetLineStyle(9)
-    line95.DrawLine(-1,3.84,1,3.84)
+    line95.DrawLine(xmin,3.84,xmax,3.84)
     cache.append(line95)
 
     oneSig = xpostext.TPaveText(1)
