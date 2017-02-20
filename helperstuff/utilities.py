@@ -6,6 +6,7 @@ from itertools import tee, izip
 import operator
 import json
 import os
+import sys
 import time
 
 import ROOT
@@ -114,6 +115,22 @@ class KeepWhileOpenFile(object):
             self.fd = self.f = None
     def __nonzero__(self):
         return bool(self.f)
+
+class Tee(object):
+    """http://stackoverflow.com/a/616686/5228524"""
+    def __init__(self, *openargs, **openkwargs):
+        self.openargs = openargs
+        self.openkwargs = openkwargs
+    def __enter__(self):
+        self.file = open(*self.openargs, **self.openkwargs)
+        self.stdout = sys.stdout
+        sys.stdout = self
+    def __exit__(self, *args):
+        sys.stdout = self.stdout
+        self.file.close()
+    def write(self, data):
+        self.file.write(data)
+        self.stdout.write(data)
 
 class OneAtATime(KeepWhileOpenFile):
     def __init__(self, name, delay, message=None, task="doing this"):

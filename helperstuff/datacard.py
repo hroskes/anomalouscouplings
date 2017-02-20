@@ -10,7 +10,7 @@ import combineinclude
 from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1
 import config
 from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode
-from utilities import callclassinitfunctions, cd, generatortolist, KeepWhileOpenFile, mkdir_p
+from utilities import callclassinitfunctions, cd, generatortolist, KeepWhileOpenFile, mkdir_p, Tee
 from yields import YieldSystematic, YieldSystematicValue
 
 names = set()
@@ -119,6 +119,9 @@ class Datacard(MultiEnum):
     @property
     def rootfile_base(self):
         return "hzz4l_{}S_{}_{}.input.root".format(self.channel, self.category, self.year)
+    @property
+    def logfile(self):
+        return "log_hzz4l_{}S_{}_{}.input".format(self.channel, self.category, self.year)
 
     @property
     def productionmodes(self):
@@ -257,6 +260,8 @@ class Datacard(MultiEnum):
         pdf_syst1Up = {}
         pdf_syst1Down = {}
         norm = {}
+        r_fai_pures_norm = {}
+        r_fai_realints_norm = {}
 
         for p in "ggH", "ttH":
             #for ggH and ttH, the order is SM, BSM, int
@@ -277,10 +282,10 @@ class Datacard(MultiEnum):
                 t.SetName(makename("{}_T_ZZ_{}_{}_{}_3D_{}_ScaleResUp".format(p, self.production.year, self.channel, self.category, i)))
 
             T_ScaleResDown[p] = [
-                                     gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, "ScaleResDown"),
-                                     gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, "ScaleResDown"),
-                                     gettemplate(p, self.analysis, self.production, self.category, "g11gi1", self.channel, "ScaleResDown"),
-                                    ]
+                                 gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, "ScaleResDown"),
+                                 gettemplate(p, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, "ScaleResDown"),
+                                 gettemplate(p, self.analysis, self.production, self.category, "g11gi1", self.channel, "ScaleResDown"),
+                                ]
             for i, t in enumerate(T_ScaleResDown[p], start=1):
                 t.SetName(makename("{}_T_ZZ_{}_{}_{}_3D_{}_ScaleResDown".format(p, self.production.year, self.channel, self.category, i)))
 
@@ -291,10 +296,10 @@ class Datacard(MultiEnum):
 
             r_fai_pures_norm_Name = makename("{}_PuresNorm_{}_{}_{}".format(p, self.channel, self.category, self.production.year))
             r_fai_realints_norm_Name = makename("{}_RealIntsNorm_{}_{}_{}".format(p, self.channel, self.category, self.production.year))
-            r_fai_pures_norm = ROOT.RooFormulaVar(r_fai_pures_norm_Name,r_fai_pures_norm_Name,"( (1-abs(@0))*@1+abs(@0)*@2 )/@1",ROOT.RooArgList(x,T_integral[p][0],T_integral[p][1]))
-            r_fai_realints_norm = ROOT.RooFormulaVar(r_fai_realints_norm_Name,r_fai_realints_norm_Name,"( sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1 )/@2",ROOT.RooArgList(x,T_integral[p][2],T_integral[p][0]))
+            r_fai_pures_norm[p] = ROOT.RooFormulaVar(r_fai_pures_norm_Name,r_fai_pures_norm_Name,"( (1-abs(@0))*@1+abs(@0)*@2 )/@1",ROOT.RooArgList(x,T_integral[p][0],T_integral[p][1]))
+            r_fai_realints_norm[p] = ROOT.RooFormulaVar(r_fai_realints_norm_Name,r_fai_realints_norm_Name,"( sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1 )/@2",ROOT.RooArgList(x,T_integral[p][2],T_integral[p][0]))
             normname = "{}_norm".format(p)
-            norm[p] = ROOT.RooFormulaVar(normname, normname,"(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)",ROOT.RooArgList(r_fai_pures_norm,r_fai_realints_norm,x))
+            norm[p] = ROOT.RooFormulaVar(normname, normname,"(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)",ROOT.RooArgList(r_fai_pures_norm[p],r_fai_realints_norm[p],x))
 
             T_hist[p] = [ROOT.RooDataHist(makename("{}_T_{}_{}_{}_hist".format(p, self.channel, self.category, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T[p], start=1)]
             T_ScaleResUp_hist[p] = [ROOT.RooDataHist(makename("{}_T_{}_{}_{}_ScaleResUp_hist".format(p, self.channel, self.category, i)), "", ROOT.RooArgList(D1,D2,D3), t) for i, t in enumerate(T_ScaleResUp[p], start=1)]
@@ -471,7 +476,7 @@ class Datacard(MultiEnum):
 
     def makeCardsWorkspaces(self, outdir="."):
         mkdir_p(outdir)
-        with cd(outdir):
+        with cd(outdir), Tee(self.logfile, 'w'):
             self.makeworkspace()
             self.writedatacard()
 
