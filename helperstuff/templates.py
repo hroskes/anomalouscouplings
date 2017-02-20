@@ -655,7 +655,11 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def customsmoothingkwargs(self):
-      return self.smoothingparameters[1]
+      result = self.smoothingparameters[1].copy()
+      if "othertemplateargs" in result:
+        result["othertemplate"] = Template(*result["othertemplateargs"])
+        del result["othertemplateargs"]
+      return result
 
     @customsmoothingkwargs.setter
     def customsmoothingkwargs(self, value):

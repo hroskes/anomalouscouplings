@@ -85,6 +85,8 @@ def copydata(*args):
 def submitjobs(*args):
     remove = {}
     for arg in args:
+        if not arg.endswith(".root"): arg += ".root"
+        arg = os.path.basename(arg)
         filename = os.path.join(config.repositorydir, "step7_templates", arg)
         if not os.path.exists(filename):
             raise ValueError("{} does not exist!".format(filename))

@@ -17,7 +17,7 @@ class EnumItem(object):
         return hash(self.names)
 
     def __eq__(self, other):
-        if type(other) == int or type(other) == str:
+        if isinstance(other, (int, basestring)):
             return other in self.names
         if isinstance(other, type(self)):
             return str(self) == str(other)
