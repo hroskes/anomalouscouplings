@@ -537,7 +537,9 @@ categories = Category.items()
 
 _ = [""]
 if config.applym4lshapesystematics:
-    _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"]
+    _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
+    if config.combinem4lshapesystematics:
+        _ += ["ScaleResUp", "ScaleResDown"]
 if config.applyZXshapesystematics:
     _ += ["ZXUp", "ZXDown"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)

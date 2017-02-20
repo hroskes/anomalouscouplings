@@ -13,7 +13,7 @@ import ROOT
 def combinesystematics(channel, analysis, production, category):
     thetemplatesfiles = []
 
-    if config.applym4lshapesystematics:
+    if config.applym4lshapesystematics and config.combinem4lshapesystematics:
         ScaleResUp = TemplatesFile(channel, "signal", "ScaleResUp", analysis, production, category)
         ScaleResDown = TemplatesFile(channel, "signal", "ScaleResDown", analysis, production, category)
         thetemplatesfiles += [ScaleResUp, ScaleResDown]
@@ -27,7 +27,7 @@ def combinesystematics(channel, analysis, production, category):
 
     store = []
 
-    if config.applym4lshapesystematics:
+    if config.applym4lshapesystematics and config.combinem4lshapesystematics:
         for sample in analysis.signalsamples():
             h = Template(sample, channel, analysis, production, category).gettemplate()
             #ScaleResUp = nominal + (ScaleUp-nominal) + (ResUp-nominal)
