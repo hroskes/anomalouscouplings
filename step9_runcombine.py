@@ -51,9 +51,9 @@ def runcombine(analysis, foldername, **kwargs):
     subdirectory = ""
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
-    defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH")}
+    defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
-    expectmuggH = expectmuVVH = 1
+    expectmuffH = expectmuVVH = 1
     fixmu = False
     if config.unblindscans:
         lumitype = "fordata"
@@ -109,8 +109,8 @@ def runcombine(analysis, foldername, **kwargs):
             if config.unblindscans:
                 raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
             lumitype = float(kwarg)
-        elif kw == "expectmuggH":
-            expectmuggH = float(kwarg)
+        elif kw == "expectmuffH":
+            expectmuffH = float(kwarg)
         elif kw == "expectmuVVH":
             expectmuVVH = float(kwarg)
         elif kw == "fixmu":
@@ -131,8 +131,8 @@ def runcombine(analysis, foldername, **kwargs):
     turnoff = []
     if fixmu:
         workspacefileappend += "_fixmu"
-    if expectmuggH != 1:
-        moreappend += "_muggH{}".format(expectmuggH)
+    if expectmuffH != 1:
+        moreappend += "_muffH{}".format(expectmuffH)
     if expectmuVVH != 1:
         moreappend += "_muVVH{}".format(expectmuVVH)
     if set(usesignalproductionmodes) != set(defaultusesignalproductionmodes):
@@ -171,11 +171,11 @@ def runcombine(analysis, foldername, **kwargs):
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
-              "expectrs,": "" if fixmu else "r_ggH=.oO[expectmuggH]Oo.,r_VVH=.oO[expectmuVVH]Oo.,",
-              "expectmuggH": str(expectmuggH),
+              "expectrs,": "" if fixmu else "r_ffH=.oO[expectmuffH]Oo.,r_VVH=.oO[expectmuVVH]Oo.,",
+              "expectmuffH": str(expectmuffH),
               "expectmuVVH": str(expectmuVVH),
               "fixmu": "--PO muFixed" if fixmu else "",
-              "savemu": "" if fixmu else "--saveSpecifiedFunc=r_VVH,r_ggH"
+              "savemu": "" if fixmu else "--saveSpecifiedFunc=r_VVH,r_ffH"
              }
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
