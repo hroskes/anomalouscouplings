@@ -17,6 +17,11 @@ class YieldSystematic(MyEnum):
     enumitems = (
                  EnumItem("BTag"),
                  EnumItem("JEC"),
+                 EnumItem("QCDscale_ggH"),
+                 EnumItem("QCDscale_qqH"),
+                 EnumItem("QCDscale_VH"),
+                 EnumItem("QCDscale_ttH"),
+                 EnumItem("QCDscale_VV"),
                  EnumItem("pdf_Higgs_gg"),
                  EnumItem("pdf_Higgs_qq"),
                  EnumItem("pdf_Higgs_ttH"),
@@ -111,12 +116,10 @@ class YieldSystematicValue(MultiEnum, JsonDict):
           if not all(isinstance(_, Number) for _ in value):
             raise ValueError("value '{!r}' doesn't contain only numbers!".format(origvalue))
 
-          if list(value) == [1, 1]: value = None
-          elif 1 in list(value):
-            value = list(value)
-            value.remove(1)
-            assert len(value) == 1
-            value = value[0]
+          if all(_ >= 1 for _ in list(value)):
+            value = max(value)
+          elif all(_ <= 1 for _ in list(value)):
+            value = min(value)
 
         elif isinstance(value, Number) or value is None:
           pass
@@ -197,7 +200,7 @@ class __TotalRate(MultiEnum):
 def totalrate(*args):
   return __TotalRate(*args).rate
 
-def count(fromsamples, tosamples, categorizations):
+def count(fromsamples, tosamples, categorizations, alternateweights):
     t = ROOT.TChain("candTree")
     for fromsample in fromsamples:
         t.Add(fromsample.withdiscriminantsfile())
@@ -208,17 +211,23 @@ def count(fromsamples, tosamples, categorizations):
     t.SetBranchStatus("MC_weight_*", 1)
     t.SetBranchStatus("Z*Flav", 1)
     t.SetBranchStatus("ZZMass", 1)
+    for _ in alternateweights:
+      if _ != "1":
+        t.SetBranchStatus(_.weightname, 1)
 
     c = ROOT.TCanvas()
-    for tosample, categorization in itertools.product(tosamples, categorizations):
+    for tosample, categorization, alternateweight in itertools.product(tosamples, categorizations, alternateweights):
         if tosample == ReweightingSample("WH", "L1Zg"): continue
-        t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "{}*(ZZMass>{} && ZZMass<{})".format(tosample.weightname(), config.m4lmin, config.m4lmax), "LEGO")
+        if alternateweight.issystematic and categorization.issystematic: continue
+        t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "{}*(ZZMass>{} && ZZMass<{})*{}".format(tosample.weightname(), config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
         h = c.FindObject("htemp")
         for i in range(h.GetNbinsY()):
             for channel in channels:
                 toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
-                result[tosample, categorization, Category.fromid(i), channel] += toadd
-                result[tosample, categorization, Category.fromid(i)] += toadd
+                result[tosample, categorization, alternateweight, Category.fromid(i), channel] += toadd
+                result[tosample, categorization, alternateweight, Category.fromid(i)] += toadd
+#        for k, v in result.iteritems(): print k, v
+#        assert 0
 
         if tosample not in result:
             result[tosample] = h.Integral()

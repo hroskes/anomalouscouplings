@@ -256,6 +256,15 @@ class ProductionMode(MyEnum):
             for h in self.generatedhypotheses:
                 yield Sample(self, h, hff, production)
 
+    @property
+    def QCDsystematicname(self):
+      if self == "ggH": return "QCDscale_ggH"
+      if self == "qqH": return "QCDscale_qqH"
+      if self in ("ZH", "WH"): return "QCDscale_VH"
+      if self == "ttH": return "QCDscale_ttH"
+      if self == "qqZZ": return "QCDscale_VV"
+      assert False
+
 class ShapeSystematic(MyEnum):
     enumname = "shapesystematic"
     enumitems = (
@@ -517,6 +526,34 @@ class PythiaSystematic(MyEnum):
     def appendname(self):
         return "_" + str(self).lower().replace("dn", "down")
 
+class AlternateWeight(MyEnum):
+    enumname = "alternateweight"
+    enumitems = (
+                 EnumItem("1"),
+                 EnumItem("muRUp"),
+                 EnumItem("muRDn"),
+                 EnumItem("muFUp"),
+                 EnumItem("muFDn"),
+                 EnumItem("PDFUp"),
+                 EnumItem("PDFDn"),
+                 EnumItem("alphaSUp"),
+                 EnumItem("alphaSDn"),
+                )
+    @property
+    def issystematic(self): return self != "1"
+    @property
+    def weightname(self):
+      if self == "1": return "1"
+      if self == "muRUp": return "LHEweight_QCDscale_muR2_muF1"
+      if self == "muRDn": return "LHEweight_QCDscale_muR0p5_muF1"
+      if self == "muFUp": return "LHEweight_QCDscale_muR1_muF2"
+      if self == "muFDn": return "LHEweight_QCDscale_muR1_muF0p5"
+      if self == "PDFUp": return "LHEweight_PDFVariation_Up"
+      if self == "PDFDn": return "LHEweight_PDFVariation_Dn"
+      if self == "alphaSUp": return "LHEweight_AsMZ_Up"
+      if self == "alphaSDn": return "LHEweight_AsMZ_Dn"
+      assert False
+
 channels = Channel.items()
 JECsystematics = JECSystematic.items()
 btagsystematics = BTagSystematic.items()
@@ -534,6 +571,7 @@ analyses = Analysis.items()
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
+alternateweights = AlternateWeight.items(lambda x: x=="1" or "mu" in str(x))
 
 _ = [""]
 if config.applym4lshapesystematics:

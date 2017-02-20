@@ -12,6 +12,8 @@ class BaseCategorization(object):
     def category_function_name(self): pass
     @abstractmethod
     def get_category_function(self_categorization): pass
+    @abstractproperty
+    def issystematic(self): pass
 
     def __hash__(self): return hash(self.category_function_name)
     def __eq__(self, other): return self.category_function_name == other.category_function_name
@@ -23,6 +25,8 @@ class BaseSingleCategorization(BaseCategorization):
         self.btag = BTagSystematic(btag)
         if self.btag != "Nominal" and self.JEC != "Nominal":
             raise ValueError("Can't have systematics on both btag and JEC at the same time! {}, {}".format(self.btag, self.JEC))
+    @property
+    def issystematic(self): return self.btag != "Nominal" or self.JEC != "Nominal"
     @abstractproperty
     def g1(self): pass
     @abstractproperty
@@ -279,12 +283,18 @@ class SingleCategorizationFromSample(BaseSingleCategorization):
         assert self.sample.hffhypothesis is None or self.sample.hffhypothesis == "Hff0+"
         return self.hypothesisname
 
+    def __repr__(self):
+        return "{}({!r}, {!r}, {!r})".format(type(self).__name__, self.sample, self.JEC, self.btag)
+
 class MultiCategorization(BaseCategorization):
     def __init__(self, name, *singles):
         self.name = name
         self.singles = frozenset(singles)
-#        for single in self.singles:
-#            single.nmulticategorizations += 1
+    @property
+    def issystematic(self):
+        result = {_.issystematic for _ in self.singles}
+        assert len(result) == 1, result
+        return result.pop()
     def __hash__(self):
         return hash(self.singles)
     def __eq__(self, other):
@@ -318,3 +328,7 @@ class MultiCategorization(BaseCategorization):
 
     @property
     def category_function_name(self): return "category_{}".format(self.name)
+
+    def __repr__(self):
+        #return ("{}(" + ", ".join(["{!r}"]*(len(self.singles)+1))+")").format(type(self).__name__, self.name, *self.singles)
+        return self.name
