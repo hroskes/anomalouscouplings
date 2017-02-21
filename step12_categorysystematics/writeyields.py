@@ -62,6 +62,17 @@ def writeyields():
              or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None):
           usealternateweights = [AlternateWeight("1")]
 
+        ####################################
+        if isinstance(tosample, ReweightingSamplePlus) and tosample.alternategenerator == "MINLO" and tosample.pythiasystematic is not None:
+          try:
+            Sample(tosample.reweightingsample, tosample.alternategenerator, production)
+          except ValueError:
+            pass
+          else:
+            assert False, "Delete this section!"
+          usealternateweights = alternateweights
+        ####################################
+
         tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
       for key in tmpresult:
@@ -175,15 +186,16 @@ def writeyields():
 
           systname = productionmode.QCDsystematicname
 
-          for otherproductionmode in "ggH", "VBF", "ZH", "WH", "ttH", "ggZZ", "qqZZ", "VBFbkg", "ZX":
-            if productionmode == "ZH" and otherproductionmode == "WH" or productionmode == "WH" and otherproductionmode == "ZH": continue
-            YieldSystematicValue(channel, category, analysis, otherproductionmode, systname).value = None
+          for channel in channels:
+            for otherproductionmode in "ggH", "VBF", "ZH", "WH", "ttH", "ggZZ", "qqZZ", "VBFbkg", "ZX":
+              if productionmode == "ZH" and otherproductionmode == "WH" or productionmode == "WH" and otherproductionmode == "ZH": continue
+              YieldSystematicValue(channel, category, analysis, otherproductionmode, systname).value = None
 
-          YieldSystematicValue(channel, category, analysis, productionmode, systname).value = (QCDUp, QCDDn)
-          if productionmode == "ggH":
-            YieldSystematicValue(channel, category, analysis, "ggZZ", systname).value = (QCDUp, QCDDn)
-          if productionmode == "VBF":
-            YieldSystematicValue(channel, category, analysis, "VBF bkg", systname).value = (QCDUp, QCDDn)
+            YieldSystematicValue(channel, category, analysis, productionmode, systname).value = (QCDUp, QCDDn)
+            if productionmode == "ggH":
+              YieldSystematicValue(channel, category, analysis, "ggZZ", systname).value = (QCDUp, QCDDn)
+            if productionmode == "VBF":
+              YieldSystematicValue(channel, category, analysis, "VBF bkg", systname).value = (QCDUp, QCDDn)
 
     YieldValue.writedict()
     YieldSystematicValue.writedict()

@@ -109,7 +109,7 @@ class KeepWhileOpenFile(object):
                         self.f.write(self.message+"\n")
                         #http://stackoverflow.com/a/5255743/5228524
                         self.f.flush()
-                        os.fsync()
+                        os.fsync(self.f)
                 except:
                     self.__exit__()
                     raise
@@ -264,7 +264,11 @@ class JsonDict(object):
         assert self.value == value
 
     def getvalue(self):
-        return self.getnesteddictvalue(self.getdict(), *self.keys, default=self.default)
+        try:
+            return self.getnesteddictvalue(self.getdict(), *self.keys, default=self.default)
+        except:
+            print "Error while getting value of\n{!r}".format(self)
+            raise
 
     @property
     def value(self):

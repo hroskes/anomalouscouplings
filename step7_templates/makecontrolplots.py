@@ -54,7 +54,7 @@ def makecontrolplots(*args, **kwargs):
 if __name__ == "__main__":
     def thetemplatesfiles():
         for templatesfile in templatesfiles:
-           if templatesfile.templategroup == "tth" and templatesfile.category == "VHHadrtagged":
+           if templatesfile.channel == "2e2mu" and templatesfile.analysis == "fa2" and templatesfile.shapesystematic != "":
              yield templatesfile
     length = len(list(thetemplatesfiles()))
 

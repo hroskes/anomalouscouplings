@@ -265,6 +265,36 @@ class ProductionMode(MyEnum):
       if self == "qqZZ": return "QCDscale_VV"
       assert False
 
+    @property
+    def workspaceshapesystematics(self):
+      result = []
+      if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
+        if config.applym4lshapesystematics:
+          if config.combinem4lshapesystematics:
+            result += ["ScaleRes"]
+          else:
+            result += ["Scale", "Res"]
+      return [WorkspaceShapeSystematic(_) for _ in result]
+
+class WorkspaceShapeSystematic(MyEnum):
+    enumname = "workspaceshapesystematic"
+    enumitems = (
+                 EnumItem("Res"),
+                 EnumItem("Scale"),
+                 EnumItem("ScaleRes"),
+                )
+    @property
+    def isperchannel(self):
+        if self in ("Res", "Scale", "ScaleRes"): return True
+        return False
+
+class SystematicDirection(MyEnum):
+    enumname = "systematicdirection"
+    enumitems = (
+                 EnumItem("Up"),
+                 EnumItem("Down", "Dn"),
+                )
+
 class ShapeSystematic(MyEnum):
     enumname = "shapesystematic"
     enumitems = (
@@ -276,7 +306,7 @@ class ShapeSystematic(MyEnum):
                  EnumItem("ScaleResUp", "ResScaleUp"),
                  EnumItem("ScaleResDown", "ResScaleDown"),
                  EnumItem("ZXUp"),
-                 EnumItem("ZXDown"),
+                 EnumItem("ZXDown", "ZXDn"),
                 )
     def appendname(self):
         if self == "": return ""
