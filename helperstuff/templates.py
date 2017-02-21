@@ -772,7 +772,7 @@ class SmoothingParameters(MultiEnum, JsonDict):
         result = self.rawvalue
 
         if self.shapesystematic != "" and result == [None, None, None]:
-          kwargs = {enum.enumname: getattr(t, enum.enumname) for enum in type(t).needenums}
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in type(self).needenums}
           kwargs["shapesystematic"] = ""
           return type(self)(*kwargs.values()).getvalue()  #can't use actual kwargs
 

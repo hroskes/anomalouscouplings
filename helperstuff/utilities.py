@@ -235,7 +235,7 @@ class JsonDict(object):
     def keys(self): pass
 
     @property
-    def dictdefault(self):
+    def default(self):
         return JsonDict.__nodefault
 
     @abc.abstractmethod
@@ -254,7 +254,7 @@ class JsonDict(object):
         assert self.value == value
 
     def getvalue(self):
-        return self.getnesteddictvalue(self.getdict(), *self.keys)
+        return self.getnesteddictvalue(self.getdict(), *self.keys, default=self.default)
 
     @property
     def value(self):
@@ -294,7 +294,7 @@ class JsonDict(object):
         hasdefault = False
         for kw, kwarg in kwargs.iteritems():
            if kw == "default":
-               if default is not JsonDict.nodefault:
+               if kwarg is not JsonDict.__nodefault:
                    hasdefault = True
                    default = kwarg
            else:

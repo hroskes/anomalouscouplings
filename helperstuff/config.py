@@ -31,7 +31,7 @@ unblindscans = False
 useQGTagging = False
 useVHMETTagged = True
 
-applym4lshapesystematics = False
+applym4lshapesystematics = True
 combinem4lshapesystematics = False
 applyZXshapesystematics = True
 applyJECshapesystematics = False
