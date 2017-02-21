@@ -12,7 +12,7 @@ from helperstuff.discriminants import discriminants
 from helperstuff.samples import Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
-from helperstuff.utilities import cd, KeepWhileOpenFile
+from helperstuff.utilities import cd, KeepWhileOpenFile, LSB_JOBID
 
 cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
 if cmssw[0] == 8:
@@ -21,7 +21,7 @@ if cmssw[0] == 8:
 def buildtemplates(*args):
     templatesfile = TemplatesFile(*args)
     print templatesfile
-    with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
+    with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp", message=LSB_JOBID()) as f:
         if f:
             if not os.path.exists(templatesfile.templatesfile()):
                 if not os.path.exists(templatesfile.templatesfile(firststep=True)):
@@ -84,7 +84,11 @@ def copydata(*args):
 
 def submitjobs(*args):
     remove = {}
+    keepjson = False
     for arg in args:
+        if arg == "keepjson":
+            keepjson = True
+            continue
         if not arg.endswith(".root"): arg += ".root"
         arg = os.path.basename(arg)
         filename = os.path.join(config.repositorydir, "step7_templates", arg)
@@ -107,7 +111,8 @@ def submitjobs(*args):
         if not found:
             raise IOError("{} is not a templatesfile!".format(filename))
     with cd(config.repositorydir):
-        subprocess.check_call(["./step4_makejson.py"])
+        if not keepjson:
+            subprocess.check_call(["./step4_makejson.py"])
         for filename in remove:
             if os.path.exists(filename):
                 os.remove(filename)

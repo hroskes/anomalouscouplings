@@ -91,8 +91,9 @@ def cd(newdir):
         os.chdir(prevdir)
 
 class KeepWhileOpenFile(object):
-    def __init__(self, name):
+    def __init__(self, name, message=None):
         self.filename = name
+        self.message = message
         self.pwd = os.getcwd()
         self.fd = self.f = None
     def __enter__(self):
@@ -103,6 +104,15 @@ class KeepWhileOpenFile(object):
                 return None
             else:
                 self.f = os.fdopen(self.fd, 'w')
+                try:
+                    if self.message is not None:
+                        self.f.write(self.message+"\n")
+                        #http://stackoverflow.com/a/5255743/5228524
+                        self.f.flush()
+                        os.fsync()
+                except:
+                    self.__exit__()
+                    raise
                 return self.f
     def __exit__(self, *args):
         if self:
@@ -332,3 +342,6 @@ class JsonDict(object):
             thedict[keys[0]] = {}
 
         return cls.setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
+def LSB_JOBID():
+    return os.environ.get("LSB_JOBID", None)
