@@ -456,7 +456,7 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self == "170203": return 36.8
+        if self == "170203": return 35.867
         assert False
     def __int__(self):
         return int(str(self))

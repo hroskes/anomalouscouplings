@@ -38,7 +38,7 @@ applyJECshapesystematics = False
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
-expectedscanluminosity = 36.8
+expectedscanluminosity = 35.867
 
 m4lmin, m4lmax = 105, 140
 
