@@ -302,20 +302,19 @@ def listfromiterator(function):
 
 @listfromiterator
 def templatesfiles():
-    for shapesystematic in treeshapesystematics:
-        for channel in channels:
-            for production in productions:
-                for analysis in analyses:
-                    for category in categories:
+    for channel in channels:
+        for production in productions:
+            for analysis in analyses:
+                for category in categories:
+                    for shapesystematic in treeshapesystematics:
+                        if category != "Untagged" and shapesystematic != "": continue
                         yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
-                        if shapesystematic == "":
-                            yield TemplatesFile(channel, "bkg", analysis, production, category)
-                        if shapesystematic == "" and config.showblinddistributions:
-                            yield TemplatesFile(channel, "DATA", analysis, production, category)
+                    yield TemplatesFile(channel, "vbf", analysis, production, category)
+                    yield TemplatesFile(channel, "zh", analysis, production, category)
+                    yield TemplatesFile(channel, "wh", analysis, production, category)
+                    yield TemplatesFile(channel, "tth", analysis, production, category)
+                    yield TemplatesFile(channel, "bkg", analysis, production, category)
+                    yield TemplatesFile(channel, "DATA", analysis, production, category)
 
 class TemplateBase(object):
     __metaclass__ = abc.ABCMeta

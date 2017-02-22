@@ -3,20 +3,32 @@
 combine ScaleUp, ResUp --> ScaleResUp
 ZX systematics templates from qqZZ
 """
+from itertools import izip
+
+import ROOT
 
 from helperstuff import config
+from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import analyses, categories, channels, productions
 from helperstuff.templates import Template, TemplatesFile
 from helperstuff.utilities import tfiles
-import ROOT
 
 def combinesystematics(channel, analysis, production, category):
     thetemplatesfiles = []
 
-    if config.applym4lshapesystematics and config.combinem4lshapesystematics:
-        ScaleResUp = TemplatesFile(channel, "signal", "ScaleResUp", analysis, production, category)
-        ScaleResDown = TemplatesFile(channel, "signal", "ScaleResDown", analysis, production, category)
-        thetemplatesfiles += [ScaleResUp, ScaleResDown]
+    if config.applym4lshapesystematics:
+        ScaleAndRes = {}
+        for _ in "ggh", "vbf", "zh", "wh", "tth":
+            for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
+                if _ == "ggh" and category == "Untagged": continue
+                ScaleAndRes[_,syst] = TemplatesFile(channel, _, syst, analysis, production, category)
+        thetemplatesfiles += ScaleAndRes.values()
+        if config.combinem4lshapesystematics:
+            ScaleResUp, ScaleResDown = {}, {}
+            for _ in "ggh", "vbf", "zh", "wh", "tth":
+                ScaleResUp[_] = TemplatesFile(channel, _, "ScaleResUp", analysis, production, category)
+                ScaleResDown[_] = TemplatesFile(channel, _, "ScaleResDown", analysis, production, category)
+            thetemplatesfiles += ScaleResUp.values() + ScaleResDown.values()
 
     if config.applyZXshapesystematics:
         ZXUp = TemplatesFile(channel, "bkg", "ZXUp", analysis, production, category)
@@ -26,6 +38,30 @@ def combinesystematics(channel, analysis, production, category):
     outfiles = {templatesfile: ROOT.TFile(templatesfile.templatesfile(), "RECREATE") for templatesfile in thetemplatesfiles}
 
     store = []
+
+    if config.applym4lshapesystematics:
+        ggHuntaggedSM = {systematic:
+                           gettemplate(channel, "ggH", analysis, production, "Untagged", analysis.purehypotheses[0], systematic)
+                           .ProjectionZ().Clone("projection_{}".format(systematic))
+                         for systematic in ("", "ScaleUp", "ScaleDown", "ResUp", "ResDown")}
+        ggHnominal = ggHuntaggedSM[""]
+        for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
+            ggHsyst = ggHuntaggedSM[syst]
+            for _ in "ggh", "vbf", "zh", "wh", "tth":
+                if _ == "ggh" and category == "Untagged": continue
+                tf = TemplatesFile(channel, _, analysis, production, category)
+                for t in tf.templates() + tf.inttemplates():
+                    h = t.gettemplate().Clone()
+                    integral = h.Integral()
+                    h.SetDirectory(outfiles[ScaleAndRes[_,syst]])
+                    for x, y, z in izip(xrange(1, h.GetNbinsX()+1), xrange(1, h.GetNbinsY()+1), xrange(1, h.GetNbinsZ()+1)):
+                        h.SetBinContent(
+                                        x, y, z,
+                                          h.GetBinContent(x, y, z)
+                                          * ggHsyst.GetBinContent(z)
+                                          / ggHnominal.GetBinContent(z)
+                                       )
+                    store.append(h)
 
     if config.applym4lshapesystematics and config.combinem4lshapesystematics:
         for sample in analysis.signalsamples():
