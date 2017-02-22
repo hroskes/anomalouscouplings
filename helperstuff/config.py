@@ -32,7 +32,7 @@ useQGTagging = False
 useVHMETTagged = True
 
 applym4lshapesystematics = True
-combinem4lshapesystematics = False
+combinem4lshapesystematics = True
 applyZXshapesystematics = True
 applyJECshapesystematics = False
 

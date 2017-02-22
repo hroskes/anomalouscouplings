@@ -7,10 +7,13 @@ from itertools import izip
 
 import ROOT
 
+import helperstuff.rootoverloads.histogramfloor
+
 from helperstuff import config
+
 from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import analyses, categories, channels, productions
-from helperstuff.templates import Template, TemplatesFile
+from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import tfiles
 
 def combinesystematics(channel, analysis, production, category):
@@ -63,29 +66,35 @@ def combinesystematics(channel, analysis, production, category):
                                        )
                     store.append(h)
 
+        for templatesfile in ScaleAndRes.values(): outfiles[templatesfile].Write()
+
     if config.applym4lshapesystematics and config.combinem4lshapesystematics:
-        for sample in analysis.signalsamples():
-            h = Template(sample, channel, analysis, production, category).gettemplate()
-            #ScaleResUp = nominal + (ScaleUp-nominal) + (ResUp-nominal)
-            #           = -nominal + ScaleUp + ResUp
-            hup = h.Clone(Template(sample, channel, analysis, "ScaleResUp", production, category).templatename())
-            hup.SetDirectory(outfiles[ScaleResUp])
-            hup.Scale(-1)
-            hup.Add(Template(sample, channel, analysis, "ResUp", production, category).gettemplate())
-            hup.Add(Template(sample, channel, analysis, "ScaleUp", production, category).gettemplate())
+        for _ in "ggh", "vbf", "zh", "wh", "tth":
+            tf = TemplatesFile(channel, _, analysis, production, category)
+            for t in tf.templates() + tf.inttemplates():
+                if isinstance(t, Template): hypothesis = t.hypothesis
+                elif isinstance(t, IntTemplate): hypothesis = t.interferencetype
+                h = gettemplate(t.productionmode, hypothesis, channel, analysis, production, category)
+                #ScaleResDown = nominal + (ScaleDown-nominal) + (ResDown-nominal)
+                #           = -nominal + ScaleDown + ResDown
+                hdn = h.Clone()
+                hdn.SetDirectory(outfiles[ScaleResDown[_]])
+                hdn.Scale(-1)
+                hdn.Add(gettemplate(t.productionmode, hypothesis, channel, analysis, "ResDown", production, category))
+                hdn.Add(gettemplate(t.productionmode, hypothesis, channel, analysis, "ScaleDown", production, category))
 
-            #ScaleResDown = nominal - (ScaleResUp-nominal)
-            #             = 2*nominal - ScaleResUp
-            hdn = h.Clone(Template(sample, channel, analysis, "ScaleResDown", production, category).templatename())
-            hdn.SetDirectory(outfiles[ScaleResDown])
-            hdn.Scale(2)
-            hdn.Add(hup, -1)
+                #ScaleResUp = nominal - (ScaleResDown-nominal)
+                #             = 2*nominal - ScaleResDown
+                hup = h.Clone()
+                hup.SetDirectory(outfiles[ScaleResUp[_]])
+                hup.Scale(2)
+                hup.Add(hdn, -1)
 
-            store += [hup, hdn]
+                store += [hup, hdn]
 
     if config.applyZXshapesystematics:
-        ZXtemplate = Template("ZX", channel, analysis, production, category).gettemplate()
-        qqZZtemplate = Template("qqZZ", channel, analysis, production, category).gettemplate()
+        ZXtemplate = gettemplate("ZX", channel, analysis, production, category)
+        qqZZtemplate = gettemplate("qqZZ", channel, analysis, production, category)
         ZXUptemplate = qqZZtemplate.Clone(Template("ZX", channel, analysis, "ZXUp", production, category).templatename())
         ZXUptemplate.Scale(ZXtemplate.Integral() / ZXUptemplate.Integral())
         ZXUptemplate.SetDirectory(outfiles[ZXUp])
@@ -94,6 +103,8 @@ def combinesystematics(channel, analysis, production, category):
         ZXDowntemplate.SetDirectory(outfiles[ZXDown])
         ZXDowntemplate.Scale(2)
         ZXDowntemplate.Add(ZXUptemplate, -1)
+        ZXDowntemplate.Floor()
+        ZXDowntemplate.Scale(ZXtemplate.Integral() / ZXDowntemplate.Integral())
 
     for f in outfiles.values():
         f.Write()
