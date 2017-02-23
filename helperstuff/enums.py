@@ -469,14 +469,14 @@ class Analysis(MyEnum):
 class Production(MyEnum):
     enumname = "production"
     enumitems = (
-                 EnumItem("170222"),
+                 EnumItem("170203"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
-        if self == "170222":
+        if self == "170203":
             if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/170222"
+                return "root://lxcms03//data3/Higgs/170203"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -488,13 +488,13 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self == "170222": return 35.867
+        if self == "170203": return 35.867
         assert False
     def __int__(self):
         return int(str(self))
     @property
     def year(self):
-        if "170222" <= self:
+        if "170203" <= self:
             return 2016
         assert False
 
