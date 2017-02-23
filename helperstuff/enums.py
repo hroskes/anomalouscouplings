@@ -305,6 +305,8 @@ class ShapeSystematic(MyEnum):
                  EnumItem("ScaleDown"),
                  EnumItem("ScaleResUp", "ResScaleUp"),
                  EnumItem("ScaleResDown", "ResScaleDown"),
+                 EnumItem("JECUp"),
+                 EnumItem("JECDown", "JECDn"),
                  EnumItem("ZXUp"),
                  EnumItem("ZXDown", "ZXDn"),
                 )
@@ -610,8 +612,10 @@ if config.applym4lshapesystematics:
         _ += ["ScaleResUp", "ScaleResDown"]
 if config.applyZXshapesystematics:
     _ += ["ZXUp", "ZXDown"]
+if config.applyJECshapesystematics:
+    _ += ["JECUp", "JECDown"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
-treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown"))
 del _
 
 class MetaclassForMultiEnums(type):

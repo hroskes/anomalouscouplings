@@ -167,25 +167,30 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_decay")
 
+        if self.shapesystematic in ("JECUp", "JECDn"):
+            JECappend = "_{}".format(self.shapesystematic)
+        else:
+            JECappend = ""
+
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
-                return discriminant("D_0minus_VBFdecay")
+                return discriminant("D_0minus_VBFdecay"+JECappend)
             if self.analysis == "fa2":
-                return discriminant("D_0hplus_VBFdecay")
+                return discriminant("D_0hplus_VBFdecay"+JECappend)
             if self.analysis == "fL1":
-                return discriminant("D_L1_VBFdecay")
+                return discriminant("D_L1_VBFdecay"+JECappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_L1Zg_VBFdecay")
+                return discriminant("D_L1Zg_VBFdecay"+JECappend)
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
-                return discriminant("D_0minus_HadVHdecay")
+                return discriminant("D_0minus_HadVHdecay"+JECappend)
             if self.analysis == "fa2":
-                return discriminant("D_0hplus_HadVHdecay")
+                return discriminant("D_0hplus_HadVHdecay"+JECappend)
             if self.analysis == "fL1":
-                return discriminant("D_L1_HadVHdecay")
+                return discriminant("D_L1_HadVHdecay"+JECappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_L1Zg_HadVHdecay")
+                return discriminant("D_L1Zg_HadVHdecay"+JECappend)
 
         assert False
 
@@ -203,25 +208,30 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_decay")
 
+        if self.shapesystematic in ("JECUp", "JECDn"):
+            JECappend = "_{}".format(self.shapesystematic)
+        else:
+            JECappend = ""
+
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
-                return discriminant("D_CP_VBF")
+                return discriminant("D_CP_VBF"+JECappend)
             if self.analysis == "fa2":
-                return discriminant("D_int_VBF")
+                return discriminant("D_int_VBF"+JECappend)
             if self.analysis == "fL1":
-                return discriminant("D_0hplus_VBFdecay")
+                return discriminant("D_0hplus_VBFdecay"+JECappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_0hplus_VBFdecay")
+                return discriminant("D_0hplus_VBFdecay"+JECappend)
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
-                return discriminant("D_CP_HadVH")
+                return discriminant("D_CP_HadVH"+JECappend)
             if self.analysis == "fa2":
-                return discriminant("D_int_HadVH")
+                return discriminant("D_int_HadVH"+JECappend)
             if self.analysis == "fL1":
-                return discriminant("D_0hplus_HadVHdecay")
+                return discriminant("D_0hplus_HadVHdecay"+JECappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_0hplus_HadVHdecay")
+                return discriminant("D_0hplus_HadVHdecay"+JECappend)
 
         assert False
 
@@ -307,13 +317,14 @@ def templatesfiles():
             for analysis in analyses:
                 for category in categories:
                     for shapesystematic in treeshapesystematics:
-                        if category != "Untagged" and shapesystematic != "": continue
+                        if category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
-                    yield TemplatesFile(channel, "vbf", analysis, production, category)
-                    yield TemplatesFile(channel, "zh", analysis, production, category)
-                    yield TemplatesFile(channel, "wh", analysis, production, category)
-                    yield TemplatesFile(channel, "tth", analysis, production, category)
-                    yield TemplatesFile(channel, "bkg", analysis, production, category)
+                        if shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+                        yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
+                        yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
+                        yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
+                        yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
+                        yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
                     yield TemplatesFile(channel, "DATA", analysis, production, category)
 
 class TemplateBase(object):
