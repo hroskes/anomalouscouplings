@@ -360,11 +360,15 @@ class LSF_creating(object):
         for filename in files:
             if not filename.startswith("/"):
                 raise ValueError("{} should be an absolute path!".format(filename))
+
         self.jsonfile = None
+        self.ignorefailure = False
         for kw, kwarg in kwargs.iteritems():
             if kw == "jsonfile":
                 self.jsonfile = kwarg
                 if not self.jsonfile.startswith("/"): raise ValueError("jsonfile={} should be an absolute path!".format(self.jsonfile))
+            elif kw == "ignorefailure":
+                self.ignorefailure = kwarg
             else:
                 raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
 
@@ -387,6 +391,13 @@ class LSF_creating(object):
 
         return self
 
+    def basename(self, filename):
+        if filename not in self.files: raise ValueError("Unknown filename {}!".format(filename))
+        if LSB_JOBID():
+            return os.path.basename(filename)
+        else:
+            return filename
+
     def __exit__(self, *errorinfo):
         if not LSB_JOBID(): return
 
@@ -398,5 +409,5 @@ class LSF_creating(object):
             else:
                 notcreated.append(os.path.basename(filename))
 
-        if notcreated:
+        if notcreated and not self.ignorefailure:
             raise RuntimeError("\n".join("{} was not created!".format(os.path.basename(filename)) for filename in filenames))

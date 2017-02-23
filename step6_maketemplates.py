@@ -117,7 +117,7 @@ def submitjobs(*args):
             if os.path.exists(filename):
                 os.remove(filename)
         for i in range(njobs):
-            submitjob("./step6_maketemplates.py", jobname=str(i), jobtime="1-0:0:0")
+            submitjob(os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0")
 
 if __name__ == "__main__":
     if sys.argv[1:]:

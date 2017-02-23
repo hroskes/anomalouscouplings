@@ -1265,6 +1265,7 @@ class TreeWrapper(Iterator):
         ReweightingSample("ZX"),
 
         ReweightingSamplePlus("ggH", "0+", "NNLOPS"),
+        ReweightingSamplePlus("ggH", "0+", "MINLO"),
         ReweightingSamplePlus("VBF", "0+", "POWHEG"),
         ReweightingSamplePlus("ZH", "0+", "POWHEG"),
         ReweightingSamplePlus("WplusH", "0+", "POWHEG"),

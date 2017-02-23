@@ -6,7 +6,7 @@ from helperstuff import xrd
 from helperstuff.enums import flavors, hffhypotheses, ProductionMode, productions, pythiasystematics
 from helperstuff.samples import allsamples, Sample
 from helperstuff.treewrapper import TreeWrapper
-from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID
+from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID, LSF_creating
 import os
 import ROOT
 import sys
@@ -23,7 +23,7 @@ def adddiscriminants(*args):
   filename = sample.CJLSTfile()
   newfilename = sample.withdiscriminantsfile()
   print newfilename
-  with KeepWhileOpenFile(newfilename+".tmp", message=LSB_JOBID()) as kwof:
+  with KeepWhileOpenFile(newfilename+".tmp", message=LSB_JOBID()) as kwof, LSF_creating(newfilename, ignorefailure=True) as LSF:
     if not kwof:
         return
     if os.path.exists(newfilename):
@@ -63,7 +63,7 @@ def adddiscriminants(*args):
 
     failed = False
     try:
-        newf = ROOT.TFile.Open(newfilename, "recreate")
+        newf = ROOT.TFile.Open(LSF.basename(newfilename), "recreate")
         newt = t.CloneTree(0)
         if treewrapper.effectiveentriestree is not None:
             treewrapper.effectiveentriestree.SetDirectory(newf)

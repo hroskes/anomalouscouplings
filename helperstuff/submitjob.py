@@ -12,7 +12,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 import config
 
 if config.host == "lxplus":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], waitsuccessids=[], outputfile=None, errorfile=None):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], waitsuccessids=[], outputfile=None, errorfile=None, docd=False):
         if outputfile is not None:
             outputfile = outputfile.format(jobid="%J")
         if errorfile is not None:

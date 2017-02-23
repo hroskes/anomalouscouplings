@@ -486,6 +486,9 @@ class Production(MyEnum):
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VH(self):
         return self.CJLSTdir()
+    def CJLSTdir_MINLO(self):
+        if self == "170203":
+            return "root://lxcms03//data3/Higgs/170222"
     @property
     def dataluminosity(self):
         if self == "170203": return 35.867

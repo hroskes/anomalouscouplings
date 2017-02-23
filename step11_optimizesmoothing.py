@@ -161,7 +161,7 @@ def runiteration(iternumber):
             print "submitting jobs..."
             jobids = []
             for i in range(nchangedfiles):
-                jobids.append(submitjob("python step6_maketemplates.py", jobname="iter{}_job{}".format(iternumber, i), jobtime="10:0:0", outputfile=outputfile))
+                jobids.append(submitjob("python step6_maketemplates.py", jobname="iter{}_job{}".format(iternumber, i), jobtime="10:0:0", outputfile=outputfile, docd=True))
 
             submitjob("echo done", jobname="afteriteration", jobtime="0:0:10", interactive=True, waitids=jobids)
 

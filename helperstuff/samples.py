@@ -1130,24 +1130,24 @@ class Sample(ReweightingSamplePlus):
         if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
             raise ValueError("Separate {} sample is produced with POWHEG.  Maybe you meant to specify POWHEG, or WH?\n{}".format(self.productionmode, args))
 
-        if self.pythiasystematic is None and self.alternategenerator == "MINLO":
-            raise ValueError("MINLO nominal sample is not ready yet :(\n{}".format(args))
-
         if self.pythiasystematic is not None and self.alternategenerator == "NNLOPS":
             raise ValueError("No NNLOPS samples with systematics!\n{}".format(args))
 
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
+      if self.alternategenerator is None:
         if self.productionmode == "ggH":
-            return self.production.CJLSTdir_anomalous()
+          return self.production.CJLSTdir_anomalous()
         if self.productionmode == "VBF":
-            return self.production.CJLSTdir_anomalous_VBF()
+          return self.production.CJLSTdir_anomalous_VBF()
         if self.productionmode in ("ZH", "WH"):
-            return self.production.CJLSTdir_anomalous_VH()
+          return self.production.CJLSTdir_anomalous_VH()
         if self.productionmode in ("data", "ZX"):
-            return self.production.CJLSTdir_data()
-        return self.production.CJLSTdir()
+          return self.production.CJLSTdir_data()
+      if self.productionmode == "ggH" and self.alternategenerator == "MINLO" and self.pythiasystematic is None:
+        return self.production.CJLSTdir_MINLO()
+      return self.production.CJLSTdir()
 
     def CJLSTdirname(self):
         if self.alternategenerator is not None:
@@ -1287,6 +1287,7 @@ def allsamples():
             if not flavor.hastaus:
                 yield Sample("VBF bkg", flavor, production)
         yield Sample("ggH", "0+", "NNLOPS", production)
+        yield Sample("ggH", "0+", "MINLO", production)
         for productionmode in "VBF", "ZH", "WplusH", "WminusH":
             yield Sample(productionmode, "0+", "POWHEG", production)
         yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
