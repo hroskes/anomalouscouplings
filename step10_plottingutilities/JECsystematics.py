@@ -35,7 +35,7 @@ def makeplot(productionmode, analysis, category, disc):
 
   xaxislabel = discriminant(disc).title
 
-  for color, JEC in enumerate(("Nominal", "JECUp", "JECDn")):
+  for color, JEC in enumerate(("Nominal", "JECUp", "JECDn"), start=1):
     if color == 3: color = 4
     JECappend = ("" if JEC == "Nominal" else "_"+JEC)
     h = hs[analysis,disc,JEC,sample] = plotfromtree(

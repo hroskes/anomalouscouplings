@@ -325,7 +325,8 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
-                    yield TemplatesFile(channel, "DATA", analysis, production, category)
+                    if config.showblinddistributions:
+                        yield TemplatesFile(channel, "DATA", analysis, production, category)
 
 class TemplateBase(object):
     __metaclass__ = abc.ABCMeta
