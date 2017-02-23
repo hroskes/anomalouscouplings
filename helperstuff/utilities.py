@@ -6,6 +6,7 @@ from itertools import tee, izip
 import operator
 import json
 import os
+import shutil
 import sys
 import time
 
@@ -96,6 +97,8 @@ class KeepWhileOpenFile(object):
         self.message = message
         self.pwd = os.getcwd()
         self.fd = self.f = None
+        self.bool = False
+
     def __enter__(self):
         with cd(self.pwd):
             try:
@@ -107,24 +110,25 @@ class KeepWhileOpenFile(object):
                 try:
                     if self.message is not None:
                         self.f.write(self.message+"\n")
-                        #http://stackoverflow.com/a/5255743/5228524
-                        self.f.flush()
-                        os.fsync(self.f)
                 except:
                     self.__exit__()
                     raise
-                return self.f
+                finally:
+                    self.f.close()
+                self.bool = True
+                return True
+
     def __exit__(self, *args):
-        if self:
-            self.f.close()
-            try:
-                with cd(self.pwd):
-                    os.remove(self.filename)
-            except OSError:
-                pass #ignore it
-            self.fd = self.f = None
+        try:
+            with cd(self.pwd):
+                os.remove(self.filename)
+        except OSError:
+            pass #ignore it
+        self.fd = self.f = None
+        self.bool = False
+
     def __nonzero__(self):
-        return bool(self.f)
+        return self.bool
 
 class Tee(object):
     """http://stackoverflow.com/a/616686/5228524"""
@@ -349,3 +353,50 @@ class JsonDict(object):
 
 def LSB_JOBID():
     return os.environ.get("LSB_JOBID", None)
+
+class LSF_creating(object):
+    def __init__(self, *files, **kwargs):
+        self.files = files
+        for filename in files:
+            if not filename.startswith("/"):
+                raise ValueError("{} should be an absolute path!".format(filename))
+        self.jsonfile = None
+        for kw, kwarg in kwargs.iteritems():
+            if kw == "jsonfile":
+                self.jsonfile = kwarg
+                if not self.jsonfile.startswith("/"): raise ValueError("jsonfile={} should be an absolute path!".format(self.jsonfile))
+            else:
+                raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
+
+    def __enter__(self):
+        if not LSB_JOBID(): return self
+        if self.jsonfile is not None:
+            shutil.copy(self.jsonfile, "./")
+            self.jsonfile = os.path.basename(self.jsonfile)
+            if len(self.files) != 1: raise ValueError("only know how to handle 1 file")
+
+            with open(os.path.basename(self.jsonfile)) as f:
+                content = f.read()
+
+            if content.count(self.files[0]) != 1:
+                raise ValueError("{} is not in {}".format(self.files[0], self.jsonfile))
+            content = content.replace(self.files[0], os.path.basename(self.files[0]))
+
+            with open(os.path.basename(self.jsonfile), "w") as f:
+                f.write(content)
+
+        return self
+
+    def __exit__(self, *errorinfo):
+        if not LSB_JOBID(): return
+
+        notcreated = []
+
+        for filename in self.files:
+            if os.path.exists(os.path.basename(filename)):
+                shutil.copy(os.path.basename(filename), filename)
+            else:
+                notcreated.append(os.path.basename(filename))
+
+        if notcreated:
+            raise RuntimeError("\n".join("{} was not created!".format(os.path.basename(filename)) for filename in filenames))

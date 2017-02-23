@@ -13,7 +13,7 @@ ZXsetupstatus ZXsetup(int production, TString dir) {
   if (didsetup == production) return ZXsetupsuccess;
   didsetup = production;
   delete fFakeRates;
-  if (production == 170203) {
+  if (production == 170222) {
     fFakeRates = TFile::Open(dir+"/FakeRate_SS_Moriond368_hists.root");
     h1D_FRel_EB = dynamic_cast<TH1F*>(fFakeRates->Get("FR_SS_electron_EB"));
     h1D_FRel_EE = dynamic_cast<TH1F*>(fFakeRates->Get("FR_SS_electron_EE"));

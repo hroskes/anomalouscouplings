@@ -6,7 +6,7 @@ from helperstuff import xrd
 from helperstuff.enums import flavors, hffhypotheses, ProductionMode, productions, pythiasystematics
 from helperstuff.samples import allsamples, Sample
 from helperstuff.treewrapper import TreeWrapper
-from helperstuff.utilities import KeepWhileOpenFile
+from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID
 import os
 import ROOT
 import sys
@@ -23,7 +23,7 @@ def adddiscriminants(*args):
   filename = sample.CJLSTfile()
   newfilename = sample.withdiscriminantsfile()
   print newfilename
-  with KeepWhileOpenFile(newfilename+".tmp") as kwof:
+  with KeepWhileOpenFile(newfilename+".tmp", message=LSB_JOBID()) as kwof:
     if not kwof:
         return
     if os.path.exists(newfilename):
