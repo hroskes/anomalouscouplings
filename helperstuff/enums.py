@@ -569,6 +569,8 @@ class AlternateWeight(MyEnum):
                  EnumItem("muRDn"),
                  EnumItem("muFUp"),
                  EnumItem("muFDn"),
+                 EnumItem("muRFUp"),
+                 EnumItem("muRFDn"),
                  EnumItem("PDFUp"),
                  EnumItem("PDFDn"),
                  EnumItem("alphaSUp"),
@@ -583,6 +585,8 @@ class AlternateWeight(MyEnum):
       if self == "muRDn": return "LHEweight_QCDscale_muR0p5_muF1"
       if self == "muFUp": return "LHEweight_QCDscale_muR1_muF2"
       if self == "muFDn": return "LHEweight_QCDscale_muR1_muF0p5"
+      if self == "muRFUp": return "LHEweight_QCDscale_muR2_muF2"
+      if self == "muRFDn": return "LHEweight_QCDscale_muR0p5_muF0p5"
       if self == "PDFUp": return "LHEweight_PDFVariation_Up"
       if self == "PDFDn": return "LHEweight_PDFVariation_Dn"
       if self == "alphaSUp": return "LHEweight_AsMZ_Up"
@@ -606,7 +610,7 @@ analyses = Analysis.items()
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
-alternateweights = AlternateWeight.items(lambda x: x=="1" or "mu" in str(x))
+alternateweights = AlternateWeight.items(lambda x: x=="1" or "muRF" in str(x))
 
 _ = [""]
 if config.applym4lshapesystematics:

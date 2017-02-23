@@ -143,16 +143,8 @@ def writeyields():
             for channel in channels:
               YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
           elif systname == productionmode.QCDsystematicname:
-            muRUp = sum(result[tosample, categorization, AlternateWeight("muRUp"), category] for tosample in samples) / nominal
-            muRDn = sum(result[tosample, categorization, AlternateWeight("muRDn"), category] for tosample in samples) / nominal
-            muFUp = sum(result[tosample, categorization, AlternateWeight("muFUp"), category] for tosample in samples) / nominal
-            muFDn = sum(result[tosample, categorization, AlternateWeight("muFDn"), category] for tosample in samples) / nominal
-
-#            assert max(muRUp, muRDn)>1>min(muRUp, muRDn), (muRUp, muRDn)
-#            assert max(muFUp, muFDn)>1>min(muFUp, muFDn), (muFUp, muFDn)
-
-            QCDUp = 1+sqrt((max(muRUp, muRDn)-1)**2 + (max(muFUp, muFDn)-1)**2)
-            QCDDn = 1-sqrt((max(muRUp, muRDn)-1)**2 + (max(muFUp, muFDn)-1)**2)
+            QCDUp = sum(result[tosample, categorization, AlternateWeight("muRFUp"), category] for tosample in samples) / nominal
+            QCDDn = sum(result[tosample, categorization, AlternateWeight("muRFDn"), category] for tosample in samples) / nominal
 
             systname = productionmode.QCDsystematicname
 
