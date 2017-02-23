@@ -25,8 +25,8 @@ except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
 usedata = True
-showblinddistributions = False
-unblinddistributions = False
+showblinddistributions = True
+unblinddistributions = True
 unblindscans = False
 useQGTagging = False
 useVHMETTagged = True

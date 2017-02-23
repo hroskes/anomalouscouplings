@@ -1004,6 +1004,7 @@ class TreeWrapper(Iterator):
         if self.isalternate: return
         if self.isdummy: return
         if self.isZX: return
+        if self.isdata: return
         if self.treesample.productionmode == "ggZZ": return
 
         if self.treesample.productionmode == "qqZZ":

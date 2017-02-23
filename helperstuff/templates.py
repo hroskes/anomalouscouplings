@@ -325,8 +325,8 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
-                    if config.showblinddistributions:
-                        yield TemplatesFile(channel, "DATA", analysis, production, category)
+#                    if config.showblinddistributions:
+#                        yield TemplatesFile(channel, "DATA", analysis, production, category)
 
 class TemplateBase(object):
     __metaclass__ = abc.ABCMeta
@@ -939,7 +939,7 @@ class DataTree(MultiEnum):
     def treefile(self):
         return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
     def passescut(self, t):
-        return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblindscans and getattr(t, self.analysis.categoryname) in self.category
+        return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblinddistributions and getattr(t, "category_"+self.analysis.categoryname) in self.category
 
 datatrees = []
 for channel in channels:
