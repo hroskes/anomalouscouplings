@@ -263,7 +263,7 @@ class ProductionMode(MyEnum):
       if self in ("ZH", "WH"): return "QCDscale_VH"
       if self == "ttH": return "QCDscale_ttH"
       if self == "qqZZ": return "QCDscale_VV"
-      assert False
+      return None
 
     @property
     def workspaceshapesystematics(self):

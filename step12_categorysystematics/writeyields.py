@@ -172,30 +172,34 @@ def writeyields():
           YieldSystematicValue(channel, category, analysis, productionmode, "JEC").value = (JECUp, JECDn)
           YieldSystematicValue(channel, category, analysis, productionmode, "BTag").value = (btSFUp, btSFDn)
 
-        if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ"):
-          muRUp = sum(result[tosample, categorization, AlternateWeight("muRUp"), category] for tosample in samples) / nominal
-          muRDn = sum(result[tosample, categorization, AlternateWeight("muRDn"), category] for tosample in samples) / nominal
-          muFUp = sum(result[tosample, categorization, AlternateWeight("muFUp"), category] for tosample in samples) / nominal
-          muFDn = sum(result[tosample, categorization, AlternateWeight("muFDn"), category] for tosample in samples) / nominal
+        allQCDsystematicnames = [_.QCDsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")]
 
-#          assert max(muRUp, muRDn)>1>min(muRUp, muRDn), (muRUp, muRDn)
-#          assert max(muFUp, muFDn)>1>min(muFUp, muFDn), (muFUp, muFDn)
+        for systname in allQCDsystematicnames:
+          if productionmode == "ggZZ":
+            for channel in channels:
+              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "ggH", systname).value
+          elif productionmode == "VBF bkg":
+            for channel in channels:
+              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
+          elif systname == productionmode.QCDsystematicname:
+            muRUp = sum(result[tosample, categorization, AlternateWeight("muRUp"), category] for tosample in samples) / nominal
+            muRDn = sum(result[tosample, categorization, AlternateWeight("muRDn"), category] for tosample in samples) / nominal
+            muFUp = sum(result[tosample, categorization, AlternateWeight("muFUp"), category] for tosample in samples) / nominal
+            muFDn = sum(result[tosample, categorization, AlternateWeight("muFDn"), category] for tosample in samples) / nominal
 
-          QCDUp = 1+sqrt((max(muRUp, muRDn)-1)**2 + (max(muFUp, muFDn)-1)**2)
-          QCDDn = 1-sqrt((max(muRUp, muRDn)-1)**2 + (max(muFUp, muFDn)-1)**2)
+#            assert max(muRUp, muRDn)>1>min(muRUp, muRDn), (muRUp, muRDn)
+#            assert max(muFUp, muFDn)>1>min(muFUp, muFDn), (muFUp, muFDn)
 
-          systname = productionmode.QCDsystematicname
+            QCDUp = 1+sqrt((max(muRUp, muRDn)-1)**2 + (max(muFUp, muFDn)-1)**2)
+            QCDDn = 1-sqrt((max(muRUp, muRDn)-1)**2 + (max(muFUp, muFDn)-1)**2)
 
-          for channel in channels:
-            for otherproductionmode in "ggH", "VBF", "ZH", "WH", "ttH", "ggZZ", "qqZZ", "VBFbkg", "ZX":
-              if productionmode == "ZH" and otherproductionmode == "WH" or productionmode == "WH" and otherproductionmode == "ZH": continue
-              YieldSystematicValue(channel, category, analysis, otherproductionmode, systname).value = None
+            systname = productionmode.QCDsystematicname
 
-            YieldSystematicValue(channel, category, analysis, productionmode, systname).value = (QCDUp, QCDDn)
-            if productionmode == "ggH":
-              YieldSystematicValue(channel, category, analysis, "ggZZ", systname).value = (QCDUp, QCDDn)
-            if productionmode == "VBF":
-              YieldSystematicValue(channel, category, analysis, "VBF bkg", systname).value = (QCDUp, QCDDn)
+            for channel in channels:
+              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = (QCDUp, QCDDn)
+          else:
+            for channel in channels:
+              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = None
 
     YieldValue.writedict()
     YieldSystematicValue.writedict()
