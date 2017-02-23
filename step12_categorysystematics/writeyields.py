@@ -54,11 +54,11 @@ def writeyields():
         tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
       for key in tmpresult:
-        if isinstance(key, ReweightingSample): continue
-        elif isinstance(key, tuple):
+        if len(key) == 3: continue
+        elif 4 <= len(key) <= 5:
 #          try:
             assert key[0] in usesamples
-            tmpresult[key] /= sum(tmpresult[tosample] for tosample in usesamples)
+            tmpresult[key] /= sum(tmpresult[tosample,key[1],key[2]] for tosample in usesamples)
 #          except ZeroDivisionError:
 #            pass
         else: assert False

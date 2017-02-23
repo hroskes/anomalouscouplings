@@ -231,7 +231,6 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
 #        for k, v in result.iteritems(): print k, v
 #        assert 0
 
-        if tosample not in result:
-            result[tosample] = h.Integral()
+        result[tosample,categorization,alternateweight] = h.Integral()
 
     return result
