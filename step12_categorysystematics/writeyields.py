@@ -46,32 +46,10 @@ def writeyields():
     for usesamples in samplegroups:
       tmpresult = MultiplyCounter()
       for tosample in usesamples:
-        ####################################
-        if isinstance(tosample, ReweightingSamplePlus) and tosample.alternategenerator == "MINLO" and tosample.pythiasystematic is None:
-          try:
-            Sample(tosample, production)
-          except ValueError:
-            pass
-          else:
-            assert False, "Delete this section!"
-          continue
-        ####################################
-
         usealternateweights = alternateweights
         if (productionmode in ("ggZZ", "VBF bkg", "ZX")
              or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None):
           usealternateweights = [AlternateWeight("1")]
-
-        ####################################
-        if isinstance(tosample, ReweightingSamplePlus) and tosample.alternategenerator == "MINLO" and tosample.pythiasystematic is not None:
-          try:
-            Sample(tosample.reweightingsample, tosample.alternategenerator, production)
-          except ValueError:
-            pass
-          else:
-            assert False, "Delete this section!"
-          usealternateweights = alternateweights
-        ####################################
 
         tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
@@ -87,27 +65,6 @@ def writeyields():
 
       result += tmpresult
 
-
-    ####################################
-    if productionmode == "ggH":
-      tosample = samples.copy().pop()
-      try:
-        Sample(tosample, production)
-      except ValueError:
-        pass
-      else:
-        assert False, "Delete this section!"
-      for ctgrztn, category, alternateweight in itertools.product(categorizations, categories, alternateweights):
-        result[tosample,ctgrztn,alternateweight,category] = .25 * sum(
-            result[ReweightingSamplePlus(tosample, _), ctgrztn, alternateweight, category]
-               for _ in pythiasystematics
-        )
-        for channel in channels:
-          result[tosample,ctgrztn,alternateweight,category,channel] = .25 * sum(
-              result[ReweightingSamplePlus(tosample, _), ctgrztn, alternateweight, category, channel]
-                 for _ in pythiasystematics
-          )
-    ####################################
 
     #if productionmode.issignal():
     #  result += count(
@@ -126,6 +83,7 @@ def writeyields():
         YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
 
       #same for all categories and channels
+      #from yaml
       for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_Higgs_qq", "BRhiggs_hzz4l", "QCDscale_ggZH", "QCDscale_ggVV_bonly", "lumi_13TeV":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
@@ -136,6 +94,7 @@ def writeyields():
             syst.value = None
 
       #same for all categories
+      #from yaml
       for systname in "CMS_eff_e", "CMS_eff_m":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
@@ -153,12 +112,13 @@ def writeyields():
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           if str(channel) in systname and productionmode == "ZX":
-            syst.value = .4
+            syst.value = 0.4
           else:
             syst.value = None
 
       #same for all channels
       for category in categories:
+        #variations on category definition: JEC and btagging
         nominal = sum(result[tosample, categorization, AlternateWeight("1"), category] for tosample in samples)
         if productionmode == "ZX":
           JECUp = JECDn = btSFUp = btSFDn = 1
@@ -172,8 +132,9 @@ def writeyields():
           YieldSystematicValue(channel, category, analysis, productionmode, "JEC").value = (JECUp, JECDn)
           YieldSystematicValue(channel, category, analysis, productionmode, "BTag").value = (btSFUp, btSFDn)
 
-        allQCDsystematicnames = [_.QCDsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")]
+        allQCDsystematicnames = [ProductionMode(_).QCDsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")]
 
+        #QCD weight variations
         for systname in allQCDsystematicnames:
           if productionmode == "ggZZ":
             for channel in channels:
@@ -200,6 +161,18 @@ def writeyields():
           else:
             for channel in channels:
               YieldSystematicValue(channel, category, analysis, productionmode, systname).value = None
+
+        #pythia scale and tune
+        if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
+          scaleup = sum(result[ReweightingSamplePlus(tosample, "ScaleUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+          scaledn = sum(result[ReweightingSamplePlus(tosample, "ScaleDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+          tuneup = sum(result[ReweightingSamplePlus(tosample, "TuneUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+          tunedn = sum(result[ReweightingSamplePlus(tosample, "TuneDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+        else:
+          scaleup = scaledn = tuneup = tunedn = 1
+        for channel in channels:
+          YieldSystematicValue(channel, category, analysis, productionmode, "PythiaScale").value = (scaleup, scaledn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "PythiaTune").value = (tuneup, tunedn)
 
     YieldValue.writedict()
     YieldSystematicValue.writedict()
