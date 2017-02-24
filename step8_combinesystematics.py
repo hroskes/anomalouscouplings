@@ -25,22 +25,26 @@ def combinesystematics(channel, analysis, production, category):
             for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
                 if _ == "ggh" and category == "Untagged": continue
                 ScaleAndRes[_,syst] = TemplatesFile(channel, _, syst, analysis, production, category)
+            assert all("Scale" in _.templatesfile() or "Res" in _.templatesfile() for _ in ScaleAndRes.values())
         thetemplatesfiles += ScaleAndRes.values()
         if config.combinem4lshapesystematics:
             ScaleResUp, ScaleResDown = {}, {}
             for _ in "ggh", "vbf", "zh", "wh", "tth":
                 ScaleResUp[_] = TemplatesFile(channel, _, "ScaleResUp", analysis, production, category)
                 ScaleResDown[_] = TemplatesFile(channel, _, "ScaleResDown", analysis, production, category)
+            assert all("ScaleRes" in _.templatesfile() for _ in ScaleResUp.values()+ScaleResDown.values())
             thetemplatesfiles += ScaleResUp.values() + ScaleResDown.values()
 
     if config.applyZXshapesystematics:
         ZXUp = TemplatesFile(channel, "bkg", "ZXUp", analysis, production, category)
         ZXDown = TemplatesFile(channel, "bkg", "ZXDown", analysis, production, category)
+        assert "ZXUp" in ZXUp.templatesfile() and "ZXDown" in ZXDown.templatesfile()
         thetemplatesfiles += [ZXUp, ZXDown]
 
     if config.applyMINLOsystematics:
         MINLOUp = TemplatesFile(channel, "ggh", "MINLOUp", analysis, production, category)
         MINLODn = TemplatesFile(channel, "ggh", "MINLODn", analysis, production, category)
+        assert "MINLOUp" in MINLOUp.templatesfile() and "MINLODn" in MINLODn.templatesfile()
         thetemplatesfiles += [MINLOUp, MINLODn]
 
     if any(tf.copyfromothertemplatesfile for tf in thetemplatesfiles):
