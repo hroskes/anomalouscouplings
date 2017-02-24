@@ -1236,6 +1236,10 @@ class Sample(ReweightingSamplePlus):
     def copyfromothersample(self):
         if self == Sample("170203", "ggH", "MINLO", "0+"):
             return Sample("170222", "ggH", "MINLO", "0+")
+        if self == Sample("170222", "ZX"):
+            return Sample("170203", "ZX")
+        if self == Sample("170222", "data"):
+            return Sample("170203", "data")
         return None
 
 class SampleBasis(MultiEnum):

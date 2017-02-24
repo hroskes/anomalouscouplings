@@ -427,7 +427,7 @@ class LSF_creating(object):
 
         for filename in self.files:
             if os.path.exists(os.path.basename(filename)):
-                shutil.copy(os.path.basename(filename), filename)
+                shutil.move(os.path.basename(filename), filename)
             else:
                 notcreated.append(os.path.basename(filename))
 
