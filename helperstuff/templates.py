@@ -773,7 +773,7 @@ class SmoothingParameters(MultiEnum, JsonDict):
                 str(self.analysis),
                 str(self.hypothesis),
                 str(self.shapesystematic),
-                str(self.production),
+                str(self.production.productionforsmoothingparameters),
                )
       @property
       def default(self):

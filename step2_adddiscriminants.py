@@ -29,6 +29,12 @@ def adddiscriminants(*args):
     if os.path.exists(newfilename):
         return
 
+    if sample.copyfromothersample is not None:
+      if xrd.exists(sample.CJLSTfile()):
+        raise ValueError("{} exists, why not use it?".format(sample.CJLSTfile()))
+      os.symlink(sample.copyfromothersample.withdiscriminantsfile(), sample.withdiscriminantsfile())
+      return
+
     isdummy = False
     if not xrd.exists(filename):
         isdummy = True

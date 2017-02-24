@@ -473,6 +473,7 @@ class Production(MyEnum):
     enumname = "production"
     enumitems = (
                  EnumItem("170203"),
+                 EnumItem("170222"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -480,6 +481,9 @@ class Production(MyEnum):
         if self == "170203":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170203"
+        if self == "170222":
+            if config.host == "lxplus":
+                return "root://lxcms03//data3/Higgs/170222"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -490,19 +494,22 @@ class Production(MyEnum):
     def CJLSTdir_anomalous_VH(self):
         return self.CJLSTdir()
     def CJLSTdir_MINLO(self):
-        if self == "170203":
-            return "root://lxcms03//data3/Higgs/170222"
+        return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self == "170203": return 35.867
+        if self in ("170203", "170222"): return 35.867
         assert False
     def __int__(self):
         return int(str(self))
     @property
     def year(self):
-        if "170203" <= self:
+        if "170222" <= self:
             return 2016
         assert False
+    @property
+    def productionforsmoothingparameters(self):
+        if self == "170222": return type(self)("170203")
+        return self
 
 class Category(MyEnum):
     """
@@ -609,9 +616,9 @@ purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-#productions = Production.items(lambda x: x in ("160225", "160729"))
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine)
+productions = Production.items(lambda x: x in ("170203", "170222"))
+#productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
 alternateweights = AlternateWeight.items(lambda x: x=="1" or "muRF" in str(x))
 

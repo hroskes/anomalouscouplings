@@ -1232,6 +1232,12 @@ class Sample(ReweightingSamplePlus):
                 raise ValueError("Can't get xsec for {!r}".format(self))
             return result
 
+    @property
+    def copyfromothersample(self):
+        if self == Sample("170203", "ggH", "MINLO", "0+"):
+            return Sample("170222", "ggH", "MINLO", "0+")
+        return None
+
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]
     def __init__(self, hypotheses, *args):
