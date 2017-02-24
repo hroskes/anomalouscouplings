@@ -3,6 +3,7 @@ import collections
 import contextlib
 import errno
 from itertools import tee, izip
+import logging
 import operator
 import json
 import os
@@ -93,6 +94,7 @@ def cd(newdir):
 
 class KeepWhileOpenFile(object):
     def __init__(self, name, message=None):
+        logging.debug("creating KeepWhileOpenFile {}".format(name))
         self.filename = name
         self.message = message
         self.pwd = os.getcwd()
@@ -100,30 +102,49 @@ class KeepWhileOpenFile(object):
         self.bool = False
 
     def __enter__(self):
+        logging.debug("entering KeepWhileOpenFile {}".format(self.filename))
         with cd(self.pwd):
+            logging.debug("does it exist? {}".format(os.path.exists(self.filename)))
             try:
+                logging.debug("trying to open")
                 self.fd = os.open(self.filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            except OSError as e:
+            except OSError:
+                logging.debug("failed: it already exists")
                 return None
             else:
+                logging.debug("succeeded: it didn't exist")
+                logging.debug("does it now? {}".format(os.path.exists(self.filename)))
+                assert os.path.exists(self.filename)
                 self.f = os.fdopen(self.fd, 'w')
                 try:
                     if self.message is not None:
+                        logging.debug("writing message")
                         self.f.write(self.message+"\n")
-                except:
-                    self.__exit__()
-                    raise
-                finally:
+                        logging.debug("wrote message")
+                except IOError:
+                    logging.debug("failed to write message")
+                    pass
+                try:
+                    logging.debug("trying to close")
                     self.f.close()
+                    logging.debug("closed")
+                except IOError:
+                    logging.debug("failed to close")
+                    pass
                 self.bool = True
                 return True
 
     def __exit__(self, *args):
-        try:
-            with cd(self.pwd):
-                os.remove(self.filename)
-        except OSError:
-            pass #ignore it
+        logging.debug("exiting")
+        if self:
+            try:
+                with cd(self.pwd):
+                    logging.debug("trying to remove")
+                    os.remove(self.filename)
+                    logging.debug("removed")
+            except OSError:
+                logging.debug("failed")
+                pass #ignore it
         self.fd = self.f = None
         self.bool = False
 
