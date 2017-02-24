@@ -46,10 +46,11 @@ if config.host == "lxplus":
                        "-w": " && ".join(["ended({:d})".format(id) for id in waitids]+["done({:d})".format(id) for id in waitsuccessids])
                       }
         repmap = {
-                  "jobtext": quote("cd .oO[CMSSW_BASE]Oo. && eval $(scram ru -sh) && cd .oO[pwd]Oo. && "+jobtext),
+                  "jobtext": quote("cd .oO[CMSSW_BASE]Oo. && eval $(scram ru -sh) && .oO[docd]Oo. && "+jobtext),
                   "CMSSW_BASE": os.environ["CMSSW_BASE"],
                   "pwd": os.getcwd(),
                   "options": " ".join("{} {}".format(key, quote(value)) for key, value in optionsdict.iteritems() if value),
+                  "docd": "cd .oO[pwd]Oo." if docd else "cd -"
                  }
         if interactive:
             repmap["options"] += " -I"
