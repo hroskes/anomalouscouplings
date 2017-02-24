@@ -49,6 +49,9 @@ class TemplatesFile(MultiEnum):
         return result
 
     def templatesfile(self, iteration=None, firststep=False):
+        if self.copyfromothertemplatesfile is not None:
+            return self.copyfromothertemplatesfile.templatesfile()
+
         folder = os.path.join(config.repositorydir, "step7_templates")
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
@@ -309,6 +312,14 @@ class TemplatesFile(MultiEnum):
 
         for template in self.templates()+self.inttemplates():
             template.docustomsmoothing(newf, controlplotsdir)
+
+    @property
+    def copyfromothertemplatesfile(self):
+        if self.production == "170222":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "170203"
+          return TemplatesFile(*kwargs.values())
+        return None
 
 def listfromiterator(function):
     return list(function())

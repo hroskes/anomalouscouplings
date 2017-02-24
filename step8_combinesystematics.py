@@ -43,6 +43,10 @@ def combinesystematics(channel, analysis, production, category):
         MINLODn = TemplatesFile(channel, "ggh", "MINLODn", analysis, production, category)
         thetemplatesfiles += [MINLOUp, MINLODn]
 
+    if any(tf.copyfromothertemplatesfile for tf in thetemplatesfiles):
+        assert all(tf.copyfromothertemplatesfile for tf in thetemplatesfiles)
+        return
+
     outfiles = {templatesfile: ROOT.TFile(templatesfile.templatesfile(), "RECREATE") for templatesfile in thetemplatesfiles}
 
     store = []
