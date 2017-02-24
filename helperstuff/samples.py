@@ -1206,7 +1206,7 @@ class Sample(ReweightingSamplePlus):
     @cache
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
-        if reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data"):
+        if reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data") or reweightfrom.alternategenerator is not None:
             assert reweightfrom.reweightingsample == reweightto
             return 1
         f = tfiles[reweightfrom.withdiscriminantsfile()]

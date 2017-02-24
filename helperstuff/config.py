@@ -35,6 +35,7 @@ applym4lshapesystematics = True
 combinem4lshapesystematics = True
 applyZXshapesystematics = True
 applyJECshapesystematics = False
+applyMINLOsystematics = True
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 

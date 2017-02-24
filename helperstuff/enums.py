@@ -309,14 +309,17 @@ class ShapeSystematic(MyEnum):
                  EnumItem("JECDown", "JECDn"),
                  EnumItem("ZXUp"),
                  EnumItem("ZXDown", "ZXDn"),
+                 EnumItem("MINLO_SM"),
+                 EnumItem("MINLO"),
                 )
     def appendname(self):
-        if self == "": return ""
-        return "_" + str(self)
+        if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
+        return ""
     def D_bkg(self, title=False):
         from discriminants import discriminant
         return discriminant("D_bkg"+self.appendname())
     def appliesto(self, templategroup):
+        if templategroup == "ggh" and self == "MINLO_SM": return True
         if templategroup in ("ggh", "vbf", "zh", "wh", "tth"):
             return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
         elif templategroup == "bkg":

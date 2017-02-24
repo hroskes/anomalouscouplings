@@ -126,8 +126,8 @@ if __name__ == "__main__":
         else:
             raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
     else:
-#        for templatesfile in templatesfiles:
-#            buildtemplates(templatesfile)
+        for templatesfile in templatesfiles:
+            buildtemplates(templatesfile)
             #and copy data
         for datatree in datatrees:
             copydata(datatree)

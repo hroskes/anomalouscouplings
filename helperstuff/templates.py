@@ -10,7 +10,7 @@ import numpy
 import config
 import customsmoothing
 from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
-from samples import ReweightingSample, Sample, SampleBasis
+from samples import ReweightingSample, ReweightingSamplePlus, Sample, SampleBasis
 from utilities import cache, is_almost_integer, JsonDict, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
@@ -70,6 +70,8 @@ class TemplatesFile(MultiEnum):
 
     def signalsamples(self):
         if self.templategroup == "ggh":
+            if self.shapesystematic == "MINLO_SM":
+                return [ReweightingSamplePlus("ggH", "0+", "MINLO")]
             if self.analysis == "fa3":
                 reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "0-"), ReweightingSample("ggH", "fa30.5")]
             if self.analysis == "fa2":
@@ -135,7 +137,7 @@ class TemplatesFile(MultiEnum):
         assert False
 
     def inttemplates(self):
-        if self.templategroup == "ggh":
+        if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM":
             return [IntTemplate(self, "ggH", "g11gi1")]
         elif self.templategroup == "vbf":
             return [IntTemplate(self, "VBF", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
@@ -145,7 +147,7 @@ class TemplatesFile(MultiEnum):
             return [IntTemplate(self, "WH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup == "tth":
             return [IntTemplate(self, "ttH", "g11gi1")]
-        elif self.templategroup in ("bkg", "DATA"):
+        elif self.templategroup in ("bkg", "DATA") or self.shapesystematic == "MINLO_SM":
             return []
         assert False
 
@@ -237,6 +239,7 @@ class TemplatesFile(MultiEnum):
 
     @property
     def discriminants(self):
+        if self.shapesystematic == "MINLO_SM": return (self.purediscriminant, self.mixdiscriminant)
         return (self.purediscriminant, self.mixdiscriminant, self.bkgdiscriminant)
 
     @property
@@ -327,6 +330,9 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
 #                    if config.showblinddistributions:
 #                        yield TemplatesFile(channel, "DATA", analysis, production, category)
+                    if category != "Untagged" and config.applyMINLOsystematics:
+                        yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
+
 
 class TemplateBase(object):
     __metaclass__ = abc.ABCMeta
@@ -378,9 +384,7 @@ class TemplateBase(object):
 
     @property
     def binning(self):
-        result = sum(([d.bins, d.min, d.max] for d in self.discriminants), [])
-        for i in 1, 2, 4, 5, 7, 8:
-            result[i] = float(result[i])
+        result = sum(([d.bins, float(d.min), float(d.max)] for d in self.discriminants), [])
         return result
 
     @abc.abstractmethod
@@ -416,7 +420,7 @@ class TemplateBase(object):
 
 class Template(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
-    enums = [TemplatesFile, ProductionMode, Hypothesis, HffHypothesis]
+    enums = [TemplatesFile, ReweightingSamplePlus]
     enumname = "template"
 
     def __init__(self, *args, **kwargs):
@@ -434,8 +438,9 @@ class Template(TemplateBase, MultiEnum):
         elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis) not in self.templatesfile.signalsamples():
-                raise ValueError("{} {} is not used to make templates for {} {}!\n{}".format(self.productionmode, self.hypothesis, self.templategroup, self.analysis, args))
+            if self.reweightingsampleplus not in self.templatesfile.signalsamples():
+                print self.templatesfile.signalsamples()
+                raise ValueError("{} is not used to make templates for {} {}!\n{}".format(self.reweightingsampleplus, self.templategroup, self.analysis, args))
             if self.templategroup != str(self.productionmode).lower():
                 raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.templategroup, args))
 
@@ -528,15 +533,9 @@ class Template(TemplateBase, MultiEnum):
         assert False
 
     def weightname(self):
-        if self.productionmode in ("ggZZ", "VBF bkg"):
-            return ReweightingSample(self.productionmode, "2e2mu").weightname()
-        if self.productionmode == "ttH":
-            return ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis).weightname()
-        if self.hypothesis is not None:
-            return ReweightingSample(self.productionmode, self.hypothesis).weightname()
         if self.productionmode == "data":
             return None
-        return ReweightingSample(self.productionmode).weightname()
+        return self.reweightingsampleplus.weightname()
 
     @property
     def categoryname(self):
@@ -550,10 +549,13 @@ class Template(TemplateBase, MultiEnum):
 
     def reweightfrom(self):
         if self.productionmode == "ggH":
-            result={
-                    Sample(self.production, self.productionmode, hypothesis)
-                        for hypothesis in ("0+", "0-", "a2", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5")
-                   }
+            if self.shapesystematic == "MINLO_SM":
+                result = {Sample(self.production, self.productionmode, self.hypothesis, "MINLO")}
+            else:
+                result={
+                        Sample(self.production, self.productionmode, hypothesis)
+                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5")
+                       }
         if self.productionmode in ["VBF", "ZH", "WH"]:
             result={
                     Sample(self.production, self.productionmode, hypothesis)
@@ -577,7 +579,9 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def scalefactor(self):
-        if self.productionmode in ("VBF", "ggH", "ZH", "WH"):
+        if self.shapesystematic == "MINLO":
+            result = len(self.reweightfrom)
+        elif self.productionmode in ("VBF", "ggH", "ZH", "WH"):
             result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
         elif self.productionmode == "ttH":
             result = ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis).xsec / ReweightingSample(self.productionmode, "SM", "Hff0+").xsec
@@ -642,8 +646,8 @@ class Template(TemplateBase, MultiEnum):
       result = self.smoothingparameters[0][2]
       #validation
       if result is not None:
-        if len(result) != 3:
-          raise ValueError("len(reweightrebin) for {!r} != 3!\n{}".format(self, reweightrebin))
+        if len(result) != len(self.discriminants):
+          raise ValueError("len(reweightrebin) for {!r} != {}!\n{}".format(self, len(self.discriminants), reweightrebin))
         for axis, (_, disc) in enumerate(zip(result, self.discriminants)):
           if _ is not None:
             if _ != sorted(_):
