@@ -38,6 +38,11 @@ def combinesystematics(channel, analysis, production, category):
         ZXDown = TemplatesFile(channel, "bkg", "ZXDown", analysis, production, category)
         thetemplatesfiles += [ZXUp, ZXDown]
 
+    if config.applyMINLOsystematics:
+        MINLOUp = TemplatesFile(channel, "ggh", "MINLOUp", analysis, production, category)
+        MINLODn = TemplatesFile(channel, "ggh", "MINLODn", analysis, production, category)
+        thetemplatesfiles += [MINLOUp, MINLODn]
+
     outfiles = {templatesfile: ROOT.TFile(templatesfile.templatesfile(), "RECREATE") for templatesfile in thetemplatesfiles}
 
     store = []
@@ -91,6 +96,29 @@ def combinesystematics(channel, analysis, production, category):
                 hup.Add(hdn, -1)
 
                 store += [hup, hdn]
+
+    if config.applyMINLOsystematics:
+        tf = TemplatesFile(channel, _, analysis, production, category)
+        POWHEG3DSM = gettemplate("ggH", "0+", tf)
+        POWHEG2DSM = POWHEG.Project3D("xye")
+        MINLO2D = POWHEG2D.Clone("MINLO2D")
+        MINLO2D.Reset("M")
+        for c in channels:
+            MINLO2D.Add(gettemplate("ggH", "0+", "MINLO_SM", "MINLO", c, analysis, production, category))
+
+        for t in tf.templates() + tf.inttemplates():
+            POWHEG3D = t.gettemplate()
+            MINLO3D = POWHEG3D.Clone(Template("ggH", "0+", ShapeSystematic("MINLOUp"), channel, analysis, production, category).templatename())
+            MINLO3D.SetDirectory(MINLOUp)
+            for x, y, z in izip(xrange(1, MINLO3D.GetNbinsX()+1), xrange(1, MINLO3D.GetNbinsY()+1), xrange(1, MINLO3D.GetNbinsZ()+1)):
+                MINLO3D.SetBinContent(
+                                      x, y, z,
+                                      MINLO3D.GetBinContent(x, y, z) * MINLO2D.GetBinContent(x, y) / POWHEG2D.GetBinConent(x, y)
+                                     )
+            MINLO3DDn = POWHEG3D.Clone(Template("ggH", "0+", ShapeSystematic("MINLOUp"), channel, analysis, production, category).templatename())
+            MINLO3DDn.Scale(2)
+            Minlo3DDn.Add(MINLO3D, -1)
+            store += [MINLO3D, MINLO3DDn]
 
     if config.applyZXshapesystematics:
         ZXtemplate = gettemplate("ZX", channel, analysis, production, category)

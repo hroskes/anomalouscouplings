@@ -20,7 +20,8 @@ def makeline(sample, title, reweightfrom=None):
   global color
   color += 1
   thecolor = color
-  assert thecolor < 6
+  assert thecolor < 8
+  if thecolor == 7: thecolor = ROOT.kViolet-1
   if thecolor == 5: thecolor = 6
   return Line(sample, title, thecolor, reweightfrom)
 
@@ -31,13 +32,8 @@ def lines(productionmode, analysis):
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ggH SM JHUGen H+jj")
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ggH 0^{-} JHUGen H+jj")
     yield makeline(ReweightingSample(productionmode, "0+", "fCP0.5"), "ggH f_{CP}=0.5 JHUGen H+jj")
-    try:
-      Sample("ggH", "0+", "MINLO", production)
-    except ValueError:
-      pass
-    else:
-      raise ValueError("Use nominal!")
-    yield makeline(ReweightingSamplePlus("ggH", "0+", "MINLO", "ScaleUp"), "ggH SM MINLO")
+    yield makeline(ReweightingSamplePlus("ggH", "0+", "MINLO"), "ggH SM MINLO")
+    yield makeline(ReweightingSamplePlus("ggH", "0+", "NNLOPS"), "ggH SM NNLOPS")
   elif productionmode == "ttH":
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ttH SM JHUGen")
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ttH 0^{-} JHUGen")
