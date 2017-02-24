@@ -97,28 +97,48 @@ def combinesystematics(channel, analysis, production, category):
 
                 store += [hup, hdn]
 
-    if config.applyMINLOsystematics:
-        tf = TemplatesFile(channel, _, analysis, production, category)
-        POWHEG3DSM = gettemplate("ggH", "0+", tf)
-        POWHEG2DSM = POWHEG.Project3D("xye")
-        MINLO2D = POWHEG2D.Clone("MINLO2D")
-        MINLO2D.Reset("M")
+    if config.applyMINLOsystematics and category != "Untagged":
+        tf = TemplatesFile(channel, "ggh", analysis, production, category)
+        SM = analysis.purehypotheses[0]
+        POWHEG3DSM = gettemplate("ggH", SM, tf)
+        POWHEG2DSM = POWHEG3DSM.Project3D("yxe")
+        MINLO2DSM = POWHEG2DSM.Clone("MINLO2DSM")
+        MINLO2DSM.Reset("M")
         for c in channels:
-            MINLO2D.Add(gettemplate("ggH", "0+", "MINLO_SM", "MINLO", c, analysis, production, category))
+            MINLO2DSM.Add(gettemplate("ggH", "0+", "MINLO_SM", "MINLO", c, analysis, production, category))
 
-        for t in tf.templates() + tf.inttemplates():
+        for t in tf.templates():
             POWHEG3D = t.gettemplate()
-            MINLO3D = POWHEG3D.Clone(Template("ggH", "0+", ShapeSystematic("MINLOUp"), channel, analysis, production, category).templatename())
-            MINLO3D.SetDirectory(MINLOUp)
+            MINLO3D = POWHEG3D.Clone(Template("ggH", t.hypothesis, "MINLOUp", channel, analysis, production, category).templatename())
+            MINLO3D.SetDirectory(outfiles[MINLOUp])
+            MINLO3DDn = POWHEG3D.Clone(Template("ggH", t.hypothesis, "MINLODn", channel, analysis, production, category).templatename())
+            MINLO3DDn.SetDirectory(outfiles[MINLODn])
             for x, y, z in izip(xrange(1, MINLO3D.GetNbinsX()+1), xrange(1, MINLO3D.GetNbinsY()+1), xrange(1, MINLO3D.GetNbinsZ()+1)):
                 MINLO3D.SetBinContent(
                                       x, y, z,
-                                      MINLO3D.GetBinContent(x, y, z) * MINLO2D.GetBinContent(x, y) / POWHEG2D.GetBinConent(x, y)
+                                      MINLO3D.GetBinContent(x, y, z) * MINLO2DSM.GetBinContent(x, y) / POWHEG2DSM.GetBinContent(x, y)
                                      )
-            MINLO3DDn = POWHEG3D.Clone(Template("ggH", "0+", ShapeSystematic("MINLOUp"), channel, analysis, production, category).templatename())
-            MINLO3DDn.Scale(2)
-            Minlo3DDn.Add(MINLO3D, -1)
+                MINLO3DDn.SetBinContent(
+                                        x, y, z,
+                                        POWHEG3D.GetBinContent(x, y, z) **2 / MINLO3D.GetBinContent(x, y, z)
+                                       )
             store += [MINLO3D, MINLO3DDn]
+        for templatesfile in MINLOUp, MINLODn: outfiles[templatesfile].Write()
+
+        for t in tf.inttemplates():
+            MINLOintUp = POWHEG3D.Clone(IntTemplate("ggH", t.interferencetype, "MINLOUp", channel, analysis, production, category).templatename())
+            MINLOintUp.SetDirectory(outfiles[MINLOUp])
+            MINLOintUp.Reset("M")
+            for template, factor in t.templatesandfactors:
+                MINLOintUp.Add(getattr(outfiles[MINLOUp], template.templatename()), factor)
+
+            MINLOintDn = POWHEG3D.Clone(IntTemplate("ggH", t.interferencetype, "MINLODn", channel, analysis, production, category).templatename())
+            MINLOintDn.SetDirectory(outfiles[MINLODn])
+            MINLOintDn.Reset("M")
+            for template, factor in t.templatesandfactors:
+                MINLOintDn.Add(getattr(outfiles[MINLODn], template.templatename()), factor)
+
+            store += [MINLOintUp, MINLOintDn]
 
     if config.applyZXshapesystematics:
         ZXtemplate = gettemplate("ZX", channel, analysis, production, category)

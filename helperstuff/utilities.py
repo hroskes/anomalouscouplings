@@ -114,7 +114,8 @@ class KeepWhileOpenFile(object):
             else:
                 logging.debug("succeeded: it didn't exist")
                 logging.debug("does it now? {}".format(os.path.exists(self.filename)))
-                assert os.path.exists(self.filename)
+                if not os.path.exists(self.filename):
+                    logging.warning("{} doesn't exist!??".format(self.filename))
                 self.f = os.fdopen(self.fd, 'w')
                 try:
                     if self.message is not None:

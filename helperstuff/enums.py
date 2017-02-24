@@ -310,7 +310,8 @@ class ShapeSystematic(MyEnum):
                  EnumItem("ZXUp"),
                  EnumItem("ZXDown", "ZXDn"),
                  EnumItem("MINLO_SM"),
-                 EnumItem("MINLO"),
+                 EnumItem("MINLOUp"),
+                 EnumItem("MINLODn"),
                 )
     def appendname(self):
         if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
@@ -319,13 +320,14 @@ class ShapeSystematic(MyEnum):
         from discriminants import discriminant
         return discriminant("D_bkg"+self.appendname())
     def appliesto(self, templategroup):
-        if templategroup == "ggh" and self == "MINLO_SM": return True
-        if templategroup in ("ggh", "vbf", "zh", "wh", "tth"):
-            return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
-        elif templategroup == "bkg":
-            return self in ("", "ZXUp", "ZXDown")
-        elif templategroup == "DATA":
-            return self in ("", )
+        if self == "":
+            return True
+        if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"):
+            return templategroup in ("ggh", "vbf", "zh", "wh", "tth")
+        if self in ("ZXUp", "ZXDown"):
+            return templategroup == "bkg"
+        if self in ("MINLO_SM", "MINLOUp", "MINLODn"):
+            return templategroup == "ggh"
         assert False
 
 class JECSystematic(MyEnum):
@@ -631,6 +633,8 @@ if config.applyZXshapesystematics:
     _ += ["ZXUp", "ZXDown"]
 if config.applyJECshapesystematics:
     _ += ["JECUp", "JECDown"]
+if config.applyMINLOsystematics:
+    _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
 treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown"))
 del _
