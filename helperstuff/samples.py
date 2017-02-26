@@ -1114,6 +1114,16 @@ class ReweightingSamplePlus(ReweightingSample):
             result += "_" + str(self.alternategenerator)
         if self.pythiasystematic:
             result += "_" + str(self.pythiasystematic)
+        #############################################################
+#        import datetime
+#        if self.productionmode == "ggH" and self.alternategenerator == "POWHEG":
+#            if self.pythiasystematic is None:
+#                result = result.replace("POWHEG", "NNLOPS")
+#            else:
+#                result = result.replace("_POWHEG", "")
+#            if datetime.date.today() > datetime.date(year=2017, month=2, day=27):
+#                raise ValueError("fix this!!")
+        #############################################################
         return result
 
 class Sample(ReweightingSamplePlus):

@@ -3,7 +3,7 @@
 combine ScaleUp, ResUp --> ScaleResUp
 ZX systematics templates from qqZZ
 """
-from itertools import izip
+from itertools import product
 
 import ROOT
 
@@ -70,7 +70,7 @@ def combinesystematics(channel, analysis, production, category):
                     h = t.gettemplate().Clone()
                     integral = h.Integral()
                     h.SetDirectory(outfiles[ScaleAndRes[_,syst]])
-                    for x, y, z in izip(xrange(1, h.GetNbinsX()+1), xrange(1, h.GetNbinsY()+1), xrange(1, h.GetNbinsZ()+1)):
+                    for x, y, z in product(xrange(1, h.GetNbinsX()+1), xrange(1, h.GetNbinsY()+1), xrange(1, h.GetNbinsZ()+1)):
                         h.SetBinContent(
                                         x, y, z,
                                           h.GetBinContent(x, y, z)
@@ -121,15 +121,16 @@ def combinesystematics(channel, analysis, production, category):
             MINLO3D.SetDirectory(outfiles[MINLOUp])
             MINLO3DDn = POWHEG3D.Clone(Template("ggH", t.hypothesis, "MINLODn", channel, analysis, production, category).templatename())
             MINLO3DDn.SetDirectory(outfiles[MINLODn])
-            for x, y, z in izip(xrange(1, MINLO3D.GetNbinsX()+1), xrange(1, MINLO3D.GetNbinsY()+1), xrange(1, MINLO3D.GetNbinsZ()+1)):
+            for x, y, z in product(xrange(1, MINLO3D.GetNbinsX()+1), xrange(1, MINLO3D.GetNbinsY()+1), xrange(1, MINLO3D.GetNbinsZ()+1)):
                 MINLO3D.SetBinContent(
                                       x, y, z,
-                                      MINLO3D.GetBinContent(x, y, z) * MINLO2DSM.GetBinContent(x, y) / POWHEG2DSM.GetBinContent(x, y)
+                                      POWHEG3D.GetBinContent(x, y, z) * MINLO2DSM.GetBinContent(x, y) / POWHEG2DSM.GetBinContent(x, y)
                                      )
                 MINLO3DDn.SetBinContent(
                                         x, y, z,
                                         POWHEG3D.GetBinContent(x, y, z) **2 / MINLO3D.GetBinContent(x, y, z)
                                        )
+            MINLO3D.Scale(POWHEG3D.Integral()/MINLO3D.Integral())
             store += [MINLO3D, MINLO3DDn]
         for templatesfile in MINLOUp, MINLODn: outfiles[templatesfile].Write()
 
