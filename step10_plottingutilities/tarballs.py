@@ -41,3 +41,14 @@ for a in analyses:
             shutil.copy(filename, os.path.join(tmpdir, "{}_{}".format(a, os.path.basename(filename))))
 
 subprocess.check_call(["tar", "-cvzf", "categorydiscriminants.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
+
+tmpdir = tempfile.mkdtemp()
+for a in analyses:
+    for c in categories:
+        print os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), str(c), "*.pdf")
+        for filename in glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), str(c), "*.pdf")):
+            if "D_bkg" in filename:
+                filename = filename.replace("enrich", "fullrange")
+            shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, c, os.path.basename(filename))))
+
+subprocess.check_call(["tar", "-cvzf", "discriminantdistributions.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
