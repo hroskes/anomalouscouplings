@@ -45,7 +45,10 @@ def niceplots(*args, **kwargs):
 
         for channel in channels:
             f = ROOT.TFile(os.path.join(previousplots[channel], discriminant+".root"))
-            c = f.c1
+            try:
+                c = f.c1
+            except AttributeError:
+                return
             lst = c.GetListOfPrimitives()[1].GetHists()
 
             if category == "VBFtagged" or category == "VHHadrtagged":
@@ -114,15 +117,22 @@ def niceplots(*args, **kwargs):
         #l.SetFillStyle(0)
         style.applylegendstyle(l)
 
+        if category == "Untagged":
+            superscript = None
+        elif category == "VBFtagged":
+            superscript = "VBF"
+        elif category == "VHHadrtagged":
+            superscript = "VH"
+
         l.AddEntry(data, "Observed", "ep")
         hstack.Add(SM, "hist")
         l.AddEntry(SM, "SM", "l")
-        if discriminant == tf.mixdiscriminant and analysis == "fa3" or discriminant in (tf.mixdiscriminant, tf.purediscriminant) and analysis == "fL1":
+        if discriminant == tf.mixdiscriminant.name and analysis == "fa3" or discriminant in (tf.mixdiscriminant.name, tf.purediscriminant.name) and analysis == "fL1":
             hstack.Add(mix, "hist")
-            l.AddEntry(mix, analysis.title()+" = #plus 0.5", "l")
-        elif discriminant in (tf.mixdiscriminant, tf.purediscriminant) and analysis == "fa2":
+            l.AddEntry(mix, analysis.title(superscript=superscript)+" = #plus 0.5", "l")
+        elif discriminant in (tf.mixdiscriminant.name, tf.purediscriminant.name) and analysis == "fa2":
             hstack.Add(mixminus, "hist")
-            l.AddEntry(mixminus, analysis.title()+" = #minus 0.5", "l")
+            l.AddEntry(mixminus, analysis.title(superscript=superscript)+" = #minus 0.5", "l")
         else:
             hstack.Add(BSM, "hist")
             l.AddEntry(BSM, analysis.title()+" = 1", "l")

@@ -211,7 +211,7 @@ def CMS(extratext, lumi):
             text = pt.AddText(0.165, 0.42, "#font[52]{"+extratext+"}")
             text.SetTextSize(0.0315)
 
-        lumitext = "#font[42]{"+str(lumi)+" fb^{-1} (13 TeV)}"
+        lumitext = "#font[42]{{{:.1f} fb^{{-1}} (13 TeV)}}".format(lumi)
 
         #run1lumitext = "#font[42]{19.7 fb^{-1} (8 TeV) + 5.1 fb^{-1} (7 TeV)}"
         #run1xlumi = 0.537

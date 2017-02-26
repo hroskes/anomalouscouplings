@@ -304,7 +304,7 @@ class Projections(MultiEnum):
     giname = self.analysis.couplingname
     BSMhypothesis = self.analysis.purehypotheses[1]
 
-    ggHfactor = VBFfactor = VHfactor = 1
+    ggHfactor = VBFfactor = VHfactor = ttHfactor = 1
     subdir = ""
     saveasdir = self.saveasdir(info)
     customfai = None
@@ -320,6 +320,8 @@ class Projections(MultiEnum):
            VBFfactor = float(kwarg)
        elif kw == "VHfactor":
            VHfactor = float(kwarg)
+       elif kw == "ttHfactor":
+           ttHfactor = float(kwarg)
        elif kw == "subdir":
            subdir = kwarg
        elif kw == "saveasdir":
@@ -437,7 +439,7 @@ class Projections(MultiEnum):
                                          for ca, ch in itertools.product(categories, channels)),
                                        []
                                       ))
-    ffHmix_p  = self.IntegralSum(*sum(
+    ffHmix_m  = self.IntegralSum(*sum(
                                              ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
                                                (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
                                                 for ca, ch in itertools.product(categories, channels)),
@@ -471,15 +473,15 @@ class Projections(MultiEnum):
 
     ggHSM = self.TemplateSum("ggH SM", 0, (ggHg12gi0[category,channel], 1))
     ggHBSM = self.ComponentTemplateSumInGroup("ggH {}=1".format(fainame), 0, ffHBSM, ffHSM, (ggHg10gi2[category,channel], 1))
-    ggHmix_p  = self.ComponentTemplateSumInGroup("ggH {}=#plus0.5" .format(fainame), 0, ffHBSM, ffHSM,
+    ggHmix_p  = self.ComponentTemplateSumInGroup("ggH {}=#plus0.5" .format(fainame), 0, ffHmix_p, ffHSM,
                                                  (ggHg12gi0[category,channel], g1_mix**2), (ggHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[category,channel],  g1_mix*gi_mix/gi_ggHBSM))
-    ggHmix_m  = self.ComponentTemplateSumInGroup("ggH {}=#minus0.5".format(fainame), 0, ffHBSM, ffHSM,
+    ggHmix_m  = self.ComponentTemplateSumInGroup("ggH {}=#minus0.5".format(fainame), 0, ffHmix_m, ffHSM,
                                                  (ggHg12gi0[category,channel], g1_mix**2), (ggHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[category,channel], -g1_mix*gi_mix/gi_ggHBSM))
     ttHSM = self.TemplateSum("ttH SM", 0, (ttHg12gi0[category,channel], 1))
     ttHBSM = self.ComponentTemplateSumInGroup("ttH {}=1".format(fainame), 0, ffHBSM, ffHSM, (ttHg10gi2[category,channel], 1))
-    ttHmix_p  = self.ComponentTemplateSumInGroup("ttH {}=#plus0.5" .format(fainame), 0, ffHBSM, ffHSM,
+    ttHmix_p  = self.ComponentTemplateSumInGroup("ttH {}=#plus0.5" .format(fainame), 0, ffHmix_p, ffHSM,
                                                  (ttHg12gi0[category,channel], g1_mix**2), (ttHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[category,channel],  g1_mix*gi_mix/gi_ggHBSM))
-    ttHmix_m  = self.ComponentTemplateSumInGroup("ttH {}=#minus0.5".format(fainame), 0, ffHBSM, ffHSM,
+    ttHmix_m  = self.ComponentTemplateSumInGroup("ttH {}=#minus0.5".format(fainame), 0, ffHmix_m, ffHSM,
                                                  (ttHg12gi0[category,channel], g1_mix**2), (ttHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[category,channel], -g1_mix*gi_mix/gi_ggHBSM))
 
     VBFSM = self.TemplateSum("VBF SM", 0, (VBFg14gi0[category,channel], 1))
@@ -506,10 +508,10 @@ class Projections(MultiEnum):
                                              )
                                            )
 
-    SM    = self.TemplateSum("SM",                                 1,             (ggHSM,    ggHfactor), (VBFSM,    VBFfactor), (VHSM,    VHfactor))
-    BSM   = self.TemplateSum("{}=1".format(self.analysis.title()), ROOT.kCyan,    (ggHBSM,   ggHfactor), (VBFBSM,   VBFfactor), (VHBSM,   VHfactor))
-    mix_p = self.TemplateSum("{}=#plus0.5".format(fainame),        ROOT.kGreen+3, (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (VHmix_p, VHfactor))
-    mix_m = self.TemplateSum("{}=#minus0.5".format(fainame),       4,             (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (VHmix_m, VHfactor))
+    SM    = self.TemplateSum("SM",                                 1,             (ggHSM,    ggHfactor), (VBFSM,    VBFfactor), (VHSM,    VHfactor), (ttHSM,    ttHfactor))
+    BSM   = self.TemplateSum("{}=1".format(self.analysis.title()), ROOT.kCyan,    (ggHBSM,   ggHfactor), (VBFBSM,   VBFfactor), (VHBSM,   VHfactor), (ttHBSM,   ttHfactor))
+    mix_p = self.TemplateSum("{}=#plus0.5".format(fainame),        ROOT.kGreen+3, (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (VHmix_p, VHfactor), (ttHmix_p, ttHfactor))
+    mix_m = self.TemplateSum("{}=#minus0.5".format(fainame),       4,             (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (VHmix_m, VHfactor), (ttHmix_m, ttHfactor))
 
     qqZZ      = self.TemplateFromFile(6,              category, self.enrichstatus, self.normalization, self.analysis, channel, "qqZZ",    self.shapesystematic, self.production)
     ggZZ      = self.TemplateFromFile(ROOT.kOrange+6, category, self.enrichstatus, self.normalization, self.analysis, channel, "ggZZ",    self.shapesystematic, self.production)
