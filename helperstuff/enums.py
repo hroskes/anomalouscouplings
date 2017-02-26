@@ -265,8 +265,7 @@ class ProductionMode(MyEnum):
       if self == "qqZZ": return "QCDscale_VV"
       return None
 
-    @property
-    def workspaceshapesystematics(self):
+    def workspaceshapesystematics(self, category):
       result = []
       if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
         if config.applym4lshapesystematics:
@@ -274,7 +273,7 @@ class ProductionMode(MyEnum):
             result += ["ScaleRes"]
           else:
             result += ["Scale", "Res"]
-      if self == "ggH":
+      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged"):
         result += "MINLO"
       return [WorkspaceShapeSystematic(_) for _ in result]
 

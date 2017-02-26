@@ -198,7 +198,7 @@ class Datacard(MultiEnum):
       if workspaceshapesystematic.isperchannel and channel == self.channel:
         return " ".join(
                         ["shape1"] +
-                        ["1" if workspaceshapesystematic in p.workspaceshapesystematics else "-"
+                        ["1" if workspaceshapesystematic in p.workspaceshapesystematics(self.category) else "-"
                             for p in self.productionmodes]
                        )
 
@@ -207,7 +207,7 @@ class Datacard(MultiEnum):
       if workspaceshapesystematic.isperchannel: return None
       return " ".join(
                       ["shape1"] +
-                      ["1" if workspaceshapesystematic in p.workspaceshapesystematics else "-"
+                      ["1" if workspaceshapesystematic in p.workspaceshapesystematics(self.category) else "-"
                           for p in self.productionmodes]
                      )
 
@@ -267,7 +267,7 @@ class Datacard(MultiEnum):
         for p in self.productionmodes:
             pdfkwargs = {"fai": fai, "a1": a1, "ai": ai, "D1": D1, "D2": D2, "D3": D3}
             pdfs.append(Pdf(self, p, **pdfkwargs))
-            for systematic in p.workspaceshapesystematics:
+            for systematic in p.workspaceshapesystematics(self.category):
                 pdfs.append(Pdf(self, p, systematic, "Up", **pdfkwargs))
                 pdfs.append(Pdf(self, p, systematic, "Down", **pdfkwargs))
 
