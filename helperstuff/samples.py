@@ -1077,7 +1077,7 @@ class ReweightingSamplePlus(ReweightingSample):
             self.alternategenerator == "POWHEG"
             and (
                  self.hypothesis != "0+"
-                 or self.productionmode not in ("VBF", "ZH", "WplusH", "WminusH", "ttH")
+                 or self.productionmode not in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH")
                 )
            ) or (
             self.alternategenerator in ("MINLO", "NNLOPS")
@@ -1103,8 +1103,8 @@ class ReweightingSamplePlus(ReweightingSample):
                 or self.productionmode not in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH")
                ):
                 raise ValueError("No {} {} sample produced with pythia {}\n{}".format(self.productionmode, self.hypothesis, self.pythiasystematic, args))
-            if self.productionmode != "ggH" and self.alternategenerator != "POWHEG":
-                raise ValueError("{} sample with pythia {} is produced with POWHEG\n{}".format(self.productionmode, self.pythiasystematic, args))
+            if self.alternategenerator not in ("POWHEG", "MINLO"):
+                raise ValueError("{} sample with pythia {} is produced with POWHEG{}\n{}".format(self.productionmode, self.pythiasystematic, " or MINLO" if self.productionmode == "ggH" else "", args))
 
         super(ReweightingSamplePlus, self).check(*args)
 
@@ -1153,20 +1153,22 @@ class Sample(ReweightingSamplePlus):
     def CJLSTdirname(self):
         if self.alternategenerator is not None:
             if self.alternategenerator == "POWHEG":
-                if self.productionmode in ("VBF", "ZH", "WplusH", "WminusH", "ttH"):
+                if self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
                     s = str(self.productionmode)
                     if self.productionmode == "VBF": s = "VBFH"
                     if self.hypothesis == "0+": result = "{}125".format(s)
                 if self.pythiasystematic is not None:
                     result += self.pythiasystematic.appendname
                 return result
-        if self.alternategenerator in ("MINLO", "NNLOPS") or self.pythiasystematic is not None:
+        if self.alternategenerator in ("MINLO", "NNLOPS"):
             if self.productionmode == "ggH":
                 result = "ggH125"
                 if self.pythiasystematic is not None:
                     result += self.pythiasystematic.appendname
                 if self.alternategenerator == "MINLO":
                     result += "_minloHJJ"
+                if self.alternategenerator == "NNLOPS":
+                    result += "_NNLOPS"
                 return result
             raise self.ValueError("CJLSTdirname")
         if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
@@ -1295,14 +1297,13 @@ def allsamples():
                 yield Sample("VBF bkg", flavor, production)
         yield Sample("ggH", "0+", "NNLOPS", production)
         yield Sample("ggH", "0+", "MINLO", production)
-        for productionmode in "VBF", "ZH", "WplusH", "WminusH":
+        for productionmode in "ggH", "VBF", "ZH", "WplusH", "WminusH":
             yield Sample(productionmode, "0+", "POWHEG", production)
         yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
         for systematic in pythiasystematics:
-            for productionmode in "VBF", "ZH", "WplusH", "WminusH":
+            for productionmode in "ggH", "VBF", "ZH", "WplusH", "WminusH":
                 yield Sample(productionmode, "0+", "POWHEG", production, systematic)
             yield Sample("ttH", "Hff0+", "0+", "POWHEG", production, systematic)
-            yield Sample("ggH", "0+", production, systematic)
             yield Sample("ggH", "0+", "MINLO", production, systematic)
         yield Sample("qqZZ", production)
         yield Sample("ZX", production)

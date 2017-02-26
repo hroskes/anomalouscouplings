@@ -24,7 +24,7 @@ SampleCount = namedtuple("SampleCount", "productionmode samples")
 
 def writeyields():
   tosamples_foryields = [
-    SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "MINLO")}),
+    SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
     SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("WH"), {ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG")}),
@@ -167,21 +167,21 @@ def writeyields():
             muDnUntagged["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn"), Category("Untagged")] for tosample in samples) / nominaluntagged
             muDnUntagged["F"] = sum(result[tosample, categorization, AlternateWeight("muFDn"), Category("Untagged")] for tosample in samples) / nominaluntagged
 
-            if muYieldUp["R"] > 1 > muYieldDn["R"]:
+            if muYieldUp["R"] >= 1 >= muYieldDn["R"]:
               pass
-            elif muYieldDn["R"] > 1 > muYieldUp["R"]:
+            elif muYieldDn["R"] >= 1 >= muYieldUp["R"]:
               muYieldUp["R"], muYieldDn["R"] = muYieldDn["R"], muYieldUp["R"]
             else:
               assert False, (muYieldUp["R"], muYieldDn["R"])
 
-            if muYieldUp["F"] > 1 > muYieldDn["F"]:
+            if muYieldUp["F"] >= 1 >= muYieldDn["F"]:
               pass
-            elif muYieldDn["F"] > 1 > muYieldUp["F"]:
+            elif muYieldDn["F"] >= 1 >= muYieldUp["F"]:
               muYieldUp["F"], muYieldDn["F"] = muYieldDn["F"], muYieldUp["F"]
             else:
               assert False, (muYieldUp["F"], muYieldDn["F"])
 
-            if muUpUntagged["R"] > muDnUntagged["R"]:
+            if muUpUntagged["R"] >= muDnUntagged["R"]:
               pass
             elif muDnUntagged["R"] > muUpUntagged["R"]:
               muUp["R"], muDn["R"] = muDn["R"], muUp["R"]
@@ -189,7 +189,7 @@ def writeyields():
             else:
               assert False, (muUpUntagged["R"], muDnUntagged["R"])
 
-            if muUpUntagged["F"] > muDnUntagged["F"]:
+            if muUpUntagged["F"] >= muDnUntagged["F"]:
               pass
             elif muDnUntagged["F"] > muUpUntagged["F"]:
               muUp["F"], muDn["F"] = muDn["F"], muUp["F"]

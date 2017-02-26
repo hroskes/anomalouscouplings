@@ -1263,6 +1263,7 @@ class TreeWrapper(Iterator):
         ReweightingSample("VBF bkg"),
         ReweightingSample("ZX"),
 
+        ReweightingSamplePlus("ggH", "0+", "POWHEG"),
         ReweightingSamplePlus("ggH", "0+", "NNLOPS"),
         ReweightingSamplePlus("ggH", "0+", "MINLO"),
         ReweightingSamplePlus("VBF", "0+", "POWHEG"),
@@ -1271,7 +1272,7 @@ class TreeWrapper(Iterator):
         ReweightingSamplePlus("WminusH", "0+", "POWHEG"),
         ReweightingSamplePlus("ttH", "Hff0+", "0+", "POWHEG"),
     ] + sum(([
-        ReweightingSamplePlus("ggH", "0+", _),
+        ReweightingSamplePlus("ggH", "0+", "POWHEG", _),
         ReweightingSamplePlus("ggH", "0+", "MINLO", _),
         ReweightingSamplePlus("VBF", "0+", "POWHEG", _),
         ReweightingSamplePlus("ZH", "0+", "POWHEG", _),

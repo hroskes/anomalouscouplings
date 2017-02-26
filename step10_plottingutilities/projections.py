@@ -528,14 +528,14 @@ class Projections(MultiEnum):
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
         if customfai  > 0: plusminus = "#plus"
-        ggHcustom = self.ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, ggHSM.Integral(), (ggHSM, g1_custom**2), (ggHBSM, (gi_custom/gi_ggHBSM)**2), (ggHg11gi1,  g1_custom*gi_custom/gi_ggHBSM))
-        VBFcustom = self.ComponentTemplateSum("VBF ({}={}{:.2f})".format(self.analysis.title(superscript="VBF"), plusminus, abs(customsample.fai("VBF", self.analysis))), 2, VBFSM.Integral(),
-                                         *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces))
+        ggHcustom = self.ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, 1, (ggHSM[category,channel], g1_custom**2), (ggHBSM[category,channel], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[category,channel],  g1_custom*gi_custom/gi_ggHBSM))
+        VBFcustom = self.ComponentTemplateSum("VBF ({}={}{:.2f})".format(self.analysis.title(superscript="VBF"), plusminus, abs(customsample.fai("VBF", self.analysis))), 2, 1,
+                                         *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces[category,channel]))
                                         )
-        VHcustom  = self.ComponentTemplateSum("VH ({}={}{:.2f})".format(self.analysis.title(superscript="VH"), plusminus, abs(customsample.fai("VH", self.analysis))), 4, ZHSM.Integral()+WHSM.Integral(),
+        VHcustom  = self.ComponentTemplateSum("VH ({}={}{:.2f})".format(self.analysis.title(superscript="VH"), plusminus, abs(customsample.fai("VH", self.analysis))), 4, 1,
                                          *(
-                                             [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces)]
-                                           + [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces)]
+                                             [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces[category,channel])]
+                                           + [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces[category,channel])]
                                           )
                                         )
         for t in ggHcustom, VBFcustom, VHcustom:
@@ -687,9 +687,9 @@ if __name__ == "__main__":
   length = len(list(projections()))
   for i, (p, ch, ca) in enumerate(itertools.product(projections(), channels, categories), start=1):
     p.projections(ch, ca)
-    #p.projections(ch, ca, subdir="ggH", ggHfactor=1, VBFfactor=0, VHfactor=0)
-    #p.projections(ch, ca, subdir="VBF", ggHfactor=0, VBFfactor=1, VHfactor=0)
-    #p.projections(ch, ca, subdir="VH",  ggHfactor=0, VBFfactor=0, VHfactor=1)
-    #if p.enrichstatus == "fullrange":
-      #p.animation(ch, ca)
+    p.projections(ch, ca, subdir="ggH", ggHfactor=1, VBFfactor=0, VHfactor=0)
+    p.projections(ch, ca, subdir="VBF", ggHfactor=0, VBFfactor=1, VHfactor=0)
+    p.projections(ch, ca, subdir="VH",  ggHfactor=0, VBFfactor=0, VHfactor=1)
+    if p.enrichstatus == "fullrange":
+      p.animation(ch, ca)
     print i, "/", length*len(channels)*len(categories)
