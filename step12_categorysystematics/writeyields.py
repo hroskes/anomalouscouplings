@@ -2,6 +2,7 @@
 
 from collections import namedtuple
 import itertools
+import logging
 from math import sqrt
 import os
 import yaml
@@ -140,10 +141,12 @@ def writeyields():
         for systname in allQCDsystematicnames:
           if productionmode == "ggZZ":
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "ggH", systname).value
+              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_yield").value = YieldSystematicValue(channel, category, analysis, "ggH", systname+"_yield").value
+              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_cat").value = YieldSystematicValue(channel, category, analysis, "ggH", systname+"_cat").value
           elif productionmode == "VBF bkg":
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
+              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_yield").value = YieldSystematicValue(channel, category, analysis, "VBF", systname+"_yield").value
+              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_cat").value = YieldSystematicValue(channel, category, analysis, "VBF", systname+"_cat").value
           elif systname == productionmode.QCDsystematicname:
             muYieldUp, muYieldDn = {}, {}
             muUp, muDn = {}, {}
@@ -178,52 +181,39 @@ def writeyields():
             else:
               assert False, (muYieldUp["F"], muYieldDn["F"])
 
-            if muUpUntagged["R"] > 1 > muDnUntagged["R"]:
+            if muUpUntagged["R"] > muDnUntagged["R"]:
               pass
-            elif muDnUntagged["R"] > 1 > muUpUntagged["R"]:
+            elif muDnUntagged["R"] > muUpUntagged["R"]:
               muUp["R"], muDn["R"] = muDn["R"], muUp["R"]
               muUpUntagged["R"], muDnUntagged["R"] = muDnUntagged["R"], muUpUntagged["R"]
             else:
               assert False, (muUpUntagged["R"], muDnUntagged["R"])
 
-            if muUpUntagged["F"] > 1 > muDnUntagged["F"]:
+            if muUpUntagged["F"] > muDnUntagged["F"]:
               pass
-            elif muDnUntagged["F"] > 1 > muUpUntagged["F"]:
+            elif muDnUntagged["F"] > muUpUntagged["F"]:
               muUp["F"], muDn["F"] = muDn["F"], muUp["F"]
               muUpUntagged["F"], muDnUntagged["F"] = muDnUntagged["F"], muUpUntagged["F"]
             else:
               assert False, (muUpUntagged["F"], muDnUntagged["F"])
 
-            print (repr(category), muUp, muDn)
+            if muUpUntagged["F"] > 1 and muDnUntagged["F"] > 1 or muUpUntagged["F"] < 1 and muDnUntagged["F"] < 1:
+              logging.warning("muF up and down go in the same direction {} {}".format(muUpUntagged, muDnUntagged))
+            if muUpUntagged["R"] > 1 and muDnUntagged["R"] > 1 or muUpUntagged["R"] < 1 and muDnUntagged["R"] < 1:
+              logging.warning("muR up and down go in the same direction {} {}".format(muUpUntagged, muDnUntagged))
 
             QCDYieldUp = 1 + sqrt((muYieldUp["R"]-1)**2 + (muYieldUp["F"]-1)**2)
             QCDYieldDn = 1 - sqrt((muYieldDn["R"]-1)**2 + (muYieldDn["F"]-1)**2)
 
-            if muUp["R"] >= 1 and muUp["F"] >= 1: signup = 1
-            elif muUp["R"] <= 1 and muUp["F"] <= 1: signup = -1
+            if   muUp["R"] >= 1 and muUp["F"] >= 1 and muDn["R"] <= 1 and muDn["F"] <= 1: signup, signdn = +1, -1
+            elif muUp["R"] <= 1 and muUp["F"] <= 1 and muDn["R"] >= 1 and muDn["F"] >= 1: signup, signdn = -1, +1
             else:
-              if abs(muUp["R"]-1) >= abs(muUp["F"]-1): big, small = "R", "F"
-              if abs(muUp["F"]-1) >= abs(muUp["R"]-1): big, small = "F", "R"
-              if sqrt((muUp[big]-1)**2 + (muUp[small]-1)**2) - abs(muUp[big]-1) < 1e-4:
-                muUp[small] = 1
-                if muUp[big] >= 1: signup = 1
-                elif muUp[small] <= 1: signup = -1
-                else: assert False
-              else:
-                assert False, (category, muUp, muDn)
+              logging.warning("muR and muF go in different directions in {} {}: {} {}".format(productionmode, category, muUp, muDn))
+              if   sum(muUp.values()) > sum(muDn.values()): signup, signdn = +1, -1
+              elif sum(muUp.values()) < sum(muDn.values()): signup, signdn = -1, +1
+              else: assert False
 
-            if muDn["R"] >= 1 and muDn["F"] >= 1: signdn = 1
-            elif muDn["R"] <= 1 and muDn["F"] <= 1: signdn = -1
-            else:
-              if abs(muDn["R"]-1) >= abs(muDn["F"]-1): big, small = "R", "F"
-              if abs(muDn["F"]-1) >= abs(muDn["R"]-1): big, small = "F", "R"
-              if sqrt((muDn[big]-1)**2 + (muDn[small]-1)**2) - abs(muDn[big]-1) < 2e-4:
-                muDn[small] = 1
-                if muDn[big] >= 1: signdn = 1
-                elif muDn[small] <= 1: signdn = -1
-                else: assert False
-              else:
-                assert False, (category, muUp, muDn)
+            assert signup != signdn
 
             QCDUp = 1 + signup*sqrt((muUp["R"]-1)**2 + (muUp["F"]-1)**2)
             QCDDn = 1 + signdn*sqrt((muDn["R"]-1)**2 + (muDn["F"]-1)**2)
