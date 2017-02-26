@@ -8,7 +8,7 @@ import yaml
 
 from helperstuff import config
 from helperstuff.categorization import MultiCategorization
-from helperstuff.enums import AlternateWeight, alternateweights, analyses, categories, channels, flavors, ProductionMode, pythiasystematics
+from helperstuff.enums import AlternateWeight, alternateweights, analyses, categories, Category, channels, flavors, ProductionMode, pythiasystematics
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import MultiplyCounter
@@ -84,7 +84,7 @@ def writeyields():
 
       #same for all categories and channels
       #from yaml
-      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_Higgs_qq", "BRhiggs_hzz4l", "QCDscale_ggZH", "QCDscale_ggVV_bonly", "lumi_13TeV":
+      for systname in "pdf_Higgs_gg_yield", "pdf_Higgs_qq_yield", "pdf_Higgs_ttH_yield", "BRhiggs_hzz4l", "QCDscale_ggZH_yield", "QCDscale_ggVV_bonly_yield", "lumi_13TeV":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           values = syst.yieldsystematic.getfromyaml()
@@ -120,6 +120,8 @@ def writeyields():
       for category in categories:
         #variations on category definition: JEC and btagging
         nominal = sum(result[tosample, categorization, AlternateWeight("1"), category] for tosample in samples)
+        nominaluntagged = sum(result[tosample, categorization, AlternateWeight("1"), Category("Untagged")] for tosample in samples)
+        nominalyield = sum(result[tosample, categorization, AlternateWeight("1")] for tosample in samples)
         if productionmode == "ZX":
           JECUp = JECDn = btSFUp = btSFDn = 1
         else:
@@ -143,16 +145,96 @@ def writeyields():
             for channel in channels:
               YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
           elif systname == productionmode.QCDsystematicname:
-            QCDUp = sum(result[tosample, categorization, AlternateWeight("muRFUp"), category] for tosample in samples) / nominal
-            QCDDn = sum(result[tosample, categorization, AlternateWeight("muRFDn"), category] for tosample in samples) / nominal
+            muYieldUp, muYieldDn = {}, {}
+            muUp, muDn = {}, {}
+            muUpUntagged, muDnUntagged = {}, {}
 
-            systname = productionmode.QCDsystematicname
+            muYieldUp["R"] = sum(result[tosample, categorization, AlternateWeight("muRUp")] for tosample in samples) / nominalyield
+            muYieldUp["F"] = sum(result[tosample, categorization, AlternateWeight("muFUp")] for tosample in samples) / nominalyield
+            muYieldDn["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn")] for tosample in samples) / nominalyield
+            muYieldDn["F"] = sum(result[tosample, categorization, AlternateWeight("muFDn")] for tosample in samples) / nominalyield
+            muUp["R"] = sum(result[tosample, categorization, AlternateWeight("muRUp"), category] for tosample in samples) / nominal
+            muUp["F"] = sum(result[tosample, categorization, AlternateWeight("muFUp"), category] for tosample in samples) / nominal
+            muDn["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn"), category] for tosample in samples) / nominal
+            muDn["F"] = sum(result[tosample, categorization, AlternateWeight("muFDn"), category] for tosample in samples) / nominal
+
+            #figure out which to combine with which
+            muUpUntagged["R"] = sum(result[tosample, categorization, AlternateWeight("muRUp"), Category("Untagged")] for tosample in samples) / nominaluntagged
+            muUpUntagged["F"] = sum(result[tosample, categorization, AlternateWeight("muFUp"), Category("Untagged")] for tosample in samples) / nominaluntagged
+            muDnUntagged["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn"), Category("Untagged")] for tosample in samples) / nominaluntagged
+            muDnUntagged["F"] = sum(result[tosample, categorization, AlternateWeight("muFDn"), Category("Untagged")] for tosample in samples) / nominaluntagged
+
+            if muYieldUp["R"] > 1 > muYieldDn["R"]:
+              pass
+            elif muYieldDn["R"] > 1 > muYieldUp["R"]:
+              muYieldUp["R"], muYieldDn["R"] = muYieldDn["R"], muYieldUp["R"]
+            else:
+              assert False, (muYieldUp["R"], muYieldDn["R"])
+
+            if muYieldUp["F"] > 1 > muYieldDn["F"]:
+              pass
+            elif muYieldDn["F"] > 1 > muYieldUp["F"]:
+              muYieldUp["F"], muYieldDn["F"] = muYieldDn["F"], muYieldUp["F"]
+            else:
+              assert False, (muYieldUp["F"], muYieldDn["F"])
+
+            if muUpUntagged["R"] > 1 > muDnUntagged["R"]:
+              pass
+            elif muDnUntagged["R"] > 1 > muUpUntagged["R"]:
+              muUp["R"], muDn["R"] = muDn["R"], muUp["R"]
+              muUpUntagged["R"], muDnUntagged["R"] = muDnUntagged["R"], muUpUntagged["R"]
+            else:
+              assert False, (muUpUntagged["R"], muDnUntagged["R"])
+
+            if muUpUntagged["F"] > 1 > muDnUntagged["F"]:
+              pass
+            elif muDnUntagged["F"] > 1 > muUpUntagged["F"]:
+              muUp["F"], muDn["F"] = muDn["F"], muUp["F"]
+              muUpUntagged["F"], muDnUntagged["F"] = muDnUntagged["F"], muUpUntagged["F"]
+            else:
+              assert False, (muUpUntagged["F"], muDnUntagged["F"])
+
+            print (repr(category), muUp, muDn)
+
+            QCDYieldUp = 1 + sqrt((muYieldUp["R"]-1)**2 + (muYieldUp["F"]-1)**2)
+            QCDYieldDn = 1 - sqrt((muYieldDn["R"]-1)**2 + (muYieldDn["F"]-1)**2)
+
+            if muUp["R"] >= 1 and muUp["F"] >= 1: signup = 1
+            elif muUp["R"] <= 1 and muUp["F"] <= 1: signup = -1
+            else:
+              if abs(muUp["R"]-1) >= abs(muUp["F"]-1): big, small = "R", "F"
+              if abs(muUp["F"]-1) >= abs(muUp["R"]-1): big, small = "F", "R"
+              if sqrt((muUp[big]-1)**2 + (muUp[small]-1)**2) - abs(muUp[big]-1) < 1e-4:
+                muUp[small] = 1
+                if muUp[big] >= 1: signup = 1
+                elif muUp[small] <= 1: signup = -1
+                else: assert False
+              else:
+                assert False, (category, muUp, muDn)
+
+            if muDn["R"] >= 1 and muDn["F"] >= 1: signdn = 1
+            elif muDn["R"] <= 1 and muDn["F"] <= 1: signdn = -1
+            else:
+              if abs(muDn["R"]-1) >= abs(muDn["F"]-1): big, small = "R", "F"
+              if abs(muDn["F"]-1) >= abs(muDn["R"]-1): big, small = "F", "R"
+              if sqrt((muDn[big]-1)**2 + (muDn[small]-1)**2) - abs(muDn[big]-1) < 2e-4:
+                muDn[small] = 1
+                if muDn[big] >= 1: signdn = 1
+                elif muDn[small] <= 1: signdn = -1
+                else: assert False
+              else:
+                assert False, (category, muUp, muDn)
+
+            QCDUp = 1 + signup*sqrt((muUp["R"]-1)**2 + (muUp["F"]-1)**2)
+            QCDDn = 1 + signdn*sqrt((muDn["R"]-1)**2 + (muDn["F"]-1)**2)
 
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = (QCDUp, QCDDn)
+              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_cat").value = (QCDUp, QCDDn)
+              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_yield").value = (QCDYieldUp, QCDYieldDn)
           else:
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = None
+              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_cat").value = None
+              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_yield").value = None
 
         #pythia scale and tune
         if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
