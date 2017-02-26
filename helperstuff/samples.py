@@ -556,7 +556,7 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
 class ReweightingSample(MultiEnum, SampleBase):
     __metaclass__ = MultiEnumABCMeta
     enumname = "reweightingsample"
-    enums = [ProductionMode, Hypothesis, HffHypothesis, Flavor]
+    enums = [ProductionMode, Hypothesis, HffHypothesis]
 
     def __eq__(self, other):
         try:
@@ -581,8 +581,6 @@ class ReweightingSample(MultiEnum, SampleBase):
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hypothesis not in self.productionmode.validhypotheses:
                 raise ValueError("{} hypothesis can't be {}\n{}".format(self.productionmode, self.hypothesis, args))
-            if self.flavor is not None:
-                raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.productionmode in ("HJJ", "ttH"):
                 if self.hffhypothesis is None:
                     raise ValueError("Hff hypothesis not provided for {} productionmode\n{}".format(self.productionmode, args))
@@ -594,24 +592,16 @@ class ReweightingSample(MultiEnum, SampleBase):
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
                 raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.flavor is None:
-                raise ValueError("No flavor provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.productionmode == "VBF bkg" and self.flavor.hastaus:
-                raise ValueError("No {} samples with taus\n{}".format(self.productionmode, args))
         elif self.productionmode == "qqZZ":
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
                 raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.flavor is not None and self.flavor.hastaus:
-                raise ValueError("No {} samples with taus\n{}".format(self.productionmode, args))
         elif self.productionmode in ("ZX", "data"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
                 raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.flavor is not None:
-                raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
         else:
             raise ValueError("Bad productionmode {}\n{}".format(self.productionmode, args))
 
@@ -621,12 +611,12 @@ class ReweightingSample(MultiEnum, SampleBase):
         return self.hypothesis.photoncut
 
     def reweightingsamples(self):
-        if self.productionmode == "qqZZ" and self.flavor is not None:
+        if self.productionmode == "qqZZ":
             return [self]
         if self.productionmode in ("ggZZ", "qqZZ", "ZX") or self.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.pythiasystematic is not None:
             return [self]
         if self.productionmode == "VBF bkg":
-            return [self, ReweightingSample("qqZZ", self.flavor)]
+            return [self, ReweightingSample("qqZZ")]
         if self.productionmode == "ttH":  #ttH reweighting doesn't work unfortunately
             return [
                     ReweightingSample(self.productionmode, hypothesis, hffhypothesis)
@@ -1066,6 +1056,18 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hffhypothesis == "fCP0.5":
                 return constants.kappa_tilde_ttH
 
+class ReweightingSampleWithFlavor(ReweightingSample):
+    enums = [ReweightingSample, Flavor]
+    def check(self, *args):
+        if self.productionmode in ("ggZZ", "VBF bkg"):
+            if self.flavor is None:
+                raise ValueError("No flavor provided for {} productionmode\n{}".format(self.productionmode, args))
+            if self.productionmode == "VBF bkg" and self.flavor.hastaus:
+                raise ValueError("No {} samples with taus\n{}".format(self.productionmode, args))
+        else:
+            if self.flavor is not None:
+                raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
+
 class ReweightingSamplePlus(ReweightingSample):
     enums = [ReweightingSample, AlternateGenerator, PythiaSystematic]
     enumname = "reweightingsampleplus"
@@ -1115,7 +1117,7 @@ class ReweightingSamplePlus(ReweightingSample):
         return result
 
 class Sample(ReweightingSamplePlus):
-    enums = [ReweightingSamplePlus, Production]
+    enums = [ReweightingSamplePlus, Flavor, Production]
 
     def check(self, *args):
         if self.production is None:
@@ -1124,11 +1126,10 @@ class Sample(ReweightingSamplePlus):
         if self.hypothesis is not None and self.hypothesis not in self.productionmode.generatedhypotheses:
             raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
 
-        if self.productionmode == "qqZZ" and self.flavor is not None:
-            raise ValueError("No {} sample produced with separate flavors!\n{}".format(self.productionmode, args))
-
         if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
             raise ValueError("Separate {} sample is produced with POWHEG.  Maybe you meant to specify POWHEG, or WH?\n{}".format(self.productionmode, args))
+
+        ReweightingSampleWithFlavor(self.reweightingsample, self.flavor)
 
         if self.pythiasystematic is not None and self.alternategenerator == "NNLOPS":
             raise ValueError("No NNLOPS samples with systematics!\n{}".format(args))

@@ -1068,7 +1068,6 @@ class TreeWrapper(Iterator):
                 SMxsec = sample.SMxsec
 
             strsample = str(sample)
-            if sample.flavor is not None: strsample = strsample.replace(" {}".format(sample.flavor), "")
 
             percentile = 99.99
 
@@ -1259,9 +1258,9 @@ class TreeWrapper(Iterator):
         ReweightingSample("HJJ", "Hff0+", "fL1-0.5"),
         ReweightingSample("HJJ", "Hff0+", "fL1Zg-0.5"),
         ReweightingSample("HJJ", "Hff0+", "fa2dec-0.9"),
-        ReweightingSample("ggZZ", "2e2mu"),  #flavor doesn't matter
+        ReweightingSample("ggZZ"),
         ReweightingSample("qqZZ"),
-        ReweightingSample("VBF bkg", "2e2mu"),  #flavor doesn't matter
+        ReweightingSample("VBF bkg"),
         ReweightingSample("ZX"),
 
         ReweightingSamplePlus("ggH", "0+", "NNLOPS"),

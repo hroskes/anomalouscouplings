@@ -224,7 +224,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
 
     c = ROOT.TCanvas()
     for tosample, categorization, alternateweight in itertools.product(tosamples, categorizations, alternateweights):
-        if tosample == ReweightingSample("WH", "L1Zg"): continue
+        if tosample.productionmode == "WH" and tosample.hypothesis == "L1Zg": continue
         if alternateweight.issystematic and categorization.issystematic: continue
         t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "{}*(ZZMass>{} && ZZMass<{})*{}".format(tosample.weightname(), config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
         h = c.FindObject("htemp")

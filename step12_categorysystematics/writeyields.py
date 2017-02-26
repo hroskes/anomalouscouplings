@@ -10,7 +10,7 @@ import yaml
 from helperstuff import config
 from helperstuff.categorization import MultiCategorization
 from helperstuff.enums import AlternateWeight, alternateweights, analyses, categories, Category, channels, flavors, ProductionMode, pythiasystematics
-from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, Sample
+from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import MultiplyCounter
 from helperstuff.yields import count, totalrate, YieldSystematicValue, YieldValue
@@ -30,8 +30,8 @@ def writeyields():
     SampleCount(ProductionMode("WH"), {ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("ttH"), {ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")}),
     SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ")}),
-    SampleCount(ProductionMode("ggZZ"), {ReweightingSample("ggZZ", flavor) for flavor in flavors}),
-    SampleCount(ProductionMode("VBF bkg"), {ReweightingSample("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}),
+    SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
+    SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}),
     SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}),
   ]
 

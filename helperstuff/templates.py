@@ -315,7 +315,11 @@ class TemplatesFile(MultiEnum):
 
     @property
     def copyfromothertemplatesfile(self):
-        if self.production == "170222":
+        if self.production == "170203" and self.templategroup == "DATA":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "170222"
+          return TemplatesFile(*kwargs.values())
+        if self.production == "170222" and self.templategroup != "DATA":
           kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
           kwargs["production"] = "170203"
           return TemplatesFile(*kwargs.values())
@@ -339,8 +343,8 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
-#                    if config.showblinddistributions:
-#                        yield TemplatesFile(channel, "DATA", analysis, production, category)
+                    if config.showblinddistributions:
+                        yield TemplatesFile(channel, "DATA", analysis, production, category)
                     if category != "Untagged" and config.applyMINLOsystematics:
                         yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
 
@@ -590,8 +594,8 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def scalefactor(self):
-        if self.shapesystematic == "MINLO":
-            result = len(self.reweightfrom)
+        if self.shapesystematic == "MINLO_SM":
+            result = len(self.reweightfrom())
         elif self.productionmode in ("VBF", "ggH", "ZH", "WH"):
             result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
         elif self.productionmode == "ttH":
@@ -603,7 +607,7 @@ class Template(TemplateBase, MultiEnum):
         result /= sum(
                       Sample.effectiveentries(
                                               reweightfrom=reweightfrom,
-                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis, reweightfrom.flavor)
+                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis)
                                              )
                        for reweightfrom in self.reweightfrom()
                      )

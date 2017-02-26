@@ -3,7 +3,7 @@ from array import array
 from collections import OrderedDict
 from helperstuff import config
 from helperstuff import xrd
-from helperstuff.enums import flavors, hffhypotheses, ProductionMode, productions, pythiasystematics
+from helperstuff.enums import hffhypotheses, ProductionMode, productions, pythiasystematics
 from helperstuff.samples import allsamples, Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.treewrapper import TreeWrapper

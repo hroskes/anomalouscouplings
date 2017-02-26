@@ -2,11 +2,15 @@
 from helperstuff import config
 from helperstuff import stylefunctions as style
 from helperstuff.combinehelpers import Luminosity
-from helperstuff.enums import Analysis, analyses, Channel, channels, EnumItem, MultiEnum, MyEnum, Production
+from helperstuff.enums import Analysis, analyses, categories, Category, Channel, channels, EnumItem, MultiEnum, MyEnum, Production
+from helperstuff.templates import TemplatesFile
 from itertools import product
 import os
 from projections import EnrichStatus, enrichstatuses
 import ROOT
+
+assert len(config.productionsforcombine) == 1
+production = config.productionsforcombine[0]
 
 class HistWrapper(object):
     def __init__(self):
@@ -30,27 +34,36 @@ def niceplots(*args, **kwargs):
         enums = (Analysis, Production, Category, EnrichStatus)
     info = NicePlots(*args)
     analysis, production, category, enrichstatus = info.analysis, info.production, info.category, info.enrichstatus
-    dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", extradir, enrichstatus.dirname(), str(analysis))
+    dir = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", extradir, enrichstatus.dirname(), str(analysis), str(category))
 
-    previousplots = {(channel, production): os.path.join(config.plotsbasedir, "templateprojections", enrichstatus.dirname(), "rescalemixtures", "{}_{}".format(analysis, production), str(channel)) for channel, production in product(channels, productions)}
+    previousplots = {channel: os.path.join(config.plotsbasedir, "templateprojections", enrichstatus.dirname(), "{}_{}".format(analysis, production), str(category), str(channel)) for channel in channels}
 
-    for discriminant, title in ("Dbkg", "D_{bkg}"), (analysis.purediscriminant(), analysis.purediscriminant(True)), (analysis.mixdiscriminant(), analysis.mixdiscriminant(True)):
+    tf = TemplatesFile("2e2mu", "ggh", category, production, analysis)
+    for discriminant, title, _, _, _ in tf.discriminants:
 
         ZX, ZZ, SM, BSM, mix, mixminus, data = HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper(), HistWrapper()
 
-        for channel, production in product(channels, productions):
-            f = ROOT.TFile(os.path.join(previousplots[channel, production], discriminant+".root"))
+        for channel in channels:
+            f = ROOT.TFile(os.path.join(previousplots[channel], discriminant+".root"))
             c = f.c1
             lst = c.GetListOfPrimitives()[1].GetHists()
 
-            ZX += lst[6]
+            if category == "VBFtagged" or category == "VHHadrtagged":
+                for h in lst:
+                    h.Rebin(5)
+
+            ZX += lst[7]
             ZZ += lst[4]
             ZZ += lst[5]
+            ZZ += lst[6]
             SM += lst[0]
             BSM += lst[1]
             mix += lst[2]
             mixminus += lst[3]
-            data += lst[7]
+            try:
+                data += lst[8]
+            except IndexError:
+                return
 
         ZX, ZZ, SM, BSM, mix, mixminus, data = ZX.h, ZZ.h, SM.h, BSM.h, mix.h, mixminus.h, data.h
 
@@ -101,25 +114,21 @@ def niceplots(*args, **kwargs):
         #l.SetFillStyle(0)
         style.applylegendstyle(l)
 
-        hstack.Add(SM, "hist")
-        if discriminant == analysis.mixdiscriminant() and analysis == "fa3" or discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fL1":
-            hstack.Add(mix, "hist")
-        elif discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fa2":
-            hstack.Add(mixminus, "hist")
-        else:
-            hstack.Add(BSM, "hist")
-        hstack.Add(ZZ, "hist")
-        hstack.Add(ZX, "hist")
-
         l.AddEntry(data, "Observed", "ep")
+        hstack.Add(SM, "hist")
         l.AddEntry(SM, "SM", "l")
-        if discriminant == analysis.mixdiscriminant() and analysis == "fa3" or discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fL1":
+        if discriminant == tf.mixdiscriminant and analysis == "fa3" or discriminant in (tf.mixdiscriminant, tf.purediscriminant) and analysis == "fL1":
+            hstack.Add(mix, "hist")
             l.AddEntry(mix, analysis.title()+" = #plus 0.5", "l")
-        elif discriminant in (analysis.mixdiscriminant(), analysis.purediscriminant()) and analysis == "fa2":
+        elif discriminant in (tf.mixdiscriminant, tf.purediscriminant) and analysis == "fa2":
+            hstack.Add(mixminus, "hist")
             l.AddEntry(mixminus, analysis.title()+" = #minus 0.5", "l")
         else:
+            hstack.Add(BSM, "hist")
             l.AddEntry(BSM, analysis.title()+" = 1", "l")
+        hstack.Add(ZZ, "hist")
         l.AddEntry(ZZ, "ZZ/Z#gamma*", "f")
+        hstack.Add(ZX, "hist")
         l.AddEntry(ZX, "Z+X", "f")
 
         ymax = style.ymax((hstack, "nostack"), (data, "P"))
@@ -135,7 +144,7 @@ def niceplots(*args, **kwargs):
         style.applycanvasstyle(c)
         style.applyaxesstyle(hstack)
         style.cuttext(enrichstatus.cuttext())
-        style.CMS("Preliminary", sum(float(Luminosity("fordata", production)) for production in productions))
+        style.CMS("Preliminary", float(Luminosity("fordata", production)))
 
         hstack.GetXaxis().SetTitle(title)
         hstack.GetYaxis().SetTitle(
@@ -154,10 +163,5 @@ def niceplots(*args, **kwargs):
 if __name__ == "__main__":
     for analysis in analyses:
         for enrichstatus in enrichstatuses:
-            p2015 = [p for p in config.productionsforcombine if p.year == 2015]
-            p2016 = [p for p in config.productionsforcombine if p.year == 2016]
-            assert len(p2015) == len(p2016) == 1
-            niceplots(p2015, analysis, enrichstatus, extradir="2015")
-            niceplots(p2016, analysis, enrichstatus, extradir="2016")
-            niceplots(p2016, analysis, enrichstatus, extradir="")
-            niceplots(config.productionsforcombine, analysis, enrichstatus, extradir="2015+2016")
+            for category in categories:
+                niceplots(production, category, analysis, enrichstatus)
