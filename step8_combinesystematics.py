@@ -131,6 +131,7 @@ def combinesystematics(channel, analysis, production, category):
                                         POWHEG3D.GetBinContent(x, y, z) **2 / MINLO3D.GetBinContent(x, y, z)
                                        )
             MINLO3D.Scale(POWHEG3D.Integral()/MINLO3D.Integral())
+            MINLO3DDn.Scale(POWHEG3D.Integral()/MINLO3DDn.Integral())
             store += [MINLO3D, MINLO3DDn]
         for templatesfile in MINLOUp, MINLODn: outfiles[templatesfile].Write()
 

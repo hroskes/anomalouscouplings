@@ -274,6 +274,8 @@ class ProductionMode(MyEnum):
             result += ["ScaleRes"]
           else:
             result += ["Scale", "Res"]
+      if self == "ggH":
+        result += "MINLO"
       return [WorkspaceShapeSystematic(_) for _ in result]
 
 class WorkspaceShapeSystematic(MyEnum):
@@ -282,6 +284,7 @@ class WorkspaceShapeSystematic(MyEnum):
                  EnumItem("Res"),
                  EnumItem("Scale"),
                  EnumItem("ScaleRes"),
+                 EnumItem("MINLO"),
                 )
     @property
     def isperchannel(self):
@@ -311,7 +314,7 @@ class ShapeSystematic(MyEnum):
                  EnumItem("ZXDown", "ZXDn"),
                  EnumItem("MINLO_SM"),
                  EnumItem("MINLOUp"),
-                 EnumItem("MINLODn"),
+                 EnumItem("MINLODn", "MINLODown"),
                 )
     def appendname(self):
         if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
