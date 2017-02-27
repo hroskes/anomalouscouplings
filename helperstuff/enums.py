@@ -267,6 +267,13 @@ class ProductionMode(MyEnum):
       if self == "qqZZ": return "QCDscale_VV_cat"
       return None
 
+    @property
+    def pdfsystematicname(self):
+      if self == "ggH": return "pdf_Higgs_gg_cat"
+      if self in ("qqH", "ZH", "WH"): return "pdf_Higgs_qq_cat"
+      if self == "ttH": return "pdf_Higgs_ttH_cat"
+      return None
+
     def workspaceshapesystematics(self, category):
       result = []
       if self in ("ggH", "qqH", "ZH", "WH", "ttH"):

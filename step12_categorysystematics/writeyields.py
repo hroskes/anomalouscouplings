@@ -131,64 +131,70 @@ def writeyields():
           YieldSystematicValue(channel, category, analysis, productionmode, "JEC").value = (JECUp, JECDn)
           YieldSystematicValue(channel, category, analysis, productionmode, "BTag").value = (btSFUp, btSFDn)
 
-        allQCDsystematicnames = [ProductionMode(_).QCDsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")]
+        allQCDsystematicnames = {ProductionMode(_).QCDsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")}
+        allpdfsystematicnames = {ProductionMode(_).pdfsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH")}
 
         #QCD weight variations
-        for systname in allQCDsystematicnames:
+        for systname in allQCDsystematicnames | allpdfsystematicnames:
           if productionmode == "ggZZ":
             for channel in channels:
               YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "ggH", systname).value
           elif productionmode == "VBF bkg":
             for channel in channels:
               YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
-          elif systname == productionmode.QCDsystematicname:
-            muUp, muDn = {}, {}
-            muUpUntagged, muDnUntagged = {}, {}
+          elif systname == productionmode.QCDsystematicname or systname == productionmode.pdfsystematicname:
+            if systname == productionmode.QCDsystematicname: first, second = "muR", "muF"
+            if systname == productionmode.pdfsystematicname: first, second = "PDF", "alphaS"
 
-            muUp["R"] = sum(result[tosample, categorization, AlternateWeight("muRUp"), category] for tosample in samples) / nominal
-            muUp["F"] = sum(result[tosample, categorization, AlternateWeight("muFUp"), category] for tosample in samples) / nominal
-            muDn["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn"), category] for tosample in samples) / nominal
-            muDn["F"] = sum(result[tosample, categorization, AlternateWeight("muFDn"), category] for tosample in samples) / nominal
+            firstup, secondup, firstdn, seconddn = (AlternateWeight(_) for _ in (first+"Up", second+"Up", first+"Dn", second+"Dn"))
+
+            up, dn = {}, {}
+            upUntagged, dnUntagged = {}, {}
+
+            up[1] = sum(result[tosample, categorization, firstup, category] for tosample in samples) / nominal
+            up[2] = sum(result[tosample, categorization, secondup, category] for tosample in samples) / nominal
+            dn[1] = sum(result[tosample, categorization, firstdn, category] for tosample in samples) / nominal
+            dn[2] = sum(result[tosample, categorization, seconddn, category] for tosample in samples) / nominal
 
             #figure out which to combine with which
-            muUpUntagged["R"] = sum(result[tosample, categorization, AlternateWeight("muRUp"), Category("Untagged")] for tosample in samples) / nominaluntagged
-            muUpUntagged["F"] = sum(result[tosample, categorization, AlternateWeight("muFUp"), Category("Untagged")] for tosample in samples) / nominaluntagged
-            muDnUntagged["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn"), Category("Untagged")] for tosample in samples) / nominaluntagged
-            muDnUntagged["F"] = sum(result[tosample, categorization, AlternateWeight("muFDn"), Category("Untagged")] for tosample in samples) / nominaluntagged
+            upUntagged[1] = sum(result[tosample, categorization, firstup, Category("Untagged")] for tosample in samples) / nominaluntagged
+            upUntagged[2] = sum(result[tosample, categorization, secondup, Category("Untagged")] for tosample in samples) / nominaluntagged
+            dnUntagged[1] = sum(result[tosample, categorization, firstdn, Category("Untagged")] for tosample in samples) / nominaluntagged
+            dnUntagged[2] = sum(result[tosample, categorization, seconddn, Category("Untagged")] for tosample in samples) / nominaluntagged
 
-            if muUpUntagged["R"] >= muDnUntagged["R"]:
+            if upUntagged[1] >= dnUntagged[1]:
               pass
-            elif muDnUntagged["R"] > muUpUntagged["R"]:
-              muUp["R"], muDn["R"] = muDn["R"], muUp["R"]
-              muUpUntagged["R"], muDnUntagged["R"] = muDnUntagged["R"], muUpUntagged["R"]
+            elif dnUntagged[1] > upUntagged[1]:
+              up[1], dn[1] = dn[1], up[1]
+              upUntagged[1], dnUntagged[1] = dnUntagged[1], upUntagged[1]
             else:
-              assert False, (muUpUntagged["R"], muDnUntagged["R"])
+              assert False, (upUntagged[1], dnUntagged[1])
 
-            if muUpUntagged["F"] >= muDnUntagged["F"]:
+            if upUntagged[2] >= dnUntagged[2]:
               pass
-            elif muDnUntagged["F"] > muUpUntagged["F"]:
-              muUp["F"], muDn["F"] = muDn["F"], muUp["F"]
-              muUpUntagged["F"], muDnUntagged["F"] = muDnUntagged["F"], muUpUntagged["F"]
+            elif dnUntagged[2] > upUntagged[2]:
+              up[2], dn[2] = dn[2], up[2]
+              upUntagged[2], dnUntagged[2] = dnUntagged[2], upUntagged[2]
             else:
-              assert False, (muUpUntagged["F"], muDnUntagged["F"])
+              assert False, (upUntagged[2], dnUntagged[2])
 
-            if muUpUntagged["F"] > 1 and muDnUntagged["F"] > 1 or muUpUntagged["F"] < 1 and muDnUntagged["F"] < 1:
-              logging.warning("muF up and down go in the same direction {} {}".format(muUpUntagged, muDnUntagged))
-            if muUpUntagged["R"] > 1 and muDnUntagged["R"] > 1 or muUpUntagged["R"] < 1 and muDnUntagged["R"] < 1:
-              logging.warning("muR up and down go in the same direction {} {}".format(muUpUntagged, muDnUntagged))
+            if upUntagged[2] > 1 and dnUntagged[2] > 1 or upUntagged[2] < 1 and dnUntagged[2] < 1:
+              logging.warning("{} up and down go in the same direction {} {}".format(second, upUntagged, dnUntagged))
+            if upUntagged[1] > 1 and dnUntagged[1] > 1 or upUntagged[1] < 1 and dnUntagged[1] < 1:
+              logging.warning("{} up and down go in the same direction {} {}".format(first, upUntagged, dnUntagged))
 
-            if   muUp["R"] >= 1 and muUp["F"] >= 1 and muDn["R"] <= 1 and muDn["F"] <= 1: signup, signdn = +1, -1
-            elif muUp["R"] <= 1 and muUp["F"] <= 1 and muDn["R"] >= 1 and muDn["F"] >= 1: signup, signdn = -1, +1
+            if   up[1] >= 1 and up[2] >= 1 and dn[1] <= 1 and dn[2] <= 1: signup, signdn = +1, -1
+            elif up[1] <= 1 and up[2] <= 1 and dn[1] >= 1 and dn[2] >= 1: signup, signdn = -1, +1
             else:
-              logging.warning("muR and muF go in different directions in {} {}: {} {}".format(productionmode, category, muUp, muDn))
-              if   sum(muUp.values()) > sum(muDn.values()): signup, signdn = +1, -1
-              elif sum(muUp.values()) < sum(muDn.values()): signup, signdn = -1, +1
+              logging.warning("{} and {} go in different directions in {} {}: {} {}".format(first, second, productionmode, category, up, dn))
+              if   sum(up.values()) > sum(dn.values()): signup, signdn = +1, -1
+              elif sum(up.values()) < sum(dn.values()): signup, signdn = -1, +1
               else: assert False
 
             assert signup != signdn
 
-            QCDUp = 1 + signup*sqrt((muUp["R"]-1)**2 + (muUp["F"]-1)**2)
-            QCDDn = 1 + signdn*sqrt((muDn["R"]-1)**2 + (muDn["F"]-1)**2)
+            QCDUp = 1 + signup*sqrt((up[1]-1)**2 + (up[2]-1)**2)
+            QCDDn = 1 + signdn*sqrt((dn[1]-1)**2 + (dn[2]-1)**2)
 
             for channel in channels:
               YieldSystematicValue(channel, category, analysis, productionmode, systname).value = (QCDUp, QCDDn)
