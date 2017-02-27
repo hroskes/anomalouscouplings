@@ -86,7 +86,7 @@ def writeyields():
 
       #same for all categories and channels
       #from yaml
-      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV":
+      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_qq", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
@@ -129,11 +129,11 @@ def writeyields():
           btSFDn = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), AlternateWeight("1"), category] for tosample in samples) / nominal
 
         for channel in channels:
-          YieldSystematicValue(channel, category, analysis, productionmode, "JEC").value = (JECUp, JECDn)
-          YieldSystematicValue(channel, category, analysis, productionmode, "BTag").value = (btSFUp, btSFDn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "JES").value = (JECUp, JECDn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "bTagSF").value = (btSFUp, btSFDn)
 
         allQCDsystematicnames = {ProductionMode(_).QCDsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")}
-        allpdfsystematicnames = {ProductionMode(_).pdfsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH")}
+        allpdfsystematicnames = {ProductionMode(_).pdfsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")}
 
         #QCD weight variations
         for systname in allQCDsystematicnames | allpdfsystematicnames:

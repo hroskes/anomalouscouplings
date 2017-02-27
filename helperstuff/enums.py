@@ -272,6 +272,7 @@ class ProductionMode(MyEnum):
       if self == "ggH": return "pdf_Higgs_gg_cat"
       if self in ("qqH", "ZH", "WH"): return "pdf_Higgs_qq_cat"
       if self == "ttH": return "pdf_Higgs_ttH_cat"
+      if self == "qqZZ": return "pdf_qq_cat"
       return None
 
     def workspaceshapesystematics(self, category):

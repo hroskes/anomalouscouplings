@@ -16,8 +16,8 @@ from utilities import JsonDict, MultiplyCounter
 class YieldSystematic(MyEnum):
     enumname = "yieldsystematic"
     enumitems = (
-                 EnumItem("BTag"),
-                 EnumItem("JEC"),
+                 EnumItem("bTagSF"),
+                 EnumItem("JES"),
                  EnumItem("QCDscale_ggH"),
                  EnumItem("QCDscale_ggH_cat"),
                  EnumItem("QCDscale_qqH"),
@@ -37,6 +37,8 @@ class YieldSystematic(MyEnum):
                  EnumItem("pdf_Higgs_qq_cat"),
                  EnumItem("pdf_Higgs_ttH"),
                  EnumItem("pdf_Higgs_ttH_cat"),
+                 EnumItem("pdf_qq"),
+                 EnumItem("pdf_qq_cat"),
                  EnumItem("BRhiggs_hzz4l"),
                  EnumItem("PythiaScale"),
                  EnumItem("PythiaTune"),
@@ -48,7 +50,7 @@ class YieldSystematic(MyEnum):
                  EnumItem("CMS_zz2e2mu_zjets"),
                 )
     def yamlfilename(self, channel=None):
-      if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV"):
+      if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_qq", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV"):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
       if self in ("lumi_13TeV",):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_expt_13TeV.yaml")
@@ -277,3 +279,25 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
         result[tosample,categorization,alternateweight] = h.Integral()
 
     return result
+
+def check():
+  filenames = set()
+  for syst in YieldSystematic.items():
+    for channel in channels:
+      try:
+        filenames.add(syst.yamlfilename(channel))
+      except ValueError:
+        pass
+  y = {}
+  for filename in filenames:
+    with open(filename) as f:
+      y.update(yaml.load(f))
+  for key in y:
+    if key == "CMS_zz4l_bkg_kdShape": continue
+    try:
+      YieldSystematic(key)
+    except:
+      raise ValueError("Don't have systematic for {}".format(key))
+
+check()
+del check
