@@ -35,7 +35,7 @@ def combinesystematics(channel, analysis, production, category):
             assert all("ScaleRes" in _.templatesfile() for _ in ScaleResUp.values()+ScaleResDown.values())
             thetemplatesfiles += ScaleResUp.values() + ScaleResDown.values()
 
-    if config.applyZXshapesystematics:
+    if config.applyZXshapesystematicsUntagged and category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and category != "Untagged":
         ZXUp = TemplatesFile(channel, "bkg", "ZXUp", analysis, production, category)
         ZXDown = TemplatesFile(channel, "bkg", "ZXDown", analysis, production, category)
         assert "ZXUp" in ZXUp.templatesfile() and "ZXDown" in ZXDown.templatesfile()
@@ -150,7 +150,7 @@ def combinesystematics(channel, analysis, production, category):
 
             store += [MINLOintUp, MINLOintDn]
 
-    if config.applyZXshapesystematics:
+    if config.applyZXshapesystematicsUntagged and category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and category != "Untagged":
         ZXtemplate = gettemplate("ZX", channel, analysis, production, category)
         qqZZtemplate = gettemplate("qqZZ", channel, analysis, production, category)
         ZXUptemplate = qqZZtemplate.Clone(Template("ZX", channel, analysis, "ZXUp", production, category).templatename())

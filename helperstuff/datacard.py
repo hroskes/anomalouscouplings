@@ -214,7 +214,8 @@ class Datacard(MultiEnum):
     @MakeSystematicFromEnums(Channel, Category)
     def CMS_zz4l_smd_zjets_bkg_channel_category(self, channel, category):
         if channel == self.channel and category == self.category:
-            return "param 0 1 [-3,3]"
+            if config.applyZXshapesystematicsUntagged and category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and category != "Untagged":
+                return "param 0 1 [-3,3]"
 
     section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel_category)
 
@@ -467,7 +468,10 @@ class Pdf(MultiEnum):
         elif self.productionmode in ("VBF", "ZH", "WH"):
             self.makepdf_proddec()
         elif self.productionmode == "ZX":
-            self.makepdf_ZX()
+            if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
+                self.makepdf_ZX()
+            else:
+                self.makepdf_bkg()
         elif self.productionmode in ("ggZZ", "qqZZ", "VBFbkg"):
             self.makepdf_bkg()
         else:

@@ -270,12 +270,12 @@ class ProductionMode(MyEnum):
     def workspaceshapesystematics(self, category):
       result = []
       if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
-        if config.applym4lshapesystematics:
+        if config.applym4lshapesystematicsUntagged and category == "Untagged" or config.applym4lshapesystematicsVBFVHtagged and category != "Untagged":
           if config.combinem4lshapesystematics:
             result += ["ScaleRes"]
           else:
             result += ["Scale", "Res"]
-      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged"):
+      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyMINLOsystematics:
         result += ["MINLO"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
@@ -503,7 +503,7 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222"): return 35.867
+        if self in ("170203", "170222"): return 35.8671
         assert False
     def __int__(self):
         return int(str(self))
@@ -625,11 +625,11 @@ categories = Category.items()
 alternateweights = AlternateWeight.items(lambda x: x=="1" or "muR" in str(x) or "muF" in str(x) or "PDF" in str(x) or "alphaS" in str(x))
 
 _ = [""]
-if config.applym4lshapesystematics:
+if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBFVHtagged:
     _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
     if config.combinem4lshapesystematics:
         _ += ["ScaleResUp", "ScaleResDown"]
-if config.applyZXshapesystematics:
+if config.applyZXshapesystematicsUntagged or config.applyZXshapesystematicsVBFVHtagged:
     _ += ["ZXUp", "ZXDown"]
 if config.applyJECshapesystematics:
     _ += ["JECUp", "JECDown"]

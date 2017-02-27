@@ -27,13 +27,15 @@ except NameError:
 usedata = True
 showblinddistributions = True
 unblinddistributions = True
-unblindscans = False
+unblindscans = True
 useQGTagging = False
 useVHMETTagged = True
 
-applym4lshapesystematics = True
+applym4lshapesystematicsUntagged = False
+applym4lshapesystematicsVBFVHtagged = False
 combinem4lshapesystematics = True
-applyZXshapesystematics = True
+applyZXshapesystematicsVBFVHtagged = False
+applyZXshapesystematicsUntagged = False
 applyJECshapesystematics = False
 applyMINLOsystematics = True
 
