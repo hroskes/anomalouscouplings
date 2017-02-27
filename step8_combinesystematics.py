@@ -16,10 +16,12 @@ from helperstuff.enums import analyses, categories, channels, productions
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import tfiles
 
+dom4lshapes = any(config.applym4lshapesystematicsUntagged, config.applym4lshapesystematicsVBFVHtagged, config.applym4lshapesystematicsggH, config.applym4lshapesystematicsggHUntagged, config.applym4lshapesystematicsdiagonal)
+
 def combinesystematics(channel, analysis, production, category):
     thetemplatesfiles = []
 
-    if config.applym4lshapesystematics:
+    if dom4lshapes:
         ScaleAndRes = {}
         for _ in "ggh", "vbf", "zh", "wh", "tth":
             for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
@@ -55,7 +57,7 @@ def combinesystematics(channel, analysis, production, category):
 
     store = []
 
-    if config.applym4lshapesystematics:
+    if dom4lshapes:
         ggHuntaggedSM = {systematic:
                            gettemplate(channel, "ggH", analysis, production, "Untagged", analysis.purehypotheses[0], systematic)
                            .ProjectionZ().Clone("projection_{}".format(systematic))
@@ -81,7 +83,7 @@ def combinesystematics(channel, analysis, production, category):
 
         for templatesfile in ScaleAndRes.values(): outfiles[templatesfile].Write()
 
-    if config.applym4lshapesystematics and config.combinem4lshapesystematics:
+    if dom4lshapes and config.combinem4lshapesystematics:
         for _ in "ggh", "vbf", "zh", "wh", "tth":
             tf = TemplatesFile(channel, _, analysis, production, category)
             for t in tf.templates() + tf.inttemplates():

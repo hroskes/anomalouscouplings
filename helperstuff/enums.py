@@ -278,7 +278,17 @@ class ProductionMode(MyEnum):
     def workspaceshapesystematics(self, category):
       result = []
       if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
-        if config.applym4lshapesystematicsUntagged and category == "Untagged" or config.applym4lshapesystematicsVBFVHtagged and category != "Untagged":
+        if (
+            config.applym4lshapesystematicsUntagged and category == "Untagged"
+            or config.applym4lshapesystematicsVBFVHtagged and category != "Untagged"
+            or config.applym4lshapesystematicsggH and self == "ggH"
+            or config.applym4lshapesystematicsggHUntagged and self == "ggH" and category == "Untagged"
+            or config.applym4lshapesystematicsdiagonal and (
+                                                            self == "ggH" and category == "Untagged"
+                                                            or self == "VBF" and category == "VBFtagged"
+                                                            or self in ("ZH", "WH") and category == "VHHadrtagged"
+                                                           )
+           ):
           if config.combinem4lshapesystematics:
             result += ["ScaleRes"]
           else:
