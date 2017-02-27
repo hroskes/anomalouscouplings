@@ -276,7 +276,7 @@ class ProductionMode(MyEnum):
           else:
             result += ["Scale", "Res"]
       if self == "ggH" and category in ("VBFtagged", "VHHadrtagged"):
-        result += "MINLO"
+        result += ["MINLO"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
 class WorkspaceShapeSystematic(MyEnum):
