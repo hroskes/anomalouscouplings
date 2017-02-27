@@ -1,5 +1,6 @@
 import itertools
 import json
+from math import sqrt
 from numbers import Number
 import os
 import yaml
@@ -27,7 +28,7 @@ class YieldSystematic(MyEnum):
                  EnumItem("QCDscale_ttH_cat"),
                  EnumItem("QCDscale_VV_yield"),
                  EnumItem("QCDscale_VV_cat"),
-                 EnumItem("QCDscale_ggZH_yield"),
+                 #EnumItem("QCDscale_ggZH_yield"),
                  EnumItem("QCDscale_ggVV_bonly_yield"),
                  EnumItem("pdf_Higgs_gg_yield"),
                  EnumItem("pdf_Higgs_qq_yield"),
@@ -43,14 +44,14 @@ class YieldSystematic(MyEnum):
                  EnumItem("CMS_zz2e2mu_zjets"),
                 )
     def yamlfilename(self, channel=None):
-      if self in ("pdf_Higgs_gg_yield", "pdf_Higgs_qq_yield", "pdf_Higgs_ttH_yield", "BRhiggs_hzz4l", "QCDscale_ggZH_yield", "QCDscale_ggVV_bonly_yield"):
-        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
+      if self in ("pdf_Higgs_gg_yield", "pdf_Higgs_qq_yield", "pdf_Higgs_ttH_yield", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly_yield"):
+        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
       if self in ("lumi_13TeV",):
-        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_expt_13TeV.yaml")
+        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_expt_13TeV.yaml")
       if self in ("CMS_eff_e", "CMS_eff_m"):
         if channel is None:
           raise ValueError("Need to give channel for {}".format(self))
-        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "systematics_13TeV_{}.yaml".format(Channel(channel)))
+        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_13TeV_{}.yaml".format(Channel(channel)))
       raise ValueError("{} is not from yaml!".format(self))
 
     def getfromyaml(self, channel=None):
@@ -67,7 +68,23 @@ class YieldSystematic(MyEnum):
         raise ValueError("Any not in {} in {}, and not all categories are the same!".format(systname, filename))
       return values
 
-
+    def valuefromyaml(self, productionmode, channel=None):
+      dct = self.getfromyaml(channel=channel)
+      if productionmode in ("WH", "ZH"):
+        if "{}_lep".format(productionmode) not in dct and "{}_had".format(productionmode) not in dct: return None
+        lep = dct["{}_lep".format(productionmode)]
+        had = dct["{}_had".format(productionmode)]
+        if lep == had: return lep
+        assert "/" in lep and "/" in had
+        up = float(lep.split("/")[0])-1, float(had.split("/")[0])-1
+        dn = float(lep.split("/")[1])-1, float(had.split("/")[1])-1
+        rates = [totalrate(productionmode, _, 1) for _ in ("lep", "had")]
+        assert all(_>0 for _ in up) and all(_<0 for _ in dn)
+        up = 1 + sqrt((up[0]*rates[0])**2+(up[1]*rates[1])**2) / sum(rates)
+        dn = 1 - sqrt((dn[0]*rates[0])**2+(dn[1]*rates[1])**2) / sum(rates)
+        return up, dn
+      else:
+        return dct.get(productionmode.yamlsystname, None)
 
 class YieldValue(MultiEnum, JsonDict):
     __metaclass__ = MultiEnumABCMeta
@@ -131,7 +148,7 @@ class YieldSystematicValue(MultiEnum, JsonDict):
         elif isinstance(value, Number) or value is None:
           pass
         else:
-          raise ValueError("value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, origvalue))
+          raise ValueError("{!r} value {!r} should be None, a number, or a list (tuple, etc.) of length 2".format(self, origvalue))
 
         if value == 1: value = None
 
@@ -146,15 +163,30 @@ class YieldSystematicValue(MultiEnum, JsonDict):
             raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
         return "{}/{}".format(self.value[0], self.value[1])
 
-class __TotalRate(MultiEnum):
-  enums = [ProductionMode, Luminosity]
+class VDecay(MyEnum):
+  enumname = "vdecay"
+  enumitems = (
+               EnumItem("had"),
+               EnumItem("lep"),
+              )
+
+class _TotalRate(MultiEnum):
+  enums = [ProductionMode, Luminosity, VDecay]
+  def check(self, *args):
+    dontcheck = []
+    if self.vdecay is not None and self.productionmode not in ("WH", "ZH"):
+      raise ValueError("Can't have VDecay for {}\n{}".format(self.productionmode, args))
+    if self.vdecay is None:
+      dontcheck.append(VDecay)
+    return super(_TotalRate, self).check(*args, dontcheck=dontcheck)
+
   @property
   def yamlrate(self):
     lumi = None
     result = 0
     tags = [tag.replace("Mor17", "").replace("tagged", "Tagged") for category in categories for tag in category.names if "Mor17" in tag]
     for channel in channels:
-      filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(channel))
+      filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(channel))
       with open(filename) as f:
         y = yaml.load(f)
       with open(filename) as f:
@@ -168,12 +200,10 @@ class __TotalRate(MultiEnum):
         else:
           raise IOError("No luminosity in {}".format(filename))
 
-      p = self.productionmode.yamlratename
+      pnames = [p for p in self.productionmode.yamlratenames if self.vdecay is None or str(self.vdecay) in p]
+      assert pnames
 
-      for tag in tags:
-        if tag == "VHMETTagged":
-          if tag in y: raise NotImplementedError("Check MET!")
-          continue
+      for tag, p in itertools.product(tags, pnames):
         try:
           result += float(y[tag][p]) * float(self.luminosity) / lumi
         except ValueError:
@@ -205,7 +235,7 @@ class __TotalRate(MultiEnum):
     else: return self.yamlrate
 
 def totalrate(*args):
-  return __TotalRate(*args).rate
+  return _TotalRate(*args).rate
 
 def count(fromsamples, tosamples, categorizations, alternateweights):
     t = ROOT.TChain("candTree")

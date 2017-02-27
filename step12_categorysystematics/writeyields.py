@@ -38,6 +38,7 @@ def writeyields():
   categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, MultiCategorization)]
 
   for productionmode, samples in tosamples_foryields:
+    if productionmode in ("ggH", "VBF"): continue
     print productionmode
     result = MultiplyCounter()
     samplegroups = [samples]
@@ -85,14 +86,10 @@ def writeyields():
 
       #same for all categories and channels
       #from yaml
-      for systname in "pdf_Higgs_gg_yield", "pdf_Higgs_qq_yield", "pdf_Higgs_ttH_yield", "BRhiggs_hzz4l", "QCDscale_ggZH_yield", "QCDscale_ggVV_bonly_yield", "lumi_13TeV":
+      for systname in "pdf_Higgs_gg_yield", "pdf_Higgs_qq_yield", "pdf_Higgs_ttH_yield", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly_yield", "lumi_13TeV":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
-          values = syst.yieldsystematic.getfromyaml()
-          if productionmode.yamlsystname in values:
-            syst.value = values[productionmode.yamlsystname]
-          else:
-            syst.value = None
+          syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
 
       #same for all categories
       #from yaml

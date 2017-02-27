@@ -5,7 +5,6 @@ from helperstuff.combinehelpers import Luminosity
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits
-from helperstuff.replacesystematics import replacesystematics
 from itertools import product
 import os
 import pipes
