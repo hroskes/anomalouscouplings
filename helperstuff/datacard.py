@@ -251,7 +251,7 @@ class Datacard(MultiEnum):
 
         #add category name in case the same discriminant is used in multiple categories
         discs = discriminants(self.analysis, self.category)
-        D1Name, D2Name, D3Name = ("{}_{}".format(d.name, self.category) for d in discs)
+        D1Name, D2Name, D3Name = (d.name for d in discs)
         dBinsX, dBinsY, dBinsZ = (d.bins for d in discs)
         dLowX, dLowY, dLowZ = (d.min for d in discs)
         dHighX, dHighY, dHighZ = (d.max for d in discs)
