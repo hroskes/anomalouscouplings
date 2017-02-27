@@ -286,6 +286,14 @@ class ProductionMode(MyEnum):
         result += ["MINLO"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
+    @property
+    def alternateweights(self):
+      if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
+         return AlternateWeight.items(lambda x: x!="EWcorrUp" and x!="EWcorrDn")
+      if self == "qqZZ":
+         return AlternateWeight.items()
+      assert False
+
 class WorkspaceShapeSystematic(MyEnum):
     enumname = "workspaceshapesystematic"
     enumitems = (
@@ -596,6 +604,8 @@ class AlternateWeight(MyEnum):
                  EnumItem("PDFDn"),
                  EnumItem("alphaSUp"),
                  EnumItem("alphaSDn"),
+                 EnumItem("EWcorrUp"),
+                 EnumItem("EWcorrDn"),
                 )
     @property
     def issystematic(self): return self != "1"
@@ -610,6 +620,8 @@ class AlternateWeight(MyEnum):
       if self == "PDFDn": return "LHEweight_PDFVariation_Dn"
       if self == "alphaSUp": return "LHEweight_AsMZ_Up"
       if self == "alphaSDn": return "LHEweight_AsMZ_Dn"
+      if self == "EWcorrUp": return "(1 + KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
+      if self == "EWcorrDn": return "(1 - KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
       assert False
 
 channels = Channel.items()
@@ -629,7 +641,6 @@ config.productionsforcombine = type(config.productionsforcombine)(Production(pro
 productions = Production.items(lambda x: x in ("170203", "170222"))
 #productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
-alternateweights = AlternateWeight.items(lambda x: x=="1" or "muR" in str(x) or "muF" in str(x) or "PDF" in str(x) or "alphaS" in str(x))
 
 _ = [""]
 if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBFVHtagged:

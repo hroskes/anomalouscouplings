@@ -9,7 +9,7 @@ import yaml
 
 from helperstuff import config
 from helperstuff.categorization import MultiCategorization
-from helperstuff.enums import AlternateWeight, alternateweights, analyses, categories, Category, channels, flavors, ProductionMode, pythiasystematics
+from helperstuff.enums import AlternateWeight, analyses, categories, Category, channels, flavors, ProductionMode, pythiasystematics
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import MultiplyCounter
@@ -47,10 +47,11 @@ def writeyields():
     for usesamples in samplegroups:
       tmpresult = MultiplyCounter()
       for tosample in usesamples:
-        usealternateweights = alternateweights
         if (productionmode in ("ggZZ", "VBF bkg", "ZX")
              or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None):
           usealternateweights = [AlternateWeight("1")]
+        else:
+          usealternateweights = productionmode.alternateweights
 
         tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
@@ -85,7 +86,7 @@ def writeyields():
 
       #same for all categories and channels
       #from yaml
-      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV":
+      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
@@ -213,6 +214,14 @@ def writeyields():
         for channel in channels:
           YieldSystematicValue(channel, category, analysis, productionmode, "PythiaScale").value = (scaleup, scaledn)
           YieldSystematicValue(channel, category, analysis, productionmode, "PythiaTune").value = (tuneup, tunedn)
+
+        if productionmode == "qqZZ":
+          EWcorrup = sum(result[tosample, categorization, AlternateWeight("EWcorrUp"), category] for tosample in samples) / nominal
+          EWcorrdn = sum(result[tosample, categorization, AlternateWeight("EWcorrDn"), category] for tosample in samples) / nominal
+        else:
+          EWcorrup = EWcorrdn = 1
+        for channel in channels:
+          YieldSystematicValue(channel, category, analysis, productionmode, "EWcorr_VV_cat").value = (EWcorrup, EWcorrdn)
 
     YieldValue.writedict()
     YieldSystematicValue.writedict()

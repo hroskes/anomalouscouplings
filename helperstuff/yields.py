@@ -28,7 +28,8 @@ class YieldSystematic(MyEnum):
                  EnumItem("QCDscale_ttH_cat"),
                  EnumItem("QCDscale_VV"),
                  EnumItem("QCDscale_VV_cat"),
-                 #EnumItem("QCDscale_ggZH"),
+                 EnumItem("EWcorr_VV"),
+                 EnumItem("EWcorr_VV_cat"),
                  EnumItem("QCDscale_ggVV_bonly"),
                  EnumItem("pdf_Higgs_gg"),
                  EnumItem("pdf_Higgs_gg_cat"),
@@ -47,7 +48,7 @@ class YieldSystematic(MyEnum):
                  EnumItem("CMS_zz2e2mu_zjets"),
                 )
     def yamlfilename(self, channel=None):
-      if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV"):
+      if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV"):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
       if self in ("lumi_13TeV",):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_expt_13TeV.yaml")
@@ -252,7 +253,11 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     t.SetBranchStatus("Z*Flav", 1)
     t.SetBranchStatus("ZZMass", 1)
     for _ in alternateweights:
-      if _ != "1":
+      if _ == "1":
+        pass
+      elif _ in ("EWcorrUp", "EWcorrDn"):
+        t.SetBranchStatus("KFactor_EW_qqZZ*", 1)
+      else:
         t.SetBranchStatus(_.weightname, 1)
 
     c = ROOT.TCanvas()
