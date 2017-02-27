@@ -38,7 +38,6 @@ def writeyields():
   categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, MultiCategorization)]
 
   for productionmode, samples in tosamples_foryields:
-    if productionmode in ("ggH", "VBF"): continue
     print productionmode
     result = MultiplyCounter()
     samplegroups = [samples]
@@ -86,7 +85,7 @@ def writeyields():
 
       #same for all categories and channels
       #from yaml
-      for systname in "pdf_Higgs_gg_yield", "pdf_Higgs_qq_yield", "pdf_Higgs_ttH_yield", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly_yield", "lumi_13TeV":
+      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
@@ -138,21 +137,14 @@ def writeyields():
         for systname in allQCDsystematicnames:
           if productionmode == "ggZZ":
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_yield").value = YieldSystematicValue(channel, category, analysis, "ggH", systname+"_yield").value
-              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_cat").value = YieldSystematicValue(channel, category, analysis, "ggH", systname+"_cat").value
+              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "ggH", systname).value
           elif productionmode == "VBF bkg":
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_yield").value = YieldSystematicValue(channel, category, analysis, "VBF", systname+"_yield").value
-              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_cat").value = YieldSystematicValue(channel, category, analysis, "VBF", systname+"_cat").value
+              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
           elif systname == productionmode.QCDsystematicname:
-            muYieldUp, muYieldDn = {}, {}
             muUp, muDn = {}, {}
             muUpUntagged, muDnUntagged = {}, {}
 
-            muYieldUp["R"] = sum(result[tosample, categorization, AlternateWeight("muRUp")] for tosample in samples) / nominalyield
-            muYieldUp["F"] = sum(result[tosample, categorization, AlternateWeight("muFUp")] for tosample in samples) / nominalyield
-            muYieldDn["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn")] for tosample in samples) / nominalyield
-            muYieldDn["F"] = sum(result[tosample, categorization, AlternateWeight("muFDn")] for tosample in samples) / nominalyield
             muUp["R"] = sum(result[tosample, categorization, AlternateWeight("muRUp"), category] for tosample in samples) / nominal
             muUp["F"] = sum(result[tosample, categorization, AlternateWeight("muFUp"), category] for tosample in samples) / nominal
             muDn["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn"), category] for tosample in samples) / nominal
@@ -163,20 +155,6 @@ def writeyields():
             muUpUntagged["F"] = sum(result[tosample, categorization, AlternateWeight("muFUp"), Category("Untagged")] for tosample in samples) / nominaluntagged
             muDnUntagged["R"] = sum(result[tosample, categorization, AlternateWeight("muRDn"), Category("Untagged")] for tosample in samples) / nominaluntagged
             muDnUntagged["F"] = sum(result[tosample, categorization, AlternateWeight("muFDn"), Category("Untagged")] for tosample in samples) / nominaluntagged
-
-            if muYieldUp["R"] >= 1 >= muYieldDn["R"]:
-              pass
-            elif muYieldDn["R"] >= 1 >= muYieldUp["R"]:
-              muYieldUp["R"], muYieldDn["R"] = muYieldDn["R"], muYieldUp["R"]
-            else:
-              assert False, (muYieldUp["R"], muYieldDn["R"])
-
-            if muYieldUp["F"] >= 1 >= muYieldDn["F"]:
-              pass
-            elif muYieldDn["F"] >= 1 >= muYieldUp["F"]:
-              muYieldUp["F"], muYieldDn["F"] = muYieldDn["F"], muYieldUp["F"]
-            else:
-              assert False, (muYieldUp["F"], muYieldDn["F"])
 
             if muUpUntagged["R"] >= muDnUntagged["R"]:
               pass
@@ -199,9 +177,6 @@ def writeyields():
             if muUpUntagged["R"] > 1 and muDnUntagged["R"] > 1 or muUpUntagged["R"] < 1 and muDnUntagged["R"] < 1:
               logging.warning("muR up and down go in the same direction {} {}".format(muUpUntagged, muDnUntagged))
 
-            QCDYieldUp = 1 + sqrt((muYieldUp["R"]-1)**2 + (muYieldUp["F"]-1)**2)
-            QCDYieldDn = 1 - sqrt((muYieldDn["R"]-1)**2 + (muYieldDn["F"]-1)**2)
-
             if   muUp["R"] >= 1 and muUp["F"] >= 1 and muDn["R"] <= 1 and muDn["F"] <= 1: signup, signdn = +1, -1
             elif muUp["R"] <= 1 and muUp["F"] <= 1 and muDn["R"] >= 1 and muDn["F"] >= 1: signup, signdn = -1, +1
             else:
@@ -216,12 +191,10 @@ def writeyields():
             QCDDn = 1 + signdn*sqrt((muDn["R"]-1)**2 + (muDn["F"]-1)**2)
 
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_cat").value = (QCDUp, QCDDn)
-              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_yield").value = (QCDYieldUp, QCDYieldDn)
+              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = (QCDUp, QCDDn)
           else:
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_cat").value = None
-              YieldSystematicValue(channel, category, analysis, productionmode, systname+"_yield").value = None
+              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = None
 
         #pythia scale and tune
         if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):

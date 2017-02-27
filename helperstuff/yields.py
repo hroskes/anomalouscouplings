@@ -18,21 +18,21 @@ class YieldSystematic(MyEnum):
     enumitems = (
                  EnumItem("BTag"),
                  EnumItem("JEC"),
-                 EnumItem("QCDscale_ggH_yield"),
+                 EnumItem("QCDscale_ggH"),
                  EnumItem("QCDscale_ggH_cat"),
-                 EnumItem("QCDscale_qqH_yield"),
+                 EnumItem("QCDscale_qqH"),
                  EnumItem("QCDscale_qqH_cat"),
-                 EnumItem("QCDscale_VH_yield"),
+                 EnumItem("QCDscale_VH"),
                  EnumItem("QCDscale_VH_cat"),
-                 EnumItem("QCDscale_ttH_yield"),
+                 EnumItem("QCDscale_ttH"),
                  EnumItem("QCDscale_ttH_cat"),
-                 EnumItem("QCDscale_VV_yield"),
+                 EnumItem("QCDscale_VV"),
                  EnumItem("QCDscale_VV_cat"),
-                 #EnumItem("QCDscale_ggZH_yield"),
-                 EnumItem("QCDscale_ggVV_bonly_yield"),
-                 EnumItem("pdf_Higgs_gg_yield"),
-                 EnumItem("pdf_Higgs_qq_yield"),
-                 EnumItem("pdf_Higgs_ttH_yield"),
+                 #EnumItem("QCDscale_ggZH"),
+                 EnumItem("QCDscale_ggVV_bonly"),
+                 EnumItem("pdf_Higgs_gg"),
+                 EnumItem("pdf_Higgs_qq"),
+                 EnumItem("pdf_Higgs_ttH"),
                  EnumItem("BRhiggs_hzz4l"),
                  EnumItem("PythiaScale"),
                  EnumItem("PythiaTune"),
@@ -44,7 +44,7 @@ class YieldSystematic(MyEnum):
                  EnumItem("CMS_zz2e2mu_zjets"),
                 )
     def yamlfilename(self, channel=None):
-      if self in ("pdf_Higgs_gg_yield", "pdf_Higgs_qq_yield", "pdf_Higgs_ttH_yield", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly_yield"):
+      if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV"):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
       if self in ("lumi_13TeV",):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_expt_13TeV.yaml")
@@ -55,7 +55,7 @@ class YieldSystematic(MyEnum):
       raise ValueError("{} is not from yaml!".format(self))
 
     def getfromyaml(self, channel=None):
-      systname = str(self).replace("_yield", "")
+      systname = str(self)
       filename = self.yamlfilename(channel=channel)
       with open(filename) as f:
         y = yaml.load(f)

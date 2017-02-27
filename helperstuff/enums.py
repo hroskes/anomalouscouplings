@@ -260,11 +260,11 @@ class ProductionMode(MyEnum):
 
     @property
     def QCDsystematicname(self):
-      if self == "ggH": return "QCDscale_ggH"
-      if self == "qqH": return "QCDscale_qqH"
-      if self in ("ZH", "WH"): return "QCDscale_VH"
-      if self == "ttH": return "QCDscale_ttH"
-      if self == "qqZZ": return "QCDscale_VV"
+      if self == "ggH": return "QCDscale_ggH_cat"
+      if self == "qqH": return "QCDscale_qqH_cat"
+      if self in ("ZH", "WH"): return "QCDscale_VH_cat"
+      if self == "ttH": return "QCDscale_ttH_cat"
+      if self == "qqZZ": return "QCDscale_VV_cat"
       return None
 
     def workspaceshapesystematics(self, category):
