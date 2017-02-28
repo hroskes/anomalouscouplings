@@ -30,6 +30,9 @@ class TFilesDict(KeyDefaultDict):
     def __delitem__(self, key):
         self[key].Close()
         return super(TFilesDict, self).__delitem__(key)
+    def clear(self):
+        for key in self: del self[key]
+        return super(TFilesDict, self).clear()
 
 tfiles = TFilesDict()
 

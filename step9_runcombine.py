@@ -5,6 +5,7 @@ from helperstuff.combinehelpers import Luminosity
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits
+from helperstuff.utilities import tfiles
 from itertools import product
 import os
 import pipes
@@ -48,8 +49,7 @@ def runcombine(analysis, foldername, **kwargs):
     productions = config.productionsforcombine
     usesystematics = True
     subdirectory = ""
-    defaultscanrange = scanrange = (-1.0, 1.0)
-    defaultnpoints = npoints = 100
+    defaultscanrange = scanrange = (100, -1.0, 1.0)
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
     expectmuffH = expectmuVVH = 1
@@ -92,8 +92,6 @@ def runcombine(analysis, foldername, **kwargs):
                 if len(scanrange) != 2: raise ValueError
             except ValueError:
                 raise ValueError("scanrange has to contain 2 floats separated by a comma!")
-        elif kw == "npoints":
-            npoints = int(kwarg)
         elif kw == "usesignalproductionmodes":
             usesignalproductionmodes = [ProductionMode(p) for p in sorted(kwarg.split(","))]
         elif kw == "subdirectory":
@@ -150,8 +148,8 @@ def runcombine(analysis, foldername, **kwargs):
         turnoff.append("--PO nobkg")
     if not usesystematics:
         moreappend += "_nosystematics"
-    if not (npoints == defaultnpoints and scanrange == defaultscanrange):
-        moreappend += "_{},{},{}".format(npoints, *scanrange)
+    if scanrange != defaultscanrange:
+        moreappend += "_{},{},{}".format(*scanrange)
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
@@ -168,8 +166,8 @@ def runcombine(analysis, foldername, **kwargs):
               "setphysicsmodelparameters": ".oO[expectrs,]Oo.CMS_zz4l_fai1=.oO[expectfai]Oo.",
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
-              "npoints": str(npoints),
-              "scanrange": "{},{}".format(*scanrange),
+              "scanrange": str(scanrange[0]),
+              "scanrange": "{},{}".format(scanrange[1:]),
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
@@ -184,6 +182,7 @@ def runcombine(analysis, foldername, **kwargs):
     with utilities.cd(folder):
         #must make it for all categories and channels even if not using them all because of mu definition!
         makeDCsandWSs(productions, categories, channels, analysis, lumitype)
+        tfiles.clear()
         with open(".gitignore", "w") as f:
             f.write("*")
         with utilities.OneAtATime(replaceByMap(".oO[combinecardsfile]Oo..tmp", repmap), 5, task="running combineCards"):
