@@ -474,9 +474,10 @@ class _Pdf(PdfBase):
                 for i, integral in enumerate(self.T_integral, start=1):
                     print "{} T{}".format(self.productionmode, i), integral.getVal()
 
-                self.r_fai_pures_norm = ROOT.RooFormulaVar(self.puresnormname, "", "( (1-abs(@0))*@1+abs(@0)*@2 )/@1",ROOT.RooArgList(self.fai, self.T_integral[0], self.T_integral[1]))
-                self.r_fai_realints_norm = ROOT.RooFormulaVar(self.realintsnormname, "", "(sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1)/@2",ROOT.RooArgList(self.fai, self.T_integral[2], self.T_integral[0]))
+                self.r_fai_pures_norm = ROOT.RooFormulaVar(self.puresnormname, "", "( (1-abs(@0))*@1+abs(@0)*@2 )",ROOT.RooArgList(self.fai, self.T_integral[0], self.T_integral[1]))
+                self.r_fai_realints_norm = ROOT.RooFormulaVar(self.realintsnormname, "", "(sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1)",ROOT.RooArgList(self.fai, self.T_integral[2]))
                 self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)", ROOT.RooArgList(self.r_fai_pures_norm, self.r_fai_realints_norm, self.fai))
+                self.norm_SM = self.T_integral[0]
 
     @cache
     def makepdf_proddec(self):
@@ -499,8 +500,8 @@ class _Pdf(PdfBase):
                     print "{} T{}".format(self.productionmode, i), integral.getVal()
 
                 formula = " + ".join("@0**{}*@1**{}*@{}".format(4-i, i, i+2) for i in range(5))
-                formula = "("+formula+") / @2"
                 self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", formula, ROOT.RooArgList(self.a1, self.ai, *self.T_integral))
+                self.norm_SM = self.T_integral[0]
 
     def getnorm(self):
         """
@@ -518,14 +519,18 @@ class _Pdf(PdfBase):
                                                                                    for ca in categories
                                                                                    for ch in channels]
         assert any(self is _ for _ in pdfswithsamemu)
-
         pdfswithsamemu.sort(key=lambda x: x==self, reverse=True) #move self to the beginning of the list
+        assert self is pdfswithsamemu[0]
+
         for pdf in pdfswithsamemu:
             pdf.makepdf()  #does nothing if pdf is already made
 
+        numerator = " + ".join("@{}".format(i) for i, pdf in enumerate(pdfswithsamemu, start=len(pdfswithsamemu)))
         denominator = " + ".join("@{}".format(i) for i, pdf in enumerate(pdfswithsamemu))
-        formula = "@0 / ("+denominator+")"
-        return ROOT.RooFormulaVar(self.normname, self.normname, formula, utilities.RooArgList(*(_.individualnorm for _ in pdfswithsamemu)))
+        formula = "@0/@{}  * ({}) / ({})".format(len(pdfswithsamemu), numerator, denominator)
+        arglist = utilities.RooArgList(*[_.individualnorm for _ in pdfswithsamemu]
+                                       +[_.norm_SM for _ in pdfswithsamemu])
+        return ROOT.RooFormulaVar(self.normname, self.normname, formula, arglist)
 
     def makepdf_ZX(self):
         if hasattr(self, "T"): return

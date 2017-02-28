@@ -54,6 +54,7 @@ def runcombine(analysis, foldername, **kwargs):
     usebkg = True
     expectmuffH = expectmuVVH = 1
     fixmu = False
+    plotmus = False
     if config.unblindscans:
         lumitype = "fordata"
     else:
@@ -114,6 +115,8 @@ def runcombine(analysis, foldername, **kwargs):
             expectmuVVH = float(kwarg)
         elif kw == "fixmu":
             fixmu = bool(int(kwarg))
+        elif kw == "plotmus":
+            plotmus = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -235,6 +238,11 @@ def runcombine(analysis, foldername, **kwargs):
             plotname = plotname.replace("."+ext, "")
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
         plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanrange=scanrange)
+        if plotmus:
+            muplotname = plotname.replace("limit", "muV")
+            plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanrange=scanrange, nuisance="r_VVH", yaxistitle="#mu_{V}")
+            muplotname = plotname.replace("limit", "muF")
+            plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanrange=scanrange, nuisance="r_ffH", yaxistitle="#mu_{f}")
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+sys.argv))

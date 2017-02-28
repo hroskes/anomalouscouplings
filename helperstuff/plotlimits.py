@@ -21,6 +21,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     moreappend = ""
     luminosity = None
     xmin, xmax = -1, 1
+    nuisance = None
+    yaxistitle = "-2#Deltaln L"
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -34,6 +36,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             luminosity = kwarg
         elif kw == "scanrange":
             xmin, xmax = kwarg
+        elif kw == "nuisance":
+            nuisance = kwarg
+        elif kw == "yaxistitle":
+            yaxistitle = kwarg
         else:
             assert False
 
@@ -76,12 +82,16 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
         for entry in islice(t, 1, None):
             fa3 = getattr(t, branchname)
-            deltaNLL = t.deltaNLL
-            NLL[fa3] = 2*deltaNLL
+            if nuisance is None:
+                deltaNLL = t.deltaNLL
+                NLL[fa3] = 2*deltaNLL
+            else:
+                 NLL[fa3] = getattr(t, nuisance)
         if 1 not in NLL and -1 in NLL:
             NLL[1] = NLL[-1]
 
         c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+        if nuisance is None: NLL.zero()
         g = NLL.TGraph()
         mg.Add(g)
 
@@ -94,7 +104,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     mg.Draw("AL")
     mg.GetXaxis().SetTitle("{} cos({})".format(analysis.title(), analysis.phi_lower))
     mg.GetXaxis().SetRangeUser(-1, 1)
-    mg.GetYaxis().SetTitle("-2#Deltaln L")
+    mg.GetYaxis().SetTitle(yaxistitle)
     l.Draw()
 
     style.applycanvasstyle(c1)
