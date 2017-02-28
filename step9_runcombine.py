@@ -224,7 +224,7 @@ def runcombine(analysis, foldername, **kwargs):
                   expectfai = minimum
               repmap_exp.update({
                 "npoints": str(scanrange[0]),
-                "scanrange": "{},{}".format(scanrange[1:]),
+                "scanrange": "{},{}".format(*scanrange[1:]),
                 "scanrangeappend": "" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.",
                 "expectfai": str(expectfai),
                 "append": ".oO[expectedappend]Oo.",
