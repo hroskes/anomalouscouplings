@@ -89,6 +89,7 @@ def runcombine(analysis, foldername, **kwargs):
             usesystematics = bool(int(kwarg))
         elif kw == "scanranges":
             scanranges = []
+            kwarg = kwarg.replace(":", ";")
             for _ in kwarg.split(";"):
                 try:
                     split = _.split(",")
@@ -233,7 +234,7 @@ def runcombine(analysis, foldername, **kwargs):
                 "-t -1": "-t -1",
               })
               if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
-                with OneAtATime(replaceByMap(".oO[filename]Oo.", repmap_exp)+".tmp"):
+                with utilities.OneAtATime(replaceByMap(".oO[filename]Oo.", repmap_exp)+".tmp", 30):
                   subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
 
         saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
@@ -261,12 +262,12 @@ def runcombine(analysis, foldername, **kwargs):
             plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance="r_ffH", yaxistitle="#mu_{f}")
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
-        f.write(" ".join(["python"]+sys.argv))
+        f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
         f.write("\n\n\n")
         f.write("python limits.py ")
         for arg in sys.argv[1:]:
             if "=" in arg and "subdirectory=" not in arg: continue
-            f.write(arg+" ")
+            f.write(pipes.quote(arg)+" ")
         f.write("plotname="+plotname+" ")
         f.write("\n\n\n\n\n\ngit info:\n\n")
         f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
