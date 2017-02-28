@@ -68,6 +68,31 @@ def cache(function):
     newfunction.__name__ = function.__name__
     return newfunction
 
+def multienumcache(function, haskwargs=False, multienumforkey=None):
+    from enums import MultiEnum
+    if multienumforkey is None:
+        multienumforkey = function
+    assert issubclass(function, MultiEnum)
+    assert issubclass(multienumforkey, MultiEnum)
+    cache = {}
+    def newfunction(*args, **kwargs):
+        if kwargs and not haskwargs:
+            raise TypeError("{} has no kwargs!".format(function.__name__))
+        key = multienumforkey(*args)
+        try:
+            oldkwargs, result = cache[key]
+            if kwargs and kwargs != oldkwargs:
+                raise ValueError("{}({}, **kwargs) called with 2 different kwargs:\n{}\n{}".format(function.__name__, ", ".join(repr(_) for _ in args), oldkwargs, kwargs))
+            return result
+        except KeyError:
+            if haskwargs and not kwargs:
+                raise ValueError("Have to give kwargs the first time you call {}({}, **kwargs)".format(function.__name__, ", ".join(repr(_) for _ in args)))
+            cache[key] = kwargs, function(*args, **kwargs)
+            return newfunction(*args, **kwargs)
+    newfunction.__name__ = function.__name__
+    return newfunction
+
+
 def cache_instancemethod(function):
     """
     for when self doesn't support __hash__
@@ -436,3 +461,26 @@ class LSF_creating(object):
 
         if notcreated and not self.ignorefailure:
             raise RuntimeError("\n".join("{} was not created!".format(os.path.basename(filename)) for filename in filenames))
+
+def RooArgList(*args, **kwargs):
+    name = None
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "name":
+            name = kwarg
+        else:
+            raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
+    args = list(args)
+    if name is None and isinstance(args[-1], basestring):
+        name = args[-1]
+        args = args[:-1]
+
+    if len(args) < 4:
+        if name is not None:
+            args.append(name)
+        return ROOT.RooArgList(*args)
+
+    nameargs = [name] if name is not None else []
+    result = ROOT.RooArgList(*nameargs)
+    for arg in args:
+        result.add(arg)
+    return result
