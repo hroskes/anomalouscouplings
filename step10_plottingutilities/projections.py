@@ -550,10 +550,10 @@ class Projections(MultiEnum):
                       qqZZ, ggZZ, VBFbkg, ZX,
                      ]
 
-    if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
-        templates += [
-                      self.TemplateFromFile(1, category, self.enrichstatus, self.normalization, self.analysis, channel, "data", self.production)
-                     ]
+        if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
+            templates += [
+                          self.TemplateFromFile(1, category, self.enrichstatus, self.normalization, self.analysis, channel, "data", self.production)
+                         ]
 
     c1 = ROOT.TCanvas()
     legend = ROOT.TLegend(.65, .6, .9, .9)
@@ -690,6 +690,6 @@ if __name__ == "__main__":
     p.projections(ch, ca, subdir="ggH", ggHfactor=1, VBFfactor=0, VHfactor=0)
     p.projections(ch, ca, subdir="VBF", ggHfactor=0, VBFfactor=1, VHfactor=0)
     p.projections(ch, ca, subdir="VH",  ggHfactor=0, VBFfactor=0, VHfactor=1)
-    if p.enrichstatus == "fullrange":
-      p.animation(ch, ca)
+    #if p.enrichstatus == "fullrange":
+    #  p.animation(ch, ca)
     print i, "/", length*len(channels)*len(categories)
