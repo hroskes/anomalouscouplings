@@ -31,7 +31,7 @@ class TFilesDict(KeyDefaultDict):
         self[key].Close()
         return super(TFilesDict, self).__delitem__(key)
     def clear(self):
-        for key in self: del self[key]
+        for key in self.keys(): del self[key]
         return super(TFilesDict, self).clear()
 
 tfiles = TFilesDict()
@@ -127,7 +127,7 @@ class KeepWhileOpenFile(object):
     def __init__(self, name, message=None):
         logging.debug("creating KeepWhileOpenFile {}".format(name))
         self.filename = name
-        self.message = message
+        self.__message = message
         self.pwd = os.getcwd()
         self.fd = self.f = None
         self.bool = False
@@ -149,9 +149,9 @@ class KeepWhileOpenFile(object):
                     logging.warning("{} doesn't exist!??".format(self.filename))
                 self.f = os.fdopen(self.fd, 'w')
                 try:
-                    if self.message is not None:
+                    if self.__message is not None:
                         logging.debug("writing message")
-                        self.f.write(self.message+"\n")
+                        self.f.write(self.__message+"\n")
                         logging.debug("wrote message")
                 except IOError:
                     logging.debug("failed to write message")
@@ -206,14 +206,14 @@ class OneAtATime(KeepWhileOpenFile):
         if message is None:
             message = "Another process is already {task}!  Waiting {delay} seconds."
         message = message.format(delay=delay, task=task)
-        self.message = message
+        self.__message = message
 
     def __enter__(self):
         while True:
             result = super(OneAtATime, self).__enter__()
             if result:
                 return result
-            print self.message
+            print self.__message
             time.sleep(self.delay)
 
 def jsonloads(jsonstring):

@@ -9,7 +9,7 @@ import ROOT
 import stylefunctions as style
 import sys
 
-filenametemplate = "higgsCombine_{}.MultiDimFit.mH125.root"
+filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
 branchname = "CMS_zz4l_fai1"
 
 Scan = namedtuple("Scan", "name title color style")
@@ -20,7 +20,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     legendposition = (.2, .7, .6, .9)
     moreappend = ""
     luminosity = None
-    xmin, xmax = -1, 1
+    scanranges = None
     nuisance = None
     yaxistitle = "-2#Deltaln L"
     for kw, kwarg in kwargs.iteritems():
@@ -34,14 +34,17 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             moreappend = kwarg
         elif kw == "luminosity":
             luminosity = kwarg
-        elif kw == "scanrange":
-            xmin, xmax = kwarg
+        elif kw == "scanranges":
+            scanranges = kwarg
         elif kw == "nuisance":
             nuisance = kwarg
         elif kw == "yaxistitle":
             yaxistitle = kwarg
         else:
-            assert False
+            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    xmin = min(scanrange[1] for scanrange in scanranges)
+    xmax = max(scanrange[2] for scanrange in scanranges)
 
     scans = []
     uptocolor = 1
@@ -73,22 +76,27 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     l.SetBorderSize(0)
 
     for scan in scans:
-        f = ROOT.TFile(filenametemplate.format(scan.name))
-        assert f
-        t = f.Get("limit")
-        assert t
-
         NLL = ExtendedCounter()
-
-        for entry in islice(t, 1, None):
-            fa3 = getattr(t, branchname)
-            if nuisance is None:
-                deltaNLL = t.deltaNLL
-                NLL[fa3] = 2*deltaNLL
+        for scanrange in scanranges:
+            if scanrange == (100, -1, 1):
+                scanrangeappend = ""
             else:
-                 NLL[fa3] = getattr(t, nuisance)
-        if 1 not in NLL and -1 in NLL:
-            NLL[1] = NLL[-1]
+                scanrangeappend = "_{},{},{}".format(*scanrange)
+            f = ROOT.TFile(filenametemplate.format(append=scan.name, scanrangeappend=scanrangeappend))
+            assert f
+            t = f.Get("limit")
+            assert t
+
+
+            for entry in islice(t, 1, None):
+                fa3 = getattr(t, branchname)
+                if nuisance is None:
+                    deltaNLL = t.deltaNLL+t.nll
+                    NLL[fa3] = 2*deltaNLL
+                else:
+                     NLL[fa3] = getattr(t, nuisance)
+            if 1 not in NLL and -1 in NLL:
+                NLL[1] = NLL[-1]
 
         c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
         if nuisance is None: NLL.zero()
