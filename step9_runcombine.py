@@ -28,10 +28,11 @@ exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = r"""
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. \
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
+        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=1 \
+        -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. \
         .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo...oO[exporobs]Oo.
+        -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
 """
 
 def check_call_test(*args, **kwargs):
@@ -48,6 +49,7 @@ def runcombine(analysis, foldername, **kwargs):
     CLtextposition = "left"
     productions = config.productionsforcombine
     usesystematics = True
+    runobs = True
     subdirectory = ""
     defaultscanrange = (100, -1.0, 1.0)
     scanranges = [defaultscanrange]
@@ -56,6 +58,9 @@ def runcombine(analysis, foldername, **kwargs):
     expectmuffH = expectmuVVH = 1
     fixmu = False
     plotmus = False
+    defaultalgo = algo = "grid"
+    robustfit = False
+    defaultPOI = POI = "CMS_zz4l_fai1"
     if config.unblindscans:
         lumitype = "fordata"
     else:
@@ -121,6 +126,14 @@ def runcombine(analysis, foldername, **kwargs):
             fixmu = bool(int(kwarg))
         elif kw == "plotmus":
             plotmus = bool(int(kwarg))
+        elif kw == "algo":
+            algo = kwarg
+        elif kw == "robustfit":
+            robustfit = bool(int(kwarg))
+        elif kw == "POI":
+            POI = kwarg
+        elif kw == "runobs":
+            runobs = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -154,6 +167,12 @@ def runcombine(analysis, foldername, **kwargs):
         turnoff.append("--PO nobkg")
     if not usesystematics:
         moreappend += "_nosystematics"
+    if algo != defaultalgo:
+        moreappend += "_algo"+algo
+    if robustfit:
+        moreappend += "_robustfit"
+    if POI != defaultPOI:
+        moreappend += "_scan"+POI
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
@@ -177,7 +196,11 @@ def runcombine(analysis, foldername, **kwargs):
               "expectmuffH": str(expectmuffH),
               "expectmuVVH": str(expectmuVVH),
               "fixmu": "--PO muFixed" if fixmu else "",
-              "savemu": "" if fixmu else "--saveSpecifiedFunc=r_VVH,r_ffH"
+              "savemu": "" if fixmu else "--saveSpecifiedFunc=r_VVH,r_ffH",
+              "algo": algo,
+              "robustfit": str(int(robustfit)),
+              "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
+              "POI": POI,
              }
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
@@ -194,7 +217,7 @@ def runcombine(analysis, foldername, **kwargs):
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
-        if config.unblindscans:
+        if config.unblindscans and runobs:
           minimum = (float("nan"), float("inf"))
           for scanrange in scanranges:
               repmap_obs = repmap.copy()
