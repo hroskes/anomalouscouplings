@@ -119,7 +119,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     style.applyaxesstyle(mg)
     style.CMS("Preliminary", luminosity)
 
-    drawlines(CLtextposition, xmin=xmin, xmax=xmax)
+    if nuisance is None:
+        drawlines(CLtextposition, xmin=xmin, xmax=xmax)
     for ext in "png eps root pdf".split():
         outputfilename = outputfilename.replace("."+ext, "")
     for ext in "png eps root pdf".split():
