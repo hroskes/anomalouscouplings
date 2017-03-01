@@ -313,15 +313,18 @@ class Projections(MultiEnum):
     exts = "png", "eps", "root", "pdf"
     otherthingstodraw = []
     floor = False
+    nicestyle = False
     for kw, kwarg in kwargs.iteritems():
-       if kw == "ggHfactor":
-           ggHfactor = float(kwarg)
-       elif kw == "VBFfactor":
-           VBFfactor = float(kwarg)
-       elif kw == "VHfactor":
-           VHfactor = float(kwarg)
-       elif kw == "ttHfactor":
-           ttHfactor = float(kwarg)
+       if kw == "productionmode":
+           assert "mus" not in kwargs
+           if   kwarg == "ggH": ggHfactor = 1; VBFfactor = VHfactor  = ttHfactor = 0
+           elif kwarg == "VBF": VBFfactor = 1; ggHfactor = VHfactor  = ttHfactor = 0
+           elif kwarg ==  "VH": VHfactor  = 1; ggHfactor = VBFfactor = ttHfactor = 0
+           elif kwarg == "ttH": ttHfactor = 1; ggHfactor = VVFfactor = VHfactor  = 0
+           else: raise ValueError("Unknown productionmode {}!".format(kwarg))
+       elif kw == "mus":
+           assert "productionmode" not in kwargs
+           muV, muf = kwarg
        elif kw == "subdir":
            subdir = kwarg
        elif kw == "saveasdir":
@@ -341,6 +344,8 @@ class Projections(MultiEnum):
            otherthingstodraw += kwarg
        elif kw == "floor":
            floor = bool(int(kwarg))
+       elif kw == "nicestyle":
+           nicestyle = bool(int(kwarg))
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -528,7 +533,7 @@ class Projections(MultiEnum):
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
         if customfai  > 0: plusminus = "#plus"
-        ggHcustom = self.ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, 1, (ggHSM[category,channel], g1_custom**2), (ggHBSM[category,channel], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[category,channel],  g1_custom*gi_custom/gi_ggHBSM))
+        ggHcustom = self.ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, 1, (ggHg12gi0[category,channel], g1_custom**2), (ggHg10gi2[category,channel], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[category,channel],  g1_custom*gi_custom/gi_ggHBSM))
         VBFcustom = self.ComponentTemplateSum("VBF ({}={}{:.2f})".format(self.analysis.title(superscript="VBF"), plusminus, abs(customsample.fai("VBF", self.analysis))), 2, 1,
                                          *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces[category,channel]))
                                         )
@@ -686,10 +691,10 @@ if __name__ == "__main__":
 
   length = len(list(projections()))
   for i, (p, ch, ca) in enumerate(itertools.product(projections(), channels, categories), start=1):
-    p.projections(ch, ca)
-    p.projections(ch, ca, subdir="ggH", ggHfactor=1, VBFfactor=0, VHfactor=0)
-    p.projections(ch, ca, subdir="VBF", ggHfactor=0, VBFfactor=1, VHfactor=0)
-    p.projections(ch, ca, subdir="VH",  ggHfactor=0, VBFfactor=0, VHfactor=1)
-    #if p.enrichstatus == "fullrange":
-    #  p.animation(ch, ca)
+    #p.projections(ch, ca)
+    #p.projections(ch, ca, subdir="ggH", productionmode="ggH")
+    #p.projections(ch, ca, subdir="VBF", productionmode="VBF")
+    #p.projections(ch, ca, subdir="VH",  productionmode="VH")
+    if p.enrichstatus == "fullrange":
+      p.animation(ca, ch)
     print i, "/", length*len(channels)*len(categories)
