@@ -63,12 +63,6 @@ class TemplateForProjection(object):
     def AddToLegend(self, legend):
         legend.AddEntry(self.Projection(0), self.title, self.legendoption)
 
-    def Scale(self, *args, **kwargs):
-        oldintegral = self.h.Integral()
-        return self.h.Scale(*args, **kwargs)
-        newintegral = self.h.Integral()
-        self.integral *= newintegral / oldintegral
-
     def Integral(self):
         return self.integral
 
@@ -93,7 +87,6 @@ class Normalization(MyEnum):
     enumname = "normalization"
     enumitems = [
                  EnumItem("rescalemixtures"),
-                 EnumItem("areanormalize"),
                 ]
 normalizations = Normalization.items()
 
@@ -140,7 +133,7 @@ class BaseTemplateFromFile(TemplateForProjection):
         else:
             self.hstackoption = "hist"
 
-        self.Scale(scalefactor)
+        self.h.Scale(scalefactor)
 
         self.integral = self.h.Integral()
 
@@ -262,7 +255,7 @@ class ComponentTemplateSum(TemplateSum):
         super(ComponentTemplateSum, self).inithistogram()
         if isinstance(self.SMintegral, TemplateForProjection): self.SMintegral = self.SMintegral.Integral()
         if self.Integral():
-            self.Scale(self.SMintegral / self.Integral())
+            self.h.Scale(self.SMintegral / self.Integral())
 
 class ComponentTemplateSumInGroup(TemplateSum):
     def __init__(self, title, mygroup, SMgroup, *templatesandfactors, **kwargs):
@@ -279,7 +272,7 @@ class ComponentTemplateSumInGroup(TemplateSum):
     def inithistogram(self):
         super(ComponentTemplateSumInGroup, self).inithistogram()
         if self.Integral():
-            self.Scale(self.SMgroup.Integral() / self.mygroup.Integral())
+            self.h.Scale(self.SMgroup.Integral() / self.mygroup.Integral())
 
 class Projections(MultiEnum):
   enums = [Analysis, Normalization, ShapeSystematic, Production, EnrichStatus]
@@ -574,7 +567,7 @@ class Projections(MultiEnum):
                                                linecolor=4
                                              )
         for t in ggHcustom, VBFcustom, VHcustom:
-            t.Scale(1.0/t.Integral())
+            assert abs(t.Integral() - 1) < 1e-6, t.Integral()
 
         templates += [
                       ggHcustom, VBFcustom, VHcustom
@@ -776,11 +769,6 @@ class Projections(MultiEnum):
 
         for template in usetemplates:
             if template.linecolor:
-                if self.normalization == "areanormalize":
-                    try:
-                        template.Scale(1/template.Integral())
-                    except ZeroDivisionError:
-                        pass
                 if floor:
                     template.Floor()
                 if template.title:
