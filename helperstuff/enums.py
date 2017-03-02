@@ -290,8 +290,9 @@ class ProductionMode(MyEnum):
                                                            )
            ):
           if config.combinem4lshapesystematics:
-            result += ["ScaleRes"]
+            result += ["Res"]
           else:
+            assert 0
             result += ["Scale", "Res"]
       if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyMINLOsystematics:
         result += ["MINLO"]
@@ -309,13 +310,13 @@ class WorkspaceShapeSystematic(MyEnum):
     enumname = "workspaceshapesystematic"
     enumitems = (
                  EnumItem("Res"),
-                 EnumItem("Scale"),
-                 EnumItem("ScaleRes"),
+#                 EnumItem("Scale"),
+#                 EnumItem("ScaleRes"),
                  EnumItem("MINLO"),
                 )
     @property
     def isperchannel(self):
-        if self in ("Res", "Scale", "ScaleRes"): return True
+        if self in ("Res",)+0*("Scale", "ScaleRes"): return True
         return False
 
 class SystematicDirection(MyEnum):
@@ -331,10 +332,10 @@ class ShapeSystematic(MyEnum):
                  EnumItem(""),
                  EnumItem("ResUp"),
                  EnumItem("ResDown"),
-                 EnumItem("ScaleUp"),
-                 EnumItem("ScaleDown"),
-                 EnumItem("ScaleResUp", "ResScaleUp"),
-                 EnumItem("ScaleResDown", "ResScaleDown"),
+#                 EnumItem("ScaleUp"),
+#                 EnumItem("ScaleDown"),
+#                 EnumItem("ScaleResUp", "ResScaleUp"),
+#                 EnumItem("ScaleResDown", "ResScaleDown"),
                  EnumItem("JECUp"),
                  EnumItem("JECDown", "JECDn"),
                  EnumItem("ZXUp"),
@@ -344,7 +345,7 @@ class ShapeSystematic(MyEnum):
                  EnumItem("MINLODn", "MINLODown"),
                 )
     def appendname(self):
-        if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
+        if self in ("ResUp", "ResDown"): return "_Scale" + str(self)
         return ""
     def D_bkg(self, title=False):
         from discriminants import discriminant
@@ -352,7 +353,7 @@ class ShapeSystematic(MyEnum):
     def appliesto(self, templategroup):
         if self == "":
             return True
-        if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"):
+        if self in ("ResUp", "ResDown"):
             return templategroup in ("ggh", "vbf", "zh", "wh", "tth")
         if self in ("ZXUp", "ZXDown"):
             return templategroup == "bkg"
@@ -654,10 +655,10 @@ productions = Production.items(lambda x: x in ("170203", "170222"))
 categories = Category.items()
 
 _ = [""]
-if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBFVHtagged:
-    _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
+if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBFVHtagged or config.applym4lshapesystematicsggH or config.applym4lshapesystematicsggHUntagged or config.applym4lshapesystematicsdiagonal:
+#    _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
     if config.combinem4lshapesystematics:
-        _ += ["ScaleResUp", "ScaleResDown"]
+        _ += ["ResUp", "ResDown"]
 if config.applyZXshapesystematicsUntagged or config.applyZXshapesystematicsVBFVHtagged:
     _ += ["ZXUp", "ZXDown"]
 if config.applyJECshapesystematics:
@@ -665,7 +666,7 @@ if config.applyJECshapesystematics:
 if config.applyMINLOsystematics:
     _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
-treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown"))
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "JECUp", "JECDown"))
 del _
 
 class MetaclassForMultiEnums(type):

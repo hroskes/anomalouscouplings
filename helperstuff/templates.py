@@ -61,7 +61,7 @@ class TemplatesFile(MultiEnum):
         nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic, self.production]
         if firststep: nameparts.append("firststep")
 
-        nameparts = [str(x) for x in nameparts if x]
+        nameparts = [str(x).replace("Res", "ScaleRes") for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")
 
         return result
@@ -335,9 +335,9 @@ def templatesfiles():
             for analysis in analyses:
                 for category in categories:
                     for shapesystematic in treeshapesystematics:
-                        if category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+                        if category != "Untagged" and shapesystematic in ("ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
-                        if shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+                        if shapesystematic in ("ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)

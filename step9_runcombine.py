@@ -210,6 +210,7 @@ def runcombine(analysis, foldername, **kwargs):
         tfiles.clear()
         with open(".gitignore", "w") as f:
             f.write("*")
+        return
         with utilities.OneAtATime(replaceByMap(".oO[combinecardsfile]Oo..tmp", repmap), 5, task="running combineCards"):
             if not os.path.exists(replaceByMap(".oO[combinecardsfile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(combinecardstemplate, repmap), shell=True)
