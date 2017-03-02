@@ -269,7 +269,7 @@ class ComponentTemplateSum(TemplateSum):
             if not self.cantakeintegral:
                 raise ValueError("Have to be able to take integral of ComponentTemplateSum, or normalize to a number")
             self.SMintegral = self.SMintegral.Integral()
-        if self.Integral():
+        if self.h.Integral():
             self.h.Scale(self.SMintegral / self.h.Integral())
 
 class ComponentTemplateSumInGroup(TemplateSum):
@@ -629,7 +629,7 @@ class Projections(MultiEnum):
         templates += [
                       SM, BSM, mix_p, mix_m,
                      ]
-    else:
+    if animation and not nicestyle:
         assert ggHfactor == VBFfactor == VHfactor == 1
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
