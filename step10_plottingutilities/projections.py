@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 import abc
 import collections
+import glob
+import itertools
+from math import copysign, sqrt
+import os
+import re
+import subprocess
+from tempfile import mkdtemp
+
+import ROOT
+
 from helperstuff import config, constants, run1info, stylefunctions as style
 from helperstuff.combinehelpers import getrate, gettemplate, Luminosity
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic
@@ -8,12 +18,9 @@ from helperstuff.samples import ReweightingSample, samplewithfai
 import helperstuff.rootoverloads.histogramaxisnumbers, helperstuff.rootoverloads.histogramfloor
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import cache, tfiles, pairwise
-import itertools
-from math import copysign, sqrt
-import os
-import ROOT
-import subprocess
-from tempfile import mkdtemp
+
+c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+style.applycanvasstyle(c1)
 
 class TemplateForProjection(object):
     __metaclass__ = abc.ABCMeta
@@ -64,7 +71,7 @@ class TemplateForProjection(object):
         legend.AddEntry(self.Projection(0), self.title, self.legendoption)
 
     def Integral(self):
-        return self.integral
+        return self.h.Integral()
 
     def Floor(self, *args, **kwargs):
         self.h.Floor(*args, **kwargs)
@@ -81,7 +88,7 @@ class TemplateForProjection(object):
 
     @property
     def histogramattrs(self):
-        return "h", "hstackoption", "integral"
+        return "h", "hstackoption"
 
 class Normalization(MyEnum):
     enumname = "normalization"
@@ -134,8 +141,6 @@ class BaseTemplateFromFile(TemplateForProjection):
             self.hstackoption = "hist"
 
         self.h.Scale(scalefactor)
-
-        self.integral = self.h.Integral()
 
         self.doenrich()
 
@@ -206,10 +211,8 @@ class TemplateSumBase(TemplateForProjection):
 class TemplateSum(TemplateSumBase):
     def inithistogram(self):
         self.h = None
-        self.integral = 0
         for template, factor in self.templatesandfactors:
             if not factor: continue
-            self.integral += template.integral*factor
             if self.h is None:
                 self.h = template.h.Clone()
                 self.h.Scale(factor)
@@ -229,12 +232,12 @@ class IntegralSum(TemplateSumBase):
         return "h{}".format(cls.counter)
     def inithistogram(self):
         self.hstackoption = None
-        self.integral = 0
+        integral = 0
         for template, factor in self.templatesandfactors:
-            self.integral += template.Integral() * factor
+            integral += template.Integral() * factor
         self.h = ROOT.TH1D(self.hname(), "", 1, 0, 1)
-        self.h.Fill(.5, self.integral)
-        assert abs(self.h.Integral() - self.integral)/self.integral < 1e-10, (self.h.Integral(), self.integral)
+        self.h.Fill(.5, integral)
+        assert abs(self.h.Integral() - integral)/integral < 1e-10, (self.h.Integral(), integral)
         super(IntegralSum, self).inithistogram()
 
 class ComponentTemplateSum(TemplateSum):
@@ -331,16 +334,17 @@ class Projections(MultiEnum):
     justoneproductionmode = None
     legendargs = [(.65, .6, .9, .9)]*3
     rebin = None
+    muV = muf = 1
     for kw, kwarg in kwargs.iteritems():
        if kw == "productionmode":
            justoneproductionmode = True
-           assert "mus" not in kwargs
+           assert "muVmuf" not in kwargs
            if   kwarg == "ggH": ggHfactor = 1; VBFfactor = VHfactor  = ttHfactor = 0
            elif kwarg == "VBF": VBFfactor = 1; ggHfactor = VHfactor  = ttHfactor = 0
            elif kwarg ==  "VH": VHfactor  = 1; ggHfactor = VBFfactor = ttHfactor = 0
            elif kwarg == "ttH": ttHfactor = 1; ggHfactor = VVFfactor = VHfactor  = 0
            else: raise ValueError("Unknown productionmode {}!".format(kwarg))
-       elif kw == "mus":
+       elif kw == "muVmuf":
            assert "productionmode" not in kwargs
            muV, muf = kwarg
        elif kw == "subdir":
@@ -594,9 +598,10 @@ class Projections(MultiEnum):
 
         templates = [ZZ, ZX]
 
+        ca = category
+
+        legendargs = [(0.20,0.57,0.58,0.90), (0.20,0.57,0.58,0.90), (0.23,0.57,0.61,0.90)]
         if not animation:
-            ca = category
-            legendargs = [(0.20,0.57,0.58,0.90), (0.20,0.57,0.58,0.90), (0.23,0.57,0.61,0.90)]
             SMffH = self.TemplateSum("",
                                      *sum(
                                           ([(ggHg12gi0[ca,ch], 1), (ttHg12gi0[ca,ch], 1)]
@@ -667,6 +672,7 @@ class Projections(MultiEnum):
                 mix_mbottom = mix_mVVH
                 bottomtitle = "VBF+VH"
                 bottomcolor = 4
+                bottommu = muV
                 toptitle = "ggH+t#bar{t}H"
                 topcolor = ROOT.kOrange+10
             elif category in ("VBFtagged", "VHHadrtagged"):
@@ -676,40 +682,83 @@ class Projections(MultiEnum):
                 mix_mbottom = mix_mffH
                 bottomtitle = "ggH+t#bar{t}H"
                 bottomcolor = ROOT.kOrange+10
+                bottommu = muf
                 toptitle = "VBF+VH"
                 topcolor = 4
 
             SMbottom = self.TemplateSum("{} SM".format(bottomtitle),
-                                       (SMbottom, 1), (ZZ, 1), #which already has ZX
+                                       (SMbottom, bottommu), (ZZ, 1), #which already has ZX
                                        linecolor=bottomcolor, linewidth=2)
             BSMbottom = self.TemplateSum("{} {} = 1".format(bottomtitle, self.analysis.title()),
-                                         (BSMbottom, 1), (ZZ, 1),
+                                         (BSMbottom, bottommu), (ZZ, 1),
                                          linecolor=bottomcolor, linewidth=2, linestyle=2)
             mix_pbottom = self.TemplateSum("{} {} = #plus 0.5".format(bottomtitle, self.analysis.title(superscript=superscript)),
-                                           (mix_pbottom, 1), (ZZ, 1),
+                                           (mix_pbottom, bottommu), (ZZ, 1),
                                            linecolor=bottomcolor, linewidth=2, linestyle=2)
             mix_mbottom = self.TemplateSum("{} {} = #minus 0.5".format(bottomtitle, self.analysis.title(superscript=superscript)),
-                                           (mix_mbottom, 1), (ZZ, 1),
+                                           (mix_mbottom, bottommu), (ZZ, 1),
                                            linecolor=bottomcolor, linewidth=2, linestyle=2)
 
             SM = self.TemplateSum("{} SM".format(toptitle),
-                                  (SMffH, 1), (SMVVH, 1), (ZZ, 1), #which already has ZX
+                                  (SMffH, muf), (SMVVH, muV), (ZZ, 1), #which already has ZX
                                   linecolor=topcolor, linewidth=2)
             BSM = self.TemplateSum("{} {} = 1".format(toptitle, self.analysis.title()),
-                                   (BSMffH, 1), (BSMVVH, 1), (ZZ, 1),
+                                   (BSMffH, muf), (BSMVVH, muV), (ZZ, 1),
                                    linecolor=topcolor, linewidth=2, linestyle=2)
             mix_p = self.TemplateSum("{} {} = #plus 0.5".format(toptitle, self.analysis.title(superscript=superscript)),
-                                     (mix_pffH, 1), (mix_pVVH, 1), (ZZ, 1),
+                                     (mix_pffH, muf), (mix_pVVH, muV), (ZZ, 1),
                                      linecolor=topcolor, linewidth=2, linestyle=2)
             mix_m = self.TemplateSum("{} {} = #minus 0.5".format(toptitle, self.analysis.title(superscript=superscript)),
-                                     (mix_mffH, 1), (mix_mVVH, 1), (ZZ, 1),
+                                     (mix_mffH, muf), (mix_mVVH, muV), (ZZ, 1),
                                      linecolor=topcolor, linewidth=2, linestyle=2)
             templates[0:0] = [SMbottom, SM, BSMbottom, BSM, mix_pbottom, mix_p, mix_mbottom, mix_m] #will remove some later, depending on the discriminant
 
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
         else: #animation
-            assert 0
+            ffH = self.ComponentTemplateSumInGroup("", ffHmix_p, ffHSM,
+                                                   *sum(
+                                                        ([(ggHg12gi0[ca,ch], g1_custom**2), (ggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
+                                                          (ttHg12gi0[ca,ch], g1_custom**2), (ttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
+                                                           for ch in channels),
+                                                         []
+                                                        )
+                                                  )
+            VVH = self.ComponentTemplateSumInGroup("", VVHmix_p, VVHSM,
+                                                   *sum(
+                                                        ([(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ca,ch])]
+                                                       + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ca,ch])]
+                                                       + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                                           for ch in channels),
+                                                         []
+                                                        )
+                                                  )
+            if category == "Untagged":
+                bottom = VVH
+                bottomtitle = "VBF+VH"
+                bottomcolor = 4
+                bottommu = muV
+                toptitle = "ggH+t#bar{t}H"
+                topcolor = ROOT.kOrange+10
+            elif category in ("VBFtagged", "VHHadrtagged"):
+                bottom = ffH
+                bottomtitle = "ggH+t#bar{t}H"
+                bottomcolor = ROOT.kOrange+10
+                bottommu = muf
+                toptitle = "VBF+VH"
+                topcolor = 4
+
+            bottom = self.TemplateSum(bottomtitle,
+                                     (bottom, bottommu), (ZZ, 1), #which already has ZX
+                                     linecolor=bottomcolor, linewidth=2)
+            top = self.TemplateSum(toptitle,
+                                   (VVH, muV), (ffH, muf), (ZZ, 1), #which already has ZX
+                                   linecolor=topcolor, linewidth=2)
+
+            templates[0:0] = [bottom, top] #will remove some later, depending on the discriminant
+
+            if category in ("VBFtagged", "VHHadrtagged"):
+                rebin = 5
 
         if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
             data = self.TemplateSum("",
@@ -735,9 +784,6 @@ class Projections(MultiEnum):
             templates += [
                           self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "data", self.production)
                          ]
-
-    c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
-    style.applycanvasstyle(c1)
 
     for i, discriminant in enumerate(self.discriminants(category)):
         usetemplates = templates
@@ -790,7 +836,7 @@ class Projections(MultiEnum):
         if nicestyle and discriminant.name == "D_CP_decay": hstack.GetXaxis().SetRangeUser(-.4, .4)
         style.applyaxesstyle(hstack)
         if nicestyle:
-            style.cuttext(self.enrichstatus.cuttext())
+            style.cuttext(self.enrichstatus.cuttext(), x1=.48+.03*(discriminant.name=="D_bkg"), x2=.58+.03*(discriminant.name=="D_bkg"))
             style.CMS("Preliminary", float(Luminosity("fordata", self.production)))
         legend.Draw()
         for thing, option in otherthingstodraw:
@@ -809,21 +855,26 @@ class Projections(MultiEnum):
       assert self.normalization == "rescalemixtures"
       return os.path.join(config.plotsbasedir, "templateprojections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
   def saveasdir_niceplots(self, category):
-      assert self.normalization == "rescalemixtures"
-      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots_new", self.enrichstatus.dirname(), "{}_{}/{}".format(self.analysis, self.production, Category(category)))
+      assert self.normalization == "rescalemixtures" and len(config.productionsforcombine) == 1
+      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots_new", self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
 
   def discriminants(self, category):
       return TemplatesFile("2e2mu", self.shapesystematic, "ggh", self.analysis, self.production, category).discriminants
 
   class AnimationStep(object):
-    def __init__(self, productionmodeforfai, analysis, fai, delay):
+    def __init__(self, productionmodeforfai, analysis, fai, delay, muV=1, muf=1, deltaNLL=None):
         self.analysis = analysis
         self.delay = delay
-        sample = samplewithfai("ggH", self.analysis, fai, productionmodeforfai=productionmodeforfai)
-        self.fai_decay = sample.fai("ggH", self.analysis)
+        self.sample = samplewithfai("ggH", self.analysis, fai, productionmodeforfai=productionmodeforfai)
+        self.fai_decay = self.sample.fai("ggH", self.analysis)
+        self.muV = muV
+        self.muf = muf
+        self.deltaNLL = deltaNLL
     def __cmp__(self, other):
         assert self.analysis == other.analysis
         return cmp((self.fai_decay, self.delay), (other.fai_decay, other.delay))
+    def fai(self, *args, **kwargs):
+        return self.sample.fai(*args, **kwargs)
     @property
     @cache
     def excludedtext(self):
@@ -840,20 +891,69 @@ class Projections(MultiEnum):
         text.SetTextColor(2)
         return pt
 
-  def animation(self, category, channel, floor=False):
+    @property
+    @cache
+    def niceplotsinfo(self):
+        x1, y1, x2, y2 = .65, .57, .85, .9
+        pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
+        pt.SetBorderSize(0)
+        pt.SetFillStyle(0)
+        pt.SetTextAlign(12)
+        pt.SetTextFont(42)
+        pt.SetTextSize(0.045)
+        pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="dec"), self.fai_decay))
+        pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="VBF"), self.fai("VBF", self.analysis)))
+        pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="VH"), self.fai("VH", self.analysis)))
+        pt.AddText("{}={:.2f}".format("#mu_{V}", self.muV))
+        pt.AddText("{}={:.2f}".format("#mu_{f}", self.muf))
+        pt.AddText("{}={:.2f}".format("-2#Deltaln L", self.deltaNLL))
+        return pt
+
+  def animation(self, category, channel, floor=False, scantree=None):
       tmpdir = mkdtemp()
 
       nsteps = 200
       animation = []
-      for productionmode in "VBF", "VH", "ggH":
-          animation += [
-                        self.AnimationStep(
-                                           productionmode,
-                                           self.analysis,
-                                           -1+(2.*i/nsteps),
-                                           50 if ((-1+(2.*i/nsteps))*2).is_integer() else 5
-                                          ) for i in range(nsteps+1)
-                       ]
+      nicestyle = (scantree is not None)
+
+      finaldir = os.path.join(self.saveasdir(category, channel), "animation")
+
+      if nicestyle:
+          if channel != "2e2mu": return
+
+          finaldir = os.path.join(self.saveasdir_niceplots(category), "animation")
+
+          minNLL, faiforminNLL = min((scantree.deltaNLL+scantree.nll+scantree.nll0, scantree.CMS_zz4l_fai1) for entry in scantree)
+          VBFmix = samplewithfai("ggH", self.analysis, 0.5, productionmodeforfai="VBF").fai("ggH", self.analysis)
+          VHmix = samplewithfai("ggH", self.analysis, 0.5, productionmodeforfai="VH").fai("ggH", self.analysis)
+          pauses = [
+                    min((scantree.CMS_zz4l_fai1 for entry in scantree), key = lambda x: abs(x-_))
+                       for _ in (0, -1, 1, .5, -.5, VBFmix, -VBFmix, VHmix, -VHmix) if _ in (0, 1, -1)
+                   ]
+          for entry in scantree:
+              animation.append(
+                               self.AnimationStep(
+                                                  "ggH",
+                                                  self.analysis,
+                                                  scantree.CMS_zz4l_fai1,
+                                                  100 if scantree.CMS_zz4l_fai1 == faiforminNLL or scantree.CMS_zz4l_fai1 in pauses
+                                                     else 10,
+                                                  muV = scantree.r_VVH,
+                                                  muf = scantree.r_ffH,
+                                                  deltaNLL = 2*(scantree.deltaNLL+scantree.nll+scantree.nll0 - minNLL)
+                                                 )
+                              )
+      else:
+          for productionmode in "VBF", "VH", "ggH":
+              animation += [
+                            self.AnimationStep(
+                                               productionmode,
+                                               self.analysis,
+                                               -1+(2.*i/nsteps),
+                                               50 if ((-1+(2.*i/nsteps))*2).is_integer() else 5
+                                              ) for i in range(nsteps+1)
+                           ]
+
       animation = sorted(set(animation))
       while True:
           for step, nextstep in pairwise(animation[:]):
@@ -866,13 +966,18 @@ class Projections(MultiEnum):
       kwargs_base = {
                      "saveasdir": tmpdir,
                      "floor": floor,
+                     "nicestyle": nicestyle,
                     }
 
       for i, step in enumerate(animation):
           kwargs = kwargs_base.copy()
           kwargs["customfaiforanimation"] = step.fai_decay, "ggH"
           kwargs["saveasappend"] = i
-          kwargs["otherthingstodraw"] = [(step.excludedtext, "")]
+          if nicestyle:
+              kwargs["otherthingstodraw"] = [(step.niceplotsinfo, "")]
+          else:
+              kwargs["otherthingstodraw"] = [(step.excludedtext, "")]
+          kwargs["muVmuf"] = step.muV, step.muf
           self.projections(category, channel, **kwargs)
 
       for discriminant in self.discriminants(category):
@@ -883,10 +988,10 @@ class Projections(MultiEnum):
                   convertcommand += ["-delay", str(step.delay)]
               convertcommand.append(os.path.join(tmpdir, "{}{}.gif".format(discriminant.name, i)))
           try:
-              os.makedirs(os.path.join(self.saveasdir(category, channel), "animation"))
+              os.makedirs(finaldir)
           except OSError:
               pass
-          convertcommand.append(os.path.join(self.saveasdir(category, channel), "animation", "{}.gif".format(discriminant.name)))
+          convertcommand.append(os.path.join(finaldir, "{}.gif".format(discriminant.name)))
           subprocess.check_call(convertcommand)
 
 def projections(*args):
@@ -905,7 +1010,13 @@ if __name__ == "__main__":
 
   length = len(list(projections()))
   for i, (p, ch, ca) in enumerate(itertools.product(projections(), channels, categories), start=1):
-    p.projections(ch, ca, nicestyle=True)
+    scantree = ROOT.TChain("limit")
+    for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_7_6_5", "src", "HiggsAnalysis", "HZZ4l_Combination",
+                                       "CreateDatacards", "cards_{}_Feb28_mu".format(p.analysis), "higgsCombine_obs_*.root")):
+        if re.match("higgsCombine_obs_lumi[0-9.]*(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
+            scantree.Add(filename)
+    #p.projections(ch, ca, nicestyle=True)
+    p.animation(ca, ch, scantree=scantree)
     #p.projections(ch, ca)
     #p.projections(ch, ca, subdir="ggH", productionmode="ggH")
     #p.projections(ch, ca, subdir="VBF", productionmode="VBF")

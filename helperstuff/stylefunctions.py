@@ -182,10 +182,10 @@ def applyaxesstyle(h):
     h.GetYaxis().SetTitleFont(42)
 
 tokeep = {}
-def cuttext(text):
+def cuttext(text, x1=.71, y1=.84, x2=.92, y2=.92):
     if not text: return
     if (cuttext, text) not in tokeep:
-        pt = tokeep[cuttext,text] = ROOT.TPaveText(0.71,0.84,0.92,0.92,"brNDC")
+        pt = tokeep[cuttext,text] = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
         pt.SetBorderSize(0)
         pt.SetTextAlign(12)
         pt.SetTextSize(0.04)

@@ -91,7 +91,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             for entry in islice(t, 1, None):
                 fa3 = getattr(t, branchname)
                 if nuisance is None:
-                    deltaNLL = t.deltaNLL+t.nll
+                    deltaNLL = t.deltaNLL+t.nll+t.nll0
                     NLL[fa3] = 2*deltaNLL
                 else:
                      NLL[fa3] = getattr(t, nuisance)

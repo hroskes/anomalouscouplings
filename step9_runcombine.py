@@ -236,8 +236,8 @@ def runcombine(analysis, foldername, **kwargs):
                   subprocess.check_call(replaceByMap(runcombinetemplate, repmap_obs), shell=True)
               f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
               for entry in f.limit:
-                  if f.limit.deltaNLL+f.limit.nll < minimum[1]:
-                      minimum = (f.limit.CMS_zz4l_fai1, f.limit.deltaNLL+f.limit.nll)
+                  if f.limit.deltaNLL+f.limit.nll+f.limit.nll0 < minimum[1]:
+                      minimum = (f.limit.CMS_zz4l_fai1, f.limit.deltaNLL+f.limit.nll+f.limit.nll0)
           minimum = minimum[0]
           del f
 
