@@ -403,6 +403,117 @@ class Projections(MultiEnum):
         gi_mix = 1/2**.25 * gi_VHBSM
         fainame = self.analysis.title(superscript="VHdec")
 
+    allggHg12gi0 = {}
+    allggHg10gi2 = {}
+    allggHg11gi1 = {}
+    allttHg12gi0 = {}
+    allttHg10gi2 = {}
+    allttHg11gi1 = {}
+
+    allVBFg14gi0 = {}
+    allVBFg13gi1 = {}
+    allVBFg12gi2 = {}
+    allVBFg11gi3 = {}
+    allVBFg10gi4 = {}
+    allVBFpieces = {}
+
+    allZHg14gi0 = {}
+    allZHg13gi1 = {}
+    allZHg12gi2 = {}
+    allZHg11gi3 = {}
+    allZHg10gi4 = {}
+    allZHpieces = {}
+
+    allWHg14gi0 = {}
+    allWHg13gi1 = {}
+    allWHg12gi2 = {}
+    allWHg11gi3 = {}
+    allWHg10gi4 = {}
+    allWHpieces = {}
+
+    for ca, ch in itertools.product(categories, channels):
+      allggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      allggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      allggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+
+      allttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      allttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      allttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+
+      allVBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      allVBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      allVBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      allVBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      allVBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+
+      allVBFpieces[ca,ch] = [allVBFg14gi0[ca,ch], allVBFg13gi1[ca,ch], allVBFg12gi2[ca,ch], allVBFg11gi3[ca,ch], allVBFg10gi4[ca,ch]]
+
+      allZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      allZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      allZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      allZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      allZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+
+      allZHpieces[ca,ch] = [allZHg14gi0[ca,ch], allZHg13gi1[ca,ch], allZHg12gi2[ca,ch], allZHg11gi3[ca,ch], allZHg10gi4[ca,ch]]
+
+      allWHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      allWHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      allWHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      allWHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      allWHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+
+      allWHpieces[ca,ch] = [allWHg14gi0[ca,ch], allWHg13gi1[ca,ch], allWHg12gi2[ca,ch], allWHg11gi3[ca,ch], allWHg10gi4[ca,ch]]
+
+    ffHSM     = self.IntegralSum(*sum(
+                                      ([(allggHg12gi0[ca,ch], 1), (allttHg12gi0[ca,ch], 1)]
+                                          for ca, ch in itertools.product(categories, channels)),
+                                       []
+                                      ))
+    ffHBSM    = self.IntegralSum(*sum(
+                                      ([(allggHg10gi2[ca,ch], 1), (allttHg10gi2[ca,ch], 1)]
+                                         for ca, ch in itertools.product(categories, channels)),
+                                      []
+                                     ))
+    ffHmix_p  = self.IntegralSum(*sum(
+                                      ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
+                                        (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
+                                         for ca, ch in itertools.product(categories, channels)),
+                                       []
+                                      ))
+    ffHmix_m  = self.IntegralSum(*sum(
+                                      ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
+                                        (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
+                                         for ca, ch in itertools.product(categories, channels)),
+                                       []
+                                     ))
+
+    VVHSM     = self.IntegralSum(*sum(
+                                      ([(allVBFg14gi0[ca,ch], 1), (allZHg14gi0[ca,ch], 1), (allWHg14gi0[ca,ch], 1)]
+                                         for ca, ch in itertools.product(categories, channels)),
+                                      []
+                                     ))
+    VVHBSM    = self.IntegralSum(*sum(
+                                      ([(allVBFg10gi4[ca,ch], 1), (allZHg10gi4[ca,ch], 1), (allWHg10gi4[ca,ch], 1)]
+                                         for ca, ch in itertools.product(categories, channels)),
+                                      []
+                                     ))
+    VVHmix_p  = self.IntegralSum(*sum((
+                                        [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
+                                         for ca, ch in itertools.product(categories, channels)),
+                                      []
+                                     ))
+    VVHmix_m  = self.IntegralSum(*sum((
+                                        [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
+                                         for ca, ch in itertools.product(categories, channels)),
+                                      []
+                                     ))
+
+    del ca, ch
+
     ggHg12gi0 = {}
     ggHg10gi2 = {}
     ggHg11gi1 = {}
@@ -431,121 +542,75 @@ class Projections(MultiEnum):
     WHg10gi4 = {}
     WHpieces = {}
 
-    for ca, ch in itertools.product(categories, channels):
-      ggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      ggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+    for ch in channels:
+      ggHg12gi0[ch] = self.TemplateFromFile(   "ggH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ggHg10gi2[ch] = self.TemplateFromFile(   "ggH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ggHg11gi1[ch] = self.IntTemplateFromFile("ggH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
 
-      ttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      ttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+      ttHg12gi0[ch] = self.TemplateFromFile(   "ttH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ttHg10gi2[ch] = self.TemplateFromFile(   "ttH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ttHg11gi1[ch] = self.IntTemplateFromFile("ttH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
 
-      VBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      VBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      VBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      VBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      VBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      VBFg14gi0[ch] = self.TemplateFromFile(   "VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      VBFg13gi1[ch] = self.IntTemplateFromFile("VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      VBFg12gi2[ch] = self.IntTemplateFromFile("VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      VBFg11gi3[ch] = self.IntTemplateFromFile("VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      VBFg10gi4[ch] = self.TemplateFromFile(   "VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
-      VBFpieces[ca,ch] = [VBFg14gi0[ca,ch], VBFg13gi1[ca,ch], VBFg12gi2[ca,ch], VBFg11gi3[ca,ch], VBFg10gi4[ca,ch]]
+      VBFpieces[ch] = [VBFg14gi0[ch], VBFg13gi1[ch], VBFg12gi2[ch], VBFg11gi3[ch], VBFg10gi4[ch]]
 
-      ZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      ZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      ZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      ZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ZHg14gi0[ch] = self.TemplateFromFile(   "ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ZHg13gi1[ch] = self.IntTemplateFromFile("ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      ZHg12gi2[ch] = self.IntTemplateFromFile("ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      ZHg11gi3[ch] = self.IntTemplateFromFile("ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      ZHg10gi4[ch] = self.TemplateFromFile(   "ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
-      ZHpieces[ca,ch] = [ZHg14gi0[ca,ch], ZHg13gi1[ca,ch], ZHg12gi2[ca,ch], ZHg11gi3[ca,ch], ZHg10gi4[ca,ch]]
+      ZHpieces[ch] = [ZHg14gi0[ch], ZHg13gi1[ch], ZHg12gi2[ch], ZHg11gi3[ch], ZHg10gi4[ch]]
 
-      WHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      WHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      WHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      WHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      WHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      WHg14gi0[ch] = self.TemplateFromFile(   "WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      WHg13gi1[ch] = self.IntTemplateFromFile("WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      WHg12gi2[ch] = self.IntTemplateFromFile("WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      WHg11gi3[ch] = self.IntTemplateFromFile("WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      WHg10gi4[ch] = self.TemplateFromFile(   "WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
-      WHpieces[ca,ch] = [WHg14gi0[ca,ch], WHg13gi1[ca,ch], WHg12gi2[ca,ch], WHg11gi3[ca,ch], WHg10gi4[ca,ch]]
+      WHpieces[ch] = [WHg14gi0[ch], WHg13gi1[ch], WHg12gi2[ch], WHg11gi3[ch], WHg10gi4[ch]]
 
-    ffHSM     = self.IntegralSum(*sum(
-                                      ([(ggHg12gi0[ca,ch], 1), (ttHg12gi0[ca,ch], 1)]
-                                          for ca, ch in itertools.product(categories, channels)),
-                                       []
-                                      ))
-    ffHBSM    = self.IntegralSum(*sum(
-                                      ([(ggHg10gi2[ca,ch], 1), (ttHg10gi2[ca,ch], 1)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-    ffHmix_p  = self.IntegralSum(*sum(
-                                      ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
-                                        (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                       []
-                                      ))
-    ffHmix_m  = self.IntegralSum(*sum(
-                                      ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
-                                        (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                       []
-                                     ))
+    del ch
 
-    VVHSM     = self.IntegralSum(*sum(
-                                      ([(VBFg14gi0[ca,ch], 1), (ZHg14gi0[ca,ch], 1), (WHg14gi0[ca,ch], 1)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-    VVHBSM    = self.IntegralSum(*sum(
-                                      ([(VBFg10gi4[ca,ch], 1), (ZHg10gi4[ca,ch], 1), (WHg10gi4[ca,ch], 1)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-    VVHmix_p  = self.IntegralSum(*sum((
-                                        [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(WHpieces[ca,ch])]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-    VVHmix_m  = self.IntegralSum(*sum((
-                                        [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[ca,ch])]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-
-    ggHSM = self.TemplateSum("ggH SM", (ggHg12gi0[category,channel], 1))
-    ggHBSM = self.ComponentTemplateSumInGroup("ggH {}=1".format(fainame), ffHBSM, ffHSM, (ggHg10gi2[category,channel], 1))
+    ggHSM = self.TemplateSum("ggH SM", (ggHg12gi0[channel], 1))
+    ggHBSM = self.ComponentTemplateSumInGroup("ggH {}=1".format(fainame), ffHBSM, ffHSM, (ggHg10gi2[channel], 1))
     ggHmix_p  = self.ComponentTemplateSumInGroup("ggH {}=#plus0.5" .format(fainame), ffHmix_p, ffHSM,
-                                                 (ggHg12gi0[category,channel], g1_mix**2), (ggHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[category,channel],  g1_mix*gi_mix/gi_ggHBSM))
+                                                 (ggHg12gi0[channel], g1_mix**2), (ggHg10gi2[channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[channel],  g1_mix*gi_mix/gi_ggHBSM))
     ggHmix_m  = self.ComponentTemplateSumInGroup("ggH {}=#minus0.5".format(fainame), ffHmix_m, ffHSM,
-                                                 (ggHg12gi0[category,channel], g1_mix**2), (ggHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[category,channel], -g1_mix*gi_mix/gi_ggHBSM))
-    ttHSM = self.TemplateSum("ttH SM", (ttHg12gi0[category,channel], 1))
-    ttHBSM = self.ComponentTemplateSumInGroup("ttH {}=1".format(fainame), ffHBSM, ffHSM, (ttHg10gi2[category,channel], 1))
+                                                 (ggHg12gi0[channel], g1_mix**2), (ggHg10gi2[channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[channel], -g1_mix*gi_mix/gi_ggHBSM))
+    ttHSM = self.TemplateSum("ttH SM", (ttHg12gi0[channel], 1))
+    ttHBSM = self.ComponentTemplateSumInGroup("ttH {}=1".format(fainame), ffHBSM, ffHSM, (ttHg10gi2[channel], 1))
     ttHmix_p  = self.ComponentTemplateSumInGroup("ttH {}=#plus0.5" .format(fainame), ffHmix_p, ffHSM,
-                                                 (ttHg12gi0[category,channel], g1_mix**2), (ttHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[category,channel],  g1_mix*gi_mix/gi_ggHBSM))
+                                                 (ttHg12gi0[channel], g1_mix**2), (ttHg10gi2[channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[channel],  g1_mix*gi_mix/gi_ggHBSM))
     ttHmix_m  = self.ComponentTemplateSumInGroup("ttH {}=#minus0.5".format(fainame), ffHmix_m, ffHSM,
-                                                 (ttHg12gi0[category,channel], g1_mix**2), (ttHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[category,channel], -g1_mix*gi_mix/gi_ggHBSM))
+                                                 (ttHg12gi0[channel], g1_mix**2), (ttHg10gi2[channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[channel], -g1_mix*gi_mix/gi_ggHBSM))
 
-    VBFSM = self.TemplateSum("VBF SM", (VBFg14gi0[category,channel], 1))
-    VBFBSM = self.ComponentTemplateSumInGroup("VBF {}=1".format(fainame), VVHBSM, VVHSM, (VBFg10gi4[category,channel], 1))
+    VBFSM = self.TemplateSum("VBF SM", (VBFg14gi0[channel], 1))
+    VBFBSM = self.ComponentTemplateSumInGroup("VBF {}=1".format(fainame), VVHBSM, VVHSM, (VBFg10gi4[channel], 1))
     VBFmix_p  = self.ComponentTemplateSumInGroup("VBF {}=#plus0.5" .format(fainame), VVHmix_p, VVHSM,
-                                            *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(VBFpieces[category,channel]))
+                                            *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(VBFpieces[channel]))
                                            )
     VBFmix_m  = self.ComponentTemplateSumInGroup("VBF {}=#minus0.5".format(fainame), VVHmix_m, VVHSM,
-                                            *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[category, channel]))
+                                            *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[channel]))
                                            )
 
-    VHSM = self.TemplateSum("VH SM", (ZHg14gi0[category,channel], 1), (WHg14gi0[category,channel], 1))
-    VHBSM = self.ComponentTemplateSumInGroup("VH {}=1".format(fainame), VVHBSM, VVHSM, (ZHg10gi4[category,channel], 1), (WHg10gi4[category,channel], 1))
+    VHSM = self.TemplateSum("VH SM", (ZHg14gi0[channel], 1), (WHg14gi0[channel], 1))
+    VHBSM = self.ComponentTemplateSumInGroup("VH {}=1".format(fainame), VVHBSM, VVHSM, (ZHg10gi4[channel], 1), (WHg10gi4[channel], 1))
     VHmix_p  = self.ComponentTemplateSumInGroup("VH {}=#plus0.5" .format(fainame), VVHmix_p, VVHSM,
                                             *(
-                                                [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(ZHpieces[category,channel])]
-                                              + [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(WHpieces[category,channel])]
+                                                [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(ZHpieces[channel])]
+                                              + [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(WHpieces[channel])]
                                              )
                                            )
     VHmix_m  = self.ComponentTemplateSumInGroup("VH {}=#minus0.5" .format(fainame), VVHmix_m, VVHSM,
                                             *(
-                                                [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[category,channel])]
-                                              + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[category,channel])]
+                                                [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[channel])]
+                                              + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[channel])]
                                              )
                                            )
 
@@ -569,15 +634,15 @@ class Projections(MultiEnum):
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
         if customfai  > 0: plusminus = "#plus"
-        ggHcustom = self.ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, (ggHg12gi0[category,channel], g1_custom**2), (ggHg10gi2[category,channel], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[category,channel],  g1_custom*gi_custom/gi_ggHBSM), linecolor=1)
+        ggHcustom = self.ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, (ggHg12gi0[channel], g1_custom**2), (ggHg10gi2[channel], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[channel],  g1_custom*gi_custom/gi_ggHBSM), linecolor=1)
         VBFcustom = self.ComponentTemplateSum("VBF ({}={}{:.2f})".format(self.analysis.title(superscript="VBF"), plusminus, abs(customsample.fai("VBF", self.analysis))), 1,
-                                              *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces[category,channel])),
+                                              *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces[channel])),
                                               linecolor=2
                                              )
         VHcustom  = self.ComponentTemplateSum("VH ({}={}{:.2f})".format(self.analysis.title(superscript="VH"), plusminus, abs(customsample.fai("VH", self.analysis))), 1,
                                               *(
-                                                  [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces[category,channel])]
-                                                + [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces[category,channel])]
+                                                  [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces[channel])]
+                                                + [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces[channel])]
                                                ),
                                                linecolor=4
                                              )
@@ -609,68 +674,66 @@ class Projections(MultiEnum):
 
         templates = [ZZ, ZX]
 
-        ca = category
-
         legendargs = [(0.20,0.57,0.58,0.90), (0.20,0.57,0.58,0.90), (0.23,0.57,0.61,0.90)]
         if not animation:
             SMffH = self.TemplateSum("",
                                      *sum(
-                                          ([(ggHg12gi0[ca,ch], 1), (ttHg12gi0[ca,ch], 1)]
+                                          ([(ggHg12gi0[ch], 1), (ttHg12gi0[ch], 1)]
                                               for ch in channels),
                                            []
                                          )
                                     )
             SMVVH = self.TemplateSum("",
                                      *sum(
-                                          ([(VBFg14gi0[ca,ch], 1), (ZHg14gi0[ca,ch], 1), (WHg14gi0[ca,ch], 1)]
+                                          ([(VBFg14gi0[ch], 1), (ZHg14gi0[ch], 1), (WHg14gi0[ch], 1)]
                                               for ch in channels),
                                            []
                                          )
                                     )
             BSMffH = self.ComponentTemplateSumInGroup("", ffHBSM, ffHSM,
                                                       *sum(
-                                                           ([(ggHg10gi2[ca,ch], 1), (ttHg10gi2[ca,ch], 1)]
+                                                           ([(ggHg10gi2[ch], 1), (ttHg10gi2[ch], 1)]
                                                                for ch in channels),
                                                             []
                                                            )
                                                      )
             BSMVVH = self.ComponentTemplateSumInGroup("", VVHBSM, VVHSM,
                                                       *sum(
-                                                           ([(VBFg10gi4[ca,ch], 1), (ZHg10gi4[ca,ch], 1), (WHg10gi4[ca,ch], 1)]
+                                                           ([(VBFg10gi4[ch], 1), (ZHg10gi4[ch], 1), (WHg10gi4[ch], 1)]
                                                                for ch in channels),
                                                             []
                                                            )
                                                      )
             mix_pffH = self.ComponentTemplateSumInGroup("", ffHmix_p, ffHSM,
                                                         *sum(
-                                                             ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
-                                                               (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
+                                                             ([(ggHg12gi0[ch], g1_mix**2), (ggHg10gi2[ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ch],  g1_mix*gi_mix/gi_ggHBSM),
+                                                               (ttHg12gi0[ch], g1_mix**2), (ttHg10gi2[ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ch],  g1_mix*gi_mix/gi_ggHBSM)]
                                                                 for ch in channels),
                                                               []
                                                              )
                                                        )
             mix_pVVH = self.ComponentTemplateSumInGroup("", VVHmix_p, VVHSM,
                                                         *sum(
-                                                             ([(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                                            + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
-                                                            + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                                             ([(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ch])]
+                                                            + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(ZHpieces[ch])]
+                                                            + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(WHpieces[ch])]
                                                                 for ch in channels),
                                                               []
                                                              )
                                                        )
             mix_mffH = self.ComponentTemplateSumInGroup("", ffHmix_m, ffHSM,
                                                         *sum(
-                                                             ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
-                                                               (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
+                                                             ([(ggHg12gi0[ch], g1_mix**2), (ggHg10gi2[ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ch], -g1_mix*gi_mix/gi_ggHBSM),
+                                                               (ttHg12gi0[ch], g1_mix**2), (ttHg10gi2[ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ch], -g1_mix*gi_mix/gi_ggHBSM)]
                                                                 for ch in channels),
                                                               []
                                                              )
                                                        )
             mix_mVVH = self.ComponentTemplateSumInGroup("", VVHmix_m, VVHSM,
                                                         *sum(
-                                                             ([(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                                            + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
-                                                            + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                                             ([(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ch])]
+                                                            + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[ch])]
+                                                            + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[ch])]
                                                                 for ch in channels),
                                                               []
                                                              )
@@ -728,31 +791,31 @@ class Projections(MultiEnum):
                 rebin = 5
         else: #animation
             ffHintegral  = self.IntegralSum(*sum(
-                                                 ([(ggHg12gi0[ca,ch], g1_custom**2), (ggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
-                                                   (ttHg12gi0[ca,ch], g1_custom**2), (ttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
+                                                 ([(allggHg12gi0[ca,ch], g1_custom**2), (allggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
+                                                   (allttHg12gi0[ca,ch], g1_custom**2), (allttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
                                                     for ca, ch in itertools.product(categories, channels)),
                                                   []
                                                  ))
             VVHintegral  = self.IntegralSum(*sum((
-                                                   [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                                 + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ca,ch])]
-                                                 + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                                   [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                                 + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                                 + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allWHpieces[ca,ch])]
                                                     for ca, ch in itertools.product(categories, channels)),
                                                  []
                                                 ))
             ffH = self.ComponentTemplateSumInGroup("", ffHintegral, ffHSM,
                                                    *sum(
-                                                        ([(ggHg12gi0[ca,ch], g1_custom**2), (ggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
-                                                          (ttHg12gi0[ca,ch], g1_custom**2), (ttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
+                                                        ([(ggHg12gi0[ch], g1_custom**2), (ggHg10gi2[ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ch],  g1_custom*gi_custom/gi_ggHBSM),
+                                                          (ttHg12gi0[ch], g1_custom**2), (ttHg10gi2[ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ch],  g1_custom*gi_custom/gi_ggHBSM)]
                                                            for ch in channels),
                                                          []
                                                         )
                                                   )
             VVH = self.ComponentTemplateSumInGroup("", VVHintegral, VVHSM,
                                                    *sum(
-                                                        ([(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                                       + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ca,ch])]
-                                                       + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                                        ([(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ch])]
+                                                       + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ch])]
+                                                       + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(WHpieces[ch])]
                                                            for ch in channels),
                                                          []
                                                         )

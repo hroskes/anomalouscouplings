@@ -56,7 +56,7 @@ def runcombine(analysis, foldername, **kwargs):
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
     expectmuffH = expectmuVVH = 1
-    fixmu = False
+    fixmuV = fixmuF = False
     plotmus = False
     defaultalgo = algo = "grid"
     robustfit = False
@@ -122,8 +122,10 @@ def runcombine(analysis, foldername, **kwargs):
             expectmuffH = float(kwarg)
         elif kw == "expectmuVVH":
             expectmuVVH = float(kwarg)
-        elif kw == "fixmu":
-            fixmu = bool(int(kwarg))
+        elif kw == "fixmuV":
+            fixmuV = bool(int(kwarg))
+        elif kw == "fixmuf":
+            fixmuf = bool(int(kwarg))
         elif kw == "plotmus":
             plotmus = bool(int(kwarg))
         elif kw == "algo":
@@ -148,8 +150,10 @@ def runcombine(analysis, foldername, **kwargs):
     workspacefileappend = ".oO[combinecardsappend]Oo."
     moreappend = ".oO[workspacefileappend]Oo."
     turnoff = []
-    if fixmu:
-        workspacefileappend += "_fixmu"
+    if fixmuV:
+        workspacefileappend += "_fixmuV"
+    if fixmuf:
+        workspacefileappend += "_fixmuf"
     if expectmuffH != 1:
         moreappend += "_muffH{}".format(expectmuffH)
     if expectmuVVH != 1:
@@ -186,17 +190,17 @@ def runcombine(analysis, foldername, **kwargs):
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": str(totallumi),
               "observedappend": "obs",
-              "setphysicsmodelparameters": ".oO[expectrs,]Oo.CMS_zz4l_fai1=.oO[expectfai]Oo.",
+              "setphysicsmodelparameters": ".oO[expectmus,]Oo.CMS_zz4l_fai1=.oO[expectfai]Oo.",
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
-              "expectrs,": "" if fixmu else "r_ffH=.oO[expectmuffH]Oo.,r_VVH=.oO[expectmuVVH]Oo.,",
+              "expectmus,": ("" if fixmuf else "r_ffH=.oO[expectmuffH]Oo.,") + ("" if fixmuV else "r_VVH=.oO[expectmuVVH]Oo.,"),
               "expectmuffH": str(expectmuffH),
               "expectmuVVH": str(expectmuVVH),
-              "fixmu": "--PO muFixed" if fixmu else "",
-              "savemu": "" if fixmu else "--saveSpecifiedFunc=r_VVH,r_ffH",
+              "fixmu": ("--PO muVFixed" if fixmuV else "") + ("--PO mufFixed" if fixmuf else ""),
+              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fixed in (("r_VVH", fixmuV), ("r_ffH", fixmuf)) if not fixed),
               "algo": algo,
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
@@ -279,10 +283,12 @@ def runcombine(analysis, foldername, **kwargs):
             plotname += "".join("_{},{},{}".format(*scanrange) for scanrange in sorted(scanranges))
         plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges)
         if plotmus:
-            muplotname = plotname.replace("limit", "muV")
-            plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance="r_VVH", yaxistitle="#mu_{V}")
-            muplotname = plotname.replace("limit", "muF")
-            plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance="r_ffH", yaxistitle="#mu_{f}")
+            if not fixmuV:
+                muplotname = plotname.replace("limit", "muV")
+                plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance="r_VVH", yaxistitle="#mu_{V}")
+            if not fixmuf:
+                muplotname = plotname.replace("limit", "muF")
+                plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance="r_ffH", yaxistitle="#mu_{f}")
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
