@@ -488,15 +488,15 @@ class Projections(MultiEnum):
                                      ))
     VVHmix_p  = self.IntegralSum(*sum((
                                         [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
+                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
+                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(WHpieces[ca,ch])]
                                          for ca, ch in itertools.product(categories, channels)),
                                       []
                                      ))
     VVHmix_m  = self.IntegralSum(*sum((
                                         [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
+                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
+                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[ca,ch])]
                                          for ca, ch in itertools.product(categories, channels)),
                                       []
                                      ))
@@ -716,7 +716,20 @@ class Projections(MultiEnum):
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
         else: #animation
-            ffH = self.ComponentTemplateSumInGroup("", ffHmix_p, ffHSM,
+            ffHintegral  = self.IntegralSum(*sum(
+                                                 ([(ggHg12gi0[ca,ch], g1_custom**2), (ggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
+                                                   (ttHg12gi0[ca,ch], g1_custom**2), (ttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
+                                                    for ca, ch in itertools.product(categories, channels)),
+                                                  []
+                                                 ))
+            VVHintegral  = self.IntegralSum(*sum((
+                                                   [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ca,ch])]
+                                                 + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ca,ch])]
+                                                 + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                                    for ca, ch in itertools.product(categories, channels)),
+                                                 []
+                                                ))
+            ffH = self.ComponentTemplateSumInGroup("", ffHintegral, ffHSM,
                                                    *sum(
                                                         ([(ggHg12gi0[ca,ch], g1_custom**2), (ggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
                                                           (ttHg12gi0[ca,ch], g1_custom**2), (ttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
@@ -724,7 +737,7 @@ class Projections(MultiEnum):
                                                          []
                                                         )
                                                   )
-            VVH = self.ComponentTemplateSumInGroup("", VVHmix_p, VVHSM,
+            VVH = self.ComponentTemplateSumInGroup("", VVHintegral, VVHSM,
                                                    *sum(
                                                         ([(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ca,ch])]
                                                        + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ca,ch])]
@@ -747,6 +760,7 @@ class Projections(MultiEnum):
                 bottommu = muf
                 toptitle = "VBF+VH"
                 topcolor = 4
+            print muV, muf, VVH.Integral(), ffH.Integral()
 
             bottom = self.TemplateSum(bottomtitle,
                                      (bottom, bottommu), (ZZ, 1), #which already has ZX
