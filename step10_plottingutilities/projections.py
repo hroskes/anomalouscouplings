@@ -923,7 +923,10 @@ class Projections(MultiEnum):
         if nicestyle and discriminant.name == "D_CP_decay": hstack.GetXaxis().SetRangeUser(-.4, .4)
         style.applyaxesstyle(hstack)
         if nicestyle:
-            style.cuttext(self.enrichstatus.cuttext(), x1=.48+.03*(discriminant.name=="D_bkg"), x2=.58+.03*(discriminant.name=="D_bkg"))
+            if animation:
+                style.cuttext(self.enrichstatus.cuttext(), x1=.48+.03*(discriminant.name=="D_bkg"), x2=.58+.03*(discriminant.name=="D_bkg"))
+            else:
+                style.cuttext(self.enrichstatus.cuttext())
             style.CMS("Preliminary", float(Luminosity("fordata", self.production)))
         legend.Draw()
         for thing, option in otherthingstodraw:
@@ -1092,7 +1095,6 @@ if __name__ == "__main__":
       for analysis in analyses:
         for normalization in normalizations:
           for enrichstatus in enrichstatuses:
-            if normalization != "rescalemixtures": continue   #uncomment this to get the niceplots fast
             yield Projections(analysis, normalization, production, enrichstatus)
 
   length = len(list(projections()))
@@ -1102,8 +1104,8 @@ if __name__ == "__main__":
                                        "CreateDatacards", "cards_{}_Feb28_mu".format(p.analysis), "higgsCombine_obs_*.root")):
         if re.match("higgsCombine_obs_lumi[0-9.]*(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
             scantree.Add(filename)
-    #p.projections(ch, ca, nicestyle=True)
-    p.animation(ca, ch, scantree=scantree)
+    p.projections(ch, ca, nicestyle=True)
+    #p.animation(ca, ch, scantree=scantree)
     #p.projections(ch, ca)
     #p.projections(ch, ca, subdir="ggH", productionmode="ggH")
     #p.projections(ch, ca, subdir="VBF", productionmode="VBF")
