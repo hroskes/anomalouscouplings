@@ -2,12 +2,13 @@
 
 from itertools import product
 import random
+import sys
 
 import ROOT
 
 from helperstuff import config
 
-from helperstuff.combinehelpers import getrate
+from helperstuff.combinehelpers import getdatatree, getrate
 from helperstuff.enums import analyses, Analysis, Category, Channel, flavors, HffHypothesis, Hypothesis, JECSystematic, MultiEnum, ProductionMode
 from helperstuff.samples import ReweightingSample, Sample
 from helperstuff.treewrapper import TreeWrapper
@@ -46,7 +47,7 @@ class Row(MultiEnum):
       self.title = str(self.productionmode)
   def check(self, *args):
     dontcheck = []
-    if self.productionmode.isbkg:
+    if self.productionmode == "data" or self.productionmode.isbkg:
       dontcheck.append(Hypothesis)
     if self.productionmode not in ("ttH", "HJJ"):
       dontcheck.append(HffHypothesis)
@@ -76,7 +77,8 @@ class Row(MultiEnum):
                                            )
                      for reweightfrom in self.productionmode.allsamples(production)
                    )
-    result *= config.expectedscanluminosity
+    if self.productionmode != "data":
+      result *= config.expectedscanluminosity
     return result
 
   @property
@@ -105,21 +107,32 @@ class Row(MultiEnum):
     self.__categorydistribution *= scaleby
 
   def getlatex(self, dochannels=True):
-    result = " & {}".format(self.title)
+    result = ""
+    if self.productionmode != "data":
+      result += " & {}".format(self.title)
     for category in categories:
       result += " & "
       total = 0
       for channel in channels:
         channel = Channel(channel)
         total += self.categorydistribution[channel, category]
+        if self.productionmode == "data":
+          fmt = "{:d}"
+        else:
+          fmt = "{:.1f}"
         if dochannels:
-          result += "{:.1f}/".format(self.categorydistribution[channel, category])
-      result += "{:.1f}".format(total)
+          result += fmt.format(self.categorydistribution[channel, category])+"/"
+      result += fmt.format(total)
     return result
 
 class RowChannel(Row, MultiEnum):
   enums = (Row, Channel)
   def getcategorydistribution(self):
+    if self.productionmode == "data":
+      return MultiplyCounter({
+                              (self.channel, category): getdatatree(self.analysis, category, self.channel, production).GetEntries()
+                                for category in categories
+                            })
     if self.productionmode.isbkg or self.hypothesis == "SM":
       result = MultiplyCounter({(self.channel, category): getrate(self.channel, category, production, "forexpectedscan", self.analysis, self.productionmode) for category in categories})
     else:
@@ -154,7 +167,11 @@ class Section(object):
     self.title = title
     self.rows = rows
   def getlatex(self, dochannels=True):
-    result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
+    if self.title == "Observed":
+      assert len(self.rows)==1
+      result = r"\multicolumn{{2}}{{c}}{{{}}}".format(self.title)
+    else:
+      result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
     result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex(dochannels=dochannels) for _ in self.rows)
     return result
   def findrow(self, productionmode):
@@ -167,6 +184,9 @@ def scalerows(scalethese, tothese):
   previoustotal = sum(row.categorydistribution[channel, category] for row in scalethese for channel in channels for category in categories)
   for row in scalethese:
     row.scale(wanttotal / previoustotal)
+
+def total(rows):
+  return sum(row.categorydistribution[channel, category] for row in rows for channel in channels for category in categories)
 
 def maketable(analysis, dochannels=True):
   analysis = Analysis(analysis)
@@ -192,6 +212,12 @@ def maketable(analysis, dochannels=True):
       Row(analysis, "ZX", title=r"$\Z+\X$"),
     )
   ]
+  if config.unblinddistributions:
+    sections.append(
+      Section("Observed",
+        Row(analysis, "data", title="")
+      )
+    )
 
   scalerows([sections[1].findrow(p) for p in ("VBF", "ZH", "WH")], [sections[0].findrow(p) for p in ("VBF", "ZH", "WH")])
   scalerows([sections[1].findrow(p) for p in ("ggH", "ttH")], [sections[0].findrow(p) for p in ("ggH", "ttH")])
@@ -204,4 +230,4 @@ def maketable(analysis, dochannels=True):
   print r"\end{tabular}"
 
 if __name__ == "__main__":
-  maketable("fL1Zg", dochannels=True)
+  maketable(sys.argv[1], dochannels=True)

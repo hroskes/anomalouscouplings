@@ -303,23 +303,29 @@ class Projections(MultiEnum):
       self.shapesystematic = ShapeSystematic("")
     super(Projections, self).check(*args, dontcheck=dontcheck)
 
+  @classmethod
   @cache
-  def TemplateFromFile(self, *args, **kwargs):
+  def TemplateFromFile(cls, *args, **kwargs):
     return TemplateFromFile(*args, **kwargs)
+  @classmethod
   @cache
-  def IntTemplateFromFile(self, *args, **kwargs):
+  def IntTemplateFromFile(cls, *args, **kwargs):
     return IntTemplateFromFile(*args, **kwargs)
+  @classmethod
   @cache
-  def TemplateSum(self, *args, **kwargs):
+  def TemplateSum(cls, *args, **kwargs):
     return TemplateSum(*args, **kwargs)
+  @classmethod
   @cache
-  def IntegralSum(self, *args, **kwargs):
+  def IntegralSum(cls, *args, **kwargs):
     return IntegralSum(*args, **kwargs)
+  @classmethod
   @cache
-  def ComponentTemplateSum(self, *args, **kwargs):
+  def ComponentTemplateSum(cls, *args, **kwargs):
     return ComponentTemplateSum(*args, **kwargs)
+  @classmethod
   @cache
-  def ComponentTemplateSumInGroup(self, *args, **kwargs):
+  def ComponentTemplateSumInGroup(cls, *args, **kwargs):
     return ComponentTemplateSumInGroup(*args, **kwargs)
 
   class CategoryAndChannel(MultiEnum): enums = (Category, Channel)
@@ -739,7 +745,7 @@ class Projections(MultiEnum):
                                                              )
                                                        )
 
-            if category == "Untagged":
+            if category == "Untagged" or True:
                 SMbottom = SMVVH
                 BSMbottom = BSMVVH
                 mix_pbottom = mix_pVVH
@@ -747,7 +753,8 @@ class Projections(MultiEnum):
                 bottomtitle = "VBF+VH"
                 bottomcolor = 4
                 bottommu = muV
-                toptitle = "ggH+t#bar{t}H"
+                #toptitle = "ggH+t#bar{t}H"
+                toptitle = "total"
                 topcolor = ROOT.kOrange+10
             elif category in ("VBFtagged", "VHHadrtagged"):
                 SMbottom = SMffH
@@ -762,16 +769,16 @@ class Projections(MultiEnum):
 
             SMbottom = self.TemplateSum("{} SM".format(bottomtitle),
                                        (SMbottom, bottommu), (ZZ, 1), #which already has ZX
-                                       linecolor=bottomcolor, linewidth=2)
+                                       linecolor=bottomcolor, linewidth=2, legendoption="f")
             BSMbottom = self.TemplateSum("{} {} = 1".format(bottomtitle, self.analysis.title()),
                                          (BSMbottom, bottommu), (ZZ, 1),
-                                         linecolor=bottomcolor, linewidth=2, linestyle=2)
+                                         linecolor=bottomcolor, linewidth=2, linestyle=2, legendoption="f")
             mix_pbottom = self.TemplateSum("{} {} = #plus 0.5".format(bottomtitle, self.analysis.title(superscript=superscript)),
                                            (mix_pbottom, bottommu), (ZZ, 1),
-                                           linecolor=bottomcolor, linewidth=2, linestyle=2)
+                                           linecolor=bottomcolor, linewidth=2, linestyle=2, legendoption="f")
             mix_mbottom = self.TemplateSum("{} {} = #minus 0.5".format(bottomtitle, self.analysis.title(superscript=superscript)),
                                            (mix_mbottom, bottommu), (ZZ, 1),
-                                           linecolor=bottomcolor, linewidth=2, linestyle=2)
+                                           linecolor=bottomcolor, linewidth=2, linestyle=2, legendoption="f")
 
             SM = self.TemplateSum("{} SM".format(toptitle),
                                   (SMffH, muf), (SMVVH, muV), (ZZ, 1), #which already has ZX
@@ -785,7 +792,7 @@ class Projections(MultiEnum):
             mix_m = self.TemplateSum("{} {} = #minus 0.5".format(toptitle, self.analysis.title(superscript=superscript)),
                                      (mix_mffH, muf), (mix_mVVH, muV), (ZZ, 1),
                                      linecolor=topcolor, linewidth=2, linestyle=2)
-            templates[0:0] = [SMbottom, SM, BSMbottom, BSM, mix_pbottom, mix_p, mix_mbottom, mix_m] #will remove some later, depending on the discriminant
+            templates[0:0] = [SM, SMbottom, BSM, BSMbottom, mix_p, mix_pbottom, mix_m, mix_mbottom] #will remove some later, depending on the discriminant
 
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
@@ -820,12 +827,12 @@ class Projections(MultiEnum):
                                                          []
                                                         )
                                                   )
-            if category == "Untagged":
+            if category == "Untagged" or True:
                 bottom = VVH
                 bottomtitle = "VBF+VH"
                 bottomcolor = 4
                 bottommu = muV
-                toptitle = "ggH+t#bar{t}H"
+                toptitle = "total" #"ggH+t#bar{t}H"
                 topcolor = ROOT.kOrange+10
             elif category in ("VBFtagged", "VHHadrtagged"):
                 bottom = ffH
@@ -837,12 +844,12 @@ class Projections(MultiEnum):
 
             bottom = self.TemplateSum(bottomtitle,
                                      (bottom, bottommu), (ZZ, 1), #which already has ZX
-                                     linecolor=bottomcolor, linewidth=2)
+                                     linecolor=bottomcolor, linewidth=2, legendoption="f")
             top = self.TemplateSum(toptitle,
                                    (VVH, muV), (ffH, muf), (ZZ, 1), #which already has ZX
                                    linecolor=topcolor, linewidth=2)
 
-            templates[0:0] = [bottom, top] #will remove some later, depending on the discriminant
+            templates[0:0] = [top, bottom] #will remove some later, depending on the discriminant
 
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
@@ -1095,6 +1102,7 @@ if __name__ == "__main__":
       for analysis in analyses:
         for normalization in normalizations:
           for enrichstatus in enrichstatuses:
+            if enrichstatus == "blind": continue
             yield Projections(analysis, normalization, production, enrichstatus)
 
   length = len(list(projections()))
