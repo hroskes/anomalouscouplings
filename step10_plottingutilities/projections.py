@@ -604,14 +604,20 @@ class Projections(MultiEnum):
         if not animation:
             ca = category
             legendargs = [(0.20,0.57,0.58,0.90), (0.20,0.57,0.58,0.90), (0.23,0.57,0.61,0.90)]
-            SM = self.TemplateSum("",
-                                  *sum(
-                                       ([(ggHg12gi0[ca,ch], 1), (ttHg12gi0[ca,ch], 1),
-                                         (VBFg14gi0[ca,ch], 1), (ZHg14gi0[ca,ch], 1), (WHg14gi0[ca,ch], 1)]
-                                           for ch in channels),
-                                        []
-                                      )
-                                 )
+            SMffH = self.TemplateSum("",
+                                     *sum(
+                                          ([(ggHg12gi0[ca,ch], 1), (ttHg12gi0[ca,ch], 1)]
+                                              for ch in channels),
+                                           []
+                                         )
+                                    )
+            SMVVH = self.TemplateSum("",
+                                     *sum(
+                                          ([(VBFg14gi0[ca,ch], 1), (ZHg14gi0[ca,ch], 1), (WHg14gi0[ca,ch], 1)]
+                                              for ch in channels),
+                                           []
+                                         )
+                                    )
             BSMffH = self.ComponentTemplateSumInGroup("", ffHBSM, ffHSM,
                                                       *sum(
                                                            ([(ggHg10gi2[ca,ch], 1), (ttHg10gi2[ca,ch], 1)]
@@ -661,19 +667,51 @@ class Projections(MultiEnum):
                                                              )
                                                        )
 
-            SM = self.TemplateSum("SM",
-                                  (SM, 1), (ZZ, 1), #which already has ZX
-                                  linecolor=ROOT.kOrange+10, linewidth=2)
-            BSM = self.TemplateSum(self.analysis.title()+" = 1",
+            if category == "Untagged":
+                SMbottom = SMVVH
+                BSMbottom = BSMVVH
+                mix_pbottom = mix_pVVH
+                mix_mbottom = mix_mVVH
+                bottomtitle = "VBF+VH"
+                bottomcolor = 4
+                toptitle = "ggH+t#bar{t}H"
+                topcolor = ROOT.kOrange+10
+            elif category in ("VBFtagged", "VHHadrtagged"):
+                SMbottom = SMffH
+                BSMbottom = BSMffH
+                mix_pbottom = mix_pffH
+                mix_mbottom = mix_mffH
+                bottomtitle = "ggH+t#bar{t}H"
+                bottomcolor = ROOT.kOrange+10
+                toptitle = "VBF+VH"
+                topcolor = 4
+
+            SMbottom = self.TemplateSum("{} SM".format(bottomtitle),
+                                       (SMbottom, 1), (ZZ, 1), #which already has ZX
+                                       linecolor=bottomcolor, linewidth=2)
+            BSMbottom = self.TemplateSum("{} {} = 1".format(bottomtitle, self.analysis.title()),
+                                         (BSMbottom, 1), (ZZ, 1),
+                                         linecolor=bottomcolor, linewidth=2, linestyle=2)
+            mix_pbottom = self.TemplateSum("{} {} = #plus 0.5".format(bottomtitle, self.analysis.title(superscript=superscript)),
+                                           (mix_pbottom, 1), (ZZ, 1),
+                                           linecolor=bottomcolor, linewidth=2, linestyle=2)
+            mix_mbottom = self.TemplateSum("{} {} = #minus 0.5".format(bottomtitle, self.analysis.title(superscript=superscript)),
+                                           (mix_mbottom, 1), (ZZ, 1),
+                                           linecolor=bottomcolor, linewidth=2, linestyle=2)
+
+            SM = self.TemplateSum("{} SM".format(toptitle),
+                                  (SMffH, 1), (SMVVH, 1), (ZZ, 1), #which already has ZX
+                                  linecolor=topcolor, linewidth=2)
+            BSM = self.TemplateSum("{} {} = 1".format(toptitle, self.analysis.title()),
                                    (BSMffH, 1), (BSMVVH, 1), (ZZ, 1),
-                                   linecolor=ROOT.kOrange+10, linewidth=2, linestyle=2)
-            mix_p = self.TemplateSum(self.analysis.title(superscript=superscript)+" = #plus 0.5",
+                                   linecolor=topcolor, linewidth=2, linestyle=2)
+            mix_p = self.TemplateSum("{} {} = #plus 0.5".format(toptitle, self.analysis.title(superscript=superscript)),
                                      (mix_pffH, 1), (mix_pVVH, 1), (ZZ, 1),
-                                     linecolor=ROOT.kOrange+10, linewidth=2, linestyle=2)
-            mix_m = self.TemplateSum(self.analysis.title(superscript=superscript)+" = #minus 0.5",
+                                     linecolor=topcolor, linewidth=2, linestyle=2)
+            mix_m = self.TemplateSum("{} {} = #minus 0.5".format(toptitle, self.analysis.title(superscript=superscript)),
                                      (mix_mffH, 1), (mix_mVVH, 1), (ZZ, 1),
-                                     linecolor=ROOT.kOrange+10, linewidth=2, linestyle=2)
-            templates[0:0] = [SM, BSM, mix_p, mix_m] #will remove some later, depending on the discriminant
+                                     linecolor=topcolor, linewidth=2, linestyle=2)
+            templates[0:0] = [SMbottom, SM, BSMbottom, BSM, mix_pbottom, mix_p, mix_mbottom, mix_m] #will remove some later, depending on the discriminant
 
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
@@ -716,12 +754,18 @@ class Projections(MultiEnum):
             if discriminant == tf.mixdiscriminant and self.analysis == "fa3" or discriminant in (tf.mixdiscriminant, tf.purediscriminant) and self.analysis == "fL1":
                 usetemplates.remove(BSM)
                 usetemplates.remove(mix_m)
+                usetemplates.remove(BSMbottom)
+                usetemplates.remove(mix_mbottom)
             elif discriminant in (tf.mixdiscriminant, tf.purediscriminant) and self.analysis == "fa2":
                 usetemplates.remove(BSM)
                 usetemplates.remove(mix_p)
+                usetemplates.remove(BSMbottom)
+                usetemplates.remove(mix_pbottom)
             else:
                 usetemplates.remove(mix_p)
                 usetemplates.remove(mix_m)
+                usetemplates.remove(mix_pbottom)
+                usetemplates.remove(mix_mbottom)
         hstack = ROOT.THStack("{}{}".format(discriminant.name, saveasappend), "")
         legend = ROOT.TLegend(*legendargs[i])
         style.applylegendstyle(legend)
