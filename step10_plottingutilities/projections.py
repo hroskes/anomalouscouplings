@@ -71,7 +71,9 @@ class TemplateForProjection(object):
         legend.AddEntry(self.Projection(0), self.title, self.legendoption)
 
     def Integral(self):
-        return self.h.Integral()
+        if self.cantakeintegral:
+            return self.h.Integral()
+        raise ValueError("Can't take integral of {}".format(self))
 
     def Floor(self, *args, **kwargs):
         self.h.Floor(*args, **kwargs)
@@ -88,7 +90,7 @@ class TemplateForProjection(object):
 
     @property
     def histogramattrs(self):
-        return "h", "hstackoption"
+        return "h", "hstackoption", "cantakeintegral"
 
 class Normalization(MyEnum):
     enumname = "normalization"
@@ -143,6 +145,8 @@ class BaseTemplateFromFile(TemplateForProjection):
         self.h.Scale(scalefactor)
 
         self.doenrich()
+
+        self.cantakeintegral = (self.enrichstatus == "fullrange")
 
         super(BaseTemplateFromFile, self).inithistogram()
 
@@ -210,6 +214,7 @@ class TemplateSumBase(TemplateForProjection):
 
 class TemplateSum(TemplateSumBase):
     def inithistogram(self):
+        self.cantakeintegral = True
         self.h = None
         for template, factor in self.templatesandfactors:
             if not factor: continue
@@ -218,6 +223,7 @@ class TemplateSum(TemplateSumBase):
                 self.h.Scale(factor)
             else:
                 self.h.Add(template.h, factor)
+            self.cantakeintegral = self.cantakeintegral and template.cantakeintegral
         self.hstackoption = "hist"
         super(TemplateSum, self).inithistogram()
 
@@ -233,7 +239,10 @@ class IntegralSum(TemplateSumBase):
     def inithistogram(self):
         self.hstackoption = None
         integral = 0
+        self.cantakeintegral = True
         for template, factor in self.templatesandfactors:
+            if not factor: continue
+            self.cantakeintegral = self.cantakeintegral and template.cantakeintegral
             integral += template.Integral() * factor
         self.h = ROOT.TH1D(self.hname(), "", 1, 0, 1)
         self.h.Fill(.5, integral)
@@ -256,9 +265,12 @@ class ComponentTemplateSum(TemplateSum):
 
     def inithistogram(self):
         super(ComponentTemplateSum, self).inithistogram()
-        if isinstance(self.SMintegral, TemplateForProjection): self.SMintegral = self.SMintegral.Integral()
+        if isinstance(self.SMintegral, TemplateForProjection):
+            if not self.cantakeintegral:
+                raise ValueError("Have to be able to take integral of ComponentTemplateSum, or normalize to a number")
+            self.SMintegral = self.SMintegral.Integral()
         if self.Integral():
-            self.h.Scale(self.SMintegral / self.Integral())
+            self.h.Scale(self.SMintegral / self.h.Integral())
 
 class ComponentTemplateSumInGroup(TemplateSum):
     def __init__(self, title, mygroup, SMgroup, *templatesandfactors, **kwargs):
@@ -274,8 +286,7 @@ class ComponentTemplateSumInGroup(TemplateSum):
 
     def inithistogram(self):
         super(ComponentTemplateSumInGroup, self).inithistogram()
-        if self.Integral():
-            self.h.Scale(self.SMgroup.Integral() / self.mygroup.Integral())
+        self.h.Scale(self.SMgroup.Integral() / self.mygroup.Integral())
 
 class Projections(MultiEnum):
   enums = [Analysis, Normalization, ShapeSystematic, Production, EnrichStatus]
@@ -421,35 +432,35 @@ class Projections(MultiEnum):
     WHpieces = {}
 
     for ca, ch in itertools.product(categories, channels):
-      ggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      ggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+      ggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
 
-      ttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      ttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+      ttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
 
-      VBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      VBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      VBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      VBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      VBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      VBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      VBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      VBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      VBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      VBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
       VBFpieces[ca,ch] = [VBFg14gi0[ca,ch], VBFg13gi1[ca,ch], VBFg12gi2[ca,ch], VBFg11gi3[ca,ch], VBFg10gi4[ca,ch]]
 
-      ZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      ZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      ZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      ZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      ZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      ZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      ZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
       ZHpieces[ca,ch] = [ZHg14gi0[ca,ch], ZHg13gi1[ca,ch], ZHg12gi2[ca,ch], ZHg11gi3[ca,ch], ZHg10gi4[ca,ch]]
 
-      WHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      WHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      WHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      WHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      WHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      WHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      WHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      WHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      WHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      WHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
       WHpieces[ca,ch] = [WHg14gi0[ca,ch], WHg13gi1[ca,ch], WHg12gi2[ca,ch], WHg11gi3[ca,ch], WHg10gi4[ca,ch]]
 
@@ -571,7 +582,7 @@ class Projections(MultiEnum):
                                                linecolor=4
                                              )
         for t in ggHcustom, VBFcustom, VHcustom:
-            assert abs(t.Integral() - 1) < 1e-6, t.Integral()
+            assert abs(t.h.Integral() - 1) < 1e-6, t.h.Integral()
 
         templates += [
                       ggHcustom, VBFcustom, VHcustom
@@ -760,7 +771,6 @@ class Projections(MultiEnum):
                 bottommu = muf
                 toptitle = "VBF+VH"
                 topcolor = 4
-            print muV, muf, VVH.Integral(), ffH.Integral()
 
             bottom = self.TemplateSum(bottomtitle,
                                      (bottom, bottommu), (ZZ, 1), #which already has ZX
