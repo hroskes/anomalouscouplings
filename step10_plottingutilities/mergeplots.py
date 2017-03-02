@@ -1,22 +1,27 @@
 #!/usr/bin/env python
-from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
 from glob import glob
-from helperstuff import config
-from helperstuff.enums import Analysis
-import helperstuff.stylefunctions as style
-from helperstuff.utilities import tfiles
 import os
-import ROOT
+import pipes
+import subprocess
 import sys
 
+import ROOT
+
+from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
+
+from helperstuff import config
+from helperstuff.enums import Analysis, Production
+from helperstuff.plotlimits import drawlines
+import helperstuff.stylefunctions as style
+from helperstuff.utilities import tfiles
+
 class Folder(object):
-    def __init__(self, folder, title, color, analysis, subdir, plotname):
-        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname = folder, title, color, Analysis(analysis), subdir, plotname
+    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None):
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber
         self.repmap = {
                        "analysis": str(self.analysis),
-                       "gi": self.analysis.couplingname.replace("g", "").replace("1prime2", "1}^{#prime2"),
-                       "intname": "CP" if self.analysis == "fa3" else "int",
                       }
+        if repmap is not None: self.repmap.update(repmap)
     @property
     def folder(self):
         result = os.path.join(config.plotsbasedir, "limits", self.subdir, replaceByMap(self.__folder, self.repmap))
@@ -31,15 +36,18 @@ class Folder(object):
         return replaceByMap(self.__title, self.repmap)
     @property
     def graph(self):
-        f = tfiles[os.path.join(self.folder, self.plotname)]
+        f = tfiles[replaceByMap(os.path.join(self.folder, self.plotname), self.repmap)]
         c = f.c1
         mg = c.GetListOfPrimitives()[1]
         graphs = mg.GetListOfGraphs()
-        assert len(graphs) == 1
-        graphs[0].SetLineColor(self.color)
+        graphnumber = self.graphnumber
+        if self.graphnumber is None:
+            assert len(graphs) == 1
+            graphnumber = 0
+        graphs[graphnumber].SetLineColor(self.color)
         self.__xtitle = mg.GetXaxis().GetTitle()
         self.__ytitle = mg.GetYaxis().GetTitle()
-        return graphs[0]
+        return graphs[graphnumber]
     @property
     def xtitle(self):
         try:
@@ -57,13 +65,16 @@ class Folder(object):
     def addtolegend(self, legend):
         legend.AddEntry(self.graph, self.title, "l")
 
-def mergeplots(analysis, subdir="", plotname="limit_.oO[analysis]Oo._comparetoICHEPstyle_40.root"):
+def mergeplots(analysis, scanrange, **drawlineskwargs):
     analysis = Analysis(analysis)
+    repmap = {"scanrange": scanrange, "analysis": str(analysis)}
+    subdir = ""
+    plotname = "limit_lumi35.8671_withorwithoutsystematics_.oO[scanrange]Oo..root"
     folders = [
-               Folder(".oO[analysis]Oo._discriminants_D_int_prod",    "production+decay", 2, analysis, subdir, plotname="limit_lumi30.0_nosystematics.root"),
-               Folder(".oO[analysis]Oo._discriminants_D_int_prod",    "ICHEP style", 4, analysis, subdir, plotname="limit_lumi36.0_ggH_Untagged_nosystematics.root"),
+               Folder(".oO[analysis]Oo._Feb28_mu", "no systematics", 2, analysis, subdir, plotname="limit_lumi35.8671_nosystematics_.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap),
+               Folder(".oO[analysis]Oo._Feb28_mu", "with systematics", 4, analysis, subdir, plotname="limit_lumi35.8671_.oO[scanrange]Oo..root", graphnumber=1, repmap=repmap),
               ]
-    outdir = "comparetoICHEPstyle"
+    outdir = ".oO[analysis]Oo._Feb28_mu"
 
     mg = ROOT.TMultiGraph("limit", "")
     if analysis == "fa3":
@@ -83,14 +94,32 @@ def mergeplots(analysis, subdir="", plotname="limit_.oO[analysis]Oo._comparetoIC
     l.Draw()
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
-    style.CMS("Preliminary", 30.)
-    saveasdir = os.path.join(config.plotsbasedir, "limits", subdir, outdir)
+    style.CMS("Preliminary", Production(config.productionsforcombine[0]).dataluminosity)
+    for k, v in drawlineskwargs.items():
+        if k == "xpostext":
+            try:
+                drawlineskwargs[k] = float(v)
+            except ValueError:
+                pass
+        elif k in ("xmin", "xmax"):
+            drawlineskwargs[k] = float(v)
+    drawlines(**drawlineskwargs)
+    saveasdir = replaceByMap(os.path.join(config.plotsbasedir, "limits", subdir, outdir), repmap)
     try:
         os.makedirs(saveasdir)
     except OSError:
         pass
+    assert "root" in plotname
     for ext in "png eps root pdf".split():
-        c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), {"analysis":str(analysis)})))
+        c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
+    with open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
+        f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
+        f.write("\n\n\n\n\n\ngit info:\n\n")
+        f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
+        f.write("\n")
+        f.write(subprocess.check_output(["git", "status"]))
+        f.write("\n")
+        f.write(subprocess.check_output(["git", "diff"]))
 
 if __name__ == "__main__":
     args = []
@@ -103,21 +132,4 @@ if __name__ == "__main__":
     if args or kwargs:
         mergeplots(*args, **kwargs)
     else:
-        print """
-python mergeplots.py fa3 plotname=limit_VBF_nobkg_nosystematics.root
-python mergeplots.py fa2 plotname=limit_VBF_nobkg_nosystematics.root
-python mergeplots.py fa3 plotname=limit_WH,ZH_nobkg_nosystematics.root
-python mergeplots.py fa2 plotname=limit_WH,ZH_nobkg_nosystematics.root
-python mergeplots.py fa3 plotname=limit_VBF_nosystematics.root
-python mergeplots.py fa2 plotname=limit_VBF_nosystematics.root
-python mergeplots.py fa3 plotname=limit_WH,ZH_nosystematics.root
-python mergeplots.py fa2 plotname=limit_WH,ZH_nosystematics.root
-mkdir -p {basedir}/limits/discriminantcomparison/
-for a in fa2 fa3; do
-    for c in png eps root pdf; do
-        for file in $(ls {basedir}/limits/${{a}}_discriminants/ | grep ".${{c}}$"); do
-            ln -s {basedir}/limits/${{a}}_discriminants/$file {basedir}/limits/discriminantcomparison/${{a}}_${{file}}
-        done
-    done
-done
-""".format(basedir=config.plotsbasedir)
+        raise TypeError("Need to give args or kwargs")
