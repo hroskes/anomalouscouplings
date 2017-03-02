@@ -56,7 +56,7 @@ def runcombine(analysis, foldername, **kwargs):
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
     expectmuffH = expectmuVVH = 1
-    fixmuV = fixmuF = False
+    fixmuV = fixmuf = False
     plotmus = False
     defaultalgo = algo = "grid"
     robustfit = False
