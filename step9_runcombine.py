@@ -270,7 +270,7 @@ def runcombine(analysis, foldername, **kwargs):
         except OSError:
             pass
         plotscans = []
-        if config.unblindscans:
+        if config.unblindscans and runobs:
             plotscans.append("obs")
         for expectfai in expectvalues:
             if expectfai == "minimum":

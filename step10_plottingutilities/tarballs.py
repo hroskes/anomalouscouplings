@@ -45,7 +45,7 @@ subprocess.check_call(["tar", "-cvzf", "categorydiscriminants.tar.gz", "-C", tmp
 tmpdir = tempfile.mkdtemp()
 for a in analyses:
     for c in categories:
-        for filename in glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), str(c), "*.pdf")):
+        for filename in glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots_new", "enrich", str(a), str(c), "*.pdf")):
             if "D_bkg" in filename:
                 filename = filename.replace("enrich", "fullrange")
             shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, c, os.path.basename(filename))))
