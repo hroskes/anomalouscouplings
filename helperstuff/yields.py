@@ -181,8 +181,10 @@ class YieldSystematicValue(MultiEnum, JsonDict):
             result = [float("{:.3f}".format(_)) for _ in result]
             if result[0] == result[1] == 0: return "-"
             if result[0] == 0: result.reverse()
-            if abs(result[0]) == abs(result[1]) or result[1] == 0:
+            if result[1] == 0 or result[0] == abs(result[1]):
                 return "$\pm{:.1%}$".format(abs(result[0])).replace("%", r"\%")
+            if result[1] == abs(result[0]):
+                return "$\mp{:.1%}$".format(abs(result[0])).replace("%", r"\%")
             return "${:+.1%}/{:+.1%}$".format(*(_-1 for _ in self.value)).replace("%", r"\%")
 
         raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
