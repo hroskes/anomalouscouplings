@@ -29,7 +29,7 @@ exit ${PIPESTATUS[0]}
 runcombinetemplate = r"""
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=1 \
+        --setPhysicsModelParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
         -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. \
         .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
         -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
@@ -56,7 +56,7 @@ def runcombine(analysis, foldername, **kwargs):
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
     expectmuffH = expectmuVVH = 1
-    fixmuV = fixmuf = False
+    fixmuV = fixmuf = fixfai = False
     plotnuisances = []
     defaultalgo = algo = "grid"
     robustfit = False
@@ -126,6 +126,8 @@ def runcombine(analysis, foldername, **kwargs):
             fixmuV = bool(int(kwarg))
         elif kw == "fixmuf":
             fixmuf = bool(int(kwarg))
+        elif kw == "fixfai":
+            fixfai = bool(int(kwarg))
         elif kw == "plotnuisances":
             plotnuisances += kwarg.split(",")
         elif kw == "plotmus":
@@ -180,6 +182,8 @@ def runcombine(analysis, foldername, **kwargs):
         moreappend += "_robustfit"
     if POI != defaultPOI:
         moreappend += "_scan"+plottitle(POI)
+    if fixfai:
+        moreappend += "_fixfai"
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
@@ -214,6 +218,7 @@ def runcombine(analysis, foldername, **kwargs):
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
               "POI": POI,
+              "floatotherpois": str(int(not fixfai)),
              }
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
@@ -293,9 +298,10 @@ def runcombine(analysis, foldername, **kwargs):
             plotname += "".join("_{},{},{}".format(*scanrange) for scanrange in sorted(scanranges))
         plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI)
         for nuisance in plotnuisances:
-            if nuisance!=POI:
-                nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-                plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI)
+            if nuisance == POI: continue
+            if nuisance == "CMS_zz4l_fai1" and fixfai: continue
+            nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
+            plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI)
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
