@@ -5,6 +5,7 @@ import glob
 import itertools
 from math import copysign, sqrt
 import os
+import pipes
 import re
 import subprocess
 from tempfile import mkdtemp
@@ -1089,7 +1090,9 @@ class Projections(MultiEnum):
           except OSError:
               pass
           convertcommand.append(os.path.join(finaldir, "{}.gif".format(discriminant.name)))
-          subprocess.check_call(convertcommand)
+          #http://stackoverflow.com/a/38792806/5228524
+          #subprocess.check_call(convertcommand)
+          os.system(" ".join(pipes.quote(_) for _ in convertcommand))
 
 def projections(*args):
     Projections(*args).projections()
@@ -1112,8 +1115,8 @@ if __name__ == "__main__":
                                        "CreateDatacards", "cards_{}_Feb28_mu".format(p.analysis), "higgsCombine_obs_*.root")):
         if re.match("higgsCombine_obs_lumi[0-9.]*(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
             scantree.Add(filename)
-    p.projections(ch, ca, nicestyle=True)
-    #p.animation(ca, ch, scantree=scantree)
+    #p.projections(ch, ca, nicestyle=True)
+    p.animation(ca, ch, scantree=scantree)
     #p.projections(ch, ca)
     #p.projections(ch, ca, subdir="ggH", productionmode="ggH")
     #p.projections(ch, ca, subdir="VBF", productionmode="VBF")
