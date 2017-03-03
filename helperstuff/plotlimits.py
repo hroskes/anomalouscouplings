@@ -10,9 +10,22 @@ import stylefunctions as style
 import sys
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
-branchname = "CMS_zz4l_fai1"
 
 Scan = namedtuple("Scan", "name title color style")
+
+def plottitle(nuisance):
+    if nuisance == "CMS_zz4l_fai1": return "fai"
+    if nuisance == "r_VVH": return "muV"
+    if nuisance == "r_ffH": return "muf"
+    assert False, nuisance
+def xaxistitle(POI, analysis):
+    if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(), analysis.phi_lower)
+    if POI == "r_VVH": return "#mu_{V}"
+    if POI == "r_ffH": return "#mu_{f}"
+    assert False
+def yaxistitle(nuisance, analysis):
+    if nuisance is None: return "-2#Deltaln L"
+    return xaxistitle(POI=nuisance, analysis=analysis)
 
 def plotlimits(outputfilename, analysis, *args, **kwargs):
     analysis = Analysis(analysis)
@@ -22,7 +35,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     luminosity = None
     scanranges = None
     nuisance = None
-    yaxistitle = "-2#Deltaln L"
+    POI = "CMS_zz4l_fai1"
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -38,8 +51,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             scanranges = kwarg
         elif kw == "nuisance":
             nuisance = kwarg
-        elif kw == "yaxistitle":
-            yaxistitle = kwarg
+        elif kw == "POI":
+            POI = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -89,7 +102,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
 
             for entry in islice(t, 1, None):
-                fa3 = getattr(t, branchname)
+                fa3 = getattr(t, POI)
                 if nuisance is None:
                     deltaNLL = t.deltaNLL+t.nll+t.nll0
                     NLL[fa3] = 2*deltaNLL
@@ -110,9 +123,9 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         l.AddEntry(g, scan.title, "l")
 
     mg.Draw("AL")
-    mg.GetXaxis().SetTitle("{} cos({})".format(analysis.title(), analysis.phi_lower))
-    mg.GetXaxis().SetRangeUser(-1, 1)
-    mg.GetYaxis().SetTitle(yaxistitle)
+    mg.GetXaxis().SetTitle(xaxistitle(POI, analysis))
+    #mg.GetXaxis().SetRangeUser(-1, 1)
+    mg.GetYaxis().SetTitle(yaxistitle(nuisance, analysis))
     l.Draw()
 
     style.applycanvasstyle(c1)

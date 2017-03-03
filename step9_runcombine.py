@@ -4,7 +4,7 @@ from helperstuff import config, utilities
 from helperstuff.combinehelpers import Luminosity
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
-from helperstuff.plotlimits import plotlimits
+from helperstuff.plotlimits import plotlimits, plottitle
 from helperstuff.utilities import tfiles
 from itertools import product
 import os
@@ -29,10 +29,10 @@ exit ${PIPESTATUS[0]}
 runcombinetemplate = r"""
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=1 \
+        --setPhysicsModelParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=1 \
         -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. \
         .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
+        -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
 """
 
 def check_call_test(*args, **kwargs):
@@ -57,7 +57,7 @@ def runcombine(analysis, foldername, **kwargs):
     usebkg = True
     expectmuffH = expectmuVVH = 1
     fixmuV = fixmuf = False
-    plotmus = False
+    plotnuisances = []
     defaultalgo = algo = "grid"
     robustfit = False
     defaultPOI = POI = "CMS_zz4l_fai1"
@@ -126,8 +126,11 @@ def runcombine(analysis, foldername, **kwargs):
             fixmuV = bool(int(kwarg))
         elif kw == "fixmuf":
             fixmuf = bool(int(kwarg))
+        elif kw == "plotnuisances":
+            plotnuisances += kwarg.split(",")
         elif kw == "plotmus":
-            plotmus = bool(int(kwarg))
+            if bool(int(kwarg)):
+                plotnuisances += ["r_VVH", "r_ffH"]
         elif kw == "algo":
             algo = kwarg
         elif kw == "robustfit":
@@ -176,11 +179,16 @@ def runcombine(analysis, foldername, **kwargs):
     if robustfit:
         moreappend += "_robustfit"
     if POI != defaultPOI:
-        moreappend += "_scan"+POI
+        moreappend += "_scan"+plottitle(POI)
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
     totallumi = sum(float(Luminosity(p, lumitype)) for p in productions)
+
+    physicsmodelparameterranges = {
+                                   "CMS_zz4l_fai1": "-1,1",
+                                   POI: ".oO[scanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
+                                  }
 
     repmap = {
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
@@ -191,6 +199,7 @@ def runcombine(analysis, foldername, **kwargs):
               "totallumi": str(totallumi),
               "observedappend": "obs",
               "setphysicsmodelparameters": ".oO[expectmus,]Oo.CMS_zz4l_fai1=.oO[expectfai]Oo.",
+              "physicsmodelparameterranges": ":".join("{}={}".format(k, v) for k, v in physicsmodelparameterranges.iteritems()),
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "turnoff": " ".join(turnoff),
@@ -200,7 +209,7 @@ def runcombine(analysis, foldername, **kwargs):
               "expectmuffH": str(expectmuffH),
               "expectmuVVH": str(expectmuVVH),
               "fixmu": ("--PO muVFixed" if fixmuV else "") + ("--PO mufFixed" if fixmuf else ""),
-              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fixed in (("r_VVH", fixmuV), ("r_ffH", fixmuf)) if not fixed),
+              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("r_VVH", fixmuV), ("r_ffH", fixmuf)) if not fix and mu!=POI),
               "algo": algo,
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
@@ -239,9 +248,10 @@ def runcombine(analysis, foldername, **kwargs):
                 with utilities.OneAtATime(replaceByMap(".oO[filename]Oo.", repmap_obs)+".tmp", 30):
                   subprocess.check_call(replaceByMap(runcombinetemplate, repmap_obs), shell=True)
               f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
-              for entry in f.limit:
-                  if f.limit.deltaNLL+f.limit.nll+f.limit.nll0 < minimum[1]:
-                      minimum = (f.limit.CMS_zz4l_fai1, f.limit.deltaNLL+f.limit.nll+f.limit.nll0)
+              t = f.limit
+              for entry in t:
+                  if t.deltaNLL+t.nll+t.nll0 < minimum[1]:
+                      minimum = (getattr(t, POI), t.deltaNLL+t.nll+t.nll0)
           minimum = minimum[0]
           del f
 
@@ -281,14 +291,11 @@ def runcombine(analysis, foldername, **kwargs):
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
         if scanranges != [defaultscanrange]:
             plotname += "".join("_{},{},{}".format(*scanrange) for scanrange in sorted(scanranges))
-        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges)
-        if plotmus:
-            if not fixmuV:
-                muplotname = plotname.replace("limit", "muV")
-                plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance="r_VVH", yaxistitle="#mu_{V}")
-            if not fixmuf:
-                muplotname = plotname.replace("limit", "muF")
-                plotlimits(os.path.join(saveasdir, muplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance="r_ffH", yaxistitle="#mu_{f}")
+        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI)
+        for nuisance in plotnuisances:
+            if nuisance!=POI:
+                nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
+                plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI)
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
