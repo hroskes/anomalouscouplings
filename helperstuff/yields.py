@@ -1,3 +1,4 @@
+from collections import Sequence
 import itertools
 import json
 from math import sqrt
@@ -49,6 +50,7 @@ class YieldSystematic(MyEnum):
                  EnumItem("CMS_zz4mu_zjets"),
                  EnumItem("CMS_zz2e2mu_zjets"),
                 )
+
     def yamlfilename(self, channel=None):
       if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_qq", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV"):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
@@ -140,7 +142,7 @@ class YieldSystematicValue(MultiEnum, JsonDict):
               except ValueError:
                 raise ValueError("string value {!r} can't be parsed as a number or 2 numbers with / in between".format(origvalue))
 
-        if hasattr(value, "__len__"):
+        if isinstance(value, Sequence):
           if len(value) != 2:
             raise ValueError("value '{!r}' is a list or similar, but has length {} instead of 2!".format(origvalue, len(value)))
           if not all(isinstance(_, Number) for _ in value):
@@ -160,12 +162,37 @@ class YieldSystematicValue(MultiEnum, JsonDict):
 
         super(YieldSystematicValue, self).setvalue(value)
 
+    @property
+    def value(self):
+        result = super(YieldSystematicValue, self).value
+        if isinstance(result, list) and len(result) == 2:
+          result = tuple(result)
+        return result
+
+    @property
+    def latexstr(self):
+        if self.value is None or self.value == 1:
+            return "-"
+        elif isinstance(self.value, Number):
+            if abs(self.value-1) < .001: return "-"
+            return "$\pm{:.1%}$".format(abs(self.value-1)).replace("%", r"\%")
+        elif isinstance(self.value, Sequence) and len(self.value) == 2:
+            result = [_-1 for _ in self.value]
+            result = [float("{:.3f}".format(_)) for _ in result]
+            if result[0] == result[1] == 0: return "-"
+            if result[0] == 0: result.reverse()
+            if abs(result[0]) == abs(result[1]) or result[1] == 0:
+                return "$\pm{:.1%}$".format(abs(result[0])).replace("%", r"\%")
+            return "${:+.1%}/{:+.1%}$".format(*(_-1 for _ in self.value)).replace("%", r"\%")
+
+        raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
+
     def __str__(self):
         if self.value is None or self.value == 1:
             return "-"
         if isinstance(self.value, Number):
             return str(self.value)
-        if not (hasattr(self.value, "__len__") and len(self.value) == 2):
+        if not (isinstance(self.value, Sequence) and len(self.value) == 2):
             raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
         return "{}/{}".format(self.value[0], self.value[1])
 
