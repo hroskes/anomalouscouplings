@@ -12,9 +12,9 @@ import os
 
 #========================
 #inputs
-productionmode = "VBF"
+productionmode = "ttH"
 disc           = "D_CP_VBF"
-reweightto     = ReweightingSample(productionmode, "0-")
+reweightto     = ReweightingSample(productionmode, "0+", "Hff0+")
 bins           = None
 min            = None
 max            = None
@@ -23,8 +23,12 @@ enrich         = False
 masscut        = True
 normalizeto1   = False
 
-channel        = "2e2mu"
-category       = None
+channel        = None
+
+category       = "VBFtagged"
+analysis       = "fa3"
+
+cut            = "D_bkg<1./40"
 
 skip           = []
 #========================
@@ -43,9 +47,14 @@ productionmode = ProductionMode(productionmode)
 def hypothesestouse():
     for hypothesis in hypotheses:
         if hypothesis not in productionmode.generatedhypotheses: continue
-        if productionmode == "ggH" and hypothesis == "L1": continue
         if skip is not None and hypothesis in skip: continue
         yield hypothesis
+
+def hffhypothesistouse():
+    if productionmode == "ttH":
+        return "Hff0+"
+    else:
+        return None
 
 for hypothesis in hypotheses:
     if hypothesis not in hypothesestouse():
@@ -60,7 +69,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     hname = "h{}".format(hypothesis)
 
     h = hs[hypothesis] = plotfromtree(
-      reweightfrom=ReweightingSample(productionmode, hypothesis),
+      reweightfrom=ReweightingSample(productionmode, hypothesis, hffhypothesistouse()),
       reweightto=reweightto,
       disc=disc,
       bins=bins,
@@ -71,8 +80,10 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       normalizeto1=normalizeto1,
       channel=channel,
       category=category,
+      analysis=analysis,
       color=color,
       hname=hname,
+      cut=cut
     )
     h.SetMinimum(0)
 

@@ -9,10 +9,25 @@ import ROOT
 import stylefunctions as style
 import sys
 
-filenametemplate = "higgsCombine_{}.MultiDimFit.mH125.root"
-branchname = "CMS_zz4l_fai1"
+filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
 
 Scan = namedtuple("Scan", "name title color style")
+
+def plottitle(nuisance):
+    if nuisance == "CMS_zz4l_fai1": return "fai"
+    if nuisance == "r_VVH": return "muV"
+    if nuisance == "r_ffH": return "muf"
+    if nuisance == "JES": return nuisance
+    assert False, nuisance
+def xaxistitle(POI, analysis):
+    if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(), analysis.phi_lower)
+    if POI == "r_VVH": return "#mu_{V}"
+    if POI == "r_ffH": return "#mu_{f}"
+    if nuisance == "JES": return nuisance
+    assert False
+def yaxistitle(nuisance, analysis):
+    if nuisance is None: return "-2#Deltaln L"
+    return xaxistitle(POI=nuisance, analysis=analysis)
 
 def plotlimits(outputfilename, analysis, *args, **kwargs):
     analysis = Analysis(analysis)
@@ -20,6 +35,9 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     legendposition = (.2, .7, .6, .9)
     moreappend = ""
     luminosity = None
+    scanranges = None
+    nuisance = None
+    POI = "CMS_zz4l_fai1"
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -31,8 +49,17 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             moreappend = kwarg
         elif kw == "luminosity":
             luminosity = kwarg
+        elif kw == "scanranges":
+            scanranges = kwarg
+        elif kw == "nuisance":
+            nuisance = kwarg
+        elif kw == "POI":
+            POI = kwarg
         else:
-            assert False
+            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    xmin = min(scanrange[1] for scanrange in scanranges)
+    xmax = max(scanrange[2] for scanrange in scanranges)
 
     scans = []
     uptocolor = 1
@@ -49,7 +76,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             if arg == 0:
                 scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = 0 or #pi".format(analysis.phi), uptocolor, 2))
             else:
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title, arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title(), arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
     if luminosity is None:
@@ -64,21 +91,30 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     l.SetBorderSize(0)
 
     for scan in scans:
-        f = ROOT.TFile(filenametemplate.format(scan.name))
-        assert f
-        t = f.Get("limit")
-        assert t
-
         NLL = ExtendedCounter()
+        for scanrange in scanranges:
+            if scanrange == (100, -1, 1):
+                scanrangeappend = ""
+            else:
+                scanrangeappend = "_{},{},{}".format(*scanrange)
+            f = ROOT.TFile(filenametemplate.format(append=scan.name, scanrangeappend=scanrangeappend))
+            assert f
+            t = f.Get("limit")
+            assert t
 
-        for entry in islice(t, 1, None):
-            fa3 = getattr(t, branchname)
-            deltaNLL = t.deltaNLL
-            NLL[fa3] = 2*deltaNLL
-        if 1 not in NLL and -1 in NLL:
-            NLL[1] = NLL[-1]
+
+            for entry in islice(t, 1, None):
+                fa3 = getattr(t, POI)
+                if nuisance is None:
+                    deltaNLL = t.deltaNLL+t.nll+t.nll0
+                    NLL[fa3] = 2*deltaNLL
+                else:
+                     NLL[fa3] = getattr(t, nuisance)
+            if 1 not in NLL and -1 in NLL:
+                NLL[1] = NLL[-1]
 
         c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+        if nuisance is None: NLL.zero()
         g = NLL.TGraph()
         mg.Add(g)
 
@@ -88,17 +124,18 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
         l.AddEntry(g, scan.title, "l")
 
-    mg.Draw("AC")
-    mg.GetXaxis().SetTitle("{} cos({})".format(analysis.title, analysis.phi_lower))
-    mg.GetXaxis().SetRangeUser(-1, 1)
-    mg.GetYaxis().SetTitle("-2#Deltaln L")
+    mg.Draw("AL")
+    mg.GetXaxis().SetTitle(xaxistitle(POI, analysis))
+    #mg.GetXaxis().SetRangeUser(-1, 1)
+    mg.GetYaxis().SetTitle(yaxistitle(nuisance, analysis))
     l.Draw()
 
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)
     style.CMS("Preliminary", luminosity)
 
-    drawlines(CLtextposition)
+    if nuisance is None:
+        drawlines(CLtextposition, xmin=xmin, xmax=xmax)
     for ext in "png eps root pdf".split():
         outputfilename = outputfilename.replace("."+ext, "")
     for ext in "png eps root pdf".split():
@@ -158,16 +195,16 @@ class XPos(MyEnum):
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
-def drawlines(xpostext="left"):
+def drawlines(xpostext="left", xmin=-1, xmax=1):
     xpostext = XPos(xpostext)
 
     line68 = ROOT.TLine()
     line68.SetLineStyle(9)
-    line68.DrawLine(-1,1,1,1)
+    line68.DrawLine(xmin,1,xmax,1)
     cache.append(line68)
     line95 = ROOT.TLine()
     line95.SetLineStyle(9)
-    line95.DrawLine(-1,3.84,1,3.84)
+    line95.DrawLine(xmin,3.84,xmax,3.84)
     cache.append(line95)
 
     oneSig = xpostext.TPaveText(1)

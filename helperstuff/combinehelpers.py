@@ -1,13 +1,15 @@
 import collections
-import config
-from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode
 from math import copysign, isnan
 import os
+import yaml
+
 import ROOT
+
+import config
+from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode, shapesystematics
 from samples import ReweightingSample, Sample
 from templates import DataTree, IntTemplate, Template, TemplatesFile
 from utilities import tfiles
-import yaml
 
 datacardprocessline = "ggH qqH WH ZH bkg_qqzz bkg_ggzz bkg_vbf bkg_zjets"
 datacardprocessorder = [ProductionMode(p) for p in datacardprocessline.split()]
@@ -72,40 +74,8 @@ class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production, Category, Analysis]
 
     def getrate(self):
-        if self.productionmode == "ZX" and not config.usedata:
-            return self.yamlrate()
-
-        if self.productionmode.issignal:
-            hypothesis = self.analysis.purehypotheses[0]
-        else:
-            hypothesis = None
-        return gettemplate(self.analysis, self.category, self.productionmode, self.channel, self.production, hypothesis).Integral()*float(self.luminosity)
-
-    def yamlrate(self):
-        if self.production.year == 2016:
-            filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_ICHEP2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
-            tags = [tag.replace("Ichep16", "").replace("tagged", "Tagged") for tag in self.category.names if "Ichep16" in tag]
-        elif self.production.year == 2015:
-            assert False
-        with open(filename) as f:
-            y = yaml.load(f)
-        with open(filename) as f:
-            for line in f:
-                if "fb-1" in line:
-                    lumi = float(line.split("=")[1].split("fb-1")[0])
-                    break
-            else:
-                raise IOError("No luminosity in {}".format(filename))
-        rate = 0
-
-        for tag in tags:
-            for p in self.productionmode.yamlratenames:
-                try:
-                    rate += float(y[tag][p]) * float(self.luminosity) / lumi
-                except ValueError:
-                    rate += eval(y[tag][p].replace("@0", "125")) * float(self.luminosity) / lumi
-
-        return rate
+        from yields import YieldValue
+        return YieldValue(self.productionmode, self.channel, self.category, self.analysis).value * float(self.luminosity)
 
     def __float__(self):
         return self.getrate()
@@ -146,13 +116,10 @@ def gettemplate(*args):
     except ValueError as e2:
         raise ValueError("Can't gettemplate using args:\n{}\n\nTrying to make a regular template:\n{}\n\nTrying to make an interference template:\n{}".format(args, e1.message, e2.message))
 
-    #############
-    from datetime import date
-    if date.today() > date(2017, 1, 26):
-        raise ValueError("VBF bkg 4mu??!")
-    if t.channel == "4mu" and t.productionmode == "VBFbkg":
-        return gettemplate(t.analysis, t.category, t.productionmode, t.production, "4e")
-    #############
+    if t.shapesystematic not in shapesystematics:
+        kwargs = {enum.enumname: getattr(t, enum.enumname) for enum in type(t).needenums}
+        kwargs["shapesystematic"] = ""
+        t = type(t)(*kwargs.values())  #can't use actual kwargs
 
     result = t.gettemplate()
     if isnan(result.Integral()):

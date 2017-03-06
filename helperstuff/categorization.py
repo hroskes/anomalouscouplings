@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-from CJLSTscripts import categoryIchep16, VBF2jTaggedIchep16, VHHadrTaggedIchep16
+from CJLSTscripts import categoryMor17, VBF2jTaggedMor17, VHHadrTaggedMor17
 import config
-from enums import Category, categories, HffHypothesis, Hypothesis, JECSystematic
+from enums import BTagSystematic, Category, categories, HffHypothesis, Hypothesis, JECSystematic
 from samples import ArbitraryCouplingsSample
 import re
 
@@ -12,14 +12,21 @@ class BaseCategorization(object):
     def category_function_name(self): pass
     @abstractmethod
     def get_category_function(self_categorization): pass
+    @abstractproperty
+    def issystematic(self): pass
 
     def __hash__(self): return hash(self.category_function_name)
     def __eq__(self, other): return self.category_function_name == other.category_function_name
     def __ne__(self, other): return not self == other
 
 class BaseSingleCategorization(BaseCategorization):
-    def __init__(self, JEC):
+    def __init__(self, JEC, btag):
         self.JEC = JECSystematic(JEC)
+        self.btag = BTagSystematic(btag)
+        if self.btag != "Nominal" and self.JEC != "Nominal":
+            raise ValueError("Can't have systematics on both btag and JEC at the same time! {}, {}".format(self.btag, self.JEC))
+    @property
+    def issystematic(self): return self.btag != "Nominal" or self.JEC != "Nominal"
     @abstractproperty
     def g1(self): pass
     @abstractproperty
@@ -51,13 +58,13 @@ class BaseSingleCategorization(BaseCategorization):
     def pAux_variable_name(self): return "pAux_JVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC)
 
     @property
-    def njets_variable_name(self): return "nCleanedJetsPt30" + self.JEC.appendname.replace("JEC", "jec")
+    def njets_variable_name(self): return "nCleanedJetsPt30" + self.JEC.njetsappendname
     @property
-    def nbtagged_variable_name(self): return "nCleanedJetsPt30BTagged_bTagSF" + self.JEC.appendname.replace("JEC", "jec")
+    def nbtagged_variable_name(self): return "nCleanedJetsPt30BTagged" + self.btag.njetsappendname + self.JEC.njetsappendname
     @property
-    def phi_variable_name(self): return "jetPhi" + self.JEC.appendname.replace("JEC", "jec")
+    def phi_variable_name(self): return "jetPhi" + self.JEC.njetsappendname
     @property
-    def QGL_variable_name(self): return "jetQGLikelihood" + self.JEC.appendname.replace("JEC", "jec")
+    def QGL_variable_name(self): return "jetQGLikelihood" + self.JEC.njetsappendname
 
     @staticmethod
     def get_p_function(terms, multiplier, name):
@@ -154,7 +161,7 @@ class BaseSingleCategorization(BaseCategorization):
         QGL_variable_name = self_categorization.QGL_variable_name
 
         def function(self_tree):
-            result = self_categorization.lastvalue = categoryIchep16(
+            result = self_categorization.lastvalue = categoryMor17(
                 self_tree.nExtraLep,
                 self_tree.nExtraZ,
                   getattr(self_tree, njets_variable_name),
@@ -169,6 +176,8 @@ class BaseSingleCategorization(BaseCategorization):
                   getattr(self_tree, pZH_function_name)(),
                   getattr(self_tree, phi_variable_name),
                 self_tree.ZZMass,
+                self_tree.PFMET,
+                config.useVHMETTagged,
                 config.useQGTagging,
             )
             return result
@@ -176,7 +185,7 @@ class BaseSingleCategorization(BaseCategorization):
         return function
 
 class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
-    def __init__(self, g1, g2, g4, g1prime2, ghg2=1, ghg4=0, JEC="Nominal"):
+    def __init__(self, g1, g2, g4, g1prime2, ghg2=1, ghg4=0, JEC="Nominal", btag="Nominal"):
         self.__g1 = g1
         self.__g2 = g2
         self.__g4 = g4
@@ -186,7 +195,7 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
             raise ValueError("Can't use more than 1 of g2, g4, g1prime2, ghzgs1prime2")
         self.__ghg2 = ghg2
         self.__ghg4 = ghg4
-        super(ArbitraryCouplingsSingleCategorization, self).__init__(JEC)
+        super(ArbitraryCouplingsSingleCategorization, self).__init__(JEC=JEC, btag=btag)
 
     @property
     def g1(self): return self.__g1
@@ -213,12 +222,12 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
     def pWH_function_name(self): return "category_p_HadWH_SIG_{}_JHUGen_{}".format("_".join("{}_{}".format(name.replace("g", "ghw"), getattr(self, name)) for name in ("g1", "g2", "g4", "g1prime2")), self.JEC)
 
     @property
-    def category_function_name(self): return "category_{}".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4", "g1", "g2", "g4", "g1prime2"))) + self.JEC.appendname
+    def category_function_name(self): return "category_{}".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4", "g1", "g2", "g4", "g1prime2"))) + self.btag.appendname + self.JEC.appendname
 
 class SingleCategorizationFromSample(BaseSingleCategorization):
-    def __init__(self, sample, JEC="Nominal"):
+    def __init__(self, sample, JEC="Nominal", btag="Nominal"):
         self.sample = sample
-        super(SingleCategorizationFromSample, self).__init__(JEC)
+        super(SingleCategorizationFromSample, self).__init__(JEC=JEC, btag=btag)
 
     @property
     def g1(self): return self.sample.g1
@@ -265,7 +274,7 @@ class SingleCategorizationFromSample(BaseSingleCategorization):
 
     @property
     def category_function_name(self):
-        result = "category_{}".format(self.hypothesisname) + self.JEC.appendname
+        result = "category_{}".format(self.hypothesisname) + self.btag.appendname + self.JEC.appendname
         if self.sample.hffhypothesis:
             result += "_" + self.hffhypothesisname
         return result
@@ -274,12 +283,18 @@ class SingleCategorizationFromSample(BaseSingleCategorization):
         assert self.sample.hffhypothesis is None or self.sample.hffhypothesis == "Hff0+"
         return self.hypothesisname
 
+    def __repr__(self):
+        return "{}({!r}, {!r}, {!r})".format(type(self).__name__, self.sample, self.JEC, self.btag)
+
 class MultiCategorization(BaseCategorization):
     def __init__(self, name, *singles):
         self.name = name
         self.singles = frozenset(singles)
-#        for single in self.singles:
-#            single.nmulticategorizations += 1
+    @property
+    def issystematic(self):
+        result = {_.issystematic for _ in self.singles}
+        assert len(result) == 1, result
+        return result.pop()
     def __hash__(self):
         return hash(self.singles)
     def __eq__(self, other):
@@ -302,10 +317,10 @@ class MultiCategorization(BaseCategorization):
         singles = self_categorization.singles
         def function(self_tree):
             lastvalues = {single.lastvalue for single in singles}
-            if any(_ == VBF2jTaggedIchep16 for _ in lastvalues):
-                return VBF2jTaggedIchep16
-            if any(_ == VHHadrTaggedIchep16 for _ in lastvalues):
-                return VHHadrTaggedIchep16
+            if any(_ == VBF2jTaggedMor17 for _ in lastvalues):
+                return VBF2jTaggedMor17
+            if any(_ == VHHadrTaggedMor17 for _ in lastvalues):
+                return VHHadrTaggedMor17
             assert len(lastvalues) == 1
             return lastvalues.pop()
         function.__name__ = self_categorization.category_function_name
@@ -313,3 +328,7 @@ class MultiCategorization(BaseCategorization):
 
     @property
     def category_function_name(self): return "category_{}".format(self.name)
+
+    def __repr__(self):
+        #return ("{}(" + ", ".join(["{!r}"]*(len(self.singles)+1))+")").format(type(self).__name__, self.name, *self.singles)
+        return self.name

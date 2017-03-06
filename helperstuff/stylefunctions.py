@@ -182,10 +182,10 @@ def applyaxesstyle(h):
     h.GetYaxis().SetTitleFont(42)
 
 tokeep = {}
-def cuttext(text):
+def cuttext(text, x1=.71, y1=.84, x2=.92, y2=.92):
     if not text: return
     if (cuttext, text) not in tokeep:
-        pt = tokeep[cuttext,text] = ROOT.TPaveText(0.71,0.84,0.92,0.92,"brNDC")
+        pt = tokeep[cuttext,text] = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
         pt.SetBorderSize(0)
         pt.SetTextAlign(12)
         pt.SetTextSize(0.04)
@@ -211,7 +211,7 @@ def CMS(extratext, lumi):
             text = pt.AddText(0.165, 0.42, "#font[52]{"+extratext+"}")
             text.SetTextSize(0.0315)
 
-        lumitext = "#font[42]{"+str(lumi)+" fb^{-1} (13 TeV)}"
+        lumitext = "#font[42]{{{:.1f} fb^{{-1}} (13 TeV)}}".format(lumi)
 
         #run1lumitext = "#font[42]{19.7 fb^{-1} (8 TeV) + 5.1 fb^{-1} (7 TeV)}"
         #run1xlumi = 0.537

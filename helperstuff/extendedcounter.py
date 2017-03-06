@@ -47,7 +47,6 @@ class ExtendedCounter(collections.Counter):
 
     def TGraph(self):
         """make a TGraph with the data in self.  Keys and values have to be numbers."""
-        self.zero()
         items = self.items()
         items.sort(key = lambda x: x[0])
         keysvalues = zip(*items)

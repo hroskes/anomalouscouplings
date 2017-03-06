@@ -4,7 +4,7 @@ import os
 
 import config
 import constants
-from utilities import generatortolist
+from utilities import generatortolist_condition, tfiles
 
 class EnumItem(object):
     def __init__(self, name, *other):
@@ -17,7 +17,7 @@ class EnumItem(object):
         return hash(self.names)
 
     def __eq__(self, other):
-        if type(other) == int or type(other) == str:
+        if isinstance(other, (int, basestring)):
             return other in self.names
         if isinstance(other, type(self)):
             return str(self) == str(other)
@@ -95,6 +95,13 @@ class Flavor(MyEnum):
     @property
     def hastaus(self):
         return self in ("2e2tau", "2mu2tau", "4tau")
+    @property
+    def countersbin(self):
+        if self == "4mu": return 2
+        if self == "4e": return 3
+        if self == "2e2mu": return 4
+        if self == "4tau": return 9
+        assert False
 
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
@@ -105,24 +112,31 @@ class Hypothesis(MyEnum):
                  EnumItem("0-", "a3", "PS", "pseudoscalar"),
                  EnumItem("L1", "Lambda1"),
                  EnumItem("L1Zg"),
-                 EnumItem("g1g2"),
-                 EnumItem("g1g4"),
-                 EnumItem("g1g1prime2"),
-                 EnumItem("fa20.5", "fa2dec0.5"),
-                 EnumItem("fa30.5", "fa3dec0.5"),
-                 EnumItem("fL10.5", "fL1dec0.5"),
-                 EnumItem("fL1Zg0.5", "fL1Zgdec0.5"),
-                 EnumItem("fa2prod0.5"),
-                 EnumItem("fa3prod0.5"),
-                 EnumItem("fL1prod0.5"),
-                 EnumItem("fL1Zgprod0.5"),
+                 EnumItem("fa20.5", "fa2dec0.5", "fa2+0.5", "fa2dec+0.5"),
+                 EnumItem("fa30.5", "fa3dec0.5", "fa3+0.5", "fa3dec+0.5"),
+                 EnumItem("fL10.5", "fL1dec0.5", "fL1+0.5", "fL1dec+0.5"),
+                 EnumItem("fL1Zg0.5", "fL1Zgdec0.5", "fL1Zg+0.5", "fL1Zgdec+0.5"),
+                 EnumItem("fa2prod0.5", "fa2prod+0.5"),
+                 EnumItem("fa3prod0.5", "fa3prod+0.5"),
+                 EnumItem("fL1prod0.5", "fL1prod+0.5"),
+                 EnumItem("fL1Zgprod0.5", "fL1Zgprod+0.5"),
+                 EnumItem("fa2proddec0.5", "fa2proddec+0.5"),
+                 EnumItem("fa3proddec0.5", "fa3proddec+0.5"),
+                 EnumItem("fL1proddec0.5", "fL1proddec+0.5"),
+                 EnumItem("fL1Zgproddec0.5", "fL1Zgproddec+0.5"),
+                 EnumItem("fa2dec-0.5", "fa2-0.5"),
+                 EnumItem("fa3dec-0.5", "fa3-0.5"),
+                 EnumItem("fL1dec-0.5", "fL1-0.5"),
+                 EnumItem("fL1Zgdec-0.5", "fL1Zg-0.5"),
+                 EnumItem("fa2prod-0.5"),
+                 EnumItem("fa3prod-0.5"),
+                 EnumItem("fL1prod-0.5"),
+                 EnumItem("fL1Zgprod-0.5"),
                  EnumItem("fa2proddec-0.5"),
                  EnumItem("fa3proddec-0.5"),
-                 EnumItem("fL1proddec0.5"),
+                 EnumItem("fL1proddec-0.5"),
                  EnumItem("fL1Zgproddec-0.5"),
-                 EnumItem("fa2dec-0.5"),
-                 EnumItem("fa2prod-0.5"),
-                 EnumItem("fa2proddec0.5"),
+                 EnumItem("fa2dec-0.9", "fa2-0.9"),
                 )
     @property
     def ispure(self):
@@ -137,8 +151,15 @@ class Hypothesis(MyEnum):
         assert False
     @property
     def photoncut(self):
-        if self in ("0+_photoncut", "L1Zg", "fL1Zgdec0.5", "fL1Zgprod0.5", "fL1Zgproddec-0.5"): return True
-        return False
+        if self in ("0+_photoncut", "L1Zg"): return True
+        if self in ("0+", "0-", "a2", "L1"): return False
+        for b in "prod", "dec", "proddec":
+            for c in "+-":
+                for a in "fa2", "fa3", "fL1":
+                    if self == "{}{}{}0.5".format(a, b, c): return False
+                if self == "{}{}{}0.5".format("fL1Zg", b, c): return True
+        if self == "fa2dec-0.9": return False
+        assert False
 
 class HffHypothesis(MyEnum):
     enumname = "hffhypothesis"
@@ -167,7 +188,7 @@ class ProductionMode(MyEnum):
                 )
     @property
     def combinename(self):
-        for name in "ggH", "qqH", "ZH", "WH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets":
+        for name in "ggH", "qqH", "ZH", "WH", "ttH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets":
             if self == name:
                 return name
         assert False
@@ -177,17 +198,15 @@ class ProductionMode(MyEnum):
             return ["qqH"]
         elif self == "ZX":
             return ["zjets"]
+        elif self in ["ZH", "WH"]:
+            return ["{}_{}".format(self, dec) for dec in ("lep", "had")]
         return [str(self)]
     @property
-    def yamlsystematicsname(self):
-        if self == "ggH":
-            return "ggH"
-        elif self == "VBF":
+    def yamlsystname(self):
+        if self in ("VBF", "VBF bkg"):
             return "qqH"
         elif self == "ZX":
             return "zjets"
-        elif self == "VBF bkg":
-            return "qqZZ"
         return str(self)
     @property
     def isbkg(self):
@@ -204,11 +223,11 @@ class ProductionMode(MyEnum):
         if self in ("ggH", "ttH", "HJJ"):
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
         if self == "VBF":
-            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+            return Hypothesis.items(lambda x: x in proddechypotheses)
         if self == "ZH":
-            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+            return Hypothesis.items(lambda x: x in proddechypotheses)
         if self == "WH":
-            return Hypothesis.items(lambda x: x in proddechypotheses+["fa2dec-0.5", "fa2prod-0.5", "fa2proddec0.5"])
+            return Hypothesis.items(lambda x: x in proddechypotheses)
         if self in ("WplusH", "WminusH"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
@@ -221,9 +240,10 @@ class ProductionMode(MyEnum):
         if self in ("WplusH", "WminusH", "ttH", "HJJ"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
-    @generatortolist
+    @generatortolist_condition(lambda x: tfiles[x.withdiscriminantsfile()].candTree.GetEntries())
     def allsamples(self, production):
         from samples import Sample
+        from utilities import tfiles
         if self == "VBF bkg":
             for flavor in "2e2mu", "4e", "4mu":
                 yield Sample(self, flavor, production)
@@ -233,8 +253,77 @@ class ProductionMode(MyEnum):
         elif self.isbkg:
             yield Sample(self, production)
         else:
+            hff = None
+            if self in ("HJJ", "ttH"): hff = "Hff0+"
             for h in self.generatedhypotheses:
-                yield Sample(self, h)
+                yield Sample(self, h, hff, production)
+
+    @property
+    def QCDsystematicname(self):
+      if self == "ggH": return "QCDscale_ggH_cat"
+      if self == "qqH": return "QCDscale_qqH_cat"
+      if self in ("ZH", "WH"): return "QCDscale_VH_cat"
+      if self == "ttH": return "QCDscale_ttH_cat"
+      if self == "qqZZ": return "QCDscale_VV_cat"
+      return None
+
+    @property
+    def pdfsystematicname(self):
+      if self == "ggH": return "pdf_Higgs_gg_cat"
+      if self in ("qqH", "ZH", "WH"): return "pdf_Higgs_qq_cat"
+      if self == "ttH": return "pdf_Higgs_ttH_cat"
+      if self == "qqZZ": return "pdf_qq_cat"
+      return None
+
+    def workspaceshapesystematics(self, category):
+      result = []
+      if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
+        if (
+            config.applym4lshapesystematicsUntagged and category == "Untagged"
+            or config.applym4lshapesystematicsVBFVHtagged and category != "Untagged"
+            or config.applym4lshapesystematicsggH and self == "ggH"
+            or config.applym4lshapesystematicsggHUntagged and self == "ggH" and category == "Untagged"
+            or config.applym4lshapesystematicsdiagonal and (
+                                                            self == "ggH" and category == "Untagged"
+                                                            or self == "VBF" and category == "VBFtagged"
+                                                            or self in ("ZH", "WH") and category == "VHHadrtagged"
+                                                           )
+           ):
+          if config.combinem4lshapesystematics:
+            result += ["ScaleRes"]
+          else:
+            result += ["Scale", "Res"]
+      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyMINLOsystematics:
+        result += ["MINLO"]
+      return [WorkspaceShapeSystematic(_) for _ in result]
+
+    @property
+    def alternateweights(self):
+      if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
+         return AlternateWeight.items(lambda x: x!="EWcorrUp" and x!="EWcorrDn")
+      if self == "qqZZ":
+         return AlternateWeight.items()
+      assert False
+
+class WorkspaceShapeSystematic(MyEnum):
+    enumname = "workspaceshapesystematic"
+    enumitems = (
+                 EnumItem("Res"),
+                 EnumItem("Scale"),
+                 EnumItem("ScaleRes"),
+                 EnumItem("MINLO"),
+                )
+    @property
+    def isperchannel(self):
+        if self in ("Res", "Scale", "ScaleRes"): return True
+        return False
+
+class SystematicDirection(MyEnum):
+    enumname = "systematicdirection"
+    enumitems = (
+                 EnumItem("Up"),
+                 EnumItem("Down", "Dn"),
+                )
 
 class ShapeSystematic(MyEnum):
     enumname = "shapesystematic"
@@ -246,22 +335,29 @@ class ShapeSystematic(MyEnum):
                  EnumItem("ScaleDown"),
                  EnumItem("ScaleResUp", "ResScaleUp"),
                  EnumItem("ScaleResDown", "ResScaleDown"),
+                 EnumItem("JECUp"),
+                 EnumItem("JECDown", "JECDn"),
                  EnumItem("ZXUp"),
-                 EnumItem("ZXDown"),
+                 EnumItem("ZXDown", "ZXDn"),
+                 EnumItem("MINLO_SM"),
+                 EnumItem("MINLOUp"),
+                 EnumItem("MINLODn", "MINLODown"),
                 )
     def appendname(self):
-        if self == "": return ""
-        return "_" + str(self)
+        if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
+        return ""
     def D_bkg(self, title=False):
         from discriminants import discriminant
         return discriminant("D_bkg"+self.appendname())
     def appliesto(self, templategroup):
-        if templategroup in ("ggh", "vbf", "zh", "wh"):
-            return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
-        elif templategroup == "bkg":
-            return self in ("", "ZXUp", "ZXDown")
-        elif templategroup == "DATA":
-            return self in ("", )
+        if self == "":
+            return True
+        if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"):
+            return templategroup in ("ggh", "vbf", "zh", "wh", "tth")
+        if self in ("ZXUp", "ZXDown"):
+            return templategroup == "bkg"
+        if self in ("MINLO_SM", "MINLOUp", "MINLODn"):
+            return templategroup == "ggh"
         assert False
 
 class JECSystematic(MyEnum):
@@ -275,6 +371,24 @@ class JECSystematic(MyEnum):
     def appendname(self):
         if self == "JECNominal": return ""
         return "_" + str(self)
+    @property
+    def njetsappendname(self):
+        return self.appendname.replace("JEC", "jec")
+
+class BTagSystematic(MyEnum):
+    enumname = "btagsystematic"
+    enumitems = (
+                 EnumItem("bTagSFNominal", "Nominal"),
+                 EnumItem("bTagSFUp", "Up"),
+                 EnumItem("bTagSFDn", "Dn"),
+                )
+    @property
+    def appendname(self):
+        if self == "bTagSFNominal": return ""
+        return "_" + str(self)
+    @property
+    def njetsappendname(self):
+        return "_"+str(self).replace("Nominal", "")
 
 class TemplateGroup(MyEnum):
     enumname = "templategroup"
@@ -283,6 +397,7 @@ class TemplateGroup(MyEnum):
                  EnumItem("vbf"),
                  EnumItem("zh"),
                  EnumItem("wh"),
+                 EnumItem("tth"),
                  EnumItem("background", "bkg"),
                  EnumItem("DATA"),
                 )
@@ -295,17 +410,32 @@ class Analysis(MyEnum):
                  EnumItem("fL1"),
                  EnumItem("fL1Zg"),
                 )
-    @property
-    def title(self):
+    def title(self, latex=False, superscript=None):
         if self == "fa3":
-            return "f_{a3}"
-        if self == "fa2":
-            return "f_{a2}"
-        if self == "fL1":
-            return "f_{#Lambda1}"
-        if self == "fL1Zg":
-            return "f_{#Lambda1}^{Z#gamma}"
-        assert False
+            result = "f_{{a3}}"
+        elif self == "fa2":
+            result = "f_{{a2}}"
+        elif self == "fL1":
+            result = "f_{{{Lambda}1}}"
+        elif self == "fL1Zg":
+            result = "f_{{{Lambda}1}}^{{{Z}{gamma}}}"
+        else:
+            assert False
+
+        if latex:
+            repmap = {"Lambda": r"\Lambda", "Z": r"\Z", "gamma": r"\gamma"}
+        else:
+            repmap = {"Lambda": "#Lambda", "Z": "Z", "gamma": r"#gamma"}
+        result = result.format(**repmap)
+
+        if superscript is not None:
+            if "^" in result:
+                result = result.rstrip("}") + ", " + str(superscript) + "}"
+            else:
+                result += "^{" + str(superscript) + "}"
+
+        return result
+
     @property
     def phi(self):
         if self == "fa3":
@@ -374,18 +504,18 @@ class Analysis(MyEnum):
 class Production(MyEnum):
     enumname = "production"
     enumitems = (
-                 EnumItem("161221"),
-                 EnumItem("170119"),
+                 EnumItem("170203"),
+                 EnumItem("170222"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
-        if self == "161221":
+        if self == "170203":
             if config.host == "lxplus":
-                return "/afs/cern.ch/work/h/hroskes/public/reweighting_CJLST/CMSSW_8_0_24_patch1/src/ZZAnalysis/AnalysisStep/test/prod/anomalouscouplings/AAAOK"
-        if self == "170119":
+                return "root://lxcms03//data3/Higgs/170203"
+        if self == "170222":
             if config.host == "lxplus":
-                return "/afs/cern.ch/work/h/hroskes/public/reweighting_CJLST/CMSSW_8_0_24_patch1/src/ZZAnalysis/AnalysisStep/test/prod/anomalouscouplings_Moriond/AAAOK"
+                return "root://lxcms03//data3/Higgs/170222"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -395,27 +525,23 @@ class Production(MyEnum):
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VH(self):
         return self.CJLSTdir()
+    def CJLSTdir_MINLO(self):
+        return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        from datetime import date
-        if date.today() > date(2017, 1, 28):
-            raise ValueError("luminosity??!!")
-        if self == "170119": return 40
+        if self in ("170203", "170222"): return 35.8671
         assert False
     def __int__(self):
         return int(str(self))
     @property
     def year(self):
-        if "170119" <= self:
+        if "170222" <= self:
             return 2016
         assert False
-
-class BlindStatus(MyEnum):
-    enumname = "blindstatus"
-    enumitems = (
-                 EnumItem("unblind"),
-                 EnumItem("blind"),
-                )
+    @property
+    def productionforsmoothingparameters(self):
+        if self == "170222": return type(self)("170203")
+        return self
 
 class Category(MyEnum):
     """
@@ -423,9 +549,9 @@ class Category(MyEnum):
     """
     enumname = "category"
     enumitems = (
-                 EnumItem("Untagged", "UntaggedIchep16", "VBF1jTaggedIchep16", "VHLeptTaggedIchep16", "ttHTaggedIchep16"),
-                 EnumItem("VHHadrtagged", "VHHadrTaggedIchep16"),
-                 EnumItem("VBFtagged", "VBF2jTaggedIchep16"),
+                 EnumItem("Untagged", "UntaggedMor17", "VBF1jTaggedMor17", "VHLeptTaggedMor17", "ttHTaggedMor17", "VHMETTaggedMor17"),
+                 EnumItem("VHHadrtagged", "VHHadrTaggedMor17"),
+                 EnumItem("VBFtagged", "VBF2jTaggedMor17"),
                 )
     @property
     def idnumbers(self):
@@ -434,7 +560,7 @@ class Category(MyEnum):
         (defined in Category.h)
         """
         import CJLSTscripts
-        return [getattr(CJLSTscripts, name) for name in self.item.names if "Ichep16" in name]
+        return [getattr(CJLSTscripts, name) for name in self.item.names if "Mor17" in name]
 
     @property
     def yamlname(self):
@@ -449,33 +575,98 @@ class Category(MyEnum):
         if self == "VBFtagged": return [ProductionMode("VBF")]
         if self == "VHHadrtagged": return [ProductionMode("ZH"), ProductionMode("WH")]
 
+    @classmethod
+    def fromid(cls, number):
+        for category in cls.items():
+            if number in category:
+                return category
+        raise ValueError("Invalid id {}".format(number))
+
 class AlternateGenerator(MyEnum):
     enumname = "alternategenerator"
     enumitems = (
                  EnumItem("POWHEG"),
+                 EnumItem("MINLO"),
+                 EnumItem("NNLOPS"),
                 )
 
+class PythiaSystematic(MyEnum):
+    enumname = "pythiasystematic"
+    enumitems = (
+                 EnumItem("ScaleUp"),
+                 EnumItem("ScaleDn"),
+                 EnumItem("TuneUp"),
+                 EnumItem("TuneDn"),
+                )
+
+    @property
+    def appendname(self):
+        return "_" + str(self).lower().replace("dn", "down")
+
+class AlternateWeight(MyEnum):
+    enumname = "alternateweight"
+    enumitems = (
+                 EnumItem("1"),
+                 EnumItem("muRUp"),
+                 EnumItem("muRDn"),
+                 EnumItem("muFUp"),
+                 EnumItem("muFDn"),
+                 EnumItem("PDFUp"),
+                 EnumItem("PDFDn"),
+                 EnumItem("alphaSUp"),
+                 EnumItem("alphaSDn"),
+                 EnumItem("EWcorrUp"),
+                 EnumItem("EWcorrDn"),
+                )
+    @property
+    def issystematic(self): return self != "1"
+    @property
+    def weightname(self):
+      if self == "1": return "1"
+      if self == "muRUp": return "LHEweight_QCDscale_muR2_muF1"
+      if self == "muRDn": return "LHEweight_QCDscale_muR0p5_muF1"
+      if self == "muFUp": return "LHEweight_QCDscale_muR1_muF2"
+      if self == "muFDn": return "LHEweight_QCDscale_muR1_muF0p5"
+      if self == "PDFUp": return "LHEweight_PDFVariation_Up"
+      if self == "PDFDn": return "LHEweight_PDFVariation_Dn"
+      if self == "alphaSUp": return "LHEweight_AsMZ_Up"
+      if self == "alphaSDn": return "LHEweight_AsMZ_Dn"
+      if self == "EWcorrUp": return "(1 + KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
+      if self == "EWcorrDn": return "(1 - KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
+      assert False
+
 channels = Channel.items()
-if config.applyshapesystematics:
-    shapesystematics = ShapeSystematic.items()
-    treeshapesystematics = ShpaeSystematic.items(lambda x: x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown"))
-else:
-    shapesystematics = treeshapesystematics = ShapeSystematic.items(lambda x: x == "")
 JECsystematics = JECSystematic.items()
+btagsystematics = BTagSystematic.items()
+pythiasystematics = PythiaSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
-decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa20.5", "fa30.5", "fL10.5", "fL1Zg0.5"))
-prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5"))
-proddechypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5", "fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec0.5", "fL1Zgproddec-0.5"))
+decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5", "fa2dec-0.9"))
+prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5", "fa2prod-0.5", "fa3prod-0.5", "fL1prod-0.5", "fL1Zgprod-0.5"))
+proddechypotheses = Hypothesis.items()
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
-#productions = Production.items(lambda x: x in ("160225", "160729"))
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine)
-blindstatuses = BlindStatus.items()
+productions = Production.items(lambda x: x in ("170203", "170222"))
+#productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
+
+_ = [""]
+if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBFVHtagged:
+    _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
+    if config.combinem4lshapesystematics:
+        _ += ["ScaleResUp", "ScaleResDown"]
+if config.applyZXshapesystematicsUntagged or config.applyZXshapesystematicsVBFVHtagged:
+    _ += ["ZXUp", "ZXDown"]
+if config.applyJECshapesystematics:
+    _ += ["JECUp", "JECDown"]
+if config.applyMINLOsystematics:
+    _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
+shapesystematics = ShapeSystematic.items(lambda x: x in _)
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown"))
+del _
 
 class MetaclassForMultiEnums(type):
     def __new__(cls, clsname, bases, dct):

@@ -68,12 +68,6 @@ SMXSWpH2L2l = SMXSWpH * SMBR2L2l
 SMXSWmH2L2l = SMXSWmH * SMBR2L2l
 SMXSttH2L2l = SMXSttH * SMBR2L2l
 
-#############
-from datetime import date
-if date.today() > date(2017, 1, 26):
-    raise ValueError("Update mix L1Zg xsecs!")
-#############
-
 JHUXSggH2L2la1           = 7.1517173;      JHUXSggH2L2la1err            = 0.23044650E-03
 JHUXSggH2L2la2           = 2.5849908;      JHUXSggH2L2la2err            = 0.77294379E-04
 JHUXSggH2L2la3           = 1.0954288;      JHUXSggH2L2la3err            = 0.43443941E-04
@@ -83,7 +77,7 @@ JHUXSggH2L2la1a3         = 14.278034;      JHUXSggH2L2la1a3err          = 0.4531
 JHUXSggH2L2la1L1         = 0.23727827;     JHUXSggH2L2la1L1err          = 0.15982277E-04    #using g1prime2 = -12100.42
 JHUXSggH2L2la1_photoncut = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27583899E-03    #This is bigger than the uncut xsec.  Fix below.
 JHUXSggH2L2lL1Zg         = 0.12338393E-06; JHUXSggH2L2lL1Zgerr          = 0.58002047E-11
-JHUXSggH2L2la1L1Zg       = 13.169996;      JHUXSggH2L2la1L1Zgerr        = 0.18226318E-01
+JHUXSggH2L2la1L1Zg       = 13.145473;      JHUXSggH2L2la1L1Zgerr        = 0.53550812E-03
 
 JHUXSVBFa1           = 968.674284006;      JHUXSVBFa1err            = 0.075115702763
 JHUXSVBFa2           = 13102.7106117;      JHUXSVBFa2err            = 0.522399748272
@@ -94,7 +88,7 @@ JHUXSVBFa1a3         = 1937.20646111;      JHUXSVBFa1a3err          = 0.12261732
 JHUXSVBFa1L1         = 2861.21349769;      JHUXSVBFa1L1err          = 0.0771278408768
 JHUXSVBFa1_photoncut = 834.24595;          JHUXSVBFa1err_photoncut  = 0.41631690
 JHUXSVBFL1Zg         = 0.49845301E-04;     JHUXSVBFL1Zgerr          = 0.21806623E-07
-JHUXSVBFa1L1Zg       = 1394.3489;          JHUXSVBFa1L1Zgerr        = 10.828923
+JHUXSVBFa1L1Zg       = 1410.5494;          JHUXSVBFa1L1Zgerr        = 0.68216715
 
 JHUXSZHa1           = 9022.36;        JHUXSZHa1err            = 1.17
 JHUXSZHa2           = 713123;         JHUXSZHa2err            = 103
@@ -105,7 +99,7 @@ JHUXSZHa1a3         = 18040.66;       JHUXSZHa1a3err          = 2.73
 JHUXSZHa1L1         = 6852.307;       JHUXSZHa1L1err          = 0.929
 JHUXSZHa1_photoncut = 1437150.9;      JHUXSZHa1err_photoncut  = 289.72492
 JHUXSZHL1Zg         = 3.4592597;      JHUXSZHL1Zgerr          = 0.56602360E-03
-JHUXSZHa1L1Zg       = 3479155.1;      JHUXSZHa1L1Zgerr        = 6901.4960
+JHUXSZHa1L1Zg       = 3479412.2;      JHUXSZHa1L1Zgerr        = 486.4
 
 JHUXSWHa1           = 30998.54;       JHUXSWHa1err           = 2.50
 JHUXSWHa2           = 3106339;        JHUXSWHa2err           = 308

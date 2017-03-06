@@ -7,7 +7,7 @@ import ROOT
 from helperstuff import config
 from helperstuff import constants
 from helperstuff.discriminants import discriminant
-from helperstuff.enums import Category, Channel
+from helperstuff.enums import Analysis, Category, Channel
 import helperstuff.rootoverloads.histogramfloor
 from helperstuff.samples import ReweightingSample, Sample, SampleBase
 
@@ -30,9 +30,9 @@ def plotfromtree(**kwargs):
     "max":            None,
 
     "disc2":          None,
-    "bins2":           None,
-    "min2":            None,
-    "max2":            None,
+    "bins2":          None,
+    "min2":           None,
+    "max2":           None,
 
     "transformation": None,  #should be a string with {disc} in it
 
@@ -42,9 +42,12 @@ def plotfromtree(**kwargs):
 
     "channel":        None,
     "category":       None,
-    "analysis":       None,  #for which categorization to use
+    "categorization": None,  #for which categorization to use, or set the next argument
+    "analysis":       None,  #for which categorization to use, or set the previous argument
+    "cut":            None,
 
     "color":          1,
+    "linestyle":      1,
     "hname":          None,
     "xaxislabel":     None,
   })
@@ -111,8 +114,12 @@ def plotfromtree(**kwargs):
                    "{}>-98".format(discname),
                   ]
   if o.category is not None:
-    if o.analysis is None: raise TypeError("analysis is mandatory if category is provided!")
-    weightfactors.append(" || ".join("(category_{}=={})".format(o.analysis.categoryname, _) for _ in Category(o.category).idnumbers))
+    o.category = Category(o.category)
+    if o.analysis is o.categorization is None: raise TypeError("analysis or categorization is mandatory if category is provided!")
+    if o.analysis is not None is not o.categorization: raise TypeError("Can't provide both analysis and categorization!")
+    if o.analysis is not None: categoryname = Analysis(o.analysis).categoryname
+    else:                      categoryname = o.categorization
+    weightfactors.append(" || ".join("(category_{}=={})".format(categoryname, _) for _ in Category(o.category).idnumbers))
   if o.enrich:
     weightfactors.append("D_bkg>0.5")
   if o.channel is not None:
@@ -122,6 +129,8 @@ def plotfromtree(**kwargs):
     weightfactors.append("ZZMass < {}".format(config.m4lmax))
   if o.disc2 is not None:
     weightfactors.append("{}>-98".format(disc2name))
+  if o.cut is not None:
+    weightfactors.append(o.cut)
 
   wt = "*".join("("+_+")" for _ in weightfactors)
 
@@ -163,6 +172,8 @@ def plotfromtree(**kwargs):
     except ZeroDivisionError:
       pass
   h.SetLineColor(o.color)
+  h.SetLineStyle(o.linestyle)
+  h.SetMarkerColor(o.color)
   h.SetMarkerStyle(1)
 
   return h

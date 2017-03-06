@@ -3,10 +3,11 @@ from array import array
 from collections import OrderedDict
 from helperstuff import config
 from helperstuff import xrd
-from helperstuff.enums import flavors, hffhypotheses, ProductionMode, productions
-from helperstuff.samples import Sample
+from helperstuff.enums import hffhypotheses, ProductionMode, productions, pythiasystematics
+from helperstuff.samples import allsamples, Sample
+from helperstuff.submitjob import submitjob
 from helperstuff.treewrapper import TreeWrapper
-from helperstuff.utilities import KeepWhileOpenFile
+from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID, LSF_creating
 import os
 import ROOT
 import sys
@@ -23,11 +24,17 @@ def adddiscriminants(*args):
   filename = sample.CJLSTfile()
   newfilename = sample.withdiscriminantsfile()
   print newfilename
-  with KeepWhileOpenFile(newfilename+".tmp") as kwof:
+  with KeepWhileOpenFile(newfilename+".tmp", message=LSB_JOBID()) as kwof, LSF_creating(newfilename, ignorefailure=True) as LSF:
     if not kwof:
         return
     if os.path.exists(newfilename):
         return
+
+    if sample.copyfromothersample is not None:
+      if xrd.exists(sample.CJLSTfile()):
+        raise ValueError("{} exists, why not use it?".format(sample.CJLSTfile()))
+      os.symlink(sample.copyfromothersample.withdiscriminantsfile(), sample.withdiscriminantsfile())
+      return
 
     isdummy = False
     if not xrd.exists(filename):
@@ -63,7 +70,7 @@ def adddiscriminants(*args):
 
     failed = False
     try:
-        newf = ROOT.TFile.Open(newfilename, "recreate")
+        newf = ROOT.TFile.Open(LSF.basename(newfilename), "recreate")
         newt = t.CloneTree(0)
         if treewrapper.effectiveentriestree is not None:
             treewrapper.effectiveentriestree.SetDirectory(newf)
@@ -99,22 +106,22 @@ def adddiscriminants(*args):
             except:
                 pass
 
+def submitjobs():
+    njobs = 0
+    for sample in allsamples():
+        if not os.path.exists(sample.withdiscriminantsfile()) and not os.path.exists(sample.withdiscriminantsfile()+".tmp"):
+            njobs += 1
+    for i in range(njobs):
+        submitjob(os.path.join(config.repositorydir, "step2_adddiscriminants.py"), jobname=str(i), jobtime="1-0:0:0")
+
 if __name__ == '__main__':
-    for production in productions:
-        for productionmode in "ggH", "VBF", "ZH", "WH":
-            for hypothesis in ProductionMode(productionmode).generatedhypotheses:
-                adddiscriminants(productionmode, hypothesis, production)
-        for hypothesis in hffhypotheses:
-            adddiscriminants("HJJ", hypothesis, "0+", production)
-            adddiscriminants("ttH", hypothesis, "0+", production)
-        for flavor in flavors:
-            adddiscriminants("ggZZ", flavor, production)
-            if not flavor.hastaus:
-                adddiscriminants("VBF bkg", flavor, production)
-        for productionmode in "VBF", "ZH", "WplusH", "WminusH":
-            adddiscriminants(productionmode, "0+", "POWHEG", production)
-        adddiscriminants("ttH", "Hff0+", "0+", "POWHEG", production)
-        adddiscriminants("qqZZ", production)
-        adddiscriminants("ZX", production)
-        adddiscriminants("data", production, "unblind")
-        adddiscriminants("data", production, "blind")
+    if sys.argv[1:]:
+        if sys.argv[1].lower() == "submitjobs":
+            submitjobs(*sys.argv[2:])
+        else:
+            raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
+    else:
+        for production in productions:
+            adddiscriminants("ggZZ", "4tau", production)  #to catch bugs early
+        for sample in allsamples():
+            adddiscriminants(sample)

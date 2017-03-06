@@ -1,9 +1,14 @@
+import abc
 import collections
 import contextlib
+import errno
 from itertools import tee, izip
+import logging
 import operator
 import json
 import os
+import shutil
+import sys
 import time
 
 import ROOT
@@ -25,6 +30,9 @@ class TFilesDict(KeyDefaultDict):
     def __delitem__(self, key):
         self[key].Close()
         return super(TFilesDict, self).__delitem__(key)
+    def clear(self):
+        for key in self.keys(): del self[key]
+        return super(TFilesDict, self).clear()
 
 tfiles = TFilesDict()
 
@@ -50,16 +58,58 @@ class MultiplyCounter(collections.Counter):
         return self
 
 def cache(function):
-    cachename = "__cache_{}".format(function.__name__)
-    def newfunction(self, *args):
+    cache = {}
+    def newfunction(*args, **kwargs):
         try:
-            return getattr(self, cachename)[args]
+            return cache[args, tuple(sorted(kwargs.iteritems()))]
+        except TypeError:
+            print args, tuple(sorted(kwargs.iteritems()))
+            raise
+        except KeyError:
+            cache[args, tuple(sorted(kwargs.iteritems()))] = function(*args, **kwargs)
+            return newfunction(*args, **kwargs)
+    newfunction.__name__ = function.__name__
+    return newfunction
+
+def multienumcache(function, haskwargs=False, multienumforkey=None):
+    from enums import MultiEnum
+    if multienumforkey is None:
+        multienumforkey = function
+    assert issubclass(function, MultiEnum)
+    assert issubclass(multienumforkey, MultiEnum)
+    cache = {}
+    def newfunction(*args, **kwargs):
+        if kwargs and not haskwargs:
+            raise TypeError("{} has no kwargs!".format(function.__name__))
+        key = multienumforkey(*args)
+        try:
+            oldkwargs, result = cache[key]
+            if kwargs and kwargs != oldkwargs:
+                raise ValueError("{}({}, **kwargs) called with 2 different kwargs:\n{}\n{}".format(function.__name__, ", ".join(repr(_) for _ in args), oldkwargs, kwargs))
+            return result
+        except KeyError:
+            if haskwargs and not kwargs:
+                raise ValueError("Have to give kwargs the first time you call {}({}, **kwargs)".format(function.__name__, ", ".join(repr(_) for _ in args)))
+            cache[key] = kwargs, function(*args, **kwargs)
+            return newfunction(*args, **kwargs)
+    newfunction.__name__ = function.__name__
+    return newfunction
+
+
+def cache_instancemethod(function):
+    """
+    for when self doesn't support __hash__
+    """
+    cachename = "__cache_{}".format(function.__name__)
+    def newfunction(self, *args, **kwargs):
+        try:
+            return getattr(self, cachename)[args, tuple(sorted(kwargs.iteritems()))]
         except AttributeError:
             setattr(self, cachename, {})
-            return newfunction(self, *args)
+            return newfunction(self, *args, **kwargs)
         except KeyError:
-            getattr(self, cachename)[args] = function(self, *args)
-            return newfunction(self, *args)
+            getattr(self, cachename)[args, tuple(sorted(kwargs.iteritems()))] = function(self, *args, **kwargs)
+            return newfunction(self, *args, **kwargs)
     newfunction.__name__ = function.__name__
     return newfunction
 
@@ -74,35 +124,97 @@ def cd(newdir):
         os.chdir(prevdir)
 
 class KeepWhileOpenFile(object):
-    def __init__(self, name):
+    def __init__(self, name, message=None):
+        logging.debug("creating KeepWhileOpenFile {}".format(name))
         self.filename = name
+        self.__message = message
         self.pwd = os.getcwd()
         self.fd = self.f = None
+        self.bool = False
+
     def __enter__(self):
+        logging.debug("entering KeepWhileOpenFile {}".format(self.filename))
         with cd(self.pwd):
+            logging.debug("does it exist? {}".format(os.path.exists(self.filename)))
             try:
+                logging.debug("trying to open")
                 self.fd = os.open(self.filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            except OSError, e:
-                if e.errno == 17:
-                    return None
-                else:
-                    raise
+            except OSError:
+                logging.debug("failed: it already exists")
+                return None
             else:
+                logging.debug("succeeded: it didn't exist")
+                logging.debug("does it now? {}".format(os.path.exists(self.filename)))
+                if not os.path.exists(self.filename):
+                    logging.warning("{} doesn't exist!??".format(self.filename))
                 self.f = os.fdopen(self.fd, 'w')
-                return self.f
+                try:
+                    if self.__message is not None:
+                        logging.debug("writing message")
+                        self.f.write(self.__message+"\n")
+                        logging.debug("wrote message")
+                except IOError:
+                    logging.debug("failed to write message")
+                    pass
+                try:
+                    logging.debug("trying to close")
+                    self.f.close()
+                    logging.debug("closed")
+                except IOError:
+                    logging.debug("failed to close")
+                    pass
+                self.bool = True
+                return True
+
     def __exit__(self, *args):
+        logging.debug("exiting")
         if self:
-            self.f.close()
             try:
                 with cd(self.pwd):
+                    logging.debug("trying to remove")
                     os.remove(self.filename)
+                    logging.debug("removed")
             except OSError:
-                if os.path.exists(self.filename):
-                    raise
-                #else ignore it
-            self.fd = self.f = None
+                logging.debug("failed")
+                pass #ignore it
+        self.fd = self.f = None
+        self.bool = False
+
     def __nonzero__(self):
-        return bool(self.f)
+        return self.bool
+
+class Tee(object):
+    """http://stackoverflow.com/a/616686/5228524"""
+    def __init__(self, *openargs, **openkwargs):
+        self.openargs = openargs
+        self.openkwargs = openkwargs
+    def __enter__(self):
+        self.file = open(*self.openargs, **self.openkwargs)
+        self.stdout = sys.stdout
+        sys.stdout = self
+    def __exit__(self, *args):
+        sys.stdout = self.stdout
+        self.file.close()
+    def write(self, data):
+        self.file.write(data)
+        self.stdout.write(data)
+
+class OneAtATime(KeepWhileOpenFile):
+    def __init__(self, name, delay, message=None, task="doing this"):
+        super(OneAtATime, self).__init__(name)
+        self.delay = delay
+        if message is None:
+            message = "Another process is already {task}!  Waiting {delay} seconds."
+        message = message.format(delay=delay, task=task)
+        self.__message = message
+
+    def __enter__(self):
+        while True:
+            result = super(OneAtATime, self).__enter__()
+            if result:
+                return result
+            print self.__message
+            time.sleep(self.delay)
 
 def jsonloads(jsonstring):
     try:
@@ -110,26 +222,6 @@ def jsonloads(jsonstring):
     except:
         print jsonstring
         raise
-
-def getnesteddictvalue(thedict, *keys, **kwargs):
-    hasdefault = False
-    for kw, kwarg in kwargs.iteritems():
-       if kw == "default":
-           hasdefault = True
-           default = kwarg
-       else:
-           raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
-
-    if len(keys) == 0:
-        return thedict
-
-    if hasdefault and keys[0] not in thedict:
-        if len(keys) == 1:
-            thedict[keys[0]] = default
-        else:
-            thedict[keys[0]] = {}
-
-    return getnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
 
 def pairwise(iterable):
     """
@@ -172,7 +264,226 @@ def sign(x):
     return cmp(x, 0)
 
 def generatortolist(function):
-    def newfunction(*args, **kwargs):
-        return list(function(*args, **kwargs))
-    newfunction.__name__ = function.__name__
-    return newfunction
+    return generatortolist_condition(lambda x: True)(function)
+
+def generatortolist_condition(condition):
+    def generatortolist(function):
+        def newfunction(*args, **kwargs):
+            return [_ for _ in function(*args, **kwargs) if condition(_)]
+        newfunction.__name__ = function.__name__
+        return newfunction
+    return generatortolist
+
+
+def rreplace(s, old, new, occurrence):
+    """http://stackoverflow.com/a/2556252/5228524"""
+    li = s.rsplit(old, occurrence)
+    return new.join(li)
+
+def mkdir_p(path):
+    """http://stackoverflow.com/a/600612/5228524"""
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+def is_almost_integer(flt):
+    if isinstance(flt, (int, long)) or flt.is_integer(): return True
+    if float("{:.8g}".format(flt)).is_integer(): return True
+    return False
+
+class JsonDict(object):
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractproperty
+    def keys(self): pass
+
+    @property
+    def default(self):
+        return JsonDict.__nodefault
+
+    @abc.abstractmethod
+    def dictfile(self):
+        """should be a member, not a method"""
+
+
+
+
+
+    __nodefault = object()
+    __dictscache = collections.defaultdict(lambda: None)
+
+    def setvalue(self, value):
+        self.setnesteddictvalue(self.getdict(), *self.keys, value=value)
+        assert self.value == value
+
+    def getvalue(self):
+        try:
+            return self.getnesteddictvalue(self.getdict(), *self.keys, default=self.default)
+        except:
+            print "Error while getting value of\n{!r}".format(self)
+            raise
+
+    @property
+    def value(self):
+        return self.getvalue()
+
+    @value.setter
+    def value(self, value):
+        self.setvalue(value)
+
+    @classmethod
+    def getdict(cls, trycache=True):
+      import globals
+      if cls.__dictscache[cls] is None or not trycache:
+        try:
+          with open(cls.dictfile) as f:
+            jsonstring = f.read()
+        except IOError:
+          try:
+            os.makedirs(os.path.dirname(cls.dictfile))
+          except OSError:
+            pass
+          with open(cls.dictfile, "w") as f:
+            f.write("{}\n")
+            jsonstring = "{}"
+        cls.__dictscache[cls] = json.loads(jsonstring)
+      return cls.__dictscache[cls]
+
+    @classmethod
+    def writedict(cls):
+      dct = cls.getdict()
+      jsonstring = json.dumps(dct, sort_keys=True, indent=4, separators=(',', ': '))
+      with open(cls.dictfile, "w") as f:
+        f.write(jsonstring)
+
+    @classmethod
+    def getnesteddictvalue(cls, thedict, *keys, **kwargs):
+        hasdefault = False
+        for kw, kwarg in kwargs.iteritems():
+           if kw == "default":
+               if kwarg is not JsonDict.__nodefault:
+                   hasdefault = True
+                   default = kwarg
+           else:
+               raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+        if len(keys) == 0:
+            return thedict
+
+        if hasdefault and keys[0] not in thedict:
+            if len(keys) == 1:
+                thedict[keys[0]] = default
+            else:
+                thedict[keys[0]] = {}
+
+        return cls.getnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
+    @classmethod
+    def setnesteddictvalue(cls, thedict, *keys, **kwargs):
+        for kw, kwarg in kwargs.iteritems():
+            if kw == "value":
+                value = kwarg
+            else:
+                raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+        try:
+            value
+        except NameError:
+            raise TypeError("Didn't provide value kwarg!")
+
+        if len(keys) == 1:
+            thedict[keys[0]] = value
+            return
+
+        if keys[0] not in thedict:
+            thedict[keys[0]] = {}
+
+        return cls.setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
+def LSB_JOBID():
+    return os.environ.get("LSB_JOBID", None)
+
+class LSF_creating(object):
+    def __init__(self, *files, **kwargs):
+        self.files = files
+        for filename in files:
+            if not filename.startswith("/"):
+                raise ValueError("{} should be an absolute path!".format(filename))
+
+        self.jsonfile = None
+        self.ignorefailure = False
+        for kw, kwarg in kwargs.iteritems():
+            if kw == "jsonfile":
+                self.jsonfile = kwarg
+                if not self.jsonfile.startswith("/"): raise ValueError("jsonfile={} should be an absolute path!".format(self.jsonfile))
+            elif kw == "ignorefailure":
+                self.ignorefailure = kwarg
+            else:
+                raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
+
+    def __enter__(self):
+        if not LSB_JOBID(): return self
+        if self.jsonfile is not None:
+            shutil.copy(self.jsonfile, "./")
+            self.jsonfile = os.path.basename(self.jsonfile)
+            if len(self.files) != 1: raise ValueError("only know how to handle 1 file")
+
+            with open(os.path.basename(self.jsonfile)) as f:
+                content = f.read()
+
+            if content.count(self.files[0]) != 1:
+                raise ValueError("{} is not in {}".format(self.files[0], self.jsonfile))
+            content = content.replace(self.files[0], os.path.basename(self.files[0]))
+
+            with open(os.path.basename(self.jsonfile), "w") as f:
+                f.write(content)
+
+        return self
+
+    def basename(self, filename):
+        if filename not in self.files: raise ValueError("Unknown filename {}!".format(filename))
+        if LSB_JOBID():
+            return os.path.basename(filename)
+        else:
+            return filename
+
+    def __exit__(self, *errorinfo):
+        if not LSB_JOBID(): return
+
+        notcreated = []
+
+        for filename in self.files:
+            if os.path.exists(os.path.basename(filename)):
+                shutil.move(os.path.basename(filename), filename)
+            else:
+                notcreated.append(os.path.basename(filename))
+
+        if notcreated and not self.ignorefailure:
+            raise RuntimeError("\n".join("{} was not created!".format(os.path.basename(filename)) for filename in filenames))
+
+def RooArgList(*args, **kwargs):
+    name = None
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "name":
+            name = kwarg
+        else:
+            raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
+    args = list(args)
+    if name is None and isinstance(args[-1], basestring):
+        name = args[-1]
+        args = args[:-1]
+
+    if len(args) < 4:
+        if name is not None:
+            args.append(name)
+        return ROOT.RooArgList(*args)
+
+    nameargs = [name] if name is not None else []
+    result = ROOT.RooArgList(*nameargs)
+    for arg in args:
+        result.add(arg)
+    return result

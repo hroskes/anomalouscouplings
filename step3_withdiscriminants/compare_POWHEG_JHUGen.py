@@ -8,7 +8,7 @@ import ROOT
 from helperstuff import config, style
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, categories, Category, hffhypotheses
-from helperstuff.samples import ReweightingSample, Sample
+from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, Sample
 from helperstuff.plotfromtree import Line, plotfromtree
 from helperstuff.templates import TemplatesFile
 from helperstuff.utilities import tfiles
@@ -20,7 +20,8 @@ def makeline(sample, title, reweightfrom=None):
   global color
   color += 1
   thecolor = color
-  assert thecolor < 6
+  assert thecolor < 8
+  if thecolor == 7: thecolor = ROOT.kViolet-1
   if thecolor == 5: thecolor = 6
   return Line(sample, title, thecolor, reweightfrom)
 
@@ -31,6 +32,8 @@ def lines(productionmode, analysis):
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ggH SM JHUGen H+jj")
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ggH 0^{-} JHUGen H+jj")
     yield makeline(ReweightingSample(productionmode, "0+", "fCP0.5"), "ggH f_{CP}=0.5 JHUGen H+jj")
+    yield makeline(ReweightingSamplePlus("ggH", "0+", "MINLO"), "ggH SM MINLO")
+    yield makeline(ReweightingSamplePlus("ggH", "0+", "NNLOPS"), "ggH SM NNLOPS")
   elif productionmode == "ttH":
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ttH SM JHUGen")
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ttH 0^{-} JHUGen")
@@ -46,8 +49,8 @@ def lines(productionmode, analysis):
     if analysis == "fL1Zg" and productionmode == "WH":
       color += 2
     else:
-      yield makeline(ReweightingSample(productionmode, analysis.purehypotheses[1]), "{0} {1}^{{{0}}}=1 JHUGen".format(productionmode, analysis.title), reweightfrom)
-      yield makeline(ReweightingSample(productionmode, analysis.mixprodhypothesis), "{0} {1}^{{{0}}}=0.5 JHUGen".format(productionmode, analysis.title), reweightfrom)
+      yield makeline(ReweightingSample(productionmode, analysis.purehypotheses[1]), "{} {}=1 JHUGen".format(productionmode, analysis.title(superscript=productionmode)), reweightfrom)
+      yield makeline(ReweightingSample(productionmode, analysis.mixprodhypothesis), "{} {}=0.5 JHUGen".format(productionmode, analysis.title(superscript=productionmode)), reweightfrom)
 
   if productionmode == "HJJ":
     yield makeline(ReweightingSample("ggH", "SM"), "ggH POWHEG")

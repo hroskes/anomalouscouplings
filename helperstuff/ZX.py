@@ -7,11 +7,17 @@ def fakeRate13TeV(*args, **kwargs):
 
 def setup(production):
     global fakeRate13TeV
-    success = ROOT.ZXsetup(int(production), CJLSTscriptsfolder)
-    if not success:
+    status = ROOT.ZXsetup(int(production), CJLSTscriptsfolder)
+    if status == ROOT.ZXsetupsuccess:
+        pass
+    elif status == ROOT.ZXsetupbadproduction:
         raise ValueError("Bad production: {}".format(production))
+    elif status == ROOT.ZXsetupfailed:
+        raise ValueError("ZX setup failed! {}".format(production))
+    else:
+        raise ValueError("???????")
     from ROOT import fakeRate13TeV
 
-convertTGraphstoTH1Fs.convertTGraphstoTH1Fs(os.path.join(CJLSTscriptsfolder, "FakeRate_SS_2016D.root"))
+convertTGraphstoTH1Fs.convertTGraphstoTH1Fs(os.path.join(CJLSTscriptsfolder, "FakeRate_SS_Moriond368.root"))
 
 from ROOT import CRZLLss, test_bit

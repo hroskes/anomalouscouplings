@@ -4,3 +4,4 @@
 download_info.txt
 *.root
 ReducibleBackgroundAA_2015.C
+!PyException.h

@@ -5,7 +5,7 @@ import ROOT, rootoverloads
 import style
 
 t = ROOT.TChain("candTree")
-t.Add("ggH0+170119.root")
+t.Add("ggH0+170203.root")
 
 Hypothesis = namedtuple("Hypothesis", "name weightname color")
 Angle = namedtuple("Angle", "name title bins min max")
