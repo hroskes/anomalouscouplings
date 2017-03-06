@@ -17,11 +17,13 @@ def plottitle(nuisance):
     if nuisance == "CMS_zz4l_fai1": return "fai"
     if nuisance == "r_VVH": return "muV"
     if nuisance == "r_ffH": return "muf"
+    if nuisance == "JES": return nuisance
     assert False, nuisance
 def xaxistitle(POI, analysis):
     if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(), analysis.phi_lower)
     if POI == "r_VVH": return "#mu_{V}"
     if POI == "r_ffH": return "#mu_{f}"
+    if nuisance == "JES": return nuisance
     assert False
 def yaxistitle(nuisance, analysis):
     if nuisance is None: return "-2#Deltaln L"
