@@ -48,7 +48,7 @@ class SystematicsSection(Section):
     def getlines(self, obj, objtype):
         result = super(SystematicsSection, self).getlines(obj, objtype)
         for line in result[:]:
-            if all(systematicvalue == "-" for systematicvalue in line.split()[2:]):
+            if len(line.split()) > 2 and all(systematicvalue == "-" for systematicvalue in line.split()[2:]):
                 result.remove(line)
         return result
 
@@ -220,7 +220,12 @@ class _Datacard(MultiEnum):
             if config.applyZXshapesystematicsUntagged and category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and category != "Untagged":
                 return "param 0 1 [-3,3]"
 
-    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel_category)
+    @property
+    def muVratio(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
+    @property
+    def mufratio(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
+
+    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel_category, "muVratio", "mufratio")
 
     divider = "\n------------\n"
 
@@ -322,6 +327,7 @@ class _Datacard(MultiEnum):
             getattr(w, 'import')(pdf.pdf, ROOT.RooFit.RecycleConflictNodes())
             if pdf.productionmode.issignal and pdf.shapesystematic == "":
                 getattr(w, 'import')(pdf.norm, ROOT.RooFit.RecycleConflictNodes())
+                getattr(w, 'import')(pdf.muratio, ROOT.RooFit.RecycleConflictNodes())
 
         w.writeToFile(self.rootfile_base)
 
@@ -371,7 +377,11 @@ class _Pdf(PdfBase):
     def norm(self):
         if self.shapesystematic != "" or self.productionmode.isbkg:
             raise ValueError("Can't get norm for systematic or bkg pdf!\n{!r}".format(self))
-        return self.getnorm()
+        self.makepdf()
+        return self.__norm
+    @property
+    def muratio(self):
+        return self.getmuratio()
 
     @property
     def appendname(self):
@@ -428,82 +438,63 @@ class _Pdf(PdfBase):
             raise ValueError("Can't get norm for systematic pdf!\n{!r}".format(self))
         return "{}_norm".format(self.productionmode.combinename)  #no makename!
 
-    """
-    @property
-    @cache
-    def T(self):
-        if self.productionmode in ("ggH", "ttH"):
-            result = [
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
-                     ]
-            for i, t in enumerate(result, start=1):
-                t.SetName(self.templatename(i))
-
-        if self.productionmode in ("VBF", "ZH", "WH"):
-            result = [
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, "g13gi1", self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, "g12gi2", self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi3", self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, self.shapesystematic),
-                     ]
-
-            for i, t in enumerate(result, start=1):
-                t.SetName(self.templatename(i))
-
-        return result
-    """
+    @classmethod
+    def murationame(cls, productionmodes):
+        if productionmodes == ("ggH", "ttH"):
+            return makename("mufratio")
+        if productionmodes == ("VBF", "ZH", "WH"):
+            return makename("muVratio")
 
     @cache
     def makepdf_decayonly(self):
-            self.T = [
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
-                     ]
-            for i, t in enumerate(self.T, start=1):
-                t.SetName(self.templatename(i))
+        self.T = [
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                 ]
+        for i, t in enumerate(self.T, start=1):
+            t.SetName(self.templatename(i))
 
-            self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
-            self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+        self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
+        self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
 
-            if self.shapesystematic == "":
-                self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
-                for i, integral in enumerate(self.T_integral, start=1):
-                    print "{} T{}".format(self.productionmode, i), integral.getVal()
+        if self.shapesystematic == "":
+            self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
+            for i, integral in enumerate(self.T_integral, start=1):
+                print "{} T{}".format(self.productionmode, i), integral.getVal()
 
-                self.r_fai_pures_norm = ROOT.RooFormulaVar(self.puresnormname, "", "( (1-abs(@0))*@1+abs(@0)*@2 )",ROOT.RooArgList(self.fai, self.T_integral[0], self.T_integral[1]))
-                self.r_fai_realints_norm = ROOT.RooFormulaVar(self.realintsnormname, "", "(sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1)",ROOT.RooArgList(self.fai, self.T_integral[2]))
-                self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)", ROOT.RooArgList(self.r_fai_pures_norm, self.r_fai_realints_norm, self.fai))
-                self.norm_SM = self.T_integral[0]
+            self.r_fai_pures_norm = ROOT.RooFormulaVar(self.puresnormname, "", "( (1-abs(@0))*@1+abs(@0)*@2 )",ROOT.RooArgList(self.fai, self.T_integral[0], self.T_integral[1]))
+            self.r_fai_realints_norm = ROOT.RooFormulaVar(self.realintsnormname, "", "(sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1)",ROOT.RooArgList(self.fai, self.T_integral[2]))
+            self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)", ROOT.RooArgList(self.r_fai_pures_norm, self.r_fai_realints_norm, self.fai))
+            self.norm_SM = self.T_integral[0]
+            self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1", ROOT.RooArgList(self.individualnorm, self.norm_SM))
 
     @cache
     def makepdf_proddec(self):
-            self.T = [
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, "g13gi1", self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, "g12gi2", self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi3", self.channel, self.shapesystematic),
-                      gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, self.shapesystematic),
-                     ]
-            for i, t in enumerate(self.T, start=1):
-                t.SetName(self.templatename(i))
+        self.T = [
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "g13gi1", self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "g12gi2", self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi3", self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, self.shapesystematic),
+                 ]
+        for i, t in enumerate(self.T, start=1):
+            t.SetName(self.templatename(i))
 
-            self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
-            self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+        self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
+        self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
 
-            if self.shapesystematic == "":
-                self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
-                for i, integral in enumerate(self.T_integral, start=1):
-                    print "{} T{}".format(self.productionmode, i), integral.getVal()
+        if self.shapesystematic == "":
+            self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
+            for i, integral in enumerate(self.T_integral, start=1):
+                print "{} T{}".format(self.productionmode, i), integral.getVal()
 
-                formula = " + ".join("@0**{}*@1**{}*@{}".format(4-i, i, i+2) for i in range(5))
-                self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", formula, ROOT.RooArgList(self.a1, self.ai, *self.T_integral))
-                self.norm_SM = self.T_integral[0]
+            formula = " + ".join("@0**{}*@1**{}*@{}".format(4-i, i, i+2) for i in range(5))
+            self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", formula, ROOT.RooArgList(self.a1, self.ai, *self.T_integral))
+            self.norm_SM = self.T_integral[0]
+            self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1", ROOT.RooArgList(self.individualnorm, self.norm_SM))
 
-    def getnorm(self):
+    def getmuratio(self):
         """
         The individualnorm, set by makepdf, models how the number of events changes
         as a function of fai.  Now we want to divide by the sum of the individualnorms
@@ -511,27 +502,30 @@ class _Pdf(PdfBase):
         for any fai, and constant muf corresponds to the same number of observed ggH+ttH
         events for any fai.
         """
+
         if self.productionmode in ("VBF", "ZH", "WH"):
             productionmodes = [ProductionMode(_) for _ in ("VBF", "ZH", "WH")]
         if self.productionmode in ("ggH", "ttH"):
             productionmodes = [ProductionMode(_) for _ in ("ggH", "ttH")]
-        pdfswithsamemu = [Pdf(Datacard(self.analysis, self.luminosity, ca, ch), p) for p in productionmodes
-                                                                                   for ca in categories
-                                                                                   for ch in channels]
-        assert any(self is _ for _ in pdfswithsamemu)
-        pdfswithsamemu.sort(key=lambda x: x==self, reverse=True) #move self to the beginning of the list
-        assert self is pdfswithsamemu[0]
+        return self.makemuratio(tuple(productionmodes), self.luminosity, self.analysis)
 
+    @classmethod
+    @cache
+    def makemuratio(cls, productionmodes, luminosity, analysis):
+        pdfswithsamemu = [Pdf(Datacard(analysis, luminosity, ca, ch), p) for p in productionmodes
+                                                                         for ca in categories
+                                                                         for ch in channels]
         for pdf in pdfswithsamemu:
             pdf.makepdf()  #does nothing if pdf is already made
 
         numerator = " + ".join("@{}".format(i) for i, pdf in enumerate(pdfswithsamemu, start=len(pdfswithsamemu)))
         denominator = " + ".join("@{}".format(i) for i, pdf in enumerate(pdfswithsamemu))
-        formula = "@0/@{}  * ({}) / ({})".format(len(pdfswithsamemu), numerator, denominator)
+        formula = "({}) / ({})".format(numerator, denominator)
         arglist = utilities.RooArgList(*[_.individualnorm for _ in pdfswithsamemu]
                                        +[_.norm_SM for _ in pdfswithsamemu])
-        return ROOT.RooFormulaVar(self.normname, self.normname, formula, arglist)
+        return ROOT.RooFormulaVar(cls.murationame(productionmodes), "", formula, arglist)
 
+    @cache
     def makepdf_ZX(self):
         if hasattr(self, "T"): return
         if self.shapesystematic != "":
@@ -556,6 +550,7 @@ class _Pdf(PdfBase):
         self.alphaMorphBkg.setConstant(False)
         self.morphVarListBkg.add(self.alphaMorphBkg)
 
+    @cache
     def makepdf_bkg(self):
         if hasattr(self, "T"): return
         self.T = gettemplate(self.productionmode, self.analysis, self.production, self.category, self.channel, self.shapesystematic)
@@ -577,12 +572,16 @@ class _Pdf(PdfBase):
         else:
             raise ValueError("Unknown productionmode {}".format(self.productionmode))
 
+    @cache
     def getpdf_decayonly(self):
         return ROOT.HZZ4L_RooSpinZeroPdf(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.fai, ROOT.RooArgList(*self.T_histfunc))
+    @cache
     def getpdf_proddec(self):
         return ROOT.VBFHZZ4L_RooSpinZeroPdf(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.a1, self.ai, ROOT.RooArgList(*self.T_histfunc))
+    @cache
     def getpdf_ZX(self):
         return ROOT.FastVerticalInterpHistPdf3D(self.pdfname,self.pdfname,self.D1,self.D2,self.D3,False,self.funcList_zjets,self.morphVarListBkg,1.0,1)
+    @cache
     def getpdf_bkg(self):
         return ROOT.RooHistPdf(self.pdfname, self.pdfname, ROOT.RooArgSet(self.D1,self.D2,self.D3), self.T_datahist)
 

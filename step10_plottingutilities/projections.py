@@ -1114,6 +1114,8 @@ if __name__ == "__main__":
     for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_7_6_5", "src", "HiggsAnalysis", "HZZ4l_Combination",
                                        "CreateDatacards", "cards_{}_Feb28_mu".format(p.analysis), "higgsCombine_obs_*.root")):
         if re.match("higgsCombine_obs_lumi[0-9.]*(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
+            if "Feb28" not in filename:
+                raise ValueError("Need to change r_VVH and r_ffH to muVscaled and mufscaled!")
             scantree.Add(filename)
     #p.projections(ch, ca, nicestyle=True)
     p.animation(ca, ch, scantree=scantree)

@@ -213,7 +213,7 @@ def runcombine(analysis, foldername, **kwargs):
               "expectmuffH": str(expectmuffH),
               "expectmuVVH": str(expectmuVVH),
               "fixmu": ("--PO muVFixed" if fixmuV else "") + ("--PO mufFixed" if fixmuf else ""),
-              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("r_VVH", fixmuV), ("r_ffH", fixmuf)) if not fix and mu!=POI),
+              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("r_VVH,muV_scaled", fixmuV), ("r_ffH,muf_scaled", fixmuf)) if not fix and mu!=POI),
               "algo": algo,
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",

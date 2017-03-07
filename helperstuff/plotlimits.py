@@ -14,20 +14,30 @@ filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.roo
 Scan = namedtuple("Scan", "name title color style")
 
 def plottitle(nuisance):
+    nuisance = actualvariable(nuisance)
     if nuisance == "CMS_zz4l_fai1": return "fai"
-    if nuisance == "r_VVH": return "muV"
-    if nuisance == "r_ffH": return "muf"
+    if nuisance == "muV_scaled": return "muV"
+    if nuisance == "muf_scaled": return "muf"
     if nuisance == "JES": return nuisance
     assert False, nuisance
 def xaxistitle(POI, analysis):
+    POI = actualvariable(POI)
     if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(), analysis.phi_lower)
-    if POI == "r_VVH": return "#mu_{V}"
-    if POI == "r_ffH": return "#mu_{f}"
+    if POI == "muV_scaled": return "#mu_{V}"
+    if POI == "muf_scaled": return "#mu_{f}"
     if nuisance == "JES": return nuisance
     assert False
+def xaxisrange(POI):
+    POI = actualvariable(POI)
+    if POI == "CMS_zz4l_fai1": return -1.0, 1.0
 def yaxistitle(nuisance, analysis):
+    nuisance = actualvariable(nuisance)
     if nuisance is None: return "-2#Deltaln L"
     return xaxistitle(POI=nuisance, analysis=analysis)
+def actualvariable(variable):
+    if variable == "r_VVH": return "muV_scaled"
+    if variable == "r_ffH": return "muf_scaled"
+    return variable
 
 def plotlimits(outputfilename, analysis, *args, **kwargs):
     analysis = Analysis(analysis)
@@ -52,9 +62,9 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         elif kw == "scanranges":
             scanranges = kwarg
         elif kw == "nuisance":
-            nuisance = kwarg
+            nuisance = actualvariable(kwarg)
         elif kw == "POI":
-            POI = kwarg
+            POI = actualvariable(kwarg)
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -126,7 +136,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     mg.Draw("AL")
     mg.GetXaxis().SetTitle(xaxistitle(POI, analysis))
-    #mg.GetXaxis().SetRangeUser(-1, 1)
+    if xaxisrange(POI) is not None:
+        mg.GetXaxis().SetRangeUser(*xaxisrange(POI))
     mg.GetYaxis().SetTitle(yaxistitle(nuisance, analysis))
     l.Draw()
 
