@@ -223,11 +223,11 @@ def runcombine(analysis, foldername, **kwargs):
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
     with utilities.cd(folder):
+        with open(".gitignore", "w") as f:
+            f.write("*")
         #must make it for all categories and channels even if not using them all because of mu definition!
         makeDCsandWSs(productions, categories, channels, analysis, lumitype)
         tfiles.clear()
-        with open(".gitignore", "w") as f:
-            f.write("*")
         with utilities.OneAtATime(replaceByMap(".oO[combinecardsfile]Oo..tmp", repmap), 5, task="running combineCards"):
             if not os.path.exists(replaceByMap(".oO[combinecardsfile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(combinecardstemplate, repmap), shell=True)
