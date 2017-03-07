@@ -11,7 +11,7 @@ else:
     raise ValueError("Who/where are you?")
 
 unblinddistributions = True
-unblindscans = False
+unblindscans = True
 expectedscanluminosity = 30
 m4lmin, m4lmax = 105, 140
 blindcut = lambda self: self.D_bkg_0plus() < 0.5
