@@ -540,7 +540,7 @@ class _Pdf(PdfBase):
         self.ZXpdfs = {shapesystematic: ROOT.RooHistPdf(self.ZXsinglepdfname(shapesystematic), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for shapesystematic, datahist in self.T_datahist.iteritems()}
 
         self.funcList_zjets = ROOT.RooArgList()
-        self.morphBkgVarName =  makename("CMS_zz4l_smd_zjets_bkg_{}_{}".format(self.channel, self.category))
+        morphBkgVarName =  makename("CMS_zz4l_smd_zjets_bkg_{}_{}".format(self.channel, self.category))
         self.alphaMorphBkg = ROOT.RooRealVar(morphBkgVarName,morphBkgVarName,0,-20,20)
         self.morphVarListBkg = ROOT.RooArgList()
 
