@@ -22,7 +22,7 @@ combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
-                           --PO verbose --PO allowPMF .oO[fixmu]Oo. -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
+                           --PO sqrts=13 --PO verbose --PO allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
                            |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
 exit ${PIPESTATUS[0]}
 """
@@ -156,8 +156,10 @@ def runcombine(analysis, foldername, **kwargs):
     moreappend = ".oO[workspacefileappend]Oo."
     turnoff = []
     if fixmuV:
+        assert False
         workspacefileappend += "_fixmuV"
     if fixmuf:
+        assert False
         workspacefileappend += "_fixmuf"
     if expectmuffH != 1:
         moreappend += "_muffH{}".format(expectmuffH)
@@ -212,7 +214,6 @@ def runcombine(analysis, foldername, **kwargs):
               "expectmus,": ("" if fixmuf else "r_ffH=.oO[expectmuffH]Oo.,") + ("" if fixmuV else "r_VVH=.oO[expectmuVVH]Oo.,"),
               "expectmuffH": str(expectmuffH),
               "expectmuVVH": str(expectmuVVH),
-              "fixmu": ("--PO muVFixed" if fixmuV else "") + ("--PO mufFixed" if fixmuf else ""),
               "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("r_VVH,muV_scaled", fixmuV), ("r_ffH,muf_scaled", fixmuf)) if not fix and mu!=POI),
               "algo": algo,
               "robustfit": str(int(robustfit)),

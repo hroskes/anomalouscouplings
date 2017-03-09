@@ -221,11 +221,11 @@ class _Datacard(MultiEnum):
                 return "param 0 1 [-3,3]"
 
     @property
-    def muVratio(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
+    def muV_scaled(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
     @property
-    def mufratio(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
+    def muf_scaled(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
 
-    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel_category, "muVratio", "mufratio")
+    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel_category, "muV_scaled", "muf_scaled")
 
     divider = "\n------------\n"
 
@@ -327,7 +327,7 @@ class _Datacard(MultiEnum):
             getattr(w, 'import')(pdf.pdf, ROOT.RooFit.RecycleConflictNodes())
             if pdf.productionmode.issignal and pdf.shapesystematic == "":
                 getattr(w, 'import')(pdf.norm, ROOT.RooFit.RecycleConflictNodes())
-                getattr(w, 'import')(pdf.muratio, ROOT.RooFit.RecycleConflictNodes())
+                getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
 
         w.writeToFile(self.rootfile_base)
 
@@ -380,8 +380,8 @@ class _Pdf(PdfBase):
         self.makepdf()
         return self.__norm
     @property
-    def muratio(self):
-        return self.getmuratio()
+    def muscaled(self):
+        return self.getmuscaled()
 
     @property
     def appendname(self):
@@ -444,6 +444,45 @@ class _Pdf(PdfBase):
             return makename("mufratio")
         if productionmodes == ("VBF", "ZH", "WH"):
             return makename("muVratio")
+    @classmethod
+    def muscaledname(cls, productionmodes):
+        if productionmodes == ("ggH", "ttH"):
+            return makename("muf_scaled")
+        if productionmodes == ("VBF", "ZH", "WH"):
+            return makename("muV_scaled")
+
+    @classmethod
+    @cache
+    def RV(cls):
+        return ROOT.RooRealVar(makename("RV"), "RV", 0, 400)
+    @classmethod
+    @cache
+    def RF(cls):
+        return ROOT.RooRealVar(makename("RF"), "RF", 0, 400)
+    @classmethod
+    @cache
+    def R(cls):
+        return ROOT.RooRealVar(makename("R"), "R", 0, 400)
+    @classmethod
+    @cache
+    def RV_13TeV(cls):
+        return ROOT.RooRealVar(makename("RV_13TeV"), "RV_13TeV", 0, 400)
+    @classmethod
+    @cache
+    def RF_13TeV(cls):
+        return ROOT.RooRealVar(makename("RF_13TeV"), "RF_13TeV", 0, 400)
+    @classmethod
+    @cache
+    def R_13TeV(cls):
+        return ROOT.RooRealVar(makename("R_13TeV"), "R_13TeV", 0, 400)
+    @classmethod
+    @cache
+    def muV(cls):
+        return ROOT.RooFormulaVar(makename("muV"), "muV", "@0*@1*@2*@3", ROOT.RooArgList(cls.RV(), cls.RV_13TeV(), cls.R(), cls.R_13TeV()))
+    @classmethod
+    @cache
+    def muf(cls):
+        return ROOT.RooFormulaVar(makename("muf"), "muf", "@0*@1*@2*@3", ROOT.RooArgList(cls.RF(), cls.RF_13TeV(), cls.R(), cls.R_13TeV()))
 
     @cache
     def makepdf_decayonly(self):
@@ -467,7 +506,7 @@ class _Pdf(PdfBase):
             self.r_fai_realints_norm = ROOT.RooFormulaVar(self.realintsnormname, "", "(sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1)",ROOT.RooArgList(self.fai, self.T_integral[2]))
             self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)", ROOT.RooArgList(self.r_fai_pures_norm, self.r_fai_realints_norm, self.fai))
             self.norm_SM = self.T_integral[0]
-            self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1", ROOT.RooArgList(self.individualnorm, self.norm_SM))
+            self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1 * @2", ROOT.RooArgList(self.individualnorm, self.norm_SM, self.muf()))
 
     @cache
     def makepdf_proddec(self):
@@ -492,9 +531,9 @@ class _Pdf(PdfBase):
             formula = " + ".join("@0**{}*@1**{}*@{}".format(4-i, i, i+2) for i in range(5))
             self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", formula, ROOT.RooArgList(self.a1, self.ai, *self.T_integral))
             self.norm_SM = self.T_integral[0]
-            self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1", ROOT.RooArgList(self.individualnorm, self.norm_SM))
+            self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1 * @2", ROOT.RooArgList(self.individualnorm, self.norm_SM, self.muV()))
 
-    def getmuratio(self):
+    def getmuscaled(self):
         """
         The individualnorm, set by makepdf, models how the number of events changes
         as a function of fai.  Now we want to divide by the sum of the individualnorms
@@ -505,9 +544,11 @@ class _Pdf(PdfBase):
 
         if self.productionmode in ("VBF", "ZH", "WH"):
             productionmodes = [ProductionMode(_) for _ in ("VBF", "ZH", "WH")]
+            mu = self.muV()
         if self.productionmode in ("ggH", "ttH"):
             productionmodes = [ProductionMode(_) for _ in ("ggH", "ttH")]
-        return self.makemuratio(tuple(productionmodes), self.luminosity, self.analysis)
+            mu = self.muf()
+        return self.makemuscaled(tuple(productionmodes), self.luminosity, self.analysis, mu)
 
     @classmethod
     @cache
@@ -524,6 +565,12 @@ class _Pdf(PdfBase):
         arglist = utilities.RooArgList(*[_.individualnorm for _ in pdfswithsamemu]
                                        +[_.norm_SM for _ in pdfswithsamemu])
         return ROOT.RooFormulaVar(cls.murationame(productionmodes), "", formula, arglist)
+
+    @classmethod
+    @cache
+    def makemuscaled(cls, productionmodes, luminosity, analysis, mu):
+        muratio = cls.makemuratio(productionmodes, luminosity, analysis)
+        return ROOT.RooFormulaVar(cls.muscaledname(productionmodes), "", "@0/@1", ROOT.RooArgList(mu, muratio))
 
     @cache
     def makepdf_ZX(self):
