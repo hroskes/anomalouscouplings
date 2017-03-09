@@ -55,7 +55,6 @@ def runcombine(analysis, foldername, **kwargs):
     scanranges = [defaultscanrange]
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
-    expectmuffH = expectmuVVH = 1
     fixmuV = fixmuf = fixfai = False
     plotnuisances = []
     defaultalgo = algo = "grid"
@@ -118,10 +117,6 @@ def runcombine(analysis, foldername, **kwargs):
             if config.unblindscans:
                 raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
             lumitype = float(kwarg)
-        elif kw == "expectmuffH":
-            expectmuffH = float(kwarg)
-        elif kw == "expectmuVVH":
-            expectmuVVH = float(kwarg)
         elif kw == "fixmuV":
             fixmuV = bool(int(kwarg))
         elif kw == "fixmuf":
@@ -132,7 +127,7 @@ def runcombine(analysis, foldername, **kwargs):
             plotnuisances += kwarg.split(",")
         elif kw == "plotmus":
             if bool(int(kwarg)):
-                plotnuisances += ["r_VVH", "r_ffH"]
+                plotnuisances += ["muV", "muf"]
         elif kw == "algo":
             algo = kwarg
         elif kw == "robustfit":
@@ -161,10 +156,6 @@ def runcombine(analysis, foldername, **kwargs):
     if fixmuf:
         assert False
         workspacefileappend += "_fixmuf"
-    if expectmuffH != 1:
-        moreappend += "_muffH{}".format(expectmuffH)
-    if expectmuVVH != 1:
-        moreappend += "_muVVH{}".format(expectmuVVH)
     if set(usesignalproductionmodes) != set(defaultusesignalproductionmodes):
         workspacefileappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
@@ -204,17 +195,14 @@ def runcombine(analysis, foldername, **kwargs):
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": str(totallumi),
               "observedappend": "obs",
-              "setphysicsmodelparameters": ".oO[expectmus,]Oo.CMS_zz4l_fai1=.oO[expectfai]Oo.",
+              "setphysicsmodelparameters": "CMS_zz4l_fai1=.oO[expectfai]Oo.",
               "physicsmodelparameterranges": ":".join("{}={}".format(k, v) for k, v in physicsmodelparameterranges.iteritems()),
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
-              "expectmus,": ("" if fixmuf else "r_ffH=.oO[expectmuffH]Oo.,") + ("" if fixmuV else "r_VVH=.oO[expectmuVVH]Oo.,"),
-              "expectmuffH": str(expectmuffH),
-              "expectmuVVH": str(expectmuVVH),
-              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("r_VVH,muV_scaled", fixmuV), ("r_ffH,muf_scaled", fixmuf)) if not fix and mu!=POI),
+              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI),
               "algo": algo,
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
