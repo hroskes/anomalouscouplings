@@ -103,7 +103,7 @@ elif config.host == "MARCC":
             options["--dependency"] = "afterany:.oO[waitids]Oo."
 
         options = {replaceByMap(k, repmap): replaceByMap(v, repmap) for k, v in options.iteritems() if v is not None}
-        options = [quote("{}={}".format(k, v)) for k, v in options.iteritems()]
+        options = ["{}={}".format(k, quote(v)) for k, v in options.iteritems()]
 
         if interactive:
             subprocess.check_call(
