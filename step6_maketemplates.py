@@ -21,6 +21,7 @@ if cmssw[0] == 8:
 def buildtemplates(*args):
     templatesfile = TemplatesFile(*args)
     print templatesfile
+    if templatesfile.copyfromothertemplatesfile is not None: return
     with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp", message=LSB_JOBID()) as f:
         if f:
             if not os.path.exists(templatesfile.templatesfile()):

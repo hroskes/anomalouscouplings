@@ -18,10 +18,11 @@ def draw(channel):
   l = ROOT.TLegend(.6, .6, .9, .9)
   l.SetBorderSize(0)
   l.SetFillStyle(0)
-  for color, syst in enumerate(("", "ScaleUp", "ScaleDown", "ResUp", "ResDown"), start=1):
+#  for color, syst in enumerate(("", "ScaleUp", "ScaleDown", "ResUp", "ResDown"), start=1):
+  for color, syst in enumerate(("", "MINLOUp", "MINLODn"), start=1):
     title = syst if syst else "Nominal"
     if color == 5: color = 6
-    h = gettemplate("ggH", "fa2", channel, "Untagged", production, "0+", syst).ProjectionZ()
+    h = gettemplate("ggH", "fa3", channel, "VBFtagged", production, "0+", syst).ProjectionX()
     h.SetLineColor(color)
     hstack.Add(h)
     store.append(h)

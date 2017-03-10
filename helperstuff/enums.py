@@ -193,12 +193,14 @@ class ProductionMode(MyEnum):
                 return name
         assert False
     @property
-    def yamlratename(self):
+    def yamlratenames(self):
         if self == "VBF":
-            return "qqH"
+            return ["qqH"]
         elif self == "ZX":
-            return "zjets"
-        return str(self)
+            return ["zjets"]
+        elif self in ["ZH", "WH"]:
+            return ["{}_{}".format(self, dec) for dec in ("lep", "had")]
+        return [str(self)]
     @property
     def yamlsystname(self):
         if self in ("VBF", "VBF bkg"):
@@ -258,23 +260,50 @@ class ProductionMode(MyEnum):
 
     @property
     def QCDsystematicname(self):
-      if self == "ggH": return "QCDscale_ggH"
-      if self == "qqH": return "QCDscale_qqH"
-      if self in ("ZH", "WH"): return "QCDscale_VH"
-      if self == "ttH": return "QCDscale_ttH"
-      if self == "qqZZ": return "QCDscale_VV"
+      if self == "ggH": return "QCDscale_ggH_cat"
+      if self == "qqH": return "QCDscale_qqH_cat"
+      if self in ("ZH", "WH"): return "QCDscale_VH_cat"
+      if self == "ttH": return "QCDscale_ttH_cat"
+      if self == "qqZZ": return "QCDscale_VV_cat"
       return None
 
     @property
-    def workspaceshapesystematics(self):
+    def pdfsystematicname(self):
+      if self == "ggH": return "pdf_Higgs_gg_cat"
+      if self in ("qqH", "ZH", "WH"): return "pdf_Higgs_qq_cat"
+      if self == "ttH": return "pdf_Higgs_ttH_cat"
+      if self == "qqZZ": return "pdf_qq_cat"
+      return None
+
+    def workspaceshapesystematics(self, category):
       result = []
       if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
-        if config.applym4lshapesystematics:
+        if (
+            config.applym4lshapesystematicsUntagged and category == "Untagged"
+            or config.applym4lshapesystematicsVBFVHtagged and category != "Untagged"
+            or config.applym4lshapesystematicsggH and self == "ggH"
+            or config.applym4lshapesystematicsggHUntagged and self == "ggH" and category == "Untagged"
+            or config.applym4lshapesystematicsdiagonal and (
+                                                            self == "ggH" and category == "Untagged"
+                                                            or self == "VBF" and category == "VBFtagged"
+                                                            or self in ("ZH", "WH") and category == "VHHadrtagged"
+                                                           )
+           ):
           if config.combinem4lshapesystematics:
             result += ["ScaleRes"]
           else:
             result += ["Scale", "Res"]
+      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyMINLOsystematics:
+        result += ["MINLO"]
       return [WorkspaceShapeSystematic(_) for _ in result]
+
+    @property
+    def alternateweights(self):
+      if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
+         return AlternateWeight.items(lambda x: x!="EWcorrUp" and x!="EWcorrDn")
+      if self == "qqZZ":
+         return AlternateWeight.items()
+      assert False
 
 class WorkspaceShapeSystematic(MyEnum):
     enumname = "workspaceshapesystematic"
@@ -282,6 +311,7 @@ class WorkspaceShapeSystematic(MyEnum):
                  EnumItem("Res"),
                  EnumItem("Scale"),
                  EnumItem("ScaleRes"),
+                 EnumItem("MINLO"),
                 )
     @property
     def isperchannel(self):
@@ -310,7 +340,8 @@ class ShapeSystematic(MyEnum):
                  EnumItem("ZXUp"),
                  EnumItem("ZXDown", "ZXDn"),
                  EnumItem("MINLO_SM"),
-                 EnumItem("MINLO"),
+                 EnumItem("MINLOUp"),
+                 EnumItem("MINLODn", "MINLODown"),
                 )
     def appendname(self):
         if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
@@ -319,13 +350,14 @@ class ShapeSystematic(MyEnum):
         from discriminants import discriminant
         return discriminant("D_bkg"+self.appendname())
     def appliesto(self, templategroup):
-        if templategroup == "ggh" and self == "MINLO_SM": return True
-        if templategroup in ("ggh", "vbf", "zh", "wh", "tth"):
-            return self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown")
-        elif templategroup == "bkg":
-            return self in ("", "ZXUp", "ZXDown")
-        elif templategroup == "DATA":
-            return self in ("", )
+        if self == "":
+            return True
+        if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"):
+            return templategroup in ("ggh", "vbf", "zh", "wh", "tth")
+        if self in ("ZXUp", "ZXDown"):
+            return templategroup == "bkg"
+        if self in ("MINLO_SM", "MINLOUp", "MINLODn"):
+            return templategroup == "ggh"
         assert False
 
 class JECSystematic(MyEnum):
@@ -497,7 +529,7 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222"): return 35.867
+        if self in ("170203", "170222"): return 35.8671
         assert False
     def __int__(self):
         return int(str(self))
@@ -579,12 +611,12 @@ class AlternateWeight(MyEnum):
                  EnumItem("muRDn"),
                  EnumItem("muFUp"),
                  EnumItem("muFDn"),
-                 EnumItem("muRFUp"),
-                 EnumItem("muRFDn"),
                  EnumItem("PDFUp"),
                  EnumItem("PDFDn"),
                  EnumItem("alphaSUp"),
                  EnumItem("alphaSDn"),
+                 EnumItem("EWcorrUp"),
+                 EnumItem("EWcorrDn"),
                 )
     @property
     def issystematic(self): return self != "1"
@@ -595,12 +627,12 @@ class AlternateWeight(MyEnum):
       if self == "muRDn": return "LHEweight_QCDscale_muR0p5_muF1"
       if self == "muFUp": return "LHEweight_QCDscale_muR1_muF2"
       if self == "muFDn": return "LHEweight_QCDscale_muR1_muF0p5"
-      if self == "muRFUp": return "LHEweight_QCDscale_muR2_muF2"
-      if self == "muRFDn": return "LHEweight_QCDscale_muR0p5_muF0p5"
       if self == "PDFUp": return "LHEweight_PDFVariation_Up"
       if self == "PDFDn": return "LHEweight_PDFVariation_Dn"
       if self == "alphaSUp": return "LHEweight_AsMZ_Up"
       if self == "alphaSDn": return "LHEweight_AsMZ_Dn"
+      if self == "EWcorrUp": return "(1 + KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
+      if self == "EWcorrDn": return "(1 - KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
       assert False
 
 channels = Channel.items()
@@ -620,17 +652,18 @@ config.productionsforcombine = type(config.productionsforcombine)(Production(pro
 productions = Production.items(lambda x: x in ("170203", "170222"))
 #productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
-alternateweights = AlternateWeight.items(lambda x: x=="1" or "muRF" in str(x))
 
 _ = [""]
-if config.applym4lshapesystematics:
+if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBFVHtagged:
     _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
     if config.combinem4lshapesystematics:
         _ += ["ScaleResUp", "ScaleResDown"]
-if config.applyZXshapesystematics:
+if config.applyZXshapesystematicsUntagged or config.applyZXshapesystematicsVBFVHtagged:
     _ += ["ZXUp", "ZXDown"]
 if config.applyJECshapesystematics:
     _ += ["JECUp", "JECDown"]
+if config.applyMINLOsystematics:
+    _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
 treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown"))
 del _

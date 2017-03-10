@@ -49,6 +49,9 @@ class TemplatesFile(MultiEnum):
         return result
 
     def templatesfile(self, iteration=None, firststep=False):
+        if self.copyfromothertemplatesfile is not None:
+            return self.copyfromothertemplatesfile.templatesfile()
+
         folder = os.path.join(config.repositorydir, "step7_templates")
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
@@ -310,6 +313,18 @@ class TemplatesFile(MultiEnum):
         for template in self.templates()+self.inttemplates():
             template.docustomsmoothing(newf, controlplotsdir)
 
+    @property
+    def copyfromothertemplatesfile(self):
+        if self.production == "170203" and self.templategroup == "DATA":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "170222"
+          return TemplatesFile(*kwargs.values())
+        if self.production == "170222" and self.templategroup != "DATA":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "170203"
+          return TemplatesFile(*kwargs.values())
+        return None
+
 def listfromiterator(function):
     return list(function())
 
@@ -328,8 +343,8 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
-#                    if config.showblinddistributions:
-#                        yield TemplatesFile(channel, "DATA", analysis, production, category)
+                    if config.showblinddistributions:
+                        yield TemplatesFile(channel, "DATA", analysis, production, category)
                     if category != "Untagged" and config.applyMINLOsystematics:
                         yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
 
@@ -579,8 +594,8 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def scalefactor(self):
-        if self.shapesystematic == "MINLO":
-            result = len(self.reweightfrom)
+        if self.shapesystematic == "MINLO_SM":
+            result = len(self.reweightfrom())
         elif self.productionmode in ("VBF", "ggH", "ZH", "WH"):
             result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
         elif self.productionmode == "ttH":
@@ -592,7 +607,7 @@ class Template(TemplateBase, MultiEnum):
         result /= sum(
                       Sample.effectiveentries(
                                               reweightfrom=reweightfrom,
-                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis, reweightfrom.flavor)
+                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis)
                                              )
                        for reweightfrom in self.reweightfrom()
                      )

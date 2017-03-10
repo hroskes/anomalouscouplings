@@ -27,24 +27,29 @@ except NameError:
 usedata = True
 showblinddistributions = True
 unblinddistributions = True
-unblindscans = False
+unblindscans = True
 useQGTagging = False
 useVHMETTagged = True
 
-applym4lshapesystematics = True
+applym4lshapesystematicsUntagged = False
+applym4lshapesystematicsVBFVHtagged = False
+applym4lshapesystematicsggH = False
+applym4lshapesystematicsggHUntagged = False
+applym4lshapesystematicsdiagonal = False #VBF in VBFtagged, VH in VHHadrtagged
 combinem4lshapesystematics = True
-applyZXshapesystematics = True
+applyZXshapesystematicsVBFVHtagged = False
+applyZXshapesystematicsUntagged = False
 applyJECshapesystematics = False
 applyMINLOsystematics = True
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
-expectedscanluminosity = 35.867
+expectedscanluminosity = 35.8671
 
 m4lmin, m4lmax = 105, 140
 
 blindcut = lambda self: self.D_bkg() < 0.5
 
-productionsforcombine = ["170203"]
+productionsforcombine = ["170222"]
 
 defaultnbins = 40

@@ -3,8 +3,9 @@ from array import array
 from collections import OrderedDict
 from helperstuff import config
 from helperstuff import xrd
-from helperstuff.enums import flavors, hffhypotheses, ProductionMode, productions, pythiasystematics
+from helperstuff.enums import hffhypotheses, ProductionMode, productions, pythiasystematics
 from helperstuff.samples import allsamples, Sample
+from helperstuff.submitjob import submitjob
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID, LSF_creating
 import os
@@ -105,8 +106,22 @@ def adddiscriminants(*args):
             except:
                 pass
 
-if __name__ == '__main__':
-    for production in productions:
-        adddiscriminants("ggZZ", "4tau", production)  #to catch bugs early
+def submitjobs():
+    njobs = 0
     for sample in allsamples():
-        adddiscriminants(sample)
+        if not os.path.exists(sample.withdiscriminantsfile()) and not os.path.exists(sample.withdiscriminantsfile()+".tmp"):
+            njobs += 1
+    for i in range(njobs):
+        submitjob(os.path.join(config.repositorydir, "step2_adddiscriminants.py"), jobname=str(i), jobtime="1-0:0:0")
+
+if __name__ == '__main__':
+    if sys.argv[1:]:
+        if sys.argv[1].lower() == "submitjobs":
+            submitjobs(*sys.argv[2:])
+        else:
+            raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
+    else:
+        for production in productions:
+            adddiscriminants("ggZZ", "4tau", production)  #to catch bugs early
+        for sample in allsamples():
+            adddiscriminants(sample)

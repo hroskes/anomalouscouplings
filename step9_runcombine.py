@@ -4,8 +4,8 @@ from helperstuff import config, utilities
 from helperstuff.combinehelpers import Luminosity
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
-from helperstuff.plotlimits import plotlimits
-from helperstuff.replacesystematics import replacesystematics
+from helperstuff.plotlimits import plotlimits, plottitle
+from helperstuff.utilities import tfiles
 from itertools import product
 import os
 import pipes
@@ -22,16 +22,17 @@ combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
-                           --PO verbose --PO allowPMF .oO[fixmu]Oo. -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
+                           --PO sqrts=13 --PO verbose --PO allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
                            |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
 exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = r"""
 eval $(scram ru -sh) &&
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 -n $1_.oO[append]Oo..oO[moreappend]Oo. \
+combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
+        --setPhysicsModelParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
+        -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. \
         .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. .oO[savemu]Oo. |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo...oO[exporobs]Oo.
+        -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
 """
 
 def check_call_test(*args, **kwargs):
@@ -48,13 +49,17 @@ def runcombine(analysis, foldername, **kwargs):
     CLtextposition = "left"
     productions = config.productionsforcombine
     usesystematics = True
+    runobs = True
     subdirectory = ""
-    defaultscanrange = scanrange = (-1.0, 1.0)
-    defaultnpoints = npoints = 100
+    defaultscanrange = (100, -1.0, 1.0)
+    scanranges = [defaultscanrange]
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
-    expectmuffH = expectmuVVH = 1
-    fixmu = False
+    fixmuV = fixmuf = fixfai = False
+    plotnuisances = []
+    defaultalgo = algo = "grid"
+    robustfit = False
+    defaultPOI = POI = "CMS_zz4l_fai1"
     if config.unblindscans:
         lumitype = "fordata"
     else:
@@ -86,14 +91,17 @@ def runcombine(analysis, foldername, **kwargs):
             productions = [Production(p) for p in kwarg.split(",")]
         elif kw == "usesystematics":
             usesystematics = bool(int(kwarg))
-        elif kw == "scanrange":
-            try:
-                scanrange = tuple(float(a) for a in kwarg.split(","))
-                if len(scanrange) != 2: raise ValueError
-            except ValueError:
-                raise ValueError("scanrange has to contain 2 floats separated by a comma!")
-        elif kw == "npoints":
-            npoints = int(kwarg)
+        elif kw == "scanranges":
+            scanranges = []
+            kwarg = kwarg.replace(":", ";")
+            for _ in kwarg.split(";"):
+                try:
+                    split = _.split(",")
+                    scanrange = tuple([int(split[0])] + [float(a) for a in split[1:]])
+                    if len(scanrange) != 3: raise ValueError
+                    scanranges.append(scanrange)
+                except ValueError:
+                    raise ValueError("each scanrange has to contain an int and 2 floats separated by commas!")
         elif kw == "usesignalproductionmodes":
             usesignalproductionmodes = [ProductionMode(p) for p in sorted(kwarg.split(","))]
         elif kw == "subdirectory":
@@ -109,12 +117,25 @@ def runcombine(analysis, foldername, **kwargs):
             if config.unblindscans:
                 raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
             lumitype = float(kwarg)
-        elif kw == "expectmuffH":
-            expectmuffH = float(kwarg)
-        elif kw == "expectmuVVH":
-            expectmuVVH = float(kwarg)
-        elif kw == "fixmu":
-            fixmu = bool(int(kwarg))
+        elif kw == "fixmuV":
+            fixmuV = bool(int(kwarg))
+        elif kw == "fixmuf":
+            fixmuf = bool(int(kwarg))
+        elif kw == "fixfai":
+            fixfai = bool(int(kwarg))
+        elif kw == "plotnuisances":
+            plotnuisances += kwarg.split(",")
+        elif kw == "plotmus":
+            if bool(int(kwarg)):
+                plotnuisances += ["muV", "muf"]
+        elif kw == "algo":
+            algo = kwarg
+        elif kw == "robustfit":
+            robustfit = bool(int(kwarg))
+        elif kw == "POI":
+            POI = kwarg
+        elif kw == "runobs":
+            runobs = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -129,12 +150,12 @@ def runcombine(analysis, foldername, **kwargs):
     workspacefileappend = ".oO[combinecardsappend]Oo."
     moreappend = ".oO[workspacefileappend]Oo."
     turnoff = []
-    if fixmu:
-        workspacefileappend += "_fixmu"
-    if expectmuffH != 1:
-        moreappend += "_muffH{}".format(expectmuffH)
-    if expectmuVVH != 1:
-        moreappend += "_muVVH{}".format(expectmuVVH)
+    if fixmuV:
+        assert False
+        workspacefileappend += "_fixmuV"
+    if fixmuf:
+        assert False
+        workspacefileappend += "_fixmuf"
     if set(usesignalproductionmodes) != set(defaultusesignalproductionmodes):
         workspacefileappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
@@ -148,41 +169,54 @@ def runcombine(analysis, foldername, **kwargs):
         turnoff.append("--PO nobkg")
     if not usesystematics:
         moreappend += "_nosystematics"
-    if not (npoints == defaultnpoints and scanrange == defaultscanrange):
-        moreappend += "_{},{},{}".format(npoints, *scanrange)
+    if algo != defaultalgo:
+        moreappend += "_algo"+algo
+    if robustfit:
+        moreappend += "_robustfit"
+    if POI != defaultPOI:
+        moreappend += "_scan"+plottitle(POI)
+    if fixfai:
+        moreappend += "_fixfai"
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
     totallumi = sum(float(Luminosity(p, lumitype)) for p in productions)
 
+    physicsmodelparameterranges = {
+                                   "CMS_zz4l_fai1": "-1,1",
+                                   POI: ".oO[scanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
+                                  }
+
     repmap = {
               "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
               "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
               "workspacefile": "workspace.oO[workspacefileappend]Oo..root",
-              "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..MultiDimFit.mH125.root",
+              "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": str(totallumi),
               "observedappend": "obs",
-              "setphysicsmodelparameters": ".oO[expectrs,]Oo.CMS_zz4l_fai1=.oO[expectfai]Oo.",
+              "setphysicsmodelparameters": "CMS_zz4l_fai1=.oO[expectfai]Oo.",
+              "physicsmodelparameterranges": ":".join("{}={}".format(k, v) for k, v in physicsmodelparameterranges.iteritems()),
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
-              "npoints": str(npoints),
-              "scanrange": "{},{}".format(*scanrange),
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
-              "expectrs,": "" if fixmu else "r_ffH=.oO[expectmuffH]Oo.,r_VVH=.oO[expectmuVVH]Oo.,",
-              "expectmuffH": str(expectmuffH),
-              "expectmuVVH": str(expectmuVVH),
-              "fixmu": "--PO muFixed" if fixmu else "",
-              "savemu": "" if fixmu else "--saveSpecifiedFunc=r_VVH,r_ffH"
+              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI),
+              "algo": algo,
+              "robustfit": str(int(robustfit)),
+              "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
+              "POI": POI,
+              "floatotherpois": str(int(not fixfai)),
              }
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
     with utilities.cd(folder):
-        makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
         with open(".gitignore", "w") as f:
             f.write("*")
+        #must make it for all categories and channels even if not using them all because of mu definition!
+        makeDCsandWSs(productions, categories, channels, analysis, lumitype)
+        tfiles.clear()
         with utilities.OneAtATime(replaceByMap(".oO[combinecardsfile]Oo..tmp", repmap), 5, task="running combineCards"):
             if not os.path.exists(replaceByMap(".oO[combinecardsfile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(combinecardstemplate, repmap), shell=True)
@@ -190,34 +224,49 @@ def runcombine(analysis, foldername, **kwargs):
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
-        if config.unblindscans:
-            repmap_obs = repmap.copy()
-            repmap_obs["expectfai"] = "0.0"  #starting point
-            repmap_obs["append"] = ".oO[observedappend]Oo."
-            repmap_obs["expectfaiappend"] = ""
-            repmap_obs["exporobs"] = "obs"
-            repmap_obs["-t -1"] = ""
-            if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
-                subprocess.check_call(replaceByMap(runcombinetemplate, repmap_obs), shell=True)
-            f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
-            minimum = (float("nan"), float("inf"))
-            for entry in f.limit:
-                if f.limit.deltaNLL < minimum[1]:
-                    minimum = (f.limit.CMS_zz4l_fai1, f.limit.deltaNLL)
-            minimum = minimum[0]
-            del f
+        if config.unblindscans and runobs:
+          minimum = (float("nan"), float("inf"))
+          for scanrange in scanranges:
+              repmap_obs = repmap.copy()
+              repmap_obs.update({
+                "npoints": str(scanrange[0]),
+                "scanrange": "{},{}".format(*scanrange[1:]),
+                "scanrangeappend": "" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.",
+                "expectfai": "0.0",  #starting point
+                "append": ".oO[observedappend]Oo.",
+                "expectfaiappend": "",
+                "exporobs": "obs",
+                "-t -1": "",
+              })
+              if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
+                with utilities.OneAtATime(replaceByMap(".oO[filename]Oo.", repmap_obs)+".tmp", 30):
+                  subprocess.check_call(replaceByMap(runcombinetemplate, repmap_obs), shell=True)
+              f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
+              t = f.limit
+              for entry in t:
+                  if t.deltaNLL+t.nll+t.nll0 < minimum[1]:
+                      minimum = (getattr(t, POI), t.deltaNLL+t.nll+t.nll0)
+          minimum = minimum[0]
+          del f
 
-        for expectfai in expectvalues:
-            repmap_exp = repmap.copy()
-            if expectfai == "minimum":
-                expectfai = minimum
-            repmap_exp["expectfai"] = str(expectfai)
-            repmap_exp["append"] = ".oO[expectedappend]Oo."
-            repmap_exp["expectfaiappend"] = "_.oO[expectfai]Oo."
-            repmap_exp["exporobs"] = "exp"
-            repmap_exp["-t -1"] = "-t -1"
-            if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
-                subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
+        for scanrange in scanranges:
+          for expectfai in expectvalues:
+              repmap_exp = repmap.copy()
+              if expectfai == "minimum":
+                  expectfai = minimum
+              repmap_exp.update({
+                "npoints": str(scanrange[0]),
+                "scanrange": "{},{}".format(*scanrange[1:]),
+                "scanrangeappend": "" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.",
+                "expectfai": str(expectfai),
+                "append": ".oO[expectedappend]Oo.",
+                "expectfaiappend": "_.oO[expectfai]Oo.",
+                "exporobs": "exp",
+                "-t -1": "-t -1",
+              })
+              if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
+                with utilities.OneAtATime(replaceByMap(".oO[filename]Oo.", repmap_exp)+".tmp", 30):
+                  subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
 
         saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
         try:
@@ -225,7 +274,7 @@ def runcombine(analysis, foldername, **kwargs):
         except OSError:
             pass
         plotscans = []
-        if config.unblindscans:
+        if config.unblindscans and runobs:
             plotscans.append("obs")
         for expectfai in expectvalues:
             if expectfai == "minimum":
@@ -234,15 +283,22 @@ def runcombine(analysis, foldername, **kwargs):
         for ext in "png eps root pdf".split():
             plotname = plotname.replace("."+ext, "")
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
-        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanrange=scanrange)
+        if scanranges != [defaultscanrange]:
+            plotname += "".join("_{},{},{}".format(*scanrange) for scanrange in sorted(scanranges))
+        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI)
+        for nuisance in plotnuisances:
+            if nuisance == POI: continue
+            if nuisance == "CMS_zz4l_fai1" and fixfai: continue
+            nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
+            plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI)
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
-        f.write(" ".join(["python"]+sys.argv))
+        f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
         f.write("\n\n\n")
         f.write("python limits.py ")
         for arg in sys.argv[1:]:
             if "=" in arg and "subdirectory=" not in arg: continue
-            f.write(arg+" ")
+            f.write(pipes.quote(arg)+" ")
         f.write("plotname="+plotname+" ")
         f.write("\n\n\n\n\n\ngit info:\n\n")
         f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))

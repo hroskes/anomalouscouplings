@@ -30,6 +30,9 @@ class TFilesDict(KeyDefaultDict):
     def __delitem__(self, key):
         self[key].Close()
         return super(TFilesDict, self).__delitem__(key)
+    def clear(self):
+        for key in self.keys(): del self[key]
+        return super(TFilesDict, self).clear()
 
 tfiles = TFilesDict()
 
@@ -59,11 +62,39 @@ def cache(function):
     def newfunction(*args, **kwargs):
         try:
             return cache[args, tuple(sorted(kwargs.iteritems()))]
+        except TypeError:
+            print args, tuple(sorted(kwargs.iteritems()))
+            raise
         except KeyError:
             cache[args, tuple(sorted(kwargs.iteritems()))] = function(*args, **kwargs)
             return newfunction(*args, **kwargs)
     newfunction.__name__ = function.__name__
     return newfunction
+
+def multienumcache(function, haskwargs=False, multienumforkey=None):
+    from enums import MultiEnum
+    if multienumforkey is None:
+        multienumforkey = function
+    assert issubclass(function, MultiEnum)
+    assert issubclass(multienumforkey, MultiEnum)
+    cache = {}
+    def newfunction(*args, **kwargs):
+        if kwargs and not haskwargs:
+            raise TypeError("{} has no kwargs!".format(function.__name__))
+        key = multienumforkey(*args)
+        try:
+            oldkwargs, result = cache[key]
+            if kwargs and kwargs != oldkwargs:
+                raise ValueError("{}({}, **kwargs) called with 2 different kwargs:\n{}\n{}".format(function.__name__, ", ".join(repr(_) for _ in args), oldkwargs, kwargs))
+            return result
+        except KeyError:
+            if haskwargs and not kwargs:
+                raise ValueError("Have to give kwargs the first time you call {}({}, **kwargs)".format(function.__name__, ", ".join(repr(_) for _ in args)))
+            cache[key] = kwargs, function(*args, **kwargs)
+            return newfunction(*args, **kwargs)
+    newfunction.__name__ = function.__name__
+    return newfunction
+
 
 def cache_instancemethod(function):
     """
@@ -96,7 +127,7 @@ class KeepWhileOpenFile(object):
     def __init__(self, name, message=None):
         logging.debug("creating KeepWhileOpenFile {}".format(name))
         self.filename = name
-        self.message = message
+        self.__message = message
         self.pwd = os.getcwd()
         self.fd = self.f = None
         self.bool = False
@@ -114,12 +145,13 @@ class KeepWhileOpenFile(object):
             else:
                 logging.debug("succeeded: it didn't exist")
                 logging.debug("does it now? {}".format(os.path.exists(self.filename)))
-                assert os.path.exists(self.filename)
+                if not os.path.exists(self.filename):
+                    logging.warning("{} doesn't exist!??".format(self.filename))
                 self.f = os.fdopen(self.fd, 'w')
                 try:
-                    if self.message is not None:
+                    if self.__message is not None:
                         logging.debug("writing message")
-                        self.f.write(self.message+"\n")
+                        self.f.write(self.__message+"\n")
                         logging.debug("wrote message")
                 except IOError:
                     logging.debug("failed to write message")
@@ -174,14 +206,14 @@ class OneAtATime(KeepWhileOpenFile):
         if message is None:
             message = "Another process is already {task}!  Waiting {delay} seconds."
         message = message.format(delay=delay, task=task)
-        self.message = message
+        self.__message = message
 
     def __enter__(self):
         while True:
             result = super(OneAtATime, self).__enter__()
             if result:
                 return result
-            print self.message
+            print self.__message
             time.sleep(self.delay)
 
 def jsonloads(jsonstring):
@@ -426,9 +458,32 @@ class LSF_creating(object):
 
         for filename in self.files:
             if os.path.exists(os.path.basename(filename)):
-                shutil.copy(os.path.basename(filename), filename)
+                shutil.move(os.path.basename(filename), filename)
             else:
                 notcreated.append(os.path.basename(filename))
 
         if notcreated and not self.ignorefailure:
             raise RuntimeError("\n".join("{} was not created!".format(os.path.basename(filename)) for filename in filenames))
+
+def RooArgList(*args, **kwargs):
+    name = None
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "name":
+            name = kwarg
+        else:
+            raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
+    args = list(args)
+    if name is None and isinstance(args[-1], basestring):
+        name = args[-1]
+        args = args[:-1]
+
+    if len(args) < 4:
+        if name is not None:
+            args.append(name)
+        return ROOT.RooArgList(*args)
+
+    nameargs = [name] if name is not None else []
+    result = ROOT.RooArgList(*nameargs)
+    for arg in args:
+        result.add(arg)
+    return result
