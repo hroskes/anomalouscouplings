@@ -14,7 +14,7 @@ import sys
 
 makeworkspacestemplate = """
 eval $(scram ru -sh) &&
-python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo.
+python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[analysis]Oo. -P .oO[production]Oo. --sigmaVVai=T1:.oO[SM_XS_VV]Oo.,T2:.oO[BSM_XS_VV]Oo.,T4:.oO[int_XS_VV]Oo. --newMu
 """
 
 createworkspacetemplate = """
@@ -120,17 +120,20 @@ def runcombine(analysis, foldername, **kwargs):
               "moreappend": moreappend,
               "npoints": str(npoints),
               "scanrange": "{},{}".format(*scanrange),
+              "SM_XS_VV": analysis.SM_XS_VV
+              "SM_XS_VV": analysis.BSM_XS_VV
+              "SM_XS_VV": analysis.int_XS_VV
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         for production in productions:
             production = Production(production)
-            if not all(os.path.exists("cards_{}/HCG/125/hzz4l_{}S_{}.input.root".format(foldername, channel, production.year)) for channel in usechannels):
+            if not all(os.path.exists("cards_{}/HCG/125/13TeV/hzz4l_{}S_{}.input.root".format(foldername, channel, production.year)) for channel in usechannels):
                 makeworkspacesmap = repmap.copy()
                 makeworkspacesmap["production"] = str(production)
                 subprocess.check_call(replaceByMap(makeworkspacestemplate, makeworkspacesmap), shell=True)
         with open("cards_{}/.gitignore".format(foldername), "w") as f:
             f.write("*")
-        with filemanager.cd("cards_{}/HCG/125".format(foldername)):
+        with filemanager.cd("cards_{}/HCG/125/13TeV".format(foldername)):
             #replace rates
             for channel, production in product(channels, productions):
                 if channel in usechannels:

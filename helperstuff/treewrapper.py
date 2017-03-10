@@ -209,7 +209,7 @@ class TreeWrapper(Iterator):
 #####################
 
     def MC_weight_ggH(self, index):
-        return self.MC_weight * self.reweightingweights[index] * constants.SMXS2L2l / self.nevents2L2l[index]
+        return self.MC_weight * self.reweightingweights[index] * constants.SMXSggH2L2l / self.nevents2L2l[index]
     def MC_weight_ggH_g1(self):
         return self.MC_weight_ggH(0)
     def MC_weight_ggH_g2(self):

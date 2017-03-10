@@ -240,11 +240,11 @@ class Analysis(MyEnum):
         return [Template(sample, self, *args) for sample in self.signalsamples()]
     def interfxsec(self):
         if self == "fa3":
-            return constants.JHUXS2L2la1a3 - 2*constants.JHUXS2L2la1
+            return constants.JHUXSggH2L2la1a3 - 2*constants.JHUXSggH2L2la1
         elif self == "fa2":
-            return constants.JHUXS2L2la1a2 - 2*constants.JHUXS2L2la1
+            return constants.JHUXSggH2L2la1a2 - 2*constants.JHUXSggH2L2la1
         elif self == "fL1":
-            return constants.JHUXS2L2la1L1 - 2*constants.JHUXS2L2la1
+            return constants.JHUXSggH2L2la1L1 - 2*constants.JHUXSggH2L2la1
         assert False
 
 class Production(MyEnum):
@@ -685,11 +685,11 @@ class Template(MultiEnum):
         if self.hypothesis in ("0+", "0-", "a2", "L1"):
             result = 1.0
         elif self.hypothesis == "fa30.5":
-            result = constants.JHUXS2L2la1a3 / constants.JHUXS2L2la1
+            result = constants.JHUXSggH2L2la1a3 / constants.JHUXSggH2L2la1
         elif self.hypothesis == "fa20.5":
-            result = constants.JHUXS2L2la1a2 / constants.JHUXS2L2la1
+            result = constants.JHUXSggH2L2la1a2 / constants.JHUXSggH2L2la1
         elif self.hypothesis == "fL10.5":
-            result = constants.JHUXS2L2la1L1 / constants.JHUXS2L2la1
+            result = constants.JHUXSggH2L2la1L1 / constants.JHUXSggH2L2la1
         else:
             assert False
         result /= len(self.reweightfrom())
