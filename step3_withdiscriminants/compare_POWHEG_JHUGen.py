@@ -33,7 +33,7 @@ def lines(productionmode, analysis):
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ggH 0^{-} JHUGen H+jj")
     yield makeline(ReweightingSample(productionmode, "0+", "fCP0.5"), "ggH f_{CP}=0.5 JHUGen H+jj")
     yield makeline(ReweightingSamplePlus("ggH", "0+", "MINLO"), "ggH SM MINLO")
-    yield makeline(ReweightingSamplePlus("ggH", "0+", "NNLOPS"), "ggH SM NNLOPS")
+#    yield makeline(ReweightingSamplePlus("ggH", "0+", "NNLOPS"), "ggH SM NNLOPS")
   elif productionmode == "ttH":
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0+"), "ttH SM JHUGen")
     yield makeline(ReweightingSample(productionmode, "0+", "Hff0-"), "ttH 0^{-} JHUGen")
