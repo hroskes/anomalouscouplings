@@ -22,7 +22,7 @@ python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[ana
 createworkspacetemplate = """
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l.txt &&
-text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs --PO allowPMF --PO sqrts=13 -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace &&
+text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs --PO allowPMF --PO sqrts=13 .oO[morePO]Oo. -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace &&
 exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = """
@@ -51,6 +51,7 @@ def runcombine(analysis, foldername, **kwargs):
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
     defaultscenario = scenario = 1
+    scalemuvmuftogether = False
 
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
@@ -89,6 +90,8 @@ def runcombine(analysis, foldername, **kwargs):
             npoints = int(kwarg)
         elif kw == "scenario":
             scenario = int(kwarg)
+        elif kw == "scalemuvmuftogether":
+            scalemuvmuftogether = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -101,7 +104,12 @@ def runcombine(analysis, foldername, **kwargs):
     if len(set(years)) != len(years):
         raise ValueError("Some of your productions are from the same year!")
 
-    moreappend = ""
+    workspacefileappend = ""
+    if scalemuvmuftogether:
+        workspacefileappend += "_scalemuvmuftogether"
+    print workspacefileappend
+
+    moreappend = ".oO[workspacefileappend]Oo."
     if not usesystematics:
         moreappend += "_nosystematics"
     if not (npoints == defaultnpoints and scanrange == defaultscanrange):
@@ -115,10 +123,11 @@ def runcombine(analysis, foldername, **kwargs):
               "foldername": pipes.quote(foldername),
               "analysis": str(analysis),
               "cardstocombine": " ".join("hzz4l_{}S_{}.txt".format(channel, production.year) for channel, production in product(usechannels, productions)),
-              "workspacefile": "floatMu.root",
+              "workspacefile": "floatMu.oO[workspacefileappend]Oo..root",
               "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..MultiDimFit.mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "observedappend": "obs",
+              "workspacefileappend": workspacefileappend,
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "npoints": str(npoints),
@@ -126,6 +135,7 @@ def runcombine(analysis, foldername, **kwargs):
               "SM_XS_VV": str(analysis.SM_XS_VV),
               "BSM_XS_VV": str(analysis.BSM_XS_VV),
               "int_XS_VV": str(analysis.int_XS_VV),
+              "morePO": "--PO scalemuvmuftogether" if scalemuvmuftogether else "",
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         for production in productions:
@@ -200,7 +210,8 @@ def runcombine(analysis, foldername, **kwargs):
             for ext in "png eps root pdf".split():
                 plotname = plotname.replace("."+ext, "")
             plotname += moreappend
-            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=moreappend)
+            plotname = replaceByMap(plotname, repmap)
+            plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(moreappend, repmap))
             with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
                 f.write(" ".join(["python"]+sys.argv))
                 f.write("\n\n\n")
