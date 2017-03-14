@@ -22,7 +22,8 @@ python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[ana
 createworkspacetemplate = """
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l.txt &&
-text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs --PO muFloating --PO allowPMF --PO sqrts=13 -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
+text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs --PO allowPMF --PO sqrts=13 -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace &&
+exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = """
 eval $(scram ru -sh) &&
@@ -122,20 +123,20 @@ def runcombine(analysis, foldername, **kwargs):
               "moreappend": moreappend,
               "npoints": str(npoints),
               "scanrange": "{},{}".format(*scanrange),
-              "SM_XS_VV": analysis.SM_XS_VV,
-              "BSM_XS_VV": analysis.BSM_XS_VV,
-              "int_XS_VV": analysis.int_XS_VV,
+              "SM_XS_VV": str(analysis.SM_XS_VV),
+              "BSM_XS_VV": str(analysis.BSM_XS_VV),
+              "int_XS_VV": str(analysis.int_XS_VV),
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         for production in productions:
             production = Production(production)
-            if not all(os.path.exists("cards_{}/HCG/125/13TeV/hzz4l_{}S_{}.input.root".format(foldername, channel, production.year)) for channel in usechannels):
+            if not all(os.path.exists("cards_{}/HCG/125/{}/hzz4l_{}S_{}.input.root".format(foldername, production.year, channel, production.year)) for channel in usechannels):
                 makeworkspacesmap = repmap.copy()
                 makeworkspacesmap["production"] = str(production)
                 subprocess.check_call(replaceByMap(makeworkspacestemplate, makeworkspacesmap), shell=True)
         with open("cards_{}/.gitignore".format(foldername), "w") as f:
             f.write("*")
-        with filemanager.cd("cards_{}/HCG/125/13TeV".format(foldername)):
+        with filemanager.cd("cards_{}/HCG/125/{}".format(foldername, production.year)):
             #replace rates
             for channel, production in product(channels, productions):
                 if channel in usechannels:

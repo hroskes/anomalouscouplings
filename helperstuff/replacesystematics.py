@@ -112,6 +112,7 @@ class ReadSystematics_BaseClass(MultiEnum):
                    "QCDscale_VH": "QCDscale_VH",    #need to figure out how to add them
                    "QCDscale_ttH": "QCDscale_ttH",  #to QCDscale_ggH properly
                    "QCDscale_ggVV": "QCDscale_ggVV",
+                   "QCDscale_ggVV_bonly": "QCDscale_ggVV_bonly",
                    "QCDscale_VV": "QCDscale_VV",
                    "BRhiggs_hzz4l": "BRhiggs_hzz4l",
                    "CMS_eff_m": "CMS_eff_m",
@@ -136,7 +137,8 @@ class MoriondSystematics(ReadSystematics_BaseClass):
         if self.scenario != 1:
             raise ValueError("Bad scenario {}".format(self.scenario))
         #for theory systematics
-        self.ichepsystematics = ICHEPSystematics([_ for _ in config.productionsforcombine if _.year == 2016][0], self.channel)
+        #self.ichepsystematics = ICHEPSystematics([_ for _ in config.productionsforcombine if _.year == 2016][0], self.channel)
+        self.ichepsystematics = ICHEPSystematics("160729", self.channel)
 
     def getsystematics(self):
         with open(self.channel.moriondcardfile()) as f:
