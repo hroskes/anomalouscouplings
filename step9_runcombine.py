@@ -20,7 +20,7 @@ python make_prop_DCsandWSs.py -i SM_inputs_8TeV -a .oO[foldername]Oo. -A .oO[ana
 createworkspacetemplate = """
 eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > hzz4l_4l.txt &&
-text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs --PO=muFloating,allowPMF -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
+text2workspace.py -m 125 hzz4l_4l.txt -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs --PO muFloating --PO allowPMF --PO sqrts=13 -o .oO[workspacefile]Oo. -v 7 |& tee log.text2workspace
 """
 runcombinetemplate = """
 eval $(scram ru -sh) &&
