@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from helperstuff import constants
 from helperstuff.samples import Sample
 from helperstuff.enums import TemplatesFile, templatesfiles

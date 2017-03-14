@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from array import array
 from helperstuff import xrd
 from helperstuff.enums import flavors, hypotheses, productions

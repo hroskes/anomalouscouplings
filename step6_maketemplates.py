@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from helperstuff import config
 from helperstuff.enums import DataTree, datatrees, TemplatesFile, templatesfiles
 from helperstuff.samples import Sample
