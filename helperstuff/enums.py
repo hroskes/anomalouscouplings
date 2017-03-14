@@ -247,6 +247,72 @@ class Analysis(MyEnum):
             return constants.JHUXSggH2L2la1L1 - 2*constants.JHUXSggH2L2la1
         assert False
 
+    @property
+    def SM_XS_VV(self):
+        return constants.SMXSVBF + constants.SMXSZH + constants.SMXSWH
+
+    @property
+    def BSM_XS_VV(self):
+        if self == "fa3":
+            return (
+                      constants.SMXSVBF * constants.g4decay**2*constants.JHUXSVBFa3/constants.JHUXSVBFa1
+                    + constants.SMXSZH  * constants.g4decay**2*constants.JHUXSZHa3 /constants.JHUXSZHa1
+                    + constants.SMXSWH  * constants.g4decay**2*constants.JHUXSWHa3 /constants.JHUXSWHa1
+                   )
+        if self == "fa2":
+            return (
+                      constants.SMXSVBF * constants.g2decay**2*constants.JHUXSVBFa2/constants.JHUXSVBFa1
+                    + constants.SMXSZH  * constants.g2decay**2*constants.JHUXSZHa2 /constants.JHUXSZHa1
+                    + constants.SMXSWH  * constants.g2decay**2*constants.JHUXSWHa2 /constants.JHUXSWHa1
+                   )
+        if self == "fL1":
+            return (
+                      constants.SMXSVBF * constants.g1prime2decay_gen**2*constants.JHUXSVBFL1/constants.JHUXSVBFa1
+                    + constants.SMXSZH  * constants.g1prime2decay_gen**2*constants.JHUXSZHL1 /constants.JHUXSZHa1
+                    + constants.SMXSWH  * constants.g1prime2decay_gen**2*constants.JHUXSWHL1 /constants.JHUXSWHa1
+                   )
+        if self == "fL1Zg":
+            return (
+                      constants.SMXSVBF * constants.ghzgs1prime2decay_gen**2*constants.JHUXSVBFL1Zg/constants.JHUXSVBFa1
+                    + constants.SMXSZH  * constants.ghzgs1prime2decay_gen**2*constants.JHUXSZHL1Zg /constants.JHUXSZHa1
+                    + constants.SMXSWH  * constants.ghzgs1prime2decay_gen**2*constants.JHUXSWHL1Zg /constants.JHUXSWHa1
+                   )
+
+    @property
+    def int_XS_VV(self):
+        """
+        To replicate these numbers in the production branch:
+          sum(ArbitraryCouplingsSample(p, **kwargs1).xsec / ArbitraryCouplingsSample("ggH", **kwargs1).xsec - ArbitraryCouplingsSample(p, **kwargs2).xsec / ArbitraryCouplingsSample("ggH", **kwargs2).xsec - ArbitraryCouplingsSample(p, **kwargs3).xsec / ArbitraryCouplingsSample("ggH", **kwargs3).xsec for p in ("VBF", "ZH", "WH")) / sum(ArbitraryCouplingsSample(p, **kwargs3).xsec / ArbitraryCouplingsSample("ggH", **kwargs3).xsec for p in ("VBF", "ZH", "WH"))
+        should equal
+          analysis.int_XS_VV / analysis.SM_XS_VV
+        kwargs1 and kwargs3 have g1=1
+        kwargs2 and kwargs3 have ganomalous = ReweightingSample("ggH", anomalous).ganomalous
+        """
+        if self == "fa3":
+            return (
+                      constants.SMXSVBF * (constants.JHUXSVBFa1a3*constants.g4decay/constants.g4VBF) / constants.JHUXSVBFa1
+                    + constants.SMXSZH *  (constants.JHUXSZHa1a3 *constants.g4decay/constants.g4ZH ) / constants.JHUXSZHa1
+                    + constants.SMXSWH *  (constants.JHUXSWHa1a3 *constants.g4decay/constants.g4WH ) / constants.JHUXSWHa1
+                   )
+        if self == "fa2":
+            return (
+                      constants.SMXSVBF * (constants.JHUXSVBFa1a2*constants.g2decay/constants.g2VBF) / constants.JHUXSVBFa1
+                    + constants.SMXSZH *  (constants.JHUXSZHa1a2 *constants.g2decay/constants.g2ZH ) / constants.JHUXSZHa1
+                    + constants.SMXSWH *  (constants.JHUXSWHa1a2 *constants.g2decay/constants.g2WH ) / constants.JHUXSWHa1
+                   )
+        if self == "fL1":
+            return (
+                      constants.SMXSVBF * (constants.JHUXSVBFa1L1*constants.g1prime2decay_gen/constants.g1prime2VBF_gen) / constants.JHUXSVBFa1
+                    + constants.SMXSZH *  (constants.JHUXSZHa1L1 *constants.g1prime2decay_gen/constants.g1prime2ZH_gen ) / constants.JHUXSZHa1
+                    + constants.SMXSWH *  (constants.JHUXSWHa1L1 *constants.g1prime2decay_gen/constants.g1prime2WH_gen ) / constants.JHUXSWHa1
+                   )
+        if self == "fL1Zg":
+            return (
+                      constants.SMXSVBF * (constants.JHUXSVBFa1L1Zg*constants.ghzgs1prime2decay_gen/constants.ghzgs1prime2VBF_gen) / constants.JHUXSVBFa1
+                    + constants.SMXSZH *  (constants.JHUXSZHa1L1Zg *constants.ghzgs1prime2decay_gen/constants.ghzgs1prime2ZH_gen ) / constants.JHUXSZHa1
+                    + constants.SMXSWH *  (constants.JHUXSWHa1L1Zg *constants.ghzgs1prime2decay_gen/constants.ghzgs1prime2WH_gen ) / constants.JHUXSWHa1
+                   )
+
 class Production(MyEnum):
     enumname = "production"
     enumitems = (

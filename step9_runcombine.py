@@ -120,9 +120,9 @@ def runcombine(analysis, foldername, **kwargs):
               "moreappend": moreappend,
               "npoints": str(npoints),
               "scanrange": "{},{}".format(*scanrange),
-              "SM_XS_VV": analysis.SM_XS_VV
-              "SM_XS_VV": analysis.BSM_XS_VV
-              "SM_XS_VV": analysis.int_XS_VV
+              "SM_XS_VV": analysis.SM_XS_VV,
+              "BSM_XS_VV": analysis.BSM_XS_VV,
+              "int_XS_VV": analysis.int_XS_VV,
              }
     with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         for production in productions:
