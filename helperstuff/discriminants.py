@@ -17,7 +17,7 @@ decaydiscriminants = [
     Discriminant("D_int_decay", "D_{int}^{dec}", defaultnbins, 0, 1),
     Discriminant("D_L1_decay", "D_{#Lambda1}^{dec}", defaultnbins, 0, 1),
     Discriminant("D_L1int_decay", "D_{#Lambda1int}^{dec}", defaultnbins, 0, 1),
-    Discriminant("D_L1Zg_decay", "D_{#Lambda1Z#gamma}^{dec}", defaultnbins, 0, 1),
+    Discriminant("D_L1Zg_decay", "D_{#Lambda1}^{Z#gamma,dec}", defaultnbins, 0, 1),
     Discriminant("D_L1Zgint_decay", "D_{#Lambda1Z#gammaint}^{dec}", defaultnbins, -.3, .25),
 ]
 VBFdiscriminants = [
@@ -27,12 +27,12 @@ VBFdiscriminants = [
     Discriminant("D_int_VBF", "D_{int}^{VBF}", defaultnbins, -1, 1),
     Discriminant("D_L1_VBF", "D_{#Lambda1}^{VBF}", defaultnbins, 0, 1),
     Discriminant("D_L1int_VBF", "D_{#Lambda1int}^{VBF}", defaultnbins, -1, 1),
-    Discriminant("D_L1Zg_VBF", "D_{#LambdaZ#gamma1}^{VBF}", defaultnbins, 0, 1),
+    Discriminant("D_L1Zg_VBF", "D_{#Lambda1Z#gamma}^{VBF}", defaultnbins, 0, 1),
     Discriminant("D_L1Zgint_VBF", "D_{#Lambda1Z#gammaint}^{VBF}", defaultnbins, 0, .35),
-    Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBFdec}", defaultnbins, 0, 1),
-    Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBFdec}", defaultnbins, 0, 1),
-    Discriminant("D_L1_VBFdecay", "D_{#Lambda1}^{VBFdec}", defaultnbins, 0, 1),
-    Discriminant("D_L1Zg_VBFdecay", "D_{#Lambda1Z#gamma}^{VBFdec}", defaultnbins, 0, 1),
+    Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", defaultnbins, 0, 1),
+    Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBF+dec}", defaultnbins, 0, 1),
+    Discriminant("D_L1_VBFdecay", "D_{#Lambda1}^{VBF+dec}", defaultnbins, 0, 1),
+    Discriminant("D_L1Zg_VBFdecay", "D_{#Lambda1}^{Z#gamma,VBF+dec}", defaultnbins, 0, 1),
 ]
 VHdiscriminants = [
     Discriminant("D_0minus_HadVH", "D_{0-}^{VH}", defaultnbins, 0, 1),
@@ -41,12 +41,12 @@ VHdiscriminants = [
     Discriminant("D_int_HadVH", "D_{int}^{VH}", defaultnbins, -1, .05),
     Discriminant("D_L1_HadVH", "D_{#Lambda1}^{VH}", defaultnbins, 0, 1),
     Discriminant("D_L1int_HadVH", "D_{#Lambda1int}^{VH}", defaultnbins, 0, 1),
-    Discriminant("D_L1Zg_HadVH", "D_{#Lambda1Z#gamma}^{VH}", defaultnbins, 0, 1),
+    Discriminant("D_L1Zg_HadVH", "D_{#Lambda1}^{Z#gamma,VH}", defaultnbins, 0, 1),
     Discriminant("D_L1Zgint_HadVH", "D_{#Lambda1Z#gammaint}^{VH}", defaultnbins, -.4, 0),
-    Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VHdec}", defaultnbins, 0, 1),
-    Discriminant("D_0hplus_HadVHdecay", "D_{0h+}^{VHdec}", defaultnbins, 0, 1),
-    Discriminant("D_L1_HadVHdecay", "D_{#Lambda1}^{VHdec}", defaultnbins, 0, 1),
-    Discriminant("D_L1Zg_HadVHdecay", "D_{#Lambda1Z#gamma}^{VHdec}", defaultnbins, 0, 1),
+    Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", defaultnbins, 0, 1),
+    Discriminant("D_0hplus_HadVHdecay", "D_{0h+}^{VH+dec}", defaultnbins, 0, 1),
+    Discriminant("D_L1_HadVHdecay", "D_{#Lambda1}^{VH+dec}", defaultnbins, 0, 1),
+    Discriminant("D_L1Zg_HadVHdecay", "D_{#Lambda1}^{Z#gamma,VH+dec}", defaultnbins, 0, 1),
 ]
 categorydiscriminants = [
     Discriminant("D_2jet_0plus", "D_{2jet}^{VBF, 0+}", defaultnbins, 0, 1),
