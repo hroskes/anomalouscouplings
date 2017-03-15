@@ -454,27 +454,27 @@ class _Pdf(PdfBase):
     @classmethod
     @cache
     def RV(cls):
-        return ROOT.RooRealVar(makename("RV"), "RV", 0, 400)
+        return ROOT.RooRealVar(makename("RV"), "RV", 1, 0, 400)
     @classmethod
     @cache
     def RF(cls):
-        return ROOT.RooRealVar(makename("RF"), "RF", 0, 400)
+        return ROOT.RooRealVar(makename("RF"), "RF", 1, 0, 400)
     @classmethod
     @cache
     def R(cls):
-        return ROOT.RooRealVar(makename("R"), "R", 0, 400)
+        return ROOT.RooRealVar(makename("R"), "R", 1, 0, 400)
     @classmethod
     @cache
     def RV_13TeV(cls):
-        return ROOT.RooRealVar(makename("RV_13TeV"), "RV_13TeV", 0, 400)
+        return ROOT.RooRealVar(makename("RV_13TeV"), "RV_13TeV", 1, 0, 400)
     @classmethod
     @cache
     def RF_13TeV(cls):
-        return ROOT.RooRealVar(makename("RF_13TeV"), "RF_13TeV", 0, 400)
+        return ROOT.RooRealVar(makename("RF_13TeV"), "RF_13TeV", 1, 0, 400)
     @classmethod
     @cache
     def R_13TeV(cls):
-        return ROOT.RooRealVar(makename("R_13TeV"), "R_13TeV", 0, 400)
+        return ROOT.RooRealVar(makename("R_13TeV"), "R_13TeV", 1, 0, 400)
     @classmethod
     @cache
     def muV(cls):
