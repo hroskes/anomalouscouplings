@@ -119,7 +119,7 @@ class ReadSystematics_BaseClass(MultiEnum):
                    "CMS_eff_e": "CMS_eff_e",
                    "lumi_8TeV": "lumi_13TeV",
                   }
-        thedict.update({"CMS_hzz{}_Zjets".format(channel): "CMS_zz{}_zjets".format(channel) for channel in channels})
+        thedict.update({"CMS_zz{}_Zjets".format(channel): "CMS_zz{}_zjets".format(channel) for channel in channels})
         if oldname in thedict.values():
             name = oldname
         else:
