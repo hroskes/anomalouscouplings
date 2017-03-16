@@ -24,9 +24,9 @@ def addL1Zg(t, doreweighting=False):
     SM = array.array('f', [0])
     L1Zg = array.array('f', [0])
     L1Zgint = array.array('f', [0])
-    a3test = array.array('f', [0])
-    newtree.Branch("p0plus_forL1Zg_VAJHU", a3test, "p0plus_forL1Zg_VAJHU/F")
-    newtree.Branch("p0minus_forL1Zg_VAJHU", SM, "p0minus_forL1Zg_VAJHU/F")
+    a3 = array.array('f', [0])
+    newtree.Branch("p0plus_forL1Zg_VAJHU", SM, "p0plus_forL1Zg_VAJHU/F")
+    newtree.Branch("p0minus_forL1Zg_VAJHU", a3, "p0minus_forL1Zg_VAJHU/F")
     newtree.Branch("p0_ghzgs1prime2_VAJHU", L1Zg, "p0_ghzgs1prime2_VAJHU/F")
     newtree.Branch("pg1ghzgs1prime2_VAJHU", L1Zgint, "pg1ghzgs1prime2_VAJHU/F")
 
@@ -39,7 +39,7 @@ def addL1Zg(t, doreweighting=False):
 
         mela.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZINDEPENDENT)
         mela.ghz4 = 1
-        a3test[0] = mela.computeP(True)
+        a3[0] = mela.computeP(True)
 
         mela.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZINDEPENDENT)
         mela.ghzgs1_prime2 = 1
