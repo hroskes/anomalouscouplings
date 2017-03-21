@@ -92,9 +92,11 @@ class Hypothesis(MyEnum):
                  EnumItem("a2", "0h+"),
                  EnumItem("0-", "PS", "pseudoscalar"),
                  EnumItem("L1", "Lambda1"),
+                 EnumItem("L1Zg"),
                  EnumItem("fa20.5"),
                  EnumItem("fa30.5"),
                  EnumItem("fL10.5", "flambda10.5"),
+                 EnumItem("fL1Zg0.5"),
                 )
 
 class ProductionMode(MyEnum):
@@ -158,6 +160,7 @@ class Analysis(MyEnum):
                  EnumItem("fa3"),
                  EnumItem("fa2"),
                  EnumItem("fL1"),
+                 EnumItem("fL1Zg"),
                 )
     @property
     def title(self):
@@ -167,6 +170,8 @@ class Analysis(MyEnum):
             return "f_{a2}"
         if self == "fL1":
             return "f_{#Lambda1}"
+        if self == "fL1Zg":
+            return "f_{#Lambda1}^{Z#gamma}"
         assert False
     @property
     def phi(self):
@@ -176,6 +181,8 @@ class Analysis(MyEnum):
             return "#phi_{a2}"
         if self == "fL1":
             return "#phi_{#Lambda1}"
+        if self == "fL1Zg":
+            return "#phi_{#Lambda1}^{Z#gamma}"
         assert False
     @property
     def phi_lower(self):
@@ -188,6 +195,8 @@ class Analysis(MyEnum):
                 return "D_g2_decay"
             if self == "fL1":
                 return "D_g1prime2_decay"
+            if self == "fL1Zg":
+                return "D_L1Zg_decay"
         else:
             if self == "fa3":
                 return "D_{0-}"
@@ -195,6 +204,8 @@ class Analysis(MyEnum):
                 return "D_{0h+}"
             if self == "fL1":
                 return "D_{#Lambda1}"
+            if self == "fL1":
+                return "D_{#Lambda1}^{Z#gamma}"
         assert False
     def mixdiscriminant(self, title=False):
         if not title:
@@ -204,12 +215,16 @@ class Analysis(MyEnum):
                 return "D_g1g2_decay"
             if self == "fL1":
                 return "D_g2_decay"
+            if self == "fL1Zg":
+                return "D_g2_decay"
         else:
             if self == "fa3":
                 return "D_{CP}"
             if self == "fa2":
                 return "D_{int}"
             if self == "fL1":
+                return "D_{0h+}"
+            if self == "fL1Zg":
                 return "D_{0h+}"
         assert False
     def mixdiscriminantmin(self):
@@ -234,6 +249,8 @@ class Analysis(MyEnum):
             return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "a2"), ReweightingSample("ggH", "fa20.5")]
         elif self == "fL1":
             return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
+        elif self == "fL1Zg":
+            return [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL1Zg0.5")]
         else:
             assert False
     def signaltemplates(self, *args):
@@ -245,6 +262,8 @@ class Analysis(MyEnum):
             return constants.JHUXSggH2L2la1a2 - 2*constants.JHUXSggH2L2la1
         elif self == "fL1":
             return constants.JHUXSggH2L2la1L1 - 2*constants.JHUXSggH2L2la1
+        elif self == "fL1Zg":
+            return constants.JHUXSggH2L2la1L1Zg - 2*constants.JHUXSggH2L2la1_photoncut
         assert False
 
     @property
@@ -324,16 +343,22 @@ class Production(MyEnum):
                  EnumItem("160729"),
                 )
     def CJLSTdir(self):
-        if self == "160225":
-            return "root://lxcms03//data3/Higgs/160225/"
-        if self == "160624":
-            return "root://lxcms03//data3/Higgs/160624/"
-        if self == "160714":
-            return "root://lxcms03//data3/Higgs/160714/"
-        if self == "160720":
-            return "root://lxcms03//data3/Higgs/160720/"
-        if self == "160725" or self == "160729":
-            return "root://lxcms03//data3/Higgs/160726/"
+        if config.host == "lxplus":
+            if self == "160225":
+                return "root://lxcms03//data3/Higgs/160225/"
+            if self == "160624":
+                return "root://lxcms03//data3/Higgs/160624/"
+            if self == "160714":
+                return "root://lxcms03//data3/Higgs/160714/"
+            if self == "160720":
+                return "root://lxcms03//data3/Higgs/160720/"
+            if self == "160725" or self == "160729":
+                return "root://lxcms03//data3/Higgs/160726/"
+        elif config.host == "MARCC":
+            if self == "160225":
+                return "/work-zfs/lhc/CJLSTtrees/160225"
+            if self == "160725" or self == "160729":
+                return "/work-zfs/lhc/CJLSTtrees/160726"
         assert False
     def CJLSTdir_anomalous(self):
         if self == "160225":
@@ -344,12 +369,16 @@ class Production(MyEnum):
             return "root://lxcms03//data3/Higgs/160718/"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
-        if self == "160714":
-            return "root://lxcms03//data3/Higgs/160716/"
-        if self == "160725":
-            return "root://lxcms03//data3/Higgs/160725/"
-        if self == "160729":
-            return "root://lxcms03//data3/Higgs/160729_complete/"
+        if config.host == "lxplus":
+            if self == "160714":
+                return "root://lxcms03//data3/Higgs/160716/"
+            if self == "160725":
+                return "root://lxcms03//data3/Higgs/160725/"
+            if self == "160729":
+                return "root://lxcms03//data3/Higgs/160729_complete/"
+        elif config.host == "MARCC":
+            if self == "160225":
+                return "/work-zfs/lhc/CJLSTtrees/160225_withL1ZgME"
         return self.CJLSTdir()
     @property
     def useMELAv2(self):
@@ -557,7 +586,15 @@ class TemplatesFile(MultiEnum):
 
         folder = os.path.join(config.repositorydir, "step7_templates")
 
-        if self.signalorbkg == "bkg":
+        if self.analysis == "fL1Zg":
+            #taken from Moriond17
+            if self.signalorbkg == "bkg":
+                result = os.path.join(folder, "L1Zg", "templates_background_fL1Zg_{}_Untagged{}_170203".format(self.channel, self.systematic.appendname()))
+            elif self.signalorbkg == "signal":
+                result = os.path.join(folder, "L1Zg", "templates_ggh_fL1Zg_{}_Untagged{}_170203".format(self.channel, self.systematic.appendname()))
+            else:
+                assert False
+        elif self.signalorbkg == "bkg":
             result = os.path.join(folder, "{}_bkg{}_{}Adap_{}".format(self.channel, self.systematic.appendname(), self.analysis, self.production))
         elif self.signalorbkg == "DATA":
             result = os.path.join(folder, "data_{}_{}_{}".format(self.channel, self.analysis, self.production))
@@ -625,7 +662,7 @@ class Template(MultiEnum):
         elif self.productionmode == "ggH":
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if ReweightingSample(self.productionmode, self.hypothesis) not in self.analysis.signalsamples():
+            if ReweightingSample(str(self.productionmode), str(self.hypothesis)) not in self.analysis.signalsamples():
                 raise ValueError("Hypothesis {} is not used in analysis {}!\n{}".format(self.hypothesis, self.analysis, args))
             if self.signalorbkg != "signal":
                 raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.signalorbkg, args))
@@ -655,7 +692,9 @@ class Template(MultiEnum):
                 name = "template0HPlusAdapSmooth"
             elif self.hypothesis == "L1":
                 name = "template0L1AdapSmooth"
-            elif self.hypothesis in ("fa20.5", "fa30.5", "fL10.5"):
+            elif self.hypothesis == "L1Zg":
+                name = "template0L1ZgAdapSmooth"
+            elif self.hypothesis in ("fa20.5", "fa30.5", "fL10.5", "fL1Zg0.5"):
                 if final:
                     name = "templateIntAdapSmooth"
                 else:

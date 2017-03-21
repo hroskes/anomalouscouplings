@@ -7,12 +7,12 @@ from samples import ReweightingSample
 import sys
 import ZX
 
-resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
+#resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
 sys.setrecursionlimit(10000)
 
 class TreeWrapper(Iterator):
 
-    def __init__(self, tree, treesample, Counters, Counters_reweighted, minevent=0, maxevent=None, isdummy=False):
+    def __init__(self, tree, treesample, Counters, Counters_reweighted, minevent=0, maxevent=None, isdummy=False, withL1Zg=False):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
@@ -27,6 +27,7 @@ class TreeWrapper(Iterator):
         self.isZX = treesample.isZX()
         self.useMELAv2 = treesample.useMELAv2
         self.isdummy = isdummy
+        self.withL1Zg = withL1Zg
         if self.isdata:
             self.unblind = treesample.unblind
         else:
@@ -160,6 +161,10 @@ class TreeWrapper(Iterator):
             self.M2g1_VBF = t.pvbf_VAJHU_new
             self.M2g2_HJJ = t.phjj_VAJHU_new
 
+        if self.withL1Zg:
+            self.p0_ghzgs1prime2_VAJHU = self.M2ghzgs1prime2_decay = t.p0_ghzgs1prime2_VAJHU
+            self.p0plus_forL1Zg_VAJHU = self.M2g1_decay_forL1Zg = t.p0plus_forL1Zg_VAJHU
+
         if self.isdata and not self.unblind and not self.passesblindcut():
             return next(self)
 
@@ -203,6 +208,8 @@ class TreeWrapper(Iterator):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
     def D_g1g1prime2_decay(self):
         return self.M2g1g1prime2_decay*constants.g1prime2decay_reco / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+    def D_L1Zg_decay(self):
+        return self.M2g1_decay_forL1Zg / (self.M2g1_decay_forL1Zg + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
 
 #####################
 #Reweighting weights#
@@ -299,8 +306,13 @@ class TreeWrapper(Iterator):
             "unblind",
             "useMELAv2",
             "weightfunctions",
+            "withL1Zg",
             "xsec",
         ]
+        if self.withL1Zg:
+            self.toaddtotree.append("D_L1Zg_decay")
+        else:
+            self.exceptions.append("D_L1Zg_decay")
 
         allsamples = [    #all samples that have weight functions defined in this class
             ReweightingSample("ggH", "0+"),

@@ -9,10 +9,10 @@ import os
 import ROOT
 import sys
 
-definitelyexists = Sample("ggH", "0+", "160225")
-assert xrd.exists(definitelyexists.CJLSTfile())
+definitelyexists = Sample("ggZZ", "2e2mu", "160225")
+assert xrd.exists(definitelyexists.CJLSTfile()), definitelyexists.CJLSTfile()
 
-def adddiscriminants(*args):
+def adddiscriminants(*args, **kwargs):
 
     sample = Sample(*args)
     reweightingsamples = sample.reweightingsamples()
@@ -41,7 +41,7 @@ def adddiscriminants(*args):
     t = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
     t.Add(filename)
 
-    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted, isdummy=isdummy)
+    treewrapper = TreeWrapper(t, sample, Counters=Counters, Counters_reweighted=Counters_reweighted, isdummy=isdummy, **kwargs)
 
     if os.path.exists(newfilename):
         return
@@ -65,6 +65,7 @@ def adddiscriminants(*args):
 if __name__ == '__main__':
     for production in productions:
         for hypothesis in hypotheses:
+            if hypothesis in ("L1Zg", "fL1Zg0.5"): continue
             adddiscriminants("ggH", hypothesis, production)
         for flavor in flavors:
             adddiscriminants("ggZZ", flavor, production)
@@ -75,5 +76,5 @@ if __name__ == '__main__':
         adddiscriminants("WplusH", "0+", production)
         adddiscriminants("WminusH", "0+", production)
         adddiscriminants("ttH", "0+", production)
-        adddiscriminants("data", production, "unblind")
-        adddiscriminants("data", production, "blind")
+        adddiscriminants("data", production, "unblind", withL1Zg=production=="160225")
+        adddiscriminants("data", production, "blind", withL1Zg=production=="160225")

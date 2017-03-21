@@ -72,6 +72,10 @@ if __name__ == "__main__":
         newf = ROOT.TFile(outfile, "RECREATE")
         newdir = newf.mkdir("ZZTree")
         newdir.cd()
+        for key in f.ZZTree.GetListOfKeys():
+            obj = key.ReadObj()
+            obj.SetDirectory(newdir)
+            obj.Write()
         newt = addL1Zg(t)
         newt.Write()
     except:

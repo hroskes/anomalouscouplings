@@ -4,9 +4,11 @@ import socket
 if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and getpass.getuser() == "hroskes":
     repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings"
     plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings/"
+    host = "lxplus"
 elif "login-node" in socket.gethostname() and getpass.getuser() == "jroskes1@jhu.edu":
     repositorydir = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/"
     plotsbasedir = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/plots/"
+    host = "MARCC"
 else:
     raise ValueError("Who/where are you?")
 
