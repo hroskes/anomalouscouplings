@@ -318,8 +318,8 @@ class _Datacard(MultiEnum):
         if os.path.exists(self.rootfile_base): return
         w = ROOT.RooWorkspace("w","w")
 
-        w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf.Class(),True)
-        w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf.Class(),True)
+        w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf_1D_fast.Class(),True)
+        w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf_fast.Class(),True)
 
         getattr(w,'import')(self.data_obs,ROOT.RooFit.Rename("data_obs")) ### Should this be renamed?
 
@@ -494,8 +494,8 @@ class _Pdf(PdfBase):
         for i, t in enumerate(self.T, start=1):
             t.SetName(self.templatename(i))
 
-        self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
-        self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+        self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
+        self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
 
         if self.shapesystematic == "":
             self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
@@ -520,8 +520,8 @@ class _Pdf(PdfBase):
         for i, t in enumerate(self.T, start=1):
             t.SetName(self.templatename(i))
 
-        self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
-        self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+        self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
+        self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
 
         if self.shapesystematic == "":
             self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
@@ -621,10 +621,10 @@ class _Pdf(PdfBase):
 
     @cache
     def getpdf_decayonly(self):
-        return ROOT.HZZ4L_RooSpinZeroPdf(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.fai, ROOT.RooArgList(*self.T_histfunc))
+        return ROOT.HZZ4L_RooSpinZeroPdf_1D_fast(self.pdfname, self.pdfname, self.fai, ROOT.RooArgList(self.D1, self.D2, self.D3), ROOT.RooArgList(*self.T_histfunc))
     @cache
     def getpdf_proddec(self):
-        return ROOT.VBFHZZ4L_RooSpinZeroPdf(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.a1, self.ai, ROOT.RooArgList(*self.T_histfunc))
+        return ROOT.VBFHZZ4L_RooSpinZeroPdf_fast(self.pdfname, self.pdfname, self.a1, self.ai, ROOT.RooArgList(self.D1, self.D2, self.D3), ROOT.RooArgList(*self.T_histfunc))
     @cache
     def getpdf_ZX(self):
         return ROOT.FastVerticalInterpHistPdf3D(self.pdfname,self.pdfname,self.D1,self.D2,self.D3,False,self.funcList_zjets,self.morphVarListBkg,1.0,1)

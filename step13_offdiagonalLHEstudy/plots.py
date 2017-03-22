@@ -10,11 +10,12 @@ from helperstuff.samples import Sample
 from helperstuff.utilities import mkdir_p
 
 c = ROOT.TCanvas()
+ROOT.gStyle.SetOptStat(0)
 
 assert len(config.productionsforcombine) == 1
 production = config.productionsforcombine[0]
 
-for disc in "D_0minus_HadVH", "D_CP_HadVH", "DiJetMass":
+for disc in "D_0minus_HadVH", "D_CP_HadVH", "D_0hplus_HadVH", "D_int_HadVH", "D_L1_HadVH", "D_L1Zg_HadVH":
     h = plotfromtree(
         reweightfrom=Sample("VBF", "0+", production),
         disc=disc,
@@ -31,7 +32,7 @@ for disc in "D_0minus_HadVH", "D_CP_HadVH", "DiJetMass":
     for ext in "png eps root pdf".split():
         c.SaveAs(os.path.join(outdir, "{}.{}".format(disc, ext)))
 
-for disc in "D_0minus_VBF", "D_CP_VBF":
+for disc in "D_0minus_VBF", "D_CP_VBF", "D_0hplus_VBF", "D_int_VBF", "D_L1_VBF", "D_L1Zg_VBF":
     h = plotfromtree(
         reweightfrom=Sample("VBF", "0+", production),
         disc=disc,
@@ -49,7 +50,7 @@ for disc in "D_0minus_VBF", "D_CP_VBF":
         c.SaveAs(os.path.join(outdir, "{}.{}".format(disc, ext)))
 
 for p in "ZH", "WH":
-    for disc in "D_0minus_VBF", "D_CP_VBF":
+    for disc in "D_0minus_VBF", "D_CP_VBF", "D_0hplus_VBF", "D_int_VBF", "D_L1_VBF", "D_L1Zg_VBF":
         h = plotfromtree(
             reweightfrom=Sample(p, "0+", production),
             disc=disc,
@@ -67,7 +68,7 @@ for p in "ZH", "WH":
             c.SaveAs(os.path.join(outdir, "{}.{}".format(disc, ext)))
 
 for p in "ZH", "WH":
-    for disc in "D_0minus_HadVH", "D_CP_HadVH":
+    for disc in "D_0minus_HadVH", "D_CP_HadVH", "D_0hplus_HadVH", "D_int_HadVH", "D_L1_HadVH", "D_L1Zg_HadVH":
         h = plotfromtree(
             reweightfrom=Sample(p, "0+", production),
             disc=disc,

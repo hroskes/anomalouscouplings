@@ -31,6 +31,7 @@ eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
         --setPhysicsModelParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
         -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. \
+        --includePOIEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
         .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
         -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
 """
