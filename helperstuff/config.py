@@ -37,8 +37,11 @@ applym4lshapesystematicsggH = True
 applym4lshapesystematicsggHUntagged = True
 applym4lshapesystematicsdiagonal = True #VBF in VBFtagged, VH in VHHadrtagged
 combinem4lshapesystematics = True
+
 applyZXshapesystematicsVBFVHtagged = True
 applyZXshapesystematicsUntagged = True
+mergeZXVBFVHsystematics = False
+
 applyJECshapesystematics = False
 applyMINLOsystematics = True
 
