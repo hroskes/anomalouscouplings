@@ -12,7 +12,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 import config
 
 if config.host == "lxplus":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], waitsuccessids=[], outputfile=None, errorfile=None, docd=False):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], waitsuccessids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None):
         if outputfile is not None:
             outputfile = outputfile.format(jobid="%J")
         if errorfile is not None:
@@ -52,6 +52,10 @@ if config.host == "lxplus":
                   "options": " ".join("{} {}".format(key, quote(value)) for key, value in optionsdict.iteritems() if value),
                   "docd": "cd .oO[pwd]Oo." if docd else "cd -"
                  }
+        if morerepmap:
+            assert not (set(repmap) & set(morerepmap))
+            repmap.update(morerepmap)
+
         if interactive:
             repmap["options"] += " -I"
             subprocess.check_call(replaceByMap(run, repmap), shell=True)
@@ -62,7 +66,7 @@ if config.host == "lxplus":
             return jobid
 
 elif config.host == "MARCC":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[], outputfile=None, errorfile=None):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[], outputfile=None, errorfile=None, morerepmap=None):
         if outputfile is not None:
             outputfile = outputfile.format(jobid="%j")
         if errorfile is not None:
@@ -89,6 +93,9 @@ elif config.host == "MARCC":
                   "queue": queue,
                   "waitids": ":".join("{:d}".format(id) for id in waitids)
                  }
+        if morerepmap:
+            assert not (set(repmap) & set(morerepmap))
+            repmap.update(morerepmap)
 
         options = {
                    "--job-name": ".oO[jobname]Oo.",

@@ -1,18 +1,23 @@
 #!/usr/bin/env python
+from itertools import product
+import json
+import os
+import pipes
+import shutil
+import subprocess
+import sys
+
+import ROOT
+
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
+
 from helperstuff import config, utilities
 from helperstuff.combinehelpers import Luminosity
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits, plottitle
+from helperstuff.submitjob import submitjob
 from helperstuff.utilities import tfiles
-from itertools import product
-import os
-import pipes
-import ROOT
-import shutil
-import subprocess
-import sys
 
 combinecardstemplate = r"""
 eval $(scram ru -sh) &&
@@ -30,7 +35,7 @@ runcombinetemplate = r"""
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
         --setPhysicsModelParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
-        -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. \
+        -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
         --includePOIEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
         .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
         -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
@@ -40,6 +45,53 @@ def check_call_test(*args, **kwargs):
     print args[0]
 #uncomment this for testing purposes
 #subprocess.check_call = check_call_test
+
+def runscan(repmap, submitjobs, directory=None):
+  if submitjobs:
+    npoints = int(repmap["npoints"])
+    result = set()
+    for i in range(npoints+1):
+      repmap_i = repmap.copy()
+      repmap_i.update({
+        "selectpoints": "--firstPoint .oO[pointindex]Oo. --lastPoint .oO[pointindex]Oo.",
+        "pointindex": str(i),
+      })
+      replaceByMap(runcombinetemplate, repmap_i) #sanity check that replaceByMap works
+      if os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_i)):
+        continue
+      job = "{} runscan {} directory={}".format(
+                                                os.path.join(config.repositorydir, "./step9_runcombine.py"),
+                                                pipes.quote(json.dumps(repmap_i)),
+                                                pipes.quote(os.getcwd()),
+                                               )
+      jobname = replaceByMap(".oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i)
+      jobid = submitjob(job, jobname=jobname, jobtime="1-0:0:0", morerepmap=repmap_i)
+      result.add(jobid)
+      if i == 0: raw_input()
+    return result
+  else:
+    cwd = os.path.realpath(os.getcwd())
+    if directory is None: directory = cwd
+    directory = os.path.realpath(directory)
+    if cwd != directory:
+#      if utilities.LSB_JOBID() is None:
+#        raise ValueError("Should call runscan from directory except in a batch job")
+      shutil.copytree(directory, os.path.basename(directory.rstrip("/")), symlinks=True)
+      cdto = os.path.basename(directory.rstrip("/"))
+    else:
+      cdto = "."
+
+    repmap = repmap.copy()
+    if "selectpoints" not in repmap:
+      repmap["selectpoints"] = ""
+    filename = replaceByMap(".oO[filename]Oo.", repmap)
+    tmpfile = os.path.join(directory, filename+".tmp")
+    if not os.path.exists(filename):
+      with utilities.cd(cdto), \
+           utilities.KeepWhileOpenFile(tmpfile, message=utilities.LSB_JOBID()), \
+           utilities.LSF_creating(os.path.join(directory, filename)):
+        subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
+
 
 def runcombine(analysis, foldername, **kwargs):
     usechannels = channels
@@ -61,6 +113,7 @@ def runcombine(analysis, foldername, **kwargs):
     defaultalgo = algo = "grid"
     robustfit = False
     defaultPOI = POI = "CMS_zz4l_fai1"
+    submitjobs = False
     if config.unblindscans:
         lumitype = "fordata"
     else:
@@ -137,8 +190,16 @@ def runcombine(analysis, foldername, **kwargs):
             POI = kwarg
         elif kw == "runobs":
             runobs = bool(int(kwarg))
+        elif kw == "submitjobs":
+            submitjobs=bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
+
+    if submitjobs:
+        if not utilities.inscreen():
+            raise RuntimeError("submitjobs should be run from a screen session!")
+        if "minimum" in expectvalues:
+            raise ValueError("Can't run scan for minimum using submitjobs")
 
     if len(productions) > 1 and lumitype != "fordata":
         raise TypeError("If there's >1 production, have to use lumitype == 'fordata'")
@@ -209,6 +270,7 @@ def runcombine(analysis, foldername, **kwargs):
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
               "POI": POI,
               "floatotherpois": str(int(not fixfai)),
+              "pointindex": "",
              }
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
@@ -225,6 +287,8 @@ def runcombine(analysis, foldername, **kwargs):
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
+        jobids = set()
+
         if config.unblindscans and runobs:
           minimum = (float("nan"), float("inf"))
           for scanrange in scanranges:
@@ -232,21 +296,22 @@ def runcombine(analysis, foldername, **kwargs):
               repmap_obs.update({
                 "npoints": str(scanrange[0]),
                 "scanrange": "{},{}".format(*scanrange[1:]),
-                "scanrangeappend": "" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.",
+                "scanrangeappend": ("" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.")+".oO[pointindex]Oo.",
                 "expectfai": "0.0",  #starting point
                 "append": ".oO[observedappend]Oo.",
                 "expectfaiappend": "",
                 "exporobs": "obs",
                 "-t -1": "",
               })
-              if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_obs)):
-                with utilities.OneAtATime(replaceByMap(".oO[filename]Oo.", repmap_obs)+".tmp", 30):
-                  subprocess.check_call(replaceByMap(runcombinetemplate, repmap_obs), shell=True)
-              f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
-              t = f.limit
-              for entry in t:
-                  if t.deltaNLL+t.nll+t.nll0 < minimum[1]:
-                      minimum = (getattr(t, POI), t.deltaNLL+t.nll+t.nll0)
+              addjobids = runscan(repmap_obs, submitjobs=submitjobs)
+              if addjobids:
+                  jobids |= addjobids
+              if not submitjobs:
+                  f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
+                  t = f.limit
+                  for entry in t:
+                      if t.deltaNLL+t.nll+t.nll0 < minimum[1]:
+                          minimum = (getattr(t, POI), t.deltaNLL+t.nll+t.nll0)
           minimum = minimum[0]
           del f
 
@@ -258,16 +323,18 @@ def runcombine(analysis, foldername, **kwargs):
               repmap_exp.update({
                 "npoints": str(scanrange[0]),
                 "scanrange": "{},{}".format(*scanrange[1:]),
-                "scanrangeappend": "" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.",
+                "scanrangeappend": ("" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.")+".oO[pointindex]Oo.",
                 "expectfai": str(expectfai),
                 "append": ".oO[expectedappend]Oo.",
                 "expectfaiappend": "_.oO[expectfai]Oo.",
                 "exporobs": "exp",
                 "-t -1": "-t -1",
               })
-              if not os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_exp)):
-                with utilities.OneAtATime(replaceByMap(".oO[filename]Oo.", repmap_exp)+".tmp", 30):
-                  subprocess.check_call(replaceByMap(runcombinetemplate, repmap_exp), shell=True)
+              jobids.add(runscan(repmap_exp, submitjobs=submitjobs))
+
+        if None in jobids: jobids.remove(None)
+        if jobids:
+            submitjob("echo done", waitids=jobids, interactive=True, jobtime="0:0:10")
 
         saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
         try:
@@ -309,13 +376,25 @@ def runcombine(analysis, foldername, **kwargs):
         f.write(subprocess.check_output(["git", "diff"]))
             
 
-if __name__ == "__main__":
-    analysis = Analysis(sys.argv[1])
-    foldername = sys.argv[2]
+def main():
+    if sys.argv[1] == "runscan":
+        function = runscan
+        repmap = json.loads(sys.argv[2])
+        args = [repmap, False]
+    else:
+        function = runcombine
+        analysis = Analysis(sys.argv[1])
+        foldername = sys.argv[2]
+        args = [analysis, foldername]
+
     kwargs = {}
     for arg in sys.argv[3:]:
-        kw, kwarg = arg.split("=")
-        if kw in kwargs:
-            raise TypeError("Duplicate kwarg {}!".format(kw))
-        kwargs[kw] = kwarg
-    runcombine(analysis, foldername, **kwargs)
+       kw, kwarg = arg.split("=")
+       if kw in kwargs:
+           raise TypeError("Duplicate kwarg {}!".format(kw))
+       kwargs[kw] = kwarg
+
+    function(*args, **kwargs)
+
+if __name__ == "__main__":
+    main()
