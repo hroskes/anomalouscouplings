@@ -48,6 +48,7 @@ def runcombine(analysis, foldername, **kwargs):
     productions = config.productionsforcombine
     usesystematics = True
     usebkg = True
+    runobs = True
     defaultscanrange = scanrange = (-1.0, 1.0)
     defaultnpoints = npoints = 100
     defaultscenario = scenario = 1
@@ -92,6 +93,8 @@ def runcombine(analysis, foldername, **kwargs):
             scenario = int(kwarg)
         elif kw == "scalemuvmuftogether":
             scalemuvmuftogether = bool(int(kwarg))
+        elif kw == "runobs":
+            runobs = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -172,7 +175,7 @@ def runcombine(analysis, foldername, **kwargs):
                     replacesystematics(channel, production, scenario=scenario, luminosity=luminosity)
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
-            if config.unblindscans:
+            if config.unblindscans and runobs:
                 repmap_obs = repmap.copy()
                 repmap_obs["expectfai"] = "0.0"  #starting point
                 repmap_obs["append"] = ".oO[observedappend]Oo."
@@ -201,7 +204,7 @@ def runcombine(analysis, foldername, **kwargs):
             except OSError:
                 pass
             plotscans = []
-            if config.unblindscans:
+            if config.unblindscans and runobs:
                 plotscans.append("obs")
             for expectfai in expectvalues:
                 if expectfai == "minimum":

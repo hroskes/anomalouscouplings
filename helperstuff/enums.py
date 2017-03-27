@@ -204,7 +204,7 @@ class Analysis(MyEnum):
                 return "D_{0h+}"
             if self == "fL1":
                 return "D_{#Lambda1}"
-            if self == "fL1":
+            if self == "fL1Zg":
                 return "D_{#Lambda1}^{Z#gamma}"
         assert False
     def mixdiscriminant(self, title=False):
@@ -586,18 +586,16 @@ class TemplatesFile(MultiEnum):
 
         folder = os.path.join(config.repositorydir, "step7_templates")
 
-        if self.analysis == "fL1Zg":
+        if self.signalorbkg == "DATA":
+            result = os.path.join(folder, "data_{}_{}_{}".format(self.channel, self.analysis, self.production))
+        elif self.analysis == "fL1Zg":
             #taken from Moriond17
             if self.signalorbkg == "bkg":
                 result = os.path.join(folder, "L1Zg", "templates_background_fL1Zg_{}_Untagged{}_170203".format(self.channel, self.systematic.appendname()))
             elif self.signalorbkg == "signal":
                 result = os.path.join(folder, "L1Zg", "templates_ggh_fL1Zg_{}_Untagged{}_170203".format(self.channel, self.systematic.appendname()))
-            else:
-                assert False
         elif self.signalorbkg == "bkg":
             result = os.path.join(folder, "{}_bkg{}_{}Adap_{}".format(self.channel, self.systematic.appendname(), self.analysis, self.production))
-        elif self.signalorbkg == "DATA":
-            result = os.path.join(folder, "data_{}_{}_{}".format(self.channel, self.analysis, self.production))
         elif self.signalorbkg == "signal":
             result = os.path.join(folder, "{}{}_{}Adap_{}".format(self.channel, self.systematic.appendname(), self.analysis, self.production))
         else:
@@ -631,12 +629,14 @@ def tmp():
         for channel in channels:
             for production in productions:
                 for analysis in analyses:
-                    templatesfiles.append(TemplatesFile(channel, systematic, "signal", analysis, production))
-                    if systematic == "":
-                        templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production))
-                    for blindstatus in blindstatuses:
-                        if systematic == "" and (blindstatus == "blind" or config.unblinddistributions):
-                            templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus))
+                    if analysis != "fL1Zg":
+                        templatesfiles.append(TemplatesFile(channel, systematic, "signal", analysis, production))
+                        if systematic == "":
+                            templatesfiles.append(TemplatesFile(channel, "bkg", analysis, production))
+                    if production == "160225" or analysis != "fL1Zg":
+                        for blindstatus in blindstatuses:
+                            if systematic == "" and (blindstatus == "blind" or config.unblinddistributions):
+                                templatesfiles.append(TemplatesFile(channel, "DATA", analysis, production, blindstatus))
 tmp()
 del tmp
 
@@ -815,6 +815,8 @@ class Template(MultiEnum):
         elif self.analysis == "fa3":
             result = [50, 0, 1, 50, -0.5, 0.5, 50, 0, 1]
         elif self.analysis == "fL1":
+            result = [50, 0, 1, 50, 0, 1, 50, 0, 1]
+        elif self.analysis == "fL1Zg":
             result = [50, 0, 1, 50, 0, 1, 50, 0, 1]
         else:
             assert False

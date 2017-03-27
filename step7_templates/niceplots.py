@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from helperstuff import config
 from helperstuff import stylefunctions as style
 from helperstuff.combinehelpers import Luminosity
@@ -153,10 +154,14 @@ def niceplots(productions, *args, **kwargs):
 if __name__ == "__main__":
     for analysis in analyses:
         for enrichstatus in enrichstatuses:
+            if analysis != "fL1Zg": continue
             p2015 = [p for p in config.productionsforcombine if p.year == 2015]
-            p2016 = [p for p in config.productionsforcombine if p.year == 2016]
-            assert len(p2015) == len(p2016) == 1
+            assert len(p2015) == 1
             niceplots(p2015, analysis, enrichstatus, extradir="2015")
+
+            if analysis == "fL1Zg": continue #this stays permanently
+            p2016 = [p for p in config.productionsforcombine if p.year == 2016]
+            assert len(p2016) == 1
             niceplots(p2016, analysis, enrichstatus, extradir="2016")
             niceplots(p2016, analysis, enrichstatus, extradir="")
             niceplots(config.productionsforcombine, analysis, enrichstatus, extradir="2015+2016")

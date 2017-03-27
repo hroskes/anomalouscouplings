@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import collections
 from helperstuff import config, constants
 from helperstuff.combinehelpers import getrate
@@ -213,7 +214,8 @@ if __name__ == "__main__":
       for analysis in analyses:
         for normalization in normalizations:
           for enrichstatus in enrichstatuses:
+            if analysis == "fL1Zg" and production != "160225": continue #this stays permanently
             if normalization != "rescalemixtures": continue   #uncomment this to get the niceplots fast
-#            if channel != "2e2mu" or analysis != "fa3" or normalization != "areanormalize": continue
+            if analysis != "fL1Zg": continue
             print production, channel, analysis, normalization, enrichstatus
             projections(channel, analysis, normalization, production, enrichstatus)
