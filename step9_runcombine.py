@@ -49,7 +49,14 @@ def check_call_test(*args, **kwargs):
 def runscan(repmap, submitjobs, directory=None):
   if submitjobs:
     npoints = int(repmap["npoints"])
-    result = set()
+    jobids = set()
+    individualfilenames = set()
+
+    repmap_final = repmap.copy()
+    repmap_final["selectpoints"] = ""
+    finalfilename = replaceByMap(".oO[filename]Oo.", repmap_final)
+    if os.path.exists(finalfilename): return
+
     for i in range(npoints+1):
       repmap_i = repmap.copy()
       repmap_i.update({
@@ -57,6 +64,7 @@ def runscan(repmap, submitjobs, directory=None):
         "pointindex": str(i),
       })
       replaceByMap(runcombinetemplate, repmap_i) #sanity check that replaceByMap works
+      individualfilenames.add(replaceByMap(".oO[filename]Oo.", repmap_i))
       if os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_i)):
         continue
       job = "{} runscan {} directory={}".format(
@@ -66,9 +74,11 @@ def runscan(repmap, submitjobs, directory=None):
                                                )
       jobname = replaceByMap(".oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i)
       jobid = submitjob(job, jobname=jobname, jobtime="1-0:0:0", morerepmap=repmap_i)
-      result.add(jobid)
-      if i == 0: raw_input()
-    return result
+      jobids.add(jobid)
+
+    haddjobid = submitjob(" ".join(["hadd", finalfilename] + list(individualfilenames)), jobtime="1:0:0", waitids=jobids, docd=True)
+    return haddjobid
+
   else:
     cwd = os.path.realpath(os.getcwd())
     if directory is None: directory = cwd
@@ -87,8 +97,8 @@ def runscan(repmap, submitjobs, directory=None):
     filename = replaceByMap(".oO[filename]Oo.", repmap)
     tmpfile = os.path.join(directory, filename+".tmp")
     if not os.path.exists(filename):
+           #utilities.KeepWhileOpenFile(tmpfile, message=utilities.LSB_JOBID()), \
       with utilities.cd(cdto), \
-           utilities.KeepWhileOpenFile(tmpfile, message=utilities.LSB_JOBID()), \
            utilities.LSF_creating(os.path.join(directory, filename)):
         subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
 
@@ -303,9 +313,7 @@ def runcombine(analysis, foldername, **kwargs):
                 "exporobs": "obs",
                 "-t -1": "",
               })
-              addjobids = runscan(repmap_obs, submitjobs=submitjobs)
-              if addjobids:
-                  jobids |= addjobids
+              jobids.add(runscan(repmap_obs, submitjobs=submitjobs))
               if not submitjobs:
                   f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
                   t = f.limit
