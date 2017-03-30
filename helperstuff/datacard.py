@@ -214,10 +214,27 @@ class _Datacard(MultiEnum):
                           for p in self.productionmodes]
                      )
 
-    @MakeSystematicFromEnums(Channel, Category)
-    def CMS_zz4l_smd_zjets_bkg_channel_category(self, channel, category):
+    @MakeSystematicFromEnums(Channel)
+    def CMS_zz4l_smd_zjets_bkg_channel(self, channel):
+        category = "Untagged"
         if channel == self.channel and category == self.category:
-            if config.applyZXshapesystematicsUntagged and category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and category != "Untagged":
+            if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
+                return "param 0 1 [-3,3]"
+
+    @MakeSystematicFromEnums(Category)
+    def CMS_zz4l_smd_zjets_bkg_category(self, category):
+        if category == "Untagged": return None
+        if not config.mergeZXVBFVHsystematics: return None
+        if category == self.category:
+            if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
+                return "param 0 1 [-3,3]"
+
+    @MakeSystematicFromEnums(Category, Channel)
+    def CMS_zz4l_smd_zjets_bkg_category_channel(self, category, channel):
+        if category == "Untagged": return None
+        if config.mergeZXVBFVHsystematics: return None
+        if category == self.category and channel == self.channel:
+            if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
                 return "param 0 1 [-3,3]"
 
     @property
@@ -225,7 +242,7 @@ class _Datacard(MultiEnum):
     @property
     def muf_scaled(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
 
-    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel_category, "muV_scaled", "muf_scaled")
+    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, "muV_scaled", "muf_scaled")
 
     divider = "\n------------\n"
 
@@ -318,8 +335,8 @@ class _Datacard(MultiEnum):
         if os.path.exists(self.rootfile_base): return
         w = ROOT.RooWorkspace("w","w")
 
-        w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf.Class(),True)
-        w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf.Class(),True)
+        w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf_1D_fast.Class(),True)
+        w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf_fast.Class(),True)
 
         getattr(w,'import')(self.data_obs,ROOT.RooFit.Rename("data_obs")) ### Should this be renamed?
 
@@ -453,6 +470,48 @@ class _Pdf(PdfBase):
 
     @classmethod
     @cache
+    def alphaMorphBkg_perchannel(cls, channel):
+        channel = Channel(channel)
+        name = makename("CMS_zz4l_smd_zjets_bkg_{}".format(channel))
+        result = ROOT.RooRealVar(name,name,0,-20,20)
+        result.setConstant(False)
+        return result
+
+    @classmethod
+    @cache
+    def alphaMorphBkg_percategory(cls, category):
+        category = Category(category)
+        name = makename("CMS_zz4l_smd_zjets_bkg_{}".format(category))
+        result = ROOT.RooRealVar(name,name,0,-20,20)
+        result.setConstant(False)
+        return result
+
+    @classmethod
+    @cache
+    def alphaMorphBkg_percategorychannel(cls, category, channel):
+        category = Category(category)
+        channel = Channel(channel)
+        name = makename("CMS_zz4l_smd_zjets_bkg_{}_{}".format(category, channel))
+        result = ROOT.RooRealVar(name,name,0,-20,20)
+        result.setConstant(False)
+        return result
+
+    @classmethod
+    def alphaMorphBkg(cls, channel, category):
+        class _(MultiEnum): enums = (Channel, Category)
+        _ = _(channel, category)
+        channel, category = _.channel, _.category
+        if category == "Untagged":
+            return cls.alphaMorphBkg_perchannel(channel)
+        else:
+            if config.mergeZXVBFVHsystematics:
+                return cls.alphaMorphBkg_percategory(category)
+            else:
+                return cls.alphaMorphBkg_percategorychannel(category, channel)
+
+
+    @classmethod
+    @cache
     def RV(cls):
         return ROOT.RooRealVar(makename("RV"), "RV", 1, 0, 400)
     @classmethod
@@ -494,8 +553,8 @@ class _Pdf(PdfBase):
         for i, t in enumerate(self.T, start=1):
             t.SetName(self.templatename(i))
 
-        self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
-        self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+        self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
+        self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
 
         if self.shapesystematic == "":
             self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
@@ -520,8 +579,8 @@ class _Pdf(PdfBase):
         for i, t in enumerate(self.T, start=1):
             t.SetName(self.templatename(i))
 
-        self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
-        self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+        self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
+        self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
 
         if self.shapesystematic == "":
             self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
@@ -587,15 +646,12 @@ class _Pdf(PdfBase):
         self.ZXpdfs = {shapesystematic: ROOT.RooHistPdf(self.ZXsinglepdfname(shapesystematic), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for shapesystematic, datahist in self.T_datahist.iteritems()}
 
         self.funcList_zjets = ROOT.RooArgList()
-        morphBkgVarName =  makename("CMS_zz4l_smd_zjets_bkg_{}_{}".format(self.channel, self.category))
-        self.alphaMorphBkg = ROOT.RooRealVar(morphBkgVarName,morphBkgVarName,0,-20,20)
         self.morphVarListBkg = ROOT.RooArgList()
 
         self.funcList_zjets.add(self.ZXpdfs[ShapeSystematic("")])
         self.funcList_zjets.add(self.ZXpdfs[ShapeSystematic("ZXUp")])
         self.funcList_zjets.add(self.ZXpdfs[ShapeSystematic("ZXDn")])
-        self.alphaMorphBkg.setConstant(False)
-        self.morphVarListBkg.add(self.alphaMorphBkg)
+        self.morphVarListBkg.add(self.alphaMorphBkg(self.category, self.channel))
 
     @cache
     def makepdf_bkg(self):
@@ -621,10 +677,10 @@ class _Pdf(PdfBase):
 
     @cache
     def getpdf_decayonly(self):
-        return ROOT.HZZ4L_RooSpinZeroPdf(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.fai, ROOT.RooArgList(*self.T_histfunc))
+        return ROOT.HZZ4L_RooSpinZeroPdf_1D_fast(self.pdfname, self.pdfname, self.fai, ROOT.RooArgList(self.D1, self.D2, self.D3), ROOT.RooArgList(*self.T_histfunc))
     @cache
     def getpdf_proddec(self):
-        return ROOT.VBFHZZ4L_RooSpinZeroPdf(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.a1, self.ai, ROOT.RooArgList(*self.T_histfunc))
+        return ROOT.VBFHZZ4L_RooSpinZeroPdf_fast(self.pdfname, self.pdfname, self.a1, self.ai, ROOT.RooArgList(self.D1, self.D2, self.D3), ROOT.RooArgList(*self.T_histfunc))
     @cache
     def getpdf_ZX(self):
         return ROOT.FastVerticalInterpHistPdf3D(self.pdfname,self.pdfname,self.D1,self.D2,self.D3,False,self.funcList_zjets,self.morphVarListBkg,1.0,1)

@@ -35,11 +35,12 @@ def yaxistitle(nuisance, analysis):
     if nuisance is None: return "-2#Deltaln L"
     return xaxistitle(POI=nuisance, analysis=analysis)
 def actualvariable(variable):
-    if variable == "r_VVH": return "muV_scaled"
-    if variable == "r_ffH": return "muf_scaled"
+    if variable in ("r_VVH", "muV"): return "muV_scaled"
+    if variable in ("r_ffH", "muf"): return "muf_scaled"
     return variable
 
 def plotlimits(outputfilename, analysis, *args, **kwargs):
+    if not args: return
     analysis = Analysis(analysis)
     productions = None
     legendposition = (.2, .7, .6, .9)

@@ -405,6 +405,8 @@ class JsonDict(object):
         return cls.setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
 
 def LSB_JOBID():
+    import config
+    if config.host != "lxplus": raise NotImplementedError("have to implement LSB_JOBID for MARCC!")
     return os.environ.get("LSB_JOBID", None)
 
 class LSF_creating(object):
@@ -487,3 +489,10 @@ def RooArgList(*args, **kwargs):
     for arg in args:
         result.add(arg)
     return result
+
+def inscreen():
+    return bool(os.environ.get("STY"))
+
+class DummyContextManager(object):
+    def __enter__(self): return self
+    def __exit__(*stuff): pass
