@@ -653,8 +653,14 @@ Pdf = multienumcache(_Pdf, haskwargs=True, multienumforkey=PdfBase)
 
 def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
     with OneAtATime("makeDCsandWSs.tmp", 30):
-        for production, channel, category in itertools.product(productions, channels, categories):
-            dc = Datacard(production, channel, category, *otherargs)
+        dcs = [
+               Datacard(production, channel, category, *otherargs)
+                       for production, channel, category
+                       in itertools.product(productions, channels, categories)
+              ]
+        if all(os.path.exists(thing) for dc in dcs for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)):
+            return
+        for dc in dcs:
             dc.makeCardsWorkspaces(**kwargs)
             for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
                 if not os.path.exists(thing):

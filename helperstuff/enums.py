@@ -513,9 +513,13 @@ class Production(MyEnum):
         if self == "170203":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170203"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/heshy/CJLSTtrees/170203"
         if self == "170222":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170222"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/heshy/CJLSTtrees/170222"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
