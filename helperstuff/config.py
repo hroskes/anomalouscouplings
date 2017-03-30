@@ -31,6 +31,8 @@ unblindscans = True
 useQGTagging = False
 useVHMETTagged = True
 
+usefastpdf = True
+
 applym4lshapesystematicsUntagged = True
 applym4lshapesystematicsVBFVHtagged = True
 applym4lshapesystematicsggH = True
