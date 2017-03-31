@@ -51,8 +51,11 @@ class RowBase(object):
     self.categorydistribution
     self.__categorydistribution *= scaleby
 
-  def getlatex(self, dochannels=True):
-    result = " & {}".format(self.title)
+  def getlatex(self, dochannels=True, PRL=False):
+    result = ""
+    if not PRL:
+      result += " & "
+    result = "{}".format(self.title)
     for category in categories:
       result += " & "
       total = 0
@@ -146,12 +149,18 @@ class Row(RowBase, MultiEnum):
     return self.reweightingsample.weightname()
 
 class TotalRow(RowBase):
-  def __init__(self, *rows):
+  def __init__(self, *rows, **kwargs):
     self.rows = rows
+    self.__title = "Expected"
+    for kw, kwarg in kwargs.iteritems():
+      if kw == "title":
+        self.__title = kwarg
+      else:
+        raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
     super(TotalRow, self).__init__()
   @property
   def title(self):
-    return "Expected"
+    return self.__title
   def getcategorydistribution(self):
     return sum((row.categorydistribution for row in self.rows), MultiplyCounter())
   @property
@@ -195,15 +204,18 @@ class RowChannel(Row, MultiEnum):
     return result
 
 class Section(object):
-  def __init__(self, title, *rows):
+  def __init__(self, title, *rows, **kwargs):
     self.c = ROOT.TCanvas()
     self.title = title
     self.rows = rows
     if not config.unblinddistributions:
       self.rows = tuple(row for row in self.rows if row.productionmode != "data")
-  def getlatex(self, dochannels=True):
-    result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
-    result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex(dochannels=dochannels) for _ in self.rows)
+  def getlatex(self, dochannels=True, PRL=False):
+    if PRL:
+      result = (r"\\"+"\n").join(_.getlatex(dochannels=dochannels, PRL=True) for _ in self.rows)
+    else:
+      result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
+      result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex(dochannels=dochannels) for _ in self.rows)
     return result
   def findrow(self, productionmode):
     result = [row for row in self.rows if row.productionmode == productionmode]
@@ -219,46 +231,97 @@ def scalerows(scalethese, tothese):
 def total(rows):
   return sum(row.categorydistribution[channel, category] for row in rows for channel in channels for category in categories)
 
-def maketable(analysis, dochannels=True):
+def maketable(analysis, dochannels=True, PRL=False):
   analysis = Analysis(analysis)
-  sections = [
-    Section("SM",
-      Row(analysis, "VBF", analysis.purehypotheses[0]),
-      Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
-      Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
-      Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
-      Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
-    ),
-    Section("${}=1$".format(analysis.title(latex=True)),
-      Row(analysis, "VBF", analysis.purehypotheses[1]),
-      Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
-      Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),
-      Row(analysis, "ggH", analysis.purehypotheses[1], title=r"$\Pg\Pg\to\PH$"),
-      Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"$\ttbar\PH$"),
-    ),
-    Section("bkg",
-      Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$"),
-      Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$"),
-      Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$"),
-      Row(analysis, "ZX", title=r"$\Z+\X$"),
+  if PRL:
+    sections = [
+      Section("SM",
+        Row(analysis, "VBF", analysis.purehypotheses[0], title="VBF signal"),
+        TotalRow(
+          Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
+          Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
+          title=r"$\V\PH$ signal"
+        ),
+        TotalRow(
+          Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
+          Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
+          title="other signal"
+        ),
+      ),
+      Section("bkg",
+        TotalRow(
+          Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$"),
+          Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$"),
+          Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$"),
+          title=r"EW $4\ell$ background"
+        ),
+        Row(analysis, "ZX", title=r"$\Z+\X$ background"),
+      )
+    ]
+    sections.append(
+      Section("Total",
+        TotalRow(*(sections[0].rows+sections[1].rows), title="Total expected"),
+        Row(analysis, "data", title="Total observed"),
+      )
     )
-  ]
-  sections.append(
-    Section("Total",
-      TotalRow(*(sections[0].rows+sections[2].rows)),
-      Row(analysis, "data", title="Observed"),
+  else:
+    sections = [
+      Section("SM",
+        Row(analysis, "VBF", analysis.purehypotheses[0]),
+        Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
+        Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
+        Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
+        Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
+      ),
+      Section("${}=1$".format(analysis.title(latex=True)),
+        Row(analysis, "VBF", analysis.purehypotheses[1]),
+        Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
+        Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),
+        Row(analysis, "ggH", analysis.purehypotheses[1], title=r"$\Pg\Pg\to\PH$"),
+        Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"$\ttbar\PH$"),
+      ),
+      Section("bkg",
+        Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$"),
+        Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$"),
+        Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$"),
+        Row(analysis, "ZX", title=r"$\Z+\X$"),
+      )
+    ]
+    sections.append(
+      Section("Total",
+        TotalRow(*(sections[0].rows+sections[2].rows)),
+        Row(analysis, "data", title="Observed"),
+      )
     )
-  )
 
-  scalerows([sections[1].findrow(p) for p in ("VBF", "ZH", "WH")], [sections[0].findrow(p) for p in ("VBF", "ZH", "WH")])
-  scalerows([sections[1].findrow(p) for p in ("ggH", "ttH")], [sections[0].findrow(p) for p in ("ggH", "ttH")])
+  if not PRL:
+    scalerows([sections[1].findrow(p) for p in ("VBF", "ZH", "WH")], [sections[0].findrow(p) for p in ("VBF", "ZH", "WH")])
+    scalerows([sections[1].findrow(p) for p in ("ggH", "ttH")], [sections[0].findrow(p) for p in ("ggH", "ttH")])
 
-  print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")
-  print r"\hline"
-  print " & & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline\hline"
-  print (r"\\\hline"+"\n").join(section.getlatex(dochannels=dochannels) for section in sections)
-  print r"\\\hline"
+  if PRL:
+    print r"\begin{{tabular}}{{{}}}".format("l" + "c"*len(categories))
+    print r"\hline\hline"
+  else:
+    print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")
+    print r"\hline"
+  if PRL:
+    print " & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline"
+  else:
+    print " & & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline\hline"
+  print (r"\\"+"\n" if PRL else r"\\\hline"+"\n").join(section.getlatex(dochannels=dochannels, PRL=PRL) for section in sections)
+  if PRL:
+    print r"\\\hline\hline"
+  else:
+    print r"\\\hline"
   print r"\end{tabular}"
 
 if __name__ == "__main__":
-  maketable(sys.argv[1], dochannels=True)
+  dochannels = True
+  PRL = False
+  for arg in sys.argv[2:]:
+    if arg == "PRL":
+      PRL = True
+      dochannels = False
+    else:
+      raise ValueError("Unknown command line argument {}".format(arg))
+  maketable(sys.argv[1], dochannels=dochannels, PRL=PRL)
