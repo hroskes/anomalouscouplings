@@ -406,8 +406,11 @@ class JsonDict(object):
 
 def LSB_JOBID():
     import config
-    if config.host != "lxplus": raise NotImplementedError("have to implement LSB_JOBID for MARCC!")
-    return os.environ.get("LSB_JOBID", None)
+    if config.host == "lxplus":
+        return os.environ.get("LSB_JOBID", None)
+    if config.host == "MARCC":
+        return os.environ.get("SLURM_JOBID", None)
+    assert False, config.host
 
 class LSF_creating(object):
     def __init__(self, *files, **kwargs):
