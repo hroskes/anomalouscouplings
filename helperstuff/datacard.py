@@ -558,8 +558,12 @@ class _Pdf(PdfBase):
             t.SetName(self.templatename(i))
 
         if config.usefastpdf:
-            self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
-            self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+            if config.usefastpdfdouble:
+                self.T_datahist = [ROOT.FastHisto3D_d(t) for i, t in enumerate(self.T, start=1)]
+                self.T_histfunc = [ROOT.FastHisto3DFunc_d(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+            else:
+                self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
+                self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
         else:
             self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
             self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
@@ -588,8 +592,12 @@ class _Pdf(PdfBase):
             t.SetName(self.templatename(i))
 
         if config.usefastpdf:
-            self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
-            self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+            if config.usefastpdfdouble:
+                self.T_datahist = [ROOT.FastHisto3D_d(t) for i, t in enumerate(self.T, start=1)]
+                self.T_histfunc = [ROOT.FastHisto3DFunc_d(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+            else:
+                self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
+                self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
         else:
             self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
             self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
