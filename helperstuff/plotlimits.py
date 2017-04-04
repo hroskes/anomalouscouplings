@@ -49,6 +49,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                 scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title, arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
+    if not scans: return
+
     if productions is None or not config.unblindscans:
         luminosity = float(Luminosity("forexpectedscan"))
     else:
