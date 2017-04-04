@@ -90,8 +90,10 @@ class __Rate(MultiEnum):
             for p in productionmodes:
                 try:
                     rate += float(y[tag][p]) * float(self.luminosity) / lumi
+                    print p, float(y[tag][p]) * float(self.luminosity) / lumi
                 except ValueError:
                     rate += eval(y[tag][p].replace("@0", "125")) * float(self.luminosity) / lumi
+                    print p, eval(y[tag][p].replace("@0", "125")) * float(self.luminosity) / lumi
 
         return rate
 
