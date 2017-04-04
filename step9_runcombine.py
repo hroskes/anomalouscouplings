@@ -124,6 +124,8 @@ def runcombine(analysis, foldername, **kwargs):
     robustfit = False
     defaultPOI = POI = "CMS_zz4l_fai1"
     submitjobs = False
+    alsocombinename = None
+    alsocombine = []
     if config.unblindscans:
         lumitype = "fordata"
     else:
@@ -202,6 +204,11 @@ def runcombine(analysis, foldername, **kwargs):
             runobs = bool(int(kwarg))
         elif kw == "submitjobs":
             submitjobs=bool(int(kwarg))
+        elif kw == "alsocombine":
+            alsocombine = kwarg.split(",")
+            if ".root" in alsocombine[0]:
+                raise ValueError("For alsocombine, the first item should be a name")
+            alsocombinename, alsocombine = alsocombine[0], alsocombine[1:]
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -249,6 +256,8 @@ def runcombine(analysis, foldername, **kwargs):
         moreappend += "_scan"+plottitle(POI)
     if fixfai:
         moreappend += "_fixfai"
+    if alsocombine:
+        combinecardsappend += "_" + alsocombinename
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
@@ -260,7 +269,7 @@ def runcombine(analysis, foldername, **kwargs):
                                   }
 
     repmap = {
-              "cardstocombine": " ".join("hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)),
+              "cardstocombine": " ".join(["hzz4l_{}S_{}_{}.lumi{}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)] + alsocombine),
               "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
               "workspacefile": "workspace.oO[workspacefileappend]Oo..root",
               "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..MultiDimFit.mH125.root",
@@ -289,6 +298,11 @@ def runcombine(analysis, foldername, **kwargs):
             f.write("*")
         #must make it for all categories and channels even if not using them all because of mu definition!
         makeDCsandWSs(productions, categories, channels, analysis, lumitype)
+        for filename in alsocombine:
+            for _ in filename, filename.replace(".input.root", ".txt"):
+                if os.path.isfile(os.path.basename(_)): continue  #includes valid links https://docs.python.org/2/library/os.path.html#os.path.isfile
+                if not os.path.exists(_): raise ValueError("{} does not exist!".format(_))
+                os.symlink(_, os.path.basename(_))
         tfiles.clear()
         with utilities.OneAtATime(replaceByMap(".oO[combinecardsfile]Oo..tmp", repmap), 5, task="running combineCards"):
             if not os.path.exists(replaceByMap(".oO[combinecardsfile]Oo.", repmap)):
