@@ -66,7 +66,7 @@ if config.host == "lxplus":
             return jobid
 
 elif config.host == "MARCC":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[], outputfile=None, errorfile=None, morerepmap=None):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None):
         if outputfile is not None:
             outputfile = outputfile.format(jobid="%j")
         if errorfile is not None:
@@ -77,7 +77,7 @@ elif config.host == "MARCC":
             . /work-zfs/lhc/cms/cmsset_default.sh &&
             cd .oO[CMSSW_BASE]Oo.                 &&
             eval $(scram ru -sh)                  &&
-            cd .oO[pwd]Oo.                        &&
+            .oO[docd]Oo.                          &&
             echo "SLURM job running in: " `pwd`   &&
 
             #commands
@@ -91,7 +91,8 @@ elif config.host == "MARCC":
                   "jobname": jobname,
                   "jobtime": jobtime,
                   "queue": queue,
-                  "waitids": ":".join("{:d}".format(id) for id in waitids)
+                  "waitids": ":".join("{:d}".format(id) for id in waitids),
+                  "docd": "cd .oO[pwd]Oo." if docd else "cd $(mktemp -d)",
                  }
         if morerepmap:
             assert not (set(repmap) & set(morerepmap))

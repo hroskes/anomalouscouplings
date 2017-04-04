@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import glob
 from itertools import product
 import json
 import os
@@ -27,7 +28,7 @@ combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
-                           --PO sqrts=13 --PO verbose --PO allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
+                           --PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
                            |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
 exit ${PIPESTATUS[0]}
 """
@@ -72,11 +73,11 @@ def runscan(repmap, submitjobs, directory=None):
                                                 pipes.quote(json.dumps(repmap_i)),
                                                 pipes.quote(os.getcwd()),
                                                )
-      jobname = replaceByMap(".oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i)
+      jobname = replaceByMap(".oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i).lstrip("_")
       jobid = submitjob(job, jobname=jobname, jobtime="1-0:0:0", morerepmap=repmap_i)
       jobids.add(jobid)
 
-    haddjobid = submitjob(" ".join(["hadd", finalfilename] + list(individualfilenames)), jobtime="1:0:0", waitids=jobids, docd=True)
+    haddjobid = submitjob(" ".join(["hadd", finalfilename] + list(individualfilenames)), jobname="hadd", jobtime="1:0:0", waitids=jobids, docd=True)
     return haddjobid
 
   else:
@@ -126,6 +127,7 @@ def runcombine(analysis, foldername, **kwargs):
     submitjobs = False
     alsocombinename = None
     alsocombine = []
+    sqrts = None
     if config.unblindscans:
         lumitype = "fordata"
     else:
@@ -205,10 +207,35 @@ def runcombine(analysis, foldername, **kwargs):
         elif kw == "submitjobs":
             submitjobs=bool(int(kwarg))
         elif kw == "alsocombine":
-            alsocombine = kwarg.split(",")
-            if ".root" in alsocombine[0]:
+            kwarg = kwarg.split(",")
+            alsocombinename = kwarg[0]
+            if ".root" in alsocombinename or ".txt" in alsocombinename:
                 raise ValueError("For alsocombine, the first item should be a name")
-            alsocombinename, alsocombine = alsocombine[0], alsocombine[1:]
+
+            if len(kwarg) == 1:
+                raise ValueError("You didn't give anything to alsocombine")
+
+            alsocombine = []
+            for _ in kwarg[1:]:
+                theglob = glob.glob(_)
+                if not theglob:
+                    raise ValueError("{} does not exist!".format(_))
+                theglob = [_.replace(".input.root", ".txt") for _ in theglob]
+                theglob = list(set(theglob))
+                alsocombine += theglob
+            del theglob
+
+            for _ in alsocombine:
+                if ".txt" not in _:
+                    raise ValueError("{} in alsocombine should end with .txt or .input.root".format(_))
+                for _2 in _, _.replace(".txt", ".input.root"):
+                    if not os.path.exists(_):
+                        raise ValueError("{} does not exist!".format(_2))
+        elif kw == "sqrts":
+            try:
+                sqrts = [int(_) for _ in kwarg.split(",")]
+            except ValueError:
+                raise ValueError("sqrts has to contain ints separated by commas!")
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -258,6 +285,11 @@ def runcombine(analysis, foldername, **kwargs):
         moreappend += "_fixfai"
     if alsocombine:
         combinecardsappend += "_" + alsocombinename
+        if sqrts is None:
+            raise ValueError("Have to provide sqrts if you provide alsocombine!")
+
+    if sqrts is None:
+        sqrts = [13]
 
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
@@ -290,6 +322,7 @@ def runcombine(analysis, foldername, **kwargs):
               "POI": POI,
               "floatotherpois": str(int(not fixfai)),
               "pointindex": "",
+              "sqrts": ",".join("{:d}".format(_) for _ in sqrts),
              }
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
@@ -300,9 +333,7 @@ def runcombine(analysis, foldername, **kwargs):
         makeDCsandWSs(productions, categories, channels, analysis, lumitype)
         for filename in alsocombine:
             for _ in filename, filename.replace(".input.root", ".txt"):
-                if os.path.isfile(os.path.basename(_)): continue  #includes valid links https://docs.python.org/2/library/os.path.html#os.path.isfile
                 if not os.path.exists(_): raise ValueError("{} does not exist!".format(_))
-                os.symlink(_, os.path.basename(_))
         tfiles.clear()
         with utilities.OneAtATime(replaceByMap(".oO[combinecardsfile]Oo..tmp", repmap), 5, task="running combineCards"):
             if not os.path.exists(replaceByMap(".oO[combinecardsfile]Oo.", repmap)):
@@ -356,7 +387,7 @@ def runcombine(analysis, foldername, **kwargs):
 
         if None in jobids: jobids.remove(None)
         if jobids:
-            submitjob("echo done", waitids=jobids, interactive=True, jobtime="0:0:10")
+            submitjob("echo done", waitids=jobids, interactive=True, jobtime="0:0:10", jobname="wait")
 
         saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
         try:

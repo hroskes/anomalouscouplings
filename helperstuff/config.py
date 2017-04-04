@@ -32,7 +32,7 @@ useQGTagging = False
 useVHMETTagged = True
 
 usefastpdf = True
-usefastpdfdouble = True
+usefastpdfdouble = False
 
 applym4lshapesystematicsUntagged = True
 applym4lshapesystematicsVBFVHtagged = True
