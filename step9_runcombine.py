@@ -45,10 +45,11 @@ combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO
 def check_call_test(*args, **kwargs):
     print args[0]
 #uncomment this for testing purposes
-#subprocess.check_call = check_call_test
+#subprocess.check_call = subprocess.check_output = check_call_test
 
 def runscan(repmap, submitjobs, directory=None):
   if submitjobs:
+    utilities.mkdir_p("jobs")
     npoints = int(repmap["npoints"])
     jobids = set()
     individualfilenames = set()
@@ -65,8 +66,28 @@ def runscan(repmap, submitjobs, directory=None):
         "pointindex": str(i),
       })
       replaceByMap(runcombinetemplate, repmap_i) #sanity check that replaceByMap works
-      individualfilenames.add(replaceByMap(".oO[filename]Oo.", repmap_i))
+      individualfilenames.add(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
+
+      ############################
+      #compatibility
       if os.path.exists(replaceByMap(".oO[filename]Oo.", repmap_i)):
+        shutil.move(replaceByMap(".oO[filename]Oo.", repmap_i), "jobs/")
+      ############################
+
+      if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i)):
+        try:
+          f = ROOT.TFile(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
+          f.limit
+        except Exception as e:
+          try:
+            del f
+            os.remove(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
+          except:
+            pass
+        else:
+          del f
+
+      if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i)):
         continue
       job = "{} runscan {} directory={}".format(
                                                 os.path.join(config.repositorydir, "./step9_runcombine.py"),
@@ -77,7 +98,7 @@ def runscan(repmap, submitjobs, directory=None):
       jobid = submitjob(job, jobname=jobname, jobtime="1-0:0:0", morerepmap=repmap_i)
       jobids.add(jobid)
 
-    haddjobid = submitjob(" ".join(["hadd", finalfilename] + list(individualfilenames)), jobname="hadd", jobtime="1:0:0", waitids=jobids, docd=True)
+    haddjobid = submitjob(" ".join([os.path.join(config.repositorydir, "helperstuff", "hadd.py"), finalfilename] + list(individualfilenames)), jobname="hadd", jobtime="1:0:0", waitids=jobids, docd=True)
     return haddjobid
 
   else:
@@ -88,7 +109,10 @@ def runscan(repmap, submitjobs, directory=None):
 #      if utilities.LSB_JOBID() is None:
 #        raise ValueError("Should call runscan from directory except in a batch job")
       shutil.copytree(directory, os.path.basename(directory.rstrip("/")), symlinks=True)
-      cdto = os.path.basename(directory.rstrip("/"))
+      if utilities.LSB_JOBID() is None:
+         cdto = os.path.basename(directory.rstrip("/"))
+      else:
+         cdto = "."
     else:
       cdto = "."
 
@@ -97,14 +121,21 @@ def runscan(repmap, submitjobs, directory=None):
       repmap["selectpoints"] = ""
     filename = replaceByMap(".oO[filename]Oo.", repmap)
     tmpfile = os.path.join(directory, filename+".tmp")
+    logfile = replaceByMap("log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap)
     if not os.path.exists(filename):
            #utilities.KeepWhileOpenFile(tmpfile, message=utilities.LSB_JOBID()), \
       with utilities.cd(cdto), \
-           utilities.LSF_creating(os.path.join(directory, filename)):
+           utilities.LSF_creating(os.path.join(directory, filename)), \
+           utilities.LSF_creating(os.path.join(directory, logfile)):
         subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
 
 
 def runcombine(analysis, foldername, **kwargs):
+    global ntry
+    ntry += 1
+    inputargs = analysis, foldername
+    inputkwargs = kwargs.copy()
+
     usechannels = channels
     usecategories = categories
     expectvalues = [0.0]
@@ -343,6 +374,7 @@ def runcombine(analysis, foldername, **kwargs):
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
 
         jobids = set()
+        finalfiles = []
 
         if config.unblindscans and runobs:
           minimum = (float("nan"), float("inf"))
@@ -359,6 +391,7 @@ def runcombine(analysis, foldername, **kwargs):
                 "-t -1": "",
               })
               jobids.add(runscan(repmap_obs, submitjobs=submitjobs))
+              finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_obs))
               if not submitjobs:
                   f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
                   t = f.limit
@@ -384,10 +417,29 @@ def runcombine(analysis, foldername, **kwargs):
                 "-t -1": "-t -1",
               })
               jobids.add(runscan(repmap_exp, submitjobs=submitjobs))
+              finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_exp))
 
         if None in jobids: jobids.remove(None)
         if jobids:
             submitjob("echo done", waitids=jobids, interactive=True, jobtime="0:0:10", jobname="wait")
+
+        if ntry < maxntries:
+            e = None
+            for filename in finalfiles:
+                try:
+                    f = ROOT.TFile(filename)
+                    f.limit
+                except Exception as e:
+                    try:
+                        del f
+                        os.remove(filename)
+                    except:
+                        pass
+                else:
+                    del f
+            if e is not None:
+                runcombine(*inputargs, **inputkwargs)
+                return
 
         saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
         try:
@@ -427,7 +479,9 @@ def runcombine(analysis, foldername, **kwargs):
         f.write(subprocess.check_output(["git", "status"]))
         f.write("\n")
         f.write(subprocess.check_output(["git", "diff"]))
-            
+
+ntry = 0
+maxntries = 3
 
 def main():
     if sys.argv[1] == "runscan":
@@ -442,10 +496,10 @@ def main():
 
     kwargs = {}
     for arg in sys.argv[3:]:
-       kw, kwarg = arg.split("=")
-       if kw in kwargs:
-           raise TypeError("Duplicate kwarg {}!".format(kw))
-       kwargs[kw] = kwarg
+        kw, kwarg = arg.split("=")
+        if kw in kwargs:
+            raise TypeError("Duplicate kwarg {}!".format(kw))
+        kwargs[kw] = kwarg
 
     function(*args, **kwargs)
 
