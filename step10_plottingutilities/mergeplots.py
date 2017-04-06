@@ -74,6 +74,8 @@ def mergeplots(analysis, **kwargs):
         elif kw == "PRL":
             PRL = bool(int(kwarg))
             drawlineskwargs[kw] = kwarg
+        elif kw == "CLtextposition":
+            drawlineskwargs["xpostext"] = kwarg
         elif kw == "legendposition":
             try:
                 legendposition = [float(a) for a in kwarg.split(",")]

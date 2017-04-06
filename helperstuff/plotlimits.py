@@ -196,10 +196,10 @@ class XPos(MyEnum):
             xsize=.15
             ysize=.03
         if self == "right":
-            x2, y1 = GetNDC(1, ypos, logscale)
+            x2, y1 = GetNDC(.95, ypos, logscale)
             x1 = x2 - xsize
         elif self == "left":
-            x1, y1 = GetNDC(-1, ypos, logscale)
+            x1, y1 = GetNDC(-.95, ypos, logscale)
             x2 = x1 + xsize
         elif self == "custom":
             x1, y1 = GetNDC(self.custompos, ypos, logscale)
