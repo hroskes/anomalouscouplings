@@ -52,10 +52,14 @@ assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
 expectedscanluminosity = 35.8671
 
+lumi2015 = 2.8
+
 m4lmin, m4lmax = 105, 140
 
 blindcut = lambda self: self.D_bkg() < 0.5
 
 productionsforcombine = ["170222"]
+if len(productionsforcombine) == 1:
+    productionforcombine = productionsforcombine[0]
 
 defaultnbins = 40

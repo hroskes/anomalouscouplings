@@ -65,9 +65,13 @@ class Folder(object):
 def mergeplots(analysis, **kwargs):
     drawlineskwargs = {}
     logscale = False
+    PRL = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "logscale":
             logscale = bool(int(kwarg))
+            drawlineskwargs[kw] = kwarg
+        if kw == "PRL":
+            PRL = bool(int(kwarg))
             drawlineskwargs[kw] = kwarg
         else:
             drawlineskwargs[kw] = kwarg
@@ -101,6 +105,10 @@ def mergeplots(analysis, **kwargs):
     mg.GetYaxis().SetTitle(folders[0].ytitle)
     mg.GetXaxis().SetRangeUser(-1, 1)
 
+    if PRL:
+        mg.GetXaxis().CenterTitle()
+        mg.GetYaxis().CenterTitle()
+
     if logscale:
         c.SetLogy()
         mg.SetMinimum(0.1)
@@ -110,7 +118,8 @@ def mergeplots(analysis, **kwargs):
     l.Draw()
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
-    style.CMS("Preliminary", Production(config.productionsforcombine[0]).dataluminosity)
+    style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
+                                            .format(config.productionforcombine.dataluminosity+config.lumi2015))
     for k, v in drawlineskwargs.items():
         if k == "xpostext":
             try:

@@ -2,6 +2,8 @@ import ROOT
 
 from ROOT import gStyle, gPad, gROOT, kWhite
 
+from utilities import cache
+
 def fixOverlay():
   gPad.RedrawAxis()
 
@@ -181,62 +183,62 @@ def applyaxesstyle(h):
     h.GetYaxis().SetTitleOffset(1.1)
     h.GetYaxis().SetTitleFont(42)
 
-tokeep = {}
-def cuttext(text, x1=.71, y1=.84, x2=.92, y2=.92):
-    if not text: return
-    if (cuttext, text) not in tokeep:
-        pt = tokeep[cuttext,text] = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
-        pt.SetBorderSize(0)
-        pt.SetTextAlign(12)
-        pt.SetTextSize(0.04)
-        pt.SetFillStyle(0)
-        pt.SetTextFont(42)
-        pt.AddText(0.01,0.01,text)
-    tokeep[cuttext,text].Draw()
+@cache
+def makecuttext(text, x1=.71, y1=.84, x2=.92, y2=.92):
+    pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
+    pt.SetBorderSize(0)
+    pt.SetTextAlign(12)
+    pt.SetTextSize(0.04)
+    pt.SetFillStyle(0)
+    pt.SetTextFont(42)
+    pt.AddText(0.01,0.01,text)
 
-def CMS(extratext, lumi):
-    if lumi.is_integer():
-        lumi = int(lumi)
-    if (CMS, extratext, lumi) not in tokeep:
-        x1, y1, x2, y2 = 0.15, 0.93, 0.85, 1
-        pt = tokeep[CMS,extratext,lumi] = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
-        pt.SetBorderSize(0)
-        pt.SetFillStyle(0)
-        pt.SetTextAlign(12)
-        pt.SetTextFont(42)
-        pt.SetTextSize(0.045)
-        text = pt.AddText(0.025,0.45,"#font[61]{CMS}")
-        text.SetTextSize(0.044)
-        if extratext:
-            text = pt.AddText(0.165, 0.42, "#font[52]{"+extratext+"}")
-            text.SetTextSize(0.0315)
+    return pt
 
-        lumitext = "#font[42]{{{:.1f} fb^{{-1}} (13 TeV)}}".format(lumi)
+def cuttext(*args, **kwargs):
+    makecuttext(*args, **kwargs).Draw()
 
-        #run1lumitext = "#font[42]{19.7 fb^{-1} (8 TeV) + 5.1 fb^{-1} (7 TeV)}"
-        #run1xlumi = 0.537
-        #run1widthlumi = 1 - 0.537
-        #from array import array
-        #wrun1, w, dummy = array('I', [0]), array('I', [0]), array('I', [0])  #arrays of unsigned int (aka pointers)
-
-        #from helperstuff.textwidth import GetTextWidth
-        #assert ROOT.gPad
-
-        #text = pt.AddText(run1xlumi,0.45,run1lumitext)
-        #text.SetTextSize(0.0315)
-
-        #wrun1 = ROOT.GetTextWidth(text)
-        #text.SetText(run1xlumi, 0.45, lumitext)
-        #w = ROOT.GetTextWidth(text)
-
-        #widthlumi = run1widthlumi * w / wrun1
-        #widthlumi  = .18 #???
-        #xlumi = 1 - widthlumi
-        #text.SetText(xlumi, 0.45, lumitext)
-
-        widthlumi  = .18 #???
-        xlumi = 1 - widthlumi
-        text = pt.AddText(xlumi,0.45,lumitext)
+@cache
+def makeCMS(extratext):
+    x1, y1, x2, y2 = 0.15, 0.93, 0.85, 1
+    pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
+    pt.SetBorderSize(0)
+    pt.SetFillStyle(0)
+    pt.SetTextAlign(12)
+    pt.SetTextFont(42)
+    pt.SetTextSize(0.045)
+    text = pt.AddText(0.025,0.45,"#font[61]{CMS}")
+    text.SetTextSize(0.044)
+    if extratext:
+        text = pt.AddText(0.165, 0.42, "#font[52]{"+extratext+"}")
         text.SetTextSize(0.0315)
 
-    tokeep[CMS,extratext,lumi].Draw()
+    return pt
+
+@cache
+def makelumi(lumi=None, lumitext=None):
+    if lumi is lumitext is None:
+        raise ValueError("Have to provide lumi or lumitext!")
+    if lumi is not None is not lumitext:
+        raise ValueError("Can't provide both lumi and lumitext!")
+
+    if lumitext is None:
+        lumitext = "{:.1f} fb^{{-1}} (13 TeV)".format(lumi)
+
+    lumitext = "#font[42]{" + lumitext + "}"
+
+    x1, y1, x2, y2 = 0.15, 0.93, .99, 1
+    pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
+    pt.SetBorderSize(0)
+    pt.SetFillStyle(0)
+    pt.SetTextAlign(32)
+    pt.SetTextFont(42)
+    pt.SetTextSize(0.045)
+    text = pt.AddText(1,0.45,lumitext)
+    text.SetTextSize(0.0315)
+
+    return pt
+
+def CMS(extratext, lumi=None, lumitext=None):
+    makeCMS(extratext=extratext).Draw()
+    makelumi(lumi=lumi, lumitext=lumitext).Draw()

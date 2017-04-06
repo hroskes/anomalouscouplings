@@ -40,7 +40,7 @@ def xaxisrange(POI):
     if POI == "CMS_zz4l_fai1": return -1.0, 1.0
 def yaxistitle(nuisance, analysis):
     nuisance = actualvariable(nuisance)
-    if nuisance is None: return "-2#Deltaln L"
+    if nuisance is None: return "#minus2 #Deltaln L"
     return xaxistitle(POI=nuisance, analysis=analysis)
 def actualvariable(variable):
     if variable in ("r_VVH", "muV"): return "muV_scaled"
@@ -189,10 +189,12 @@ class XPos(MyEnum):
             self.custompos = value
     def __nonzero__(self):
         return self == "right" or self == "left" or -1 <= self.custompos <= 1
-    def TPaveText(self, ypos, logscale=False):
+    def TPaveText(self, ypos, logscale=False, PRL=False, yshift=.01):
         xsize = .1
         ysize = .03
-        yshift = 0
+        if PRL:
+            xsize=.15
+            ysize=.03
         if self == "right":
             x2, y1 = GetNDC(1, ypos, logscale)
             x1 = x2 - xsize
@@ -218,9 +220,8 @@ class XPos(MyEnum):
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
-def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False):
+def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, PRL=False, CLbelow=False):
     xpostext = XPos(xpostext)
-
     line68 = ROOT.TLine()
     line68.SetLineStyle(9)
     line68.DrawLine(xmin,1,xmax,1)
@@ -230,17 +231,28 @@ def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False):
     line95.DrawLine(xmin,3.84,xmax,3.84)
     cache.append(line95)
 
-    oneSig = xpostext.TPaveText(1, logscale=logscale)
+    yshift=0
+    if PRL:
+        if CLbelow:
+            yshift=-.04
+        else:
+            yshift=.01
+
+    oneSig = xpostext.TPaveText(1, logscale=logscale, PRL=PRL, yshift=yshift)
     oneSig.SetFillColor(0)
     oneSig.SetFillStyle(0)
     oneSig.SetTextFont(42)
     oneSig.SetBorderSize(0)
 
-    twoSig = xpostext.TPaveText(3.84, logscale=logscale)
+    twoSig = xpostext.TPaveText(3.84, logscale=logscale, PRL=PRL, yshift=yshift)
     twoSig.SetFillColor(0)
     twoSig.SetFillStyle(0)
     twoSig.SetTextFont(42)
     twoSig.SetBorderSize(0)
+
+    if PRL:
+        oneSig.SetTextSize(0.044)
+        twoSig.SetTextSize(0.044)
 
     if xpostext:
         oneSig.AddText("68% CL")

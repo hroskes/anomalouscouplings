@@ -653,6 +653,8 @@ hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
 analyses = Analysis.items()
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
+if len(config.productionsforcombine) == 1:
+    config.productionforcombine = Production(config.productionforcombine)
 productions = Production.items(lambda x: x in ("170203", "170222"))
 #productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()

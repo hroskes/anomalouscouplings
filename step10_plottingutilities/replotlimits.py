@@ -11,10 +11,16 @@ def replotlimits(fileorfolder):
         with open(fileorfolder) as f:
             contents = f.readline().split()
             try:
-                if contents[0] == "python" and contents[1] in ["step9_runcombine.py", "./step9_runcombine.py"]:
+#                if contents[0] == "python" and contents[1] in ["step9_runcombine.py", "./step9_runcombine.py"]:
+#                    print fileorfolder
+#                    filename = os.path.dirname(fileorfolder).replace("/", "")
+#                    with KeepWhileOpenFile(filename) as f:
+#                        if f:
+#                            subprocess.check_call(contents)
+                if contents[0] == "python" and contents[1] in ["mergeplots.py", "./mergeplots.py"]:
                     print fileorfolder
                     filename = os.path.dirname(fileorfolder).replace("/", "")
-                    with KeepWhileOpenFile(filename) as f:
+                    with KeepWhileOpenFile(filename) as f, cd("step10_plottingutilities"):
                         if f:
                             subprocess.check_call(contents)
             except IndexError:
