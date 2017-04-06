@@ -57,5 +57,7 @@ m4lmin, m4lmax = 105, 140
 blindcut = lambda self: self.D_bkg() < 0.5
 
 productionsforcombine = ["170222"]
+if len(productionsforcombine) == 1:
+    productionforcombine = productionsforcombine[0]
 
 defaultnbins = 40

@@ -68,6 +68,26 @@ class TemplateForProjection(object):
         result.SetFillStyle(self.fillstyle)
         return result
 
+    @cache
+    def Project3D(self, option, rebinx=None, rebiny=None):
+        if len(option) != 2 or not (set(option) <= set("xyz")):
+            raise ValueError("Project3D only works for 2D projections")
+        i = ["xyz".index(_) for _ in option]
+        if rebinx is not None or rebiny is not None:
+            result = self.Project3D(option).Clone()
+            if rebinx is not None:
+                result.RebinX(rebinx)
+            if rebiny is not None:
+                result.RebinY(rebiny)
+            return result
+
+        result = self.h.Project3D(option)
+        result.SetName("_".join(self.discriminants[_].name for _ in i))
+        result.SetTitle(" ".join(self.discriminants[_].title for _ in i))
+        result.SetXTitle(self.discriminants[i[1]].title)
+        result.SetYTitle(self.discriminants[i[0]].title)
+        return result
+
     def AddToLegend(self, legend):
         legend.AddEntry(self.Projection(0), self.title, self.legendoption)
 
