@@ -66,13 +66,20 @@ def mergeplots(analysis, **kwargs):
     drawlineskwargs = {}
     logscale = False
     PRL = False
+    legendposition = (.2, .7, .6, .9)
     for kw, kwarg in kwargs.iteritems():
         if kw == "logscale":
             logscale = bool(int(kwarg))
             drawlineskwargs[kw] = kwarg
-        if kw == "PRL":
+        elif kw == "PRL":
             PRL = bool(int(kwarg))
             drawlineskwargs[kw] = kwarg
+        elif kw == "legendposition":
+            try:
+                legendposition = [float(a) for a in kwarg.split(",")]
+                if len(legendposition) != 4: raise ValueError
+            except ValueError:
+                raise ValueError("legendposition has to contain 4 floats separated by commas!")
         else:
             drawlineskwargs[kw] = kwarg
 
@@ -89,10 +96,7 @@ def mergeplots(analysis, **kwargs):
     outdir = ".oO[analysis]Oo._allsysts"
 
     mg = ROOT.TMultiGraph("limit", "")
-    if analysis == "fa3":
-        l = ROOT.TLegend(.3, .6, .6, .9)
-    else:
-        l = ROOT.TLegend(.6, .6, .9, .9)
+    l = ROOT.TLegend(*legendposition)
     l.SetBorderSize(0)
     l.SetFillStyle(0)
     for folder in folders:
