@@ -65,16 +65,18 @@ class Folder(object):
     def addtolegend(self, legend):
         legend.AddEntry(self.graph, self.title, "l")
 
-def mergeplots(analysis, scanrange, **drawlineskwargs):
+def mergeplots(analysis, **drawlineskwargs):
     analysis = Analysis(analysis)
-    repmap = {"scanrange": scanrange, "analysis": str(analysis)}
+    repmap = {"analysis": str(analysis)}
     subdir = ""
-    plotname = "limit_lumi35.8671_withorwithoutsystematics_.oO[scanrange]Oo..root"
+    plotname = "limit_lumi35.8671.root"
     folders = [
-               Folder(".oO[analysis]Oo._Feb28_mu", "no systematics", 2, analysis, subdir, plotname="limit_lumi35.8671_nosystematics_.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap),
-               Folder(".oO[analysis]Oo._Feb28_mu", "with systematics", 4, analysis, subdir, plotname="limit_lumi35.8671_.oO[scanrange]Oo..root", graphnumber=1, repmap=repmap),
+               Folder(".oO[analysis]Oo._allsysts", "Observed", 1, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap),
+               Folder(".oO[analysis]Oo._allsysts", "Expected", 1, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap),
+               Folder(".oO[analysis]Oo._allsysts", "Observed, 13 TeV", 6, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap),
+               Folder(".oO[analysis]Oo._allsysts", "Expected, 13 TeV", 6, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap),
               ]
-    outdir = ".oO[analysis]Oo._Feb28_mu"
+    outdir = ".oO[analysis]Oo._allsysts"
 
     mg = ROOT.TMultiGraph("limit", "")
     if analysis == "fa3":
@@ -88,7 +90,7 @@ def mergeplots(analysis, scanrange, **drawlineskwargs):
         folder.addtolegend(l)
 
     c = ROOT.TCanvas("c", "", 8, 30, 800, 800)
-    mg.Draw("ac")
+    mg.Draw("al")
     mg.GetXaxis().SetTitle(folders[0].xtitle)
     mg.GetYaxis().SetTitle(folders[0].ytitle)
     l.Draw()

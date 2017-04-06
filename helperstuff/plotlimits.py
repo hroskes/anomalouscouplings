@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import array
 from collections import namedtuple
 from combinehelpers import Luminosity
@@ -5,6 +7,7 @@ import config
 from enums import Analysis, EnumItem, MyEnum
 from extendedcounter import ExtendedCounter
 from itertools import islice
+import os
 import ROOT
 import stylefunctions as style
 import sys
@@ -239,3 +242,30 @@ def drawlines(xpostext="left", xmin=-1, xmax=1):
     cache.append(oneSig)
     twoSig.Draw()
     cache.append(twoSig)
+
+if __name__ == "__main__":
+    args, kwargs = [], {}
+    for arg in sys.argv[1:]:
+        if "=" in arg:
+            kw, kwarg = arg.split("=")
+            if kw in kwargs:
+                raise TypeError("Duplicate kwarg {}!".format(kw))
+            if kw == "scanranges":
+                kwarg = kwarg.replace(";", ":")
+                kwarg = [tuple(float(_2) for _2 in _.split(",")) for _ in kwarg.split(":")]
+                assert all(len(_) == 3 for _ in kwarg)
+            if kw == "productions":
+                kwarg = kwarg.split(",")
+            kwargs[kw] = kwarg
+        else:
+            args.append(arg)
+
+    plotlimits(*args, **kwargs)
+
+    outputfilename = kwargs.get("outputfilename", args[0])
+
+    for ext in "png eps root pdf".split():
+        outputfilename = outputfilename.replace("."+ext, "")
+    with open(outputfilename+".txt", 'w') as f:
+        f.write("cd {} &&\n".format(os.getcwd()))
+        f.write("python " + " ".join(sys.argv))
