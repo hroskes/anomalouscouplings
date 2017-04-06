@@ -11,9 +11,9 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 
 from helperstuff import config
 from helperstuff.enums import Analysis, Production
-from helperstuff.plotlimits import drawlines
+from helperstuff.plotlimits import drawlines, xaxisrange
 import helperstuff.stylefunctions as style
-from helperstuff.utilities import tfiles
+from helperstuff.utilities import cache, tfiles
 
 class Folder(object):
     def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None):
@@ -35,6 +35,7 @@ class Folder(object):
     def title(self):
         return replaceByMap(self.__title, self.repmap)
     @property
+    @cache
     def graph(self):
         f = tfiles[replaceByMap(os.path.join(self.folder, self.plotname), self.repmap)]
         c = f.c1
@@ -50,22 +51,25 @@ class Folder(object):
         return graphs[graphnumber]
     @property
     def xtitle(self):
-        try:
-            return self.__xtitle
-        except AttributeError:
-            self.graph
-            return self.__xtitle
+        self.graph
+        return self.__xtitle
     @property
     def ytitle(self):
-        try:
-            return self.__ytitle
-        except AttributeError:
-            self.graph
-            return self.__ytitle
+        self.graph
+        return self.__ytitle
     def addtolegend(self, legend):
         legend.AddEntry(self.graph, self.title, "l")
 
-def mergeplots(analysis, **drawlineskwargs):
+def mergeplots(analysis, **kwargs):
+    drawlineskwargs = {}
+    logscale = False
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "logscale":
+            logscale = bool(int(kwarg))
+            drawlineskwargs[kw] = kwarg
+        else:
+            drawlineskwargs[kw] = kwarg
+
     analysis = Analysis(analysis)
     repmap = {"analysis": str(analysis)}
     subdir = ""
@@ -93,6 +97,13 @@ def mergeplots(analysis, **drawlineskwargs):
     mg.Draw("al")
     mg.GetXaxis().SetTitle(folders[0].xtitle)
     mg.GetYaxis().SetTitle(folders[0].ytitle)
+    mg.GetXaxis().SetRangeUser(-1, 1)
+
+    if logscale:
+        c.SetLogy()
+        mg.SetMinimum(0.1)
+        plotname = plotname.replace(".root", "_log.root")
+
     l.Draw()
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
@@ -111,7 +122,7 @@ def mergeplots(analysis, **drawlineskwargs):
         os.makedirs(saveasdir)
     except OSError:
         pass
-    assert "root" in plotname
+    assert ".root" in plotname
     for ext in "png eps root pdf".split():
         c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
     with open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
