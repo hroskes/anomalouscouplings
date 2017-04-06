@@ -116,7 +116,7 @@ def printlimits(analysis, foldername, **kwargs):
             else:
                 prob = 1 - ROOT.TMath.Prob(NLL[0]-NLL[1], 1)/2
 
-            print "Probability for pure BSM vs. pure SM: {:.2g}{}".format(prob*100, "%" if printformat == "ppt" else r"\%")
+#            print "Probability for pure BSM vs. pure SM: {:.2g}{}".format(prob*100, "%" if printformat == "ppt" else r"\%")
         print
         print
 

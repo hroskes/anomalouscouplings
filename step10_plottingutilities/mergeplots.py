@@ -11,13 +11,13 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 
 from helperstuff import config
 from helperstuff.enums import Analysis, Production
-from helperstuff.plotlimits import drawlines
+from helperstuff.plotlimits import drawlines, xaxisrange
 import helperstuff.stylefunctions as style
-from helperstuff.utilities import tfiles
+from helperstuff.utilities import cache, tfiles
 
 class Folder(object):
-    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None):
-        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber
+    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None):
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle
         self.repmap = {
                        "analysis": str(self.analysis),
                       }
@@ -35,6 +35,7 @@ class Folder(object):
     def title(self):
         return replaceByMap(self.__title, self.repmap)
     @property
+    @cache
     def graph(self):
         f = tfiles[replaceByMap(os.path.join(self.folder, self.plotname), self.repmap)]
         c = f.c1
@@ -45,36 +46,43 @@ class Folder(object):
             assert len(graphs) == 1
             graphnumber = 0
         graphs[graphnumber].SetLineColor(self.color)
+        if self.linestyle is not None:
+            graphs[graphnumber].SetLineStyle(self.linestyle)
         self.__xtitle = mg.GetXaxis().GetTitle()
         self.__ytitle = mg.GetYaxis().GetTitle()
         return graphs[graphnumber]
     @property
     def xtitle(self):
-        try:
-            return self.__xtitle
-        except AttributeError:
-            self.graph
-            return self.__xtitle
+        self.graph
+        return self.__xtitle
     @property
     def ytitle(self):
-        try:
-            return self.__ytitle
-        except AttributeError:
-            self.graph
-            return self.__ytitle
+        self.graph
+        return self.__ytitle
     def addtolegend(self, legend):
         legend.AddEntry(self.graph, self.title, "l")
 
-def mergeplots(analysis, scanrange, **drawlineskwargs):
+def mergeplots(analysis, **kwargs):
+    drawlineskwargs = {}
+    logscale = False
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "logscale":
+            logscale = bool(int(kwarg))
+            drawlineskwargs[kw] = kwarg
+        else:
+            drawlineskwargs[kw] = kwarg
+
     analysis = Analysis(analysis)
-    repmap = {"scanrange": scanrange, "analysis": str(analysis)}
+    repmap = {"analysis": str(analysis)}
     subdir = ""
-    plotname = "limit_lumi35.8671_withorwithoutsystematics_.oO[scanrange]Oo..root"
+    plotname = "limit_lumi35.8671.root"
     folders = [
-               Folder(".oO[analysis]Oo._Feb28_mu", "no systematics", 2, analysis, subdir, plotname="limit_lumi35.8671_nosystematics_.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap),
-               Folder(".oO[analysis]Oo._Feb28_mu", "with systematics", 4, analysis, subdir, plotname="limit_lumi35.8671_.oO[scanrange]Oo..root", graphnumber=1, repmap=repmap),
+               Folder(".oO[analysis]Oo._allsysts", "Observed", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1),
+               Folder(".oO[analysis]Oo._allsysts", "Expected", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=3),
+               Folder(".oO[analysis]Oo._allsysts", "Observed, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7),
+               Folder(".oO[analysis]Oo._allsysts", "Expected, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=6),
               ]
-    outdir = ".oO[analysis]Oo._Feb28_mu"
+    outdir = ".oO[analysis]Oo._allsysts"
 
     mg = ROOT.TMultiGraph("limit", "")
     if analysis == "fa3":
@@ -87,10 +95,18 @@ def mergeplots(analysis, scanrange, **drawlineskwargs):
         mg.Add(folder.graph)
         folder.addtolegend(l)
 
-    c = ROOT.TCanvas("c", "", 8, 30, 800, 800)
-    mg.Draw("ac")
+    c = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+    mg.Draw("al")
     mg.GetXaxis().SetTitle(folders[0].xtitle)
     mg.GetYaxis().SetTitle(folders[0].ytitle)
+    mg.GetXaxis().SetRangeUser(-1, 1)
+
+    if logscale:
+        c.SetLogy()
+        mg.SetMinimum(0.1)
+        mg.SetMaximum(120)
+        plotname = plotname.replace(".root", "_log.root")
+
     l.Draw()
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
@@ -109,11 +125,17 @@ def mergeplots(analysis, scanrange, **drawlineskwargs):
         os.makedirs(saveasdir)
     except OSError:
         pass
-    assert "root" in plotname
+    assert ".root" in plotname
     for ext in "png eps root pdf".split():
         c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
     with open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
+        f.write("\n\n")
+        if replaceByMap(outdir, repmap).startswith(str(analysis)+"_"):
+            restofoutdir = replaceByMap(outdir, repmap).replace(str(analysis)+"_", "")
+            f.write("python limits.py {} {} ".format(analysis, restofoutdir))
+            if subdir: f.write("subdirectory={} ".format(pipes.quote(subdir)))
+            f.write("plotname="+plotname+" ")
         f.write("\n\n\n\n\n\ngit info:\n\n")
         f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
         f.write("\n")

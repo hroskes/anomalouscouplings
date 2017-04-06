@@ -1,13 +1,21 @@
+#!/usr/bin/env python
+
 import array
+import math
+import os
+import sys
+
 from collections import namedtuple
-from combinehelpers import Luminosity
+from itertools import islice
+
+import ROOT
+
 import config
+import stylefunctions as style
+
+from combinehelpers import Luminosity
 from enums import Analysis, EnumItem, MyEnum
 from extendedcounter import ExtendedCounter
-from itertools import islice
-import ROOT
-import stylefunctions as style
-import sys
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
 
@@ -154,10 +162,13 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         c1.SaveAs("{}.{}".format(outputfilename, ext))
 
 #https://root.cern.ch/phpBB3/viewtopic.php?t=10159
-def GetNDC(x, y):
+def GetNDC(x, y, logscale=False):
     ROOT.gPad.Update()#this is necessary!
+    if logscale:
+        y = math.log10(y)
+
     xndc = (x - ROOT.gPad.GetX1())/(ROOT.gPad.GetX2()-ROOT.gPad.GetX1())
-    yndc = (y - ROOT.gPad.GetY1())/(ROOT.gPad.GetY2()-ROOT.gPad.GetY1())
+    yndc = (y - ROOT.gPad.GetY1()) / (ROOT.gPad.GetY2() - ROOT.gPad.GetY1())
     return xndc, yndc
 
 cache = []
@@ -178,18 +189,18 @@ class XPos(MyEnum):
             self.custompos = value
     def __nonzero__(self):
         return self == "right" or self == "left" or -1 <= self.custompos <= 1
-    def TPaveText(self, ypos):
+    def TPaveText(self, ypos, logscale=False):
         xsize = .1
         ysize = .03
         yshift = 0
         if self == "right":
-            x2, y1 = GetNDC(1, ypos)
+            x2, y1 = GetNDC(1, ypos, logscale)
             x1 = x2 - xsize
         elif self == "left":
-            x1, y1 = GetNDC(-1, ypos)
+            x1, y1 = GetNDC(-1, ypos, logscale)
             x2 = x1 + xsize
         elif self == "custom":
-            x1, y1 = GetNDC(self.custompos, ypos)
+            x1, y1 = GetNDC(self.custompos, ypos, logscale)
             x2 = x1 + xsize
         else:
             assert False
@@ -207,7 +218,7 @@ class XPos(MyEnum):
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
-def drawlines(xpostext="left", xmin=-1, xmax=1):
+def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False):
     xpostext = XPos(xpostext)
 
     line68 = ROOT.TLine()
@@ -219,13 +230,13 @@ def drawlines(xpostext="left", xmin=-1, xmax=1):
     line95.DrawLine(xmin,3.84,xmax,3.84)
     cache.append(line95)
 
-    oneSig = xpostext.TPaveText(1)
+    oneSig = xpostext.TPaveText(1, logscale=logscale)
     oneSig.SetFillColor(0)
     oneSig.SetFillStyle(0)
     oneSig.SetTextFont(42)
     oneSig.SetBorderSize(0)
 
-    twoSig = xpostext.TPaveText(3.84)
+    twoSig = xpostext.TPaveText(3.84, logscale=logscale)
     twoSig.SetFillColor(0)
     twoSig.SetFillStyle(0)
     twoSig.SetTextFont(42)
@@ -239,3 +250,30 @@ def drawlines(xpostext="left", xmin=-1, xmax=1):
     cache.append(oneSig)
     twoSig.Draw()
     cache.append(twoSig)
+
+if __name__ == "__main__":
+    args, kwargs = [], {}
+    for arg in sys.argv[1:]:
+        if "=" in arg:
+            kw, kwarg = arg.split("=")
+            if kw in kwargs:
+                raise TypeError("Duplicate kwarg {}!".format(kw))
+            if kw == "scanranges":
+                kwarg = kwarg.replace(";", ":")
+                kwarg = [tuple(float(_2) for _2 in _.split(",")) for _ in kwarg.split(":")]
+                assert all(len(_) == 3 for _ in kwarg)
+            if kw == "productions":
+                kwarg = kwarg.split(",")
+            kwargs[kw] = kwarg
+        else:
+            args.append(arg)
+
+    plotlimits(*args, **kwargs)
+
+    outputfilename = kwargs.get("outputfilename", args[0])
+
+    for ext in "png eps root pdf".split():
+        outputfilename = outputfilename.replace("."+ext, "")
+    with open(outputfilename+".txt", 'w') as f:
+        f.write("cd {} &&\n".format(os.getcwd()))
+        f.write("python " + " ".join(sys.argv))
