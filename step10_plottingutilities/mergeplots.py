@@ -16,8 +16,8 @@ import helperstuff.stylefunctions as style
 from helperstuff.utilities import cache, tfiles
 
 class Folder(object):
-    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None):
-        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber
+    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None):
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle
         self.repmap = {
                        "analysis": str(self.analysis),
                       }
@@ -46,6 +46,8 @@ class Folder(object):
             assert len(graphs) == 1
             graphnumber = 0
         graphs[graphnumber].SetLineColor(self.color)
+        if self.linestyle is not None:
+            graphs[graphnumber].SetLineStyle(self.linestyle)
         self.__xtitle = mg.GetXaxis().GetTitle()
         self.__ytitle = mg.GetYaxis().GetTitle()
         return graphs[graphnumber]
@@ -75,10 +77,10 @@ def mergeplots(analysis, **kwargs):
     subdir = ""
     plotname = "limit_lumi35.8671.root"
     folders = [
-               Folder(".oO[analysis]Oo._allsysts", "Observed", 1, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap),
-               Folder(".oO[analysis]Oo._allsysts", "Expected", 1, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap),
-               Folder(".oO[analysis]Oo._allsysts", "Observed, 13 TeV", 6, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap),
-               Folder(".oO[analysis]Oo._allsysts", "Expected, 13 TeV", 6, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap),
+               Folder(".oO[analysis]Oo._allsysts", "Observed", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1),
+               Folder(".oO[analysis]Oo._allsysts", "Expected", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=3),
+               Folder(".oO[analysis]Oo._allsysts", "Observed, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7),
+               Folder(".oO[analysis]Oo._allsysts", "Expected, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=6),
               ]
     outdir = ".oO[analysis]Oo._allsysts"
 
@@ -93,7 +95,7 @@ def mergeplots(analysis, **kwargs):
         mg.Add(folder.graph)
         folder.addtolegend(l)
 
-    c = ROOT.TCanvas("c", "", 8, 30, 800, 800)
+    c = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
     mg.Draw("al")
     mg.GetXaxis().SetTitle(folders[0].xtitle)
     mg.GetYaxis().SetTitle(folders[0].ytitle)
@@ -102,6 +104,7 @@ def mergeplots(analysis, **kwargs):
     if logscale:
         c.SetLogy()
         mg.SetMinimum(0.1)
+        mg.SetMaximum(120)
         plotname = plotname.replace(".root", "_log.root")
 
     l.Draw()
@@ -127,6 +130,12 @@ def mergeplots(analysis, **kwargs):
         c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
     with open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
+        f.write("\n\n")
+        if replaceByMap(outdir, repmap).startswith(str(analysis)+"_"):
+            restofoutdir = replaceByMap(outdir, repmap).replace(str(analysis)+"_", "")
+            f.write("python limits.py {} {} ".format(analysis, restofoutdir))
+            if subdir: f.write("subdirectory={} ".format(pipes.quote(subdir)))
+            f.write("plotname="+plotname+" ")
         f.write("\n\n\n\n\n\ngit info:\n\n")
         f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
         f.write("\n")
