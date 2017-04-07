@@ -170,7 +170,7 @@ def runcombine(analysis, foldername, **kwargs):
                     if os.path.exists("hzz4l_{}S_{}.txt".format(channel, production.year)):
                         os.remove("hzz4l_{}S_{}.txt".format(channel, production.year))
                         os.remove("hzz4l_{}S_{}.input.root".format(channel, production.year))
-            if not os.path.exists(repmap["workspacefile"]):
+            if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 for channel, production in product(usechannels, productions):
                     replacesystematics(channel, production, scenario=scenario, luminosity=luminosity)
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)

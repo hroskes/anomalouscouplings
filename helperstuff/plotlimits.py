@@ -89,7 +89,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     mg.Draw("AC")
     mg.GetXaxis().SetTitle("{} cos({})".format(analysis.title, analysis.phi_lower))
     mg.GetXaxis().SetRangeUser(-1, 1)
-#    mg.GetHistogram().SetMaximum(5)
+    mg.GetHistogram().SetMaximum(5)
     mg.GetYaxis().SetTitle("-2#Deltaln L")
     l.Draw()
 
