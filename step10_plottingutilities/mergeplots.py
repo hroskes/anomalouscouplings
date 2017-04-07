@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from glob import glob
+import math
 import os
 import pipes
 import subprocess
@@ -15,9 +16,11 @@ from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
 from helperstuff.utilities import cache, tfiles
 
+from limits import findwhereyequals, Point
+
 class Folder(object):
-    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None):
-        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth
+    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None, secondcolumn=None):
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth, self.secondcolumn = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth, secondcolumn
         self.repmap = {
                        "analysis": str(self.analysis),
                       }
@@ -34,6 +37,9 @@ class Folder(object):
     @property
     def title(self):
         return replaceByMap(self.__title, self.repmap)
+    @title.setter
+    def title(self, newtitle):
+        self.__title = newtitle
     @property
     @cache
     def graph(self):
@@ -63,6 +69,8 @@ class Folder(object):
         return self.__ytitle
     def addtolegend(self, legend):
         legend.AddEntry(self.graph, self.title, "l")
+        if self.secondcolumn is not None:
+            legend.AddEntry(0, self.secondcolumn, "")
 
 def mergeplots(analysis, **kwargs):
     drawlineskwargs = {}
@@ -99,6 +107,42 @@ def mergeplots(analysis, **kwargs):
               ]
     outdir = ".oO[analysis]Oo._allsysts"
 
+    if logscale and config.minimainlegend:
+        for folder in folders:
+            graph = folder.graph
+            folder.title = folder.title.replace("Observed, 13 TeV", "Obs. 13 TeV")
+            folder.title = folder.title.replace("Expected, 13 TeV", "Exp. 13 TeV")
+            minimum = Point(float("nan"), float("inf"))
+            CLleft = CLright = None
+            for i, x, y in zip(xrange(graph.GetN()), graph.GetX(), graph.GetY()):
+                if y > 1:
+                    if CLright is None and i > 0:
+                        CLright = findwhereyequals(1, Point(lastx, lasty), Point(x, y))
+                        print "right", lastx, "    ", lasty, "    ", x, "    ", y
+                if y < 1:
+                    CLright = None
+                    if CLleft is None:
+                        CLleft = findwhereyequals(1, Point(lastx, lasty), Point(x, y))
+                        print "left ", lastx, "    ", lasty, "    ", x, "    ", y
+                if y < minimum.y:
+                    minimum = Point(x, y)
+
+                lasti, lastx, lasty = i, x, y
+
+            minimum = minimum.x
+            CLplus = CLright - minimum
+            CLminus = minimum - CLleft
+            if analysis == "fa3" and "Exp" in folder.title: CLplus = CLminus = (CLplus+CLminus)/2
+            ndigits = min(1 - math.floor(math.log10(max(CLplus, CLminus))), 3)
+            appendfmt = "{:.%df}^{{{:+.%df}}}_{{{:+.%df}}}" % (ndigits, ndigits, ndigits)
+            if float(("{:.%df}"%ndigits).format(minimum)) == 0:
+                minimum = 0 #to turn -0.00 --> 0.00
+            append = appendfmt.format(minimum, CLplus, -CLminus)
+            append = append.replace("+", "#plus").replace("-", "#minus")
+            folder.secondcolumn = append
+            print folder.secondcolumn
+
+
     mg = ROOT.TMultiGraph("limit", "")
     l = ROOT.TLegend(*legendposition)
     l.SetBorderSize(0)
@@ -106,6 +150,8 @@ def mergeplots(analysis, **kwargs):
     for folder in folders:
         mg.Add(folder.graph)
         folder.addtolegend(l)
+    if all(folder.secondcolumn is not None for folder in folders):
+        l.SetNColumns(2)
 
     c = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
     mg.Draw("al")

@@ -67,4 +67,4 @@ defaultnbins = 40
 
 
 arrowsatminima = False
-minimuminlegend = True
+minimainlegend = True
