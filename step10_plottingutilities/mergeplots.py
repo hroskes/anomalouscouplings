@@ -16,8 +16,8 @@ import helperstuff.stylefunctions as style
 from helperstuff.utilities import cache, tfiles
 
 class Folder(object):
-    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None):
-        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle
+    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None):
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth
         self.repmap = {
                        "analysis": str(self.analysis),
                       }
@@ -48,6 +48,8 @@ class Folder(object):
         graphs[graphnumber].SetLineColor(self.color)
         if self.linestyle is not None:
             graphs[graphnumber].SetLineStyle(self.linestyle)
+        if self.linewidth is not None:
+            graphs[graphnumber].SetLineWidth(self.linewidth)
         self.__xtitle = mg.GetXaxis().GetTitle()
         self.__ytitle = mg.GetYaxis().GetTitle()
         return graphs[graphnumber]
@@ -90,10 +92,10 @@ def mergeplots(analysis, **kwargs):
     subdir = ""
     plotname = "limit_lumi35.8671.root"
     folders = [
-               Folder(".oO[analysis]Oo._allsysts", "Observed", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1),
-               Folder(".oO[analysis]Oo._allsysts", "Expected", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=3),
-               Folder(".oO[analysis]Oo._allsysts", "Observed, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7),
-               Folder(".oO[analysis]Oo._allsysts", "Expected, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=6),
+               Folder(".oO[analysis]Oo._allsysts", "Observed", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+               Folder(".oO[analysis]Oo._allsysts", "Expected", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
+               Folder(".oO[analysis]Oo._allsysts", "Observed, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
+               Folder(".oO[analysis]Oo._allsysts", "Expected, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=1),
               ]
     outdir = ".oO[analysis]Oo._allsysts"
 
