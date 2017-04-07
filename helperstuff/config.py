@@ -63,3 +63,8 @@ if len(productionsforcombine) == 1:
     productionforcombine = productionsforcombine[0]
 
 defaultnbins = 40
+
+
+
+arrowsatminima = False
+minimuminlegend = True

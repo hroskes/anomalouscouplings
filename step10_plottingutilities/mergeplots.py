@@ -11,7 +11,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 
 from helperstuff import config
 from helperstuff.enums import Analysis, Production
-from helperstuff.plotlimits import drawlines, xaxisrange
+from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
 from helperstuff.utilities import cache, tfiles
 
@@ -122,6 +122,15 @@ def mergeplots(analysis, **kwargs):
         mg.SetMinimum(0.1)
         mg.SetMaximum(120)
         plotname = plotname.replace(".root", "_log.root")
+        for folder in folders:
+            if config.arrowsatminima:
+                if "Observed" in folder.title:
+                    if analysis == "fa3" and folder.title == "Observed": continue
+                    if analysis in ("fa3", "fL1Zg"):
+                        abovexaxis = False
+                    else:
+                        abovexaxis = True
+                    arrowatminimum(folder.graph, abovexaxis=abovexaxis).Draw()
 
     l.Draw()
     style.applycanvasstyle(c)

@@ -16,6 +16,7 @@ import stylefunctions as style
 from combinehelpers import Luminosity
 from enums import Analysis, EnumItem, MyEnum
 from extendedcounter import ExtendedCounter
+from utilities import cache
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
 
@@ -171,8 +172,6 @@ def GetNDC(x, y, logscale=False):
     yndc = (y - ROOT.gPad.GetY1()) / (ROOT.gPad.GetY2() - ROOT.gPad.GetY1())
     return xndc, yndc
 
-cache = []
-
 class XPos(MyEnum):
     enumitems = (
                  EnumItem("right"),
@@ -220,16 +219,15 @@ class XPos(MyEnum):
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
+@cache
 def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, PRL=False, CLbelow=False):
     xpostext = XPos(xpostext)
     line68 = ROOT.TLine()
     line68.SetLineStyle(9)
     line68.DrawLine(xmin,1,xmax,1)
-    cache.append(line68)
     line95 = ROOT.TLine()
     line95.SetLineStyle(9)
     line95.DrawLine(xmin,3.84,xmax,3.84)
-    cache.append(line95)
 
     yshift=0
     if PRL:
@@ -259,9 +257,9 @@ def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, PRL=False, CLbel
         twoSig.AddText("95% CL")
 
     oneSig.Draw()
-    cache.append(oneSig)
     twoSig.Draw()
-    cache.append(twoSig)
+
+    return line68, line95, oneSig, twoSig
 
 if __name__ == "__main__":
     args, kwargs = [], {}
@@ -289,3 +287,22 @@ if __name__ == "__main__":
     with open(outputfilename+".txt", 'w') as f:
         f.write("cd {} &&\n".format(os.getcwd()))
         f.write("python " + " ".join(sys.argv))
+
+@cache
+def arrowatminimum(graph, abovexaxis=True):
+  minimum = (float("nan"), float("inf"))
+  for i, x, y in zip(xrange(graph.GetN()), graph.GetX(), graph.GetY()):
+    if y < minimum[1]:
+      minimum = x, y
+
+  x = minimum[0]
+  if abovexaxis:
+    y1, y2 = .15, .1
+  else:
+    y1, y2 = .1**2/.15, .1
+  arrow = ROOT.TArrow(x, y1, x, y2, .01, "|>")
+  arrow.SetLineStyle(graph.GetLineStyle())
+  arrow.SetLineColor(graph.GetLineColor())
+  arrow.SetFillColor(graph.GetLineColor())
+  arrow.SetLineWidth(graph.GetLineWidth())
+  return arrow
