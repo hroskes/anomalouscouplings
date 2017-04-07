@@ -26,7 +26,7 @@ subprocess.check_call(["tar", "-cvzf", "templateprojections.tar.gz", "-C", tmpdi
 tmpdir = tempfile.mkdtemp()
 for analysis in analyses:
     for productionmode in "VBF", "ZH", "WH", "HJJ", "ttH":
-        for filename in glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "compare_POWHEG_JHUGen", str(analysis), productionmode, "*.pdf")):
+        for filename in glob.glob(os.path.join(config.plotsbasedir, "xchecks", "compare_POWHEG_JHUGen", str(analysis), productionmode, "*.pdf")):
              shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(analysis, productionmode, os.path.basename(filename))))
 
 subprocess.check_call(["tar", "-cvzf", "POWHEGvsJHUGen.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))

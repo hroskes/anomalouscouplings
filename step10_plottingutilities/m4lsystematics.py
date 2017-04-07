@@ -31,7 +31,7 @@ def draw(channel):
   hstack.Draw("hist nostack")
   hstack.GetXaxis().SetTitle("D_{bkg}")
   l.Draw()
-  saveasdir = os.path.join(config.plotsbasedir, "templateprojections", "m4lsystematics")
+  saveasdir = os.path.join(config.plotsbasedir, "xchecks", "m4lsystematics")
   mkdir_p(saveasdir)
   for ext in "png eps root pdf".split():
     c.SaveAs(os.path.join(saveasdir, "{}.{}".format(channel, ext)))

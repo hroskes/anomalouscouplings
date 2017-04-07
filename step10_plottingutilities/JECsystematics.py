@@ -59,7 +59,7 @@ def makeplot(productionmode, analysis, category, disc):
 
   hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
 
-  saveasdir = os.path.join(config.plotsbasedir, "JECsystematics", str(analysis), str(productionmode))
+  saveasdir = os.path.join(config.plotsbasedir, "xchecks", "JECsystematics", str(analysis), str(productionmode))
   try:
     os.makedirs(saveasdir)
   except OSError:

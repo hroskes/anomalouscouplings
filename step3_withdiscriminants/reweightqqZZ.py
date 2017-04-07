@@ -52,7 +52,7 @@ def plot(disc, category, analysis):
   l.Draw()
   hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
 
-  saveasdir = os.path.join(config.plotsbasedir, "reweightqqZZ", str(analysis), str(category))
+  saveasdir = os.path.join(config.plotsbasedir, "xchecks", "reweightqqZZ", str(analysis), str(category))
   mkdir_p(saveasdir)
   for ext in "png eps root pdf".split():
     c.SaveAs(os.path.join(saveasdir, "{}.{}".format(disc, ext)))

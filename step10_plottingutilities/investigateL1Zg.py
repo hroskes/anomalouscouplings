@@ -51,7 +51,7 @@ def investigateL1Zg():
     hstack.GetXaxis().SetTitle(discriminant.title)
     legend.Draw()
 
-    saveasdir = os.path.join(config.plotsbasedir, "checkfL1Zg")
+    saveasdir = os.path.join(config.plotsbasedir, "xchecks", "checkfL1Zg")
 
     try:
       os.makedirs(saveasdir)

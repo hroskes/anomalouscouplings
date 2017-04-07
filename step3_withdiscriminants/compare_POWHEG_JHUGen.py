@@ -87,7 +87,7 @@ for analysis, category in product(analyses, categories):
       hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
       legend.Draw()
 
-      directory = os.path.join(config.plotsbasedir, "templateprojections", "compare_POWHEG_JHUGen", str(analysis), str(productionmode))
+      directory = os.path.join(config.plotsbasedir, "xchecks", "compare_POWHEG_JHUGen", str(analysis), str(productionmode))
       try:
         os.makedirs(directory)
       except OSError:
