@@ -47,7 +47,6 @@ class TemplateForProjection(object):
 
     @abc.abstractmethod
     def inithistogram(self):
-        print self
         self.__initedhistogram = True
         for attr in self.histogramattrs:
             assert hasattr(self, attr)
