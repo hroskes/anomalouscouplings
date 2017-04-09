@@ -216,6 +216,8 @@ class IntTemplateFromFile(BaseTemplateFromFile, MultiEnum):
 class TemplateSumBase(TemplateForProjection):
     def __init__(self, title, *templatesandfactors, **kwargs):
         self.title = title
+        if not isinstance(self.title, basestring):
+            raise TypeError("Title should be a string, not {}!!".format(self.title))
         self.templatesandfactors = templatesandfactors
         analyses = {t[0].analysis for t in templatesandfactors}
         assert len(analyses) == 1
@@ -543,53 +545,53 @@ class Projections(MultiEnum):
 
       allWHpieces[ca,ch] = [allWHg14gi0[ca,ch], allWHg13gi1[ca,ch], allWHg12gi2[ca,ch], allWHg11gi3[ca,ch], allWHg10gi4[ca,ch]]
 
-    ffHSM     = self.DbkgSum(*sum(
-                                  ([(allggHg12gi0[ca,ch], 1), (allttHg12gi0[ca,ch], 1)]
-                                     for ca, ch in itertools.product(categories, channels)),
-                                   []
-                                  ))
-    ffHBSM    = self.DbkgSum(*sum(
-                                  ([(allggHg10gi2[ca,ch], 1), (allttHg10gi2[ca,ch], 1)]
-                                     for ca, ch in itertools.product(categories, channels)),
-                                   []
-                                 ))
-    ffHmix_p  = self.DbkgSum(*sum(
-                                  ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
-                                    (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
-                                     for ca, ch in itertools.product(categories, channels)),
-                                   []
-                                  ))
-    ffHmix_m  = self.DbkgSum(*sum(
-                                  ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
-                                    (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
-                                     for ca, ch in itertools.product(categories, channels)),
-                                   []
-                                 ))
+    ffHSM     = self.DbkgSum("ffHSM", *sum(
+                                           ([(allggHg12gi0[ca,ch], 1), (allttHg12gi0[ca,ch], 1)]
+                                              for ca, ch in itertools.product(categories, channels)),
+                                            []
+                                           ))
+    ffHBSM    = self.DbkgSum("ffHBSM", *sum(
+                                            ([(allggHg10gi2[ca,ch], 1), (allttHg10gi2[ca,ch], 1)]
+                                               for ca, ch in itertools.product(categories, channels)),
+                                             []
+                                           ))
+    ffHmix_p  = self.DbkgSum("ffHmix_p", *sum(
+                                              ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
+                                                (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
+                                                 for ca, ch in itertools.product(categories, channels)),
+                                               []
+                                              ))
+    ffHmix_m  = self.DbkgSum("ffHmix_m", *sum(
+                                              ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
+                                                (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
+                                                 for ca, ch in itertools.product(categories, channels)),
+                                               []
+                                             ))
 
-    VVHSM     = self.DbkgSum(*sum(
-                                  ([(allVBFg14gi0[ca,ch], 1), (allZHg14gi0[ca,ch], 1), (allWHg14gi0[ca,ch], 1)]
-                                     for ca, ch in itertools.product(categories, channels)),
-                                   []
-                                 ))
-    VVHBSM    = self.DbkgSum(*sum(
-                                  ([(allVBFg10gi4[ca,ch], 1), (allZHg10gi4[ca,ch], 1), (allWHg10gi4[ca,ch], 1)]
-                                     for ca, ch in itertools.product(categories, channels)),
-                                   []
-                                 ))
-    VVHmix_p  = self.DbkgSum(*sum((
-                                    [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
-                                  + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
-                                  + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
-                                     for ca, ch in itertools.product(categories, channels)),
-                                   []
-                                 ))
-    VVHmix_m  = self.DbkgSum(*sum((
-                                    [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
-                                  + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
-                                  + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
-                                     for ca, ch in itertools.product(categories, channels)),
-                                   []
-                                 ))
+    VVHSM     = self.DbkgSum("VVHSM", *sum(
+                                           ([(allVBFg14gi0[ca,ch], 1), (allZHg14gi0[ca,ch], 1), (allWHg14gi0[ca,ch], 1)]
+                                              for ca, ch in itertools.product(categories, channels)),
+                                            []
+                                          ))
+    VVHBSM    = self.DbkgSum("VVHBSM", *sum(
+                                            ([(allVBFg10gi4[ca,ch], 1), (allZHg10gi4[ca,ch], 1), (allWHg10gi4[ca,ch], 1)]
+                                               for ca, ch in itertools.product(categories, channels)),
+                                             []
+                                           ))
+    VVHmix_p  = self.DbkgSum("VVHmix_p", *sum((
+                                                [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                              + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                              + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
+                                                 for ca, ch in itertools.product(categories, channels)),
+                                               []
+                                             ))
+    VVHmix_m  = self.DbkgSum("VVHmix_m", *sum((
+                                                [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                              + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                              + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
+                                                 for ca, ch in itertools.product(categories, channels)),
+                                               []
+                                             ))
 
     ffHSM.Integral(), ffHBSM.Integral(), ffHmix_p.Integral(), ffHmix_m.Integral()
     VVHSM.Integral(), VVHBSM.Integral(), VVHmix_p.Integral(), VVHmix_m.Integral()
@@ -885,19 +887,19 @@ class Projections(MultiEnum):
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
         else: #animation
-            ffHintegral  = self.DbkgSum(*sum(
-                                             ([(allggHg12gi0[ca,ch], g1_custom**2), (allggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
-                                               (allttHg12gi0[ca,ch], g1_custom**2), (allttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
-                                                for ca, ch in itertools.product(categories, channels)),
-                                              []
-                                             ))
-            VVHintegral  = self.DbkgSum(*sum((
-                                               [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
-                                             + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allZHpieces[ca,ch])]
-                                             + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allWHpieces[ca,ch])]
-                                                for ca, ch in itertools.product(categories, channels)),
-                                               []
-                                            ))
+            ffHintegral  = self.DbkgSum("ffHintegral", *sum(
+                                                            ([(allggHg12gi0[ca,ch], g1_custom**2), (allggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
+                                                            (allttHg12gi0[ca,ch], g1_custom**2), (allttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
+                                                             for ca, ch in itertools.product(categories, channels)),
+                                                            []
+                                                           ))
+            VVHintegral  = self.DbkgSum("VVHintegral", *sum((
+                                                              [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                                            + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                                            + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allWHpieces[ca,ch])]
+                                                               for ca, ch in itertools.product(categories, channels)),
+                                                              []
+                                                           ))
             ffH = templateclassingroup("", ffHintegral, ffHSM,
                                        *sum(
                                             ([(ggHg12gi0[ca,ch], g1_custom**2), (ggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
