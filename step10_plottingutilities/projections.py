@@ -47,6 +47,7 @@ class TemplateForProjection(object):
 
     @abc.abstractmethod
     def inithistogram(self):
+        print self
         self.__initedhistogram = True
         for attr in self.histogramattrs:
             assert hasattr(self, attr)
@@ -61,12 +62,15 @@ class TemplateForProjection(object):
         result.SetName(self.discriminants[i].name)
         result.SetTitle(self.discriminants[i].title)
         result.SetXTitle(self.discriminants[i].title)
-        result.SetLineColor(self.linecolor)
-        result.SetLineStyle(self.linestyle)
-        result.SetLineWidth(self.linewidth)
-        result.SetFillColor(self.fillcolor)
-        result.SetFillStyle(self.fillstyle)
+        self.SetHistStyle(result)
         return result
+
+    def SetHistStyle(self, h):
+        h.SetLineColor(self.linecolor)
+        h.SetLineStyle(self.linestyle)
+        h.SetLineWidth(self.linewidth)
+        h.SetFillColor(self.fillcolor)
+        h.SetFillStyle(self.fillstyle)
 
     @cache
     def Project3D(self, option, rebinx=None, rebiny=None):
@@ -89,7 +93,7 @@ class TemplateForProjection(object):
         return result
 
     def AddToLegend(self, legend):
-        legend.AddEntry(self.Projection(0), self.title, self.legendoption)
+        legend.AddEntry(self.Projection(2), self.title, self.legendoption)
 
     def Integral(self):
         if self.cantakeintegral:
@@ -111,7 +115,7 @@ class TemplateForProjection(object):
 
     @property
     def histogramattrs(self):
-        return "h", "hstackoption", "cantakeintegral"
+        return "h", "hstackoption", "cantakeintegral", "isDbkgonly"
 
 class Normalization(MyEnum):
     enumname = "normalization"
@@ -147,6 +151,7 @@ class BaseTemplateFromFile(TemplateForProjection):
         self.template.gettemplate()
 
     def inithistogram(self):
+        self.isDbkgonly = False
         self.h = self.template.gettemplate().Clone()
 
         if self.productionmode in ["ggH", "VBF", "ZH", "WH"]:
@@ -233,10 +238,28 @@ class TemplateSumBase(TemplateForProjection):
         assert len({template.discriminants for template, factor in self.templatesandfactors}) == 1
         return self.templatesandfactors[0][0].discriminants
 
+    @cache
+    def Projection(self, i, rebin=None):
+        if self.isDbkgonly and rebin is None:  #rebin is handled in super
+            if i == 2:
+                return self.h.Clone()
+            else:
+                raise ValueError("Can only get the 2nd (Z) projection of {}, not Projection({})".format(self, i))
+        else:
+            return super(TemplateSumBase, self).Projection(i, rebin=rebin)
+
 class TemplateSum(TemplateSumBase):
     def inithistogram(self):
         self.cantakeintegral = True
         self.h = None
+
+        if all(template.isDbkgonly for template, factor in self.templatesandfactors):
+            self.isDbkgonly = True
+        elif not any(template.isDbkgonly for template, factor in self.templatesandfactors):
+            self.isDbkgonly = False
+        else:
+            raise ValueError("Some of the templates for {} are Dbkg only and some are not!".format(self))
+
         for template, factor in self.templatesandfactors:
             if not factor: continue
             if self.h is None:
@@ -245,48 +268,50 @@ class TemplateSum(TemplateSumBase):
             else:
                 self.h.Add(template.h, factor)
             self.cantakeintegral = self.cantakeintegral and template.cantakeintegral
+        if self.isDbkgonly:
+            self.SetHistStyle(self.h)
         self.hstackoption = "hist"
         super(TemplateSum, self).inithistogram()
 
-class IntegralSum(TemplateSumBase):
-    counter = 0
-    def __init__(self, *templatesandfactors, **kwargs):
-        if "linecolor" not in kwargs: kwargs.update(linecolor=0)
-        super(IntegralSum, self).__init__("", *templatesandfactors, **kwargs)
-    @classmethod
-    def hname(cls):
-        cls.counter += 1
-        return "h{}".format(cls.counter)
+class DbkgSum(TemplateSumBase):
     def inithistogram(self):
-        self.hstackoption = None
-        integral = 0
         self.cantakeintegral = True
+        self.h = None
+        self.isDbkgonly = True
+        integral = 0
         for template, factor in self.templatesandfactors:
             if not factor: continue
             self.cantakeintegral = self.cantakeintegral and template.cantakeintegral
-            integral += template.Integral() * factor
-        self.h = ROOT.TH1D(self.hname(), "", 1, 0, 1)
-        self.h.Fill(.5, integral)
-        print integral
-        assert abs(self.h.Integral() - integral)/integral < 1e-10, (self.h.Integral(), integral)
-        super(IntegralSum, self).inithistogram()
+            if self.cantakeintegral:
+                integral += template.Integral() * factor
+            if self.h is None:
+                self.h = template.Projection(2).Clone()
+                self.h.Scale(factor)
+            else:
+                self.h.Add(template.Projection(2), factor)
+        if self.cantakeintegral:
+            print integral
+            assert abs(self.h.Integral() - integral)/integral < 1e-10, (self.h.Integral(), integral)
+        self.SetHistStyle(self.h)
+        self.hstackoption = "hist"
+        super(DbkgSum, self).inithistogram()
 
-class ComponentTemplateSum(TemplateSum):
+class ComponentTemplateSumBase(TemplateSumBase):
     def __init__(self, title, SMintegral, *templatesandfactors, **kwargs):
         """
         Works the same as TemplateSum, but rescales
         """
         self.SMintegral = SMintegral
-        super(ComponentTemplateSum, self).__init__(title, *templatesandfactors, **kwargs)
+        super(ComponentTemplateSumBase, self).__init__(title, *templatesandfactors, **kwargs)
         for template, factor in templatesandfactors:
             if not isinstance(template, BaseTemplateFromFile):
                 raise TypeError("{} can only come from TemplatesFromFiles".format(type(self).__name__))
 
     def __hash__(self):
-        return hash((self.SMintegral, super(ComponentTemplateSum, self).__hash__()))
+        return hash((self.SMintegral, super(ComponentTemplateSumBase, self).__hash__()))
 
     def inithistogram(self):
-        super(ComponentTemplateSum, self).inithistogram()
+        super(ComponentTemplateSumBase, self).inithistogram()
         if isinstance(self.SMintegral, TemplateForProjection):
             if not self.cantakeintegral:
                 raise ValueError("Have to be able to take integral of ComponentTemplateSum, or normalize to a number")
@@ -294,21 +319,30 @@ class ComponentTemplateSum(TemplateSum):
         if self.h.Integral():
             self.h.Scale(self.SMintegral / self.h.Integral())
 
-class ComponentTemplateSumInGroup(TemplateSum):
+class ComponentTemplateSum(ComponentTemplateSumBase, TemplateSum):  #the order is important!
+    pass
+
+class ComponentTemplateSumInGroupBase(TemplateSumBase):
     def __init__(self, title, mygroup, SMgroup, *templatesandfactors, **kwargs):
         self.mygroup = mygroup
         self.SMgroup = SMgroup
-        super(ComponentTemplateSumInGroup, self).__init__(title, *templatesandfactors, **kwargs)
+        super(ComponentTemplateSumInGroupBase, self).__init__(title, *templatesandfactors, **kwargs)
         for template, factor in templatesandfactors:
             if not isinstance(template, BaseTemplateFromFile):
                 raise TypeError("{} can only come from TemplatesFromFiles".format(type(self).__name__))
 
     def __hash__(self):
-        return hash((self.mygroup, self.SMgroup, super(ComponentTemplateSumInGroup, self).__hash__()))
+        return hash((self.mygroup, self.SMgroup, super(ComponentTemplateSumInGroupBase, self).__hash__()))
 
     def inithistogram(self):
-        super(ComponentTemplateSumInGroup, self).inithistogram()
+        super(ComponentTemplateSumInGroupBase, self).inithistogram()
         self.h.Scale(self.SMgroup.Integral() / self.mygroup.Integral())
+
+class ComponentTemplateSumInGroup(ComponentTemplateSumInGroupBase, TemplateSum):  #the order is important!
+    pass
+
+class DbkgSumInGroup(ComponentTemplateSumInGroupBase, DbkgSum):  #the order is important!
+    pass
 
 class Projections(MultiEnum):
   enums = [Analysis, Normalization, ShapeSystematic, Production, EnrichStatus]
@@ -339,8 +373,12 @@ class Projections(MultiEnum):
     return TemplateSum(*args, **kwargs)
   @classmethod
   @cache
-  def IntegralSum(cls, *args, **kwargs):
-    return IntegralSum(*args, **kwargs)
+  def DbkgSum(cls, *args, **kwargs):
+    return DbkgSum(*args, **kwargs)
+  @classmethod
+  @cache
+  def DbkgSumInGroup(cls, *args, **kwargs):
+    return DbkgSumInGroup(*args, **kwargs)
   @classmethod
   @cache
   def ComponentTemplateSum(cls, *args, **kwargs):
@@ -361,9 +399,9 @@ class Projections(MultiEnum):
 
     ggHfactor = VBFfactor = VHfactor = ttHfactor = 1
     subdir = ""
-    saveasdir = self.saveasdir(info)
     customfai = None
     animation = False
+    saveasdir = None
     saveasappend = ""
     exts = "png", "eps", "root", "pdf"
     otherthingstodraw = []
@@ -374,6 +412,7 @@ class Projections(MultiEnum):
     legendargs = [(.65, .6, .9, .9)]*3
     rebin = None
     muV = muf = 1
+    Dbkg_allcategories = False
     for kw, kwarg in kwargs.iteritems():
        if kw == "productionmode":
            justoneproductionmode = True
@@ -407,11 +446,22 @@ class Projections(MultiEnum):
            floor = bool(int(kwarg))
        elif kw == "nicestyle":
            nicestyle = bool(int(kwarg))
-           assert saveasdir not in kwargs
-           saveasdir = self.saveasdir_niceplots(category)
            if nicestyle and channel != "2e2mu": return
+       elif kw == "Dbkg_allcategories":
+           Dbkg_allcategories = bool(int(kwarg))
+           if Dbkg_allcategories and category != "Untagged": return
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    if saveasdir is None:
+        if Dbkg_allcategories:
+            saveasdir = self.saveasdir_Dbkgsum(category)
+        elif nicestyle:
+            saveasdir = self.saveasdir_niceplots(category)
+        else:
+            saveasdir = self.saveasdir(info)
+
+    if Dbkg_allcategories and not nicestyle: raise ValueError("Dbkg_allcategories requires nicestyle!")
 
     SMhypothesis = self.analysis.purehypotheses[0]
     gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
@@ -492,53 +542,53 @@ class Projections(MultiEnum):
 
       allWHpieces[ca,ch] = [allWHg14gi0[ca,ch], allWHg13gi1[ca,ch], allWHg12gi2[ca,ch], allWHg11gi3[ca,ch], allWHg10gi4[ca,ch]]
 
-    ffHSM     = self.IntegralSum(*sum(
-                                      ([(allggHg12gi0[ca,ch], 1), (allttHg12gi0[ca,ch], 1)]
-                                          for ca, ch in itertools.product(categories, channels)),
-                                       []
-                                      ))
-    ffHBSM    = self.IntegralSum(*sum(
-                                      ([(allggHg10gi2[ca,ch], 1), (allttHg10gi2[ca,ch], 1)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-    ffHmix_p  = self.IntegralSum(*sum(
-                                      ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
-                                        (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                       []
-                                      ))
-    ffHmix_m  = self.IntegralSum(*sum(
-                                      ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
-                                        (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                       []
-                                     ))
+    ffHSM     = self.DbkgSum(*sum(
+                                  ([(allggHg12gi0[ca,ch], 1), (allttHg12gi0[ca,ch], 1)]
+                                     for ca, ch in itertools.product(categories, channels)),
+                                   []
+                                  ))
+    ffHBSM    = self.DbkgSum(*sum(
+                                  ([(allggHg10gi2[ca,ch], 1), (allttHg10gi2[ca,ch], 1)]
+                                     for ca, ch in itertools.product(categories, channels)),
+                                   []
+                                 ))
+    ffHmix_p  = self.DbkgSum(*sum(
+                                  ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
+                                    (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
+                                     for ca, ch in itertools.product(categories, channels)),
+                                   []
+                                  ))
+    ffHmix_m  = self.DbkgSum(*sum(
+                                  ([(allggHg12gi0[ca,ch], g1_mix**2), (allggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
+                                    (allttHg12gi0[ca,ch], g1_mix**2), (allttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
+                                     for ca, ch in itertools.product(categories, channels)),
+                                   []
+                                 ))
 
-    VVHSM     = self.IntegralSum(*sum(
-                                      ([(allVBFg14gi0[ca,ch], 1), (allZHg14gi0[ca,ch], 1), (allWHg14gi0[ca,ch], 1)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-    VVHBSM    = self.IntegralSum(*sum(
-                                      ([(allVBFg10gi4[ca,ch], 1), (allZHg10gi4[ca,ch], 1), (allWHg10gi4[ca,ch], 1)]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-    VVHmix_p  = self.IntegralSum(*sum((
-                                        [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
-    VVHmix_m  = self.IntegralSum(*sum((
-                                        [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
-                                      + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
-                                         for ca, ch in itertools.product(categories, channels)),
-                                      []
-                                     ))
+    VVHSM     = self.DbkgSum(*sum(
+                                  ([(allVBFg14gi0[ca,ch], 1), (allZHg14gi0[ca,ch], 1), (allWHg14gi0[ca,ch], 1)]
+                                     for ca, ch in itertools.product(categories, channels)),
+                                   []
+                                 ))
+    VVHBSM    = self.DbkgSum(*sum(
+                                  ([(allVBFg10gi4[ca,ch], 1), (allZHg10gi4[ca,ch], 1), (allWHg10gi4[ca,ch], 1)]
+                                     for ca, ch in itertools.product(categories, channels)),
+                                   []
+                                 ))
+    VVHmix_p  = self.DbkgSum(*sum((
+                                    [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                  + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                  + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
+                                     for ca, ch in itertools.product(categories, channels)),
+                                   []
+                                 ))
+    VVHmix_m  = self.DbkgSum(*sum((
+                                    [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                  + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                  + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allWHpieces[ca,ch])]
+                                     for ca, ch in itertools.product(categories, channels)),
+                                   []
+                                 ))
 
     ffHSM.Integral(), ffHBSM.Integral(), ffHmix_p.Integral(), ffHmix_m.Integral()
     VVHSM.Integral(), VVHBSM.Integral(), VVHmix_p.Integral(), VVHmix_m.Integral()
@@ -576,75 +626,75 @@ class Projections(MultiEnum):
     WHg10gi4 = {}
     WHpieces = {}
 
-    for ch in channels:
-      ggHg12gi0[ch] = self.TemplateFromFile(   "ggH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ggHg10gi2[ch] = self.TemplateFromFile(   "ggH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      ggHg11gi1[ch] = self.IntTemplateFromFile("ggH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+    for ca, ch in itertools.product(categories, channels):
+      ggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
 
-      ttHg12gi0[ch] = self.TemplateFromFile(   "ttH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ttHg10gi2[ch] = self.TemplateFromFile(   "ttH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      ttHg11gi1[ch] = self.IntTemplateFromFile("ttH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+      ttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
 
-      VBFg14gi0[ch] = self.TemplateFromFile(   "VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      VBFg13gi1[ch] = self.IntTemplateFromFile("VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      VBFg12gi2[ch] = self.IntTemplateFromFile("VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      VBFg11gi3[ch] = self.IntTemplateFromFile("VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      VBFg10gi4[ch] = self.TemplateFromFile(   "VBF", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      VBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      VBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      VBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      VBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      VBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
-      VBFpieces[ch] = [VBFg14gi0[ch], VBFg13gi1[ch], VBFg12gi2[ch], VBFg11gi3[ch], VBFg10gi4[ch]]
+      VBFpieces[ca,ch] = [VBFg14gi0[ca,ch], VBFg13gi1[ca,ch], VBFg12gi2[ca,ch], VBFg11gi3[ca,ch], VBFg10gi4[ca,ch]]
 
-      ZHg14gi0[ch] = self.TemplateFromFile(   "ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ZHg13gi1[ch] = self.IntTemplateFromFile("ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      ZHg12gi2[ch] = self.IntTemplateFromFile("ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      ZHg11gi3[ch] = self.IntTemplateFromFile("ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      ZHg10gi4[ch] = self.TemplateFromFile(   "ZH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      ZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      ZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      ZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      ZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
-      ZHpieces[ch] = [ZHg14gi0[ch], ZHg13gi1[ch], ZHg12gi2[ch], ZHg11gi3[ch], ZHg10gi4[ch]]
+      ZHpieces[ca,ch] = [ZHg14gi0[ca,ch], ZHg13gi1[ca,ch], ZHg12gi2[ca,ch], ZHg11gi3[ca,ch], ZHg10gi4[ca,ch]]
 
-      WHg14gi0[ch] = self.TemplateFromFile(   "WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      WHg13gi1[ch] = self.IntTemplateFromFile("WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      WHg12gi2[ch] = self.IntTemplateFromFile("WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      WHg11gi3[ch] = self.IntTemplateFromFile("WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      WHg10gi4[ch] = self.TemplateFromFile(   "WH", category, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      WHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
+      WHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
+      WHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
+      WHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
+      WHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
 
-      WHpieces[ch] = [WHg14gi0[ch], WHg13gi1[ch], WHg12gi2[ch], WHg11gi3[ch], WHg10gi4[ch]]
+      WHpieces[ca,ch] = [WHg14gi0[ca,ch], WHg13gi1[ca,ch], WHg12gi2[ca,ch], WHg11gi3[ca,ch], WHg10gi4[ca,ch]]
 
-    del ch
+    del ca, ch
 
-    ggHSM = self.TemplateSum("ggH SM", (ggHg12gi0[channel], 1))
-    ggHBSM = self.ComponentTemplateSumInGroup("ggH {}=1".format(fainame), ffHBSM, ffHSM, (ggHg10gi2[channel], 1))
+    ggHSM = self.TemplateSum("ggH SM", (ggHg12gi0[category,channel], 1))
+    ggHBSM = self.ComponentTemplateSumInGroup("ggH {}=1".format(fainame), ffHBSM, ffHSM, (ggHg10gi2[category,channel], 1))
     ggHmix_p  = self.ComponentTemplateSumInGroup("ggH {}=#plus0.5" .format(fainame), ffHmix_p, ffHSM,
-                                                 (ggHg12gi0[channel], g1_mix**2), (ggHg10gi2[channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[channel],  g1_mix*gi_mix/gi_ggHBSM))
+                                                 (ggHg12gi0[category,channel], g1_mix**2), (ggHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[category,channel],  g1_mix*gi_mix/gi_ggHBSM))
     ggHmix_m  = self.ComponentTemplateSumInGroup("ggH {}=#minus0.5".format(fainame), ffHmix_m, ffHSM,
-                                                 (ggHg12gi0[channel], g1_mix**2), (ggHg10gi2[channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[channel], -g1_mix*gi_mix/gi_ggHBSM))
-    ttHSM = self.TemplateSum("ttH SM", (ttHg12gi0[channel], 1))
-    ttHBSM = self.ComponentTemplateSumInGroup("ttH {}=1".format(fainame), ffHBSM, ffHSM, (ttHg10gi2[channel], 1))
+                                                 (ggHg12gi0[category,channel], g1_mix**2), (ggHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[category,channel], -g1_mix*gi_mix/gi_ggHBSM))
+    ttHSM = self.TemplateSum("ttH SM", (ttHg12gi0[category,channel], 1))
+    ttHBSM = self.ComponentTemplateSumInGroup("ttH {}=1".format(fainame), ffHBSM, ffHSM, (ttHg10gi2[category,channel], 1))
     ttHmix_p  = self.ComponentTemplateSumInGroup("ttH {}=#plus0.5" .format(fainame), ffHmix_p, ffHSM,
-                                                 (ttHg12gi0[channel], g1_mix**2), (ttHg10gi2[channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[channel],  g1_mix*gi_mix/gi_ggHBSM))
+                                                 (ttHg12gi0[category,channel], g1_mix**2), (ttHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[category,channel],  g1_mix*gi_mix/gi_ggHBSM))
     ttHmix_m  = self.ComponentTemplateSumInGroup("ttH {}=#minus0.5".format(fainame), ffHmix_m, ffHSM,
-                                                 (ttHg12gi0[channel], g1_mix**2), (ttHg10gi2[channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[channel], -g1_mix*gi_mix/gi_ggHBSM))
+                                                 (ttHg12gi0[category,channel], g1_mix**2), (ttHg10gi2[category,channel], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[category,channel], -g1_mix*gi_mix/gi_ggHBSM))
 
-    VBFSM = self.TemplateSum("VBF SM", (VBFg14gi0[channel], 1))
-    VBFBSM = self.ComponentTemplateSumInGroup("VBF {}=1".format(fainame), VVHBSM, VVHSM, (VBFg10gi4[channel], 1))
+    VBFSM = self.TemplateSum("VBF SM", (VBFg14gi0[category,channel], 1))
+    VBFBSM = self.ComponentTemplateSumInGroup("VBF {}=1".format(fainame), VVHBSM, VVHSM, (VBFg10gi4[category,channel], 1))
     VBFmix_p  = self.ComponentTemplateSumInGroup("VBF {}=#plus0.5" .format(fainame), VVHmix_p, VVHSM,
-                                            *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(VBFpieces[channel]))
+                                            *((template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(VBFpieces[category,channel]))
                                            )
     VBFmix_m  = self.ComponentTemplateSumInGroup("VBF {}=#minus0.5".format(fainame), VVHmix_m, VVHSM,
-                                            *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[channel]))
+                                            *((template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[category,channel]))
                                            )
 
-    VHSM = self.TemplateSum("VH SM", (ZHg14gi0[channel], 1), (WHg14gi0[channel], 1))
-    VHBSM = self.ComponentTemplateSumInGroup("VH {}=1".format(fainame), VVHBSM, VVHSM, (ZHg10gi4[channel], 1), (WHg10gi4[channel], 1))
+    VHSM = self.TemplateSum("VH SM", (ZHg14gi0[category,channel], 1), (WHg14gi0[category,channel], 1))
+    VHBSM = self.ComponentTemplateSumInGroup("VH {}=1".format(fainame), VVHBSM, VVHSM, (ZHg10gi4[category,channel], 1), (WHg10gi4[category,channel], 1))
     VHmix_p  = self.ComponentTemplateSumInGroup("VH {}=#plus0.5" .format(fainame), VVHmix_p, VVHSM,
                                             *(
-                                                [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(ZHpieces[channel])]
-                                              + [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(WHpieces[channel])]
+                                                [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(ZHpieces[category,channel])]
+                                              + [(template, g1_mix**(4-j) * gi_mix**j) for j, template in enumerate(WHpieces[category,channel])]
                                              )
                                            )
     VHmix_m  = self.ComponentTemplateSumInGroup("VH {}=#minus0.5" .format(fainame), VVHmix_m, VVHSM,
                                             *(
-                                                [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[channel])]
-                                              + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[channel])]
+                                                [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[category,channel])]
+                                              + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[category,channel])]
                                              )
                                            )
 
@@ -659,7 +709,7 @@ class Projections(MultiEnum):
     ZX        = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ZX",      self.shapesystematic, self.production, linecolor=2)
 
     templates = []
-    if not animation:
+    if not animation and not nicestyle:
         templates += [
                       SM, BSM, mix_p, mix_m,
                      ]
@@ -668,15 +718,15 @@ class Projections(MultiEnum):
         if customfai <  0: plusminus = "#minus"
         if customfai == 0: plusminus = ""
         if customfai  > 0: plusminus = "#plus"
-        ggHcustom = self.ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, (ggHg12gi0[channel], g1_custom**2), (ggHg10gi2[channel], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[channel],  g1_custom*gi_custom/gi_ggHBSM), linecolor=1)
+        ggHcustom = self.ComponentTemplateSum("ggH ({}={}{:.2f})".format(self.analysis.title(superscript="dec"), plusminus, abs(customsample.fai("ggH", self.analysis))), 1, (ggHg12gi0[category,channel], g1_custom**2), (ggHg10gi2[category,channel], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[category,channel],  g1_custom*gi_custom/gi_ggHBSM), linecolor=1)
         VBFcustom = self.ComponentTemplateSum("VBF ({}={}{:.2f})".format(self.analysis.title(superscript="VBF"), plusminus, abs(customsample.fai("VBF", self.analysis))), 1,
-                                              *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces[channel])),
+                                              *((template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(VBFpieces[category,channel])),
                                               linecolor=2
                                              )
         VHcustom  = self.ComponentTemplateSum("VH ({}={}{:.2f})".format(self.analysis.title(superscript="VH"), plusminus, abs(customsample.fai("VH", self.analysis))), 1,
                                               *(
-                                                  [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces[channel])]
-                                                + [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces[channel])]
+                                                  [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(ZHpieces[category,channel])]
+                                                + [(template, g1_custom**(4-j) * gi_custom**j) for j, template in enumerate(WHpieces[category,channel])]
                                                ),
                                                linecolor=4
                                              )
@@ -687,18 +737,30 @@ class Projections(MultiEnum):
                       ggHcustom, VBFcustom, VHcustom
                      ]
 
-    if not justoneproductionmode and not animation:
+    if not justoneproductionmode and not animation and not nicestyle:
         templates += [
                       qqZZ, ggZZ, VBFbkg, ZX,
                      ]
 
     if nicestyle:
-        ZX = self.TemplateSum("Z+X",
-                              *((self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, ch, "ZX",      self.shapesystematic, self.production, linecolor=2), 1) for ch in channels),
-                              linecolor=1, fillcolor=ROOT.TColor.GetColor("#669966"), linewidth=2, fillstyle=1001, legendoption="f")
-        ZZ = self.TemplateSum("ZZ/Z#gamma*",
-                              *((self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, ch, p,      self.shapesystematic, self.production, linecolor=2), 1) for ch in channels for p in ("qqZZ", "ggZZ", "VBFbkg", "ZX")),
-                              linecolor=1, fillcolor=ROOT.kAzure-9, linewidth=2, fillstyle=1001, legendoption="f")
+        ZXname = "Z+X"
+        ZXkwargs = dict(linecolor=1, fillcolor=ROOT.TColor.GetColor("#669966"), linewidth=2, fillstyle=1001, legendoption="f")
+        ZZname = "ZZ/Z#gamma*"
+        ZZkwargs = dict(linecolor=1, fillcolor=ROOT.kAzure-9, linewidth=2, fillstyle=1001, legendoption="f")
+        if Dbkg_allcategories:
+            ZX = self.DbkgSum(ZXname,
+                              *((self.TemplateFromFile(ca, self.enrichstatus, self.normalization, self.analysis, ch, "ZX",      self.shapesystematic, self.production, linecolor=2), 1) for ca, ch in itertools.product(categories, channels)),
+                              **ZXkwargs)
+            ZZ = self.DbkgSum(ZZname,
+                              *((self.TemplateFromFile(ca, self.enrichstatus, self.normalization, self.analysis, ch, p,      self.shapesystematic, self.production, linecolor=2), 1) for ca, ch in itertools.product(categories, channels) for p in ("qqZZ", "ggZZ", "VBFbkg", "ZX")),
+                              **ZZkwargs)
+        else:
+            ZX = self.TemplateSum(ZXname,
+                                  *((self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, ch, "ZX",      self.shapesystematic, self.production, linecolor=2), 1) for ch in channels),
+                                  **ZXkwargs)
+            ZZ = self.TemplateSum(ZZname,
+                                  *((self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, ch, p,      self.shapesystematic, self.production, linecolor=2), 1) for ch in channels for p in ("qqZZ", "ggZZ", "VBFbkg", "ZX")),
+                                  **ZZkwargs)
         if category == "Untagged":
             superscript = None
         elif category == "VBFtagged":
@@ -706,94 +768,91 @@ class Projections(MultiEnum):
         elif category == "VHHadrtagged":
             superscript = "VH"
 
-        templates = [ZZ, ZX]
+        templates += [ZZ, ZX]
 
         legendargs = [(0.20,0.57,0.58,0.90), (0.20,0.57,0.58,0.90), (0.23,0.57,0.61,0.90)]
+        if Dbkg_allcategories:
+            usecategories = categories
+            templateclass = self.DbkgSum
+            templateclassingroup = self.DbkgSumInGroup
+        else:
+            usecategories = [category]
+            templateclass = self.TemplateSum
+            templateclassingroup = self.ComponentTemplateSumInGroup
         if not animation:
-            SMffH = self.TemplateSum("",
-                                     *sum(
-                                          ([(ggHg12gi0[ch], 1), (ttHg12gi0[ch], 1)]
-                                              for ch in channels),
-                                           []
+            SMffH = templateclass("",
+                                  *sum(
+                                       ([(ggHg12gi0[ca,ch], 1), (ttHg12gi0[ca,ch], 1)]
+                                           for ca, ch in itertools.product(usecategories, channels)),
+                                        []
+                                      )
+                                 )
+            SMVVH = templateclass("",
+                                  *sum(
+                                       ([(VBFg14gi0[ca,ch], 1), (ZHg14gi0[ca,ch], 1), (WHg14gi0[ca,ch], 1)]
+                                           for ca, ch in itertools.product(usecategories, channels)),
+                                        []
+                                      )
+                                 )
+            BSMffH = templateclassingroup("", ffHBSM, ffHSM,
+                                          *sum(
+                                               ([(ggHg10gi2[ca,ch], 1), (ttHg10gi2[ca,ch], 1)]
+                                                   for ca, ch in itertools.product(usecategories, channels)),
+                                                []
+                                               )
                                          )
-                                    )
-            SMVVH = self.TemplateSum("",
-                                     *sum(
-                                          ([(VBFg14gi0[ch], 1), (ZHg14gi0[ch], 1), (WHg14gi0[ch], 1)]
-                                              for ch in channels),
-                                           []
+            BSMVVH = templateclassingroup("", VVHBSM, VVHSM,
+                                          *sum(
+                                               ([(VBFg10gi4[ca,ch], 1), (ZHg10gi4[ca,ch], 1), (WHg10gi4[ca,ch], 1)]
+                                                   for ca, ch in itertools.product(usecategories, channels)),
+                                                []
+                                               )
                                          )
-                                    )
-            BSMffH = self.ComponentTemplateSumInGroup("", ffHBSM, ffHSM,
-                                                      *sum(
-                                                           ([(ggHg10gi2[ch], 1), (ttHg10gi2[ch], 1)]
-                                                               for ch in channels),
-                                                            []
-                                                           )
-                                                     )
-            BSMVVH = self.ComponentTemplateSumInGroup("", VVHBSM, VVHSM,
-                                                      *sum(
-                                                           ([(VBFg10gi4[ch], 1), (ZHg10gi4[ch], 1), (WHg10gi4[ch], 1)]
-                                                               for ch in channels),
-                                                            []
-                                                           )
-                                                     )
-            mix_pffH = self.ComponentTemplateSumInGroup("", ffHmix_p, ffHSM,
-                                                        *sum(
-                                                             ([(ggHg12gi0[ch], g1_mix**2), (ggHg10gi2[ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ch],  g1_mix*gi_mix/gi_ggHBSM),
-                                                               (ttHg12gi0[ch], g1_mix**2), (ttHg10gi2[ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ch],  g1_mix*gi_mix/gi_ggHBSM)]
-                                                                for ch in channels),
-                                                              []
-                                                             )
-                                                       )
-            mix_pVVH = self.ComponentTemplateSumInGroup("", VVHmix_p, VVHSM,
-                                                        *sum(
-                                                             ([(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ch])]
-                                                            + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(ZHpieces[ch])]
-                                                            + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(WHpieces[ch])]
-                                                                for ch in channels),
-                                                              []
-                                                             )
-                                                       )
-            mix_mffH = self.ComponentTemplateSumInGroup("", ffHmix_m, ffHSM,
-                                                        *sum(
-                                                             ([(ggHg12gi0[ch], g1_mix**2), (ggHg10gi2[ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ch], -g1_mix*gi_mix/gi_ggHBSM),
-                                                               (ttHg12gi0[ch], g1_mix**2), (ttHg10gi2[ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ch], -g1_mix*gi_mix/gi_ggHBSM)]
-                                                                for ch in channels),
-                                                              []
-                                                             )
-                                                       )
-            mix_mVVH = self.ComponentTemplateSumInGroup("", VVHmix_m, VVHSM,
-                                                        *sum(
-                                                             ([(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ch])]
-                                                            + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[ch])]
-                                                            + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[ch])]
-                                                                for ch in channels),
-                                                              []
-                                                             )
-                                                       )
+            mix_pffH = templateclassingroup("", ffHmix_p, ffHSM,
+                                            *sum(
+                                                 ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
+                                                   (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
+                                                    for ca, ch in itertools.product(usecategories, channels)),
+                                                  []
+                                                 )
+                                           )
+            mix_pVVH = templateclassingroup("", VVHmix_p, VVHSM,
+                                            *sum(
+                                                 ([(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
+                                                + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
+                                                + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                                    for ca, ch in itertools.product(usecategories, channels)),
+                                                  []
+                                                 )
+                                           )
+            mix_mffH = templateclassingroup("", ffHmix_m, ffHSM,
+                                            *sum(
+                                                 ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
+                                                   (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
+                                                    for ca, ch in itertools.product(usecategories, channels)),
+                                                  []
+                                                 )
+                                           )
+            mix_mVVH = templateclassingroup("", VVHmix_m, VVHSM,
+                                            *sum(
+                                                 ([(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
+                                                + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
+                                                + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                                    for ca, ch in itertools.product(usecategories, channels)),
+                                                  []
+                                                 )
+                                           )
 
-            if category == "Untagged" or True:
-                SMbottom = SMVVH
-                BSMbottom = BSMVVH
-                mix_pbottom = mix_pVVH
-                mix_mbottom = mix_mVVH
-                bottomtitle = "VBF+VH"
-                bottomcolor = 4
-                bottommu = muV
-                #toptitle = "ggH+t#bar{t}H"
-                toptitle = "total"
-                topcolor = ROOT.kOrange+10
-            elif category in ("VBFtagged", "VHHadrtagged"):
-                SMbottom = SMffH
-                BSMbottom = BSMffH
-                mix_pbottom = mix_pffH
-                mix_mbottom = mix_mffH
-                bottomtitle = "ggH+t#bar{t}H"
-                bottomcolor = ROOT.kOrange+10
-                bottommu = muf
-                toptitle = "VBF+VH"
-                topcolor = 4
+            SMbottom = SMVVH
+            BSMbottom = BSMVVH
+            mix_pbottom = mix_pVVH
+            mix_mbottom = mix_mVVH
+            bottomtitle = "VBF+VH"
+            bottomcolor = 4
+            bottommu = muV
+            #toptitle = "ggH+t#bar{t}H"
+            toptitle = "total"
+            topcolor = ROOT.kOrange+10
 
             SMbottom = self.TemplateSum("{} SM".format(bottomtitle),
                                        (SMbottom, bottommu), (ZZ, 1), #which already has ZX
@@ -825,50 +884,47 @@ class Projections(MultiEnum):
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
         else: #animation
-            ffHintegral  = self.IntegralSum(*sum(
-                                                 ([(allggHg12gi0[ca,ch], g1_custom**2), (allggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
-                                                   (allttHg12gi0[ca,ch], g1_custom**2), (allttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
-                                                    for ca, ch in itertools.product(categories, channels)),
-                                                  []
-                                                 ))
-            VVHintegral  = self.IntegralSum(*sum((
-                                                   [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
-                                                 + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allZHpieces[ca,ch])]
-                                                 + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allWHpieces[ca,ch])]
-                                                    for ca, ch in itertools.product(categories, channels)),
-                                                 []
-                                                ))
-            ffH = self.ComponentTemplateSumInGroup("", ffHintegral, ffHSM,
-                                                   *sum(
-                                                        ([(ggHg12gi0[ch], g1_custom**2), (ggHg10gi2[ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ch],  g1_custom*gi_custom/gi_ggHBSM),
-                                                          (ttHg12gi0[ch], g1_custom**2), (ttHg10gi2[ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ch],  g1_custom*gi_custom/gi_ggHBSM)]
-                                                           for ch in channels),
-                                                         []
-                                                        )
-                                                  )
-            VVH = self.ComponentTemplateSumInGroup("", VVHintegral, VVHSM,
-                                                   *sum(
-                                                        ([(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ch])]
-                                                       + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ch])]
-                                                       + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(WHpieces[ch])]
-                                                           for ch in channels),
-                                                         []
-                                                        )
-                                                  )
-            if category == "Untagged" or True:
-                bottom = VVH
-                bottomtitle = "VBF+VH"
-                bottomcolor = 4
-                bottommu = muV
-                toptitle = "total" #"ggH+t#bar{t}H"
-                topcolor = ROOT.kOrange+10
-            elif category in ("VBFtagged", "VHHadrtagged"):
-                bottom = ffH
-                bottomtitle = "ggH+t#bar{t}H"
-                bottomcolor = ROOT.kOrange+10
-                bottommu = muf
-                toptitle = "VBF+VH"
-                topcolor = 4
+            ffHintegral  = self.DbkgSum(*sum(
+                                             ([(allggHg12gi0[ca,ch], g1_custom**2), (allggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
+                                               (allttHg12gi0[ca,ch], g1_custom**2), (allttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
+                                                for ca, ch in itertools.product(categories, channels)),
+                                              []
+                                             ))
+            VVHintegral  = self.DbkgSum(*sum((
+                                               [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allVBFpieces[ca,ch])]
+                                             + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allZHpieces[ca,ch])]
+                                             + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(allWHpieces[ca,ch])]
+                                                for ca, ch in itertools.product(categories, channels)),
+                                               []
+                                            ))
+            ffH = templateclassingroup("", ffHintegral, ffHSM,
+                                       *sum(
+                                            ([(ggHg12gi0[ca,ch], g1_custom**2), (ggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
+                                              (ttHg12gi0[ca,ch], g1_custom**2), (ttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
+                                               for ca, ch in itertools.product(usecategories, channels)),
+                                             []
+                                            )
+                                      )
+            VVH = templateclassingroup("", VVHintegral, VVHSM,
+                                       *sum(
+                                            ([(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ca,ch])]
+                                           + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ca,ch])]
+                                           + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(WHpieces[ca,ch])]
+                                               for ca, ch in itertools.product(usecategories, channels)),
+                                             []
+                                            )
+                                      )
+
+            if Dbkg_allcategories:
+                VVH = VVHintegral
+                ffH = ffHintegral
+
+            bottom = VVH
+            bottomtitle = "VBF+VH"
+            bottomcolor = 4
+            bottommu = muV
+            toptitle = "total" #"ggH+t#bar{t}H"
+            topcolor = ROOT.kOrange+10
 
             bottom = self.TemplateSum(bottomtitle,
                                      (bottom, bottommu), (ZZ, 1), #which already has ZX
@@ -883,14 +939,24 @@ class Projections(MultiEnum):
                 rebin = 5
 
         if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
-            data = self.TemplateSum("",
+            if Dbkg_allcategories:
+                data = self.DbkgSum("",
                                     *((self.TemplateFromFile(
-                                                             category, self.enrichstatus, self.normalization,
+                                                             ca, self.enrichstatus, self.normalization,
                                                              self.analysis, ch, "data", self.production, linecolor=1
-                                                            ), 1) for ch in channels)
+                                                            ), 1) for ca, ch in itertools.product(categories, channels))
                                    )
-            data = [style.asymmerrorsfromhistogram(data.Projection(i, rebin=rebin), showemptyerrors=False) for i in range(3)]
+                data = [None, None, style.asymmerrorsfromhistogram(data.Projection(2, rebin=rebin), showemptyerrors=False)]
+            else:
+                data = self.TemplateSum("",
+                                        *((self.TemplateFromFile(
+                                                                 category, self.enrichstatus, self.normalization,
+                                                                 self.analysis, ch, "data", self.production, linecolor=1
+                                                                ), 1) for ch in channels)
+                                       )
+                data = [style.asymmerrorsfromhistogram(data.Projection(i, rebin=rebin), showemptyerrors=False) for i in range(3)]
             for g in data:
+                if g is None: continue
                 g.SetLineColor(1)
                 g.SetMarkerColor(1)
                 g.SetLineStyle(1)
@@ -908,6 +974,7 @@ class Projections(MultiEnum):
                          ]
 
     for i, discriminant in enumerate(self.discriminants(category)):
+        if Dbkg_allcategories and i != 2: continue
         usetemplates = templates
         if nicestyle and not animation:
             usetemplates = templates[:]
@@ -982,6 +1049,8 @@ class Projections(MultiEnum):
   def saveasdir_niceplots(self, category):
       assert self.normalization == "rescalemixtures" and len(config.productionsforcombine) == 1
       return os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), "{}/{}_deleteme2".format(self.analysis, Category(category)))
+  def saveasdir_Dbkgsum(self, category):
+      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), str(self.analysis))
 
   def discriminants(self, category):
       return TemplatesFile("2e2mu", self.shapesystematic, "ggh", self.analysis, self.production, category).discriminants
@@ -1034,7 +1103,7 @@ class Projections(MultiEnum):
         pt.AddText("{}={:.2f}".format("-2#Deltaln L", self.deltaNLL))
         return pt
 
-  def animation(self, category, channel, floor=False, scantree=None):
+  def animation(self, category, channel, floor=False, scantree=None, Dbkg_allcategories=None):
       tmpdir = mkdtemp()
 
       nsteps = 200
@@ -1045,6 +1114,7 @@ class Projections(MultiEnum):
 
       if nicestyle:
           if channel != "2e2mu": return
+          if Dbkg_allcategories and category != "Untagged": return
 
           finaldir = os.path.join(self.saveasdir_niceplots(category), "animation")
 
@@ -1092,6 +1162,7 @@ class Projections(MultiEnum):
                      "saveasdir": tmpdir,
                      "floor": floor,
                      "nicestyle": nicestyle,
+                     "Dbkg_allcategories": Dbkg_allcategories,
                     }
 
       for i, step in enumerate(animation):
@@ -1105,7 +1176,8 @@ class Projections(MultiEnum):
           kwargs["muVmuf"] = step.muV, step.muf
           self.projections(category, channel, **kwargs)
 
-      for discriminant in self.discriminants(category):
+      for j, discriminant in enumerate(self.discriminants(category)):
+          if Dbkg_allcategories and j != 2: continue
           convertcommand = ["gm", "convert", "-loop", "0"]
           lastdelay = None
           for i, step in enumerate(animation):
@@ -1147,6 +1219,7 @@ if __name__ == "__main__":
             scantree.Add(filename)
     p.projections(ch, ca, nicestyle=True)
     #p.animation(ca, ch, scantree=scantree)
+    #p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
     #p.projections(ch, ca)
     #p.projections(ch, ca, subdir="ggH", productionmode="ggH")
     #p.projections(ch, ca, subdir="VBF", productionmode="VBF")
