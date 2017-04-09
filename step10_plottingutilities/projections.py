@@ -267,6 +267,7 @@ class IntegralSum(TemplateSumBase):
             integral += template.Integral() * factor
         self.h = ROOT.TH1D(self.hname(), "", 1, 0, 1)
         self.h.Fill(.5, integral)
+        print integral
         assert abs(self.h.Integral() - integral)/integral < 1e-10, (self.h.Integral(), integral)
         super(IntegralSum, self).inithistogram()
 
@@ -538,6 +539,12 @@ class Projections(MultiEnum):
                                          for ca, ch in itertools.product(categories, channels)),
                                       []
                                      ))
+
+    ffHSM.Integral(), ffHBSM.Integral(), ffHmix_p.Integral(), ffHmix_m.Integral()
+    VVHSM.Integral(), VVHBSM.Integral(), VVHmix_p.Integral(), VVHmix_m.Integral()
+    print ffHSM.Integral(), ffHBSM.Integral(), ffHmix_p.Integral(), ffHmix_m.Integral()
+    print VVHSM.Integral(), VVHBSM.Integral(), VVHmix_p.Integral(), VVHmix_m.Integral()
+    assert 0
 
     del ca, ch
 
@@ -974,7 +981,7 @@ class Projections(MultiEnum):
       return os.path.join(config.plotsbasedir, "templateprojections", "projections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
   def saveasdir_niceplots(self, category):
       assert self.normalization == "rescalemixtures" and len(config.productionsforcombine) == 1
-      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
+      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), "{}/{}_deleteme2".format(self.analysis, Category(category)))
 
   def discriminants(self, category):
       return TemplatesFile("2e2mu", self.shapesystematic, "ggh", self.analysis, self.production, category).discriminants
@@ -1130,6 +1137,7 @@ if __name__ == "__main__":
 
   length = len(list(projections()))
   for i, (p, ch, ca) in enumerate(itertools.product(projections(), channels, categories), start=1):
+    if p.analysis != "fa2" or p.enrichstatus != "enrich" or ca != "Untagged": continue
     scantree = ROOT.TChain("limit")
     for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_7_6_5", "src", "HiggsAnalysis", "HZZ4l_Combination",
                                        "CreateDatacards", "cards_{}_Feb28_mu".format(p.analysis), "higgsCombine_obs_*.root")):
@@ -1137,8 +1145,8 @@ if __name__ == "__main__":
             if "Feb28" not in filename:
                 raise ValueError("Need to change r_VVH and r_ffH to muVscaled and mufscaled!")
             scantree.Add(filename)
-    #p.projections(ch, ca, nicestyle=True)
-    p.animation(ca, ch, scantree=scantree)
+    p.projections(ch, ca, nicestyle=True)
+    #p.animation(ca, ch, scantree=scantree)
     #p.projections(ch, ca)
     #p.projections(ch, ca, subdir="ggH", productionmode="ggH")
     #p.projections(ch, ca, subdir="VBF", productionmode="VBF")
