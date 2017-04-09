@@ -13,7 +13,7 @@ from tempfile import mkdtemp
 import ROOT
 
 from helperstuff import config, constants, run1info, stylefunctions as style
-from helperstuff.combinehelpers import getrate, gettemplate, Luminosity
+from helperstuff.combinehelpers import getdatatree2015, getrate, getrate2015, gettemplate, Luminosity
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic
 from helperstuff.samples import ReweightingSample, samplewithfai
 import helperstuff.rootoverloads.histogramaxisnumbers, helperstuff.rootoverloads.histogramfloor
@@ -142,6 +142,11 @@ enrichstatuses = EnrichStatus.items()
 
 class BaseTemplateFromFile(TemplateForProjection):
     def __init__(self, *args, **kwargs):
+        self.with2015 = False
+        for kw, kwarg in kwargs.items():
+          if kw == "with2015":
+            setattr(self, kw, kwarg)
+            del kwargs[kw]
         super(BaseTemplateFromFile, self).__init__(*args, **kwargs)
         self.didenrich = False
         #I don't know what the following line accomplishes
@@ -156,10 +161,30 @@ class BaseTemplateFromFile(TemplateForProjection):
 
         if self.productionmode in ["ggH", "VBF", "ZH", "WH"]:
             scalefactor = getrate(self.channel, self.category, self.productionmode, "fordata", self.production, self.analysis) / Template(self.production, self.category, self.analysis, self.channel, self.productionmode, self.analysis.purehypotheses[0]).gettemplate().Integral()
+            numerator = getrate(self.channel, self.category, self.productionmode, "fordata", self.production, self.analysis)
+            denominator = Template(self.production, self.category, self.analysis, self.channel, self.productionmode, self.analysis.purehypotheses[0]).gettemplate().Integral()
+            if self.with2015 and self.category == "Untagged" and self.productionmode == "ggH":
+                numerator += getrate2015(self.channel, self.productionmode)
+            scalefactor = numerator / denominator
         elif self.productionmode == "data" or self.h.Integral() == 0:
             scalefactor = 1
+            if self.with2015 and self.category == "Untagged":
+                discnames = [d.name
+                                   .replace("D_bkg", "D_bkg_0plus")
+                                   .replace("0hplus", "g2")
+                                   .replace("L1_", "g1prime2_")
+                                   .replace("int", "g1g2")
+                                                                    for d in self.discriminants]
+                for entry in getdatatree2015(self.channel):
+                    self.h.Fill(*(getattr(entry, discname) for discname in discnames))
+        elif self.h.Integral() == 0:
+            scalefactor = 1
         else:
-            scalefactor = getrate(self.channel, self.category, self.productionmode, "fordata", self.production, self.analysis) / self.h.Integral()
+            numerator = getrate(self.channel, self.category, self.productionmode, "fordata", self.production, self.analysis)
+            if self.with2015 and self.category == "Untagged" and self.productionmode != "VBF bkg":
+                numerator += getrate2015(self.channel, self.productionmode)
+            denominator = self.h.Integral()
+            scalefactor = numerator / denominator
 
         if self.productionmode == "data":
             self.hstackoption = "P"
@@ -412,6 +437,7 @@ class Projections(MultiEnum):
     rebin = None
     muV = muf = 1
     Dbkg_allcategories = False
+    with2015 = False
     for kw, kwarg in kwargs.iteritems():
        if kw == "productionmode":
            justoneproductionmode = True
@@ -449,6 +475,9 @@ class Projections(MultiEnum):
        elif kw == "Dbkg_allcategories":
            Dbkg_allcategories = bool(int(kwarg))
            if Dbkg_allcategories and category != "Untagged": return
+       elif kw == "with2015":
+           with2015 = bool(int(kwarg))
+           if with2015 and category != "Untagged": return
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -456,11 +485,15 @@ class Projections(MultiEnum):
         if Dbkg_allcategories:
             saveasdir = self.saveasdir_Dbkgsum(category)
         elif nicestyle:
-            saveasdir = self.saveasdir_niceplots(category)
+            saveasdir = self.saveasdir_niceplots(category, with2015=with2015)
         else:
             saveasdir = self.saveasdir(info)
 
     if Dbkg_allcategories and not nicestyle: raise ValueError("Dbkg_allcategories requires nicestyle!")
+    if with2015 and not nicestyle: raise ValueError("with2015 requires nicestyle!")
+    if with2015 and Dbkg_allcategories:
+        assert saveasappend == ""
+        saveasappend = "_with2015" + saveasappend
 
     SMhypothesis = self.analysis.purehypotheses[0]
     gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
@@ -509,35 +542,35 @@ class Projections(MultiEnum):
     allWHpieces = {}
 
     for ca, ch in itertools.product(categories, channels):
-      allggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      allggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      allggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+      allggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      allggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1", with2015=with2015)
 
-      allttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      allttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      allttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+      allttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      allttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1", with2015=with2015)
 
-      allVBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      allVBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      allVBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      allVBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      allVBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      allVBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allVBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      allVBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      allVBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      allVBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       allVBFpieces[ca,ch] = [allVBFg14gi0[ca,ch], allVBFg13gi1[ca,ch], allVBFg12gi2[ca,ch], allVBFg11gi3[ca,ch], allVBFg10gi4[ca,ch]]
 
-      allZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      allZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      allZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      allZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      allZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      allZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      allZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      allZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      allZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       allZHpieces[ca,ch] = [allZHg14gi0[ca,ch], allZHg13gi1[ca,ch], allZHg12gi2[ca,ch], allZHg11gi3[ca,ch], allZHg10gi4[ca,ch]]
 
-      allWHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      allWHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      allWHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      allWHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      allWHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      allWHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allWHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      allWHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      allWHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      allWHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       allWHpieces[ca,ch] = [allWHg14gi0[ca,ch], allWHg13gi1[ca,ch], allWHg12gi2[ca,ch], allWHg11gi3[ca,ch], allWHg10gi4[ca,ch]]
 
@@ -620,35 +653,35 @@ class Projections(MultiEnum):
     WHpieces = {}
 
     for ca, ch in itertools.product(categories, channels):
-      ggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      ggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+      ggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      ggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      ggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1", with2015=with2015)
 
-      ttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
-      ttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1")
+      ttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      ttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      ttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1", with2015=with2015)
 
-      VBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      VBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      VBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      VBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      VBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      VBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      VBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      VBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      VBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      VBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       VBFpieces[ca,ch] = [VBFg14gi0[ca,ch], VBFg13gi1[ca,ch], VBFg12gi2[ca,ch], VBFg11gi3[ca,ch], VBFg10gi4[ca,ch]]
 
-      ZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      ZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      ZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      ZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      ZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      ZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      ZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      ZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      ZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      ZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       ZHpieces[ca,ch] = [ZHg14gi0[ca,ch], ZHg13gi1[ca,ch], ZHg12gi2[ca,ch], ZHg11gi3[ca,ch], ZHg10gi4[ca,ch]]
 
-      WHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0])
-      WHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1")
-      WHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2")
-      WHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3")
-      WHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis)
+      WHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      WHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      WHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      WHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      WHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, self.enrichstatus, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       WHpieces[ca,ch] = [WHg14gi0[ca,ch], WHg13gi1[ca,ch], WHg12gi2[ca,ch], WHg11gi3[ca,ch], WHg10gi4[ca,ch]]
 
@@ -696,10 +729,10 @@ class Projections(MultiEnum):
     mix_p = self.TemplateSum("{}=#plus0.5".format(fainame),        (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (VHmix_p, VHfactor), (ttHmix_p, ttHfactor), linecolor=ROOT.kGreen+3)
     mix_m = self.TemplateSum("{}=#minus0.5".format(fainame),       (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (VHmix_m, VHfactor), (ttHmix_m, ttHfactor), linecolor=4)
 
-    qqZZ      = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "qqZZ",    self.shapesystematic, self.production, linecolor=6)
-    ggZZ      = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ggZZ",    self.shapesystematic, self.production, linecolor=ROOT.kOrange+6)
-    VBFbkg    = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "VBF bkg", self.shapesystematic, self.production, linecolor=ROOT.kViolet+7)
-    ZX        = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ZX",      self.shapesystematic, self.production, linecolor=2)
+    qqZZ      = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "qqZZ",    self.shapesystematic, self.production, linecolor=6, with2015=with2015)
+    ggZZ      = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ggZZ",    self.shapesystematic, self.production, linecolor=ROOT.kOrange+6, with2015=with2015)
+    VBFbkg    = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "VBF bkg", self.shapesystematic, self.production, linecolor=ROOT.kViolet+7, with2015=with2015)
+    ZX        = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ZX",      self.shapesystematic, self.production, linecolor=2, with2015=with2015)
 
     templates = []
     if not animation and not nicestyle:
@@ -742,17 +775,17 @@ class Projections(MultiEnum):
         ZZkwargs = dict(linecolor=1, fillcolor=ROOT.kAzure-9, linewidth=2, fillstyle=1001, legendoption="f")
         if Dbkg_allcategories:
             ZX = self.DbkgSum(ZXname,
-                              *((self.TemplateFromFile(ca, self.enrichstatus, self.normalization, self.analysis, ch, "ZX",      self.shapesystematic, self.production, linecolor=2), 1) for ca, ch in itertools.product(categories, channels)),
+                              *((self.TemplateFromFile(ca, self.enrichstatus, self.normalization, self.analysis, ch, "ZX",      self.shapesystematic, self.production, linecolor=2, with2015=with2015), 1) for ca, ch in itertools.product(categories, channels)),
                               **ZXkwargs)
             ZZ = self.DbkgSum(ZZname,
-                              *((self.TemplateFromFile(ca, self.enrichstatus, self.normalization, self.analysis, ch, p,      self.shapesystematic, self.production, linecolor=2), 1) for ca, ch in itertools.product(categories, channels) for p in ("qqZZ", "ggZZ", "VBFbkg", "ZX")),
+                              *((self.TemplateFromFile(ca, self.enrichstatus, self.normalization, self.analysis, ch, p,      self.shapesystematic, self.production, linecolor=2, with2015=with2015), 1) for ca, ch in itertools.product(categories, channels) for p in ("qqZZ", "ggZZ", "VBFbkg", "ZX")),
                               **ZZkwargs)
         else:
             ZX = self.TemplateSum(ZXname,
-                                  *((self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, ch, "ZX",      self.shapesystematic, self.production, linecolor=2), 1) for ch in channels),
+                                  *((self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, ch, "ZX",      self.shapesystematic, self.production, linecolor=2, with2015=with2015), 1) for ch in channels),
                                   **ZXkwargs)
             ZZ = self.TemplateSum(ZZname,
-                                  *((self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, ch, p,      self.shapesystematic, self.production, linecolor=2), 1) for ch in channels for p in ("qqZZ", "ggZZ", "VBFbkg", "ZX")),
+                                  *((self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, ch, p,      self.shapesystematic, self.production, linecolor=2, with2015=with2015), 1) for ch in channels for p in ("qqZZ", "ggZZ", "VBFbkg", "ZX")),
                                   **ZZkwargs)
         if category == "Untagged":
             superscript = None
@@ -936,7 +969,8 @@ class Projections(MultiEnum):
                 data = self.DbkgSum("",
                                     *((self.TemplateFromFile(
                                                              ca, self.enrichstatus, self.normalization,
-                                                             self.analysis, ch, "data", self.production, linecolor=1
+                                                             self.analysis, ch, "data", self.production,
+                                                             linecolor=1, with2015=with2015,
                                                             ), 1) for ca, ch in itertools.product(categories, channels))
                                    )
                 data = [None, None, style.asymmerrorsfromhistogram(data.Projection(2, rebin=rebin), showemptyerrors=False)]
@@ -944,7 +978,8 @@ class Projections(MultiEnum):
                 data = self.TemplateSum("",
                                         *((self.TemplateFromFile(
                                                                  category, self.enrichstatus, self.normalization,
-                                                                 self.analysis, ch, "data", self.production, linecolor=1
+                                                                 self.analysis, ch, "data", self.production,
+                                                                 linecolor=1, with2015=with2015,
                                                                 ), 1) for ch in channels)
                                        )
                 data = [style.asymmerrorsfromhistogram(data.Projection(i, rebin=rebin), showemptyerrors=False) for i in range(3)]
@@ -963,7 +998,7 @@ class Projections(MultiEnum):
     if not justoneproductionmode and not animation and not nicestyle:
         if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
             templates += [
-                          self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "data", self.production)
+                          self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "data", self.production, with2015=with2015)
                          ]
 
     for i, discriminant in enumerate(self.discriminants(category)):
@@ -1022,7 +1057,10 @@ class Projections(MultiEnum):
                 style.cuttext(self.enrichstatus.cuttext(), x1=.48+.03*(discriminant.name=="D_bkg"), x2=.58+.03*(discriminant.name=="D_bkg"))
             else:
                 style.cuttext(self.enrichstatus.cuttext())
-            style.CMS("Preliminary", float(Luminosity("fordata", self.production)))
+            lumi = float(Luminosity("fordata", self.production))
+            if with2015:
+                lumi += config.lumi2015
+            style.CMS("Preliminary", lumi)
         legend.Draw()
         for thing, option in otherthingstodraw:
             if isinstance(thing, collections.Sequence) and len(thing) == 3: thing = thing[i]
@@ -1039,9 +1077,11 @@ class Projections(MultiEnum):
       categoryandchannel = self.CategoryAndChannel(*categoryandchannel)
       assert self.normalization == "rescalemixtures"
       return os.path.join(config.plotsbasedir, "templateprojections", "projections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
-  def saveasdir_niceplots(self, category):
+  def saveasdir_niceplots(self, category, with2015=False):
       assert self.normalization == "rescalemixtures" and len(config.productionsforcombine) == 1
-      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
+      result = os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
+      if with2015: result += "_with2015"
+      return result
   def saveasdir_Dbkgsum(self, category):
       return os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), str(self.analysis))
 
@@ -1209,9 +1249,13 @@ if __name__ == "__main__":
             if "Feb28" not in filename:
                 raise ValueError("Need to change r_VVH and r_ffH to muVscaled and mufscaled!")
             scantree.Add(filename)
+    if p.analysis != "fa2": continue
     #p.projections(ch, ca, nicestyle=True)
     #p.animation(ca, ch, scantree=scantree)
-    p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
+    #p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
+    #p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True)
+    #p.projections(ch, ca, nicestyle=True, with2015=True)
+    p.projections(ch, ca, nicestyle=True, with2015=False)
     #p.projections(ch, ca)
     #p.projections(ch, ca, subdir="ggH", productionmode="ggH")
     #p.projections(ch, ca, subdir="VBF", productionmode="VBF")

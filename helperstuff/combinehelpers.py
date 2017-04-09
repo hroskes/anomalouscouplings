@@ -9,7 +9,7 @@ import config
 from enums import Analysis, categories, Category, Channel, EnumItem, MultiEnum, MyEnum, Production, ProductionMode, shapesystematics
 from samples import ReweightingSample, Sample
 from templates import DataTree, IntTemplate, Template, TemplatesFile
-from utilities import tfiles
+from utilities import cache, tfiles
 
 datacardprocessline = "ggH qqH WH ZH bkg_qqzz bkg_ggzz bkg_vbf bkg_zjets"
 datacardprocessorder = [ProductionMode(p) for p in datacardprocessline.split()]
@@ -73,6 +73,7 @@ class Luminosity(MultiEnum):
 class __Rate(MultiEnum):
     enums = [ProductionMode, Channel, Luminosity, Production, Category, Analysis]
 
+    @cache
     def getrate(self):
         from yields import YieldValue
         return YieldValue(self.productionmode, self.channel, self.category, self.analysis).value * float(self.luminosity)
@@ -80,12 +81,8 @@ class __Rate(MultiEnum):
     def __float__(self):
         return self.getrate()
 
-__cache = {}
 def getrate(*args):
-    rate = __Rate(*args)
-    if rate not in __cache:
-        __cache[rate] = float(rate)
-    return __cache[rate]
+    return float(__Rate(*args))
 
 def getrates(*args, **kwargs):
     disableproductionmodes = ()
@@ -186,3 +183,51 @@ def mixturesign(analysis, productionmode=None):
         assert mixturesign(analysis, "ggH") == mixturesign(analysis, "VBF") == mixturesign(analysis, "ZH")
         productionmode = "ggH"
     return copysign(1, getattr(ReweightingSample(productionmode, analysis.mixdecayhypothesis), analysis.couplingname))
+
+
+class __Rate2015(MultiEnum):
+    enums = [ProductionMode, Channel]
+    @cache
+    def getrate(self):
+        filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
+        tags = ["UnTagged", "VBFTagged"]
+        with open(filename) as f:
+            y = yaml.load(f)
+        with open(filename) as f:
+            for line in f:
+                if "fb-1" in line:
+                    lumi = float(line.split("=")[1].split("fb-1")[0])
+                    break
+            else:
+                raise IOError("No luminosity in {}".format(filename))
+        if self.productionmode == "ggH":
+            productionmodes = ["ggH", "qqH", "WH", "ZH", "ttH"]
+        elif self.productionmode == "ZX":
+            productionmodes = ["zjets"]
+        else:
+            productionmodes = [str(self.productionmode)]
+        rate = 0
+
+        for tag in tags:
+            for p in productionmodes:
+                try:
+                    rate += float(y[tag][p]) * config.lumi2015 / lumi
+                except ValueError:
+                    rate += eval(y[tag][p].replace("@0", "125")) * config.lumi2015 / lumi
+
+        return rate
+
+    def __float__(self):
+        return self.getrate()
+
+def getrate2015(*args):
+    return float(__Rate2015(*args))
+
+class DataTree2015(MultiEnum):
+    enums = [Channel]
+    @property
+    def treefile(self):
+        return os.path.join(config.repositorydir2015, "step7_templates", "data_160225_{}.root".format(self.channel))
+
+def getdatatree2015(*args):
+    return tfiles[DataTree2015(*args).treefile].candTree

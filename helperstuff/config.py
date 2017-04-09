@@ -13,6 +13,7 @@ if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and 
 elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname() or "bigmem" in socket.gethostname()) and getpass.getuser() == "jroskes1@jhu.edu":
     host = "MARCC"
     repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/"
+    repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/"
     plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/"
 
 repositorydir = os.path.realpath(repositorydir)
