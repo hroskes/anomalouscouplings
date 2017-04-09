@@ -971,10 +971,10 @@ class Projections(MultiEnum):
   def saveasdir(self, *categoryandchannel):
       categoryandchannel = self.CategoryAndChannel(*categoryandchannel)
       assert self.normalization == "rescalemixtures"
-      return os.path.join(config.plotsbasedir, "templateprojections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
+      return os.path.join(config.plotsbasedir, "templateprojections", "projections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
   def saveasdir_niceplots(self, category):
       assert self.normalization == "rescalemixtures" and len(config.productionsforcombine) == 1
-      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots_new", self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
+      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
 
   def discriminants(self, category):
       return TemplatesFile("2e2mu", self.shapesystematic, "ggh", self.analysis, self.production, category).discriminants
