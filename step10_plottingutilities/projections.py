@@ -265,9 +265,11 @@ class IntegralSum(TemplateSumBase):
             if not factor: continue
             self.cantakeintegral = self.cantakeintegral and template.cantakeintegral
             integral += template.Integral() * factor
+            print template.Integral(), factor
         self.h = ROOT.TH1D(self.hname(), "", 1, 0, 1)
         self.h.Fill(.5, integral)
         print integral
+        print
         assert abs(self.h.Integral() - integral)/integral < 1e-10, (self.h.Integral(), integral)
         super(IntegralSum, self).inithistogram()
 
