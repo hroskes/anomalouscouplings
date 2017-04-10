@@ -188,7 +188,7 @@ def makecuttext(text, x1=.71, y1=.84, x2=.92, y2=.92):
     pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
     pt.SetBorderSize(0)
     pt.SetTextAlign(12)
-    pt.SetTextSize(0.04)
+    pt.SetTextSize(0.045)
     pt.SetFillStyle(0)
     pt.SetTextFont(42)
     pt.AddText(0.01,0.01,text)
@@ -197,6 +197,25 @@ def makecuttext(text, x1=.71, y1=.84, x2=.92, y2=.92):
 
 def cuttext(*args, **kwargs):
     makecuttext(*args, **kwargs).Draw()
+
+@cache
+def makesubfig(letter, x1=.88, y1=.86, x2=.92, y2=.92):
+    if not letter:
+        return None
+    letter = letter.lstrip("(").rstrip(")")
+    if len(letter) > 1:
+        raise ValueError("letter should just be 1 character")
+    pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
+    pt.SetBorderSize(0)
+    pt.SetTextAlign(12)
+    pt.SetTextSize(0.04)
+    pt.SetFillStyle(0)
+    pt.SetTextFont(42)
+    pt.AddText(0.01,0.01,"#font[62]{("+letter+")}")
+    return pt
+
+def subfig(*args, **kwargs):
+    makesubfig(*args, **kwargs).Draw()
 
 @cache
 def makeCMS(extratext):

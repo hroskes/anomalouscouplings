@@ -1068,23 +1068,28 @@ class Projections(MultiEnum):
         if nicestyle and discriminant.name == "D_CP_decay": hstack.GetXaxis().SetRangeUser(-.4, .4)
         style.applyaxesstyle(hstack)
         if nicestyle:
-            hstack.GetXaxis().CenterTitle()
-            hstack.GetYaxis().CenterTitle()
-            if animation:
-                style.cuttext(self.enrichstatus.cuttext(), x1=.48+.03*(discriminant.name=="D_bkg"), x2=.58+.03*(discriminant.name=="D_bkg"))
-            else:
-                style.cuttext(self.enrichstatus.cuttext())
-
-            lumi = float(Luminosity("fordata", self.production))
-            if with2015:
-                lumi += config.lumi2015
-
+            subfigletter = None
+            #PRL fig. 1
             if self.analysis == "fa3" and Dbkg_allcategories and with2015 and self.enrichstatus == "fullrange":
                 CMStext = ""
-            elif discriminant.name in ("D_0minus_VBFdecay", "D_0minus_HadVHdecay") and self.enrichstatus == "enrich":
+                subfigletter = "a"
+            elif discriminant.name == "D_0hplus_decay" and with2015 and self.enrichstatus == "enrich":
                 CMStext = ""
-            elif discriminant.name in ("D_0minus_decay", "D_CP_decay", "D_0hplus_decay") and with2015 and self.enrichstatus == "enrich":
+                subfigletter = "b"
+            elif discriminant.name == "D_CP_decay" and with2015 and self.enrichstatus == "enrich":
                 CMStext = ""
+                subfigletter = "c"
+            #PRL fig. 2
+            elif discriminant.name == "D_0minus_VBFdecay" and self.enrichstatus == "enrich":
+                CMStext = ""
+                subfigletter = "a"
+            elif discriminant.name == "D_0minus_HadVHdecay" and self.enrichstatus == "enrich":
+                CMStext = ""
+                subfigletter = "b"
+            elif discriminant.name == "D_0minus_decay" and with2015 and self.enrichstatus == "enrich":
+                CMStext = ""
+                subfigletter = "c"
+            #aux - add subfig letters here?
             elif discriminant.name == "D_bkg" and with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange":
                 CMStext = "Unpublished"
             elif discriminant.name == "D_bkg" and category != "Untagged" and not Dbkg_allcategories and self.enrichstatus == "fullrange":
@@ -1096,7 +1101,22 @@ class Projections(MultiEnum):
             else:
                 CMStext = "Internal"
 
+            lumi = float(Luminosity("fordata", self.production))
+            if with2015:
+                lumi += config.lumi2015
+
             style.CMS(CMStext, lumi)
+
+            hstack.GetXaxis().CenterTitle()
+            hstack.GetYaxis().CenterTitle()
+
+            cuttextkwargs = {}
+            if animation:
+                cuttextkwargs.update(x1=.48+.03*(discriminant.name=="D_bkg"), x2=.58+.03*(discriminant.name=="D_bkg"))
+            if subfigletter is not None:
+                style.subfig(subfigletter)
+                cuttextkwargs.update(y1=.78, y2=.86)
+            style.cuttext(self.enrichstatus.cuttext(), **cuttextkwargs)
 
         legend.Draw()
         for thing, option in otherthingstodraw:
