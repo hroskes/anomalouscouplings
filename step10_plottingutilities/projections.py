@@ -1068,6 +1068,8 @@ class Projections(MultiEnum):
         if nicestyle and discriminant.name == "D_CP_decay": hstack.GetXaxis().SetRangeUser(-.4, .4)
         style.applyaxesstyle(hstack)
         if nicestyle:
+            hstack.GetXaxis().CenterTitle()
+            hstack.GetYaxis().CenterTitle()
             if animation:
                 style.cuttext(self.enrichstatus.cuttext(), x1=.48+.03*(discriminant.name=="D_bkg"), x2=.58+.03*(discriminant.name=="D_bkg"))
             else:
