@@ -96,7 +96,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)
-    style.CMS("Projection", luminosity)
+    style.CMS("Preliminary", luminosity)
 
     drawlines(CLtextposition)
     for ext in "png eps root pdf".split():
