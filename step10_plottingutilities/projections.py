@@ -8,6 +8,7 @@ import os
 import pipes
 import re
 import subprocess
+import sys
 from tempfile import mkdtemp
 
 import ROOT
@@ -141,6 +142,7 @@ enrichstatuses = EnrichStatus.items()
 
 class BaseTemplateFromFile(TemplateForProjection):
     def __init__(self, *args, **kwargs):
+        self.kwargs = kwargs
         self.with2015 = False
         for kw, kwarg in kwargs.items():
           if kw == "with2015":
@@ -153,6 +155,9 @@ class BaseTemplateFromFile(TemplateForProjection):
         #Otherwise they are wrong in some way that
         # I don't understand
         self.template.gettemplate()
+
+    def __hash__(self):
+        return hash((super(BaseTemplateFromFile, self).__hash__(), tuple(sorted(self.kwargs.iteritems()))))
 
     def inithistogram(self):
         self.isDbkgonly = False
@@ -910,6 +915,8 @@ class Projections(MultiEnum):
 
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
+            elif category == "Untagged":
+                rebin = 2
         else: #animation
             ffHintegral  = self.DbkgSum("ffHintegral", *sum(
                                                             ([(allggHg12gi0[ca,ch], g1_custom**2), (allggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
@@ -964,6 +971,8 @@ class Projections(MultiEnum):
 
             if category in ("VBFtagged", "VHHadrtagged"):
                 rebin = 5
+            elif category == "Untagged":
+                rebin = 2
 
         if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
             if Dbkg_allcategories:
@@ -1041,7 +1050,12 @@ class Projections(MultiEnum):
 
         if nicestyle:
             ymax = style.ymax((hstack, "nostack"), (data[i], "P"))
-            hstack.SetMaximum(ymax*1.25)
+            if category == "Untagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
+                hstack.SetMaximum(ymax)
+            elif category == "Untagged" and discriminant.name in ("D_0minus_decay", "D_CP_decay", "D_0hplus_decay") and self.enrichstatus == "enrich":
+                hstack.SetMaximum(ymax * 1.4)
+            else:
+                hstack.SetMaximum(ymax * 1.25)
 
         c1.cd()
         hstack.Draw("nostack")
@@ -1058,10 +1072,30 @@ class Projections(MultiEnum):
                 style.cuttext(self.enrichstatus.cuttext(), x1=.48+.03*(discriminant.name=="D_bkg"), x2=.58+.03*(discriminant.name=="D_bkg"))
             else:
                 style.cuttext(self.enrichstatus.cuttext())
+
             lumi = float(Luminosity("fordata", self.production))
             if with2015:
                 lumi += config.lumi2015
-            style.CMS("Preliminary", lumi)
+
+            if self.analysis == "fa3" and Dbkg_allcategories and with2015 and self.enrichstatus == "fullrange":
+                CMStext = ""
+            elif discriminant.name in ("D_0minus_VBFdecay", "D_0minus_HadVHdecay") and self.enrichstatus == "enrich":
+                CMStext = ""
+            elif discriminant.name in ("D_0minus_decay", "D_CP_decay", "D_0hplus_decay") and with2015 and self.enrichstatus == "enrich":
+                CMStext = ""
+            elif discriminant.name == "D_bkg" and with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange":
+                CMStext = "Unpublished"
+            elif discriminant.name == "D_bkg" and category != "Untagged" and not Dbkg_allcategories and self.enrichstatus == "fullrange":
+                CMStext = "Unpublished"
+            elif discriminant.name != "D_bkg" and with2015 and self.enrichstatus == "enrich":
+                CMStext = "Unpublished"
+            elif discriminant.name != "D_bkg" and category != "Untagged" and self.enrichstatus == "enrich":
+                CMStext = "Unpublished"
+            else:
+                CMStext = "Internal"
+
+            style.CMS(CMStext, lumi)
+
         legend.Draw()
         for thing, option in otherthingstodraw:
             if isinstance(thing, collections.Sequence) and len(thing) == 3: thing = thing[i]
@@ -1243,7 +1277,6 @@ if __name__ == "__main__":
 
   length = len(list(projections()))
   for i, (p, ch, ca) in enumerate(itertools.product(projections(), channels, categories), start=1):
-    if p.analysis != "fa2" or p.enrichstatus != "enrich" or ca != "Untagged": continue
     scantree = ROOT.TChain("limit")
     for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_7_6_5", "src", "HiggsAnalysis", "HZZ4l_Combination",
                                        "CreateDatacards", "cards_{}_Feb28_mu".format(p.analysis), "higgsCombine_obs_*.root")):
@@ -1251,18 +1284,21 @@ if __name__ == "__main__":
             if "Feb28" not in filename:
                 raise ValueError("Need to change r_VVH and r_ffH to muVscaled and mufscaled!")
             scantree.Add(filename)
-    if p.analysis != "fa2": continue
-    #p.projections(ch, ca, nicestyle=True)
-    #p.animation(ca, ch, scantree=scantree)
-    #p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
-    #p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True)
-    #p.projections(ch, ca, nicestyle=True, with2015=True)
-    p.projections(ch, ca, nicestyle=True, with2015=False)
-    p.projections(ch, ca, nicestyle=True, with2015=True)
-    #p.projections(ch, ca)
-    #p.projections(ch, ca, subdir="ggH", productionmode="ggH")
-    #p.projections(ch, ca, subdir="VBF", productionmode="VBF")
-    #p.projections(ch, ca, subdir="VH",  productionmode="VH")
-    #if p.enrichstatus == "fullrange":
-    #  p.animation(ca, ch)
+    process = int(sys.argv[1])
+    if process == 1:
+      p.projections(ch, ca, nicestyle=True)
+      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
+    if process == 2:
+      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True)
+      p.projections(ch, ca, nicestyle=True, with2015=True)
+    if process == 3:
+      p.projections(ch, ca)
+      p.projections(ch, ca, subdir="ggH", productionmode="ggH")
+      p.projections(ch, ca, subdir="VBF", productionmode="VBF")
+      p.projections(ch, ca, subdir="VH",  productionmode="VH")
+    if process == 4:
+      p.animation(ca, ch, scantree=scantree)
+    if process == 5:
+      if p.enrichstatus == "fullrange":
+        p.animation(ca, ch)
     print i, "/", length*len(channels)*len(categories)
