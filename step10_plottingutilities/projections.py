@@ -914,7 +914,7 @@ class Projections(MultiEnum):
             templates[0:0] = [SM, SMbottom, BSM, BSMbottom, mix_p, mix_pbottom, mix_m, mix_mbottom] #will remove some later, depending on the discriminant
 
             if category in ("VBFtagged", "VHHadrtagged"):
-                rebin = 5
+                rebin = 4
             elif category == "Untagged":
                 rebin = 2
         else: #animation
@@ -970,7 +970,7 @@ class Projections(MultiEnum):
             templates[0:0] = [top, bottom] #will remove some later, depending on the discriminant
 
             if category in ("VBFtagged", "VHHadrtagged"):
-                rebin = 5
+                rebin = 4
             elif category == "Untagged":
                 rebin = 2
 
@@ -1265,11 +1265,15 @@ def projections(*args):
     Projections(*args).projections()
 
 if __name__ == "__main__":
+  useanalyses = [Analysis(_) for _ in sys.argv[2:]]
+  if not useanalyses:
+    useanalyses = analyses
   def projections():
 #    yield Projections("170203", "2e2mu", "fa3", "rescalemixtures", "fullrange", "VHHadrtagged")
 #    return
     for production in config.productionsforcombine:
       for analysis in analyses:
+        if analysis not in useanalyses: continue
         for normalization in normalizations:
           for enrichstatus in enrichstatuses:
             if enrichstatus == "blind": continue
