@@ -199,7 +199,7 @@ def cuttext(*args, **kwargs):
     makecuttext(*args, **kwargs).Draw()
 
 @cache
-def makesubfig(letter, x1=.88, y1=.86, x2=.92, y2=.92):
+def makesubfig(letter, x1=.86, y1=.86, x2=.90, y2=.92):
     if not letter:
         return None
     letter = letter.lstrip("(").rstrip(")")
@@ -208,10 +208,10 @@ def makesubfig(letter, x1=.88, y1=.86, x2=.92, y2=.92):
     pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
     pt.SetBorderSize(0)
     pt.SetTextAlign(12)
-    pt.SetTextSize(0.04)
+    pt.SetTextSize(0.06)
     pt.SetFillStyle(0)
     pt.SetTextFont(42)
-    pt.AddText(0.01,0.01,"#font[62]{("+letter+")}")
+    pt.AddText(0.01,0.01,"("+letter+")")
     return pt
 
 def subfig(*args, **kwargs):

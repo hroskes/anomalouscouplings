@@ -343,13 +343,16 @@ class ComponentTemplateSumBase(TemplateSumBase):
     def inithistogram(self):
         super(ComponentTemplateSumBase, self).inithistogram()
         if isinstance(self.SMintegral, TemplateForProjection):
-            if not self.cantakeintegral:
-                raise ValueError("Have to be able to take integral of ComponentTemplateSum, or normalize to a number")
+            #if not self.cantakeintegral:
+            #    raise ValueError("Have to be able to take integral of ComponentTemplateSum, or normalize to a number")
             self.SMintegral = self.SMintegral.Integral()
         if self.h.Integral():
             self.h.Scale(self.SMintegral / self.h.Integral())
 
 class ComponentTemplateSum(ComponentTemplateSumBase, TemplateSum):  #the order is important!
+    pass
+
+class ComponentDbkgSum(ComponentTemplateSumBase, DbkgSum):  #the order is important!
     pass
 
 class ComponentTemplateSumInGroupBase(TemplateSumBase):
@@ -371,7 +374,7 @@ class ComponentTemplateSumInGroupBase(TemplateSumBase):
 class ComponentTemplateSumInGroup(ComponentTemplateSumInGroupBase, TemplateSum):  #the order is important!
     pass
 
-class DbkgSumInGroup(ComponentTemplateSumInGroupBase, DbkgSum):  #the order is important!
+class ComponentDbkgSumInGroup(ComponentTemplateSumInGroupBase, DbkgSum):  #the order is important!
     pass
 
 class Projections(MultiEnum):
@@ -407,16 +410,20 @@ class Projections(MultiEnum):
     return DbkgSum(*args, **kwargs)
   @classmethod
   @cache
-  def DbkgSumInGroup(cls, *args, **kwargs):
-    return DbkgSumInGroup(*args, **kwargs)
-  @classmethod
-  @cache
   def ComponentTemplateSum(cls, *args, **kwargs):
     return ComponentTemplateSum(*args, **kwargs)
   @classmethod
   @cache
+  def ComponentDbkgSum(cls, *args, **kwargs):
+    return ComponentDbkgSum(*args, **kwargs)
+  @classmethod
+  @cache
   def ComponentTemplateSumInGroup(cls, *args, **kwargs):
     return ComponentTemplateSumInGroup(*args, **kwargs)
+  @classmethod
+  @cache
+  def ComponentDbkgSumInGroup(cls, *args, **kwargs):
+    return ComponentDbkgSumInGroup(*args, **kwargs)
 
   class CategoryAndChannel(MultiEnum): enums = (Category, Channel)
 
@@ -628,7 +635,57 @@ class Projections(MultiEnum):
                                                []
                                              ))
 
-    del ca, ch
+    del ca
+
+    ffHSM_cat     = self.DbkgSum("ffHSM", *sum(
+                                           ([(allggHg12gi0[category,ch], 1), (allttHg12gi0[category,ch], 1)]
+                                              for ch in channels),
+                                            []
+                                           ))
+    ffHBSM_cat    = self.DbkgSum("ffHBSM", *sum(
+                                            ([(allggHg10gi2[category,ch], 1), (allttHg10gi2[category,ch], 1)]
+                                               for ch in channels),
+                                             []
+                                           ))
+    ffHmix_p_cat  = self.DbkgSum("ffHmix_p", *sum(
+                                              ([(allggHg12gi0[category,ch], g1_mix**2), (allggHg10gi2[category,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[category,ch],  g1_mix*gi_mix/gi_ggHBSM),
+                                                (allttHg12gi0[category,ch], g1_mix**2), (allttHg10gi2[category,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[category,ch],  g1_mix*gi_mix/gi_ggHBSM)]
+                                                 for ch in channels),
+                                               []
+                                              ))
+    ffHmix_m_cat  = self.DbkgSum("ffHmix_m", *sum(
+                                              ([(allggHg12gi0[category,ch], g1_mix**2), (allggHg10gi2[category,ch], (gi_mix/gi_ggHBSM)**2), (allggHg11gi1[category,ch], -g1_mix*gi_mix/gi_ggHBSM),
+                                                (allttHg12gi0[category,ch], g1_mix**2), (allttHg10gi2[category,ch], (gi_mix/gi_ggHBSM)**2), (allttHg11gi1[category,ch], -g1_mix*gi_mix/gi_ggHBSM)]
+                                                 for ch in channels),
+                                               []
+                                             ))
+
+    VVHSM_cat     = self.DbkgSum("VVHSM", *sum(
+                                           ([(allVBFg14gi0[category,ch], 1), (allZHg14gi0[category,ch], 1), (allWHg14gi0[category,ch], 1)]
+                                              for ch in channels),
+                                            []
+                                          ))
+    VVHBSM_cat    = self.DbkgSum("VVHBSM", *sum(
+                                            ([(allVBFg10gi4[category,ch], 1), (allZHg10gi4[category,ch], 1), (allWHg10gi4[category,ch], 1)]
+                                               for ch in channels),
+                                             []
+                                           ))
+    VVHmix_p_cat  = self.DbkgSum("VVHmix_p", *sum((
+                                                [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allVBFpieces[category,ch])]
+                                              + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allZHpieces[category,ch])]
+                                              + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(allWHpieces[category,ch])]
+                                                 for ch in channels),
+                                               []
+                                             ))
+    VVHmix_m_cat  = self.DbkgSum("VVHmix_m", *sum((
+                                                [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allVBFpieces[category,ch])]
+                                              + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allZHpieces[category,ch])]
+                                              + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(allWHpieces[category,ch])]
+                                                 for ch in channels),
+                                               []
+                                             ))
+
+    del ch
 
     ggHg12gi0 = {}
     ggHg10gi2 = {}
@@ -806,11 +863,24 @@ class Projections(MultiEnum):
         if Dbkg_allcategories:
             usecategories = categories
             templateclass = self.DbkgSum
-            templateclassingroup = self.DbkgSumInGroup
+            componenttemplateclass = self.ComponentDbkgSum
+            componenttemplateclassingroup = self.ComponentDbkgSumInGroup
         else:
             usecategories = [category]
             templateclass = self.TemplateSum
-            templateclassingroup = self.ComponentTemplateSumInGroup
+            componenttemplateclass = self.ComponentTemplateSum
+            componenttemplateclassingroup = self.ComponentTemplateSumInGroup
+
+        if True:
+            ffHSM = ffHSM_cat
+            ffHBSM = ffHBSM_cat
+            ffHmix_p = ffHmix_p_cat
+            ffHmix_m = ffHmix_m_cat
+            VVHSM = VVHSM_cat
+            VVHBSM = VVHBSM_cat
+            VVHmix_p = VVHmix_p_cat
+            VVHmix_m = VVHmix_m_cat
+
         if not animation:
             SMffH = templateclass("",
                                   *sum(
@@ -826,21 +896,21 @@ class Projections(MultiEnum):
                                         []
                                       )
                                  )
-            BSMffH = templateclassingroup("", ffHBSM, ffHSM,
+            BSMffH = componenttemplateclassingroup("", ffHBSM, ffHSM,
                                           *sum(
                                                ([(ggHg10gi2[ca,ch], 1), (ttHg10gi2[ca,ch], 1)]
                                                    for ca, ch in itertools.product(usecategories, channels)),
                                                 []
                                                )
                                          )
-            BSMVVH = templateclassingroup("", VVHBSM, VVHSM,
+            BSMVVH = componenttemplateclassingroup("", VVHBSM, VVHSM,
                                           *sum(
                                                ([(VBFg10gi4[ca,ch], 1), (ZHg10gi4[ca,ch], 1), (WHg10gi4[ca,ch], 1)]
                                                    for ca, ch in itertools.product(usecategories, channels)),
                                                 []
                                                )
                                          )
-            mix_pffH = templateclassingroup("", ffHmix_p, ffHSM,
+            mix_pffH = componenttemplateclassingroup("", ffHmix_p, ffHSM,
                                             *sum(
                                                  ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM),
                                                    (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_mix*gi_mix/gi_ggHBSM)]
@@ -848,7 +918,7 @@ class Projections(MultiEnum):
                                                   []
                                                  )
                                            )
-            mix_pVVH = templateclassingroup("", VVHmix_p, VVHSM,
+            mix_pVVH = componenttemplateclassingroup("", VVHmix_p, VVHSM,
                                             *sum(
                                                  ([(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
                                                 + [(template, g1_mix**(4-j) * (+gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
@@ -857,7 +927,7 @@ class Projections(MultiEnum):
                                                   []
                                                  )
                                            )
-            mix_mffH = templateclassingroup("", ffHmix_m, ffHSM,
+            mix_mffH = componenttemplateclassingroup("", ffHmix_m, ffHSM,
                                             *sum(
                                                  ([(ggHg12gi0[ca,ch], g1_mix**2), (ggHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ggHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM),
                                                    (ttHg12gi0[ca,ch], g1_mix**2), (ttHg10gi2[ca,ch], (gi_mix/gi_ggHBSM)**2), (ttHg11gi1[ca,ch], -g1_mix*gi_mix/gi_ggHBSM)]
@@ -865,7 +935,7 @@ class Projections(MultiEnum):
                                                   []
                                                  )
                                            )
-            mix_mVVH = templateclassingroup("", VVHmix_m, VVHSM,
+            mix_mVVH = componenttemplateclassingroup("", VVHmix_m, VVHSM,
                                             *sum(
                                                  ([(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(VBFpieces[ca,ch])]
                                                 + [(template, g1_mix**(4-j) * (-gi_mix)**j) for j, template in enumerate(ZHpieces[ca,ch])]
@@ -931,7 +1001,7 @@ class Projections(MultiEnum):
                                                                for ca, ch in itertools.product(categories, channels)),
                                                               []
                                                            ))
-            ffH = templateclassingroup("", ffHintegral, ffHSM,
+            ffH = componenttemplateclassingroup("", ffHintegral, ffHSM,
                                        *sum(
                                             ([(ggHg12gi0[ca,ch], g1_custom**2), (ggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
                                               (ttHg12gi0[ca,ch], g1_custom**2), (ttHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (ttHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM)]
@@ -939,7 +1009,7 @@ class Projections(MultiEnum):
                                              []
                                             )
                                       )
-            VVH = templateclassingroup("", VVHintegral, VVHSM,
+            VVH = componenttemplateclassingroup("", VVHintegral, VVHSM,
                                        *sum(
                                             ([(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(VBFpieces[ca,ch])]
                                            + [(template, g1_custom**(4-j) * (+gi_custom)**j) for j, template in enumerate(ZHpieces[ca,ch])]
