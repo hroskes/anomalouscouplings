@@ -1062,7 +1062,7 @@ class Projections(MultiEnum):
             ymax = style.ymax((hstack, "nostack"), (data[i], "P"))
             if category == "Untagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
                 hstack.SetMaximum(ymax)
-            elif category == "Untagged" and discriminant.name in ("D_0minus_decay", "D_CP_decay", "D_0hplus_decay") and self.enrichstatus == "enrich":
+            elif discriminant.name in ("D_0minus_decay", "D_CP_decay", "D_0hplus_decay", "D_0minus_HadVHdecay") and self.enrichstatus == "enrich":
                 hstack.SetMaximum(ymax * 1.4)
             else:
                 hstack.SetMaximum(ymax * 1.25)
