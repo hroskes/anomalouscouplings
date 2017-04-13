@@ -218,8 +218,7 @@ def subfig(*args, **kwargs):
     makesubfig(*args, **kwargs).Draw()
 
 @cache
-def makeCMS(extratext):
-    x1, y1, x2, y2 = 0.15, 0.93, 0.85, 1
+def makeCMS(extratext, x1=0.15, y1=0.93, x2=0.99, y2=1):
     pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
     pt.SetBorderSize(0)
     pt.SetFillStyle(0)
@@ -235,7 +234,7 @@ def makeCMS(extratext):
     return pt
 
 @cache
-def makelumi(lumi=None, lumitext=None):
+def makelumi(lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1):
     if lumi is lumitext is None:
         raise ValueError("Have to provide lumi or lumitext!")
     if lumi is not None is not lumitext:
@@ -246,7 +245,6 @@ def makelumi(lumi=None, lumitext=None):
 
     lumitext = "#font[42]{" + lumitext + "}"
 
-    x1, y1, x2, y2 = 0.15, 0.93, .99, 1
     pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
     pt.SetBorderSize(0)
     pt.SetFillStyle(0)
@@ -258,6 +256,6 @@ def makelumi(lumi=None, lumitext=None):
 
     return pt
 
-def CMS(extratext, lumi=None, lumitext=None):
-    makeCMS(extratext=extratext).Draw()
-    makelumi(lumi=lumi, lumitext=lumitext).Draw()
+def CMS(extratext, lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1):
+    makeCMS(extratext=extratext, x1=x1, y1=y1, x2=x2, y2=y2).Draw()
+    makelumi(lumi=lumi, lumitext=lumitext, x1=x1, y1=y1, x2=x2, y2=y2).Draw()
