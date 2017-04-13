@@ -21,16 +21,25 @@ from mergeplots import Folder
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 
 def PRL_loglinear(**kwargs):
-    drawlineskwargs = {
-                       "PRL": True,
-                       "logscale": False,  #the lines are in the linear part
-                      }
-    legendposition = (.2, .7, .6, .9)
+    commondrawlineskwargs = {
+                             "logscale": False,  #the lines are in the linear part
+                             "xsize": .3,
+                             "ysize": .1,
+                             "textsize": .1,
+                             "yshift68": .08,
+                             "yshift95": -.1,
+                            }
+    legendposition = (.15, .15, 1, .8)
     plotname = "limit_lumi35.8671.root"
     ydivide = 4.5
+    legendpad = 4
+    CLtextposition = -0.5
+    analysisforCLtext = Analysis("fa2")
     for kw, kwarg in kwargs.iteritems():
         if kw == "CLtextposition":
-            drawlineskwargs["xpostext"] = kwarg
+            CLtextposition = kwarg
+        elif kw == "analysisforCLtext":
+            analysisforCLtext = Analysis(kwarg)
         elif kw == "legendposition":
             try:
                 legendposition = [float(a) for a in kwarg.split(",")]
@@ -40,22 +49,23 @@ def PRL_loglinear(**kwargs):
         elif kw == "ydivide":
             ydivide = float(kwarg)
         else:
-            drawlineskwargs[kw] = kwarg
+            commondrawlineskwargs[kw] = kwarg
 
-    for k, v in drawlineskwargs.items():
+    for k, v in commondrawlineskwargs.items():
         if k == "xpostext":
             try:
-                drawlineskwargs[k] = float(v)
+                commondrawlineskwargs[k] = float(v)
             except ValueError:
                 pass
         elif k in ("xmin", "xmax"):
-            drawlineskwargs[k] = float(v)
+            commondrawlineskwargs[k] = float(v)
 
     c = ROOT.TCanvas("c1", "", 8, 30, len(analyses)*1600, 1600)
+    c.SetLeftMargin(.13)
     c.Divide(len(analyses), 2, 0, 0)
     mgs = {}
     mgslog = {}
-    for i, analysis in reversed(list(enumerate(analyses, start=1))):
+    for i, (analysis, letter) in reversed(list(enumerate(zip(analyses, "abcd"), start=1))):
         linearpad = c.cd(i+len(analyses))
         logpad = c.cd(i)
 
@@ -73,42 +83,47 @@ def PRL_loglinear(**kwargs):
         for folder in folders:
             mg.Add(folder.graph)
 
+        setmax = 1
+
         mglog = mgslog[analysis] = mg.Clone()
         logpad.cd()
         logpad.SetLogy()
         mglog.Draw("al")
         mglog.GetXaxis().SetTitle(folders[0].xtitle)
-        mglog.GetYaxis().SetTitle(folders[0].ytitle)
-        mglog.GetXaxis().SetRangeUser(-1, 1)
+        mglog.GetXaxis().SetRangeUser(-setmax, setmax)
         mglog.GetXaxis().CenterTitle()
         mglog.GetYaxis().CenterTitle()
         mglog.SetMinimum(ydivide)
         mglog.SetMaximum(120)
         style.applyaxesstyle(mglog)
-        mglog.GetXaxis().SetLabelSize(.08)
-        mglog.GetYaxis().SetLabelSize(.08)
-        mglog.GetXaxis().SetTitleSize(.08)
-        mglog.GetYaxis().SetTitleSize(.08)
-        logpad.SetTopMargin(.1)
+        mglog.GetXaxis().SetLabelSize(.12)
+        mglog.GetYaxis().SetLabelSize(.12)
+        mglog.GetXaxis().SetTitleSize(.12)
+        mglog.GetYaxis().SetTitleSize(.12)
+        logpad.SetTopMargin(.06)
+        style.subfig(letter, textsize=.15, x1=.9, x2=.94, y1=.78, y2=.84)
 
         linearpad.cd()
         mg.Draw("al")
         mg.GetXaxis().SetTitle(folders[0].xtitle)
-        mg.GetYaxis().SetTitle(folders[0].ytitle)
-        mg.GetXaxis().SetRangeUser(-1, 1)
+        mg.GetXaxis().SetRangeUser(-setmax, setmax)
         mg.GetXaxis().CenterTitle()
         mg.GetYaxis().CenterTitle()
         mg.SetMinimum(0)
         mg.SetMaximum(ydivide)
         style.applyaxesstyle(mg)
-        mg.GetXaxis().SetLabelSize(.08)
-        mg.GetYaxis().SetLabelSize(.08)
-        mg.GetXaxis().SetTitleSize(.09)
-        mg.GetYaxis().SetTitleSize(.09)
-        linearpad.SetBottomMargin(.2)
+        mg.GetXaxis().SetLabelSize(.12)
+        mg.GetYaxis().SetLabelSize(.12)
+        mg.GetXaxis().SetTitleSize(.15)
+        mg.GetYaxis().SetTitleSize(.12)
+        linearpad.SetBottomMargin(.32)
 
+        drawlineskwargs = commondrawlineskwargs.copy()
+        drawlineskwargs["xpostext"] = CLtextposition if analysis == analysisforCLtext else 9999999
+        drawlineskwargs["arbitraryparameter"] = analysis
         drawlines(**drawlineskwargs)
 
+    c.cd(legendpad)
     l = ROOT.TLegend(*legendposition)
     l.SetBorderSize(0)
     l.SetFillStyle(0)
@@ -121,8 +136,10 @@ def PRL_loglinear(**kwargs):
     style.applycanvasstyle(c)
     style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
                                             .format(config.productionforcombine.dataluminosity+config.lumi2015),
-                  x1=0.03)
-
+                  x1=0.007, x2=1.025, #???
+                  drawCMS=False, extratextsize=.06)
+    style.CMS("", x1=0.02, x2=1.025, y1=.82, y2=.9, CMStextsize=.1)
+    yaxislabel(folders[0].ytitle).Draw()
 
     saveasdir = os.path.join(config.plotsbasedir, "limits")
     try:
@@ -140,6 +157,21 @@ def PRL_loglinear(**kwargs):
         f.write(subprocess.check_output(["git", "status"]))
         f.write("\n")
         f.write(subprocess.check_output(["git", "diff"]))
+
+
+@cache
+def yaxislabel(label):
+    pt = ROOT.TPaveText(0, 0, .02, 1, "brNDC")
+    pt.SetBorderSize(0)
+    pt.SetFillStyle(0)
+    pt.SetTextAlign(22)
+    pt.SetTextFont(42)
+    pt.SetTextSize(.415)
+    text = pt.AddText(.5,.5,label)
+    text.SetTextSize(0.07)
+    text.SetTextAngle(90)
+    return pt
+
 
 if __name__ == "__main__":
     args = []

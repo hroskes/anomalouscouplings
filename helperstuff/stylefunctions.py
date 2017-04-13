@@ -199,7 +199,7 @@ def cuttext(*args, **kwargs):
     makecuttext(*args, **kwargs).Draw()
 
 @cache
-def makesubfig(letter, x1=.86, y1=.86, x2=.90, y2=.92):
+def makesubfig(letter, x1=.86, y1=.86, x2=.90, y2=.92, textsize=0.06):
     if not letter:
         return None
     letter = letter.lstrip("(").rstrip(")")
@@ -208,7 +208,7 @@ def makesubfig(letter, x1=.86, y1=.86, x2=.90, y2=.92):
     pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
     pt.SetBorderSize(0)
     pt.SetTextAlign(12)
-    pt.SetTextSize(0.06)
+    pt.SetTextSize(textsize)
     pt.SetFillStyle(0)
     pt.SetTextFont(42)
     pt.AddText(0.01,0.01,"("+letter+")")
@@ -218,25 +218,25 @@ def subfig(*args, **kwargs):
     makesubfig(*args, **kwargs).Draw()
 
 @cache
-def makeCMS(extratext, x1=0.15, y1=0.93, x2=0.99, y2=1):
+def makeCMS(extratext, x1=0.15, y1=0.93, x2=0.99, y2=1, CMStextsize=0.044, extratextsize=0.0315, drawCMS=True):
     pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
     pt.SetBorderSize(0)
     pt.SetFillStyle(0)
     pt.SetTextAlign(12)
     pt.SetTextFont(42)
-    pt.SetTextSize(0.045)
-    text = pt.AddText(0.025,0.45,"#font[61]{CMS}")
-    text.SetTextSize(0.044)
+    if drawCMS:
+        text = pt.AddText(0.025,0.45,"#font[61]{CMS}")
+        text.SetTextSize(CMStextsize)
     if extratext:
         text = pt.AddText(0.165, 0.42, "#font[52]{"+extratext+"}")
-        text.SetTextSize(0.0315)
+        text.SetTextSize(extratextsize)
 
     return pt
 
 @cache
-def makelumi(lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1):
+def makelumi(lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1, textsize=0.0315):
     if lumi is lumitext is None:
-        raise ValueError("Have to provide lumi or lumitext!")
+        return
     if lumi is not None is not lumitext:
         raise ValueError("Can't provide both lumi and lumitext!")
 
@@ -250,12 +250,13 @@ def makelumi(lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1):
     pt.SetFillStyle(0)
     pt.SetTextAlign(32)
     pt.SetTextFont(42)
-    pt.SetTextSize(0.045)
     text = pt.AddText(1,0.45,lumitext)
-    text.SetTextSize(0.0315)
+    text.SetTextSize(textsize)
 
     return pt
 
-def CMS(extratext, lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1):
-    makeCMS(extratext=extratext, x1=x1, y1=y1, x2=x2, y2=y2).Draw()
-    makelumi(lumi=lumi, lumitext=lumitext, x1=x1, y1=y1, x2=x2, y2=y2).Draw()
+def CMS(extratext, lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1, CMStextsize=0.044, extratextsize=0.0315, drawCMS=True):
+    CMS = makeCMS(extratext=extratext, x1=x1, y1=y1, x2=x2, y2=y2, CMStextsize=CMStextsize, extratextsize=extratextsize, drawCMS=drawCMS)
+    lumi = makelumi(lumi=lumi, lumitext=lumitext, x1=x1, y1=y1, x2=x2, y2=y2, textsize=extratextsize)
+    if CMS is not None: CMS.Draw()
+    if lumi is not None: lumi.Draw()

@@ -188,12 +188,9 @@ class XPos(MyEnum):
             self.custompos = value
     def __nonzero__(self):
         return self == "right" or self == "left" or -1 <= self.custompos <= 1
-    def TPaveText(self, ypos, logscale=False, PRL=False, yshift=.01):
+    def TPaveText(self, ypos, logscale=False, yshift=.01, xsize=.1, ysize=.03):
         xsize = .1
         ysize = .03
-        if PRL:
-            xsize=.15
-            ysize=.03
         if self == "right":
             x2, y1 = GetNDC(.95, ypos, logscale)
             x1 = x2 - xsize
@@ -220,7 +217,18 @@ class XPos(MyEnum):
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
 @cache
-def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, PRL=False, CLbelow=False):
+def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, xsize=.1, ysize=.03, yshift=0, yshift68=None, yshift95=None, textsize=None, PRL=False, CLbelow=False, arbitraryparameter=None):
+    """
+    xpostext: "left", "right", or a float, determines where the text 68% CL and 95% CL goes
+    xmin: minimum of plot
+    xmax: maximum of plot
+    logscale: is the plot in logscale
+    xsize, ysize, textsize: xsize of text
+    yshift, yshift68, yshift95: y shift of text from lines
+    PRL: quick switch for big text for PRL
+      CLbelow: for PRL, put CL text below the lines rather than above
+    arbitraryparameter: doesn't do anything, but the lines are stored separately in the cache
+    """
     xpostext = XPos(xpostext)
     line68 = ROOT.TLine()
     line68.SetLineStyle(9)
@@ -229,28 +237,37 @@ def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, PRL=False, CLbel
     line95.SetLineStyle(9)
     line95.DrawLine(xmin,3.84,xmax,3.84)
 
-    yshift=0
+    if CLbelow and not PRL:
+        raise ValueError("CLbelow only works with PRL.  Turn it on, or set yshift yourself")
+    if PRL and not (xsize == .1 and ysize == .03 and yshift == 0 and textsize is yshift68 is yshift95 is None):
+        raise ValueError("To set PRL options, keep xsize, ysize, yshift, and textsize as their defaults!")
+
     if PRL:
+        xsize = .15
+        textsize = .044
         if CLbelow:
             yshift=-.04
         else:
             yshift=.01
 
-    oneSig = xpostext.TPaveText(1, logscale=logscale, PRL=PRL, yshift=yshift)
+    if yshift68 is None: yshift68 = yshift
+    if yshift95 is None: yshift95 = yshift
+
+    oneSig = xpostext.TPaveText(1, logscale=logscale, xsize=xsize, ysize=ysize, yshift=yshift68)
     oneSig.SetFillColor(0)
     oneSig.SetFillStyle(0)
     oneSig.SetTextFont(42)
     oneSig.SetBorderSize(0)
 
-    twoSig = xpostext.TPaveText(3.84, logscale=logscale, PRL=PRL, yshift=yshift)
+    twoSig = xpostext.TPaveText(3.84, logscale=logscale, xsize=xsize, ysize=ysize, yshift=yshift95)
     twoSig.SetFillColor(0)
     twoSig.SetFillStyle(0)
     twoSig.SetTextFont(42)
     twoSig.SetBorderSize(0)
 
-    if PRL:
-        oneSig.SetTextSize(0.044)
-        twoSig.SetTextSize(0.044)
+    if textsize is not None:
+        oneSig.SetTextSize(textsize)
+        twoSig.SetTextSize(textsize)
 
     if xpostext:
         oneSig.AddText("68% CL")
