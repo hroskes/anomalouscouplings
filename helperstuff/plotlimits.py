@@ -44,8 +44,8 @@ def yaxistitle(nuisance, analysis):
     if nuisance is None: return "#minus2 #Deltaln L"
     return xaxistitle(POI=nuisance, analysis=analysis)
 def actualvariable(variable):
-    if variable in ("r_VVH", "muV"): return "muV_scaled"
-    if variable in ("r_ffH", "muf"): return "muf_scaled"
+    if variable in ("r_VVH", "muV", "RV"): return "muV_scaled"
+    if variable in ("r_ffH", "muf", "RF"): return "muf_scaled"
     return variable
 
 def plotlimits(outputfilename, analysis, *args, **kwargs):
@@ -58,6 +58,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     scanranges = None
     nuisance = None
     POI = "CMS_zz4l_fai1"
+    fixfai = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -75,6 +76,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             nuisance = actualvariable(kwarg)
         elif kw == "POI":
             POI = actualvariable(kwarg)
+        elif kw == "fixfai":
+            fixfai = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -84,8 +87,14 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     scans = []
     uptocolor = 1
     for arg in args:
+        print fixfai
+        if fixfai:
+            phipart = "{} = 0".format(analysis.title())
+        else:
+            phipart = "{} = 0 or #pi".format(analysis.phi)
         if arg == "obs":
-            scans.append(Scan("obs{}".format(moreappend), "Observed, {} = 0 or #pi".format(analysis.phi), 1, 1))
+            scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1))
+            print "Observed, {}".format(phipart)
             if productions is None:
                 raise ValueError("No productions provided!")
         else:
@@ -94,9 +103,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
             if arg == 0:
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = 0 or #pi".format(analysis.phi), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2)))
             else:
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {} = 0 or #pi".format(analysis.title(), arg, analysis.phi).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
+                assert not fixfai
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
     if luminosity is None:
