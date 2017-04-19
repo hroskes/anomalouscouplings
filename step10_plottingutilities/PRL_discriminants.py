@@ -12,16 +12,6 @@ from helperstuff.utilities import cache, tfiles
 
 from projections import Projections
 
-def bkppad(function):
-  @wraps(function)
-  def newfunction(*args, **kwargs):
-    pad = ROOT.gPad
-    try:
-      return function(*args, **kwargs)
-    finally:
-      pad.cd()
-  return newfunction
-
 class DiscriminantAxis(MyEnum):
   enumname = "discriminantaxis"
   enumitems = (
@@ -37,20 +27,49 @@ class ExtendedCategory(MyEnum):
     EnumItem("Untagged_with2015"),
   )
 
+def SetLegendPosition(legend, x1, y1, x2, y2):
+  legend.SetX1NDC(x1)
+  legend.SetX2NDC(x2)
+  legend.SetY1NDC(y1)
+  legend.SetY2NDC(y2)
+
 class Discriminant(MultiEnum):
   enums = (Projections, DiscriminantAxis, ExtendedCategory)
 
   def __init__(self, *args, **kwargs):
     super(Discriminant, self).__init__(*args)
-    self.hstack
-    self.graph
-    self.legend
+    hstack = self.hstack
+    graph = self.graph
+    legend = self.legend
 
+    fulllegend = False
     for kw, kwarg in kwargs.iteritems():
       if kw == "maximum":
-        self.hstack.SetMaximum(kwarg)
+        hstack.SetMaximum(kwarg)
+      elif kw == "legendposition":
+        SetLegendPosition(self.legend, *kwarg)
+      elif kw == "fulllegend":
+        fulllegend = kwarg
       else:
         raise ValueError("Unknown kwarg {}={}!".format(kw, kwarg))
+
+    if not fulllegend:
+      lst = legend.GetListOfPrimitives()
+      for entry in lst:
+        if entry.GetLineStyle() == 2:
+          if entry.GetLineColor() == 810: #total BSM
+            label = entry.GetLabel()
+            label = label.replace("total ", "#lower[0.5]{") + "}"
+            entry.SetLabel(label)
+          elif entry.GetLineColor() == 4:
+            entry.SetLabel("")
+          else:
+            raise ValueError("color = {}???".format(entry.GetLineColor()))
+        else:
+          lst.Remove(entry)
+
+    print legend.GetTextSize()
+    legend.SetTextSize(.08)
 
   def check(self, *args):
     if self.extendedcategory == "allevents" and self.discriminantaxis != "Z":
@@ -87,12 +106,10 @@ class Discriminant(MultiEnum):
     return rootfile.c1
 
   @cache
-  @bkppad
   def GetListOfPrimitives(self):
     return list(self.canvas.GetListOfPrimitives())
 
   @property
-  @bkppad
   @cache
   def hstack(self):
     hstack = self.GetListOfPrimitives()[1]
@@ -101,16 +118,15 @@ class Discriminant(MultiEnum):
     return hstack.Clone()
 
   @property
-  @bkppad
   @cache
   def graph(self):
     graph = self.GetListOfPrimitives()[-1]
     if not isinstance(graph, ROOT.TGraph):
       raise ValueError("graph has the wrong type:\n{}".format(graph))
+    graph.SetMarkerSize(7)
     return graph.Clone()
 
   @property
-  @bkppad
   @cache
   def legend(self):
     result = {_ for _ in self.GetListOfPrimitives() if isinstance(_, ROOT.TLegend)}
@@ -125,16 +141,16 @@ def TPad(*args, **kwargs):
 def PRL_discriminants():
   rows = [
     [
-      Discriminant("fa3", "fullrange", "Z", "allevents", config.productionforcombine),
-      Discriminant("fa2", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=22),
-      Discriminant("fL1", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=39),
-      Discriminant("fL1Zg", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=35),
+      Discriminant("fa3", "fullrange", "Z", "allevents", config.productionforcombine, fulllegend=True, legendposition=(.2, .35, .8, .95)),
+      Discriminant("fa2", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=22, legendposition=(.5,.7,.9,.85)),
+      Discriminant("fL1", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=39, legendposition=(.53,.7,.93,.85)),
+      Discriminant("fL1Zg", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=35, legendposition=(.6,.7,1,.85)),
     ],
     [
-      Discriminant("fa3", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=14),
-      Discriminant("fa3", "enrich", "X", "VBFtagged", config.productionforcombine, maximum=4.8),
-      Discriminant("fa3", "enrich", "X", "VHHadrtagged", config.productionforcombine, maximum=3.7),
-      Discriminant("fa3", "enrich", "Y", "Untagged_with2015", config.productionforcombine, maximum=19),
+      Discriminant("fa3", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=14, legendposition=(.5,.82,.9,.97)),
+      Discriminant("fa3", "enrich", "X", "VBFtagged", config.productionforcombine, maximum=4.8, legendposition=(.6,.82,1,.97)),
+      Discriminant("fa3", "enrich", "X", "VHHadrtagged", config.productionforcombine, maximum=3.7, legendposition=(.6,.82,1,.97)),
+      Discriminant("fa3", "enrich", "Y", "Untagged_with2015", config.productionforcombine, maximum=19, legendposition=(.56,.82,.9,.97)),
     ],
   ]
 
@@ -143,6 +159,11 @@ def PRL_discriminants():
   assert len(ncolumns) == 1; ncolumns = ncolumns.pop()
 
   c = ROOT.TCanvas("c", "c", 1600*ncolumns, 1600*nrows)
+  style.applycanvasstyle(c)
+  c.SetLeftMargin(.01)
+  c.SetRightMargin(.1)
+  c.SetTopMargin(.13)
+  c.SetBottomMargin(0)
   c.Divide(ncolumns, nrows, 0, 0)
 
   for iy, row in enumerate(rows):
@@ -160,11 +181,9 @@ def PRL_discriminants():
       hstack.GetYaxis().SetLabelSize(.08)
       hstack.GetXaxis().SetTitleSize(.08)
       hstack.GetYaxis().SetTitleSize(.08)
-      graph.SetMarkerSize(7)
       graph.Draw("P")
-      #legend.Draw()
+      legend.Draw()
 
-  style.applycanvasstyle(c)
   for ext in "png eps root pdf".split():
     c.SaveAs(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "PRL.{}".format(ext)))
 
