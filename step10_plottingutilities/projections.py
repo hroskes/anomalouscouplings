@@ -496,7 +496,7 @@ class Projections(MultiEnum):
 
     if saveasdir is None:
         if Dbkg_allcategories:
-            saveasdir = self.saveasdir_Dbkgsum(category)
+            saveasdir = self.saveasdir_Dbkgsum()
         elif nicestyle:
             saveasdir = self.saveasdir_niceplots(category, with2015=with2015)
         else:
@@ -1146,11 +1146,11 @@ class Projections(MultiEnum):
       return os.path.join(config.plotsbasedir, "templateprojections", "projections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
   def saveasdir_niceplots(self, category, with2015=False):
       assert self.normalization == "rescalemixtures" and len(config.productionsforcombine) == 1
-      result = os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
+      result = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
       if with2015: result += "_with2015"
       return result
-  def saveasdir_Dbkgsum(self, category):
-      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots",   self.enrichstatus.dirname(), str(self.analysis))
+  def saveasdir_Dbkgsum(self):
+      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots", self.enrichstatus.dirname(), str(self.analysis))
 
   def discriminants(self, category):
       return TemplatesFile("2e2mu", self.shapesystematic, "ggh", self.analysis, self.production, category).discriminants

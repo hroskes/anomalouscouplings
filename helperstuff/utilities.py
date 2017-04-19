@@ -2,6 +2,7 @@ import abc
 import collections
 import contextlib
 import errno
+from functools import wraps
 from itertools import tee, izip
 import logging
 import operator
@@ -59,6 +60,7 @@ class MultiplyCounter(collections.Counter):
 
 def cache(function):
     cache = {}
+    @wraps(function)
     def newfunction(*args, **kwargs):
         try:
             return cache[args, tuple(sorted(kwargs.iteritems()))]
@@ -68,7 +70,6 @@ def cache(function):
         except KeyError:
             cache[args, tuple(sorted(kwargs.iteritems()))] = function(*args, **kwargs)
             return newfunction(*args, **kwargs)
-    newfunction.__name__ = function.__name__
     return newfunction
 
 def multienumcache(function, haskwargs=False, multienumforkey=None):
