@@ -10,6 +10,7 @@ from helperstuff import stylefunctions as style
 from helperstuff.enums import EnumItem, Category, MultiEnum, MyEnum
 from helperstuff.utilities import cache, tfiles
 
+from PRL_loglinear import yaxislabel
 from projections import Projections
 
 class DiscriminantAxis(MyEnum):
@@ -68,7 +69,6 @@ class Discriminant(MultiEnum):
         else:
           lst.Remove(entry)
 
-    print legend.GetTextSize()
     legend.SetTextSize(.08)
 
   def check(self, *args):
@@ -134,10 +134,6 @@ class Discriminant(MultiEnum):
     result = result.pop().Clone()
     return result
 
-@cache
-def TPad(*args, **kwargs):
-  return ROOT.TPad(*args, **kwargs)
-
 def PRL_discriminants():
   rows = [
     [
@@ -159,30 +155,40 @@ def PRL_discriminants():
   assert len(ncolumns) == 1; ncolumns = ncolumns.pop()
 
   c = ROOT.TCanvas("c", "c", 1600*ncolumns, 1600*nrows)
-  style.applycanvasstyle(c)
-  c.SetLeftMargin(.01)
+#  style.applycanvasstyle(c)
   c.SetRightMargin(.1)
-  c.SetTopMargin(.13)
+  c.SetTopMargin(.17)
   c.SetBottomMargin(0)
+  c.SetLeftMargin(.12)
   c.Divide(ncolumns, nrows, 0, 0)
 
   for iy, row in enumerate(rows):
     for ix, plot in enumerate(row, start=1):
       pad = c.cd(iy*len(row) + ix)
-      style.applycanvasstyle(pad)
-      pad.SetLeftMargin(.08)
+#      style.applycanvasstyle(pad)
+      if not (ix == 1):
+        pad.SetLeftMargin(.08)
       pad.SetRightMargin(.02)
       pad.SetTopMargin(0)
-      pad.SetBottomMargin(.18)
+      pad.SetBottomMargin(.23)
       hstack, graph, legend = plot.hstack, plot.graph, plot.legend
       hstack.Draw("nostack")
       hstack.GetYaxis().SetTitle("")
       hstack.GetXaxis().SetLabelSize(.08)
       hstack.GetYaxis().SetLabelSize(.08)
-      hstack.GetXaxis().SetTitleSize(.08)
-      hstack.GetYaxis().SetTitleSize(.08)
+      hstack.GetXaxis().SetTitleSize(.10)
+      hstack.GetYaxis().SetTitleSize(.10)
       graph.Draw("P")
       legend.Draw()
+
+
+  c.cd()
+  style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
+                                          .format(config.productionforcombine.dataluminosity+config.lumi2015),
+                x1=0.007, x2=1.025, #???
+                drawCMS=False, extratextsize=.045)
+  style.CMS("", x1=0.007, x2=1.025, CMStextsize=.075)
+  yaxislabel("Events / bin", textsize=.045).Draw()
 
   for ext in "png eps root pdf".split():
     c.SaveAs(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "PRL.{}".format(ext)))

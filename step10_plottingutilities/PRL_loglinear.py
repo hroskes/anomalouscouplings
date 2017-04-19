@@ -160,7 +160,7 @@ def PRL_loglinear(**kwargs):
 
 
 @cache
-def yaxislabel(label):
+def yaxislabel(label, textsize=.07):
     pt = ROOT.TPaveText(0, 0, .02, 1, "brNDC")
     pt.SetBorderSize(0)
     pt.SetFillStyle(0)
@@ -168,7 +168,7 @@ def yaxislabel(label):
     pt.SetTextFont(42)
     pt.SetTextSize(.415)
     text = pt.AddText(.5,.5,label)
-    text.SetTextSize(0.07)
+    text.SetTextSize(textsize)
     text.SetTextAngle(90)
     return pt
 
