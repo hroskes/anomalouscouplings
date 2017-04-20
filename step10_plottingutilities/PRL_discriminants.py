@@ -161,7 +161,7 @@ def drawarrow():
 def PRL_discriminants():
   rows = [
     [
-      Discriminant("fa3", "fullrange", "Z", "allevents", config.productionforcombine, fulllegend=True, legendposition=(.23, .38, .83, .98)),
+      Discriminant("fa3", "fullrange", "Z", "allevents", config.productionforcombine, fulllegend=True, legendposition=(.15, .38, .75, .98)),
       Discriminant("fa2", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=22, legendposition=(.5,.7,.9,.85)),
       Discriminant("fL1", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=39, legendposition=(.53,.7,.93,.85)),
       Discriminant("fL1Zg", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=35, legendposition=(.6,.7,1,.85)),
@@ -181,9 +181,9 @@ def PRL_discriminants():
   c = ROOT.TCanvas("c", "c", 1600*ncolumns, 1600*nrows)
   style.applycanvasstyle(c)
 
-  leftmargin = .5#.12
-  rightmargin = .1
-  topmargin = .17
+  leftmargin = .024
+  rightmargin = .02
+  topmargin = .07
   bottommargin = 0
   c.SetLeftMargin(leftmargin)
   c.SetRightMargin(rightmargin)
@@ -193,7 +193,7 @@ def PRL_discriminants():
   cachelist = []
 
   for iy, row in enumerate(rows):
-    ymin = bottommargin + (1-topmargin-bottommargin) * iy / nrows
+    ymin = bottommargin + (1-topmargin-bottommargin) * (nrows-iy-1) / nrows
     ymax = ymin + (1-topmargin-bottommargin) / nrows
     for ix, plot in enumerate(row, start=1):
       xmin = leftmargin + (1-rightmargin-leftmargin) * (ix-1) / ncolumns
@@ -207,20 +207,8 @@ def PRL_discriminants():
       pad.cd()
       cachelist.append(pad)
       style.applycanvasstyle(pad)
-      if ix == 1:
-        dummypad = ROOT.TPad("dummypad{}".format(iy), "", 0, 0, leftmargin * (1 - leftmargin) / ncolumns, 1)
-        dummypad.Draw()
-        pad.cd()
-        realpad = ROOT.TPad("realpad{}".format(iy), "", leftmargin * (1 - leftmargin) / ncolumns, 0, 1, 1)
-        realpad.Draw()
-        cachelist += [pad, dummypad, realpad]
-        pad = realpad
-        pad.cd()
-        style.applycanvasstyle(pad)
-        print pad, dummypad, realpad
       letter = "abcdefgh"[idx-1]
-      if not (ix == 1):
-        pad.SetLeftMargin(.08)
+      pad.SetLeftMargin(.08)
       pad.SetRightMargin(.02)
       pad.SetTopMargin(0)
       pad.SetBottomMargin(.23)
