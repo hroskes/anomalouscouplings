@@ -134,19 +134,34 @@ class Discriminant(MultiEnum):
     result = result.pop().Clone()
     return result
 
+@cache
+def makearrow():
+  color = ROOT.kOrange+7
+  width = 2
+  line = ROOT.TLine(0.5, 0, 0.5, 20)
+  arrow = ROOT.TArrow(0.5, 20, 0.8, 20, .008, "|>")
+  line.SetLineColor(color)
+  line.SetLineWidth(width)
+  arrow.SetLineColor(color)
+  arrow.SetLineWidth(width)
+  return line, arrow
+
+def drawarrow():
+  for _ in makearrow(): _.Draw()
+
 def PRL_discriminants():
   rows = [
     [
-      Discriminant("fa3", "fullrange", "Z", "allevents", config.productionforcombine, fulllegend=True, legendposition=(.2, .35, .8, .95)),
+      Discriminant("fa3", "fullrange", "Z", "allevents", config.productionforcombine, fulllegend=True, legendposition=(.23, .38, .83, .98)),
       Discriminant("fa2", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=22, legendposition=(.5,.7,.9,.85)),
       Discriminant("fL1", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=39, legendposition=(.53,.7,.93,.85)),
       Discriminant("fL1Zg", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=35, legendposition=(.6,.7,1,.85)),
     ],
     [
-      Discriminant("fa3", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=14, legendposition=(.5,.82,.9,.97)),
-      Discriminant("fa3", "enrich", "X", "VBFtagged", config.productionforcombine, maximum=4.8, legendposition=(.6,.82,1,.97)),
-      Discriminant("fa3", "enrich", "X", "VHHadrtagged", config.productionforcombine, maximum=3.7, legendposition=(.6,.82,1,.97)),
-      Discriminant("fa3", "enrich", "Y", "Untagged_with2015", config.productionforcombine, maximum=19, legendposition=(.56,.82,.9,.97)),
+      Discriminant("fa3", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=14, legendposition=(.5,.85,.9,1)),
+      Discriminant("fa3", "enrich", "X", "VBFtagged", config.productionforcombine, maximum=4.8, legendposition=(.6,.85,1,1)),
+      Discriminant("fa3", "enrich", "X", "VHHadrtagged", config.productionforcombine, maximum=3.7, legendposition=(.6,.85,1,1)),
+      Discriminant("fa3", "enrich", "Y", "Untagged_with2015", config.productionforcombine, maximum=19, legendposition=(.56,.85,.9,1)),
     ],
   ]
 
@@ -155,7 +170,7 @@ def PRL_discriminants():
   assert len(ncolumns) == 1; ncolumns = ncolumns.pop()
 
   c = ROOT.TCanvas("c", "c", 1600*ncolumns, 1600*nrows)
-#  style.applycanvasstyle(c)
+  style.applycanvasstyle(c)
   c.SetRightMargin(.1)
   c.SetTopMargin(.17)
   c.SetBottomMargin(0)
@@ -164,8 +179,10 @@ def PRL_discriminants():
 
   for iy, row in enumerate(rows):
     for ix, plot in enumerate(row, start=1):
-      pad = c.cd(iy*len(row) + ix)
-#      style.applycanvasstyle(pad)
+      idx = iy*len(row) + ix
+      pad = c.cd(idx)
+      letter = "abcdefgh"[idx-1]
+      style.applycanvasstyle(pad)
       if not (ix == 1):
         pad.SetLeftMargin(.08)
       pad.SetRightMargin(.02)
@@ -180,6 +197,13 @@ def PRL_discriminants():
       hstack.GetYaxis().SetTitleSize(.10)
       graph.Draw("P")
       legend.Draw()
+      if ix == 1 and iy == 0: drawarrow()
+      if iy == 1 and ix in (2, 4):
+        style.subfig(letter, textsize=.08, x1=.88, x2=.92, y1=.82, y2=.88)
+      elif iy == 1 and ix == 3:
+        style.subfig(letter, textsize=.08, x1=.82, x2=.86, y1=.82, y2=.88)
+      else:
+        style.subfig(letter, textsize=.08, x1=.88, x2=.92, y1=.9, y2=.96)
 
 
   c.cd()
