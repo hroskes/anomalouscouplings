@@ -180,18 +180,33 @@ def PRL_discriminants():
 
   c = ROOT.TCanvas("c", "c", 1600*ncolumns, 1600*nrows)
   style.applycanvasstyle(c)
+
+  leftmargin = .5#.12
   c.SetRightMargin(.1)
   c.SetTopMargin(.17)
   c.SetBottomMargin(0)
-  c.SetLeftMargin(.12)
+  c.SetLeftMargin(leftmargin)
   c.Divide(ncolumns, nrows, 0, 0)
+
+  cachelist = []
 
   for iy, row in enumerate(rows):
     for ix, plot in enumerate(row, start=1):
       idx = iy*len(row) + ix
       pad = c.cd(idx)
-      letter = "abcdefgh"[idx-1]
       style.applycanvasstyle(pad)
+      if ix == 1:
+        dummypad = ROOT.TPad("dummypad{}".format(iy), "", 0, 0, leftmargin * (1 - leftmargin) / nrows, 1)
+        dummypad.Draw()
+        pad.cd()
+        realpad = ROOT.TPad("realpad{}".format(iy), "", leftmargin * (1 - leftmargin) / nrows, 0, 1, 1)
+        realpad.Draw()
+        cachelist += [pad, dummypad, realpad]
+        pad = realpad
+        pad.cd()
+        style.applycanvasstyle(pad)
+        print pad, dummypad, realpad
+      letter = "abcdefgh"[idx-1]
       if not (ix == 1):
         pad.SetLeftMargin(.08)
       pad.SetRightMargin(.02)
