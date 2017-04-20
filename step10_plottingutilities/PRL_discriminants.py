@@ -182,24 +182,36 @@ def PRL_discriminants():
   style.applycanvasstyle(c)
 
   leftmargin = .5#.12
-  c.SetRightMargin(.1)
-  c.SetTopMargin(.17)
-  c.SetBottomMargin(0)
+  rightmargin = .1
+  topmargin = .17
+  bottommargin = 0
   c.SetLeftMargin(leftmargin)
-  c.Divide(ncolumns, nrows, 0, 0)
+  c.SetRightMargin(rightmargin)
+  c.SetTopMargin(topmargin)
+  c.SetBottomMargin(bottommargin)
 
   cachelist = []
 
   for iy, row in enumerate(rows):
+    ymin = bottommargin + (1-topmargin-bottommargin) * iy / nrows
+    ymax = ymin + (1-topmargin-bottommargin) / nrows
     for ix, plot in enumerate(row, start=1):
-      idx = iy*len(row) + ix
-      pad = c.cd(idx)
+      xmin = leftmargin + (1-rightmargin-leftmargin) * (ix-1) / ncolumns
+      xmax = xmin + (1-rightmargin-leftmargin) / ncolumns
+      print xmin, xmax, ymin, ymax
+      idx = iy*ncolumns + ix
+      c.cd()
+      pad = ROOT.TPad("pad{}".format(idx), "", xmin, ymin, xmax, ymax)
+      pad.SetCanvas(c)
+      pad.Draw()
+      pad.cd()
+      cachelist.append(pad)
       style.applycanvasstyle(pad)
       if ix == 1:
-        dummypad = ROOT.TPad("dummypad{}".format(iy), "", 0, 0, leftmargin * (1 - leftmargin) / nrows, 1)
+        dummypad = ROOT.TPad("dummypad{}".format(iy), "", 0, 0, leftmargin * (1 - leftmargin) / ncolumns, 1)
         dummypad.Draw()
         pad.cd()
-        realpad = ROOT.TPad("realpad{}".format(iy), "", leftmargin * (1 - leftmargin) / nrows, 0, 1, 1)
+        realpad = ROOT.TPad("realpad{}".format(iy), "", leftmargin * (1 - leftmargin) / ncolumns, 0, 1, 1)
         realpad.Draw()
         cachelist += [pad, dummypad, realpad]
         pad = realpad
