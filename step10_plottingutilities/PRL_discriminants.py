@@ -3,15 +3,23 @@
 from functools import wraps
 import os
 
+print "importing root"
 import ROOT
 
+print "config"
 from helperstuff import config
+print "style"
 from helperstuff import stylefunctions as style
+print "enums"
 from helperstuff.enums import EnumItem, Category, MultiEnum, MyEnum
+print "utilities"
 from helperstuff.utilities import cache, tfiles
 
+print "PRL_loglinear"
 from PRL_loglinear import yaxislabel
+print "projections"
 from projections import Projections
+print "done"
 
 class DiscriminantAxis(MyEnum):
   enumname = "discriminantaxis"
@@ -39,6 +47,7 @@ class Discriminant(MultiEnum):
 
   def __init__(self, *args, **kwargs):
     super(Discriminant, self).__init__(*args)
+    print self
     hstack = self.hstack
     graph = self.graph
     legend = self.legend
@@ -198,20 +207,18 @@ def PRL_discriminants():
       graph.Draw("P")
       legend.Draw()
       if ix == 1 and iy == 0: drawarrow()
-      if iy == 1 and ix in (2, 4):
-        style.subfig(letter, textsize=.08, x1=.88, x2=.92, y1=.82, y2=.88)
-      elif iy == 1 and ix == 3:
-        style.subfig(letter, textsize=.08, x1=.82, x2=.86, y1=.82, y2=.88)
+      if iy == 1:
+        style.subfig(letter, textsize=.08, x1=.16, x2=.2, y1=.92, y2=.98)
       else:
-        style.subfig(letter, textsize=.08, x1=.88, x2=.92, y1=.9, y2=.96)
+        style.subfig(letter, textsize=.08, x1=.86, x2=.9, y1=.92, y2=.98)
 
 
   c.cd()
-  style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
-                                          .format(config.productionforcombine.dataluminosity+config.lumi2015),
-                x1=0.007, x2=1.025, #???
+  style.CMS("", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)"
+                                    .format(config.productionforcombine.dataluminosity+config.lumi2015),
+                x1=0.04, x2=1.015, #???
                 drawCMS=False, extratextsize=.045)
-  style.CMS("", x1=0.007, x2=1.025, CMStextsize=.075)
+  style.CMS("", x1=0.022, x2=1.015, CMStextsize=.055)
   yaxislabel("Events / bin", textsize=.045).Draw()
 
   for ext in "png eps root pdf".split():
