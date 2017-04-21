@@ -1079,28 +1079,8 @@ class Projections(MultiEnum):
         style.applyaxesstyle(hstack)
         if nicestyle:
             subfigletter = None
-            #PRL fig. 1
-            if self.analysis == "fa3" and Dbkg_allcategories and with2015 and self.enrichstatus == "fullrange":
-                CMStext = ""
-                subfigletter = "a"
-            elif discriminant.name == "D_0hplus_decay" and with2015 and self.enrichstatus == "enrich":
-                CMStext = ""
-                subfigletter = "b"
-            elif discriminant.name == "D_CP_decay" and with2015 and self.enrichstatus == "enrich":
-                CMStext = ""
-                subfigletter = "c"
-            #PRL fig. 2
-            elif discriminant.name == "D_0minus_VBFdecay" and self.enrichstatus == "enrich":
-                CMStext = ""
-                subfigletter = "a"
-            elif discriminant.name == "D_0minus_HadVHdecay" and self.enrichstatus == "enrich":
-                CMStext = ""
-                subfigletter = "b"
-            elif discriminant.name == "D_0minus_decay" and with2015 and self.enrichstatus == "enrich":
-                CMStext = ""
-                subfigletter = "c"
             #aux - add subfig letters here?
-            elif discriminant.name == "D_bkg" and with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange":
+            if discriminant.name == "D_bkg" and with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange":
                 CMStext = "Unpublished"
             elif discriminant.name == "D_bkg" and category != "Untagged" and not Dbkg_allcategories and self.enrichstatus == "fullrange":
                 CMStext = "Unpublished"
