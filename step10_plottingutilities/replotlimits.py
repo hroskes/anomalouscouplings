@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import glob
 from helperstuff import config
 from helperstuff.filemanager import cd
