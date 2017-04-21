@@ -7,6 +7,7 @@ from math import copysign, sqrt
 import os
 import pipes
 import re
+import shutil
 import subprocess
 import sys
 from tempfile import mkdtemp
@@ -1275,6 +1276,8 @@ class Projections(MultiEnum):
           #http://stackoverflow.com/a/38792806/5228524
           #subprocess.check_call(convertcommand)
           os.system(" ".join(pipes.quote(_) for _ in convertcommand))
+
+      shutil.rmtree(tmpdir)
 
 def projections(*args):
     Projections(*args).projections()
