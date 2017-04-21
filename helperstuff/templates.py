@@ -947,6 +947,12 @@ class IntTemplate(TemplateBase, MultiEnum):
         finally:
             del self.customsmoothing_newf
 
+    def gettemplate(self, *args, **kwargs):
+        result = super(IntTemplate, self).gettemplate(*args, **kwargs)
+        if self.analysis == "fa3" and self.productionmode in ("ggH", "ttH") and self.interferencetype == "g11gi1" and self.category in ("VBFtagged", "VHHadrtagged"):
+            assert self.domirror
+            result.Scale(0)
+        return result
 
 class DataTree(MultiEnum):
     enums = [Channel, Production, Category, Analysis]

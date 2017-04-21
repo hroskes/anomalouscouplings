@@ -1302,10 +1302,10 @@ if __name__ == "__main__":
         if re.match("higgsCombine_obs_lumi[0-9.]*_7813(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
             scantree.Add(filename)
     process = int(sys.argv[1])
-    if process == 1:
+    if process == 1 or process == 4:
       p.projections(ch, ca, nicestyle=True)
       p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
-    if process == 2:
+    if process == 2 or process == 5:
       p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True)
       p.projections(ch, ca, nicestyle=True, with2015=True)
     if process == 3:
