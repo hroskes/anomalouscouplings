@@ -504,7 +504,7 @@ class Projections(MultiEnum):
 
     if Dbkg_allcategories and not nicestyle: raise ValueError("Dbkg_allcategories requires nicestyle!")
     if with2015 and not nicestyle: raise ValueError("with2015 requires nicestyle!")
-    if with2015 and Dbkg_allcategories:
+    if with2015 and Dbkg_allcategories and not animation:
         assert saveasappend == ""
         saveasappend = "_with2015" + saveasappend
 
@@ -959,10 +959,6 @@ class Projections(MultiEnum):
                                             )
                                       )
 
-            if Dbkg_allcategories:
-                VVH = VVHintegral
-                ffH = ffHintegral
-
             bottom = VVH
             bottomtitle = "VBF+VH"
             bottomcolor = 4
@@ -1183,7 +1179,7 @@ class Projections(MultiEnum):
         pt.AddText("{}={:.2f}".format("-2#Deltaln L", self.deltaNLL))
         return pt
 
-  def animation(self, category, channel, floor=False, scantree=None, Dbkg_allcategories=None):
+  def animation(self, category, channel, floor=False, scantree=None, with2015=False, Dbkg_allcategories=False):
       tmpdir = mkdtemp()
 
       nsteps = 200
@@ -1194,9 +1190,11 @@ class Projections(MultiEnum):
 
       if nicestyle:
           if channel != "2e2mu": return
-          if Dbkg_allcategories and category != "Untagged": return
-
-          finaldir = os.path.join(self.saveasdir_niceplots(category), "animation")
+          if Dbkg_allcategories:
+              if category != "Untagged": return
+              finaldir = self.saveasdir_Dbkgsum()
+          else:
+              finaldir = os.path.join(self.saveasdir_niceplots(category, with2015=with2015), "animation")
 
           minNLL, faiforminNLL = min((scantree.deltaNLL+scantree.nll+scantree.nll0, scantree.CMS_zz4l_fai1) for entry in scantree)
           VBFmix = samplewithfai("ggH", self.analysis, 0.5, productionmodeforfai="VBF").fai("ggH", self.analysis)
@@ -1213,12 +1211,13 @@ class Projections(MultiEnum):
                                                   scantree.CMS_zz4l_fai1,
                                                   100 if scantree.CMS_zz4l_fai1 == faiforminNLL or scantree.CMS_zz4l_fai1 in pauses
                                                      else 10,
-                                                  muV = scantree.r_VVH,
-                                                  muf = scantree.r_ffH,
+                                                  muV = scantree.muV_scaled,
+                                                  muf = scantree.muf_scaled,
                                                   deltaNLL = 2*(scantree.deltaNLL+scantree.nll+scantree.nll0 - minNLL)
                                                  )
                               )
       else:
+          assert not with2015 and not Dbkg_allcategories
           for productionmode in "VBF", "VH", "ggH":
               animation += [
                             self.AnimationStep(
@@ -1242,6 +1241,7 @@ class Projections(MultiEnum):
                      "saveasdir": tmpdir,
                      "floor": floor,
                      "nicestyle": nicestyle,
+                     "with2015": with2015,
                      "Dbkg_allcategories": Dbkg_allcategories,
                     }
 
@@ -1268,7 +1268,10 @@ class Projections(MultiEnum):
               os.makedirs(finaldir)
           except OSError:
               pass
-          convertcommand.append(os.path.join(finaldir, "{}.gif".format(discriminant.name)))
+          finalplot = os.path.join(finaldir, "{}.gif".format(discriminant.name))
+          if Dbkg_allcategories and with2015:
+              finalplot = os.path.join(finaldir, "{}_with2015.gif".format(discriminant.name))
+          convertcommand.append(finalplot)
           #http://stackoverflow.com/a/38792806/5228524
           #subprocess.check_call(convertcommand)
           os.system(" ".join(pipes.quote(_) for _ in convertcommand))
@@ -1295,10 +1298,8 @@ if __name__ == "__main__":
   for i, (p, ch, ca) in enumerate(itertools.product(projections(), channels, categories), start=1):
     scantree = ROOT.TChain("limit")
     for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_7_6_5", "src", "HiggsAnalysis", "HZZ4l_Combination",
-                                       "CreateDatacards", "cards_{}_Feb28_mu".format(p.analysis), "higgsCombine_obs_*.root")):
-        if re.match("higgsCombine_obs_lumi[0-9.]*(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
-            if "Feb28" not in filename:
-                raise ValueError("Need to change r_VVH and r_ffH to muVscaled and mufscaled!")
+                                       "CreateDatacards", "cards_{}_allsysts".format(p.analysis), "higgsCombine_obs_*.root")):
+        if re.match("higgsCombine_obs_lumi[0-9.]*_7813(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
             scantree.Add(filename)
     process = int(sys.argv[1])
     if process == 1:
@@ -1314,7 +1315,11 @@ if __name__ == "__main__":
       p.projections(ch, ca, subdir="VH",  productionmode="VH")
     if process == 4:
       p.animation(ca, ch, scantree=scantree)
+      p.animation(ca, ch, scantree=scantree, Dbkg_allcategories=True)
     if process == 5:
+      p.animation(ca, ch, scantree=scantree, with2015=True)
+      p.animation(ca, ch, scantree=scantree, Dbkg_allcategories=True, with2015=True)
+    if process == 6:
       if p.enrichstatus == "fullrange":
         p.animation(ca, ch)
     print i, "/", length*len(channels)*len(categories)
