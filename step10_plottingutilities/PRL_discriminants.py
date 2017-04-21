@@ -124,6 +124,8 @@ class Discriminant(MultiEnum):
     hstack = self.GetListOfPrimitives()[1]
     if not isinstance(hstack, ROOT.THStack):
       raise ValueError("hstack has the wrong type:\n{}".format(hstack))
+    for h in hstack.GetHists():
+      h.SetLineWidth(1)
     return hstack.Clone()
 
   @property
@@ -167,10 +169,10 @@ def PRL_discriminants():
       Discriminant("fL1Zg", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=35, legendposition=(.6,.7,1,.85)),
     ],
     [
-      Discriminant("fa3", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=14, legendposition=(.5,.85,.9,1)),
-      Discriminant("fa3", "enrich", "X", "VBFtagged", config.productionforcombine, maximum=4.8, legendposition=(.6,.85,1,1)),
-      Discriminant("fa3", "enrich", "X", "VHHadrtagged", config.productionforcombine, maximum=3.7, legendposition=(.6,.85,1,1)),
-      Discriminant("fa3", "enrich", "Y", "Untagged_with2015", config.productionforcombine, maximum=19, legendposition=(.56,.85,.9,1)),
+      Discriminant("fa3", "enrich", "X", "Untagged_with2015", config.productionforcombine, maximum=14, legendposition=(.1,.85,.4,1)),
+      Discriminant("fa3", "enrich", "X", "VBFtagged", config.productionforcombine, maximum=4.8, legendposition=(.1,.85,.4,1)),
+      Discriminant("fa3", "enrich", "X", "VHHadrtagged", config.productionforcombine, maximum=3.7, legendposition=(.1,.85,.4,1)),
+      Discriminant("fa3", "enrich", "Y", "Untagged_with2015", config.productionforcombine, maximum=19, legendposition=(.1,.85,.4,1)),
     ],
   ]
 
@@ -222,10 +224,7 @@ def PRL_discriminants():
       graph.Draw("P")
       legend.Draw()
       if ix == 1 and iy == 0: drawarrow()
-      if iy == 1:
-        style.subfig(letter, textsize=.08, x1=.16, x2=.2, y1=.92, y2=.98)
-      else:
-        style.subfig(letter, textsize=.08, x1=.86, x2=.9, y1=.92, y2=.98)
+      style.subfig(letter, textsize=.08, x1=.86, x2=.9, y1=.93, y2=.99)
 
 
   c.cd()
