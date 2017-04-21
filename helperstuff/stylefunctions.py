@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import ROOT
 
 from ROOT import gStyle, gPad, gROOT, kWhite
@@ -228,7 +230,7 @@ def makeCMS(extratext, x1=0.15, y1=0.93, x2=0.99, y2=1, CMStextsize=0.044, extra
         text = pt.AddText(0.025,0.45,"#font[61]{CMS}")
         text.SetTextSize(CMStextsize)
     if extratext:
-        text = pt.AddText(0.165, 0.42, "#font[52]{"+extratext+"}")
+        text = pt.AddText(0.14, 0.42, "#font[52]{"+extratext+"}")
         text.SetTextSize(extratextsize)
 
     return pt
@@ -260,3 +262,21 @@ def CMS(extratext, lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1, CM
     lumi = makelumi(lumi=lumi, lumitext=lumitext, x1=x1, y1=y1, x2=x2, y2=y2, textsize=extratextsize)
     if CMS is not None: CMS.Draw()
     if lumi is not None: lumi.Draw()
+
+
+if __name__ == "__main__":
+    import os
+
+    import config
+    from utilities import mkdir_p
+
+    h = ROOT.TH1F("h", "h", 10, 0, 1)
+    h.Fill(5)
+    c = ROOT.TCanvas("c", "", 8, 30, 800, 800)
+    applycanvasstyle(c)
+    h.Draw()
+    applyaxesstyle(h)
+    CMS("Test")
+    mkdir_p(os.path.join(config.plotsbasedir, "TEST"))
+    for ext in "png eps root pdf".split():
+        c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "teststyle."+ext))
