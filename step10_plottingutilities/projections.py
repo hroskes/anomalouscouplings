@@ -555,36 +555,38 @@ class Projections(MultiEnum):
     allWHg10gi4 = {}
     allWHpieces = {}
 
+    fullrange = EnrichStatus("fullrange")
+
     for ca, ch in itertools.product(categories, channels):
-      allggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
-      allggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
-      allggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1", with2015=with2015)
+      allggHg12gi0[ca,ch] = self.TemplateFromFile(   "ggH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allggHg10gi2[ca,ch] = self.TemplateFromFile(   "ggH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      allggHg11gi1[ca,ch] = self.IntTemplateFromFile("ggH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1", with2015=with2015)
 
-      allttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
-      allttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
-      allttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1", with2015=with2015)
+      allttHg12gi0[ca,ch] = self.TemplateFromFile(   "ttH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allttHg10gi2[ca,ch] = self.TemplateFromFile(   "ttH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      allttHg11gi1[ca,ch] = self.IntTemplateFromFile("ttH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi1", with2015=with2015)
 
-      allVBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
-      allVBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
-      allVBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
-      allVBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
-      allVBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      allVBFg14gi0[ca,ch] = self.TemplateFromFile(   "VBF", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allVBFg13gi1[ca,ch] = self.IntTemplateFromFile("VBF", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      allVBFg12gi2[ca,ch] = self.IntTemplateFromFile("VBF", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      allVBFg11gi3[ca,ch] = self.IntTemplateFromFile("VBF", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      allVBFg10gi4[ca,ch] = self.TemplateFromFile(   "VBF", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       allVBFpieces[ca,ch] = [allVBFg14gi0[ca,ch], allVBFg13gi1[ca,ch], allVBFg12gi2[ca,ch], allVBFg11gi3[ca,ch], allVBFg10gi4[ca,ch]]
 
-      allZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
-      allZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
-      allZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
-      allZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
-      allZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      allZHg14gi0[ca,ch] = self.TemplateFromFile(   "ZH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allZHg13gi1[ca,ch] = self.IntTemplateFromFile("ZH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      allZHg12gi2[ca,ch] = self.IntTemplateFromFile("ZH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      allZHg11gi3[ca,ch] = self.IntTemplateFromFile("ZH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      allZHg10gi4[ca,ch] = self.TemplateFromFile(   "ZH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       allZHpieces[ca,ch] = [allZHg14gi0[ca,ch], allZHg13gi1[ca,ch], allZHg12gi2[ca,ch], allZHg11gi3[ca,ch], allZHg10gi4[ca,ch]]
 
-      allWHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
-      allWHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
-      allWHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
-      allWHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
-      allWHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, "fullrange", self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
+      allWHg14gi0[ca,ch] = self.TemplateFromFile(   "WH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, self.analysis.purehypotheses[0], with2015=with2015)
+      allWHg13gi1[ca,ch] = self.IntTemplateFromFile("WH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g13gi1", with2015=with2015)
+      allWHg12gi2[ca,ch] = self.IntTemplateFromFile("WH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g12gi2", with2015=with2015)
+      allWHg11gi3[ca,ch] = self.IntTemplateFromFile("WH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, "g11gi3", with2015=with2015)
+      allWHg10gi4[ca,ch] = self.TemplateFromFile(   "WH", ca, fullrange, self.normalization, self.production, ch, self.shapesystematic, self.analysis, BSMhypothesis, with2015=with2015)
 
       allWHpieces[ca,ch] = [allWHg14gi0[ca,ch], allWHg13gi1[ca,ch], allWHg12gi2[ca,ch], allWHg11gi3[ca,ch], allWHg10gi4[ca,ch]]
 
