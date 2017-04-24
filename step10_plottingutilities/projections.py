@@ -1319,11 +1319,14 @@ def main():
               str(process),
               str(analysis),
         ])
+        queue = None
         if process in (1, 2):
           jobtime = "0:20:0"
         elif process in (4, 5):
-          jobtime = "2:0:0"
-        submitjob(jobtext, jobtime=jobtime, jobname="{} {}".format(process, analysis))
+          if config.host == "MARCC":
+            queue = "lrgmem"
+          jobtime = "1:0:0"
+        submitjob(jobtext, jobtime=jobtime, jobname="{} {}".format(process, analysis), queue=queue)
     return
   useanalyses = [Analysis(_) for _ in sys.argv[2:]]
   if not useanalyses:

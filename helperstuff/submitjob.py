@@ -66,7 +66,9 @@ if config.host == "lxplus":
             return jobid
 
 elif config.host == "MARCC":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue="shared", interactive=False, waitids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None):
+        if queue is None:
+            queue = "shared"
         if outputfile is not None:
             outputfile = outputfile.format(jobid="%j")
         if errorfile is not None:
