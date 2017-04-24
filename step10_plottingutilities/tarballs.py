@@ -5,12 +5,13 @@ import os
 import shutil
 import subprocess
 
-from helperstuff import config
+from helperstuff import config, utilities
 from helperstuff.enums import analyses, categories
 
 assert len(config.productionsforcombine) == 1
 production = config.productionsforcombine[0]
 
+"""
 if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "projections")):
   tmpdir = utilities.mkdtemp()
   for analysis in analyses:
@@ -24,6 +25,7 @@ if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "proj
          shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(analysis, category, os.path.basename(filename))))
 
   subprocess.check_call(["tar", "-cvzf", "templateprojections.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
+"""
 
 if os.path.exists(os.path.join(config.plotsbasedir, "xchecks", "compare_POWHEG_JHUGen")):
   tmpdir = utilities.mkdtemp()
@@ -52,17 +54,21 @@ if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "nice
   tmpdir = utilities.mkdtemp()
   for a in analyses:
     for c in categories:
-      if c == "Untagged": c = "Untagged_with2015"
-      theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), str(c), "*.pdf"))
+      cfolder = str(c)
+      if c == "Untagged": cfolder = "Untagged_with2015"
+      theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), cfolder, "*.pdf"))
       assert theglob, (a, c)
       for filename in theglob:
         if "D_bkg" in filename:
           filename = filename.replace("enrich", "fullrange")
         shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, c, os.path.basename(filename))))
+
+      """
       theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "fullrange", str(a), "D_bkg_with2015.pdf"))
       assert theglob, (a, c)
       for filename in theglob:
         shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, c, os.path.basename(filename))))
+      """
 
   subprocess.check_call(["tar", "-cvzf", "discriminantdistributions.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
 
@@ -70,7 +76,9 @@ if glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots
   tmpdir = utilities.mkdtemp()
   for a in analyses:
     for c in categories:
-      theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), str(c), "animation", "*.gif"))
+      cfolder = str(c)
+      if c == "Untagged": cfolder = "Untagged_with2015"
+      theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), cfolder, "animation", "*.gif"))
       assert theglob, (a, c)
       for filename in theglob:
         if "D_bkg" in filename:
