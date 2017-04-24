@@ -1062,7 +1062,10 @@ class Projections(MultiEnum):
             if category == "Untagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
                 hstack.SetMaximum(ymax)
             elif category == "VBFtagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
-                hstack.SetMaximum(ymax)
+                if self.analysis in ("fL1", "fL1Zg"):
+                    hstack.SetMaximum(ymax * 1.25)
+                else:
+                    hstack.SetMaximum(ymax)
             elif category == "VHHadrtagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
                 if animation:
                     hstack.SetMaximum(ymax * 1.7)
@@ -1313,24 +1316,42 @@ def main():
       raise ValueError("For submitjobs, don't add any more arguments")
     for process in 1, 2, 4, 5:
       for analysis in analyses:
-        jobtext = " ".join(pipes.quote(_) for _ in [
-              "time",
-              os.path.join(config.repositorydir, "step10_plottingutilities", "projections.py"),
-              str(process),
-              str(analysis),
-        ])
-        queue = None
-        if process in (1, 2):
-          jobtime = "0:20:0"
-        elif process in (4, 5):
-          if config.host == "MARCC":
-            queue = "lrgmem"
-          jobtime = "1:0:0"
-        submitjob(jobtext, jobtime=jobtime, jobname="{} {}".format(process, analysis), queue=queue)
+        for enrichstatus in enrichstatuses:
+          if enrichstatus == "blind": continue
+
+          words = [
+            "time",
+            os.path.join(config.repositorydir, "step10_plottingutilities", "projections.py"),
+            str(process),
+            str(analysis),
+          ]
+
+          if process in (4, 5):
+            words.append(str(enrichstatus))
+          elif enrichstatus != "enrich":
+            continue
+
+          jobtext = " ".join(pipes.quote(_) for _ in words)
+          queue = None
+          if process in (1, 2):
+            jobtime = "0:20:0"
+          elif process in (4, 5):
+            if config.host == "MARCC":
+              queue = "lrgmem"
+            jobtime = "1:0:0"
+          submitjob(jobtext, jobtime=jobtime, jobname="{} {}".format(process, analysis), queue=queue)
     return
-  useanalyses = [Analysis(_) for _ in sys.argv[2:]]
+  useanalyses = []
+  useenrichstatuses = []
+  for _ in sys.argv[2:]:
+    try:
+      useanalyses.append(Analysis(_))
+    except ValueError:
+      useenrichstatuses.append(EnrichStatus(_))
   if not useanalyses:
     useanalyses = analyses
+  if not useenrichstatuses:
+    useenrichstatuses = enrichstatuses
   def projections():
 #    yield Projections("170203", "2e2mu", "fa3", "rescalemixtures", "fullrange", "VHHadrtagged")
 #    return
@@ -1340,6 +1361,7 @@ def main():
         for normalization in normalizations:
           for enrichstatus in enrichstatuses:
             if enrichstatus == "blind": continue
+            if enrichstatus not in useenrichstatuses: continue
             yield Projections(analysis, normalization, production, enrichstatus)
 
   length = len(list(projections()))

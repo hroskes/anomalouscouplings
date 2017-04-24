@@ -503,10 +503,13 @@ class DummyContextManager(object):
     def __exit__(*stuff): pass
 
 def mkdtemp(**kwargs):
+    import config
     if "dir" not in kwargs:
-        if LSB_JOBID() is None:
+        if LSB_JOBID() is not None:
             if config.host == "lxplus":
                 kwargs["dir"] = os.environ["LSB_JOB_TMPDIR"]
             elif config.host == "MARCC":
-                kwargs["dir"] = None
+                pass
+            else:
+                assert False, config.host
     return tempfile.mkdtemp(**kwargs)
