@@ -4,7 +4,6 @@ import glob
 import os
 import shutil
 import subprocess
-import tempfile
 
 from helperstuff import config
 from helperstuff.enums import analyses, categories
@@ -13,7 +12,7 @@ assert len(config.productionsforcombine) == 1
 production = config.productionsforcombine[0]
 
 if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "projections")):
-  tmpdir = tempfile.mkdtemp()
+  tmpdir = utilities.mkdtemp()
   for analysis in analyses:
     for category in categories:
       if category == "Untagged": productionmode = "ggH"
@@ -27,7 +26,7 @@ if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "proj
   subprocess.check_call(["tar", "-cvzf", "templateprojections.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
 
 if os.path.exists(os.path.join(config.plotsbasedir, "xchecks", "compare_POWHEG_JHUGen")):
-  tmpdir = tempfile.mkdtemp()
+  tmpdir = utilities.mkdtemp()
   for analysis in analyses:
     for productionmode in "VBF", "ZH", "WH", "HJJ", "ttH":
       theglob = glob.glob(os.path.join(config.plotsbasedir, "xchecks", "compare_POWHEG_JHUGen", str(analysis), productionmode, "*.pdf"))
@@ -38,7 +37,7 @@ if os.path.exists(os.path.join(config.plotsbasedir, "xchecks", "compare_POWHEG_J
   subprocess.check_call(["tar", "-cvzf", "POWHEGvsJHUGen.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
 
 if os.path.exists(os.path.join(config.plotsbasedir, "categorization")):
-  tmpdir = tempfile.mkdtemp()
+  tmpdir = utilities.mkdtemp()
   for a in analyses:
     for h in a.purehypotheses:
       h = str(h).replace("0+", "0plus").replace("0-", "0minus").replace("_photoncut", "")
@@ -50,7 +49,7 @@ if os.path.exists(os.path.join(config.plotsbasedir, "categorization")):
   subprocess.check_call(["tar", "-cvzf", "categorydiscriminants.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
 
 if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "niceplots")):
-  tmpdir = tempfile.mkdtemp()
+  tmpdir = utilities.mkdtemp()
   for a in analyses:
     for c in categories:
       if c == "Untagged": c = "Untagged_with2015"
@@ -68,7 +67,7 @@ if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "nice
   subprocess.check_call(["tar", "-cvzf", "discriminantdistributions.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
 
 if glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", "*", "*", "animation")):
-  tmpdir = tempfile.mkdtemp()
+  tmpdir = utilities.mkdtemp()
   for a in analyses:
     for c in categories:
       theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), str(c), "animation", "*.gif"))

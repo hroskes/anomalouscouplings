@@ -10,6 +10,7 @@ import json
 import os
 import shutil
 import sys
+import tempfile
 import time
 
 import ROOT
@@ -500,3 +501,12 @@ def inscreen():
 class DummyContextManager(object):
     def __enter__(self): return self
     def __exit__(*stuff): pass
+
+def mkdtemp(**kwargs):
+    if "dir" not in kwargs:
+        if LSB_JOBID() is None:
+            if config.host == "lxplus":
+                kwargs["dir"] = os.environ["LSB_JOB_TMPDIR"]
+            elif config.host == "MARCC":
+                kwargs["dir"] = None
+    return tempfile.mkdtemp(**kwargs)

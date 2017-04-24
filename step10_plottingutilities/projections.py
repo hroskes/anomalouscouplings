@@ -10,7 +10,6 @@ import re
 import shutil
 import subprocess
 import sys
-from tempfile import mkdtemp
 
 import ROOT
 
@@ -18,9 +17,10 @@ from helperstuff import config, constants, run1info, stylefunctions as style
 from helperstuff.combinehelpers import getdatatree2015, getrate, getrate2015, gettemplate, Luminosity
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic
 from helperstuff.samples import ReweightingSample, samplewithfai
+from helperstuff.submitjob import submitjob
 import helperstuff.rootoverloads.histogramaxisnumbers, helperstuff.rootoverloads.histogramfloor
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
-from helperstuff.utilities import cache, tfiles, pairwise
+from helperstuff.utilities import cache, tfiles, mkdtemp, pairwise
 
 c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
 style.applycanvasstyle(c1)
@@ -1059,8 +1059,26 @@ class Projections(MultiEnum):
             ymax = style.ymax((hstack, "nostack"), (data[i], "P"))
             if category == "Untagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
                 hstack.SetMaximum(ymax)
-            elif discriminant.name in ("D_0minus_decay", "D_CP_decay", "D_0hplus_decay", "D_0minus_HadVHdecay") and self.enrichstatus == "enrich":
+            elif category == "VBFtagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
+                hstack.SetMaximum(ymax)
+            elif category == "VHHadrtagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
+                if animation:
+                    hstack.SetMaximum(ymax * 1.7)
+                else:
+                    hstack.SetMaximum(ymax)
+            elif discriminant.name in ("D_0minus_decay", "D_CP_decay", "D_0minus_HadVHdecay", "D_0hplus_decay") and self.enrichstatus == "enrich":
                 hstack.SetMaximum(ymax * 1.4)
+            elif discriminant.name in ("D_L1_decay", "D_L1Zg_decay") and self.enrichstatus == "enrich" and not animation:
+                hstack.SetMaximum(ymax * 1.4)
+            elif discriminant.name in ("D_0hplus_VBFdecay", "D_int_VBF", "D_int_HadVH") and self.enrichstatus == "enrich":
+                hstack.SetMaximum(ymax * 1.7)
+            elif discriminant.name in ("D_CP_HadVH", "D_0hplus_HadVHdecay") and self.enrichstatus == "enrich":
+                if animation:
+                    hstack.SetMaximum(ymax * 1.7)
+                else:
+                    hstack.SetMaximum(ymax * 1.4)
+            elif discriminant.name in ("D_L1_VBFdecay", "D_L1_HadVHdecay", "D_L1Zg_VBFdecay", "D_L1Zg_HadVHdecay") and self.enrichstatus == "enrich" and animation:
+                hstack.SetMaximum(ymax * 1.7)
             else:
                 hstack.SetMaximum(ymax * 1.25)
 
@@ -1183,6 +1201,11 @@ class Projections(MultiEnum):
   def animation(self, category, channel, floor=False, scantree=None, with2015=False, Dbkg_allcategories=False):
       tmpdir = mkdtemp()
 
+      category = Category(category)
+      channel = Channel(channel)
+
+      if category != "Untagged" and with2015: return
+
       nsteps = 200
       animation = []
       nicestyle = (scantree is not None)
@@ -1282,7 +1305,24 @@ class Projections(MultiEnum):
 def projections(*args):
     Projections(*args).projections()
 
-if __name__ == "__main__":
+def main():
+  if sys.argv[1] == "submitjobs":
+    if sys.argv[2:]:
+      raise ValueError("For submitjobs, don't add any more arguments")
+    for process in 1, 2, 4, 5:
+      for analysis in analyses:
+        jobtext = " ".join(pipes.quote(_) for _ in [
+              "time",
+              os.path.join(config.repositorydir, "step10_plottingutilities", "projections.py"),
+              str(process),
+              str(analysis),
+        ])
+        if process in (1, 2):
+          jobtime = "0:20:0"
+        elif process in (4, 5):
+          jobtime = "2:0:0"
+        submitjob(jobtext, jobtime=jobtime, jobname="{} {}".format(process, analysis))
+    return
   useanalyses = [Analysis(_) for _ in sys.argv[2:]]
   if not useanalyses:
     useanalyses = analyses
@@ -1326,3 +1366,6 @@ if __name__ == "__main__":
       if p.enrichstatus == "fullrange":
         p.animation(ca, ch)
     print i, "/", length*len(channels)*len(categories)
+
+if __name__ == "__main__":
+    main()
