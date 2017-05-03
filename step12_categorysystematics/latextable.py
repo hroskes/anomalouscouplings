@@ -23,7 +23,7 @@ channels = list(Channel(_) for _ in ("4e", "4mu", "2e2mu"))
 
 def categoryname(category):
   if category == "VBFtagged": return "VBF-jets"
-  if category == "VHHadrtagged": return "$\V\PH$-jets"
+  if category == "VHHadrtagged": return "$\V\!\PH$-jets"
   if category == "Untagged": return "untagged"
 
 def gettree(productionmode):
@@ -34,12 +34,12 @@ def gettree(productionmode):
 
 trees = KeyDefaultDict(gettree)
 
-class RowBase(object):
+class RowBaseBase(object):
   __metaclass__ = ABCMeta
 
   def __init__(self, *args, **kwargs):
     self.__categorydistribution = None
-    super(RowBase, self).__init__(*args, **kwargs)
+    super(RowBaseBase, self).__init__(*args, **kwargs)
 
   @property
   def categorydistribution(self):
@@ -51,6 +51,16 @@ class RowBase(object):
     self.categorydistribution
     self.__categorydistribution *= scaleby
 
+  @abstractproperty
+  def title(self): pass
+  @abstractproperty
+  def fmt(self): pass
+  @abstractmethod
+  def getlatex(self, dochannels=True, PRL=False): pass
+  @abstractmethod
+  def getcategorydistribution(self): pass
+
+class RowBase(RowBaseBase):
   def getlatex(self, dochannels=True, PRL=False):
     result = ""
     if not PRL:
@@ -66,13 +76,6 @@ class RowBase(object):
           result += self.fmt.format(self.categorydistribution[channel, category])+"/"
       result += self.fmt.format(total)
     return result
-
-  @abstractproperty
-  def title(self): pass
-  @abstractproperty
-  def fmt(self): pass
-  @abstractmethod
-  def getcategorydistribution(self): pass
 
 class Row(RowBase, MultiEnum):
   __metaclass__ = MultiEnumABCMeta
@@ -167,6 +170,45 @@ class TotalRow(RowBase):
   def fmt(self):
     return "{:.1f}"
 
+class SlashRow(RowBaseBase):
+  def __init__(self, *rows, **kwargs):
+    self.rows = rows
+    for kw, kwarg in kwargs.iteritems():
+      if kw == "title":
+        self.__title = kwarg
+      else:
+        raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+    super(SlashRow, self).__init__()
+  @property
+  def title(self):
+    return self.__title
+  @property
+  def fmt(self):
+    return "{:.1f}"
+
+  def getlatex(self, dochannels=True, PRL=False):
+    assert PRL
+    assert not dochannels
+
+    result = ""
+    if not PRL:
+      result += " & "
+    result = "{}".format(self.title)
+    for category in categories:
+      result += " & "
+      parts = []
+      for row in self.rows:
+        total = 0
+        for channel in channels:
+          channel = Channel(channel)
+          total += row.categorydistribution[channel, category]
+        parts.append(self.fmt.format(total))
+      result += "/".join(parts)
+    return result
+
+  def getcategorydistribution(self):
+    return self.rows[0].categorydistribution
+
 class RowChannel(Row, MultiEnum):
   enums = (Row, Channel)
   def getcategorydistribution(self):
@@ -218,15 +260,38 @@ class Section(object):
       result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex(dochannels=dochannels) for _ in self.rows)
     return result
   def findrow(self, productionmode):
-    result = [row for row in self.rows if row.productionmode == productionmode]
-    assert len(result) == 1
+    def equalproductionmodes(a, row):
+      try:
+        ProductionMode(a)
+        row.productionmode
+      except (ValueError, AttributeError):
+        return False
+      return a == row.productionmode
+    def equaltitles(a, row):
+      try:
+        ProductionMode(a)
+      except ValueError:
+        return a == row.title
+      return False
+
+    def isthisrow(a, row):
+      return equalproductionmodes(a, row) or equaltitles(a, row)
+
+    result = [row for row in self.rows if isthisrow(productionmode, row)]
+    assert len(result) == 1, [row.title for row in result]
     return result.pop()
 
 def scalerows(scalethese, tothese):
+  scalethese = list(scalethese)
+  tothese = list(tothese)
   wanttotal = sum(row.categorydistribution[channel, category] for row in tothese for channel in channels for category in categories)
   previoustotal = sum(row.categorydistribution[channel, category] for row in scalethese for channel in channels for category in categories)
   for row in scalethese:
     row.scale(wanttotal / previoustotal)
+
+def scaleslashrows(rows):
+  for row in rows: assert len(row.rows) == 2
+  scalerows([row.rows[1] for row in rows], [row.rows[0] for row in rows])
 
 def total(rows):
   return sum(row.categorydistribution[channel, category] for row in rows for channel in channels for category in categories)
@@ -236,15 +301,35 @@ def maketable(analysis, dochannels=True, PRL=False):
   if PRL:
     sections = [
       Section("SM",
-        Row(analysis, "VBF", analysis.purehypotheses[0], title="VBF signal"),
-        TotalRow(
-          Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
-          Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
-          title=r"$\V\PH$ signal"
+        SlashRow(
+          Row(analysis, "VBF", analysis.purehypotheses[0], title="VBF signal"),
+          Row(analysis, "VBF", analysis.purehypotheses[1], title="VBF signal"),
+          title="VBF signal",
         ),
-        TotalRow(
-          Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
-          Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
+        SlashRow(
+          TotalRow(
+            Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
+            Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
+            title=r"$\V\!\PH$ signal",
+          ),
+          TotalRow(
+            Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
+            Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),
+            title=r"$\V\!\PH$ signal",
+          ),
+          title=r"$\V\!\PH$ signal",
+        ),
+        SlashRow(
+          TotalRow(
+            Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
+            Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
+            title="other signal"
+          ),
+          TotalRow(
+            Row(analysis, "ggH", analysis.purehypotheses[1], title=r"$\Pg\Pg\to\PH$"),
+            Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"$\ttbar\PH$"),
+            title="other signal"
+          ),
           title="other signal"
         ),
       ),
@@ -253,9 +338,9 @@ def maketable(analysis, dochannels=True, PRL=False):
           Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$"),
           Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$"),
           Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$"),
-          title=r"EW $4\ell$ background"
+          title=r"$\Z\Z/\Z\gamma^*$ background"
         ),
-        Row(analysis, "ZX", title=r"$\Z+\X$ background"),
+        Row(analysis, "ZX", title=r"$\Z\!+\!\X$ background"),
       )
     ]
     sections.append(
@@ -264,6 +349,8 @@ def maketable(analysis, dochannels=True, PRL=False):
         Row(analysis, "data", title="Total observed"),
       )
     )
+    scaleslashrows((sections[0].findrow("VBF signal"), sections[0].findrow(r"$\V\!\PH$ signal")))
+    scaleslashrows([sections[0].findrow("other signal")])
   else:
     sections = [
       Section("SM",
@@ -316,7 +403,7 @@ def maketable(analysis, dochannels=True, PRL=False):
   print r"\end{tabular}"
 
 if __name__ == "__main__":
-  dochannels = True
+  dochannels = False
   PRL = False
   for arg in sys.argv[2:]:
     if arg == "PRL":
