@@ -103,17 +103,14 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
             if arg == 0:
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2)))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2), uptocolor, 2))
             else:
                 assert not fixfai
                 scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
     if luminosity is None:
-        if productions is None or not config.unblindscans:
-            luminosity = float(Luminosity("forexpectedscan"))
-        else:
-            luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
+        luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
 
     mg = ROOT.TMultiGraph()
     l = ROOT.TLegend(*legendposition)

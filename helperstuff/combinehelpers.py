@@ -18,7 +18,6 @@ class LuminosityType(MyEnum):
     enumname = "luminositytype"
     enumitems = (
                  EnumItem("fordata"),
-                 EnumItem("forexpectedscan"),
                  EnumItem("customluminosity"),
                 )
     def __init__(self, value):
@@ -66,7 +65,6 @@ class Luminosity(MultiEnum):
             dontcheck.append(Production)
         super(Luminosity, self).check(self, *args, dontcheck=dontcheck)
     def __float__(self):
-        if self.luminositytype == "forexpectedscan": return float(config.expectedscanluminosity)
         if self.luminositytype == "fordata": return float(self.production.dataluminosity)
         if self.luminositytype == "customluminosity": return float(self.luminositytype)
 

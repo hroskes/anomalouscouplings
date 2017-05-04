@@ -522,10 +522,7 @@ class ControlPlotUnsalvageable(ControlPlotBase):
             raise WrongControlPlotException
 #        from combinehelpers import getrate
 #        t = self.template
-#        if config.unblindscans:
-#            lumitype = "fordata"
-#        else:
-#            lumitype = "forexpectedscan"
+#        lumitype = "fordata"
 #        if getrate(t.productionmode, t.category, t.channel, t.production, lumitype) >= 1:
 #            raise WrongControlPlotException
 

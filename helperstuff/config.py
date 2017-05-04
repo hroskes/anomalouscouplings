@@ -51,8 +51,6 @@ applyMINLOsystematics = True
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
-expectedscanluminosity = 35.8671
-
 lumi2015 = 2.7
 
 m4lmin, m4lmax = 105, 140

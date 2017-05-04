@@ -144,7 +144,7 @@ def runcombine(analysis, foldername, **kwargs):
     CLtextposition = "left"
     productions = config.productionsforcombine
     usesystematics = True
-    runobs = True
+    runobs = config.unblindscans
     subdirectory = ""
     defaultscanrange = (100, -1.0, 1.0)
     scanranges = [defaultscanrange]
@@ -159,10 +159,7 @@ def runcombine(analysis, foldername, **kwargs):
     alsocombinename = None
     alsocombine = []
     sqrts = None
-    if config.unblindscans:
-        lumitype = "fordata"
-    else:
-        lumitype = "forexpectedscan"
+    lumitype = "fordata"
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -213,8 +210,6 @@ def runcombine(analysis, foldername, **kwargs):
             else:
                 usebkg = bool(int(kwarg))
         elif kw == "luminosity":
-            if config.unblindscans:
-                raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
             lumitype = float(kwarg)
         elif kw == "fixmuV":
             fixmuV = bool(int(kwarg))
@@ -269,6 +264,11 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("sqrts has to contain ints separated by commas!")
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
+
+    if runobs and not config.unblindscans:
+        raise TypeError("Can't unblind scans!")
+    if runobs and lumitype != "fordata":
+        raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
 
     if submitjobs:
         if not utilities.inscreen():

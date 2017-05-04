@@ -132,7 +132,7 @@ class Row(RowBase, MultiEnum):
                      for reweightfrom in self.productionmode.allsamples(production)
                    )
     if self.productionmode != "data":
-      result *= config.expectedscanluminosity
+      result *= float(Luminosity(config.productionforcombine, "fordata"))
     return result
 
   @property
@@ -220,7 +220,7 @@ class RowChannel(Row, MultiEnum):
                                 for category in categories
                             })
     if self.productionmode.isbkg or self.hypothesis == "SM":
-      result = MultiplyCounter({(self.channel, category): getrate(self.channel, category, production, "forexpectedscan", self.analysis, self.productionmode) for category in categories})
+      result = MultiplyCounter({(self.channel, category): getrate(self.channel, category, production, "fordata", self.analysis, self.productionmode) for category in categories})
     else:
       t = self.tree
       weightparts = [
