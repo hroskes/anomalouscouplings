@@ -172,6 +172,7 @@ class TotalRow(RowBase):
 
 class SlashRow(RowBaseBase):
   def __init__(self, *rows, **kwargs):
+    assert len(rows) == 2
     self.rows = rows
     for kw, kwarg in kwargs.iteritems():
       if kw == "title":
@@ -203,7 +204,8 @@ class SlashRow(RowBaseBase):
           channel = Channel(channel)
           total += row.categorydistribution[channel, category]
         parts.append(self.fmt.format(total))
-      result += "/".join(parts)
+      assert len(parts) == 2
+      result += "{} ({})".format(*parts)
     return result
 
   def getcategorydistribution(self):
@@ -338,9 +340,9 @@ def maketable(analysis, dochannels=True, PRL=False):
           Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$"),
           Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$"),
           Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$"),
-          title=r"$\Z\Z/\Z\gamma^*$ background"
+          title=r"$\Z\Z/\Z\gamma^*$ bkg"
         ),
-        Row(analysis, "ZX", title=r"$\Z\!+\!\X$ background"),
+        Row(analysis, "ZX", title=r"$\Z\!+\!\X$ bkg"),
       )
     ]
     sections.append(
