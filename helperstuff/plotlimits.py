@@ -59,6 +59,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     nuisance = None
     POI = "CMS_zz4l_fai1"
     fixfai = False
+    CMStext = "Preliminary"
+    drawCMS = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -78,6 +80,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             POI = actualvariable(kwarg)
         elif kw == "fixfai":
             fixfai = kwarg
+        elif kw == "CMStext":
+            CMStext = kwarg
+        elif kw == "drawCMS":
+            drawCMS = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -160,7 +166,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)
-    style.CMS("Preliminary", luminosity)
+    style.CMS(CMStext, luminosity, drawCMS=drawCMS)
 
     if nuisance is None:
         drawlines(CLtextposition, xmin=xmin, xmax=xmax)
