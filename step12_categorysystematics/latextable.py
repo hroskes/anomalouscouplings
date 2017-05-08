@@ -9,7 +9,7 @@ import ROOT
 
 from helperstuff import config
 
-from helperstuff.combinehelpers import getdatatree, getrate
+from helperstuff.combinehelpers import getdatatree, getrate, getrate2015, Luminosity
 from helperstuff.enums import analyses, Analysis, Category, Channel, flavors, HffHypothesis, Hypothesis, JECSystematic, MultiEnum, MultiEnumABCMeta, ProductionMode
 from helperstuff.samples import ReweightingSample, Sample
 from helperstuff.treewrapper import TreeWrapper
@@ -66,7 +66,7 @@ class RowBase(RowBaseBase):
     if not PRL:
       result += " & "
     result = "{}".format(self.title)
-    for category in categories:
+    for category in list(categories)+[2015]:
       result += " & "
       total = 0
       for channel in channels:
@@ -195,7 +195,7 @@ class SlashRow(RowBaseBase):
     if not PRL:
       result += " & "
     result = "{}".format(self.title)
-    for category in categories:
+    for category in categories+[2015]:
       result += " & "
       parts = []
       for row in self.rows:
@@ -215,11 +215,11 @@ class RowChannel(Row, MultiEnum):
   enums = (Row, Channel)
   def getcategorydistribution(self):
     if self.productionmode == "data":
-      return MultiplyCounter({
-                              (self.channel, category): getdatatree(self.analysis, category, self.channel, production).GetEntries()
-                                for category in categories
-                            })
-    if self.productionmode.isbkg or self.hypothesis == "SM":
+      result = MultiplyCounter({
+                                (self.channel, category): getdatatree(self.analysis, category, self.channel, production).GetEntries()
+                                  for category in categories
+                              })
+    elif self.productionmode.isbkg or self.hypothesis == "SM":
       result = MultiplyCounter({(self.channel, category): getrate(self.channel, category, production, "fordata", self.analysis, self.productionmode) for category in categories})
     else:
       t = self.tree
@@ -239,6 +239,7 @@ class RowChannel(Row, MultiEnum):
       for i in range(h.GetNbinsX()):
         result[self.channel, Category.fromid(i)] += h.GetBinContent(i+1)
       result *= self.scalefactor
+    result[self.channel, 2015] = getrate2015(self.channel, self.productionmode)
     return result
 
   @property
@@ -280,7 +281,7 @@ class Section(object):
       return equalproductionmodes(a, row) or equaltitles(a, row)
 
     result = [row for row in self.rows if isthisrow(productionmode, row)]
-    assert len(result) == 1, [row.title for row in result]
+    assert len(result) == 1, "{}\n{}".format(productionmode, [row.title for row in result])
     return result.pop()
 
 def scalerows(scalethese, tothese):
@@ -309,41 +310,32 @@ def maketable(analysis, dochannels=True, PRL=False):
           title="VBF signal",
         ),
         SlashRow(
-          TotalRow(
-            Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
-            Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
-            title=r"$\V\!\PH$ signal",
-          ),
-          TotalRow(
-            Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
-            Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),
-            title=r"$\V\!\PH$ signal",
-          ),
-          title=r"$\V\!\PH$ signal",
+          Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
+          Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
+          title=r"$\Z\!\PH$ signal",
         ),
         SlashRow(
-          TotalRow(
-            Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
-            Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
-            title="other signal"
-          ),
-          TotalRow(
-            Row(analysis, "ggH", analysis.purehypotheses[1], title=r"$\Pg\Pg\to\PH$"),
-            Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"$\ttbar\PH$"),
-            title="other signal"
-          ),
-          title="other signal"
+          Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
+          Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),
+          title=r"$\PW\!\PH$ signal",
+        ),
+        SlashRow(
+          Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
+          Row(analysis, "ggH", analysis.purehypotheses[1], title=r"$\Pg\Pg\to\PH$"),
+          title=r"$\Pg\Pg\to\PH$ signal"
+        ),
+        SlashRow(
+          Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttbar\PH$"),
+          Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"$\ttbar\PH$"),
+          title=r"$\ttbar\PH$ signal"
         ),
       ),
       Section("bkg",
-        TotalRow(
-          Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$"),
-          Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$"),
-          Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$"),
-          title=r"$\Z\Z/\Z\gamma^*$ bkg"
-        ),
+        Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$ bkg"),
+        Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$ bkg"),
+        Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$ bkg"),
         Row(analysis, "ZX", title=r"$\Z\!+\!\X$ bkg"),
-      )
+      ),
     ]
     sections.append(
       Section("Total",
@@ -351,8 +343,8 @@ def maketable(analysis, dochannels=True, PRL=False):
         Row(analysis, "data", title="Total observed"),
       )
     )
-    scaleslashrows((sections[0].findrow("VBF signal"), sections[0].findrow(r"$\V\!\PH$ signal")))
-    scaleslashrows([sections[0].findrow("other signal")])
+    scaleslashrows((sections[0].findrow("VBF signal"), sections[0].findrow(r"$\Z\!\PH$ signal"), sections[0].findrow(r"$\PW\!\PH$ signal")))
+    scaleslashrows([sections[0].findrow(r"$\Pg\Pg\to\PH$ signal"), sections[0].findrow(r"$\ttbar\PH$ signal")])
   else:
     sections = [
       Section("SM",
@@ -388,7 +380,7 @@ def maketable(analysis, dochannels=True, PRL=False):
     scalerows([sections[1].findrow(p) for p in ("ggH", "ttH")], [sections[0].findrow(p) for p in ("ggH", "ttH")])
 
   if PRL:
-    print r"\begin{{tabular}}{{{}}}".format("l" + "c"*len(categories))
+    print r"\begin{{tabular}}{{{}}}".format("|l|" + "|".join("c"*len(categories)) + "|")
     print r"\hline\hline"
   else:
     print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")

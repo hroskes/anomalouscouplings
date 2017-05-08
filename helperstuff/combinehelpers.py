@@ -187,8 +187,15 @@ class __Rate2015(MultiEnum):
     enums = [ProductionMode, Channel]
     @cache
     def getrate(self):
+        if self.productionmode == "data":
+            if self.channel == "2e2mu": return 4
+            if self.channel == "4mu": return 6
+            if self.channel == "4e": return 1
+            assert 0
+        if self.productionmode == "VBF bkg":
+            rate2016 = sum(getrate(self.productionmode, self.channel, "fordata", config.productionforcombine, "fa3", c) for c in categories)
+            return rate2016 * config.lumi2015 / float(Luminosity("fordata", config.productionforcombine))
         filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
-        tags = ["UnTagged", "VBFTagged"]
         with open(filename) as f:
             y = yaml.load(f)
         with open(filename) as f:
@@ -198,28 +205,26 @@ class __Rate2015(MultiEnum):
                     break
             else:
                 raise IOError("No luminosity in {}".format(filename))
-        if self.productionmode == "ggH":
-            productionmodes = ["ggH", "qqH", "WH", "ZH", "ttH"]
-        elif self.productionmode == "ZX":
-            productionmodes = ["zjets"]
-        else:
-            productionmodes = [str(self.productionmode)]
         rate = 0
-
-        for tag in tags:
-            for p in productionmodes:
+        for tag in "UnTagged", "VBFTagged":
+            for p in self.productionmode.yamlratenames2015:
                 try:
-                    rate += float(y[tag][p]) * config.lumi2015 / lumi
+                    rate += float(y[tag][p]) * float(config.lumi2015) / lumi
                 except ValueError:
-                    rate += eval(y[tag][p].replace("@0", "125")) * config.lumi2015 / lumi
-
+                    rate += eval(y[tag][p].replace("@0", "125")) * float(config.lumi2015) / lumi
         return rate
 
     def __float__(self):
         return self.getrate()
 
+    def __int__(self):
+        return self.getrate()
+
 def getrate2015(*args):
-    return float(__Rate2015(*args))
+    try:
+        return int(__Rate2015(*args))
+    except Exception:
+        return float(__Rate2015(*args))
 
 class DataTree2015(MultiEnum):
     enums = [Channel]
