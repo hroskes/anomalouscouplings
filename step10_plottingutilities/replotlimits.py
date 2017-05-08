@@ -10,5 +10,5 @@ if __name__ == "__main__":
         for txtfile in glob.iglob(os.path.join(config.plotsbasedir, "limits", "*", "*.txt")):
             with open(txtfile) as f:
                 contents = f.readline().split()
-                if contents[0] == "python" and contents[1] == "step9_runcombine.py":
+                if contents[0] == "python" and contents[1] in ("step9_runcombine.py", "./step9_runcombine.py"):
                     subprocess.check_call(contents)
