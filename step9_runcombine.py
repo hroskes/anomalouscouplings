@@ -144,7 +144,7 @@ def runcombine(analysis, foldername, **kwargs):
     CLtextposition = "left"
     productions = config.productionsforcombine
     usesystematics = True
-    runobs = True
+    runobs = config.unblindscans
     subdirectory = ""
     defaultscanrange = (100, -1.0, 1.0)
     scanranges = [defaultscanrange]
@@ -159,10 +159,9 @@ def runcombine(analysis, foldername, **kwargs):
     alsocombinename = None
     alsocombine = []
     sqrts = None
-    if config.unblindscans:
-        lumitype = "fordata"
-    else:
-        lumitype = "forexpectedscan"
+    lumitype = "fordata"
+    CMStext = "Preliminary"
+    drawCMS = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -213,8 +212,6 @@ def runcombine(analysis, foldername, **kwargs):
             else:
                 usebkg = bool(int(kwarg))
         elif kw == "luminosity":
-            if config.unblindscans:
-                raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
             lumitype = float(kwarg)
         elif kw == "fixmuV":
             fixmuV = bool(int(kwarg))
@@ -267,8 +264,17 @@ def runcombine(analysis, foldername, **kwargs):
                 sqrts = [int(_) for _ in kwarg.split(",")]
             except ValueError:
                 raise ValueError("sqrts has to contain ints separated by commas!")
+        elif kw == "CMStext":
+            CMStext = kwarg
+        elif kw == "drawCMS":
+            drawCMS = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
+
+    if runobs and not config.unblindscans:
+        raise TypeError("Can't unblind scans!")
+    if runobs and lumitype != "fordata":
+        raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
 
     if submitjobs:
         if not utilities.inscreen():
@@ -458,12 +464,12 @@ def runcombine(analysis, foldername, **kwargs):
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
         if scanranges != [defaultscanrange]:
             plotname += "".join("_{},{},{}".format(*scanrange) for scanrange in sorted(scanranges))
-        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai)
+        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext)
         for nuisance in plotnuisances:
             if plottitle(nuisance) == plottitle(POI): continue
             if nuisance == "CMS_zz4l_fai1" and fixfai: continue
             nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-            plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai)
+            plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext)
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))

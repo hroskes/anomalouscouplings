@@ -1075,7 +1075,7 @@ class Projections(MultiEnum):
                 hstack.SetMaximum(ymax * 1.4)
             elif discriminant.name in ("D_L1_decay", "D_L1Zg_decay") and self.enrichstatus == "enrich" and not animation:
                 hstack.SetMaximum(ymax * 1.4)
-            elif discriminant.name in ("D_0hplus_VBFdecay", "D_int_VBF", "D_int_HadVH") and self.enrichstatus == "enrich":
+            elif discriminant.name in ("D_CP_VBF", "D_0hplus_VBFdecay", "D_int_VBF", "D_int_HadVH") and self.enrichstatus == "enrich":
                 hstack.SetMaximum(ymax * 1.7)
             elif discriminant.name in ("D_CP_HadVH", "D_0hplus_HadVHdecay") and self.enrichstatus == "enrich":
                 if animation:

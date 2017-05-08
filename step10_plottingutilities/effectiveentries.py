@@ -14,7 +14,7 @@ print("neffectiveentries", "%contribution", "channel", "templategroup", "analysi
 totalrates = {}
 for category, channel in product(categories, channels):
     totalrates[category,channel] = sum(
-                                       getrate(productionmode, category, channel, "forexpectedscan", config.productionsforcombine[0])
+                                       getrate(productionmode, category, channel, "fordata", config.productionforcombine)
                                           for productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "ggZZ", "qqZZ", "VBF bkg", "ZX")
                                       )
 
@@ -22,7 +22,7 @@ for tf in templatesfiles:
     for t in tf.templates():
         print(
               ControlPlot(t.discriminants[0], t).GetEffectiveEntries("raw"),
-              str(getrate(t.productionmode, t.category, t.channel, "forexpectedscan", t.production) / totalrates[t.category, t.channel]*100)+"%",
+              str(getrate(t.productionmode, t.category, t.channel, "fordata", t.production) / totalrates[t.category, t.channel]*100)+"%",
               str(t).replace("D_int_prod ", "").replace("0-", "'0-"),
               "'" if t.hypothesis is None else "",
               '=HYPERLINK("https://hroskes.web.cern.ch/hroskes/anomalouscouplings_production/templateprojections/controlplots/{}/?match={}","link")'.format(os.path.basename(tf.templatesfile()).replace(".root", ""), t.templatename(final=False))

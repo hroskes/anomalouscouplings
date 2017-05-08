@@ -59,6 +59,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     nuisance = None
     POI = "CMS_zz4l_fai1"
     fixfai = False
+    CMStext = "Preliminary"
+    drawCMS = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -78,6 +80,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             POI = actualvariable(kwarg)
         elif kw == "fixfai":
             fixfai = kwarg
+        elif kw == "CMStext":
+            CMStext = kwarg
+        elif kw == "drawCMS":
+            drawCMS = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -103,17 +109,14 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
             if arg == 0:
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2)))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2), uptocolor, 2))
             else:
                 assert not fixfai
                 scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
             uptocolor += 1
 
     if luminosity is None:
-        if productions is None or not config.unblindscans:
-            luminosity = float(Luminosity("forexpectedscan"))
-        else:
-            luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
+        luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
 
     mg = ROOT.TMultiGraph()
     l = ROOT.TLegend(*legendposition)
@@ -163,7 +166,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)
-    style.CMS("Preliminary", luminosity)
+    style.CMS(CMStext, luminosity, drawCMS=drawCMS)
 
     if nuisance is None:
         drawlines(CLtextposition, xmin=xmin, xmax=xmax)
