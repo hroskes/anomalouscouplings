@@ -6,7 +6,9 @@ import ROOT
 from helperstuff import config
 
 from helperstuff.samples import Sample
-from helperstuff.utilities import mkdir_p, tfiles, tlvfromptetaphim
+from helperstuff.utilities import cache, mkdir_p, tfiles, tlvfromptetaphim
+
+TF1 = cache(ROOT.TF1)
 
 s = Sample("VBF", "0+", config.productionforcombine)
 
@@ -14,20 +16,20 @@ f = tfiles[s.withdiscriminantsfile()]
 t = f.candTree
 
 hlherecojetpt = ROOT.TH1F("hlherecojetpt", "", 100, -100, 100)
-hlherecojeteta = ROOT.TH1F("hlherecojeteta", "", 100, -2, 2)
-hlherecojetphi = ROOT.TH1F("hlherecojetphi", "", 100, -.5, .5)
+hlherecojeteta = ROOT.TH1F("hlherecojeteta", "", 100, -1, 1)
+hlherecojetphi = ROOT.TH1F("hlherecojetphi", "", 100, -1, 1)
 
-hlhegenleptonpt = ROOT.TH1F("hlhegenleptonpt", "", 100, -100, 100)
-hlhegenleptoneta = ROOT.TH1F("hlhegenleptoneta", "", 100, -2, 2)
-hlhegenleptonphi = ROOT.TH1F("hlhegenleptonphi", "", 100, -.5, .5)
+hlhegenleptonpt = ROOT.TH1F("hlhegenleptonpt", "", 100, -10, 10)
+hlhegenleptoneta = ROOT.TH1F("hlhegenleptoneta", "", 100, -.2, .2)
+hlhegenleptonphi = ROOT.TH1F("hlhegenleptonphi", "", 100, -.2, .2)
 
-hgenrecoleptonpt = ROOT.TH1F("hgenrecoleptonpt", "", 100, -100, 100)
-hgenrecoleptoneta = ROOT.TH1F("hgenrecoleptoneta", "", 100, -2, 2)
-hgenrecoleptonphi = ROOT.TH1F("hgenrecoleptonphi", "", 100, -.5, .5)
+hgenrecoleptonpt = ROOT.TH1F("hgenrecoleptonpt", "", 100, -10, 10)
+hgenrecoleptoneta = ROOT.TH1F("hgenrecoleptoneta", "", 100, -.2, .2)
+hgenrecoleptonphi = ROOT.TH1F("hgenrecoleptonphi", "", 100, -.2, .2)
 
-hlherecoleptonpt = ROOT.TH1F("hlherecoleptonpt", "", 100, -100, 100)
-hlherecoleptoneta = ROOT.TH1F("hlherecoleptoneta", "", 100, -2, 2)
-hlherecoleptonphi = ROOT.TH1F("hlherecoleptonphi", "", 100, -.5, .5)
+hlherecoleptonpt = ROOT.TH1F("hlherecoleptonpt", "", 100, -10, 10)
+hlherecoleptoneta = ROOT.TH1F("hlherecoleptoneta", "", 100, -.2, .2)
+hlherecoleptonphi = ROOT.TH1F("hlherecoleptonphi", "", 100, -.2, .2)
 
 hists = [hlherecojetpt, hlherecojeteta, hlherecojetphi, hlhegenleptonpt, hlhegenleptoneta, hlhegenleptonphi, hgenrecoleptonpt, hgenrecoleptoneta, hgenrecoleptonphi, hlherecoleptonpt, hlherecoleptoneta, hlherecoleptonphi]
 
@@ -44,7 +46,7 @@ for i, entry in enumerate(t, start=1):
     for pt, eta, phi, m, id in zip(t.LHEAssociatedParticlePt, t.LHEAssociatedParticleEta, t.LHEAssociatedParticlePhi, t.LHEAssociatedParticleMass, t.LHEAssociatedParticleId):
         if 1 <= abs(id) <= 6 or id == 21:
             LHEjets.append(tlvfromptetaphim(pt, eta, phi, m))
-    for pt, eta, phi, id in zip(*((getattr(t, "GenLep{}{}".format(i, var)) for i in range(1, 5)) for var in ("Pt", "Eta", "Phi", "Id"))):
+    for pt, eta, phi, id in zip(*[[getattr(t, "GenLep{}{}".format(j, var)) for j in range(1, 5)] for var in ("Pt", "Eta", "Phi", "Id")]):
         m = 0
         genleptons.append(tlvfromptetaphim(pt, eta, phi, m))
     for pt, eta, phi, id in zip(t.LepPt, t.LepEta, t.LepPhi, t.LepLepId):
@@ -91,4 +93,7 @@ mkdir_p(saveasdir)
 for h in hists:
     for ext in "png eps root pdf".split():
         h.Draw()
+        f = TF1("f"+h.GetName(), "gaus(0)", h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
+        f.SetParameters(h.GetEntries(), h.GetMean(), h.GetRMS())
+        h.Fit(f)
         c.SaveAs(os.path.join(saveasdir, h.GetName()+"."+ext))
