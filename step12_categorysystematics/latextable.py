@@ -49,7 +49,10 @@ class RowBaseBase(object):
 
   def scale(self, scaleby):
     self.categorydistribution
-    self.__categorydistribution *= scaleby
+    for channel in channels:
+      for category in categories:
+        assert (channel, category) in self.__categorydistribution
+        self.__categorydistribution[channel, category] *= scaleby
 
   @abstractproperty
   def title(self): pass
@@ -292,6 +295,13 @@ def scalerows(scalethese, tothese):
   for row in scalethese:
     row.scale(wanttotal / previoustotal)
 
+  sum2015 = sum(row.categorydistribution[channel, 2015] for row in scalethese for channel in channels)
+
+  if any(isinstance(_[1], int) and _[1] == 2015 for _ in sum((row.categorydistribution.keys() for row in scalethese+tothese), [])):
+    for row in scalethese:
+      for channel in channels:
+        row.categorydistribution[channel, 2015] = sum2015 / wanttotal * sum(row.categorydistribution[channel, category] for category in categories)
+
 def scaleslashrows(rows):
   for row in rows: assert len(row.rows) == 2
   scalerows([row.rows[1] for row in rows], [row.rows[0] for row in rows])
@@ -380,13 +390,13 @@ def maketable(analysis, dochannels=True, PRL=False):
     scalerows([sections[1].findrow(p) for p in ("ggH", "ttH")], [sections[0].findrow(p) for p in ("ggH", "ttH")])
 
   if PRL:
-    print r"\begin{{tabular}}{{{}}}".format("|l|" + "|".join("c"*len(categories)) + "|")
+    print r"\begin{{tabular}}{{{}}}".format("l" + "".join("c"*(len(categories)+1)) + "")
     print r"\hline\hline"
   else:
     print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")
     print r"\hline"
   if PRL:
-    print " & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline"
+    print " & " + " & ".join(list(categoryname(_) for _ in categories)+["~~2015~~"]) + r"\\\hline"
   else:
     print " & & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline\hline"
   print (r"\\"+"\n" if PRL else r"\\\hline"+"\n").join(section.getlatex(dochannels=dochannels, PRL=PRL) for section in sections)
