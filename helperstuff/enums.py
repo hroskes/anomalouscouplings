@@ -137,10 +137,13 @@ class Hypothesis(MyEnum):
                  EnumItem("fL1proddec-0.5"),
                  EnumItem("fL1Zgproddec-0.5"),
                  EnumItem("fa2dec-0.9", "fa2-0.9"),
+                 EnumItem("L1_photoncut"),
+                 EnumItem("fL10.5_photoncut"),
+                 EnumItem("fL10.5fL1Zg0.5", "fL1Zg0.5fL10.5"),
                 )
     @property
     def ispure(self):
-        return self in ("0+", "0+_photoncut", "0-", "0h+", "L1", "L1Zg")
+        return self in ("0+", "0+_photoncut", "0-", "0h+", "L1", "L1_photoncut", "L1Zg")
     @property
     def couplingname(self):
         if self in ("0+", "0+_photoncut"): return "g1"
@@ -151,7 +154,7 @@ class Hypothesis(MyEnum):
         assert False
     @property
     def photoncut(self):
-        if self in ("0+_photoncut", "L1Zg"): return True
+        if self in ("0+_photoncut", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5", "L1Zg"): return True
         if self in ("0+", "0-", "a2", "L1"): return False
         for b in "prod", "dec", "proddec":
             for c in "+-":
@@ -220,8 +223,10 @@ class ProductionMode(MyEnum):
         return not self.isbkg
     @property
     def validhypotheses(self):
-        if self in ("ggH", "ttH", "HJJ"):
+        if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
+        if self in "ttH", "HJJ":
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses and x not in fL1fL1Zghypotheses)
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses)
         if self == "ZH":
@@ -409,6 +414,7 @@ class Analysis(MyEnum):
                  EnumItem("fa2"),
                  EnumItem("fL1"),
                  EnumItem("fL1Zg"),
+                 EnumItem("fL1fL1Zg"),
                 )
     def title(self, latex=False, superscript=None):
         if self == "fa3":
@@ -645,9 +651,10 @@ btagsystematics = BTagSystematic.items()
 pythiasystematics = PythiaSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
-decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5", "fa2dec-0.9"))
+decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5", "fa2dec-0.9", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"))
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5", "fa2prod-0.5", "fa3prod-0.5", "fL1prod-0.5", "fL1Zgprod-0.5"))
-proddechypotheses = Hypothesis.items()
+fL1fL1Zghypotheses = Hypothesis.items(lambda x: x in ("L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"))
+proddechypotheses = Hypothesis.items(lambda x: x not in fL1fL1Zghypotheses)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
