@@ -19,7 +19,6 @@ subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
 if set(os.listdir("CMSSW_7_6_5")) != set(["src", ".gitignore"]):
     print """CMSSW_7_6_5 area already set up."""
-    print
 else:
     print """Now setting up CMSSW_7_6_5 area for combine..."""
     #move files out of CMSSW_7_6_5
@@ -36,10 +35,19 @@ else:
         shutil.move(os.path.join(tmpdir, "src"), "CMSSW_7_6_5/src")
         shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_7_6_5/.gitignore")
 
-    with utilities.cd("CMSSW_7_6_5/src"):
-        subprocess.check_call(["scram", "b", "-j", "10"])
-
     print """CMSSW area is set up"""
+
+print
+print "Compiling MELA..."
+
+with utilities.cd("CMSSW_7_6_5/src/ZZMatrixElement"):
+    subprocess.check_call(["./setup.sh", "-j", "10"])
+
+print
+print "Compiling rest of CMSSW..."
+
+with utilities.cd("CMSSW_7_6_5/src"):
+    subprocess.check_call(["scram", "b", "-j", "10"])
 
 print "Compiling TemplateBuilder"
 
