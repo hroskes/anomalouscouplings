@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 
+import os
+import sys
+
+import config
 from treewrapper import TreeWrapperBase
-from utilities import cache, cache_instancemethod
+from utilities import cache, cache_instancemethod, requirecmsenv
+
+requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_0_20"))
 
 from ZZMatrixElement.PythonWrapper.mela import Mela, TVar
 

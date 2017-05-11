@@ -9,7 +9,9 @@ import logging
 import operator
 import json
 import os
+import pipes
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -529,3 +531,47 @@ def mkdtemp(**kwargs):
 
 def getmembernames(*args, **kwargs):
     return [_[0] for _ in inspect.getmembers(*args, **kwargs)]
+
+lastcmsswbase = None
+
+"""
+this doesn't work
+def cmsenv(folder="."):
+    global lastcmsswbase
+    #pythonpath needs special handling
+    oldpythonpath = os.environ["PYTHONPATH"].split(":")
+    indexinsyspath = sys.path.index(oldpythonpath[0])
+
+    with cd(folder):
+        scram = subprocess.check_output(["scram", "ru", "-sh"])
+        for line in scram.splitlines():
+            potentialerror = ValueError("Unknown scram b output:\n{}".format(line))
+            if line.split()[0] == "unset":
+                if line[-1] != ';': raise potentialerror
+                line = line[:-1]
+                for variable in line.split()[1:]:
+                    del os.environ[variable]
+            elif line.split()[0] == "export":
+                afterexport = line.split(None, 1)[1]
+                variable, value = afterexport.split("=", 1)
+                if value[0] != '"' or value[-2:] != '";': raise potentialerror
+                value = value[1:-2]
+                if "\\" in value or '"' in value or "'" in line: raise potentialerror
+                os.environ[variable] = value
+            else:
+                raise potentialerror
+
+    newpythonpath = os.environ["PYTHONPATH"].split(":")
+    for _ in oldpythonpath: sys.path.remove(_)
+    sys.path[indexinsyspath:indexinsyspath] = newpythonpath
+
+    if lastcmsswbase is not None and os.environ["CMSSW_BASE"] != lastcmsswbase:
+        raise ValueError("Can't cmsenv in both {} and {}!".format(lastcmsswbase, os.environ["CMSSW_BASE"]))
+    lastcmsswbase = os.environ["CMSSW_BASE"]
+"""
+
+def requirecmsenv(folder):
+    needcmsswbase = subprocess.check_output("cd {} && eval $(scram ru -sh) >& /dev/null && echo $CMSSW_BASE".format(pipes.quote(folder)), shell=True).strip()
+    cmsswbase = os.environ["CMSSW_BASE"]
+    if cmsswbase != needcmsswbase:
+        raise ValueError("Need to cmsenv in {}!".format(needcmsswbase))
