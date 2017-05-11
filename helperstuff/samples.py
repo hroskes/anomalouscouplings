@@ -640,7 +640,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                             for hypothesis in self.productionmode.validhypotheses
                             for hffhypothesis in (hffhypotheses if hypothesis in ("0+", "0-", "fa30.5") else ("Hff0+",))
                    ]
-        if productionmode == "ggH" and config.LHE:
+        if self.productionmode == "ggH" and config.LHE:
             return [self]
         if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
@@ -1229,7 +1229,8 @@ class Sample(ReweightingSamplePlus):
         if config.LHE: raise ValueError("Can't get the CJLST file when in LHE mode!")
         return os.path.join(self.CJLSTmaindir(), self.CJLSTdirname(), "ZZ4lAnalysis.root")
 
-    def lhefile(self):
+    @property
+    def LHEfile(self):
         if not config.LHE: raise ValueError("Can't get the lhe file when not in LHE mode!")
         if self.production == "LHE_170509":
             if self.productionmode == "ggH":
@@ -1241,7 +1242,7 @@ class Sample(ReweightingSamplePlus):
                 if self.hypothesis == "fL1Zg0.5": filename = "ggHa1L1Zg.lhe"
                 if self.hypothesis == "fL10.5fL1Zg0.5": filename = "ggHL1L1Zg.lhe"
                 return os.path.join(folder, filename)
-        raise self.ValueError("lhefile")
+        raise self.ValueError("LHEfile")
 
     def withdiscriminantsfile(self):
         result = os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
@@ -1280,7 +1281,7 @@ class Sample(ReweightingSamplePlus):
 
     @property
     def copyfromothersample(self):
-        if self == Sample("170203", "ggH", "MINLO", "0+"):
+        if not config.LHE and self == Sample("170203", "ggH", "MINLO", "0+"):
             return Sample("170222", "ggH", "MINLO", "0+")
         return None
 

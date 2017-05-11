@@ -104,10 +104,11 @@ class LHEEvent(object):
     print self.eventstr
 
 class LHEWrapper(TreeWrapperBase):
-  def __init__(self, treesample, minevent=0, maxevent=None, isdummy=False):
+  def __init__(self, treesample, minevent=0, maxevent=None):
     assert minevent == 0 and maxevent is None
     self.mela = self.initmela()
-    super(LHEWrapper, self).__init__(treesample, minevent, maxevent, isdummy)
+    self.event = None
+    super(LHEWrapper, self).__init__(treesample, minevent, maxevent)
 
   @staticmethod
   @cache
@@ -116,12 +117,12 @@ class LHEWrapper(TreeWrapperBase):
 
   @cache_instancemethod
   def __len__(self):
-    with open(self.treesample.LHEfilename) as f:
+    with open(self.treesample.LHEfile) as f:
       return f.read().count("</event>")
 
   def __iter__(self):
     self.__i = 0
-    self.__f = open(self.treesample.LHEfilename)
+    self.__f = open(self.treesample.LHEfile)
     return super(LHEWrapper, self).__iter__()
 
   def next(self):
@@ -216,6 +217,7 @@ class LHEWrapper(TreeWrapperBase):
       "cconstantforDHadWH",
       "cconstantforDHadZH",
       "checkfunctions",
+      "event",
       "exceptions",
       "hypothesis",
       "initlists",
@@ -223,7 +225,6 @@ class LHEWrapper(TreeWrapperBase):
       "isalternate",
       "isbkg",
       "isdata",
-      "isdummy",
       "isZX",
       "maxevent",
       "mela",

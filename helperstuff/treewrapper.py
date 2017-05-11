@@ -17,7 +17,8 @@ import constants
 import enums
 from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import cache, callclassinitfunctions, getmembernames
+from utilities import cache_instancemethod, callclassinitfunctions, getmembernames
+import xrd
 import ZX
 
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
@@ -26,8 +27,13 @@ sys.setrecursionlimit(10000)
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
 
+if not config.LHE:
+    definitelyexists = Sample("VBF", "0+", config.productionsforcombine[0])
+    if not xrd.exists(definitelyexists.CJLSTfile()):
+        raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
+
 class TreeWrapperBase(Iterator):
-    def __init__(self, treesample, minevent=0, maxevent=None, isdummy=False):
+    def __init__(self, treesample, minevent=0, maxevent=None):
         self.treesample = treesample
         self.isdata = treesample.isdata()
         self.isbkg = not self.isdata and treesample.isbkg
@@ -44,7 +50,6 @@ class TreeWrapperBase(Iterator):
         else:
             self.unblind = True
 
-        self.isdummy = isdummy
         if self.isZX and not config.usedata: self.isdummy = True
         if self.isdata and not config.showblinddistributions: self.isdummy = True
 
@@ -415,20 +420,46 @@ class TreeWrapperBase(Iterator):
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
-    def __init__(self, tree, treesample, Counters, failedtree=None, minevent=0, maxevent=None, isdummy=False):
+    def __init__(self, treesample, minevent=0, maxevent=None):
         """
         tree - a TTree object
         treesample - which sample the TTree was created from
         Counters - from the CJLST file
         """
-        self.tree = tree
-        self.failedtree = failedtree
+        filename = treesample.CJLSTfile()
+        self.isdummy = False
+        if not xrd.exists(filename):
+            self.isdummy = True
+        else:
+            self.f = ROOT.TFile.Open(filename)
+            if not self.f.Get("{}/candTree".format(sample.TDirectoryname())):
+                self.isdummy = True
+
+        if self.isdummy:
+            print "{} does not exist or is bad, using {}".format(filename, definitelyexists.CJLSTfile())
+            #give it a tree so that it can get the format, but not fill any entries
+            filename = definitelyexists.CJLSTfile()
+            self.f = ROOT.TFile.Open(filename)
+
+        self.Counters = self.f.Get("{}/Counters".format(sample.TDirectoryname()))
+        if not self.Counters:
+            raise ValueError("No Counters in file "+filename)
+
+        self.tree = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
+        self.tree.Add(filename)
+
+        if self.f.Get("{}/candTree_failed".format(sample.TDirectoryname())):
+            self.failedtree = ROOT.TChain("{}/candTree_failed".format(sample.TDirectoryname()))
+            self.failedtree.Add(filename)
+        else:
+            self.failedtree = None
+
         self.nevents = self.nevents2L2l = self.cutoffs = None
         self.xsec = None
         self.effectiveentriestree = None
         self.printevery = 10000
 
-        super(TreeWrapperBase, self).__init__(treesample, minevent, maxevent, isdummy)
+        super(TreeWrapperBase, self).__init__(treesample, minevent, maxevent)
 
         if Counters is not None:
             self.nevents = Counters.GetBinContent(40)
@@ -708,7 +739,7 @@ class TreeWrapper(TreeWrapperBase):
         self.notdijet_JECDn = self.M2g1_VBF_JECDn <= 0
         return self
 
-    @cache
+    @cache_instancemethod
     def __len__(self):
         if self.isdummy:
             return 0

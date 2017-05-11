@@ -6,22 +6,20 @@ from helperstuff import xrd
 from helperstuff.enums import hffhypotheses, ProductionMode, productions, pythiasystematics
 from helperstuff.samples import allsamples, Sample
 from helperstuff.submitjob import submitjob
-from helperstuff.treewrapper import TreeWrapper
+if config.LHE:
+    from helperstuff.lhewrapper import LHEWrapper as TreeWrapper
+else:
+    from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID, LSF_creating
 import os
 import ROOT
 import sys
-
-definitelyexists = Sample("VBF", "0+", config.productionsforcombine[0])
-if not xrd.exists(definitelyexists.CJLSTfile()):
-    raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
 
 def adddiscriminants(*args):
 
   sample = Sample(*args)
   reweightingsamples = sample.reweightingsamples()
 
-  filename = sample.CJLSTfile()
   newfilename = sample.withdiscriminantsfile()
   print newfilename
   with KeepWhileOpenFile(newfilename+".tmp", message=LSB_JOBID()) as kwof, LSF_creating(newfilename, ignorefailure=True) as LSF:
@@ -36,34 +34,7 @@ def adddiscriminants(*args):
       os.symlink(sample.copyfromothersample.withdiscriminantsfile(), sample.withdiscriminantsfile())
       return
 
-    isdummy = False
-    if not xrd.exists(filename):
-        isdummy = True
-    else:
-        f = ROOT.TFile.Open(filename)
-        if not f.Get("{}/candTree".format(sample.TDirectoryname())):
-            isdummy = True
-
-    if isdummy:
-        print "{} does not exist or is bad, using {}".format(filename, definitelyexists.CJLSTfile())
-        #give it a tree so that it can get the format, but not fill any entries
-        filename = definitelyexists.CJLSTfile()
-        f = ROOT.TFile.Open(filename)
-
-    Counters = f.Get("{}/Counters".format(sample.TDirectoryname()))
-    if not Counters:
-        raise ValueError("No Counters in file "+filename)
-
-    t = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
-    t.Add(filename)
-
-    if f.Get("{}/candTree_failed".format(sample.TDirectoryname())):
-        t_failed = ROOT.TChain("{}/candTree_failed".format(sample.TDirectoryname()))
-        t_failed.Add(filename)
-    else:
-        t_failed = None
-
-    treewrapper = TreeWrapper(t, sample, Counters=Counters, failedtree=t_failed, isdummy=isdummy)
+    treewrapper = TreeWrapper(sample)
 
     if os.path.exists(newfilename):
         return
@@ -71,9 +42,12 @@ def adddiscriminants(*args):
     failed = False
     try:
         newf = ROOT.TFile.Open(LSF.basename(newfilename), "recreate")
-        newt = t.CloneTree(0)
-        if treewrapper.effectiveentriestree is not None:
-            treewrapper.effectiveentriestree.SetDirectory(newf)
+        if not config.LHE:
+            newt = treewrapper.tree.CloneTree(0)
+            if treewrapper.effectiveentriestree is not None:
+                treewrapper.effectiveentriestree.SetDirectory(newf)
+        else:
+            newt = ROOT.TTree("candTree", "candTree")
 
         discriminants = OrderedDict()
         for discriminant in treewrapper.toaddtotree:

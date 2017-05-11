@@ -248,7 +248,7 @@ class ProductionMode(MyEnum):
         else:
             if self == "ggH":
                 return Hypothesis.items(lambda x: x in ("0+_photoncut", "L1_photoncut", "L1Zg", "fL10.5_photoncut", "fL1Zg0.5", "fL10.5fL1Zg0.5"))
-        assert False
+        assert False, self
     @generatortolist_condition(lambda x: tfiles[x.withdiscriminantsfile()].candTree.GetEntries())
     def allsamples(self, production):
         from samples import Sample
