@@ -17,7 +17,7 @@ import constants
 import enums
 from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import cache, callclassinitfunctions
+from utilities import cache, callclassinitfunctions, getmembernames
 import ZX
 
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
@@ -48,6 +48,8 @@ class TreeWrapperBase(Iterator):
         if self.isZX and not config.usedata: self.isdummy = True
         if self.isdata and not config.showblinddistributions: self.isdummy = True
 
+        self.cconstantforDbkg = self.cconstantforD2jet = self.cconstantforDHadWH = self.cconstantforDHadZH = None
+
         self.minevent = minevent
         self.maxevent = maxevent
 
@@ -68,7 +70,7 @@ class TreeWrapperBase(Iterator):
         #if a function is added in the class but not added to toaddtotree
         #all member variables, unless they have __, should be added to either toaddtotree or exceptions
         notanywhere, inboth, nonexistent, multipletimes = [], [], [], []
-        for key in set(list(type(self).__dict__) + list(self.__dict__) + self.toaddtotree+self.toaddtotree_int + self.exceptions):
+        for key in set(getmembernames(self) + self.toaddtotree+self.toaddtotree_int + self.exceptions):
             if key.startswith("__"): continue
             if key.startswith("_abc"): continue
             if any(key.startswith("_{}__".format(cls.__name__)) for cls in type(self).__mro__):
@@ -77,7 +79,7 @@ class TreeWrapperBase(Iterator):
                 notanywhere.append(key)
             if key in self.toaddtotree+self.toaddtotree_int and key in self.exceptions:
                 inboth.append(key)
-            if key not in type(self).__dict__ and key not in self.__dict__:
+            if key not in getmembernames(self):
                 nonexistent.append(key)
         for key, occurences in Counter(self.toaddtotree+self.toaddtotree_int + self.exceptions).iteritems():
             if occurences >= 2 and key not in inboth or occurences >= 3: multipletimes.append(key)
@@ -423,7 +425,6 @@ class TreeWrapper(TreeWrapperBase):
         self.failedtree = failedtree
         self.nevents = self.nevents2L2l = self.cutoffs = None
         self.xsec = None
-        self.cconstantforDbkg = self.cconstantforD2jet = self.cconstantforDHadWH = self.cconstantforDHadZH = None
         self.effectiveentriestree = None
         self.printevery = 10000
 
@@ -834,6 +835,7 @@ class TreeWrapper(TreeWrapperBase):
             "isdummy",
             "isZX",
             "kfactors",
+            "maxevent",
             "minevent",
             "nevents",
             "nevents2L2l",

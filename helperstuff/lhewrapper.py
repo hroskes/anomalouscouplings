@@ -3,7 +3,7 @@
 from treewrapper import TreeWrapperBase
 from utilities import cache, cache_instancemethod
 
-#from ZZMatrixElement.PythonWrapper.mela import Mela, TVar
+from ZZMatrixElement.PythonWrapper.mela import Mela, TVar
 
 class LHEEvent(object):
   def __init__(self, event):
@@ -94,16 +94,19 @@ class LHEEvent(object):
     if not config.m4lmin < self.ZZMass < config.m4lmax: return False
     return True
 
+  def __str__(self):
+    print self.eventstr
+
 class LHEWrapper(TreeWrapperBase):
   def __init__(self, treesample, minevent=0, maxevent=None, isdummy=False):
     assert minevent == 0 and maxevent is None
-    super(LHEWrapper, self).__init__(treesample, minevent, maxevent, isdummy)
     self.mela = self.initmela()
+    super(LHEWrapper, self).__init__(treesample, minevent, maxevent, isdummy)
 
-  #@staticmethod
-  #@cache
-  #def initmela(*args, **kwargs):
-  #  return Mela(*args, **kwargs)
+  @staticmethod
+  @cache
+  def initmela(*args, **kwargs):
+    return Mela(*args, **kwargs)
 
   @cache_instancemethod
   def __len__(self):
@@ -201,45 +204,31 @@ class LHEWrapper(TreeWrapperBase):
       "D_CP_decay",
       "D_0hplus_decay",
       "D_int_decay",
-      "allsamples",
-      "categorizations",
+
       "cconstantforDbkg",
       "cconstantforD2jet",
       "cconstantforDHadWH",
       "cconstantforDHadZH",
       "checkfunctions",
-      "cutoffs",
-      "D_L1L1Zgint_decay",
       "exceptions",
-      "failedtree",
-      "genMEs",
-      "getweightfunction",
       "hypothesis",
-      "initcategoryfunctions",
       "initlists",
-      "initsystematics",
-      "initweightfunctions",
+      "initmela",
       "isalternate",
       "isbkg",
       "isdata",
       "isdummy",
       "isZX",
-      "kfactors",
+      "maxevent",
+      "mela",
       "minevent",
-      "nevents",
-      "nevents2L2l",
       "next",
-      "onlyweights",
-      "passesblindcut",
       "productionmode",
-      "preliminaryloop",
       "toaddtotree",
       "toaddtotree_int",
-      "tree",
       "treesample",
       "Show",
       "unblind",
-      "xsec",
     ]
     proddiscriminants = [
       "D_0minus_{prod}",
@@ -256,10 +245,16 @@ class LHEWrapper(TreeWrapperBase):
       "D_L1Zg_{prod}decay",
     ]
     for prod in ("VBF", "HadVH"):
-      for JEC in "", "_JECUp", "_JECDn":
-        self.exceptions += [_.format(prod=prod)+JEC for _ in proddiscriminants]
+      self.exceptions += [_.format(prod=prod) for _ in proddiscriminants]
 
     self.toaddtotree_int = []
+
+  def Show(self):
+    print self.event
+
+  class mela(object):
+    @staticmethod
+    def resetInputEvent(*args, **kwargs): pass
 
 if __name__ == "__main__":
   from samples import Sample

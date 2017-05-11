@@ -3,6 +3,7 @@ import collections
 import contextlib
 import errno
 from functools import wraps
+import inspect
 from itertools import tee, izip
 import logging
 import operator
@@ -525,3 +526,6 @@ def mkdtemp(**kwargs):
             else:
                 assert False, config.host
     return tempfile.mkdtemp(**kwargs)
+
+def getmembernames(*args, **kwargs):
+    return [_[0] for _ in inspect.getmembers(*args, **kwargs)]

@@ -238,12 +238,16 @@ class ProductionMode(MyEnum):
         assert False
     @property
     def generatedhypotheses(self):
-        if self == "ggH":
-            return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5"))
-        if self in ("VBF", "ZH", "WH"):
-            return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"))
-        if self in ("WplusH", "WminusH", "ttH", "HJJ"):
-            return Hypothesis.items(lambda x: x == "0+")
+        if not config.LHE:
+            if self == "ggH":
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5"))
+            if self in ("VBF", "ZH", "WH"):
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"))
+            if self in ("WplusH", "WminusH", "ttH", "HJJ"):
+                return Hypothesis.items(lambda x: x == "0+")
+        else:
+            if self == "ggH":
+                return Hypothesis.items(lambda x: x in ("0+_photoncut", "L1_photoncut", "L1Zg", "fL10.5_photoncut", "fL1Zg0.5", "fL10.5fL1Zg0.5"))
         assert False
     @generatortolist_condition(lambda x: tfiles[x.withdiscriminantsfile()].candTree.GetEntries())
     def allsamples(self, production):
