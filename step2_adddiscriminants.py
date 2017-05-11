@@ -122,6 +122,7 @@ if __name__ == '__main__':
             raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
     else:
         for production in productions:
-            adddiscriminants("ggZZ", "4tau", production)  #to catch bugs early
+            if not config.LHE:
+                adddiscriminants("ggZZ", "4tau", production)  #to catch bugs early
         for sample in allsamples():
             adddiscriminants(sample)

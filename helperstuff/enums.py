@@ -138,7 +138,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fL1Zgproddec-0.5"),
                  EnumItem("fa2dec-0.9", "fa2-0.9"),
                  EnumItem("L1_photoncut"),
-                 EnumItem("fL10.5_photoncut"),
+                 EnumItem("fL10.5_photoncut", "fL1dec0.5_photoncut"),
                  EnumItem("fL10.5fL1Zg0.5", "fL1Zg0.5fL10.5"),
                 )
     @property
@@ -225,7 +225,7 @@ class ProductionMode(MyEnum):
     def validhypotheses(self):
         if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
-        if self in "ttH", "HJJ":
+        if self in ("ttH", "HJJ"):
             return Hypothesis.items(lambda x: x in decayonlyhypotheses and x not in fL1fL1Zghypotheses)
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses)
@@ -512,6 +512,7 @@ class Production(MyEnum):
     enumitems = (
                  EnumItem("170203"),
                  EnumItem("170222"),
+                 EnumItem("LHE_170509"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))

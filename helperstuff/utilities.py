@@ -73,6 +73,18 @@ def cache(function):
             return newfunction(*args, **kwargs)
     return newfunction
 
+def cache_instancemethod(function):
+    """
+    This one can't take arguments.
+    But the cache clears when self is deleted (as opposed to the cache keeping self alive).
+    Probably could be modified to take arguments without too much trouble.
+    """
+    @wraps(function)
+    def newfunction(self):
+        if not hasattr(self, "__cache_instancemethod_{}".format(function.__name__)):
+            setattr(self, "__cache_instancemethod_{}".format(function.__name__), function(self))
+        return getattr(self, "__cache_instancemethod_{}".format(function.__name__))
+
 def multienumcache(function, haskwargs=False, multienumforkey=None):
     from enums import MultiEnum
     if multienumforkey is None:

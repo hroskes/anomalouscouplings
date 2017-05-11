@@ -859,14 +859,14 @@ class ReweightingSample(MultiEnum, SampleBase):
                                      ] + ["fa2dec-0.9"]
                                   ):
                 return 1
-            if self.hypothesis in ("a2", "0-", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5L1Zg0.5"):
+            if self.hypothesis in ("a2", "0-", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"):
                 return 0
         raise self.ValueError("g1")
 
     @property
     def g2(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "0-", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5L1Zg0.5"]
+                               ["0+", "0+_photoncut", "0-", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"]
                              + ["{}{}{}0.5".format(a, b, c) for a in ("fa3", "fL1", "fL1Zg") for b in ("dec", "prod", "proddec") for c in ("+", "-")]
                               ):
             return 0
@@ -909,7 +909,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g4(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "a2", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5L1Zg0.5"]
+                               ["0+", "0+_photoncut", "a2", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"]
                              + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fL1", "fL1Zg") for b in ("dec", "prod", "proddec") for c in "+-"]
                              + ["fa2dec-0.9"]
                               ):
@@ -1370,6 +1370,10 @@ def xcheck():
     for (k1, v1), (k2, v2) in itertools.product(withdiscs.iteritems(), withdiscs.iteritems()):
         if k1 != k2 and v1 == v2:
             raise ValueError("with discriminants files for {} and {} are the same:\n{}".format(k1, k2, v1))
+
+if config.LHE:
+    def xcheck():
+        pass
 
 xcheck()
 del xcheck
