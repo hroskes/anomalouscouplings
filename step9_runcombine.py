@@ -361,7 +361,7 @@ def runcombine(analysis, foldername, **kwargs):
               "pointindex": "",
               "sqrts": ",".join("{:d}".format(_) for _ in sqrts),
              }
-    folder = os.path.join(config.repositorydir, "CMSSW_8_0_20/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
+    folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
     with utilities.cd(folder):
         with open(".gitignore", "w") as f:
