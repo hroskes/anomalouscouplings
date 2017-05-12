@@ -56,10 +56,6 @@ m4lmin, m4lmax = 105, 140
 
 blindcut = lambda self: self.D_bkg() < 0.5
 
-productionsforcombine = ["170222"]
-if len(productionsforcombine) == 1:
-    productionforcombine = productionsforcombine[0]
-
 defaultnbins = 40
 
 
@@ -68,3 +64,15 @@ arrowsatminima = False
 minimainlegend = True
 
 LHE = True
+
+if LHE:
+    productionsforcombine = ["LHE_170509"]
+    smearptelectron = 2.399/6
+    smearptmuon = 2.169/6
+    smearptjet = 18./6
+else:
+    productionsforcombine = ["170222"]
+
+if len(productionsforcombine) == 1:
+    productionforcombine = productionsforcombine[0]
+

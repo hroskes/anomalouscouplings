@@ -557,6 +557,9 @@ class Production(MyEnum):
     def productionforsmoothingparameters(self):
         if self == "170222": return type(self)("170203")
         return self
+    @property
+    def LHE(self):
+        return "LHE" in str(self)
 
 class Category(MyEnum):
     """
@@ -667,7 +670,7 @@ analyses = Analysis.items()
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in ("170203", "170222"))
+productions = Production.items(lambda x: x.LHE == config.LHE)
 #productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
 

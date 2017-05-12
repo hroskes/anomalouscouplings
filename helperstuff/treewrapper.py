@@ -53,6 +53,10 @@ class TreeWrapperBase(Iterator):
         if self.isZX and not config.usedata: self.isdummy = True
         if self.isdata and not config.showblinddistributions: self.isdummy = True
 
+        self.printevery = 10000
+        if self.isZX:
+            self.printevery = 1000
+
         self.cconstantforDbkg = self.cconstantforD2jet = self.cconstantforDHadWH = self.cconstantforDHadZH = None
 
         self.minevent = minevent
@@ -457,7 +461,6 @@ class TreeWrapper(TreeWrapperBase):
         self.nevents = self.nevents2L2l = self.cutoffs = None
         self.xsec = None
         self.effectiveentriestree = None
-        self.printevery = 10000
 
         super(TreeWrapperBase, self).__init__(treesample, minevent, maxevent)
 
@@ -469,9 +472,6 @@ class TreeWrapper(TreeWrapperBase):
             self.xsec = 0
         else:
             self.xsec = tree.xsec * 1000 #pb to fb
-
-        if self.isZX:
-            self.printevery = 1000
 
         self.preliminaryloop()
 
@@ -873,6 +873,7 @@ class TreeWrapper(TreeWrapperBase):
             "next",
             "onlyweights",
             "passesblindcut",
+            "printevery",
             "productionmode",
             "preliminaryloop",
             "toaddtotree",

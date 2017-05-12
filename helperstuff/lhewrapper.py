@@ -1,19 +1,23 @@
 #!/usr/bin/env python
 
 import os
+import random
 import sys
 
+import ROOT
+
+import CJLSTscripts
 import config
 from treewrapper import TreeWrapperBase
-from utilities import cache, cache_instancemethod, requirecmsenv
+from utilities import cache, cache_instancemethod, product, requirecmsenv, tlvfromptetaphim
 
 requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_0_20"))
 
-from ZZMatrixElement.PythonWrapper.mela import Mela, TVar
+from ZZMatrixElement.PythonWrapper.mela import Mela, SimpleParticle_t, SimpleParticleCollection_t, TVar
 
 class LHEEvent(object):
   def __init__(self, event):
-    self.eventstr = eventstr
+    self.eventstr = event
 
     #from https://github.com/hroskes/HiggsAnalysis-ZZMatrixElement/blob/b0ad77b/PythonWrapper/python/mela.py#L338-L366
     lines = event.split("\n")
@@ -49,13 +53,13 @@ class LHEEvent(object):
     id, p = particle
     if abs(id) == 11:
       newid = id
-      smearpt = constants.smearptelectron
+      smearpt = config.smearptelectron
     elif abs(id) == 13:
       newid = id
-      smearpt = constants.smearptmuon
+      smearpt = config.smearptmuon
     elif 1 <= abs(id) <= 5 or abs(id) == 21:
       newid = 0
-      smearpt = constants.smearptjet
+      smearpt = config.smearptjet
     else:
       assert False
 
@@ -86,11 +90,13 @@ class LHEEvent(object):
   @property
   @cache_instancemethod
   def ZZMass(self):
-    return sum((p for id, p in self.recodaughters()), ROOT.TLorentzVector()).M()
+    return sum((p for id, p in self.recodaughters), ROOT.TLorentzVector()).M()
 
+  @property
   def genmelaargs(self):
     return SimpleParticleCollection_t(self.gendaughters), SimpleParticleCollection_t(self.genassociated), SimpleParticleCollection_t(self.genmothers), True
 
+  @property
   def recomelaargs(self):
     return SimpleParticleCollection_t(self.recodaughters), SimpleParticleCollection_t(self.recoassociated), 0, False
 
@@ -101,7 +107,12 @@ class LHEEvent(object):
     return True
 
   def __str__(self):
-    print self.eventstr
+    return self.eventstr
+
+  @property
+  @cache_instancemethod
+  def ZZFlav(self):
+    return product(id for id, p in self.recodaughters)
 
 class LHEWrapper(TreeWrapperBase):
   def __init__(self, treesample, minevent=0, maxevent=None):
@@ -126,9 +137,13 @@ class LHEWrapper(TreeWrapperBase):
     return super(LHEWrapper, self).__iter__()
 
   def next(self):
+    self.__i += 1
     m = self.mela
     m.resetInputEvent()
     event = ""
+    if self.__i % self.printevery == 0 or self.__i == len(self):
+      print self.__i, "/", len(self)
+      raise StopIteration
     for line in self.__f:
       if "<event>" not in line and not event:
         continue
@@ -143,35 +158,44 @@ class LHEWrapper(TreeWrapperBase):
         m.ghz1 = 1
         self.M2g1_decay = m.computeP(True)
 
-        m.setInputEvent(*event.recomelaargs)
         m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZINDEPENDENT)
         m.ghz1_prime2 = 1
         self.M2g1prime2_decay = m.computeP(True)
 
-        m.setInputEvent(*event.recomelaargs)
         m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZINDEPENDENT)
         m.ghzgs1_prime2 = 1
         self.M2ghzgs1prime2_decay = m.computeP(True)
 
-        m.setInputEvent(*event.recomelaargs)
         m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZINDEPENDENT)
         m.g1 = m.ghz1_prime2 = 1
         self.M2g1g1prime2_decay = m.computeP(True) - self.M2g1_decay - self.M2g1prime2_decay
 
-        m.setInputEvent(*event.recomelaargs)
         m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZINDEPENDENT)
         m.g1 = m.ghzgs1_prime2 = 1
         self.M2g1ghzgs1prime2_decay = m.computeP(True) - self.M2g1_decay - self.M2ghzgs1prime2_decay
 
-        m.setInputEvent(*event.recomelaargs)
         m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZINDEPENDENT)
         m.ghz1_prime2 = m.ghzgs1_prime2 = 1
         self.M2g1prime2ghzgs1prime2_decay = m.computeP(True) - self.M2g1prime2_decay - self.M2ghzgs1prime2_decay
+
+        m.setProcess(TVar.HSMHiggs, TVar.JHUGen, TVar.ZZGG)
+        self.p_m4l_SIG = m.computePM4l(TVar.SMSyst_None)
+
+        m.setProcess(TVar.bkgZZ, TVar.JHUGen, TVar.ZZGG)
+        self.p_m4l_BKG = m.computePM4l(TVar.SMSyst_None)
+
+        m.setProcess(TVar.bkgZZ, TVar.MCFM, TVar.ZZQQB)
+        self.M2qqZZ = m.computeP(True)
+
+        self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.ZZFlav(), self.ZZMass())
 
         return self
 
   def ZZMass(self):
     return self.event.ZZMass
+
+  def ZZFlav(self):
+    return self.event.ZZFlav
 
   def __del__(self):
     self.mela.resetInputEvent()
@@ -230,6 +254,7 @@ class LHEWrapper(TreeWrapperBase):
       "mela",
       "minevent",
       "next",
+      "printevery",
       "productionmode",
       "toaddtotree",
       "toaddtotree_int",
@@ -254,14 +279,12 @@ class LHEWrapper(TreeWrapperBase):
     for prod in ("VBF", "HadVH"):
       self.exceptions += [_.format(prod=prod) for _ in proddiscriminants]
 
-    self.toaddtotree_int = []
+    self.toaddtotree_int = [
+      "ZZFlav",
+    ]
 
   def Show(self):
     print self.event
-
-  class mela(object):
-    @staticmethod
-    def resetInputEvent(*args, **kwargs): pass
 
 if __name__ == "__main__":
   from samples import Sample

@@ -10,7 +10,7 @@ if config.LHE:
     from helperstuff.lhewrapper import LHEWrapper as TreeWrapper
 else:
     from helperstuff.treewrapper import TreeWrapper
-from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID, LSF_creating
+from helperstuff.utilities import deletemelastuff, KeepWhileOpenFile, LSB_JOBID, LSF_creating
 import os
 import ROOT
 import sys
@@ -95,8 +95,12 @@ if __name__ == '__main__':
         else:
             raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
     else:
-        for production in productions:
-            if not config.LHE:
-                adddiscriminants("ggZZ", "4tau", production)  #to catch bugs early
-        for sample in allsamples():
-            adddiscriminants(sample)
+        try:
+            for production in productions:
+                if not config.LHE:
+                    adddiscriminants("ggZZ", "4tau", production)  #to catch bugs early
+            for sample in allsamples():
+                adddiscriminants(sample)
+        finally:
+            if config.LHE and not any(os.path.exists(sample.withdiscriminantsfile()+".tmp") for sample in allsamples()):
+                deletemelastuff()

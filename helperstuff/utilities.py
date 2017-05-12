@@ -575,3 +575,10 @@ def requirecmsenv(folder):
     cmsswbase = os.environ["CMSSW_BASE"]
     if cmsswbase != needcmsswbase:
         raise ValueError("Need to cmsenv in {}!".format(needcmsswbase))
+
+def deletemelastuff():
+    if os.path.exists("Pdfdata"):
+        shutil.rmtree("Pdfdata")
+    for thing in "br.sm1", "br.sm2", "ffwarn.dat", "input.DAT", "process.DAT":
+        if os.path.exists(thing):
+            os.remove(thing)
