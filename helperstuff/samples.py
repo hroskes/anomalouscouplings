@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from abc import ABCMeta, abstractproperty
 from collections import Counter
-import itertools
+from itertools import product as cartesianproduct
 from math import copysign, sqrt
 import numpy
 import os
@@ -11,7 +11,7 @@ import ROOT
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
-from utilities import cache, product
+from utilities import cache, product, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 
@@ -58,7 +58,7 @@ class SampleBase(object):
             JHUXSVBFa1 = constants.JHUXSVBFa1_photoncut
             JHUXSZHa1 = constants.JHUXSZHa1_photoncut
             JHUXSWHa1 = constants.JHUXSWHa1_photoncut
-            assert self.g2 == self.g4 == self.g1prime2 == 0, self
+            assert self.g2 == self.g4 == 0, self
         else:
             JHUXSggH2L2la1 = constants.JHUXSggH2L2la1
             JHUXSggH2L2lL1 = constants.JHUXSggH2L2lL1
@@ -322,21 +322,74 @@ class SampleBase(object):
 
         strsample = str(self_sample)
 
-        if self_sample.productionmode == "ggZZ":
-            def MC_weight_function(self_tree):
-                KFactor = self_tree.KFactor_QCD_ggZZ_Nominal
-                return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
+        if not config.LHE:
 
-        elif self_sample.productionmode == "qqZZ":
-            def MC_weight_function(self_tree):
-                if hasattr(self_tree, "KFactor_EW_qqZZ"): #qqZZ->itself
-                    KFactor = self_tree.KFactor_EW_qqZZ * self_tree.KFactor_QCD_qqZZ_M
-                    return self_tree.overallEventWeight * self_tree.xsec * KFactor #/ self_tree.nevents
-                                                                                   #Do NOT divide by nevents.  This will happen
-                                                                                   #in creating the templates when we divide by
-                                                                                   #sum(effectiveentries[==nevents])
-                else:                                     #VBFbkg->qqZZ
-                    result = self_tree.p_Gen_JJQCD_BKG_MCFM
+            if self_sample.productionmode == "ggZZ":
+                def MC_weight_function(self_tree):
+                    KFactor = self_tree.KFactor_QCD_ggZZ_Nominal
+                    return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
+
+            elif self_sample.productionmode == "qqZZ":
+                def MC_weight_function(self_tree):
+                    if hasattr(self_tree, "KFactor_EW_qqZZ"): #qqZZ->itself
+                        KFactor = self_tree.KFactor_EW_qqZZ * self_tree.KFactor_QCD_qqZZ_M
+                        return self_tree.overallEventWeight * self_tree.xsec * KFactor #/ self_tree.nevents
+                                                                                       #Do NOT divide by nevents.  This will happen
+                                                                                       #in creating the templates when we divide by
+                                                                                       #sum(effectiveentries[==nevents])
+                    else:                                     #VBFbkg->qqZZ
+                        result = self_tree.p_Gen_JJQCD_BKG_MCFM
+                        if not reweightingonly and result != 0:
+                            cutoff = self_tree.cutoffs[strsample]
+                            if result > cutoff:
+                                result = cutoff**2 / result
+                            result *= (
+                                         self_tree.overallEventWeight
+                                       * self_tree.multiplyweight[strsample]
+                                      )
+                        return result
+
+
+            elif self_sample.productionmode == "ZX":
+                import ZX
+                def MC_weight_function(self_tree):
+                    LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
+                    return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
+
+            elif (self_sample.productionmode == "VBF bkg"
+                       or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS")
+                       or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
+                def MC_weight_function(self_tree):
+                    return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
+
+            elif self_sample.issignal:
+
+                factors = self_sample.MC_weight_terms
+
+                photoncut_decay = self_sample.photoncut
+                photoncut_ZH = self_sample.photoncut and self_sample.productionmode == "ZH"
+                photoncut_VBF = self_sample.photoncut and self_sample.productionmode == "VBF"
+
+                def MC_weight_function(self_tree):
+                    if photoncut_decay:
+                        leptons = [(id, tlvfromptetaphim(pt, eta, phi, m)) for id, pt, eta, phi, m in zip(self_tree.LHEDaughterId, self_tree.LHEDaughterPt, self_tree.LHEDaughterEta, self_tree.LHEDaughterPhi, self_tree.LHEDaughterMass)]
+                        for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
+                            if id1 == -id2 and (p1+p2).M() < 4: return 0
+                    if photoncut_ZH:
+                        Zdecay = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
+                        assert len(Zdecay) == 2
+                        if (Zdecay[0]+Zdecay[1]).M() < 4: return 0
+                    if photoncut_VBF:
+                        jets = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
+                        assert len(jets) == 2
+                        if any(jet.Pt() < 15 for jet in jets): return 0
+                    result = product(
+                                     sum(
+                                         getattr(self_tree, weightname) * couplingsq
+                                               for weightname, couplingsq in factor
+                                        ) for factor in factors
+                                    )
+
                     if not reweightingonly and result != 0:
                         cutoff = self_tree.cutoffs[strsample]
                         if result > cutoff:
@@ -347,62 +400,20 @@ class SampleBase(object):
                                   )
                     return result
 
+            else:
+                raise ValueError("No MC weight function defined for {}".format(self_sample))
 
-        elif self_sample.productionmode == "ZX":
-            import ZX
-            def MC_weight_function(self_tree):
-                LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
-                return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
-
-        elif (self_sample.productionmode == "VBF bkg"
-                   or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS")
-                   or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
-            def MC_weight_function(self_tree):
-                return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
-
-        elif self_sample.issignal:
-
-            factors = self_sample.MC_weight_terms
-
+        else: #config.LHE
             photoncut_decay = self_sample.photoncut
-            photoncut_ZH = self_sample.photoncut and self_sample.productionmode == "ZH"
-            photoncut_VBF = self_sample.photoncut and self_sample.productionmode == "VBF"
-
-            from utilities import tlvfromptetaphim
-            from itertools import product as cartesianproduct
-
             def MC_weight_function(self_tree):
                 if photoncut_decay:
-                    leptons = [(id, tlvfromptetaphim(pt, eta, phi, m)) for id, pt, eta, phi, m in zip(self_tree.LHEDaughterId, self_tree.LHEDaughterPt, self_tree.LHEDaughterEta, self_tree.LHEDaughterPhi, self_tree.LHEDaughterMass)]
+                    leptons = [(id, tlv) for id, tlv in self_tree.event.gendaughters]
                     for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
                         if id1 == -id2 and (p1+p2).M() < 4: return 0
-                if photoncut_ZH:
-                    Zdecay = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
-                    assert len(Zdecay) == 2
-                    if (Zdecay[0]+Zdecay[1]).M() < 4: return 0
-                if photoncut_VBF:
-                    jets = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
-                    assert len(jets) == 2
-                    if any(jet.Pt() < 15 for jet in jets): return 0
-                result = product(
-                                 sum(
-                                     getattr(self_tree, weightname) * couplingsq
-                                           for weightname, couplingsq in factor
-                                    ) for factor in factors
-                                )
-
+                result = self_tree.event.weight
                 if not reweightingonly and result != 0:
-                    cutoff = self_tree.cutoffs[strsample]
-                    if result > cutoff:
-                        result = cutoff**2 / result
-                    result *= (
-                                 self_tree.overallEventWeight
-                               * self_tree.multiplyweight[strsample]
-                              )
+                    result *= self_sample.xsec / self_tree.sumofweights
                 return result
-
-        else:
-            raise ValueError("No MC weight function defined for {}".format(self_sample))
 
         MC_weight_function.__name__ = functionname
         return MC_weight_function
@@ -792,7 +803,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             for a in analyses:
                 if self.hypothesis == "{}-0.5".format(a):
                     return ReweightingSample(self.productionmode, self.hffhypothesis, "{}0.5".format(a)).weightname()+"_pi"
-            
+
         elif self.productionmode == "ggZZ":
             return "MC_weight_ggZZ"
         elif self.productionmode == "qqZZ":
@@ -856,10 +867,10 @@ class ReweightingSample(MultiEnum, SampleBase):
                                       "{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1", "fL1Zg")
                                                                   for b in ("dec", "prod", "proddec")
                                                                   for c in ("+", "-")
-                                     ] + ["fa2dec-0.9"]
+                                     ] + ["fa2dec-0.9", "fL10.5_photoncut"]
                                   ):
                 return 1
-            if self.hypothesis in ("a2", "0-", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"):
+            if self.hypothesis in ("a2", "0-", "L1", "L1Zg", "L1_photoncut", "fL10.5fL1Zg0.5"):
                 return 0
         raise self.ValueError("g1")
 
@@ -1363,12 +1374,12 @@ def xcheck():
     CJLST = {_: _.CJLSTfile() for _ in allsamples()}
     withdiscs = {_: _.withdiscriminantsfile() for _ in allsamples()}
 
-    for (k1, v1), (k2, v2) in itertools.product(CJLST.iteritems(), CJLST.iteritems()):
+    for (k1, v1), (k2, v2) in cartesianproduct(CJLST.iteritems(), CJLST.iteritems()):
         if k1.productionmode == "ZX" and k2.productionmode == "data" or k2.productionmode == "ZX" and k1.productionmode == "data": continue
         if k1 != k2 and v1 == v2:
             raise ValueError("CJLST files for {} and {} are the same:\n{}".format(k1, k2, v1))
 
-    for (k1, v1), (k2, v2) in itertools.product(withdiscs.iteritems(), withdiscs.iteritems()):
+    for (k1, v1), (k2, v2) in cartesianproduct(withdiscs.iteritems(), withdiscs.iteritems()):
         if k1 != k2 and v1 == v2:
             raise ValueError("with discriminants files for {} and {} are the same:\n{}".format(k1, k2, v1))
 

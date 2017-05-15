@@ -8,8 +8,9 @@ import ROOT
 
 import CJLSTscripts
 import config
+from samples import ReweightingSample
 from treewrapper import TreeWrapperBase
-from utilities import cache, cache_instancemethod, product, requirecmsenv, tlvfromptetaphim
+from utilities import cache, cache_instancemethod, callclassinitfunctions, product, requirecmsenv, tlvfromptetaphim
 
 requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_0_20"))
 
@@ -22,8 +23,9 @@ class LHEEvent(object):
     #from https://github.com/hroskes/HiggsAnalysis-ZZMatrixElement/blob/b0ad77b/PythonWrapper/python/mela.py#L338-L366
     lines = event.split("\n")
     lines = [line for line in lines if not ("<event>" in line or "</event>" in line or not line.split("#")[0].strip())]
-    nparticles, _, _, _, _, _ = lines[0].split()
+    nparticles, _, weight, _, _, _ = lines[0].split()
     nparticles = int(nparticles)
+    self.weight = float(weight)
     if nparticles != len(lines)-1:
       raise ValueError("Wrong number of particles! Should be {}, have {}".replace(nparticles, len(lines)-1))
     self.gendaughters, self.genmothers, self.genassociated = daughters, mothers, associated = [], [], []
@@ -114,12 +116,15 @@ class LHEEvent(object):
   def ZZFlav(self):
     return product(id for id, p in self.recodaughters)
 
+@callclassinitfunctions("initweightfunctions")
 class LHEWrapper(TreeWrapperBase):
   def __init__(self, treesample, minevent=0, maxevent=None):
     assert minevent == 0 and maxevent is None
     self.mela = self.initmela()
     self.event = None
+    self.sumofweights = None
     super(LHEWrapper, self).__init__(treesample, minevent, maxevent)
+    self.preliminaryloop()
 
   @staticmethod
   @cache
@@ -130,6 +135,25 @@ class LHEWrapper(TreeWrapperBase):
   def __len__(self):
     with open(self.treesample.LHEfile) as f:
       return f.read().count("</event>")
+
+  def preliminaryloop(self):
+    i = 0
+    sumofweights = 0
+    weightfunction = self.treesample.get_MC_weight_function(reweightingonly=True)
+    with open(self.treesample.LHEfile) as f:
+      event = ""
+      for line in f:
+        if "<event>" not in line and not event: continue
+        event += line
+        if "</event>" in line:
+          self.event = event = LHEEvent(event)
+          sumofweights += weightfunction(self)
+          event = ""
+          i += 1
+          if i % self.printevery == 0 or i == len(self):
+            print i, "/", len(self), "(preliminary loop)"
+    self.sumofweights = sumofweights
+    self.event = None
 
   def __iter__(self):
     self.__i = 0
@@ -207,6 +231,11 @@ class LHEWrapper(TreeWrapperBase):
   def __del__(self):
     self.mela.resetInputEvent()
 
+  @classmethod
+  def initweightfunctions(cls):
+    for sample in cls.allsamples:
+      setattr(cls, sample.weightname(), sample.get_MC_weight_function())
+
   def initlists(self):
     self.toaddtotree = [
       "ZZMass",
@@ -219,6 +248,7 @@ class LHEWrapper(TreeWrapperBase):
       "D_L1L1Zgint_decay",
     ]
     self.exceptions = [
+      "allsamples",
       "D_bkg_ResUp",
       "D_bkg_ResDown",
       "D_bkg_ScaleUp",
@@ -253,6 +283,7 @@ class LHEWrapper(TreeWrapperBase):
       "hypothesis",
       "initlists",
       "initmela",
+      "initweightfunctions",
       "isalternate",
       "isbkg",
       "isdata",
@@ -261,12 +292,14 @@ class LHEWrapper(TreeWrapperBase):
       "mela",
       "minevent",
       "next",
+      "preliminaryloop",
       "printevery",
       "productionmode",
+      "Show",
+      "sumofweights",
       "toaddtotree",
       "toaddtotree_int",
       "treesample",
-      "Show",
       "unblind",
     ]
     proddiscriminants = [
@@ -290,8 +323,25 @@ class LHEWrapper(TreeWrapperBase):
       "ZZFlav",
     ]
 
+    for sample in self.allsamples:
+      if sample == self.treesample:
+        self.toaddtotree.append(sample.weightname())
+      else:
+        self.exceptions.append(sample.weightname())
+    if self.treesample not in self.allsamples:
+      raise ValueError("{} not in allsamples!".format(self.treesample))
+
   def Show(self):
     print self.event
+
+  allsamples = [
+    ReweightingSample("ggH", "0+_photoncut"),
+    ReweightingSample("ggH", "L1_photoncut"),
+    ReweightingSample("ggH", "fL10.5_photoncut"),
+    ReweightingSample("ggH", "L1Zg"),
+    ReweightingSample("ggH", "fL1Zg0.5"),
+    ReweightingSample("ggH", "fL10.5fL1Zg0.5"),
+  ]
 
 if __name__ == "__main__":
   from samples import Sample
