@@ -137,6 +137,7 @@ class LHEWrapper(TreeWrapperBase):
     return super(LHEWrapper, self).__iter__()
 
   def next(self):
+    if self.__i > len(self): assert False, (self.__i, len(self))
     self.__i += 1
     m = self.mela
     m.resetInputEvent()
@@ -195,6 +196,7 @@ class LHEWrapper(TreeWrapperBase):
         self.M2g1prime2ghzgs1prime2_decay /= 1e4**2
 
         return self
+    raise StopIteration
 
   def ZZMass(self):
     return self.event.ZZMass

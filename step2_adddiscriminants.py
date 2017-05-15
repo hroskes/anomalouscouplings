@@ -10,7 +10,7 @@ if config.LHE:
     from helperstuff.lhewrapper import LHEWrapper as TreeWrapper
 else:
     from helperstuff.treewrapper import TreeWrapper
-from helperstuff.utilities import deletemelastuff, KeepWhileOpenFile, LSB_JOBID, LSF_creating
+from helperstuff.utilities import cdtemp_slurm, deletemelastuff, KeepWhileOpenFile, LSB_JOBID, LSF_creating
 import os
 import ROOT
 import sys
@@ -22,7 +22,7 @@ def adddiscriminants(*args):
 
   newfilename = sample.withdiscriminantsfile()
   print newfilename
-  with KeepWhileOpenFile(newfilename+".tmp", message=LSB_JOBID()) as kwof, LSF_creating(newfilename, ignorefailure=True) as LSF:
+  with cdtemp_slurm(), KeepWhileOpenFile(newfilename+".tmp", message=LSB_JOBID()) as kwof, LSF_creating(newfilename, ignorefailure=True) as LSF:
     if not kwof:
         return
     if os.path.exists(newfilename):

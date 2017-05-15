@@ -582,3 +582,22 @@ def deletemelastuff():
     for thing in "br.sm1", "br.sm2", "ffwarn.dat", "input.DAT", "process.DAT":
         if os.path.exists(thing):
             os.remove(thing)
+
+class cdtemp_slurm(object):
+    def __enter__(self):
+        import config
+        self.cd = None
+        if config.host == "lxplus":
+            return
+        elif config.host == "MARCC":
+            if LSB_JOBID() is not None:
+                self.cd = cd(mkdtemp())
+                return self.cd.__enter__()
+            else:
+                return
+        else:
+            assert False, config.host
+
+    def __exit__(self, *args, **kwargs):
+        if self.cd is not None:
+            return self.cd.__exit__(*args, **kwargs)
