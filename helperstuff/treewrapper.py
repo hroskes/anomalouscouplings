@@ -22,7 +22,7 @@ import xrd
 import ZX
 
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
-sys.setrecursionlimit(10000)
+sys.setrecursionlimit(100000)
 
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
@@ -79,18 +79,19 @@ class TreeWrapperBase(Iterator):
         #if a function is added in the class but not added to toaddtotree
         #all member variables, unless they have __, should be added to either toaddtotree or exceptions
         notanywhere, inboth, nonexistent, multipletimes = [], [], [], []
-        for key in set(getmembernames(self) + self.toaddtotree+self.toaddtotree_int + self.exceptions):
+        toaddtotree = self.toaddtotree+self.toaddtotree_int+self.toaddtotree_float
+        for key in set(getmembernames(self) + toaddtotree + self.exceptions):
             if key.startswith("__"): continue
             if key.startswith("_abc"): continue
             if any(key.startswith("_{}__".format(cls.__name__)) for cls in type(self).__mro__):
                 continue
-            if key not in self.exceptions and key not in self.toaddtotree+self.toaddtotree_int and (key in self.__dict__ or key in type(self).__dict__):
+            if key not in self.exceptions and key not in toaddtotree and (key in self.__dict__ or key in type(self).__dict__):
                 notanywhere.append(key)
-            if key in self.toaddtotree+self.toaddtotree_int and key in self.exceptions:
+            if key in toaddtotree and key in self.exceptions:
                 inboth.append(key)
             if key not in getmembernames(self):
                 nonexistent.append(key)
-        for key, occurences in Counter(self.toaddtotree+self.toaddtotree_int + self.exceptions).iteritems():
+        for key, occurences in Counter(toaddtotree + self.exceptions).iteritems():
             if occurences >= 2 and key not in inboth or occurences >= 3: multipletimes.append(key)
         error = ""
         if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(notanywhere) + "\n"
@@ -784,6 +785,7 @@ class TreeWrapper(TreeWrapperBase):
 
     @classmethod
     def initweightfunctions(cls):
+        if config.LHE: return
         for sample in cls.allsamples:
             setattr(cls, sample.weightname(), sample.get_MC_weight_function())
     @classmethod
@@ -877,6 +879,7 @@ class TreeWrapper(TreeWrapperBase):
             "productionmode",
             "preliminaryloop",
             "toaddtotree",
+            "toaddtotree_float",
             "toaddtotree_int",
             "tree",
             "treesample",
@@ -904,6 +907,7 @@ class TreeWrapper(TreeWrapperBase):
                 self.toaddtotree += [_.format(prod=prod)+JEC for _ in proddiscriminants]
 
         self.toaddtotree_int = []
+        self.toaddtotree_float = []
 
         for _ in self.categorizations:
             self.toaddtotree_int.append(_.category_function_name)

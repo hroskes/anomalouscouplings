@@ -56,6 +56,9 @@ def adddiscriminants(*args):
         for discriminant in treewrapper.toaddtotree_int:
             discriminants[discriminant] = array('i', [0])
             newt.Branch(discriminant, discriminants[discriminant], discriminant + "/I")
+        for discriminant in treewrapper.toaddtotree_float:
+            discriminants[discriminant] = array('f', [0])
+            newt.Branch(discriminant, discriminants[discriminant], discriminant + "/F")
 
         try:
             for entry in treewrapper:

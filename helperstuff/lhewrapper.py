@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import inspect
 import os
 import random
 import sys
@@ -8,6 +9,7 @@ import ROOT
 
 import CJLSTscripts
 import config
+from makesystematics import MakeSystematics
 from samples import ReweightingSample
 from treewrapper import TreeWrapperBase
 from utilities import cache, cache_instancemethod, callclassinitfunctions, product, requirecmsenv, tlvfromptetaphim
@@ -17,7 +19,7 @@ requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_0_20"))
 from ZZMatrixElement.PythonWrapper.mela import Mela, SimpleParticle_t, SimpleParticleCollection_t, TVar
 
 class LHEEvent(object):
-  def __init__(self, event):
+  def __init__(self, event, bkg4l=False):
     self.eventstr = event
 
     #from https://github.com/hroskes/HiggsAnalysis-ZZMatrixElement/blob/b0ad77b/PythonWrapper/python/mela.py#L338-L366
@@ -41,6 +43,9 @@ class LHEEvent(object):
         mothers.append(SimpleParticle_t(line))
       elif status == 1 and (1 <= abs(id) <= 6 or 11 <= abs(id) <= 16 or abs(id) in (21, 22)):
         while True:
+          if 11 <= abs(id) <= 16 and bkg4l:
+            daughters.append(SimpleParticle_t(line))
+            break
           if mother1 != mother2 or mother1 is None:
             associated.append(SimpleParticle_t(line))
             break
@@ -49,6 +54,12 @@ class LHEEvent(object):
             break
           mother2 = mother2s[mother1]
           mother1 = mother1s[mother1]
+      elif bkg4l and id == 25:
+        raise ValueError("Can't have explicit Higgs for bkg4l")
+
+    assert bkg4l
+    if bkg4l and len(daughters) != 4:
+      raise ValueError("{} leptons instead of 4 for bkg4l!".format(len(daughters)))
 
   @staticmethod
   def smear(particle):
@@ -63,7 +74,7 @@ class LHEEvent(object):
       newid = 0
       smearpt = config.smearptjet
     else:
-      assert False
+      raise ValueError("Don't know how to smear {}".format(id))
 
     newp = tlvfromptetaphim(random.gauss(p.Pt(), smearpt), p.Eta(), p.Phi(), p.M())
     return SimpleParticle_t(newid, newp)
@@ -75,8 +86,12 @@ class LHEEvent(object):
       if p.Pt() < 7 or abs(p.Eta()) > 2.5: return False
     elif abs(id) == 13:
       if p.Pt() < 5 or abs(p.Eta()) > 2.4: return False
-    elif 1 <= abs(id) <= 5:
+    elif abs(id) == 15:
+      return False
+    elif 1 <= abs(id) <= 5 or id == 21:
       if p.Pt() < 30 or abs(p.Eta()) > 4.7: return False
+    else:
+      raise ValueError("Don't know how to cut {}".format(id))
     return True
 
   @property
@@ -103,6 +118,7 @@ class LHEEvent(object):
     return SimpleParticleCollection_t(self.recodaughters), SimpleParticleCollection_t(self.recoassociated), 0, False
 
   @property
+  @cache_instancemethod
   def passcuts(self):
     if len(self.recodaughters) < 4: return False
     if not config.m4lmin < self.ZZMass < config.m4lmax: return False
@@ -116,13 +132,20 @@ class LHEEvent(object):
   def ZZFlav(self):
     return product(id for id, p in self.recodaughters)
 
-@callclassinitfunctions("initweightfunctions")
+  @property
+  @cache_instancemethod
+  def njets(self):
+    return sum(id == 0 for i, p in self.recodaughters)
+
+@callclassinitfunctions("initweightfunctions", "initsystematics")
 class LHEWrapper(TreeWrapperBase):
   def __init__(self, treesample, minevent=0, maxevent=None):
     assert minevent == 0 and maxevent is None
     self.mela = self.initmela()
     self.event = None
     self.sumofweights = None
+    self.dofa3stuff = (treesample.productionmode == "qqZZ")
+    self.bkg4l = (treesample.productionmode == "qqZZ")
     super(LHEWrapper, self).__init__(treesample, minevent, maxevent)
     self.preliminaryloop()
 
@@ -131,10 +154,27 @@ class LHEWrapper(TreeWrapperBase):
   def initmela(*args, **kwargs):
     return Mela(*args, **kwargs)
 
+  @classmethod
+  def initsystematics(cls):
+    for name, discriminant in inspect.getmembers(cls, predicate=lambda x: isinstance(x, MakeSystematics)):
+      nominal = discriminant.getnominal()
+      setattr(cls, discriminant.name, nominal)
+
   @cache_instancemethod
   def __len__(self):
     with open(self.treesample.LHEfile) as f:
       return f.read().count("</event>")
+
+  @property
+  @cache_instancemethod
+  def xsec(self):
+    with open(self.treesample.LHEfile) as f:
+      for line in f:
+        if "<init>" in line:
+          break
+      next(f)
+      line = next(f)
+      return float(line.split()[0])
 
   def preliminaryloop(self):
     i = 0
@@ -146,7 +186,7 @@ class LHEWrapper(TreeWrapperBase):
         if "<event>" not in line and not event: continue
         event += line
         if "</event>" in line:
-          self.event = event = LHEEvent(event)
+          self.event = event = LHEEvent(event, bkg4l=self.bkg4l)
           sumofweights += weightfunction(self)
           event = ""
           i += 1
@@ -173,7 +213,7 @@ class LHEWrapper(TreeWrapperBase):
         continue
       event += line
       if "</event>" in line:
-        self.event = event = LHEEvent(event)
+        self.event = event = LHEEvent(event, bkg4l=self.bkg4l)
         if not event.passcuts:
           return next(self)
 
@@ -219,6 +259,61 @@ class LHEWrapper(TreeWrapperBase):
         self.M2g1ghzgs1prime2_decay /= 1e4
         self.M2g1prime2ghzgs1prime2_decay /= 1e4**2
 
+        if self.dofa3stuff:
+          m.setInputEvent(*event.recomelaargs)
+          m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
+          m.ghg2 = m.ghz4 = 1
+          self.M2g4_decay = m.computeP(True)
+
+          m.setInputEvent(*event.recomelaargs)
+          m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
+          m.ghg2 = m.ghz1 = m.ghz4 = 1
+          self.M2g1g4_decay = m.computeP(True) - self.M2g1_decay - self.M2g4_decay
+
+          if self.event.njets > 2:
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.JJVBF)
+            m.ghz1 = 1
+            self.M2g1_VBF = m.computeProdP(True)
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.JJVBF)
+            m.ghz4 = 1
+            self.M2g4_VBF = m.computeProdP(True)
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.JJVBF)
+            m.ghz1 = m.ghz4 = 1
+            self.M2g1g4_VBF = m.computeProdP(True) - self.M2g1_VBF - self.M2g4_VBF
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadZH)
+            m.ghz1 = 1
+            self.M2g1_HadZH = m.computeProdP(True)
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadZH)
+            m.ghz4 = 1
+            self.M2g4_HadZH = m.computeProdP(True)
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadZH)
+            m.ghz1 = m.ghz4 = 1
+            self.M2g1g4_HadZH = m.computeProdP(True) - self.M2g1_HadZH - self.M2g4_HadZH
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadWH)
+            m.ghz1 = 1
+            self.M2g1_HadWH = m.computeProdP(True)
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadWH)
+            m.ghz4 = 1
+            self.M2g4_HadWH = m.computeProdP(True)
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadWH)
+            m.ghz1 = m.ghz4 = 1
+            self.M2g1g4_HadWH = m.computeProdP(True) - self.M2g1_HadWH - self.M2g4_HadWH
+
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.JJQCD)
+            m.ghg2 = 1
+            self.M2g2_HJJ = m.computeProdP(True)
+
+            self.notdijet = False
+          else:
+            self.notdijet = True
         return self
     raise StopIteration
 
@@ -236,6 +331,35 @@ class LHEWrapper(TreeWrapperBase):
     for sample in cls.allsamples:
       setattr(cls, sample.weightname(), sample.get_MC_weight_function())
 
+  #####################
+  #for qqZZ for Wenzer#
+  #####################
+  def category(self):
+    if self.D_2jet_0plus() > 0.5 or self.D_2jet_0minus() > 0.5:
+      return 1
+    elif self.D_HadZH_0plus() > 0.5 or self.D_HadZH_0minus() > 0.5 or self.D_HadWH_0plus() > 0.5 or self.D_HadWH_0minus() > 0.5:
+      return 2
+    return 0
+
+  def d_0minus_vbfdecay(self):
+    return self.D_0minus_VBFdecay()
+  def d_0minus_vhdecay(self):
+    return self.D_0minus_HadVHdecay()
+  def d_0minus_decay(self):
+    return self.D_0minus_decay()
+  def d_cp_vbf(self):
+    return self.D_CP_VBF()
+  def d_cp_vh(self):
+    return self.D_CP_HadVH()
+  def d_cp_decay(self):
+    return self.D_CP_decay()
+
+  def d_bkg(self):
+    return self.D_bkg()
+
+  def isSelected(self):
+    return self.event.passcuts
+
   def initlists(self):
     self.toaddtotree = [
       "ZZMass",
@@ -248,7 +372,6 @@ class LHEWrapper(TreeWrapperBase):
       "D_L1L1Zgint_decay",
     ]
     self.exceptions = [
-      "allsamples",
       "D_bkg_ResUp",
       "D_bkg_ResDown",
       "D_bkg_ScaleUp",
@@ -273,16 +396,20 @@ class LHEWrapper(TreeWrapperBase):
       "D_0hplus_decay",
       "D_int_decay",
 
+      "allsamples",
+      "bkg4l",
       "cconstantforDbkg",
       "cconstantforD2jet",
       "cconstantforDHadWH",
       "cconstantforDHadZH",
       "checkfunctions",
+      "dofa3stuff",
       "event",
       "exceptions",
       "hypothesis",
       "initlists",
       "initmela",
+      "initsystematics",
       "initweightfunctions",
       "isalternate",
       "isbkg",
@@ -298,9 +425,11 @@ class LHEWrapper(TreeWrapperBase):
       "Show",
       "sumofweights",
       "toaddtotree",
+      "toaddtotree_float",
       "toaddtotree_int",
       "treesample",
       "unblind",
+      "xsec",
     ]
     proddiscriminants = [
       "D_0minus_{prod}",
@@ -323,13 +452,33 @@ class LHEWrapper(TreeWrapperBase):
       "ZZFlav",
     ]
 
+    self.toaddtotree_float = []
+
     for sample in self.allsamples:
-      if sample == self.treesample:
+      if sample == self.treesample.reweightingsample:
         self.toaddtotree.append(sample.weightname())
       else:
         self.exceptions.append(sample.weightname())
-    if self.treesample not in self.allsamples:
+    if self.treesample.reweightingsample not in self.allsamples:
       raise ValueError("{} not in allsamples!".format(self.treesample))
+
+    stuffforwenzer = [
+      "category",
+      "d_0minus_vbfdecay",
+      "d_0minus_vhdecay",
+      "d_0minus_decay",
+      "d_cp_vbf",
+      "d_cp_vh",
+      "d_cp_decay",
+      "d_bkg",
+    ]
+
+    if self.dofa3stuff:
+      self.toaddtotree_float += stuffforwenzer
+      self.toaddtotree_int.append("isSelected")
+    else:
+      self.exceptions += stuffforwenzer
+      self.exceptions.append("isSelected")
 
   def Show(self):
     print self.event
@@ -341,6 +490,7 @@ class LHEWrapper(TreeWrapperBase):
     ReweightingSample("ggH", "L1Zg"),
     ReweightingSample("ggH", "fL1Zg0.5"),
     ReweightingSample("ggH", "fL10.5fL1Zg0.5"),
+    ReweightingSample("qqZZ"),
   ]
 
 if __name__ == "__main__":

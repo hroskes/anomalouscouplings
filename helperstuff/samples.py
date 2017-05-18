@@ -405,15 +405,24 @@ class SampleBase(object):
 
         else: #config.LHE
             photoncut_decay = self_sample.photoncut
-            def MC_weight_function(self_tree):
-                if photoncut_decay:
-                    leptons = [(id, tlv) for id, tlv in self_tree.event.gendaughters]
-                    for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
-                        if id1 == -id2 and (p1+p2).M() < 4: return 0
-                result = self_tree.event.weight
-                if not reweightingonly and result != 0:
-                    result *= self_sample.xsec / self_tree.sumofweights
-                return result
+            if self_sample.productionmode == "ggH":
+                def MC_weight_function(self_tree):
+                    if photoncut_decay:
+                        leptons = [(id, tlv) for id, tlv in self_tree.event.gendaughters]
+                        for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
+                            if id1 == -id2 and (p1+p2).M() < 4: return 0
+                    result = self_tree.event.weight
+                    if not reweightingonly and result != 0:
+                        result *= self_sample.xsec / self_tree.sumofweights
+                    return result
+            elif self_sample.productionmode == "qqZZ":
+                def MC_weight_function(self_tree):
+                    result = self_tree.event.weight
+                    if not reweightingonly and result != 0:
+                        result *= self_tree.xsec / self_tree.sumofweights
+                    return result
+            else:
+                raise ValueError("No MC weight function defined for {}".format(self_sample))
 
         MC_weight_function.__name__ = functionname
         return MC_weight_function
@@ -1253,6 +1262,8 @@ class Sample(ReweightingSamplePlus):
                 if self.hypothesis == "fL1Zg0.5": filename = "ggHa1L1Zg.lhe"
                 if self.hypothesis == "fL10.5fL1Zg0.5": filename = "ggHL1L1Zg.lhe"
                 return os.path.join(folder, filename)
+            if self.productionmode == "qqZZ":
+                return "/work-zfs/lhc/ianderso/hep/LHEFiles/qqZZ/MG/8T/ZZJetsTo4L_TuneZ2_8TeV-madgraph-tauola.lhe"
         raise self.ValueError("LHEfile")
 
     def withdiscriminantsfile(self):
@@ -1369,9 +1380,13 @@ if config.LHE:
         for production in productions:
             for hypothesis in "0+_photoncut", "L1_photoncut", "fL10.5_photoncut", "L1Zg", "fL1Zg0.5", "fL10.5fL1Zg0.5":
                 yield Sample("ggH", hypothesis, production)
+            yield Sample("qqZZ", production)
 
 def xcheck():
-    CJLST = {_: _.CJLSTfile() for _ in allsamples()}
+    if config.LHE:
+        CJLST = {_: _.LHEfile for _ in allsamples()}
+    else:
+        CJLST = {_: _.CJLSTfile() for _ in allsamples()}
     withdiscs = {_: _.withdiscriminantsfile() for _ in allsamples()}
 
     for (k1, v1), (k2, v2) in cartesianproduct(CJLST.iteritems(), CJLST.iteritems()):
@@ -1382,10 +1397,6 @@ def xcheck():
     for (k1, v1), (k2, v2) in cartesianproduct(withdiscs.iteritems(), withdiscs.iteritems()):
         if k1 != k2 and v1 == v2:
             raise ValueError("with discriminants files for {} and {} are the same:\n{}".format(k1, k2, v1))
-
-if config.LHE:
-    def xcheck():
-        pass
 
 xcheck()
 del xcheck
