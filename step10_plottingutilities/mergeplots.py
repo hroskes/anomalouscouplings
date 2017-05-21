@@ -77,6 +77,8 @@ def mergeplots(analysis, **kwargs):
     logscale = False
     PRL = False
     legendposition = (.2, .7, .6, .9)
+    ymax = None
+    xmin, xmax = -1, 1
     for kw, kwarg in kwargs.iteritems():
         if kw == "logscale":
             logscale = bool(int(kwarg))
@@ -92,20 +94,26 @@ def mergeplots(analysis, **kwargs):
                 if len(legendposition) != 4: raise ValueError
             except ValueError:
                 raise ValueError("legendposition has to contain 4 floats separated by commas!")
+        elif kw == "ymax":
+            ymax = float(kwarg)
+        elif kw == "xmin":
+            xmin = float(kwarg)
+            drawlineskwargs[kw] = kwarg
+        elif kw == "xmax":
+            xmax = float(kwarg)
+            drawlineskwargs[kw] = kwarg
         else:
             drawlineskwargs[kw] = kwarg
 
     analysis = Analysis(analysis)
     repmap = {"analysis": str(analysis)}
     subdir = ""
-    plotname = "limit_lumi35.8671.root"
+    plotname = "limit_lumi150.0.root"
     folders = [
-               Folder(".oO[analysis]Oo._allsysts", "Observed", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-               Folder(".oO[analysis]Oo._allsysts", "Expected", 4, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
-               Folder(".oO[analysis]Oo._allsysts", "Observed, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
-               Folder(".oO[analysis]Oo._allsysts", "Expected, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=1),
+               Folder(".oO[analysis]Oo._allsysts", "Now", 2, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
+               Folder(".oO[analysis]Oo._fullRun2", "150 fb^{-1}", 4, analysis, subdir, plotname="limit_lumi150.0_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
               ]
-    outdir = ".oO[analysis]Oo._allsysts"
+    outdir = ".oO[analysis]Oo._fullRun2"
 
     if logscale and config.minimainlegend:
         for folder in folders:
@@ -157,11 +165,15 @@ def mergeplots(analysis, **kwargs):
     mg.Draw("al")
     mg.GetXaxis().SetTitle(folders[0].xtitle)
     mg.GetYaxis().SetTitle(folders[0].ytitle)
-    mg.GetXaxis().SetRangeUser(-1, 1)
+    mg.GetXaxis().SetRangeUser(xmin, xmax)
 
     if PRL:
         mg.GetXaxis().CenterTitle()
         mg.GetYaxis().CenterTitle()
+
+    if ymax is not None:
+        if logscale: raise ValueError("can't set ymax and logscale!")
+        mg.SetMaximum(ymax)
 
     if logscale:
         c.SetLogy()
@@ -181,8 +193,8 @@ def mergeplots(analysis, **kwargs):
     l.Draw()
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
-    style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
-                                            .format(config.productionforcombine.dataluminosity+config.lumi2015))
+    #style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 Te
+    #                                        .format(config.productionforcombine.dataluminosity+config.lumi2015)
     for k, v in drawlineskwargs.items():
         if k == "xpostext":
             try:
