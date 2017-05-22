@@ -24,9 +24,9 @@ analyses = "fa3", "fa2", "fL1", "fL1Zg"
 def PRL_loglinear(**kwargs):
     commondrawlineskwargs = {
                              "logscale": False,  #the lines are in the linear part
-                             "xsize": .1,
-                             "ysize": .03,
-                             "textsize": .06,
+                             "xsize": .2,
+                             "ysize": .045,
+                             "textsize": .09,
                              "yshift68": .08,
                              "yshift95": -.1,
                             }
@@ -50,25 +50,25 @@ def PRL_loglinear(**kwargs):
     for i, (analysis, letter) in reversed(list(enumerate(zip(analyses, "abcd"), start=1))):
         if analysis == "fa3":
             x1legend = .32
-            CLtextposition="left"
+            CLtextposition=-.9
         elif analysis == "fa2":
             x1legend = .5
-            CLtextposition="left"
+            CLtextposition=-.9
         elif analysis == "fL1":
             x1legend = .1
-            CLtextposition="right"
+            CLtextposition=.65
         elif analysis == "fL1Zg":
             x1legend = .1
-            CLtextposition="left"
+            CLtextposition=-.9
         else:
             assert False
         legendposition = x1legend, .3, x1legend+.45, .8
 
         c = ROOT.TCanvas("c1", "", 8, 30, 1600, 1600)
-        leftmargin = .08
-        rightmargin = .04 #apply to the individual pads or 1 of the x axis gets cut off
+        leftmargin = .1
+        rightmargin = .045 #apply to the individual pads or 1 of the x axis gets cut off
         topmargin = .02
-        bottommargin = .1
+        bottommargin = .125
         assert abs((leftmargin + rightmargin) - (topmargin + bottommargin)) < 1e-5, (leftmargin + rightmargin, topmargin + bottommargin)
         c.SetLeftMargin(leftmargin)
         c.SetRightMargin(0)
@@ -105,13 +105,13 @@ def PRL_loglinear(**kwargs):
         mglog.SetMinimum(ydivide)
         mglog.SetMaximum(120)
         style.applyaxesstyle(mglog)
-        mglog.GetXaxis().SetLabelSize(.07)
-        mglog.GetYaxis().SetLabelSize(.07)
-        mglog.GetXaxis().SetTitleSize(.08)
-        mglog.GetYaxis().SetTitleSize(.07)
+        mglog.GetXaxis().SetLabelOffset(9999999)
+        mglog.GetXaxis().SetTitleOffset(9999999)
+        mglog.GetYaxis().SetLabelSize(.1)
+        mglog.GetYaxis().SetTitleSize(.1)
         logpad.SetRightMargin(rightmargin)
         logpad.SetTopMargin(topmargin*2)
-        style.subfig(letter, textsize=.08, x1=.89, x2=.93, y1=.89, y2=.93)
+        style.subfig(letter, textsize=.11, x1=.87, x2=.91, y1=.87, y2=.91)
 
         linearpad.cd()
         mg.Draw("al")
@@ -122,10 +122,10 @@ def PRL_loglinear(**kwargs):
         mg.SetMinimum(0)
         mg.SetMaximum(ydivide)
         style.applyaxesstyle(mg)
-        mg.GetXaxis().SetLabelSize(.07)
-        mg.GetYaxis().SetLabelSize(.07)
-        mg.GetXaxis().SetTitleSize(.08)
-        mg.GetYaxis().SetTitleSize(.07)
+        mg.GetXaxis().SetLabelSize(.1)
+        mg.GetYaxis().SetLabelSize(.1)
+        mg.GetXaxis().SetTitleSize(.12)
+        mg.GetYaxis().SetTitleSize(.1)
         linearpad.SetRightMargin(rightmargin)
         linearpad.SetBottomMargin(bottommargin*2)
 
@@ -148,8 +148,8 @@ def PRL_loglinear(**kwargs):
         style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
                                                 .format(config.productionforcombine.dataluminosity+config.lumi2015),
                       x1=0.007, x2=1.01, #???
-                      drawCMS=False, extratextsize=.03)
-        style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.05)
+                      drawCMS=False, extratextsize=.039)
+        style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06)
         yaxislabel(folders[0].ytitle).Draw()
 
         saveasdir = os.path.join(config.plotsbasedir, "limits")
@@ -175,7 +175,7 @@ def PRL_loglinear(**kwargs):
                        )
 
 @cache
-def yaxislabel(label, textsize=.05):
+def yaxislabel(label, textsize=.06):
     pt = ROOT.TPaveText(.01, 0, .03, 1, "brNDC")
     pt.SetBorderSize(0)
     pt.SetFillStyle(0)
