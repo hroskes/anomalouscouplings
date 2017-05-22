@@ -3,6 +3,7 @@ from glob import glob
 import math
 import os
 import pipes
+import shutil
 import subprocess
 import sys
 
@@ -23,19 +24,16 @@ analyses = "fa3", "fa2", "fL1", "fL1Zg"
 def PRL_loglinear(**kwargs):
     commondrawlineskwargs = {
                              "logscale": False,  #the lines are in the linear part
-                             "xsize": .3,
-                             "ysize": .1,
-                             "textsize": .1,
+                             "xsize": .1,
+                             "ysize": .03,
+                             "textsize": .06,
                              "yshift68": .08,
                              "yshift95": -.1,
                             }
     baseplotname = "limit_lumi35.8671.root"
     ydivide = 4.5
-    CLtextposition = -0.5
     for kw, kwarg in kwargs.iteritems():
-        if kw == "CLtextposition":
-            CLtextposition = kwarg
-        elif kw == "ydivide":
+        if kw == "ydivide":
             ydivide = float(kwarg)
         else:
             commondrawlineskwargs[kw] = kwarg
@@ -52,10 +50,16 @@ def PRL_loglinear(**kwargs):
     for i, (analysis, letter) in reversed(list(enumerate(zip(analyses, "abcd"), start=1))):
         if analysis == "fa3":
             x1legend = .32
+            CLtextposition="left"
         elif analysis == "fa2":
             x1legend = .5
-        elif analysis in ("fL1", "fL1Zg"):
+            CLtextposition="left"
+        elif analysis == "fL1":
             x1legend = .1
+            CLtextposition="right"
+        elif analysis == "fL1Zg":
+            x1legend = .1
+            CLtextposition="left"
         else:
             assert False
         legendposition = x1legend, .3, x1legend+.45, .8
@@ -127,7 +131,7 @@ def PRL_loglinear(**kwargs):
 
         drawlineskwargs = commondrawlineskwargs.copy()
         drawlineskwargs["xpostext"] = CLtextposition
-        print drawlineskwargs
+        drawlineskwargs["arbitraryparameter"] = analysis
         drawlines(**drawlineskwargs)
 
         legendpad.cd()
@@ -165,7 +169,10 @@ def PRL_loglinear(**kwargs):
             f.write(subprocess.check_output(["git", "status"]))
             f.write("\n")
             f.write(subprocess.check_output(["git", "diff"]))
-
+        shutil.copyfile(
+                        os.path.join(saveasdir, replaceByMap(plotname.replace("root", "pdf"), repmap)),
+                        os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
+                       )
 
 @cache
 def yaxislabel(label, textsize=.05):
@@ -179,7 +186,6 @@ def yaxislabel(label, textsize=.05):
     text.SetTextSize(textsize)
     text.SetTextAngle(90)
     return pt
-
 
 if __name__ == "__main__":
     args = []

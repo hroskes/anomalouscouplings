@@ -8,7 +8,7 @@ if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and 
     host = "lxplus"
     repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production/"
     plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/"
-    svndir = "/afs/cern.ch/work/h/hroskes/AN/notes"
+    svndir = "/afs/cern.ch/work/h/hroskes/AN/"
 
 elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname() or "bigmem" in socket.gethostname()) and getpass.getuser() == "jroskes1@jhu.edu":
     host = "MARCC"
