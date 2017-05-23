@@ -55,10 +55,10 @@ def PRL_loglinear(**kwargs):
             x1legend = .5
             CLtextposition=-.9
         elif analysis == "fL1":
-            x1legend = .1
+            x1legend = .15
             CLtextposition=.65
         elif analysis == "fL1Zg":
-            x1legend = .1
+            x1legend = .15
             CLtextposition=-.9
         else:
             assert False
