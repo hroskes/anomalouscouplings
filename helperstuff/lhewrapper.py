@@ -135,7 +135,7 @@ class LHEEvent(object):
   @property
   @cache_instancemethod
   def njets(self):
-    return sum(id == 0 for i, p in self.recodaughters)
+    return sum(id == 0 for id, p in self.recoassociated)
 
 @callclassinitfunctions("initweightfunctions", "initsystematics")
 class LHEWrapper(TreeWrapperBase):
@@ -192,6 +192,7 @@ class LHEWrapper(TreeWrapperBase):
           i += 1
           if i % self.printevery == 0 or i == len(self):
             print i, "/", len(self), "(preliminary loop)"
+            #break
     self.sumofweights = sumofweights
     self.event = None
 
@@ -208,6 +209,7 @@ class LHEWrapper(TreeWrapperBase):
     event = ""
     if self.__i % self.printevery == 0 or self.__i == len(self):
       print self.__i, "/", len(self)
+      #raise StopIteration
     for line in self.__f:
       if "<event>" not in line and not event:
         continue
@@ -251,7 +253,11 @@ class LHEWrapper(TreeWrapperBase):
         m.setProcess(TVar.bkgZZ, TVar.MCFM, TVar.ZZQQB)
         self.M2qqZZ = m.computeP(True)
 
+        assert not config.useQGTagging
         self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.ZZFlav(), self.ZZMass())
+        self.cconstantforD2jet = CJLSTscripts.getDVBF2jetsConstant_shiftWP(self.ZZMass(), config.useQGTagging, 0.5)
+        self.cconstantforDHadWH = CJLSTscripts.getDWHhConstant_shiftWP(self.ZZMass(), config.useQGTagging, 0.5)
+        self.cconstantforDHadZH = CJLSTscripts.getDZHhConstant_shiftWP(self.ZZMass(), config.useQGTagging, 0.5)
 
         self.M2g1prime2_decay /= 1e4**2
         self.M2ghzgs1prime2_decay /= 1e4**2
@@ -270,7 +276,7 @@ class LHEWrapper(TreeWrapperBase):
           m.ghg2 = m.ghz1 = m.ghz4 = 1
           self.M2g1g4_decay = m.computeP(True) - self.M2g1_decay - self.M2g4_decay
 
-          if self.event.njets > 2:
+          if self.event.njets >= 2:
             m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.JJVBF)
             m.ghz1 = 1
             self.M2g1_VBF = m.computeProdP(True)
@@ -283,27 +289,27 @@ class LHEWrapper(TreeWrapperBase):
             m.ghz1 = m.ghz4 = 1
             self.M2g1g4_VBF = m.computeProdP(True) - self.M2g1_VBF - self.M2g4_VBF
 
-            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadZH)
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.Had_ZH)
             m.ghz1 = 1
             self.M2g1_HadZH = m.computeProdP(True)
 
-            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadZH)
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.Had_ZH)
             m.ghz4 = 1
             self.M2g4_HadZH = m.computeProdP(True)
 
-            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadZH)
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.Had_ZH)
             m.ghz1 = m.ghz4 = 1
             self.M2g1g4_HadZH = m.computeProdP(True) - self.M2g1_HadZH - self.M2g4_HadZH
 
-            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadWH)
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.Had_WH)
             m.ghz1 = 1
             self.M2g1_HadWH = m.computeProdP(True)
 
-            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadWH)
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.Had_WH)
             m.ghz4 = 1
             self.M2g4_HadWH = m.computeProdP(True)
 
-            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.HadWH)
+            m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.Had_WH)
             m.ghz1 = m.ghz4 = 1
             self.M2g1g4_HadWH = m.computeProdP(True) - self.M2g1_HadWH - self.M2g4_HadWH
 

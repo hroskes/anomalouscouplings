@@ -416,10 +416,11 @@ class SampleBase(object):
                         result *= self_sample.xsec / self_tree.sumofweights
                     return result
             elif self_sample.productionmode == "qqZZ":
+                xsec = 1.256 * 1000
                 def MC_weight_function(self_tree):
                     result = self_tree.event.weight
                     if not reweightingonly and result != 0:
-                        result *= self_tree.xsec / self_tree.sumofweights
+                        result *= xsec / self_tree.sumofweights
                     return result
             else:
                 raise ValueError("No MC weight function defined for {}".format(self_sample))
