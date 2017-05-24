@@ -14,7 +14,7 @@ import os
 #========================
 #inputs
 productionmode = "ggH"
-disc           = "D_L1L1Zg_decay"
+disc           = "D_L1_decay"
 reweightto     = None
 bins           = None
 min            = None
@@ -30,6 +30,11 @@ category       = None
 analysis       = None
 
 cut            = None
+
+disc2          = "D_L1L1Zg_decay"
+bins2          = None
+min2           = None
+max2           = None
 
 skip           = []
 #========================
@@ -76,6 +81,10 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       bins=bins,
       min=min,
       max=max,
+      disc2=disc2,
+      bins2=bins2,
+      min2=min2,
+      max2=max2,
       enrich=enrich,
       masscut=masscut,
       normalizeto1=normalizeto1,
