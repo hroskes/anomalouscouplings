@@ -1276,7 +1276,9 @@ class Sample(ReweightingSamplePlus):
     @cache
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
-        if reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data") or reweightfrom.alternategenerator is not None:
+        if (reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data")
+                or reweightfrom.alternategenerator is not None
+                or config.LHE):
             assert reweightfrom.reweightingsample == reweightto
             return 1
         f = tfiles[reweightfrom.withdiscriminantsfile()]
@@ -1314,10 +1316,16 @@ class SampleBasis(MultiEnum):
         self.hypotheses = [Hypothesis(_) for _ in hypotheses]
         super(SampleBasis, self).__init__(*args)
 
+    def __hash__(self):
+        return hash((super(SampleBasis, self).__hash__(), tuple(self.hypotheses)))
+
     def check(self, *args):
         args = (self.hypotheses,)+args
         if self.productionmode in ("ggH", "ttH"):
-            dimension = 3
+            if self.analysis.is2d:
+                dimension = 6
+            else:
+                dimension = 3
         elif self.productionmode in ("VBF", "WH", "ZH"):
             dimension = 5
         else:
@@ -1334,17 +1342,33 @@ class SampleBasis(MultiEnum):
         hffhypothesis = None
         if self.productionmode == "ttH": hffhypothesis = "Hff0+"
         dimension = len(self.hypotheses)
-        maxpower = dimension-1
         samples = [ReweightingSample(self.productionmode, _, hffhypothesis) for _ in self.hypotheses]
-        return numpy.matrix(
-                            [
-                             [
-                              sample.g1**(maxpower-i) * getattr(sample, self.analysis.couplingname)**i
-                                  for i in range(dimension)
-                             ]
-                                 for sample in samples
-                            ]
-                           )
+        if self.analysis.is2d:
+            assert dimension == 6  #not VBF or VH
+            maxpower = 2
+            return numpy.matrix(
+                                [
+                                 [
+                                  sample.g1**(maxpower-i-j)
+                                  * getattr(sample, self.analysis.couplingnames[0])**i
+                                  * getattr(sample, self.analysis.couplingnames[1])**j
+                                     for j in range(maxpower+1)
+                                     for i in range(maxpower+1-j)
+                                 ]
+                                    for sample in samples
+                                ]
+                               )
+        else:
+            maxpower = dimension-1
+            return numpy.matrix(
+                                [
+                                 [
+                                  sample.g1**(maxpower-i) * getattr(sample, self.analysis.couplingname)**i
+                                      for i in range(dimension)
+                                 ]
+                                     for sample in samples
+                                ]
+                               )
     @property
     @cache
     def invertedmatrix(self):

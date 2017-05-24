@@ -149,9 +149,9 @@ class Hypothesis(MyEnum):
         if self in ("0+", "0+_photoncut"): return "g1"
         if self == "a2": return "g2"
         if self == "0-": return "g4"
-        if self == "L1": return "g1prime2"
+        if self in ("L1", "L1_photoncut"): return "g1prime2"
         if self == "L1Zg": return "ghzgs1prime2"
-        assert False
+        assert False, self
     @property
     def photoncut(self):
         if self in ("0+_photoncut", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5", "L1Zg"): return True
@@ -466,6 +466,11 @@ class Analysis(MyEnum):
         if self == "fa2": return "g2"
         if self == "fL1": return "g1prime2"
         if self == "fL1Zg": return "ghzgs1prime2"
+        assert False, self
+    @property
+    def couplingnames(self):
+        if self == "fL1fL1Zg": return "g1prime2", "ghzgs1prime2"
+        assert False, self
     @property
     def purehypotheses(self):
         if self == "fa3":
@@ -476,6 +481,9 @@ class Analysis(MyEnum):
             return Hypothesis("0+"), Hypothesis("L1")
         if self == "fL1Zg":
             return Hypothesis("0+_photoncut"), Hypothesis("L1Zg")
+        if self == "fL1fL1Zg":
+            return Hypothesis("0+_photoncut"), Hypothesis("L1_photoncut"), Hypothesis("L1Zg")
+        assert False, self
     @property
     def mixdecayhypothesis(self):
         if self == "fa3":
@@ -510,6 +518,20 @@ class Analysis(MyEnum):
         if self == "fL1Zg": return True
         if self in ("fa2", "fa3", "fL1"): return False
         assert False
+    @property
+    def is2d(self):
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+        if self == "fL1fL1Zg": return True
+        assert False, self
+    @property
+    def doLHE(self):
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+        if self == "fL1fL1Zg": return True
+        assert False, self
+    def doCMS(self):
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
+        if self == "fL1fL1Zg": return False
+        assert False, self
 
 class Production(MyEnum):
     enumname = "production"
@@ -666,7 +688,10 @@ proddechypotheses = Hypothesis.items(lambda x: x not in fL1fL1Zghypotheses)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
-analyses = Analysis.items()
+if config.LHE:
+    analyses = Analysis.items(lambda x: x.doLHE)
+else:
+    analyses = Analysis.items(lambda x: x.doCMS)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)

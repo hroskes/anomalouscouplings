@@ -19,6 +19,7 @@ decaydiscriminants = [
     Discriminant("D_L1int_decay", "D_{#Lambda1int}^{dec}", defaultnbins, 0, 1),
     Discriminant("D_L1Zg_decay", "D_{#Lambda1}^{Z#gamma,dec}", defaultnbins, 0, 1),
     Discriminant("D_L1Zgint_decay", "D_{#Lambda1Z#gammaint}^{dec}", defaultnbins, -.3, .25),
+    Discriminant("D_L1L1Zg_decay", "D_{#Lambda1}^{ZZ/Z#gamma,dec}", defaultnbins, 0, 1),
 ]
 VBFdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),
@@ -92,6 +93,6 @@ def discriminant(name):
         return discriminants[name]
     if name in otherplottablethings:
         return otherplottablethings[name]
-    raise KeyError("Unknown discriminants {}".format(name))
+    raise KeyError("Unknown discriminant {}".format(name))
 
 assert not any(_ in otherplottablethings for _ in discriminants)
