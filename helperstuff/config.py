@@ -3,17 +3,26 @@ import os
 import re
 import socket
 
+def getconfiguration(hostname, username):
+  if (".cern.ch" in hostname or "lxplus" in hostname) and username == "hroskes":
+    return dict(
+      host = "lxplus",
+      repositorydir = "/afs/cern.ch/work/h/hroskes/LHEanomalouscouplings/",
+      plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/LHEanomalouscouplings/",
+      svndir = "/afs/cern.ch/work/h/hroskes/AN/notes",
+    )
 
-if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and getpass.getuser() == "hroskes":
-    host = "lxplus"
-    repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production/"
-    plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/"
-    svndir = "/afs/cern.ch/work/h/hroskes/AN/notes"
+  elif ("login-node" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
+    return dict(
+      host = "MARCC",
+      repositorydir = "/work-zfs/lhc/heshy/LHEanomalouscouplings/fL1fL1Zg/",
+      plotsbasedir = "/work-zfs/lhc/heshy/LHEanomalouscouplings/fL1fL1Zg/plots/",
+      lxplususername = "hroskes",
+    )
 
-elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname() or "bigmem" in socket.gethostname()) and getpass.getuser() == "jroskes1@jhu.edu":
-    host = "MARCC"
-    repositorydir = "/work-zfs/lhc/heshy/LHEanomalouscouplings/fL1fL1Zg/"
-    plotsbasedir = "/work-zfs/lhc/heshy/LHEanomalouscouplings/fL1fL1Zg/plots/"
+for key, value in getconfiguration(socket.gethostname(), getpass.getuser()).iteritems():
+  assert key not in globals()
+  globals()[key] = value
 
 repositorydir = os.path.realpath(repositorydir)
 

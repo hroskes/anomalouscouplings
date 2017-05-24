@@ -4,6 +4,7 @@ assert __name__ == "__main__"
 
 from helperstuff import config
 from helperstuff import style
+from helperstuff.copyplots import copyplots
 from helperstuff.enums import *
 from helperstuff.plotfromtree import plotfromtree
 from helperstuff.samples import *
@@ -12,9 +13,9 @@ import os
 
 #========================
 #inputs
-productionmode = "ttH"
-disc           = "D_CP_VBF"
-reweightto     = ReweightingSample(productionmode, "0+", "Hff0+")
+productionmode = "ggH"
+disc           = "D_L1L1Zg_decay"
+reweightto     = None
 bins           = None
 min            = None
 max            = None
@@ -25,10 +26,10 @@ normalizeto1   = False
 
 channel        = None
 
-category       = "VBFtagged"
-analysis       = "fa3"
+category       = None
+analysis       = None
 
-cut            = "D_bkg<1./40"
+cut            = None
 
 skip           = []
 #========================
@@ -98,8 +99,13 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     for ext in "png eps root pdf".split():
       c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "reweighting", "{}.{}".format(hypothesis, ext)))
 
-hstack.Draw("hist")
+if reweightto is None:
+    option = "hist nostack"
+else:
+    option = "hist"
+hstack.Draw(option)
 hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
 for ext in "png eps root pdf".split():
   c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "reweighting", "test.{}".format(ext)))
 
+copyplots("TEST")
