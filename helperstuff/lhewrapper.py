@@ -313,7 +313,7 @@ class LHEWrapper(TreeWrapperMELA):
           i += 1
           if i % self.printevery == 0 or i == len(self):
             print i, "/", len(self), "(preliminary loop)"
-            break
+            #break
     self.sumofweights = sumofweights
     self.event = None
 
@@ -330,7 +330,7 @@ class LHEWrapper(TreeWrapperMELA):
     event = ""
     if self.__i % self.printevery == 0 or self.__i == len(self):
       print self.__i, "/", len(self)
-      raise StopIteration
+      #raise StopIteration
     for line in self.__f:
       if "<event>" not in line and not event:
         continue
@@ -467,14 +467,13 @@ class LHEWrapper(TreeWrapperMELA):
       "D_CP_VBF",
       "D_CP_HadVH",
       "D_CP_decay",
-      "D_bkg",
     ]
 
     if self.dofa3stuff:
       for thing in fa3stuff:
         self.exceptions.remove(thing)
         self.toaddtotree_float.append(thing)
-        self.toaddtotree_int.append("category_0P_or_0M")
+      self.toaddtotree_int.append("category_0P_or_0M")
     else:
       self.exceptions.append("category_0P_or_0M")
 
