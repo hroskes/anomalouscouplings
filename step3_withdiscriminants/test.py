@@ -84,4 +84,42 @@ for (i1, disc), (i2, disc2) in itertools.product(enumerate(discriminants), enume
     for ext in "png eps root pdf".split():
       c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}{}.{}".format(disc, disc2, ext)))
 
+for disc in discriminants:
+  hstack = ROOT.THStack("hstack{}".format(disc), "")
+  l = ROOT.TLegend(.6, .7, .9, .9)
+  for color, (hypothesis, title) in enumerate(zip(("0+_photoncut", "fL10.5_photoncut", "L1Zg"), ("SM", "f_{#Lambda1}=0.5", "#Lambda_{1}^{Z#gamma}")), start=1):
+    hname = "h{}{}".format(disc, hypothesis)
+
+    h = plotfromtree(
+      reweightfrom=ReweightingSample(productionmode, hypothesis),
+      reweightto=reweightto,
+      disc=disc,
+      bins=bins,
+      min=min,
+      max=max,
+      enrich=enrich,
+      masscut=masscut,
+      normalizeto1=normalizeto1,
+      channel=channel,
+      category=category,
+      analysis=analysis,
+      color=color,
+      hname=hname,
+      cut=cut,
+    )
+    h.SetMinimum(0)
+    l.AddEntry(h, title, "l")
+
+    cache.append(h)
+    hstack.Add(h)
+
+  hstack.Draw("hist nostack")
+  l.Draw()
+  try:
+    os.makedirs(os.path.join(config.plotsbasedir, "TEST", "reweighting"))
+  except OSError:
+    pass
+  for ext in "png eps root pdf".split():
+    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}.{}".format(disc, ext)))
+
 copyplots("TEST")
