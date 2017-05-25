@@ -71,7 +71,7 @@ for (i1, disc), (i2, disc2) in itertools.product(enumerate(discriminants), enume
       analysis=analysis,
       color=color,
       hname=hname,
-      cut=cut
+      cut=cut,
     )
     h.SetMinimum(0)
 
