@@ -3,7 +3,9 @@
 assert __name__ == "__main__"
 
 import itertools
+import math
 import os
+import random
 
 import ROOT
 
@@ -27,8 +29,21 @@ reweightto = None
 bins = min = max = bins2 = min2 = max2 = channel = category = analysis = hname = cut = None
 enrich = False
 masscut = True
-normalizeto1 = False
+normalizeto1 = True
 color = 1
+
+def mutualinformation(h2):
+  h2 = h2.Clone("h{}".format(random.random()))
+  h2.Scale(1/h2.Integral())
+  hx = h2.ProjectionX()
+  hy = h2.ProjectionY()
+
+  MI = 0
+  #https://en.wikipedia.org/wiki/Mutual_information#Definition
+  for x in range(1, h2.GetNbinsX()+1):
+    for y in range(1, h2.GetNbinsY()+1):
+      MI += h2.GetBinContent(x, y) * math.log(h2.GetBinContent(x, y) / (hx.GetBinContent(x) * hy.GetBinContent(y)))
+  return MI
 
 discriminants = "D_L1_decay", "D_L1int_decay", "D_L1Zg_decay", "D_L1Zgint_decay", "D_L1L1Zg_decay", "D_L1L1Zgint_decay"
 
@@ -61,7 +76,7 @@ for (i1, disc), (i2, disc2) in itertools.product(enumerate(discriminants), enume
     h.SetMinimum(0)
 
     cache.append(h)
-    print "{:20} {:20} {:8.3g}      {:8.3g}".format(disc, disc2, h.Integral(), h.GetEffectiveEntries())
+    print "{:20} {:20}      {:8.2f}".format(disc, disc2, mutualinformation(h))
     try:
       os.makedirs(os.path.join(config.plotsbasedir, "TEST", "reweighting"))
     except OSError:
