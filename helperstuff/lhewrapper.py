@@ -165,11 +165,11 @@ class TreeWrapperMELA(TreeWrapperBase):
     self.M2ghzgs1prime2_decay = m.computeP(True)
 
     m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
-    m.ghg2 = m.g1 = 1; m.ghz1_prime2 = 1e4
+    m.ghg2 = m.ghz1 = 1; m.ghz1_prime2 = 1e4
     self.M2g1g1prime2_decay = m.computeP(True) - self.M2g1_decay - self.M2g1prime2_decay
 
     m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
-    m.ghg2 = m.g1 = 1; m.ghzgs1_prime2 = 1e4
+    m.ghg2 = m.ghz1 = 1; m.ghzgs1_prime2 = 1e4
     self.M2g1ghzgs1prime2_decay = m.computeP(True) - self.M2g1_decay - self.M2ghzgs1prime2_decay
 
     m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
