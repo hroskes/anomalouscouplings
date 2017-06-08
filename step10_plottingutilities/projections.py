@@ -22,7 +22,7 @@ import helperstuff.rootoverloads.histogramaxisnumbers, helperstuff.rootoverloads
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import cache, tfiles, mkdtemp, pairwise
 
-c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+c1 = ROOT.TCanvas("cprojections", "", 8, 30, 800, 800)
 style.applycanvasstyle(c1)
 
 class TemplateForProjection(object):
@@ -1221,7 +1221,7 @@ class Projections(MultiEnum):
         pt.AddText("{}={:.2f}".format("-2#Deltaln L", self.deltaNLL))
         return pt
 
-  def animation(self, category, channel, floor=False, scantree=None, with2015=False, Dbkg_allcategories=False):
+  def animation(self, category, channel, floor=False, nicestyle=False, with2015=False, Dbkg_allcategories=False):
       tmpdir = mkdtemp()
 
       category = Category(category)
@@ -1230,8 +1230,6 @@ class Projections(MultiEnum):
       if category != "Untagged" and with2015: return
 
       nsteps = 200
-      animation = []
-      nicestyle = (scantree is not None)
 
       finaldir = os.path.join(self.saveasdir(category, channel), "animation")
 
@@ -1242,29 +1240,11 @@ class Projections(MultiEnum):
               finaldir = self.saveasdir_Dbkgsum()
           else:
               finaldir = os.path.join(self.saveasdir_niceplots(category, with2015=with2015), "animation")
+          animation = self.animationstepsforniceplots(self.analysis)
 
-          minNLL, faiforminNLL = min((scantree.deltaNLL+scantree.nll+scantree.nll0, scantree.CMS_zz4l_fai1) for entry in scantree)
-          VBFmix = samplewithfai("ggH", self.analysis, 0.5, productionmodeforfai="VBF").fai("ggH", self.analysis)
-          VHmix = samplewithfai("ggH", self.analysis, 0.5, productionmodeforfai="VH").fai("ggH", self.analysis)
-          pauses = [
-                    min((scantree.CMS_zz4l_fai1 for entry in scantree), key = lambda x: abs(x-_))
-                       for _ in (0, -1, 1, .5, -.5, VBFmix, -VBFmix, VHmix, -VHmix) if _ in (0, 1, -1)
-                   ]
-          for entry in scantree:
-              animation.append(
-                               self.AnimationStep(
-                                                  "ggH",
-                                                  self.analysis,
-                                                  scantree.CMS_zz4l_fai1,
-                                                  100 if scantree.CMS_zz4l_fai1 == faiforminNLL or scantree.CMS_zz4l_fai1 in pauses
-                                                     else 10,
-                                                  muV = scantree.muV_scaled,
-                                                  muf = scantree.muf_scaled,
-                                                  deltaNLL = 2*(scantree.deltaNLL+scantree.nll+scantree.nll0 - minNLL)
-                                                 )
-                              )
       else:
           assert not with2015 and not Dbkg_allcategories
+          animation = []
           for productionmode in "VBF", "VH", "ggH":
               animation += [
                             self.AnimationStep(
@@ -1275,14 +1255,14 @@ class Projections(MultiEnum):
                                               ) for i in range(nsteps+1)
                            ]
 
-      animation = sorted(set(animation))
-      while True:
-          for step, nextstep in pairwise(animation[:]):
-              if step.fai_decay == nextstep.fai_decay:
-                  animation.remove(step)
+          animation = sorted(set(animation))
+          while True:
+              for step, nextstep in pairwise(animation[:]):
+                  if step.fai_decay == nextstep.fai_decay:
+                      animation.remove(step)
+                      break
+              else:
                   break
-          else:
-              break
 
       kwargs_base = {
                      "saveasdir": tmpdir,
@@ -1325,6 +1305,53 @@ class Projections(MultiEnum):
 
       shutil.rmtree(tmpdir)
 
+  @classmethod
+  def scantreeforanimations(cls, analysis):
+    analysis = Analysis(analysis)
+    scantree = ROOT.TChain("limit")
+    for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_7_6_5", "src", "HiggsAnalysis", "HZZ4l_Combination",
+                                       "CreateDatacards", "cards_{}_allsysts".format(analysis), "higgsCombine_obs_*.root")):
+        if re.match("higgsCombine_obs_lumi[0-9.]*_7813(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
+            scantree.Add(filename)
+    return scantree
+
+  @classmethod
+  def animationstepsforniceplots(cls, analysis):
+    animation = []
+    scantree = cls.scantreeforanimations(analysis)
+    minNLL, faiforminNLL = min((scantree.deltaNLL+scantree.nll+scantree.nll0, scantree.CMS_zz4l_fai1) for entry in scantree)
+    VBFmix = samplewithfai("ggH", analysis, 0.5, productionmodeforfai="VBF").fai("ggH", analysis)
+    VHmix = samplewithfai("ggH", analysis, 0.5, productionmodeforfai="VH").fai("ggH", analysis)
+    pauses = [
+              min((scantree.CMS_zz4l_fai1 for entry in scantree), key = lambda x: abs(x-_))
+                 for _ in (0, -1, 1, .5, -.5, VBFmix, -VBFmix, VHmix, -VHmix) if _ in (0, 1, -1)
+             ]
+    for entry in scantree:
+        animation.append(
+                         cls.AnimationStep(
+                                           "ggH",
+                                           analysis,
+                                           scantree.CMS_zz4l_fai1,
+                                           100 if scantree.CMS_zz4l_fai1 == faiforminNLL or scantree.CMS_zz4l_fai1 in pauses
+                                              else 10,
+                                           muV = scantree.muV_scaled,
+                                           muf = scantree.muf_scaled,
+                                           deltaNLL = 2*(scantree.deltaNLL+scantree.nll+scantree.nll0 - minNLL)
+                                          )
+                        )
+    animation = sorted(set(animation))
+    while True:
+        for step, nextstep in pairwise(animation[:]):
+            if step.fai_decay == nextstep.fai_decay:
+                animation.remove(step)
+                break
+        else:
+            break
+    return animation
+
+
+
+
 def projections(*args):
     Projections(*args).projections()
 
@@ -1350,15 +1377,23 @@ def main():
             continue
 
           jobtext = " ".join(pipes.quote(_) for _ in words)
-          queue = None
+
+          submitjobkwargs = {
+            "jobname": "{} {}".format(process, analysis),
+            "email": True,
+          }
           if process in (1, 2):
-            jobtime = "0:20:0"
+            submitjobkwargs["jobtime"] = "0:20:0"
           elif process in (4, 5):
             if config.host == "MARCC":
-              queue = "lrgmem"
-            jobtime = "1:0:0"
-          submitjob(jobtext, jobtime=jobtime, jobname="{} {}".format(process, analysis), queue=queue, email=True)
+              submitjobkwargs["queue"] = "lrgmem"
+              submitjobkwargs["memory"] = "10000M"
+            submitjobkwargs["jobtime"] = "1:0:0"
+
+          submitjob(jobtext, **submitjobkwargs)
+
     return
+
   useanalyses = []
   useenrichstatuses = []
   for _ in sys.argv[2:]:
@@ -1384,11 +1419,6 @@ def main():
 
   length = len(list(projections()))
   for i, (p, ch, ca) in enumerate(itertools.product(projections(), channels, categories), start=1):
-    scantree = ROOT.TChain("limit")
-    for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_7_6_5", "src", "HiggsAnalysis", "HZZ4l_Combination",
-                                       "CreateDatacards", "cards_{}_allsysts".format(p.analysis), "higgsCombine_obs_*.root")):
-        if re.match("higgsCombine_obs_lumi[0-9.]*_7813(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
-            scantree.Add(filename)
     process = int(sys.argv[1])
     if process == 1 or process == 4:
       p.projections(ch, ca, nicestyle=True)
@@ -1402,11 +1432,11 @@ def main():
       p.projections(ch, ca, subdir="VBF", productionmode="VBF")
       p.projections(ch, ca, subdir="VH",  productionmode="VH")
     if process == 4:
-      p.animation(ca, ch, scantree=scantree)
-      p.animation(ca, ch, scantree=scantree, Dbkg_allcategories=True)
+      p.animation(ca, ch, nicestyle=True)
+      p.animation(ca, ch, nicestyle=True, Dbkg_allcategories=True)
     if process == 5:
-      p.animation(ca, ch, scantree=scantree, with2015=True)
-      p.animation(ca, ch, scantree=scantree, Dbkg_allcategories=True, with2015=True)
+      p.animation(ca, ch, nicestyle=True, with2015=True)
+      p.animation(ca, ch, nicestyle=True, Dbkg_allcategories=True, with2015=True)
     if process == 6:
       if p.enrichstatus == "fullrange":
         p.animation(ca, ch)

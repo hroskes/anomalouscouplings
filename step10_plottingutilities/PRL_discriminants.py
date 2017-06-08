@@ -112,7 +112,7 @@ class Discriminant(MultiEnum):
       folder = self.projections.saveasdir_niceplots(self.category, self.with2015)
 
     rootfile = tfiles[os.path.join(folder, self.discriminant.name+".root")]
-    return rootfile.c1
+    return rootfile.cprojections
 
   @cache
   def GetListOfPrimitives(self):

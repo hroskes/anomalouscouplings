@@ -1,5 +1,7 @@
 #!/usr/bin/env python
+from array import array
 from glob import glob
+from itertools import izip
 import math
 import os
 import pipes
@@ -15,7 +17,7 @@ from helperstuff import config
 from helperstuff.enums import Analysis, Production
 from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
-from helperstuff.utilities import cache, tfiles
+from helperstuff.utilities import cache, cd, mkdtemp, tfiles
 
 from mergeplots import Folder
 
@@ -32,9 +34,12 @@ def PRL_loglinear(**kwargs):
                             }
     baseplotname = "limit_lumi35.8671.root"
     ydivide = 4.5
+    doanimations = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "ydivide":
             ydivide = float(kwarg)
+        elif kw == "doanimations":
+            doanimations = bool(int(kwarg))
         else:
             commondrawlineskwargs[kw] = kwarg
 
@@ -169,10 +174,41 @@ def PRL_loglinear(**kwargs):
             f.write(subprocess.check_output(["git", "status"]))
             f.write("\n")
             f.write(subprocess.check_output(["git", "diff"]))
-        shutil.copyfile(
-                        os.path.join(saveasdir, replaceByMap(plotname.replace("root", "pdf"), repmap)),
-                        os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
-                       )
+        if hasattr(config, "svndir"):
+            shutil.copyfile(
+                            os.path.join(saveasdir, replaceByMap(plotname.replace("root", "pdf"), repmap)),
+                            os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
+                           )
+
+        if doanimations:
+            from projections import Projections
+            tmpdir = mkdtemp()
+            observed = folders[0].graph
+            convertcommand = ["gm", "convert", "-loop", "0"]
+            animation = Projections.animationstepsforniceplots(analysis)
+            lastdelay = None
+            for i, step in enumerate(animation):
+                if step.delay != lastdelay:
+                    convertcommand += ["-delay", str(step.delay)]
+                convertcommand.append(os.path.join(tmpdir, "{}.gif".format(i)))
+                x = array('d', [step.fai_decay])
+                y = array('d', [step.deltaNLL])
+                marker = ROOT.TGraph(len(x), x, y)
+                marker.SetMarkerStyle(20)
+                marker.SetMarkerColor(4)
+                mg.Add(marker, "P")
+                mglog.Add(marker, "P")
+                c.SaveAs(os.path.join(tmpdir, "{}.gif".format(i)))
+                mg.RecursiveRemove(marker)
+                mglog.RecursiveRemove(marker)
+
+            finalplot = os.path.join(saveasdir, replaceByMap(plotname.replace("root", "gif"), repmap))
+            convertcommand.append(finalplot)
+            #http://stackoverflow.com/a/38792806/5228524
+            #subprocess.check_call(convertcommand)
+            os.system(" ".join(pipes.quote(_) for _ in convertcommand))
+            shutil.rmtree(tmpdir)
+
 
 @cache
 def yaxislabel(label, textsize=.06):
