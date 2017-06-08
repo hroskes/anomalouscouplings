@@ -813,6 +813,8 @@ class Projections(MultiEnum):
         templates += [ZZ, ZX]
 
         legendargs = [(0.20,0.57,0.58,0.90), (0.20,0.57,0.58,0.90), (0.23,0.57,0.61,0.90)]
+        if category == "VHHadrtagged":
+            legendargs[2] = legendargs[0]
         if Dbkg_allcategories:
             usecategories = categories
             templateclass = self.DbkgSum
@@ -1100,7 +1102,23 @@ class Projections(MultiEnum):
         if nicestyle:
             subfigletter = None
             #aux - add subfig letters here?
-            if discriminant.name == "D_bkg" and with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange":
+            if discriminant.name == "D_bkg" and with2015 and Dbkg_allcategories and self.enrichstatus == "fullrange" and self.analysis == "fa3" and not animation:
+                CMStext = ""
+            elif discriminant.name == "D_0minus_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
+                CMStext = ""
+            elif discriminant.name == "D_0hplus_decay" and with2015 and self.enrichstatus == "enrich" and not animation and self.analysis == "fa2":
+                CMStext = ""
+            elif discriminant.name == "D_L1_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
+                CMStext = ""
+            elif discriminant.name == "D_L1Zg_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
+                CMStext = ""
+            elif discriminant.name == "D_0minus_VBFdecay" and self.enrichstatus == "enrich" and not animation:
+                CMStext = ""
+            elif discriminant.name == "D_0minus_HadVHdecay" and self.enrichstatus == "enrich" and not animation:
+                CMStext = ""
+            elif discriminant.name == "D_CP_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
+                CMStext = ""
+            elif discriminant.name == "D_bkg" and with2015 and self.enrichstatus == "fullrange":
                 CMStext = "Unpublished"
             elif discriminant.name == "D_bkg" and category != "Untagged" and not Dbkg_allcategories and self.enrichstatus == "fullrange":
                 CMStext = "Unpublished"
@@ -1339,7 +1357,7 @@ def main():
             if config.host == "MARCC":
               queue = "lrgmem"
             jobtime = "1:0:0"
-          submitjob(jobtext, jobtime=jobtime, jobname="{} {}".format(process, analysis), queue=queue)
+          submitjob(jobtext, jobtime=jobtime, jobname="{} {}".format(process, analysis), queue=queue, email=True)
     return
   useanalyses = []
   useenrichstatuses = []
