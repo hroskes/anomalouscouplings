@@ -1216,8 +1216,8 @@ class Projections(MultiEnum):
         pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="dec"), self.fai_decay))
         pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="VBF"), self.fai("VBF", self.analysis)))
         pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="VH"), self.fai("VH", self.analysis)))
-        pt.AddText("{}={:.2f}".format("#mu_{V}", self.muV))
-        pt.AddText("{}={:.2f}".format("#mu_{f}", self.muf))
+#        pt.AddText("{}={:.2f}".format("#mu_{V}", self.muV))
+#        pt.AddText("{}={:.2f}".format("#mu_{f}", self.muf))
         pt.AddText("{}={:.2f}".format("-2#Deltaln L", self.deltaNLL))
         return pt
 
