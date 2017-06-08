@@ -22,6 +22,34 @@ from helperstuff.utilities import cache, cd, mkdtemp, tfiles
 from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
+ydivide = 4.5
+setmax = 1
+
+def applystyle(mg, mglog, folders):
+        mglog.GetXaxis().SetTitle(folders[0].xtitle)
+        mglog.GetXaxis().SetRangeUser(-setmax, setmax)
+        mglog.GetXaxis().CenterTitle()
+        mglog.GetYaxis().CenterTitle()
+        mglog.SetMinimum(ydivide)
+        mglog.SetMaximum(120)
+        style.applyaxesstyle(mglog)
+        mglog.GetXaxis().SetLabelOffset(9999999)
+        mglog.GetXaxis().SetTitleOffset(9999999)
+        mglog.GetYaxis().SetLabelSize(.1)
+        mglog.GetYaxis().SetTitleSize(.1)
+
+        mg.GetXaxis().SetTitle(folders[0].xtitle)
+        mg.GetXaxis().SetRangeUser(-setmax, setmax)
+        mg.GetXaxis().CenterTitle()
+        mg.GetYaxis().CenterTitle()
+        mg.SetMinimum(0)
+        mg.SetMaximum(ydivide)
+        style.applyaxesstyle(mg)
+        mg.GetXaxis().SetLabelSize(.1)
+        mg.GetYaxis().SetLabelSize(.1)
+        mg.GetXaxis().SetTitleSize(.12)
+        mg.GetYaxis().SetTitleSize(.1)
+
 
 def PRL_loglinear(**kwargs):
     commondrawlineskwargs = {
@@ -33,7 +61,6 @@ def PRL_loglinear(**kwargs):
                              "yshift95": -.1,
                             }
     baseplotname = "limit_lumi35.8671.root"
-    ydivide = 4.5
     doanimations = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "ydivide":
@@ -97,42 +124,20 @@ def PRL_loglinear(**kwargs):
         for folder in folders:
             mg.Add(folder.graph)
 
-        setmax = 1
-
         mglog = mg.Clone()
         logpad.cd()
         logpad.SetLogy()
         mglog.Draw("al")
-        mglog.GetXaxis().SetTitle(folders[0].xtitle)
-        mglog.GetXaxis().SetRangeUser(-setmax, setmax)
-        mglog.GetXaxis().CenterTitle()
-        mglog.GetYaxis().CenterTitle()
-        mglog.SetMinimum(ydivide)
-        mglog.SetMaximum(120)
-        style.applyaxesstyle(mglog)
-        mglog.GetXaxis().SetLabelOffset(9999999)
-        mglog.GetXaxis().SetTitleOffset(9999999)
-        mglog.GetYaxis().SetLabelSize(.1)
-        mglog.GetYaxis().SetTitleSize(.1)
         logpad.SetRightMargin(rightmargin)
         logpad.SetTopMargin(topmargin*2)
         style.subfig(letter, textsize=.11, x1=.87, x2=.91, y1=.87, y2=.91)
 
         linearpad.cd()
         mg.Draw("al")
-        mg.GetXaxis().SetTitle(folders[0].xtitle)
-        mg.GetXaxis().SetRangeUser(-setmax, setmax)
-        mg.GetXaxis().CenterTitle()
-        mg.GetYaxis().CenterTitle()
-        mg.SetMinimum(0)
-        mg.SetMaximum(ydivide)
-        style.applyaxesstyle(mg)
-        mg.GetXaxis().SetLabelSize(.1)
-        mg.GetYaxis().SetLabelSize(.1)
-        mg.GetXaxis().SetTitleSize(.12)
-        mg.GetYaxis().SetTitleSize(.1)
         linearpad.SetRightMargin(rightmargin)
         linearpad.SetBottomMargin(bottommargin*2)
+
+        applystyle(mg, mglog, folders)
 
         drawlineskwargs = commondrawlineskwargs.copy()
         drawlineskwargs["xpostext"] = CLtextposition
@@ -196,8 +201,10 @@ def PRL_loglinear(**kwargs):
                 marker = ROOT.TGraph(len(x), x, y)
                 marker.SetMarkerStyle(20)
                 marker.SetMarkerColor(4)
+                marker.SetMarkerSize(3)
                 mg.Add(marker, "P")
                 mglog.Add(marker, "P")
+                applystyle(mg, mglog, folders)
                 c.SaveAs(os.path.join(tmpdir, "{}.gif".format(i)))
                 mg.RecursiveRemove(marker)
                 mglog.RecursiveRemove(marker)
