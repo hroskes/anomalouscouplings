@@ -5,6 +5,7 @@ from itertools import izip
 import math
 import os
 import pipes
+import random
 import shutil
 import subprocess
 import sys
@@ -22,10 +23,11 @@ from helperstuff.utilities import cache, cd, mkdtemp, tfiles
 from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
-ydivide = 4.5
 setmax = 1
+saveasdir = os.path.join(config.plotsbasedir, "limits")
+baseplotname = "limit_lumi35.8671.root"
 
-def applystyle(mg, mglog, folders):
+def applystyle(mg, mglog, folders, ydivide):
         mglog.GetXaxis().SetTitle(folders[0].xtitle)
         mglog.GetXaxis().SetRangeUser(-setmax, setmax)
         mglog.GetXaxis().CenterTitle()
@@ -50,6 +52,9 @@ def applystyle(mg, mglog, folders):
         mg.GetXaxis().SetTitleSize(.12)
         mg.GetYaxis().SetTitleSize(.1)
 
+def getplotname(analysis):
+    return "{}_{}".format(analysis, baseplotname)
+
 
 def PRL_loglinear(**kwargs):
     commondrawlineskwargs = {
@@ -60,13 +65,19 @@ def PRL_loglinear(**kwargs):
                              "yshift68": .08,
                              "yshift95": -.1,
                             }
-    baseplotname = "limit_lumi35.8671.root"
-    doanimations = False
+    markerposition = None
+    onlyanalysis = None
+    ydivide = 4.5
+    saveas = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "ydivide":
             ydivide = float(kwarg)
-        elif kw == "doanimations":
-            doanimations = bool(int(kwarg))
+        elif kw == "markerposition":
+            markerposition = kwarg
+        elif kw == "analysis":
+            onlyanalysis = kwarg
+        elif kw == "saveas":
+            saveas = kwarg
         else:
             commondrawlineskwargs[kw] = kwarg
 
@@ -80,6 +91,7 @@ def PRL_loglinear(**kwargs):
             commondrawlineskwargs[k] = float(v)
 
     for i, (analysis, letter) in reversed(list(enumerate(zip(analyses, "abcd"), start=1))):
+        if analysis != onlyanalysis is not None: continue
         if analysis == "fa3":
             x1legend = .32
             CLtextposition=-.9
@@ -96,7 +108,8 @@ def PRL_loglinear(**kwargs):
             assert False
         legendposition = x1legend, .3, x1legend+.45, .8
 
-        c = ROOT.TCanvas("c1", "", 8, 30, 1600, 1600)
+        c = ROOT.TCanvas("c{}".format(random.randint(1, 1000000)), "", 8, 30, 1600, 1600)
+
         leftmargin = .1
         rightmargin = .045 #apply to the individual pads or 1 of the x axis gets cut off
         topmargin = .02
@@ -124,7 +137,22 @@ def PRL_loglinear(**kwargs):
         for folder in folders:
             mg.Add(folder.graph)
 
+        drawlineskwargs = commondrawlineskwargs.copy()
+        drawlineskwargs["xpostext"] = CLtextposition
+        drawlineskwargs["arbitraryparameter"] = analysis, markerposition
+
+        if markerposition:
+            markerposition = [array('d', [_]) for _ in markerposition]
+            marker = ROOT.TGraph(1, *markerposition)
+            marker.SetMarkerStyle(20)
+            marker.SetMarkerColor(4)
+            marker.SetMarkerSize(3)
+            if marker.GetY()[0] > 0:
+                mg.Add(marker, "P")
+
         mglog = mg.Clone()
+        if markerposition and marker.GetY()[0] <= 0:
+            mg.Add(marker, "P")
         logpad.cd()
         logpad.SetLogy()
         mglog.Draw("al")
@@ -137,11 +165,8 @@ def PRL_loglinear(**kwargs):
         linearpad.SetRightMargin(rightmargin)
         linearpad.SetBottomMargin(bottommargin*2)
 
-        applystyle(mg, mglog, folders)
+        applystyle(mg, mglog, folders, ydivide)
 
-        drawlineskwargs = commondrawlineskwargs.copy()
-        drawlineskwargs["xpostext"] = CLtextposition
-        drawlineskwargs["arbitraryparameter"] = analysis
         drawlines(**drawlineskwargs)
 
         legendpad.cd()
@@ -162,59 +187,55 @@ def PRL_loglinear(**kwargs):
         style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06)
         yaxislabel(folders[0].ytitle).Draw()
 
-        saveasdir = os.path.join(config.plotsbasedir, "limits")
         try:
             os.makedirs(saveasdir)
         except OSError:
             pass
-        plotname = "{}_{}".format(analysis, baseplotname)
+        plotname = getplotname(analysis)
         assert ".root" in plotname
-        for ext in "png eps root pdf".split():
-            c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
-        with open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
-            f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
-            f.write("\n\n\n\n\n\ngit info:\n\n")
-            f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
-            f.write("\n")
-            f.write(subprocess.check_output(["git", "status"]))
-            f.write("\n")
-            f.write(subprocess.check_output(["git", "diff"]))
-        if hasattr(config, "svndir"):
-            shutil.copyfile(
-                            os.path.join(saveasdir, replaceByMap(plotname.replace("root", "pdf"), repmap)),
-                            os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
-                           )
+        if saveas is not None:
+            c.SaveAs(saveas)
+        else:
+            for ext in "png eps root pdf".split():
+                c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
+            with open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
+                f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
+                f.write("\n\n\n\n\n\ngit info:\n\n")
+                f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
+                f.write("\n")
+                f.write(subprocess.check_output(["git", "status"]))
+                f.write("\n")
+                f.write(subprocess.check_output(["git", "diff"]))
+            if hasattr(config, "svndir"):
+                shutil.copyfile(
+                                os.path.join(saveasdir, replaceByMap(plotname.replace("root", "pdf"), repmap)),
+                                os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
+                               )
 
-        if doanimations:
-            from projections import Projections
-            tmpdir = mkdtemp()
-            observed = folders[0].graph
-            convertcommand = ["gm", "convert", "-loop", "0"]
-            animation = Projections.animationstepsforniceplots(analysis)
-            lastdelay = None
-            for i, step in enumerate(animation):
-                if step.delay != lastdelay:
-                    convertcommand += ["-delay", str(step.delay)]
-                convertcommand.append(os.path.join(tmpdir, "{}.gif".format(i)))
-                x = array('d', [step.fai_decay])
-                y = array('d', [step.deltaNLL])
-                marker = ROOT.TGraph(len(x), x, y)
-                marker.SetMarkerStyle(20)
-                marker.SetMarkerColor(4)
-                marker.SetMarkerSize(3)
-                mg.Add(marker, "P")
-                mglog.Add(marker, "P")
-                applystyle(mg, mglog, folders)
-                c.SaveAs(os.path.join(tmpdir, "{}.gif".format(i)))
-                mg.RecursiveRemove(marker)
-                mglog.RecursiveRemove(marker)
+def animations(**kwargs):
+    from projections import Projections
+    for analysis in analyses:
+        tmpdir = mkdtemp()
+        convertcommand = ["gm", "convert", "-loop", "0"]
+        animation = Projections.animationstepsforniceplots(analysis)
+        lastdelay = None
+        for i, step in enumerate(animation):
+            if step.delay != lastdelay:
+                convertcommand += ["-delay", str(step.delay)]
+            convertcommand += ["-trim", os.path.join(tmpdir, "{}.pdf".format(i))]
+            PRL_loglinear(
+                          analysis=analysis,
+                          saveas=os.path.join(tmpdir, "{}.pdf".format(i)),
+                          markerposition=(step.fai_decay, step.deltaNLL),
+                          **kwargs
+                         )
 
-            finalplot = os.path.join(saveasdir, replaceByMap(plotname.replace("root", "gif"), repmap))
-            convertcommand.append(finalplot)
-            #http://stackoverflow.com/a/38792806/5228524
-            #subprocess.check_call(convertcommand)
-            os.system(" ".join(pipes.quote(_) for _ in convertcommand))
-            shutil.rmtree(tmpdir)
+        finalplot = os.path.join(saveasdir, getplotname(analysis).replace("root", "gif"))
+        convertcommand.append(finalplot)
+        #http://stackoverflow.com/a/38792806/5228524
+        #subprocess.check_call(convertcommand)
+        os.system(" ".join(pipes.quote(_) for _ in convertcommand))
+        shutil.rmtree(tmpdir)
 
 
 @cache
@@ -238,4 +259,8 @@ if __name__ == "__main__":
             kwargs[arg.split("=")[0]] = arg.split("=", 1)[1]
         else:
             args.append(arg)
-    PRL_loglinear(*args, **kwargs)
+    function = PRL_loglinear
+    if args and args[0] == "animations":
+        args = args[1:]
+        function = animations
+    function(*args, **kwargs)
