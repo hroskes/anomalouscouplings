@@ -1119,13 +1119,13 @@ class Projections(MultiEnum):
             elif discriminant.name == "D_CP_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
                 CMStext = ""
             elif discriminant.name == "D_bkg" and with2015 and self.enrichstatus == "fullrange":
-                CMStext = "Unpublished"
+                CMStext = "Supplementary"
             elif discriminant.name == "D_bkg" and category != "Untagged" and not Dbkg_allcategories and self.enrichstatus == "fullrange":
-                CMStext = "Unpublished"
+                CMStext = "Supplementary"
             elif discriminant.name != "D_bkg" and with2015 and self.enrichstatus == "enrich":
-                CMStext = "Unpublished"
+                CMStext = "Supplementary"
             elif discriminant.name != "D_bkg" and category != "Untagged" and self.enrichstatus == "enrich":
-                CMStext = "Unpublished"
+                CMStext = "Supplementary"
             else:
                 CMStext = "Internal"
 
