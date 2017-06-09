@@ -88,4 +88,9 @@ if glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots
     for filename in theglob:
       shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, "all", os.path.basename(filename.replace("_with2015", "")))))
 
+    theglob = glob.glob(os.path.join(config.plotsbasedir, "limits", "{}_limit_lumi35.8671.gif".format(a)))
+    assert theglob, a
+    for filename in theglob:
+      shutil.copy(filename, os.path.join(tmpdir, "{}_limit.gif".format(a)))
+
   subprocess.check_call(["tar", "-cvzf", "discriminantdistributions_animations.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
