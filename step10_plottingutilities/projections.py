@@ -1223,7 +1223,7 @@ class Projections(MultiEnum):
         pt.SetTextAlign(12)
         pt.SetTextFont(42)
         pt.SetTextSize(0.045)
-        pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="dec"), self.fai_decay))
+        pt.AddText("{}={:.2f}".format(self.analysis.title(), self.fai_decay))
         pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="VBF"), self.fai("VBF", self.analysis)))
         pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="VH"), self.fai("VH", self.analysis)))
 #        pt.AddText("{}={:.2f}".format("#mu_{V}", self.muV))
