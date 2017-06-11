@@ -230,6 +230,7 @@ def makeCMS(extratext, x1=0.15, y1=0.93, x2=0.99, y2=1, CMStextsize=0.044, extra
         text = pt.AddText(0.025,0.45,"#font[61]{CMS}")
         text.SetTextSize(CMStextsize)
     if extratext:
+        if extratext == "Unpublished": raise ValueError("https://hypernews.cern.ch/HyperNews/CMS/get/HIG-17-011/73/1.html")
         text = pt.AddText(0.14, 0.42, "#font[52]{"+extratext+"}")
         text.SetTextSize(extratextsize)
 

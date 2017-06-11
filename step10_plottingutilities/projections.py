@@ -452,6 +452,7 @@ class Projections(MultiEnum):
     muV = muf = 1
     Dbkg_allcategories = False
     with2015 = False
+    forWIN = False
     for kw, kwarg in kwargs.iteritems():
        if kw == "productionmode":
            justoneproductionmode = True
@@ -492,16 +493,18 @@ class Projections(MultiEnum):
        elif kw == "with2015":
            with2015 = bool(int(kwarg))
            if with2015 and category != "Untagged": return
+       elif kw == "forWIN":
+           forWIN = kwarg
        else:
            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
     if saveasdir is None:
         if Dbkg_allcategories:
-            saveasdir = self.saveasdir_Dbkgsum()
+            saveasdir = self.saveasdir_Dbkgsum(forWIN=forWIN)
         elif nicestyle:
-            saveasdir = self.saveasdir_niceplots(category, with2015=with2015)
+            saveasdir = self.saveasdir_niceplots(category, with2015=with2015, forWIN=forWIN)
         else:
-            saveasdir = self.saveasdir(info)
+            saveasdir = self.saveasdir(info, forWIN=forWIN)
 
     if Dbkg_allcategories and not nicestyle: raise ValueError("Dbkg_allcategories requires nicestyle!")
     if with2015 and not nicestyle: raise ValueError("with2015 requires nicestyle!")
@@ -1102,7 +1105,9 @@ class Projections(MultiEnum):
         if nicestyle:
             subfigletter = None
             #aux - add subfig letters here?
-            if discriminant.name == "D_bkg" and with2015 and Dbkg_allcategories and self.enrichstatus == "fullrange" and self.analysis == "fa3" and not animation:
+            if forWIN:
+                CMStext = "Preliminary"
+            elif discriminant.name == "D_bkg" and with2015 and Dbkg_allcategories and self.enrichstatus == "fullrange" and self.analysis == "fa3" and not animation:
                 CMStext = ""
             elif discriminant.name == "D_0minus_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
                 CMStext = ""
@@ -1119,13 +1124,13 @@ class Projections(MultiEnum):
             elif discriminant.name == "D_CP_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
                 CMStext = ""
             elif discriminant.name == "D_bkg" and with2015 and self.enrichstatus == "fullrange":
-                CMStext = "Unpublished"
+                CMStext = "Supplementary"
             elif discriminant.name == "D_bkg" and category != "Untagged" and not Dbkg_allcategories and self.enrichstatus == "fullrange":
-                CMStext = "Unpublished"
+                CMStext = "Supplementary"
             elif discriminant.name != "D_bkg" and with2015 and self.enrichstatus == "enrich":
-                CMStext = "Unpublished"
+                CMStext = "Supplementary"
             elif discriminant.name != "D_bkg" and category != "Untagged" and self.enrichstatus == "enrich":
-                CMStext = "Unpublished"
+                CMStext = "Supplementary"
             else:
                 CMStext = "Internal"
 
@@ -1158,17 +1163,22 @@ class Projections(MultiEnum):
         for ext in exts:
             c1.SaveAs(os.path.join(saveasdir, subdir, "{}{}.{}".format(discriminant.name, saveasappend, ext)))
 
-  def saveasdir(self, *categoryandchannel):
+  def saveasdir(self, *categoryandchannel, **kwargs):
+      forWIN = kwargs.pop("forWIN", False)
+      assert not kwargs
+      forWIN = "forWIN" if forWIN else ""
       categoryandchannel = self.CategoryAndChannel(*categoryandchannel)
       assert self.normalization == "rescalemixtures"
-      return os.path.join(config.plotsbasedir, "templateprojections", "projections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
-  def saveasdir_niceplots(self, category, with2015=False):
+      return os.path.join(config.plotsbasedir, "templateprojections", forWIN, "projections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
+  def saveasdir_niceplots(self, category, with2015=False, forWIN=False):
       assert self.normalization == "rescalemixtures" and len(config.productionsforcombine) == 1
-      result = os.path.join(config.plotsbasedir, "templateprojections", "niceplots", self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
+      forWIN = "forWIN" if forWIN else ""
+      result = os.path.join(config.plotsbasedir, "templateprojections", forWIN, "niceplots", self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
       if with2015: result += "_with2015"
       return result
-  def saveasdir_Dbkgsum(self):
-      return os.path.join(config.plotsbasedir, "templateprojections", "niceplots", self.enrichstatus.dirname(), str(self.analysis))
+  def saveasdir_Dbkgsum(self, forWIN=False):
+      forWIN = "forWIN" if forWIN else ""
+      return os.path.join(config.plotsbasedir, "templateprojections", forWIN, "niceplots", self.enrichstatus.dirname(), str(self.analysis))
 
   def discriminants(self, category):
       return TemplatesFile("2e2mu", self.shapesystematic, "ggh", self.analysis, self.production, category).discriminants
@@ -1213,7 +1223,7 @@ class Projections(MultiEnum):
         pt.SetTextAlign(12)
         pt.SetTextFont(42)
         pt.SetTextSize(0.045)
-        pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="dec"), self.fai_decay))
+        pt.AddText("{}={:.2f}".format(self.analysis.title(), self.fai_decay))
         pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="VBF"), self.fai("VBF", self.analysis)))
         pt.AddText("{}={:.2f}".format(self.analysis.title(superscript="VH"), self.fai("VH", self.analysis)))
 #        pt.AddText("{}={:.2f}".format("#mu_{V}", self.muV))
@@ -1221,7 +1231,7 @@ class Projections(MultiEnum):
         pt.AddText("{}={:.2f}".format("-2#Deltaln L", self.deltaNLL))
         return pt
 
-  def animation(self, category, channel, floor=False, nicestyle=False, with2015=False, Dbkg_allcategories=False):
+  def animation(self, category, channel, floor=False, nicestyle=False, with2015=False, Dbkg_allcategories=False, forWIN=False):
       tmpdir = mkdtemp()
 
       category = Category(category)
@@ -1231,15 +1241,15 @@ class Projections(MultiEnum):
 
       nsteps = 200
 
-      finaldir = os.path.join(self.saveasdir(category, channel), "animation")
+      finaldir = os.path.join(self.saveasdir(category, channel, forWIN=forWIN), "animation")
 
       if nicestyle:
           if channel != "2e2mu": return
           if Dbkg_allcategories:
               if category != "Untagged": return
-              finaldir = self.saveasdir_Dbkgsum()
+              finaldir = self.saveasdir_Dbkgsum(forWIN=forWIN)
           else:
-              finaldir = os.path.join(self.saveasdir_niceplots(category, with2015=with2015), "animation")
+              finaldir = os.path.join(self.saveasdir_niceplots(category, with2015=with2015, forWIN=forWIN), "animation")
           animation = self.animationstepsforniceplots(self.analysis)
 
       else:
@@ -1270,6 +1280,7 @@ class Projections(MultiEnum):
                      "nicestyle": nicestyle,
                      "with2015": with2015,
                      "Dbkg_allcategories": Dbkg_allcategories,
+                     "forWIN": forWIN,
                     }
 
       for i, step in enumerate(animation):
@@ -1423,9 +1434,13 @@ def main():
     if process == 1 or process == 4:
       p.projections(ch, ca, nicestyle=True)
       p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
+      p.projections(ch, ca, nicestyle=True, forWIN=True)
+      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, forWIN=True)
     if process == 2 or process == 5:
       p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True)
       p.projections(ch, ca, nicestyle=True, with2015=True)
+      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True, forWIN=True)
+      p.projections(ch, ca, nicestyle=True, with2015=True, forWIN=True)
     if process == 3:
       p.projections(ch, ca)
       p.projections(ch, ca, subdir="ggH", productionmode="ggH")
@@ -1434,9 +1449,13 @@ def main():
     if process == 4:
       p.animation(ca, ch, nicestyle=True)
       p.animation(ca, ch, nicestyle=True, Dbkg_allcategories=True)
+      p.animation(ca, ch, nicestyle=True, forWIN=True)
+      p.animation(ca, ch, nicestyle=True, Dbkg_allcategories=True, forWIN=True)
     if process == 5:
       p.animation(ca, ch, nicestyle=True, with2015=True)
       p.animation(ca, ch, nicestyle=True, Dbkg_allcategories=True, with2015=True)
+      p.animation(ca, ch, nicestyle=True, with2015=True, forWIN=True)
+      p.animation(ca, ch, nicestyle=True, Dbkg_allcategories=True, with2015=True, forWIN=True)
     if process == 6:
       if p.enrichstatus == "fullrange":
         p.animation(ca, ch)
