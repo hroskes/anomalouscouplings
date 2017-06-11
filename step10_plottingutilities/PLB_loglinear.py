@@ -24,7 +24,8 @@ from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
-saveasdir = os.path.join(config.plotsbasedir, "limits")
+def saveasdir(forWIN=False):
+    return os.path.join(config.plotsbasedir, "limits", "forWIN" if forWIN else "")
 baseplotname = "limit_lumi35.8671.root"
 
 def applystyle(mg, mglog, folders, ydivide):
@@ -69,6 +70,7 @@ def PRL_loglinear(**kwargs):
     onlyanalysis = None
     ydivide = 4.5
     saveas = None
+    forWIN = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "ydivide":
             ydivide = float(kwarg)
@@ -78,6 +80,8 @@ def PRL_loglinear(**kwargs):
             onlyanalysis = kwarg
         elif kw == "saveas":
             saveas = kwarg
+        elif kw == "forWIN":
+            forWIN = kwarg
         else:
             commondrawlineskwargs[kw] = kwarg
 
@@ -184,11 +188,19 @@ def PRL_loglinear(**kwargs):
                                                 .format(config.productionforcombine.dataluminosity+config.lumi2015),
                       x1=0.007, x2=1.01, #???
                       drawCMS=False, extratextsize=.039)
-        style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06)
+        if forWIN:
+            if analysis == "fa2":
+                style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
+                style.CMS("Preliminary", x1=0.0, x2=1.025, y1=.8, y2=.86, CMStextsize=.06, extratextsize=.039, drawCMS=False)
+            else:
+                style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
+                style.CMS("Preliminary", x1=0.15, x2=1.025, y1=.85, y2=.93, CMStextsize=.06, extratextsize=.039, drawCMS=False)
+        else:
+            style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06)
         yaxislabel(folders[0].ytitle).Draw()
 
         try:
-            os.makedirs(saveasdir)
+            os.makedirs(saveasdir(forWIN))
         except OSError:
             pass
         plotname = getplotname(analysis)
@@ -197,8 +209,8 @@ def PRL_loglinear(**kwargs):
             c.SaveAs(saveas)
         else:
             for ext in "png eps root pdf".split():
-                c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
-            with open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
+                c.SaveAs(os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", ext), repmap)))
+            with open(os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
                 f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
                 f.write("\n\n\n\n\n\ngit info:\n\n")
                 f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
@@ -208,12 +220,13 @@ def PRL_loglinear(**kwargs):
                 f.write(subprocess.check_output(["git", "diff"]))
             if hasattr(config, "svndir"):
                 shutil.copyfile(
-                                os.path.join(saveasdir, replaceByMap(plotname.replace("root", "pdf"), repmap)),
+                                os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", "pdf"), repmap)),
                                 os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
                                )
 
 def animations(**kwargs):
     from projections import Projections
+    forWIN = kwargs.get("forWIN", False)
     for analysis in analyses:
         tmpdir = mkdtemp()
         convertcommand = ["gm", "convert", "-loop", "0"]
@@ -230,7 +243,7 @@ def animations(**kwargs):
                           **kwargs
                          )
 
-        finalplot = os.path.join(saveasdir, getplotname(analysis).replace("root", "gif"))
+        finalplot = os.path.join(saveasdir(forWIN), getplotname(analysis).replace("root", "gif"))
         convertcommand.append(finalplot)
         #http://stackoverflow.com/a/38792806/5228524
         #subprocess.check_call(convertcommand)
