@@ -136,6 +136,7 @@ def setupdats():
 
 def makeplot():
   with cd(os.path.join(config.repositorydir, "step10_plottingutilities", "NIS_summary")):
+    subprocess.check_call(["make"])
     subprocess.check_call(["./NIS_summary_3"])
     mkdir_p(os.path.join(config.plotsbasedir, "limits", "summary"))
     for ext in "png eps root pdf C".split():
