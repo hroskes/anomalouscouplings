@@ -51,3 +51,6 @@ buildTemplate.exe
 """
 with open("TemplateBuilder/.gitignore", "w") as f:
     f.write(gitignore)
+
+print "Compiling NIS_summary"
+subprocess.check_call("cd CMSSW_7_6_5 && eval $(scram ru -sh) && cd ../step10_plottingutilities/NIS_summary && make", shell=True)
