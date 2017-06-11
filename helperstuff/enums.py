@@ -353,7 +353,7 @@ class ShapeSystematic(MyEnum):
     def appendname(self):
         if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
         return ""
-    def D_bkg(self, title=False):
+    def D_bkg(self):
         from discriminants import discriminant
         return discriminant("D_bkg"+self.appendname())
     def appliesto(self, templategroup):
@@ -463,6 +463,12 @@ class Analysis(MyEnum):
         if self == "fa2": return "g2"
         if self == "fL1": return "g1prime2"
         if self == "fL1Zg": return "ghzgs1prime2"
+    @property
+    def couplingtitle(self):
+        if self == "fa3": return "a_{3}"
+        if self == "fa2": return "a_{2}"
+        if self == "fL1": return "#Lambda_{1}"
+        if self == "fL1Zg": return "#Lambda_{1}^{Z#gamma}"
     @property
     def purehypotheses(self):
         if self == "fa3":
