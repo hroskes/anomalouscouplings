@@ -51,8 +51,8 @@ class Model(object):
   def __iter__(self):
     return iter(self.stuff)
 
-def setupdats():
-  with cd(os.path.join(config.repositorydir, "step10_plottingutilities", "NIS_summary", "Input_WIN17")):
+def setupdats(plotid):
+  with cd(os.path.join(config.repositorydir, "step10_plottingutilities", "NIS_summary", "Input_"+plotid)):
     files = Model(None, None, None, None, None, None, None, None, None, None, None, None, None, None)
     models = OrderedDict()
     with \
@@ -144,14 +144,16 @@ def setupdats():
         for data, f in zip(model, files):
           f.write(str(data).strip()+"\n")
 
-def makeplot():
+def makeplot(plotid):
   with cd(os.path.join(config.repositorydir, "step10_plottingutilities", "NIS_summary")):
     subprocess.check_call(["make"])
-    subprocess.check_call(["./NIS_summary_3"])
+    subprocess.check_call(["./NIS_summary_3", plotid])
     mkdir_p(os.path.join(config.plotsbasedir, "limits", "summary"))
     for ext in "png eps root pdf C".split():
-      shutil.copy("Summary_WIN17.{}".format(ext), os.path.join(config.plotsbasedir, "limits", "summary"))
+      shutil.copy("Summary_{}.{}".format(plotid, ext), os.path.join(config.plotsbasedir, "limits", "summary"))
 
 if __name__ == "__main__":
-  setupdats()
-  makeplot()
+  setupdats("WIN17")
+  makeplot("WIN17")
+  setupdats("HIG17011")
+  makeplot("HIG17011")
