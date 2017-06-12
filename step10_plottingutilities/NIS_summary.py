@@ -75,6 +75,16 @@ def setupdats():
         assert data[0] not in models, data[0]
         models[data[0]] = Model(*data)
 
+    def thekey(kv):
+      k, v = kv
+      if "Z#gamma" in k: k = "yy"+k
+      if "#gamma#gamma" in k: k = "zz"+k
+      k = k.replace("3", "1")
+      k = k.replace("#", "")
+      k = k.lower()
+      return k
+    models = OrderedDict((k, v) for (k, v) in sorted(models.items(), key=thekey))
+
     for analysis in analyses:
       filename = os.path.join(config.plotsbasedir, "limits", "{}_allsysts".format(analysis), "limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root")
       if analysis == "fa3": filename = filename.replace("allsysts", "fixint")
