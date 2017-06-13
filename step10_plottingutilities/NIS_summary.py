@@ -86,7 +86,10 @@ def setupdats(plotid):
     models = OrderedDict((k, v) for (k, v) in sorted(models.items(), key=thekey))
 
     for analysis in analyses:
-      filename = os.path.join(config.plotsbasedir, "limits", "{}_allsysts".format(analysis), "limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root")
+      if plotid == "WIN17":
+        filename = os.path.join(config.plotsbasedir, "limits", ".bkp", "bkp_FebruaryMarch", "{}_Feb28_mu".format(analysis), "limit_lumi35.8671_100,-1.0,1.0_100,-0.02,0.02.root")
+      else:
+        filename = os.path.join(config.plotsbasedir, "limits", "{}_allsysts".format(analysis), "limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root")
       if analysis == "fa3": filename = filename.replace("allsysts", "fixint")
       allresults = getlimits(filename, analysis=="fa3")
 
