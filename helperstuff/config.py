@@ -6,15 +6,14 @@ import socket
 
 if (".cern.ch" in socket.gethostname() or "lxplus" in socket.gethostname()) and getpass.getuser() == "hroskes":
     host = "lxplus"
-    repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production/"
-    plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/"
-    svndir = "/afs/cern.ch/work/h/hroskes/AN/"
+#    repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings_production/"
+#    plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/"
+#    svndir = "/afs/cern.ch/work/h/hroskes/AN/"
 
 elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname() or "bigmem" in socket.gethostname()) and getpass.getuser() == "jroskes1@jhu.edu":
     host = "MARCC"
-    repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/"
-    repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/"
-    plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/"
+    repositorydir = "/work-zfs/lhc/heshy/tautauanomalouscouplings/"
+    plotsbasedir = "/work-zfs/lhc/heshy/tautauanomalouscouplings/plots/"
     email = "heshyr@gmail.com"
 
 repositorydir = os.path.realpath(repositorydir)
