@@ -36,12 +36,15 @@ else:
         shutil.move(os.path.join(tmpdir, "src"), "CMSSW_7_6_5/src")
         shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_7_6_5/.gitignore")
 
-    with utilities.cd("CMSSW_7_6_5/src"):
-        subprocess.check_call(["scram", "b", "-j", "10"])
-
     print """CMSSW area is set up"""
+    print
 
-print "Compiling TemplateBuilder"
+print """Compiling CMSSW..."""
+
+with utilities.cd("CMSSW_7_6_5/src"):
+    subprocess.check_call(["scram", "b", "-j", "10"])
+
+print "Compiling TemplateBuilder..."
 
 subprocess.check_call("cd CMSSW_7_6_5 && eval $(scram ru -sh) && cd ../TemplateBuilder && make", shell=True)
 gitignore = """
@@ -52,5 +55,5 @@ buildTemplate.exe
 with open("TemplateBuilder/.gitignore", "w") as f:
     f.write(gitignore)
 
-print "Compiling NIS_summary"
+print "Compiling NIS_summary..."
 subprocess.check_call("cd CMSSW_7_6_5 && eval $(scram ru -sh) && cd ../step10_plottingutilities/NIS_summary && make", shell=True)
