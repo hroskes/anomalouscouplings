@@ -901,7 +901,7 @@ class Projections(MultiEnum):
             bottomcolor = 4
             bottommu = muV
             #toptitle = "ggH+t#bar{t}H"
-            toptitle = "total"
+            toptitle = "Total"
             topcolor = ROOT.kOrange+10
 
             SMbottom = self.TemplateSum("{} SM".format(bottomtitle),
@@ -971,7 +971,7 @@ class Projections(MultiEnum):
             bottomtitle = "VBF+VH"
             bottomcolor = 4
             bottommu = muV
-            toptitle = "total" #"ggH+t#bar{t}H"
+            toptitle = "Total" #"ggH+t#bar{t}H"
             topcolor = ROOT.kOrange+10
 
             bottom = self.TemplateSum(bottomtitle,
