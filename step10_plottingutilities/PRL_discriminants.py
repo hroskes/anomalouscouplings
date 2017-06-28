@@ -3,23 +3,15 @@
 from functools import wraps
 import os
 
-print "importing root"
 import ROOT
 
-print "config"
 from helperstuff import config
-print "style"
 from helperstuff import stylefunctions as style
-print "enums"
 from helperstuff.enums import EnumItem, Category, MultiEnum, MyEnum
-print "utilities"
 from helperstuff.utilities import cache, tfiles
 
-print "PRL_loglinear"
 from PRL_loglinear import yaxislabel
-print "projections"
 from projections import Projections
-print "done"
 
 class DiscriminantAxis(MyEnum):
   enumname = "discriminantaxis"
@@ -69,7 +61,7 @@ class Discriminant(MultiEnum):
         if entry.GetLineStyle() == 2:
           if entry.GetLineColor() == 810: #total BSM
             label = entry.GetLabel()
-            label = label.replace("total ", "#lower[0.5]{") + "}"
+            label = label.replace("Total ", "#lower[0.5]{") + "}"
             entry.SetLabel(label)
           elif entry.GetLineColor() == 4:
             entry.SetLabel("")
