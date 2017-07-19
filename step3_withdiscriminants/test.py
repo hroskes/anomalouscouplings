@@ -47,10 +47,17 @@ def mutualinformation(h2):
 
 discriminants = "D_L1_decay", "D_L1int_decay", "D_L1Zg_decay", "D_L1Zgint_decay", "D_L1L1Zg_decay", "D_L1L1Zgint_decay"
 
-for (i1, disc), (i2, disc2) in itertools.product(enumerate(discriminants), enumerate(discriminants)):
-    if i1 >= i2: continue
+hypotheses = ("0+_photoncut", "fL10.5_photoncut", "L1Zg"), ("SM", "fL1=0.5", "L1Zg")
 
-    hname = "h{}{}".format(disc, disc2)
+print "{:20} {:20}      {:>6} {:>6} {:>6}".format("", "", *hypotheses[1])
+
+for (i1, disc), (i2, disc2) in itertools.product(enumerate(discriminants), enumerate(discriminants)):
+  if i1 >= i2: continue
+
+  MI = {}
+
+  for hypothesis, title in reversed(zip(*hypotheses)):
+    hname = "h{}{}{}".format(hypothesis, disc, disc2)
 
     h = hs[hypothesis] = plotfromtree(
       reweightfrom=ReweightingSample(productionmode, hypothesis),
@@ -75,14 +82,16 @@ for (i1, disc), (i2, disc2) in itertools.product(enumerate(discriminants), enume
     )
     h.SetMinimum(0)
 
-    cache.append(h)
-    print "{:20} {:20}      {:8.2f}".format(disc, disc2, mutualinformation(h))
-    try:
-      os.makedirs(os.path.join(config.plotsbasedir, "TEST", "reweighting"))
-    except OSError:
-      pass
-    for ext in "png eps root pdf".split():
-      c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}{}.{}".format(disc, disc2, ext)))
+    MI[title] = mutualinformation(h)
+
+  cache.append(h)
+  print "{:20} {:20}      {:6.2f} {:6.2f} {:6.2f}".format(disc, disc2, *(MI[_] for _ in hypotheses[1]))
+  try:
+    os.makedirs(os.path.join(config.plotsbasedir, "TEST", "reweighting"))
+  except OSError:
+    pass
+  for ext in "png eps root pdf".split():
+    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}{}.{}".format(disc, disc2, ext)))
 
 for disc in discriminants:
   hstack = ROOT.THStack("hstack{}".format(disc), "")

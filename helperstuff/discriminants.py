@@ -16,11 +16,11 @@ decaydiscriminants = [
     Discriminant("D_0hplus_decay", "D_{0h+}^{dec}", defaultnbins, 0, 1),
     Discriminant("D_int_decay", "D_{int}^{dec}", defaultnbins, 0, 1),
     Discriminant("D_L1_decay", "D_{#Lambda1}^{dec}", defaultnbins, .3, 1),
-    Discriminant("D_L1int_decay", "D_{#Lambda1int}^{dec}", defaultnbins, 0, 1),
+    Discriminant("D_L1int_decay", "D_{#Lambda1int}^{dec}", defaultnbins, .75, 1),
     Discriminant("D_L1Zg_decay", "D_{#Lambda1}^{Z#gamma,dec}", defaultnbins, .25, 1),
-    Discriminant("D_L1Zgint_decay", "D_{#Lambda1Z#gammaint}^{dec}", defaultnbins, -.8, 0),
+    Discriminant("D_L1Zgint_decay", "D_{#Lambda1Z#gammaint}^{dec}", defaultnbins, -.25, .25),
     Discriminant("D_L1L1Zg_decay", "D_{#Lambda1}^{ZZ/Z#gamma,dec}", defaultnbins, 0, 1),
-    Discriminant("D_L1L1Zgint_decay", "D_{#Lambda1int}^{ZZ/Z#gamma,dec}", defaultnbins, -.3, .3),
+    Discriminant("D_L1L1Zgint_decay", "D_{#Lambda1int}^{ZZ/Z#gamma,dec}", defaultnbins, -.3, .25),
 ]
 VBFdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),

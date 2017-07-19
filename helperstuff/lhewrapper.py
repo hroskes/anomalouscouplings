@@ -272,6 +272,25 @@ class TreeWrapperMELA(TreeWrapperBase):
     return CJLSTscripts.UntaggedMor17
 
 @callclassinitfunctions("initweightfunctions", "initsystematics")
+class TreeWrapperPythia(TreeWrapperMELA):
+  def __init__(self, treesample, minevent=0, maxevent=None):
+    assert minevent == 0 and maxevent is None
+    self.event = None
+    self.sumofweights = None
+    self.bkg4l = True
+    super(TreeWrapperPythia, self).__init__(treesample, minevent, maxevent)
+    self.preliminaryloop()
+    self.tree = ROOT.TChain("demo/GenEvents")
+    self.tree.Add(treesample.pythiafile)
+
+  @cache_instancemethod
+  def __len__(self):
+    return self.tree.GetEntries()
+
+  def preliminaryloop(self):
+    self.sumofweights = len(self)
+
+@callclassinitfunctions("initweightfunctions", "initsystematics")
 class LHEWrapper(TreeWrapperMELA):
   def __init__(self, treesample, minevent=0, maxevent=None):
     assert minevent == 0 and maxevent is None
