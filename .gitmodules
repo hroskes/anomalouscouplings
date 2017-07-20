@@ -25,4 +25,4 @@
 [submodule "CMSSW_7_6_5/src/ZZMatrixElement"]
 	path = CMSSW_8_0_20/src/ZZMatrixElement
 	url = git@github.com:hroskes/HiggsAnalysis-ZZMatrixElement
-	branch = newVH
+	branch = master
