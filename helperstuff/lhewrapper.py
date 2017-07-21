@@ -290,6 +290,13 @@ class TreeWrapperPythia(TreeWrapperMELA):
   def preliminaryloop(self):
     self.sumofweights = len(self)
 
+  @classmethod
+  def initweightfunctions(cls):
+    pass
+  @classmethod
+  def initsystematics(cls):
+    pass
+
 @callclassinitfunctions("initweightfunctions", "initsystematics")
 class LHEWrapper(TreeWrapperMELA):
   def __init__(self, treesample, minevent=0, maxevent=None):
@@ -308,6 +315,7 @@ class LHEWrapper(TreeWrapperMELA):
   @property
   @cache_instancemethod
   def xsec(self):
+    if self.isdata: return None
     with open(self.treesample.LHEfile) as f:
       for line in f:
         if "<init>" in line:
@@ -317,6 +325,7 @@ class LHEWrapper(TreeWrapperMELA):
       return float(line.split()[0])
 
   def preliminaryloop(self):
+    if self.isdummy: return
     i = 0
     sumofweights = 0
     weightfunction = self.treesample.get_MC_weight_function(reweightingonly=True)
@@ -476,7 +485,7 @@ class LHEWrapper(TreeWrapperMELA):
         self.toaddtotree.append(sample.weightname())
       else:
         self.exceptions.append(sample.weightname())
-    if self.treesample.reweightingsample not in self.allsamples:
+    if self.treesample.reweightingsample not in self.allsamples and not self.isdata:
       raise ValueError("{} not in allsamples!".format(self.treesample))
 
     fa3stuff = [

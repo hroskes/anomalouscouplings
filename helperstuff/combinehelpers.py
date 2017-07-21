@@ -122,6 +122,14 @@ def gettemplate(*args):
 
     return result
 
+@cache
+def zerotemplate(*args):
+    result = gettemplate(*args)
+    result = result.Clone("zerotemplate"+str(hash(args)))
+    result.Reset("MICES")
+    assert result.Integral() == 0
+    return result
+
 def getdatatree(*args):
     return tfiles[DataTree(*args).treefile].candTree
     #it's empty if we don't unblind

@@ -267,6 +267,27 @@ class _Datacard(MultiEnum):
         return fai
     @classmethod
     @cache
+    def faj(cls):
+        name = makename("CMS_zz4l_fai2")
+        faj = ROOT.RooRealVar(name, name, -1., 1.)
+        faj.setBins(1000)
+        return faj
+    @classmethod
+    @cache
+    def phiai(cls):
+        name = makename("CMS_zz4l_phiai1")
+        phiai = ROOT.RooRealVar(name, name, -pi, pi)
+        phiai.setBins(1000)
+        return phiai
+    @classmethod
+    @cache
+    def phiaj(cls):
+        name = makename("CMS_zz4l_phiai2")
+        phiaj = ROOT.RooRealVar(name, name, -pi, pi)
+        phiaj.setBins(1000)
+        return phiaj
+    @classmethod
+    @cache
     def mixturesign_constvar(cls, analysis):
         name = makename("mixturesign_{}".format(analysis))
         return ROOT.RooConstVar(name, name, mixturesign(analysis))
@@ -292,12 +313,14 @@ class _Datacard(MultiEnum):
         ## -------------------------- SIGNAL SHAPE ----------------------------------- ##
 
         fai = self.fai()
-        mixturesign_constvar = self.mixturesign_constvar(self.analysis)
-        sigmaioversigma1_constvar = self.sigmaioversigma1_constvar(self.analysis)
-        a1 = self.a1()
-        ai = self.ai(self.analysis)
+        if self.analysis.is2d:
+            a1 = ai = None
+        else:
+            mixturesign_constvar = self.mixturesign_constvar(self.analysis)
+            sigmaioversigma1_constvar = self.sigmaioversigma1_constvar(self.analysis)
+            a1 = self.a1()
+            ai = self.ai(self.analysis)
 
-        #add category name in case the same discriminant is used in multiple categories
         discs = discriminants(self.analysis, self.category)
         D1Name, D2Name, D3Name = (d.name for d in discs)
         dBinsX, dBinsY, dBinsZ = (d.bins for d in discs)
@@ -337,9 +360,11 @@ class _Datacard(MultiEnum):
 
         if config.usefastpdf:
             w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf_1D_fast.Class(),True)
+            w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf_2D_fast.Class(),True)
             w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf_fast.Class(),True)
         else:
             w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf.Class(),True)
+            w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf_2D.Class(),True)
             w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf.Class(),True)
 
         getattr(w,'import')(self.data_obs,ROOT.RooFit.Rename("data_obs")) ### Should this be renamed?
@@ -580,6 +605,45 @@ class _Pdf(PdfBase):
             self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1 * @2", ROOT.RooArgList(self.individualnorm, self.norm_SM, self.muf()))
 
     @cache
+    def makepdf_decayonly_2D(self):
+        #https://github.com/hroskes/HiggsAnalysis-CombinedLimit/blob/e828bd35a5b27dda1ae31a00154053e3d2b6fe89/src/HZZ4L_RooSpinZeroPdf_2D_fast.cc#L89-L97
+        self.T = [
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[2], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gj1", self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "gi1gj1", self.channel, self.shapesystematic),
+                  zerotemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                  zerotemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                  zerotemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                 ]
+        for i, t in enumerate(self.T, start=1):
+            t.SetName(self.templatename(i))
+
+        if config.usefastpdf:
+            if config.usefastpdfdouble:
+                self.T_datahist = [ROOT.FastHisto3D_d(t) for i, t in enumerate(self.T, start=1)]
+                self.T_histfunc = [ROOT.FastHisto3DFunc_d(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+            else:
+                self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
+                self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+        else:
+            self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
+            self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+
+        if self.shapesystematic == "":
+            self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
+            for i, integral in enumerate(self.T_integral, start=1):
+                print "{} T{}".format(self.productionmode, i), integral.getVal()
+
+            self.r_fai_pures_norm = ROOT.RooFormulaVar(self.puresnormname, "", "( (1-abs(@0))*@1+abs(@0)*@2 )",ROOT.RooArgList(self.fai, self.T_integral[0], self.T_integral[1]))
+            self.r_fai_realints_norm = ROOT.RooFormulaVar(self.realintsnormname, "", "(sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1)",ROOT.RooArgList(self.fai, self.T_integral[2]))
+            self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)", ROOT.RooArgList(self.r_fai_pures_norm, self.r_fai_realints_norm, self.fai))
+            self.norm_SM = self.T_integral[0]
+            self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1 * @2", ROOT.RooArgList(self.individualnorm, self.norm_SM, self.muf()))
+
+    @cache
     def makepdf_proddec(self):
         self.T = [
                   gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
@@ -701,6 +765,12 @@ class _Pdf(PdfBase):
             return ROOT.HZZ4L_RooSpinZeroPdf_1D_fast(self.pdfname, self.pdfname, self.fai, ROOT.RooArgList(self.D1, self.D2, self.D3), ROOT.RooArgList(*self.T_histfunc))
         else:
             return ROOT.HZZ4L_RooSpinZeroPdf(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.fai, ROOT.RooArgList(*self.T_histfunc))
+    @cache
+    def getpdf_decayonly_2D(self):
+        if config.usefastpdf:
+            return ROOT.HZZ4L_RooSpinZeroPdf_2D_fast(self.pdfname, self.pdfname, self.fai, self.faj, self.phiai, self.phiaj, ROOT.RooArgList(self.D1, self.D2, self.D3), ROOT.RooArgList(*self.T_histfunc))
+        else:
+            return ROOT.HZZ4L_RooSpinZeroPdf_2D(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.fai, self.faj, self.phiai, self.phiaj, ROOT.RooArgList(*self.T_histfunc))
     @cache
     def getpdf_proddec(self):
         if config.usefastpdf:

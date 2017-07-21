@@ -35,10 +35,6 @@ if not config.LHE:
 class TreeWrapperBase(Iterator):
     def __init__(self, treesample, minevent=0, maxevent=None):
         self.treesample = treesample
-        self.isdata = treesample.isdata()
-        self.isbkg = not self.isdata and treesample.isbkg
-        self.isZX = treesample.isZX()
-        self.isalternate = treesample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or treesample.pythiasystematic is not None
         self.productionmode = str(treesample.productionmode)
         self.hypothesis = str(treesample.hypothesis)
 
@@ -49,9 +45,6 @@ class TreeWrapperBase(Iterator):
             self.unblind = config.unblinddistributions
         else:
             self.unblind = True
-
-        if self.isZX and not config.usedata: self.isdummy = True
-        if self.isdata and not config.showblinddistributions: self.isdummy = True
 
         self.printevery = 10000
         if self.isZX:
@@ -72,6 +65,26 @@ class TreeWrapperBase(Iterator):
     def initlists(self): pass
     @abstractmethod
     def Show(self): pass
+
+    @property
+    @cache_instancemethod
+    def isdummy(self):
+        if self.isZX and not config.usedata: return True
+        if self.isdata and not config.showblinddistributions: return True
+        return False
+
+    @property
+    @cache_instancemethod
+    def isdata(self): return self.treesample.isdata()
+    @property
+    @cache_instancemethod
+    def isbkg(self): return not self.isdata and self.treesample.isbkg
+    @property
+    @cache_instancemethod
+    def isZX(self): return self.treesample.isZX()
+    @property
+    @cache_instancemethod
+    def isalternate(self): return self.treesample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.treesample.pythiasystematic is not None
 
 
     def checkfunctions(self):
@@ -432,13 +445,6 @@ class TreeWrapper(TreeWrapperBase):
         Counters - from the CJLST file
         """
         filename = treesample.CJLSTfile()
-        self.isdummy = False
-        if not xrd.exists(filename):
-            self.isdummy = True
-        else:
-            self.f = ROOT.TFile.Open(filename)
-            if not self.f.Get("{}/candTree".format(sample.TDirectoryname())):
-                self.isdummy = True
 
         if self.isdummy:
             print "{} does not exist or is bad, using {}".format(filename, definitelyexists.CJLSTfile())
@@ -475,6 +481,17 @@ class TreeWrapper(TreeWrapperBase):
             self.xsec = tree.xsec * 1000 #pb to fb
 
         self.preliminaryloop()
+
+    @property
+    @cache_instancemethod
+    def isdummy(self):
+        if not xrd.exists(filename):
+            return True
+        else:
+            self.f = ROOT.TFile.Open(filename)
+            if not self.f.Get("{}/candTree".format(sample.TDirectoryname())):
+                return True
+        return super(TreeWrapper, self).isdummy
 
     def __iter__(self):
         self.__i = 0                               #at the beginning of next self.__i and self.__treeentry are

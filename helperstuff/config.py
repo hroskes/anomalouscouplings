@@ -33,10 +33,11 @@ try:
 except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
-usedata = True
-showblinddistributions = True
-unblinddistributions = True
-unblindscans = True
+LHE = True
+usedata = False
+showblinddistributions = False
+unblinddistributions = False
+unblindscans = False
 useQGTagging = False
 useVHMETTagged = True
 
@@ -57,7 +58,7 @@ mergeZXVBFVHsystematics = True
 applyJECshapesystematics = False
 applyMINLOsystematics = True
 
-assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
+assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata <= (not LHE)
 
 lumi2015 = 2.7
 
@@ -71,8 +72,6 @@ defaultnbins = 40
 
 arrowsatminima = False
 minimainlegend = True
-
-LHE = True
 
 if LHE:
     productionsforcombine = ["LHE_170509"]

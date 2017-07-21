@@ -227,7 +227,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_decay")
             if self.analysis == "fL1fL1Zg":
-                return discriminant("D_L1L1Zg_decay")
+                return discriminant("D_L1L1Zgint_decay")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -893,19 +893,19 @@ class IntTemplate(TemplateBase, MultiEnum):
     def templatename(self, final=True):
         if self.productionmode in ("ggH", "ttH"):
             if self.interferencetype == "g11gi1":
-                if analysis == "fa3":
+                if self.analysis == "fa3":
                     result = "templatea1a3IntAdapSmooth"
-                elif analysis == "fa2":
+                elif self.analysis == "fa2":
                     result = "templatea1a2IntAdapSmooth"
-                elif analysis in ("fL1", "fL1fL1Zg"):
+                elif self.analysis in ("fL1", "fL1fL1Zg"):
                     result = "templatea1L1IntAdapSmooth"
-                elif analysis == "fL1Zg":
+                elif self.analysis == "fL1Zg":
                     result = "templatea1L1ZgIntAdapSmooth"
             elif self.interferencetype == "g11gj1":
-                if analysis == "fL1fL1Zg":
+                if self.analysis == "fL1fL1Zg":
                     result = "templatea1L1ZgIntAdapSmooth"
             elif self.interferencetype == "gi1gj1":
-                if analysis == "fL1fL1Zg":
+                if self.analysis == "fL1fL1Zg":
                     result = "templateL1L1ZgIntAdapSmooth"
         if self.productionmode in ("VBF", "ZH", "WH"):
             if self.interferencetype == "g11gi3":
@@ -1041,11 +1041,12 @@ class DataTree(MultiEnum):
 
 @listfromiterator
 def datatrees():
-    if config.LHE: return
     for channel in channels:
+        if channel != "2e2mu" and config.LHE: continue
         for production in productions:
             for category in categories:
                 for analysis in analyses:
+                    if category != "Untagged" and analysis.is2d: continue
                     yield DataTree(channel, production, category, analysis)
 
 

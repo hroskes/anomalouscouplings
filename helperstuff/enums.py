@@ -567,6 +567,7 @@ class Production(MyEnum):
     @property
     def dataluminosity(self):
         if self in ("170203", "170222"): return 35.8671
+        if self == "LHE_170509": return 300
         assert False
     def __int__(self):
         return int(str(self))

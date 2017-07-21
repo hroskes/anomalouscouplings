@@ -11,7 +11,7 @@ import ROOT
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
-from utilities import cache, product, tlvfromptetaphim
+from utilities import cache, mkdtemp, product, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 
@@ -1265,6 +1265,12 @@ class Sample(ReweightingSamplePlus):
                 return os.path.join(folder, filename)
             if self.productionmode == "qqZZ":
                 return "/work-zfs/lhc/ianderso/hep/LHEFiles/qqZZ/MG/8T/ZZJetsTo4L_TuneZ2_8TeV-madgraph-tauola.lhe"
+            if self.productionmode == "data":
+                tmpdir = mkdtemp()
+                filename = os.path.join(tmpdir, "empty.lhe")
+                with open(filename, 'w') as f:
+                    pass
+                return filename
         raise self.ValueError("LHEfile")
 
     def withdiscriminantsfile(self):
@@ -1406,6 +1412,7 @@ if config.LHE:
             for hypothesis in "0+_photoncut", "L1_photoncut", "fL10.5_photoncut", "L1Zg", "fL1Zg0.5", "fL10.5fL1Zg0.5":
                 yield Sample("ggH", hypothesis, production)
             yield Sample("qqZZ", production)
+            yield Sample("data", production)
 
 def xcheck():
     if config.LHE:

@@ -18,7 +18,9 @@ from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits, plottitle
 from helperstuff.submitjob import submitjob
-from helperstuff.utilities import tfiles
+from helperstuff.utilities import requirecmsenv, tfiles
+
+requirecmsenv(os.path.join(config.repositorydir, "CMSSW_7_6_5"))
 
 combinecardstemplate = r"""
 eval $(scram ru -sh) &&
