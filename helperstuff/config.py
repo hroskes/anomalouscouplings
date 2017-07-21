@@ -9,15 +9,17 @@ def getconfiguration(hostname, username):
       host = "lxplus",
       repositorydir = "/afs/cern.ch/work/h/hroskes/LHEanomalouscouplings/",
       plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/LHEanomalouscouplings/",
-      svndir = "/afs/cern.ch/work/h/hroskes/AN/notes",
+      svndir = "/afs/cern.ch/work/h/hroskes/AN/",
     )
 
   elif ("login-node" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
     return dict(
       host = "MARCC",
       repositorydir = "/work-zfs/lhc/heshy/LHEanomalouscouplings/fL1fL1Zg/",
+      repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/",
       plotsbasedir = "/work-zfs/lhc/heshy/LHEanomalouscouplings/fL1fL1Zg/plots/",
       lxplususername = "hroskes",
+      email = "heshyr@gmail.com",
     )
 
 for key, value in getconfiguration(socket.gethostname(), getpass.getuser()).iteritems():

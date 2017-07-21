@@ -26,3 +26,7 @@
 	path = CMSSW_8_0_20/src/ZZMatrixElement
 	url = git@github.com:hroskes/HiggsAnalysis-ZZMatrixElement
 	branch = master
+[submodule "step10_plottingutilities/NIS_summary"]
+	path = step10_plottingutilities/NIS_summary
+	url = ssh://git@gitlab.cern.ch:7999/hroskes/NIS_summary.git
+	branch = master

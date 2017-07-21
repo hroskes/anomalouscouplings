@@ -12,7 +12,8 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 import config
 
 if config.host == "lxplus":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], waitsuccessids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], waitsuccessids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None, email=True):
+        if not email: raise RuntimeError("Not sure how to turn off email for lxplus")
         if outputfile is not None:
             outputfile = outputfile.format(jobid="%J")
         if errorfile is not None:
@@ -66,7 +67,7 @@ if config.host == "lxplus":
             return jobid
 
 elif config.host == "MARCC":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None, email=False, memory="3000M"):
         if queue is None:
             queue = "shared"
         if outputfile is not None:
@@ -106,12 +107,15 @@ elif config.host == "MARCC":
                    "--nodes": "1",
                    "--ntasks-per-node": "1",
                    "--partition": ".oO[queue]Oo.",
-                   "--mem": "3000",
+                   "--mem": memory,
                    "--output": outputfile,
                    "--error": errorfile,
                   }
         if waitids:
             options["--dependency"] = "afterany:.oO[waitids]Oo."
+        if email:
+            options["--mail-user"] = config.email
+            options["--mail-type"] = "end"
 
         options = {replaceByMap(k, repmap): replaceByMap(v, repmap) for k, v in options.iteritems() if v is not None}
         options = ["{}={}".format(k, quote(v)) for k, v in options.iteritems()]

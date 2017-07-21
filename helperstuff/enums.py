@@ -205,6 +205,13 @@ class ProductionMode(MyEnum):
             return ["{}_{}".format(self, dec) for dec in ("lep", "had")]
         return [str(self)]
     @property
+    def yamlratenames2015(self):
+        if self == "VBF":
+            return ["qqH"]
+        elif self == "ZX":
+            return ["zjets"]
+        return [str(self)]
+    @property
     def yamlsystname(self):
         if self in ("VBF", "VBF bkg"):
             return "qqH"
@@ -355,7 +362,7 @@ class ShapeSystematic(MyEnum):
     def appendname(self):
         if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
         return ""
-    def D_bkg(self, title=False):
+    def D_bkg(self):
         from discriminants import discriminant
         return discriminant("D_bkg"+self.appendname())
     def appliesto(self, templategroup):
@@ -471,6 +478,12 @@ class Analysis(MyEnum):
     def couplingnames(self):
         if self == "fL1fL1Zg": return "g1prime2", "ghzgs1prime2"
         assert False, self
+    @property
+    def couplingtitle(self):
+        if self == "fa3": return "a_{3}"
+        if self == "fa2": return "a_{2}"
+        if self == "fL1": return "#Lambda_{1}"
+        if self == "fL1Zg": return "#Lambda_{1}^{Z#gamma}"
     @property
     def purehypotheses(self):
         if self == "fa3":

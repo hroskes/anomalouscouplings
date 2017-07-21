@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from helperstuff import config
 from helperstuff.enums import Analysis, EnumItem, MyEnum
 import os
@@ -27,25 +27,7 @@ def findwhereyequals(y, p1, p2):
     b =  p1.y - m*p1.x
     return (y-b)/m
 
-def printlimits(analysis, foldername, **kwargs):
-    analysis = Analysis(analysis)
-    foldername = "{}_{}".format(analysis, foldername)
-    plotname = "limit"
-    printformat = PrintFormat("latex")
-    subdirectory = ""
-    for kw, kwarg in kwargs.iteritems():
-        if kw == "plotname":
-            plotname = kwarg
-            for ext in "png eps root pdf".split():
-                plotname = plotname.replace("."+ext, "")
-        elif kw == "printformat":
-            printformat = PrintFormat(kwarg)
-        elif kw == "subdirectory":
-            subdirector = kwarg
-        else:
-            raise TypeError("Unknown kwarg: {}".format(kw))
-    filename = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername, plotname+".root")
-
+def getlimits(filename, domirror=False):
     f = ROOT.TFile(filename)
     c = f.c1
     legend = c.GetListOfPrimitives()[2]
@@ -53,10 +35,18 @@ def printlimits(analysis, foldername, **kwargs):
     thresholds = [1, 3.84]
     NLL = {}
 
+    finalresult = OrderedDict()
+
     for entry in legend.GetListOfPrimitives():
         minimum = Point(float("nan"), float("infinity"))
         g, label = entry.GetObject(), entry.GetLabel()
         points = [Point(x, y) for x, y, n in zip(g.GetX(), g.GetY(), range(g.GetN()))]
+        if domirror and "Expected" in label:
+            def findy(x):
+                y = {yy for xx, yy in points if abs(xx - x) == 0}
+                assert len(y) == 1, (x, y)
+                return y.pop()
+            points = [Point(x, (y+findy(-x))/2 if any(xx==-x for xx, yy in points) else y) for x, y in points]
         isabove = {threshold: points[0].y > threshold for threshold in thresholds}
         results = {threshold: [[-1]] if not isabove[threshold] else [] for threshold in thresholds}
         for point in points:
@@ -78,45 +68,64 @@ def printlimits(analysis, foldername, **kwargs):
             if not isabove[threshold]:
                 results[threshold][-1].append(1)
 
+        finalresult[label] = minimum.x, results[1.0], results[3.84]
+
+    return finalresult
+
+def printlimits(analysis, foldername, **kwargs):
+    analysis = Analysis(analysis)
+    foldername = "{}_{}".format(analysis, foldername)
+    plotname = "limit"
+    printformat = PrintFormat("latex")
+    subdirectory = ""
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "plotname":
+            plotname = kwarg
+            for ext in "png eps root pdf".split():
+                plotname = plotname.replace("."+ext, "")
+        elif kw == "printformat":
+            printformat = PrintFormat(kwarg)
+        elif kw == "subdirectory":
+            subdirector = kwarg
+        else:
+            raise TypeError("Unknown kwarg: {}".format(kw))
+
+    filename = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername, plotname+".root")
+    allresults = getlimits(filename, domirror=(analysis=="fa3"))
+
+    for label, (minimum, c68, c95) in allresults.iteritems():
         repmap = {}
 
         print label
         print
 
-        repmap["min"] = minimum.x
-        if len(results[1.0]) == 1:
-            repmap["pluscl"] = results[1.0][0][1] - minimum.x
-            repmap["minuscl"] = results[1.0][0][0] - minimum.x
+        repmap["min"] = minimum
+        if len(c68) == 1:
+            repmap["pluscl"] = c68[0][1] - minimum
+            repmap["minuscl"] = c68[0][0] - minimum
         else:
-            if len(results[1.0]) == 2 and -results[1.0][0][0] == results[1.0][1][1] == 1:
-                if minimum.x < results[1.0][0][1]:
-                    repmap["pluscl"] = results[1.0][0][1] - minimum.x
-                    repmap["minuscl"] = results[1.0][1][0] - minimum.x - 2
-                elif minimum.x > results[1.0][1][0]:
-                    repmap["pluscl"] = results[1.0][0][1] - minimum.x + 2
-                    repmap["minuscl"] = results[1.0][1][0] - minimum.x
+            if len(c68) == 2 and -c68[0][0] == c68[1][1] == 1:
+                if minimum < c68[0][1]:
+                    repmap["pluscl"] = c68[0][1] - minimum
+                    repmap["minuscl"] = c68[1][0] - minimum - 2
+                elif minimum > c68[1][0]:
+                    repmap["pluscl"] = c68[0][1] - minimum + 2
+                    repmap["minuscl"] = c68[1][0] - minimum
                 else:
                     assert False
             else:
                 print "Need something more complicated for 68% CL!"
-                print "ranges: ", " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in results[1])
-                for range_ in results[1.0]:
-                    if range_[0] < minimum.x < range_[1]:
+                print "ranges: ", " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in c68)
+                for range_ in c68:
+                    if range_[0] < minimum < range_[1]:
                         break
-                repmap["pluscl"] = range_[1] - minimum.x
-                repmap["minuscl"] = range_[0] - minimum.x
+                repmap["pluscl"] = range_[1] - minimum
+                repmap["minuscl"] = range_[0] - minimum
 
-        repmap["95%"] = " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in results[3.84])
+        repmap["95%"] = " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in c95)
 
         print printformat.printformat.format(**repmap)
 
-        if 0 in NLL and 1 in NLL:
-            if NLL[1] >= NLL[0]:
-                prob = ROOT.TMath.Prob(NLL[1]-NLL[0], 1)/2
-            else:
-                prob = 1 - ROOT.TMath.Prob(NLL[0]-NLL[1], 1)/2
-
-#            print "Probability for pure BSM vs. pure SM: {:.2g}{}".format(prob*100, "%" if printformat == "ppt" else r"\%")
         print
         print
 

@@ -63,12 +63,10 @@ if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "nice
           filename = filename.replace("enrich", "fullrange")
         shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, c, os.path.basename(filename))))
 
-      """
-      theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "fullrange", str(a), "D_bkg_with2015.pdf"))
-      assert theglob, (a, c)
-      for filename in theglob:
-        shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, c, os.path.basename(filename))))
-      """
+    theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "fullrange", str(a), "D_bkg_with2015.pdf"))
+    assert theglob, a
+    for filename in theglob:
+      shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, "all", os.path.basename(filename.replace("_with2015", "")))))
 
   subprocess.check_call(["tar", "-cvzf", "discriminantdistributions.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))
 
@@ -84,5 +82,15 @@ if glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots
         if "D_bkg" in filename:
           filename = filename.replace("enrich", "fullrange")
         shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, c, os.path.basename(filename))))
+
+    theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "fullrange", str(a), "D_bkg_with2015.gif"))
+    assert theglob, a
+    for filename in theglob:
+      shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, "all", os.path.basename(filename.replace("_with2015", "")))))
+
+    theglob = glob.glob(os.path.join(config.plotsbasedir, "limits", "{}_limit_lumi35.8671.gif".format(a)))
+    assert theglob, a
+    for filename in theglob:
+      shutil.copy(filename, os.path.join(tmpdir, "{}_limit.gif".format(a)))
 
   subprocess.check_call(["tar", "-cvzf", "discriminantdistributions_animations.tar.gz", "-C", tmpdir] + os.listdir(tmpdir))

@@ -37,9 +37,6 @@ else:
 
     print """CMSSW area is set up"""
 
-print
-print "Compiling CMSSW..."
-
 with utilities.cd("CMSSW_7_6_5/src"):
     subprocess.check_call(["scram", "b", "-j", "10"])
 
@@ -62,6 +59,9 @@ else:
         shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_8_0_20/.gitignore")
 
     print """CMSSW area is set up"""
+    print
+
+print """Compiling CMSSW..."""
 
 print
 print "Compiling MELA..."
@@ -69,7 +69,7 @@ print "Compiling MELA..."
 with utilities.cd("CMSSW_8_0_20/src/ZZMatrixElement"):
     subprocess.check_call(["./setup.sh", "-j", "10"])
 
-print "Compiling TemplateBuilder"
+print "Compiling TemplateBuilder..."
 
 subprocess.check_call("cd CMSSW_7_6_5 && eval $(scram ru -sh) && cd ../TemplateBuilder && make", shell=True)
 gitignore = """
@@ -79,3 +79,6 @@ buildTemplate.exe
 """
 with open("TemplateBuilder/.gitignore", "w") as f:
     f.write(gitignore)
+
+print "Compiling NIS_summary..."
+subprocess.check_call("cd CMSSW_7_6_5 && eval $(scram ru -sh) && cd ../step10_plottingutilities/NIS_summary && make", shell=True)
