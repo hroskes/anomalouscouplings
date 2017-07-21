@@ -201,6 +201,7 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
+        if config.LHE: return None
         return " ".join(
                         ["lnN"] +
                         [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, p))
@@ -249,9 +250,13 @@ class _Datacard(MultiEnum):
                 return "param 0 1 [-3,3]"
 
     @property
-    def muV_scaled(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
+    def muV_scaled(self):
+        if config.LHE: return None
+        return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
     @property
-    def muf_scaled(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
+    def muf_scaled(self):
+        if config.LHE: return None
+        return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
 
     section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, "muV_scaled", "muf_scaled")
 
@@ -561,27 +566,39 @@ class _Pdf(PdfBase):
     @classmethod
     @cache
     def RV(cls):
-        return ROOT.RooRealVar(makename("RV"), "RV", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("RV"), "RV", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def RF(cls):
-        return ROOT.RooRealVar(makename("RF"), "RF", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("RF"), "RF", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def R(cls):
-        return ROOT.RooRealVar(makename("R"), "R", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("R"), "R", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def RV_13TeV(cls):
-        return ROOT.RooRealVar(makename("RV_13TeV"), "RV_13TeV", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("RV_13TeV"), "RV_13TeV", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def RF_13TeV(cls):
-        return ROOT.RooRealVar(makename("RF_13TeV"), "RF_13TeV", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("RF_13TeV"), "RF_13TeV", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def R_13TeV(cls):
-        return ROOT.RooRealVar(makename("R_13TeV"), "R_13TeV", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("R_13TeV"), "R_13TeV", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def muV(cls):
@@ -838,6 +855,8 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
         if all(os.path.exists(thing) for dc in dcs for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)):
             return
         for dc in dcs:
+            if config.LHE and dc.channel != "2e2mu": continue
+            if dc.analysis.is2d and dc.category != "Untagged": continue
             dc.makeCardsWorkspaces(**kwargs)
             for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
                 if not os.path.exists(thing):

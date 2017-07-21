@@ -14,6 +14,7 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 
 from helperstuff import config, utilities
 from helperstuff.combinehelpers import Luminosity
+from helperstuff.copyplots import copyplots
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits, plottitle
@@ -29,8 +30,8 @@ combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
 
 createworkspacetemplate = r"""
 eval $(scram ru -sh) &&
-unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs \
-                           --PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
+unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P .oO[physicsmodel]Oo. \
+                           .oO[physicsoptions]Oo. -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
                            |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
 exit ${PIPESTATUS[0]}
 """
@@ -359,7 +360,6 @@ def runcombine(analysis, foldername, **kwargs):
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
-              "savemu": "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI),
               "algo": algo,
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
@@ -367,7 +367,18 @@ def runcombine(analysis, foldername, **kwargs):
               "floatotherpois": str(int(not fixfai)),
               "pointindex": "",
               "sqrts": ",".join("{:d}".format(_) for _ in sqrts),
+              "physicsmodel": None,
+              "physicsoptions": None,
              }
+    if analysis.is2d:
+        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
+        repmap["physicsoptions"] = "--PO allowPMF"
+        repmap["savemu"] = ""
+    else:
+        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs"
+        repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF"
+        repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI and not analysis.is2d)
+
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
     with utilities.cd(folder):
@@ -492,6 +503,8 @@ def runcombine(analysis, foldername, **kwargs):
         f.write(subprocess.check_output(["git", "status"]))
         f.write("\n")
         f.write(subprocess.check_output(["git", "diff"]))
+
+    copyplots(os.path.join("limits", subdirectory, foldername))
 
 ntry = 0
 maxntries = 3

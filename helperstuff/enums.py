@@ -436,6 +436,8 @@ class Analysis(MyEnum):
             result = "f_{{{Lambda}1}}"
         elif self == "fL1Zg":
             result = "f_{{{Lambda}1}}^{{{Z}{gamma}}}"
+        if self == "fL1fL1Zg":
+            result = "f_{{{Lambda}1}}"
         else:
             assert False
 
@@ -463,6 +465,8 @@ class Analysis(MyEnum):
             return "#phi_{#Lambda1}"
         if self == "fL1Zg":
             return "#phi_{#Lambda1}^{Z#gamma}"
+        if self == "fL1fL1Zg":
+            return "#phi_{#Lambda1}"
         assert False
     @property
     def phi_lower(self):
