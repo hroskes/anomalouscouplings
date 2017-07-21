@@ -36,6 +36,9 @@ class TemplatesFile(MultiEnum):
                 raise ValueError("2D analysis is only done for untagged!\n{}".format(args))
             if self.templategroup in ("vbf", "zh", "wh", "tth"):
                 raise ValueError("2D analysis is only done with decay information!\n{}".format(args))
+        if config.LHE:
+            if self.channel != "2e2mu":
+                raise ValueError("2D analysis is only done for 2e2mu for now!\n{}".format(args))
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
@@ -1030,6 +1033,15 @@ class IntTemplate(TemplateBase, MultiEnum):
 class DataTree(MultiEnum):
     enums = [Channel, Production, Category, Analysis]
     enumname = "datatree"
+    def check(self, *args):
+        super(DataTree, self).check(*args)
+        if self.analysis.is2d:
+            if self.category != "Untagged":
+                raise ValueError("2D analysis is only done for untagged!\n{}".format(args))
+        if config.LHE:
+            if self.channel != "2e2mu":
+                raise ValueError("2D analysis is only done for 2e2mu for now!\n{}".format(args))
+
     @property
     def originaltreefile(self):
         return Sample("data", self.production).withdiscriminantsfile()

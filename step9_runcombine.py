@@ -327,6 +327,11 @@ def runcombine(analysis, foldername, **kwargs):
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
 
+    if set(usecategories) != {Category("Untagged")} and analysis.is2d:
+        raise ValueError("For 2D analysis have to specify categories=Untagged")
+    if set(usechannels) != {Channel("2e2mu")} and config.LHE:
+        raise ValueError("For LHE analysis have to specify channels=2e2mu")
+
     if sqrts is None:
         sqrts = [13]
 

@@ -46,19 +46,19 @@ useVHMETTagged = True
 usefastpdf = True
 usefastpdfdouble = False
 
-applym4lshapesystematicsUntagged = True
-applym4lshapesystematicsVBFVHtagged = True
-applym4lshapesystematicsggH = True
-applym4lshapesystematicsggHUntagged = True
-applym4lshapesystematicsdiagonal = True #VBF in VBFtagged, VH in VHHadrtagged
-combinem4lshapesystematics = True
+applym4lshapesystematicsUntagged = False
+applym4lshapesystematicsVBFVHtagged = False
+applym4lshapesystematicsggH = False
+applym4lshapesystematicsggHUntagged = False
+applym4lshapesystematicsdiagonal = False #VBF in VBFtagged, VH in VHHadrtagged
+combinem4lshapesystematics = False
 
-applyZXshapesystematicsVBFVHtagged = True
-applyZXshapesystematicsUntagged = True
-mergeZXVBFVHsystematics = True
+applyZXshapesystematicsVBFVHtagged = False
+applyZXshapesystematicsUntagged = False
+mergeZXVBFVHsystematics = False
 
 applyJECshapesystematics = False
-applyMINLOsystematics = True
+applyMINLOsystematics = False
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata <= (not LHE)
 

@@ -1,13 +1,14 @@
 from collections import Counter
 import inspect
 import itertools
+from math import pi
 import os
 import time
 
 import ROOT
 
 import combineinclude
-from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1
+from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1, zerotemplate
 import config
 from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
 import utilities
@@ -127,7 +128,17 @@ class _Datacard(MultiEnum):
 
     @property
     def productionmodes(self):
-        return [ProductionMode(p) for p in ("ggH", "qqH", "WH", "ZH", "ttH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets")]
+        result = [ProductionMode(p) for p in ("ggH", "qqH", "WH", "ZH", "ttH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets")]
+        if self.analysis.is2d:
+            result.remove("VBF")
+            result.remove("WH")
+            result.remove("ZH")
+            result.remove("ttH")
+        if config.LHE:
+            result.remove("ggZZ")
+            result.remove("VBFbkg")
+            result.remove("ZX")
+        return result
 
     @property
     def imax(self):
@@ -315,11 +326,15 @@ class _Datacard(MultiEnum):
         fai = self.fai()
         if self.analysis.is2d:
             a1 = ai = None
+            faj = self.faj()
+            phiai = self.phiai()
+            phiaj = self.phiaj()
         else:
             mixturesign_constvar = self.mixturesign_constvar(self.analysis)
             sigmaioversigma1_constvar = self.sigmaioversigma1_constvar(self.analysis)
             a1 = self.a1()
             ai = self.ai(self.analysis)
+            faj = phiai = phiaj = None
 
         discs = discriminants(self.analysis, self.category)
         D1Name, D2Name, D3Name = (d.name for d in discs)
@@ -337,7 +352,7 @@ class _Datacard(MultiEnum):
         self.pdfs = []
 
         for p in self.productionmodes:
-            pdfkwargs = {"fai": fai, "a1": a1, "ai": ai, "D1": D1, "D2": D2, "D3": D3}
+            pdfkwargs = {"fai": fai, "a1": a1, "ai": ai, "D1": D1, "D2": D2, "D3": D3, "faj": faj, "phiai": phiai, "phiaj": phiaj}
             self.pdfs.append(Pdf(self, p, **pdfkwargs))
             for systematic in p.workspaceshapesystematics(self.category):
                 self.pdfs.append(Pdf(self, p, systematic, "Up", **pdfkwargs))
@@ -373,7 +388,8 @@ class _Datacard(MultiEnum):
             getattr(w, 'import')(pdf.pdf, ROOT.RooFit.RecycleConflictNodes())
             if pdf.productionmode.issignal and pdf.shapesystematic == "":
                 getattr(w, 'import')(pdf.norm, ROOT.RooFit.RecycleConflictNodes())
-                getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
+                if not self.analysis.is2d:
+                    getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
 
         w.writeToFile(self.rootfile_base)
 
@@ -385,6 +401,8 @@ class _Datacard(MultiEnum):
         mkdir_p(outdir)
         with cd(outdir), Tee(self.logfile, 'w'):
             for channel, category in itertools.product(channels, categories):
+                if config.LHE and channel != "2e2mu": continue
+                if self.analysis.is2d and category != "Untagged": continue
                 Datacard(channel, category, self.analysis, self.luminosity).makepdfs()
             self.writeworkspace()
             self.linkworkspace()
@@ -409,7 +427,8 @@ class PdfBase(MultiEnum):
 
 class _Pdf(PdfBase):
     def __init__(self, *args, **kwargs):
-        for thing in "fai", "a1", "ai", "D1", "D2", "D3":
+        for thing in "fai", "a1", "ai", "D1", "D2", "D3", "faj", "phiai", "phiaj":
+            assert not hasattr(self, thing)
             setattr(self, thing, kwargs[thing])
             del kwargs[thing]
         super(_Pdf, self).__init__(*args, **kwargs)
@@ -746,7 +765,10 @@ class _Pdf(PdfBase):
 
     def makepdf(self):
         if self.productionmode in ("ggH", "ttH"):
-            self.makepdf_decayonly()
+            if self.analysis.is2d:
+                self.makepdf_decayonly_2D()
+            else:
+                self.makepdf_decayonly()
         elif self.productionmode in ("VBF", "ZH", "WH"):
             self.makepdf_proddec()
         elif self.productionmode == "ZX":
@@ -787,7 +809,10 @@ class _Pdf(PdfBase):
     def getpdf(self):
         self.makepdf()
         if self.productionmode in ("ggH", "ttH"):
-            return self.getpdf_decayonly()
+            if self.analysis.is2d:
+                return self.getpdf_decayonly_2D()
+            else:
+                return self.getpdf_decayonly()
         elif self.productionmode in ("VBF", "ZH", "WH"):
             return self.getpdf_proddec()
         elif self.productionmode == "ZX":
