@@ -413,7 +413,7 @@ class SampleBase(object):
                             if id1 == -id2 and (p1+p2).M() < 4: return 0
                     result = self_tree.event.weight
                     if not reweightingonly and result != 0:
-                        result *= self_sample.xsec / self_tree.sumofweights
+                        result *= self_sample.SMxsec / self_tree.sumofweights
                     return result
             elif self_sample.productionmode == "qqZZ":
                 xsec = 1.256 * 1000

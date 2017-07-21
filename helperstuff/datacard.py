@@ -673,9 +673,15 @@ class _Pdf(PdfBase):
             for i, integral in enumerate(self.T_integral, start=1):
                 print "{} T{}".format(self.productionmode, i), integral.getVal()
 
-            self.r_fai_pures_norm = ROOT.RooFormulaVar(self.puresnormname, "", "( (1-abs(@0))*@1+abs(@0)*@2 )",ROOT.RooArgList(self.fai, self.T_integral[0], self.T_integral[1]))
-            self.r_fai_realints_norm = ROOT.RooFormulaVar(self.realintsnormname, "", "(sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1)",ROOT.RooArgList(self.fai, self.T_integral[2]))
-            self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)", ROOT.RooArgList(self.r_fai_pures_norm, self.r_fai_realints_norm, self.fai))
+            self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@0)+abs(@1))>1 ? 0. : TMath::Max(0, "
+                                                                                    "(1-abs(@0)-abs(@1)) * @2 + "
+                                                                                    "abs(@0) * @3 + "
+                                                                                    "abs(@1) * @4 + "
+                                                                                    "(@0>0?1:-1)   * sqrt((1-abs(@0)-abs(@1))*abs(@0)) * @5 + "
+                                                                                    "(@1>0?1:-1)   * sqrt((1-abs(@0)-abs(@1))*abs(@1)) * @6 + "
+                                                                                    "(@0*@1>0?1:-1)* sqrt(abs(@0*@1)) * @7"
+                                                                                  ")",
+                                                     utilities.RooArgList(self.fai, self.faj, *self.T_integral))
             self.norm_SM = self.T_integral[0]
             self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1 * @2", ROOT.RooArgList(self.individualnorm, self.norm_SM, self.muf()))
 
