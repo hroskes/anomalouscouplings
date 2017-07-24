@@ -6,6 +6,7 @@ import sys
 import ROOT
 
 from helperstuff import config, style  #style needed to remove the statbox and title and adjust the axis label size
+from helperstuff.copyplots import copyplots
 from helperstuff.templates import TemplatesFile, templatesfiles
 
 def makecontrolplots(*args, **kwargs):
@@ -54,8 +55,7 @@ def makecontrolplots(*args, **kwargs):
 if __name__ == "__main__":
     def thetemplatesfiles():
         for templatesfile in templatesfiles:
-           if templatesfile.channel == "2e2mu" and templatesfile.analysis == "fa2" and templatesfile.shapesystematic != "":
-             yield templatesfile
+            yield templatesfile
     length = len(list(thetemplatesfiles()))
 
     if len(sys.argv) == 1:
@@ -68,3 +68,5 @@ if __name__ == "__main__":
     for i, templatesfile in enumerate(thetemplatesfiles(), start=1):
         makecontrolplots(templatesfile, iteration=iteration)
         print i, "/", length
+
+    copyplots(os.path.join("templateprojections", "controlplots"))
