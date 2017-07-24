@@ -300,8 +300,9 @@ del values, errors
 JHUXSggH2L2la1a2,   JHUXSggH2L2la1a2err   = JHUXSggH2L2la1a2   - 2*JHUXSggH2L2la1, sqrt(JHUXSggH2L2la1a2err  **2 + 4*JHUXSggH2L2la1err**2)
 JHUXSggH2L2la1a3,   JHUXSggH2L2la1a3err   = JHUXSggH2L2la1a3   - 2*JHUXSggH2L2la1, 0
 JHUXSggH2L2la1L1,   JHUXSggH2L2la1L1err   = JHUXSggH2L2la1L1   - 2*JHUXSggH2L2la1, sqrt(JHUXSggH2L2la1L1err  **2 + 4*JHUXSggH2L2la1err**2)
+JHUXSggH2L2la1L1_photoncut, JHUXSggH2L2la1L1err_photoncut = JHUXSggH2L2la1L1_photoncut - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la1L1err_photoncut **2 + 4*JHUXSggH2L2la1err**2)
 JHUXSggH2L2la1L1Zg, JHUXSggH2L2la1L1Zgerr = JHUXSggH2L2la1L1Zg - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la1L1Zgerr**2 + 4*JHUXSggH2L2la1err_photoncut**2)
-JHUXSggH2L2lL1L1Zg, JHUXSggH2L2lL1L1Zgerr = JHUXSggH2L2lL1L1Zg - 2*JHUXSggH2L2la1, sqrt(JHUXSggH2L2lL1L1Zgerr**2 + 4*JHUXSggH2L2la1err**2)
+JHUXSggH2L2lL1L1Zg, JHUXSggH2L2lL1L1Zgerr = JHUXSggH2L2lL1L1Zg - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2lL1L1Zgerr**2 + 4*JHUXSggH2L2la1err_photoncut**2)
 
 JHUXSVBFa1a2,   JHUXSVBFa1a2err   = JHUXSVBFa1a2   - 2*JHUXSVBFa1, sqrt(JHUXSVBFa1a2err  **2 + 4*JHUXSVBFa1err**2)
 JHUXSVBFa1a3,   JHUXSVBFa1a3err   = JHUXSVBFa1a3   - 2*JHUXSVBFa1, 0
