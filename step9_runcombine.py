@@ -165,6 +165,7 @@ def runcombine(analysis, foldername, **kwargs):
     lumitype = "fordata"
     CMStext = "Preliminary"
     drawCMS = True
+    scanfai = analysis
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -271,6 +272,10 @@ def runcombine(analysis, foldername, **kwargs):
             CMStext = kwarg
         elif kw == "drawCMS":
             drawCMS = bool(int(kwarg))
+        elif kw == "scanfai":
+            if not analysis.is2d:
+                raise ValueError("scanfai is only for 2D analyses")
+            scanfai = Analysis(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -278,6 +283,8 @@ def runcombine(analysis, foldername, **kwargs):
         raise TypeError("Can't unblind scans!")
     if runobs and lumitype != "fordata":
         raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
+    if scanfai not in analysis.fais:
+        raise ValueError("scanfai for {} has to be ".format(analysis) + " or ".join(str(_) for _ in analysis.fais))
 
     if submitjobs:
         if not utilities.inscreen():
@@ -320,6 +327,7 @@ def runcombine(analysis, foldername, **kwargs):
     if robustfit:
         moreappend += "_robustfit"
     if POI != defaultPOI:
+        if analysis.is2d: assert False
         moreappend += "_scan"+plottitle(POI)
     if fixfai:
         moreappend += "_fixfai"
@@ -327,6 +335,8 @@ def runcombine(analysis, foldername, **kwargs):
         combinecardsappend += "_" + alsocombinename
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
+    if analysis.is2d:
+        workspacefileappend += "_scan{}".format(scanfai)
 
     if set(usecategories) != {Category("Untagged")} and analysis.is2d:
         raise ValueError("For 2D analysis have to specify categories=Untagged")
@@ -373,6 +383,8 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.is2d:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
         repmap["physicsoptions"] = "--PO allowPMF"
+        if scanfai == analysis.fais[0]: pass
+        elif scanfai == analysis.fais[1]: repmap["physicsoptions"] += " --PO fai2asPOI --PO fai1fixed"
         repmap["savemu"] = ""
     else:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs"
@@ -482,7 +494,7 @@ def runcombine(analysis, foldername, **kwargs):
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
         if scanranges != [defaultscanrange]:
             plotname += "".join("_{},{},{}".format(*scanrange) for scanrange in sorted(scanranges))
-        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext)
+        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai)
         for nuisance in plotnuisances:
             if plottitle(nuisance) == plottitle(POI): continue
             if nuisance == "CMS_zz4l_fai1" and fixfai: continue

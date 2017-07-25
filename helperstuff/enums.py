@@ -428,6 +428,8 @@ class Analysis(MyEnum):
                  EnumItem("fL1fL1Zg"),
                 )
     def title(self, latex=False, superscript=None):
+        if self.is2d: return self.fais[0].title(latex=latex, superscript=superscript)
+
         if self == "fa3":
             result = "f_{{a3}}"
         elif self == "fa2":
@@ -436,8 +438,6 @@ class Analysis(MyEnum):
             result = "f_{{{Lambda}1}}"
         elif self == "fL1Zg":
             result = "f_{{{Lambda}1}}^{{{Z}{gamma}}}"
-        if self == "fL1fL1Zg":
-            result = "f_{{{Lambda}1}}"
         else:
             assert False
 
@@ -457,6 +457,7 @@ class Analysis(MyEnum):
 
     @property
     def phi(self):
+        if self.is2d: return self.fais[0].phi
         if self == "fa3":
             return "#phi_{a3}"
         if self == "fa2":
@@ -465,8 +466,6 @@ class Analysis(MyEnum):
             return "#phi_{#Lambda1}"
         if self == "fL1Zg":
             return "#phi_{#Lambda1}^{Z#gamma}"
-        if self == "fL1fL1Zg":
-            return "#phi_{#Lambda1}"
         assert False
     @property
     def phi_lower(self):
@@ -549,6 +548,10 @@ class Analysis(MyEnum):
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
         if self == "fL1fL1Zg": return False
         assert False, self
+    @property
+    def fais(self):
+        if not self.is2d: return self,
+        if self == "fL1fL1Zg": return Analysis("fL1"), Analysis("fL1Zg")
 
 class Production(MyEnum):
     enumname = "production"

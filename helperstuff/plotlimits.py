@@ -25,6 +25,7 @@ Scan = namedtuple("Scan", "name title color style")
 def plottitle(nuisance):
     nuisance = actualvariable(nuisance)
     if nuisance == "CMS_zz4l_fai1": return "fai"
+    if nuisance == "CMS_zz4l_fai2": return "faj"
     if nuisance == "muV_scaled": return "muV"
     if nuisance == "muf_scaled": return "muf"
     if nuisance == "JES": return nuisance
@@ -32,6 +33,7 @@ def plottitle(nuisance):
 def xaxistitle(POI, analysis):
     POI = actualvariable(POI)
     if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(), analysis.phi_lower)
+    if POI == "CMS_zz4l_fai2": return "{} cos({})".format(analysis.fais[1].title(), analysis.fais[1].phi_lower)
     if POI == "muV_scaled": return "#mu_{V}"
     if POI == "muf_scaled": return "#mu_{f}"
     if nuisance == "JES": return nuisance
@@ -39,6 +41,7 @@ def xaxistitle(POI, analysis):
 def xaxisrange(POI):
     POI = actualvariable(POI)
     if POI == "CMS_zz4l_fai1": return -1.0, 1.0
+    if POI == "CMS_zz4l_fai2": return -1.0, 1.0
 def yaxistitle(nuisance, analysis):
     nuisance = actualvariable(nuisance)
     if nuisance is None: return "#minus2 #Deltaln L"
@@ -84,8 +87,14 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             CMStext = kwarg
         elif kw == "drawCMS":
             drawCMS = kwarg
+        elif kw == "scanfai":
+            scanfai = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    if scanfai == analysis.fais[0]: pass
+    if scanfai == analysis.fais[1]: POI = "CMS_zz4l_fai2"
+    else: assert False
 
     xmin = min(scanrange[1] for scanrange in scanranges)
     xmax = max(scanrange[2] for scanrange in scanranges)
@@ -134,7 +143,11 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             assert t
 
 
-            for entry in islice(t, 1, None):
+            t.GetEntry(0)
+            if getattr(t, POI) == -1: startfrom = 0
+            else: startfrom = 1
+
+            for entry in islice(t, startfrom, None):
                 fa3 = getattr(t, POI)
                 if nuisance is None:
                     deltaNLL = t.deltaNLL+t.nll+t.nll0
