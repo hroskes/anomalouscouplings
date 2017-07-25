@@ -93,14 +93,12 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     scans = []
     uptocolor = 1
     for arg in args:
-        print fixfai
         if fixfai:
             phipart = "{} = 0".format(analysis.title())
         else:
             phipart = "{} = 0 or #pi".format(analysis.phi)
         if arg == "obs":
             scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1))
-            print "Observed, {}".format(phipart)
             if productions is None:
                 raise ValueError("No productions provided!")
         else:

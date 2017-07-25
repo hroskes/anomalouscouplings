@@ -201,7 +201,9 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
-        if config.LHE: return None
+        if config.LHE:
+            if yieldsystematic == "QCDscale_VV": return " ".join(["lnN"] + ["1.1" if p=="qqZZ" else "-" for p in self.productionmodes])
+            else: return None
         return " ".join(
                         ["lnN"] +
                         [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, p))
