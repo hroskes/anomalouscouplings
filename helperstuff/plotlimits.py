@@ -93,7 +93,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
     if scanfai == analysis.fais[0]: pass
-    if scanfai == analysis.fais[1]: POI = "CMS_zz4l_fai2"
+    elif scanfai == analysis.fais[1]: POI = "CMS_zz4l_fai2"
     else: assert False
 
     xmin = min(scanrange[1] for scanrange in scanranges)
