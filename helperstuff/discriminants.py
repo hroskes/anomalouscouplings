@@ -1,4 +1,5 @@
 from collections import namedtuple
+from math import pi
 
 from config import defaultnbins
 from utilities import rreplace
@@ -21,6 +22,17 @@ decaydiscriminants = [
     Discriminant("D_L1Zgint_decay", "D_{#Lambda1Z#gammaint}^{dec}", defaultnbins, -.25, .25),
     Discriminant("D_L1L1Zg_decay", "D_{#Lambda1}^{ZZ/Z#gamma,dec}", defaultnbins, 0, 1),
     Discriminant("D_L1L1Zgint_decay", "D_{#Lambda1int}^{ZZ/Z#gamma,dec}", defaultnbins, -.3, .25),
+
+    Discriminant("D_eL_decay", "D_{#epsilonL}^{dec}", defaultnbins, .12, .5),
+    Discriminant("D_eR_decay", "D_{#epsilonL}^{dec}", defaultnbins, .12, .5),
+    Discriminant("D_eLeR_decay", "D_{#epsilonL/#epsilonR}^{dec}", defaultnbins, .42, .59),
+    Discriminant("D_eLint_decay", "D_{#epsilonLint}^{dec}", defaultnbins, .55, 1),
+    Discriminant("D_eRint_decay", "D_{#epsilonLint}^{dec}", defaultnbins, -1, -.5),
+    Discriminant("D_eLeRint_decay", "D_{#epsilonL/#epsilonRint}^{dec}", defaultnbins, -.8, .2),
+
+    Discriminant("Z1Mass", "m_{1}", defaultnbins, 20, 100),
+    Discriminant("Z2Mass", "m_{2}", defaultnbins, 0, 62),
+    Discriminant("Phi", "#Phi", defaultnbins, -pi, pi),
 ]
 VBFdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),

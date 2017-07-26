@@ -89,7 +89,11 @@ def submitjobs():
         if not os.path.exists(sample.withdiscriminantsfile()) and not os.path.exists(sample.withdiscriminantsfile()+".tmp"):
             njobs += 1
     for i in range(njobs):
-        submitjob(os.path.join(config.repositorydir, "step2_adddiscriminants.py"), jobname=str(i), jobtime="1-0:0:0")
+        submitjobkwargs = {"jobname": str(i), "jobtime": "1-0:0:0"}
+        if config.host == "MARCC":
+            submitjobkwargs["queue"] = "lrgmem"
+            submitjobkwargs["memory"] = "120G"
+        submitjob("unbuffer "+os.path.join(config.repositorydir, "step2_adddiscriminants.py"), **submitjobkwargs)
 
 if __name__ == '__main__':
     if sys.argv[1:]:

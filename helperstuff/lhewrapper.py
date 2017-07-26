@@ -17,7 +17,7 @@ from utilities import cache, cache_instancemethod, callclassinitfunctions, produ
 
 requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_0_20"))
 
-from ZZMatrixElement.PythonWrapper.mela import Mela, SimpleParticle_t, SimpleParticleCollection_t, TVar
+from ZZMatrixElement.MELA.mela import Mela, SimpleParticle_t, SimpleParticleCollection_t, TVar
 
 class LHEEvent(object):
   def __init__(self, event, bkg4l=False):
@@ -73,6 +73,9 @@ class LHEEvent(object):
     elif 1 <= abs(id) <= 5 or abs(id) == 21:
       newid = 0
       smearpt = config.smearptjet
+    elif abs(id) == 15:
+      newid = id
+      smearpt = 0  #taus are dropped anyway in passparticlecuts
     else:
       raise ValueError("Don't know how to smear {}".format(id))
 
@@ -88,7 +91,7 @@ class LHEEvent(object):
       if p.Pt() < 5 or abs(p.Eta()) > 2.4: return False
     elif abs(id) == 15:
       return False
-    elif 1 <= abs(id) <= 5 or id == 21:
+    elif id == 0 or 1 <= abs(id) <= 5 or id == 21:
       if p.Pt() < 30 or abs(p.Eta()) > 4.7: return False
     else:
       raise ValueError("Don't know how to cut {}".format(id))
@@ -97,12 +100,16 @@ class LHEEvent(object):
   @property
   @cache_instancemethod
   def recodaughters(self):
-    return [self.smear(_) for _ in self.gendaughters if self.passparticlecuts(_)]
+    result = [self.smear(_) for _ in self.gendaughters]
+    result = [_ for _ in result if self.passparticlecuts(_)]
+    return result
 
   @property
   @cache_instancemethod
   def recoassociated(self):
-    return [self.smear(_) for _ in self.genassociated if self.passparticlecuts(_)]
+    result = [self.smear(_) for _ in self.genassociated]
+    result = [_ for _ in result if self.passparticlecuts(_)]
+    return result
 
   @property
   @cache_instancemethod
@@ -176,6 +183,34 @@ class TreeWrapperMELA(TreeWrapperBase):
     m.ghg2 = 1; m.ghz1_prime2 = m.ghzgs1_prime2 = 1e4
     self.M2g1prime2ghzgs1prime2_decay = m.computeP(True) - self.M2g1prime2_decay - self.M2ghzgs1prime2_decay
 
+    ###############
+    #contact terms#
+    ###############
+
+    m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
+    m.ghg2 = m.ghzzp1 = m.ezp_L_E = m.ezp_L_M = m.ezp_L_T = 1
+    self.M2eL_decay = m.computeP(True)
+
+    m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
+    m.ghg2 = m.ghzzp1 = m.ezp_R_E = m.ezp_R_M = m.ezp_R_T = 1
+    self.M2eR_decay = m.computeP(True)
+
+    m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
+    m.ghg2 = m.ghz1 = m.ghzzp1 = m.ezp_L_E = m.ezp_L_M = m.ezp_L_T = 1
+    self.M2g1eL_decay = m.computeP(True) - self.M2eL_decay - self.M2g1_decay
+
+    m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
+    m.ghg2 = m.ghz1 = m.ghzzp1 = m.ezp_R_E = m.ezp_R_M = m.ezp_R_T = 1
+    self.M2g1eR_decay = m.computeP(True) - self.M2eR_decay - self.M2g1_decay
+
+    m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
+    m.ghg2 = m.ghzzp1 = m.ezp_L_E = m.ezp_L_M = m.ezp_L_T = m.ezp_R_E = m.ezp_R_M = m.ezp_R_T = 1
+    self.M2eLeR_decay = m.computeP(True) - self.M2eL_decay - self.M2eR_decay
+
+    ############
+    #Dbkg stuff#
+    ############
+
     m.setProcess(TVar.HSMHiggs, TVar.JHUGen, TVar.ZZGG)
     self.p_m4l_SIG = m.computePM4l(TVar.SMSyst_None)
 
@@ -196,6 +231,8 @@ class TreeWrapperMELA(TreeWrapperBase):
     self.M2g1g1prime2_decay /= 1e4
     self.M2g1ghzgs1prime2_decay /= 1e4
     self.M2g1prime2ghzgs1prime2_decay /= 1e4**2
+
+    self.decayangles = m.computeDecayAngles()
 
     if self.dofa3stuff:
       m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
@@ -260,7 +297,16 @@ class TreeWrapperMELA(TreeWrapperBase):
       setattr(cls, discriminant.name, nominal)
 
   @abstractmethod
-  def ZZMass(self): pass
+  def ZZMass(self): return self.decayangles.qH
+
+  def Z1Mass(self): return min((self.decayangles.m1, self.decayangles.m2), key=lambda x: abs(x-91.1876))
+  def Z2Mass(self): return max((self.decayangles.m1, self.decayangles.m2), key=lambda x: abs(x-91.1876))
+  def costhetastar(self): return self.decayangles.costhetastar
+  def costheta1(self): return self.decayangles.costheta1
+  def costheta2(self): return self.decayangles.costheta2
+  def Phi1(self): return self.decayangles.Phi1
+  def Phi(self): return self.decayangles.Phi
+
   @abstractmethod
   def ZZFlav(self): pass
 
@@ -373,8 +419,7 @@ class LHEWrapper(TreeWrapperMELA):
     raise StopIteration
 
   def ZZMass(self):
-    return self.event.ZZMass
-
+    return self.event.ZZMass #has to happen before doing all the MELA stuff, so can't use computeDecayAngles
   def ZZFlav(self):
     return self.event.ZZFlav
 
@@ -389,6 +434,13 @@ class LHEWrapper(TreeWrapperMELA):
   def initlists(self):
     self.toaddtotree = [
       "ZZMass",
+      "Z1Mass",
+      "Z2Mass",
+      "costhetastar",
+      "costheta1",
+      "costheta2",
+      "Phi1",
+      "Phi",
       "D_bkg",
       "D_L1_decay",
       "D_L1int_decay",
@@ -396,6 +448,12 @@ class LHEWrapper(TreeWrapperMELA):
       "D_L1Zgint_decay",
       "D_L1L1Zg_decay",
       "D_L1L1Zgint_decay",
+      "D_eL_decay",
+      "D_eR_decay",
+      "D_eLint_decay",
+      "D_eRint_decay",
+      "D_eLeR_decay",
+      "D_eLeRint_decay",
     ]
     self.exceptions = [
       "D_bkg_ResUp",

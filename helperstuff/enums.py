@@ -425,7 +425,10 @@ class Analysis(MyEnum):
                  EnumItem("fa2"),
                  EnumItem("fL1"),
                  EnumItem("fL1Zg"),
-                 EnumItem("fL1fL1Zg"),
+                 EnumItem("fL1fL1Zg_DL1_DL1L1Zgint"),
+                 EnumItem("fL1fL1Zg_DeL_DeLeR"),
+                 EnumItem("fL1fL1Zg_m1_m2"),
+                 EnumItem("fL1fL1Zg_m1_phi"),
                 )
     def title(self, latex=False, superscript=None):
         if self.is2d: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -479,7 +482,7 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def couplingnames(self):
-        if self == "fL1fL1Zg": return "g1prime2", "ghzgs1prime2"
+        if self.isfL1fL1Zg: return "g1prime2", "ghzgs1prime2"
         assert False, self
     @property
     def couplingtitle(self):
@@ -497,7 +500,7 @@ class Analysis(MyEnum):
             return Hypothesis("0+"), Hypothesis("L1")
         if self == "fL1Zg":
             return Hypothesis("0+_photoncut"), Hypothesis("L1Zg")
-        if self == "fL1fL1Zg":
+        if self.isfL1fL1Zg:
             return Hypothesis("0+_photoncut"), Hypothesis("L1_photoncut"), Hypothesis("L1Zg")
         assert False, self
     @property
@@ -537,21 +540,24 @@ class Analysis(MyEnum):
     @property
     def is2d(self):
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
-        if self == "fL1fL1Zg": return True
+        if self.isfL1fL1Zg: return True
         assert False, self
     @property
     def doLHE(self):
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
-        if self == "fL1fL1Zg": return True
+        if self.isfL1fL1Zg: return True
         assert False, self
     def doCMS(self):
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
-        if self == "fL1fL1Zg": return False
+        if self.isfL1fL1Zg: return False
         assert False, self
     @property
     def fais(self):
         if not self.is2d: return self,
-        if self == "fL1fL1Zg": return Analysis("fL1"), Analysis("fL1Zg")
+        if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
+    @property
+    def isfL1fL1Zg(self):
+        return "fL1fL1Zg" in str(self)
 
 class Production(MyEnum):
     enumname = "production"

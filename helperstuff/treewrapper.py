@@ -217,6 +217,23 @@ class TreeWrapperBase(Iterator):
     def D_L1L1Zgint_decay(self):
         return self.M2g1prime2ghzgs1prime2_decay*constants.g1prime2decay_reco*constants.ghzgs1prime2decay_reco / (self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
 
+############################
+#contact term discriminants#
+############################
+
+    def D_eL_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2eL_decay*constants.eLdecay**2)
+    def D_eLint_decay(self):
+        return self.M2g1eL_decay*constants.eLdecay / (self.M2g1_decay + self.M2eL_decay*constants.eLdecay**2)
+    def D_eR_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2eR_decay*constants.eRdecay**2)
+    def D_eRint_decay(self):
+        return self.M2g1eR_decay*constants.eRdecay / (self.M2g1_decay + self.M2eR_decay*constants.eRdecay**2)
+    def D_eLeR_decay(self):
+        return self.M2eL_decay*constants.eLdecay**2 / (self.M2eR_decay*constants.eRdecay**2 + self.M2eL_decay*constants.eLdecay**2)
+    def D_eLeRint_decay(self):
+        return self.M2eLeR_decay*constants.eLdecay*constants.eRdecay / (self.M2eR_decay*constants.eRdecay**2 + self.M2eL_decay*constants.eLdecay**2)
+
 #######################################
 #VBF anomalous couplings discriminants#
 #######################################

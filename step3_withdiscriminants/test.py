@@ -45,7 +45,8 @@ def mutualinformation(h2):
       MI += h2.GetBinContent(x, y) * math.log(h2.GetBinContent(x, y) / (hx.GetBinContent(x) * hy.GetBinContent(y)))
   return MI
 
-discriminants = "D_L1_decay", "D_L1int_decay", "D_L1Zg_decay", "D_L1Zgint_decay", "D_L1L1Zg_decay", "D_L1L1Zgint_decay"
+#discriminants = "D_L1_decay", "D_L1int_decay", "D_L1Zg_decay", "D_L1Zgint_decay", "D_L1L1Zg_decay", "D_L1L1Zgint_decay"
+discriminants = "D_eL_decay", "D_eLint_decay", "D_eR_decay", "D_eRint_decay", "D_eLeR_decay", "D_eLeRint_decay"
 
 hypotheses = ("0+_photoncut", "fL10.5_photoncut", "L1Zg"), ("SM", "fL1=0.5", "L1Zg")
 
@@ -87,11 +88,11 @@ for (i1, disc), (i2, disc2) in itertools.product(enumerate(discriminants), enume
   cache.append(h)
   print "{:20} {:20}      {:6.2f} {:6.2f} {:6.2f}".format(disc, disc2, *(MI[_] for _ in hypotheses[1]))
   try:
-    os.makedirs(os.path.join(config.plotsbasedir, "TEST", "reweighting"))
+    os.makedirs(os.path.join(config.plotsbasedir, "TEST", "contactterms"))
   except OSError:
     pass
   for ext in "png eps root pdf".split():
-    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}{}.{}".format(disc, disc2, ext)))
+    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "contactterms", "{}{}.{}".format(disc, disc2, ext)))
 
 for disc in discriminants:
   hstack = ROOT.THStack("hstack{}".format(disc), "")
@@ -125,10 +126,10 @@ for disc in discriminants:
   hstack.Draw("hist nostack")
   l.Draw()
   try:
-    os.makedirs(os.path.join(config.plotsbasedir, "TEST", "reweighting"))
+    os.makedirs(os.path.join(config.plotsbasedir, "TEST", "contactterms"))
   except OSError:
     pass
   for ext in "png eps root pdf".split():
-    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "{}.{}".format(disc, ext)))
+    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "contactterms", "{}.{}".format(disc, ext)))
 
 copyplots("TEST")
