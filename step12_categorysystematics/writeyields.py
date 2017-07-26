@@ -230,8 +230,10 @@ def writeyields():
 
 def writeyields_LHE():
   if not config.LHE: raise ValueError("For non-LHE you want writeyields()")
-  YieldValue("ggH", "2e2mu", "Untagged", "fL1fL1Zg").value = 1.5258744890164022
-  YieldValue("qqZZ", "2e2mu", "Untagged", "fL1fL1Zg").value = 1.6250924214670268
+  for analysis in analyses:
+    if not analysis.isfL1fL1Zg: continue
+    YieldValue("ggH", "2e2mu", "Untagged", analysis).value = 1.5258744890164022
+    YieldValue("qqZZ", "2e2mu", "Untagged", analysis).value = 1.6250924214670268
   YieldValue.writedict()
 
 if __name__ == "__main__":

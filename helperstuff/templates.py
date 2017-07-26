@@ -92,7 +92,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
             if self.analysis == "fL1Zg":
                 reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL1Zg-0.5")]
-            if self.analysis == "fL1fL1Zg":
+            if self.analysis.isfL1fL1Zg:
                 reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL10.5_photoncut"), ReweightingSample("ggH", "fL1Zg0.5"), ReweightingSample("ggH", "fL10.5fL1Zg0.5")]
 
         elif self.templategroup == "vbf":
@@ -186,8 +186,14 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1_decay")
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_decay")
-            if self.analysis == "fL1fL1Zg":
+            if self.analysis == "fL1fL1Zg_DL1_DL1L1Zgint":
                 return discriminant("D_L1_decay")
+            if self.analysis == "fL1fL1Zg_DeR_DeLeR":
+                return discriminant("D_eR_decay")
+            if self.analysis == "fL1fL1Zg_m1_m2":
+                return discriminant("Z1Mass")
+            if self.analysis == "fL1fL1Zg_m1_phi":
+                return discriminant("Z1Mass")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -229,8 +235,14 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_decay")
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_decay")
-            if self.analysis == "fL1fL1Zg":
+            if self.analysis == "fL1fL1Zg_DL1_DL1L1Zgint":
                 return discriminant("D_L1L1Zgint_decay")
+            if self.analysis == "fL1fL1Zg_DeR_DeLeR":
+                return discriminant("D_eLeR_decay")
+            if self.analysis == "fL1fL1Zg_m1_m2":
+                return discriminant("Z2Mass")
+            if self.analysis == "fL1fL1Zg_m1_phi":
+                return discriminant("Phi")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -900,15 +912,15 @@ class IntTemplate(TemplateBase, MultiEnum):
                     result = "templatea1a3IntAdapSmooth"
                 elif self.analysis == "fa2":
                     result = "templatea1a2IntAdapSmooth"
-                elif self.analysis in ("fL1", "fL1fL1Zg"):
+                elif self.analysis == "fL1" or self.analysis.isfL1fL1Zg:
                     result = "templatea1L1IntAdapSmooth"
                 elif self.analysis == "fL1Zg":
                     result = "templatea1L1ZgIntAdapSmooth"
             elif self.interferencetype == "g11gj1":
-                if self.analysis == "fL1fL1Zg":
+                if self.analysis.isfL1fL1Zg:
                     result = "templatea1L1ZgIntAdapSmooth"
             elif self.interferencetype == "gi1gj1":
-                if self.analysis == "fL1fL1Zg":
+                if self.analysis.isfL1fL1Zg:
                     result = "templateL1L1ZgIntAdapSmooth"
         if self.productionmode in ("VBF", "ZH", "WH"):
             if self.interferencetype == "g11gi3":
