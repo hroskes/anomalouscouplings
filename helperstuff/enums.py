@@ -426,7 +426,7 @@ class Analysis(MyEnum):
                  EnumItem("fL1"),
                  EnumItem("fL1Zg"),
                  EnumItem("fL1fL1Zg_DL1_DL1L1Zgint"),
-                 EnumItem("fL1fL1Zg_DeL_DeLeR"),
+                 EnumItem("fL1fL1Zg_DeR_DeLeR"),
                  EnumItem("fL1fL1Zg_m1_m2"),
                  EnumItem("fL1fL1Zg_m1_phi"),
                 )
