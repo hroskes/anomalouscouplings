@@ -164,6 +164,10 @@ class TreeWrapperMELA(TreeWrapperBase):
     self.M2g1_decay = m.computeP(True)
 
     m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
+    m.ghg2 = m.ghz2 = 1
+    self.M2g2_decay = m.computeP(True)
+
+    m.setProcess(TVar.SelfDefine_spin0, TVar.JHUGen, TVar.ZZGG)
     m.ghg2 = 1; m.ghz1_prime2 = 1e4
     self.M2g1prime2_decay = m.computeP(True)
 
@@ -442,6 +446,7 @@ class LHEWrapper(TreeWrapperMELA):
       "Phi1",
       "Phi",
       "D_bkg",
+      "D_0hplus_decay",
       "D_L1_decay",
       "D_L1int_decay",
       "D_L1Zg_decay",
@@ -477,7 +482,6 @@ class LHEWrapper(TreeWrapperMELA):
       "D_HadZH_L1Zg",
       "D_0minus_decay",
       "D_CP_decay",
-      "D_0hplus_decay",
       "D_int_decay",
 
       "allsamples",
