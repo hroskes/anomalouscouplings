@@ -429,6 +429,7 @@ class Analysis(MyEnum):
                  EnumItem("fL1fL1Zg_DeR_DeLeR"),
                  EnumItem("fL1fL1Zg_m1_m2"),
                  EnumItem("fL1fL1Zg_m1_phi"),
+                 EnumItem("fL1fL1Zg_m2_phi"),
                 )
     def title(self, latex=False, superscript=None):
         if self.is2d: return self.fais[0].title(latex=latex, superscript=superscript)

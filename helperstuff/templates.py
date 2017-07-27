@@ -194,6 +194,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z1Mass")
             if self.analysis == "fL1fL1Zg_m1_phi":
                 return discriminant("Z1Mass")
+            if self.analysis == "fL1fL1Zg_m2_phi":
+                return discriminant("Z2Mass")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -242,6 +244,8 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1fL1Zg_m1_m2":
                 return discriminant("Z2Mass")
             if self.analysis == "fL1fL1Zg_m1_phi":
+                return discriminant("Phi")
+            if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Phi")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
