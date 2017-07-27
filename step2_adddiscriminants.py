@@ -92,7 +92,7 @@ def submitjobs():
         submitjobkwargs = {"jobname": str(i), "jobtime": "1-0:0:0"}
         if config.host == "MARCC":
             submitjobkwargs["queue"] = "lrgmem"
-            submitjobkwargs["memory"] = "120G"
+            submitjobkwargs["memory"] = "12000M"
         submitjob("unbuffer "+os.path.join(config.repositorydir, "step2_adddiscriminants.py"), **submitjobkwargs)
 
 if __name__ == '__main__':

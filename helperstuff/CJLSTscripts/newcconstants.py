@@ -83,17 +83,17 @@ getDbkgkinConstant = DBkgKin()
 
 def getDbkgConstant(*args, **kwargs): return getDbkgkinConstant(*args, **kwargs)
 
-def getDVBF2jetsConstant(ZZMass): return None
-def getDVBF1jetConstant(ZZMass): return None
-def getDZHhConstant(ZZMass): return None
-def getDWHhConstant(ZZMass): return None
+def getDVBF2jetsConstant(*args, **kwargs): return None
+def getDVBF1jetConstant(*args, **kwargs): return None
+def getDZHhConstant(*args, **kwargs): return None
+def getDWHhConstant(*args, **kwargs): return None
 
-def getDVBF2jetsConstant_shiftWP(ZZMass): return None
-def getDVBF1jetConstant_shiftWP(ZZMass): return None
-def getDZHhConstant_shiftWP(ZZMass): return None
-def getDWHhConstant_shiftWP(ZZMass): return None
+def getDVBF2jetsConstant_shiftWP(*args, **kwargs): return None
+def getDVBF1jetConstant_shiftWP(*args, **kwargs): return None
+def getDZHhConstant_shiftWP(*args, **kwargs): return None
+def getDWHhConstant_shiftWP(*args, **kwargs): return None
 
-def getDVBF2jetsWP(ZZMass): return None
-def getDVBF1jetWP(ZZMass): return None
-def getDZHhWP(ZZMass): return None
-def getDWHhWP(ZZMass): return None
+def getDVBF2jetsWP(*args, **kwargs): return None
+def getDVBF1jetWP(*args, **kwargs): return None
+def getDZHhWP(*args, **kwargs): return None
+def getDWHhWP(*args, **kwargs): return None

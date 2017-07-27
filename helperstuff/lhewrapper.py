@@ -147,7 +147,7 @@ class LHEEvent(object):
 class TreeWrapperMELA(TreeWrapperBase):
   def __init__(self, treesample, minevent=0, maxevent=None):
     self.mela = self.initmela()
-    self.dofa3stuff = (treesample.productionmode == "qqZZ")
+    self.dofa3stuff = False#(treesample.productionmode == "qqZZ")
     super(TreeWrapperMELA, self).__init__(treesample, minevent, maxevent)
 
   @staticmethod
