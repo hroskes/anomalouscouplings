@@ -1249,6 +1249,9 @@ class Sample(ReweightingSamplePlus):
     def copyfromothersample(self):
         if self == Sample("170203", "ggH", "MINLO", "0+"):
             return Sample("170222", "ggH", "MINLO", "0+")
+        if self.production == "170712" and self.productionmode in ("ggH", "HJJ", "VBF", "WH", "ZH", "ttH") and self.alternategenerator is None:
+            args = [self.reweightingsampleplus, self.flavor, "170222"]
+            return Sample(*args)
         return None
 
 class SampleBasis(MultiEnum):

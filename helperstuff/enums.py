@@ -519,6 +519,7 @@ class Production(MyEnum):
     enumitems = (
                  EnumItem("170203"),
                  EnumItem("170222"),
+                 EnumItem("170712"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -533,10 +534,20 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/170222"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/heshy/CJLSTtrees/170222"
+        if self == "170712":
+            if config.host == "lxplus":
+                return "root://lxcms03//data3/Higgs/170623"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/heshy/CJLSTtrees/170623"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
     def CJLSTdir_data(self):
+        if self == "170712":
+            if config.host == "lxplus":
+                return "root://lxcms03//data3/Higgs/170712_Data2017"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/heshy/CJLSTtrees/170712_Data2017"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
         return self.CJLSTdir()
@@ -668,7 +679,7 @@ analyses = Analysis.items()
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in ("170203", "170222"))
+productions = Production.items(lambda x: x in ("170203", "170222", "170712"))
 #productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
 
