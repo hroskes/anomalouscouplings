@@ -528,17 +528,17 @@ class Production(MyEnum):
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170203"
             elif config.host == "MARCC":
-                return "/work-zfs/lhc/heshy/CJLSTtrees/170203"
+                return "/work-zfs/lhc/CJLSTtrees/170203"
         if self == "170222":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170222"
             elif config.host == "MARCC":
-                return "/work-zfs/lhc/heshy/CJLSTtrees/170222"
+                return "/work-zfs/lhc/CJLSTtrees/170222"
         if self == "170712":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170623"
             elif config.host == "MARCC":
-                return "/work-zfs/lhc/heshy/CJLSTtrees/170623"
+                return "/work-zfs/lhc/CJLSTtrees/170623"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -547,7 +547,7 @@ class Production(MyEnum):
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170712_Data2017"
             elif config.host == "MARCC":
-                return "/work-zfs/lhc/heshy/CJLSTtrees/170712_Data2017"
+                return "/work-zfs/lhc/CJLSTtrees/170712_Data2017"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
         return self.CJLSTdir()
