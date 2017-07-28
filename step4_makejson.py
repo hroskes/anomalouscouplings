@@ -17,5 +17,4 @@ def makejson(*args):
 
 if __name__ == "__main__":
     for templatesfile in templatesfiles:
-        if templatesfile.templategroup != "vbf" or templatesfile.analysis != "fL1Zg": continue
         makejson(templatesfile)
