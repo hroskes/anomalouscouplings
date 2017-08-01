@@ -465,6 +465,26 @@ class SampleBase(object):
                         mixturesign(analysis)*getattr(self, hypothesis.couplingname)
                        )
 
+    @property
+    def a1eLeR(self):
+        assert self.g2 == self.g4 == 0
+        ghz1 = self.g1 + 2 * self.g1prime2 * (constants.M_Z**2 - 1j*constants.M_Z*constants.Ga_Z)/constants.L1**2
+        ghz1 = ghz1.real  #<-- !!!
+        ghzzp1 = constants.M_Z**2/constants.L1**2
+        ezp_L = constants.aL * self.g1prime2 + constants.e * self.ghzgs1prime2
+        ezp_R = constants.aR * self.g1prime2 + constants.e * self.ghzgs1prime2
+        return ghz1, ghzzp1*ezp_L, ghzzp1*ezp_R
+
+    @property
+    def feL(self):
+        a1, eL, eR = self.a1eLeR
+        return eL**2 * constants.JHUXSggH2L2leL / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
+
+    @property
+    def feR(self):
+        a1, eL, eR = self.a1eLeR
+        return eR**2 * constants.JHUXSggH2L2leR / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
+
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, photoncut=False):
         self.productionmode = ProductionMode(productionmode)
@@ -472,8 +492,8 @@ class ArbitraryCouplingsSample(SampleBase):
         self.photoncut = photoncut or (ghzgs1prime2 != 0)
         if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH"):
             raise ValueError("Bad productionmode {}".format(self.productionmode))
-        if sum(bool(g) for g in (g2, g4, g1prime2, ghzgs1prime2)) > 1:
-            raise ValueError("Can only set at most one of g2, g4, g1prime2, ghzgs1prime2")
+        if sum(bool(g) for g in (g2, g4, g1prime2 or ghzgs1prime2)) > 1:
+            raise ValueError("Can only set at most one of g2, g4, or g1prime2 and/or ghzgs1prime2")
 
         if self.productionmode == "HJJ":
             self.__ghg2, self.__ghg4 = ghg2, ghg4
@@ -583,6 +603,31 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
                                              mixturesign(analysis)*fai
                                             )
     return ArbitraryCouplingsSample(productionmode, **kwargs)
+
+def samplewitha1eLeR(a1, eL, eR):
+    kwargs = {
+      "g1": a1 - 2/(constants.aL - constants.aR) * (eL - eR),
+      "g1prime2": constants.L1**2 / (constants.M_Z**2 * (constants.aL - constants.aR)) * (eL-eR),
+      "ghzgs1prime2": -constants.L1**2 / (constants.M_Z**2 * constants.e * (constants.aL - constants.aR)) * (constants.aR*eL-constants.aL*eR),
+      "g2": 0,
+      "g4": 0,
+    }
+    result = ArbitraryCouplingsSample("ggH", **kwargs)
+    return result
+
+def samplewithfeLfeR(feL, feR):
+    fa1 = 1-abs(feL)-abs(feR)
+    a1 = sqrt(fa1)
+    eL = (1 if feL>0 else -1) * sqrt(abs(feL) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2leL)
+    eR = (1 if feR>0 else -1) * sqrt(abs(feR) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2leR)
+    return samplewitha1eLeR(a1, eL, eR)
+
+def samplewithfL1fL1Zg(fL1, fL1Zg):
+    fa1 = 1-abs(fL1)-abs(fL1Zg)
+    a1 = sqrt(fa1)
+    L1 = -(1 if fL1>0 else -1) * sqrt(abs(fL1) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2lL1)
+    L1Zg = -(1 if fL1Zg>0 else -1) * sqrt(abs(fL1Zg) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2lL1Zg)
+    return ArbitraryCouplingsSample("ggH", g1=a1, g1prime2=L1, ghzgs1prime2=L1Zg, g2=0, g4=0)
 
 class ReweightingSample(MultiEnum, SampleBase):
     __metaclass__ = MultiEnumABCMeta

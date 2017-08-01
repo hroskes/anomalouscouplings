@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 from math import sqrt
 
+M_Z = 91.1876
+Ga_Z = 2.4952
+aL = -0.53762
+aR = 0.46238
+e = 0.8431872482432357  # = cL_lep = cR_lep from mod_Parameters
+L1 = 10000.
+
 #https://github.com/cms-analysis/HiggsAnalysis-ZZMatrixElement/blob/c6d45de/MELA/src/Mela.cc#L307
 CJLSTg4decay_mix = 2.521
 CJLSTg2decay_mix = 1.638
@@ -81,6 +88,9 @@ JHUXSggH2L2la1_photoncut   = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27
 JHUXSggH2L2lL1Zg           = 0.12338393E-06; JHUXSggH2L2lL1Zgerr          = 0.58002047E-11
 JHUXSggH2L2la1L1Zg         = 13.145473;      JHUXSggH2L2la1L1Zgerr        = 0.53550812E-03
 JHUXSggH2L2lL1L1Zg         = 1.6472524E+01;  JHUXSggH2L2lL1L1Zgerr        = 2.2689281E-02
+
+JHUXSggH2L2leL = 1.4347981E+01
+JHUXSggH2L2leR = 1.3952140E+01
 
 JHUXSVBFa1           = 968.674284006;      JHUXSVBFa1err            = 0.075115702763
 JHUXSVBFa2           = 13102.7106117;      JHUXSVBFa2err            = 0.522399748272
