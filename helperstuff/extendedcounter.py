@@ -57,3 +57,15 @@ class ExtendedCounter(collections.Counter):
         g = ROOT.TGraph(len(self), x, y)
         g.SetTitle("")
         return g
+
+    def TGraph2D(self):
+        items = self.items()
+        items.sort(key = lambda x: x[0])
+        xx, yy, zz = zip(*((_[0][0], _[0][1], _[1]) for _ in items))
+        x = array.array("d", xx)
+        y = array.array("d", yy)
+        z = array.array("d", zz)
+        g = ROOT.TGraph2D(len(self), x, y, z)
+        g.SetTitle("")
+
+        return g

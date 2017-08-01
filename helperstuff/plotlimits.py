@@ -186,6 +186,138 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     for ext in "png eps root pdf".split():
         c1.SaveAs("{}.{}".format(outputfilename, ext))
 
+def plotlimits2D(outputfilename, analysis, *args, **kwargs):
+    if not args: return
+    analysis = Analysis(analysis)
+    productions = None
+    legendposition = (.2, .7, .6, .9)
+    moreappend = ""
+    luminosity = None
+    scanranges = None
+    nuisance = None
+    POI = "CMS_zz4l_fai1"
+    POI2 = "CMS_zz4l_fai2"
+    fixfai = False
+    CMStext = "Preliminary"
+    drawCMS = True
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "productions":
+            productions = kwarg
+        elif kw == "legendposition":
+            legendposition = kwarg
+        elif kw == "CLtextposition":
+            CLtextposition = kwarg
+        elif kw == "moreappend":
+            moreappend = kwarg
+        elif kw == "luminosity":
+            luminosity = kwarg
+        elif kw == "scanranges":
+            scanranges = kwarg
+        elif kw == "nuisance":
+            nuisance = actualvariable(kwarg)
+        elif kw == "POI":
+            POI = actualvariable(kwarg)
+        elif kw == "POI2":
+            POI2 = actualvariable(kwarg)
+        elif kw == "fixfai":
+            fixfai = kwarg
+        elif kw == "CMStext":
+            CMStext = kwarg
+        elif kw == "drawCMS":
+            drawCMS = kwarg
+        elif kw == "scanfai":
+            scanfai = kwarg
+        else:
+            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    xmin = ymin = min(scanrange[1] for scanrange in scanranges)
+    xmax = ymax = max(scanrange[2] for scanrange in scanranges)
+
+    scans = []
+    uptocolor = 1
+    assert len(args) == 1, args
+    for arg in args:
+        if fixfai:
+            phipart = "{} = 0".format(analysis.title())
+        else:
+            phipart = "{} = 0 or #pi".format(analysis.phi)
+        if arg == "obs":
+            scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1))
+            if productions is None:
+                raise ValueError("No productions provided!")
+        else:
+            try:
+                arg = float(arg)
+            except ValueError:
+                raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
+            if arg == 0:
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2), uptocolor, 2))
+            else:
+                assert not fixfai
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
+            uptocolor += 1
+
+    if luminosity is None:
+        luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
+
+    l = ROOT.TLegend(*legendposition)
+    l.SetFillStyle(0)
+    l.SetBorderSize(0)
+
+    for scan in scans:
+        NLL = ExtendedCounter()
+        for scanrange in scanranges:
+            if scanrange == (100, -1, 1):
+                scanrangeappend = ""
+            else:
+                scanrangeappend = "_{},{},{}".format(*scanrange)
+            f = ROOT.TFile(filenametemplate.format(append=scan.name, scanrangeappend=scanrangeappend))
+            assert f
+            t = f.Get("limit")
+            assert t
+
+
+            t.GetEntry(0)
+            if getattr(t, POI) == -1: startfrom = 0
+            else: startfrom = 1
+
+            for entry in islice(t, startfrom, None):
+                if abs(t.CMS_zz4l_fai1) + abs(t.CMS_zz4l_fai2) > 1+1e-14: continue
+                fa3 = getattr(t, POI), getattr(t, POI2)
+                if nuisance is None:
+                    deltaNLL = t.deltaNLL+t.nll+t.nll0
+                    NLL[fa3] = 2*deltaNLL
+                else:
+                     NLL[fa3] = getattr(t, nuisance)
+
+        c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+        if nuisance is None: NLL.zero()
+        g = NLL.TGraph2D()
+
+        g.SetLineColor(scan.color)
+        g.SetLineStyle(scan.style)
+        g.SetLineWidth(2)
+
+        l.AddEntry(g, scan.title, "l")
+
+    g.Draw("COLZ")
+    g.GetHistogram().GetXaxis().SetTitle(xaxistitle(POI, analysis))
+    if xaxisrange(POI) is not None:
+        g.GetXaxis().SetRangeUser(*xaxisrange(POI))
+    g.GetHistogram().GetYaxis().SetTitle(xaxistitle(POI2, analysis))
+    if xaxisrange(POI2) is not None:
+        g.GetYaxis().SetRangeUser(*xaxisrange(POI2))
+    g.GetHistogram().GetZaxis().SetTitle(yaxistitle(nuisance, analysis))
+
+    style.applycanvasstyle(c1)
+    style.applyaxesstyle(g)
+    style.CMS(CMStext, luminosity, drawCMS=drawCMS)
+
+    for ext in "png eps root pdf".split():
+        outputfilename = outputfilename.replace("."+ext, "")
+    for ext in "png eps root pdf".split():
+        c1.SaveAs("{}.{}".format(outputfilename, ext))
+
 #https://root.cern.ch/phpBB3/viewtopic.php?t=10159
 def GetNDC(x, y, logscale=False):
     ROOT.gPad.Update()#this is necessary!

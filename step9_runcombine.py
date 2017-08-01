@@ -17,7 +17,7 @@ from helperstuff.combinehelpers import Luminosity
 from helperstuff.copyplots import copyplots
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
-from helperstuff.plotlimits import plotlimits, plottitle
+from helperstuff.plotlimits import plotlimits, plotlimits2D, plottitle
 from helperstuff.submitjob import submitjob
 from helperstuff.utilities import requirecmsenv, tfiles
 
@@ -283,8 +283,12 @@ def runcombine(analysis, foldername, **kwargs):
         raise TypeError("Can't unblind scans!")
     if runobs and lumitype != "fordata":
         raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
-    if scanfai not in analysis.fais:
-        raise ValueError("scanfai for {} has to be ".format(analysis) + " or ".join(str(_) for _ in analysis.fais))
+    if scanfai != analysis and scanfai not in analysis.fais:
+        raise ValueError("scanfai for {} has to be ".format(analysis) + " or ".join(str(_) for _ in list(analysis.fais)+[analysis]))
+
+    is2dscan = (scanfai == analysis and analysis.is2d)
+    if is2dscan:
+      scanranges = list((points**2, min, max) for points, min, max in scanranges)
 
     if submitjobs:
         if not utilities.inscreen():
@@ -335,7 +339,7 @@ def runcombine(analysis, foldername, **kwargs):
         combinecardsappend += "_" + alsocombinename
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
-    if analysis.is2d:
+    if analysis.is2d and not is2dscan:
         workspacefileappend += "_scan{}".format(scanfai)
 
     if set(usecategories) != {Category("Untagged")} and analysis.is2d:
@@ -383,7 +387,8 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.is2d:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
         repmap["physicsoptions"] = "--PO allowPMF"
-        if scanfai == analysis.fais[0]: pass
+        if scanfai == analysis: repmap["physicsoptions"] += " --PO fai2asPOI"
+        elif scanfai == analysis.fais[0]: pass
         elif scanfai == analysis.fais[1]: repmap["physicsoptions"] += " --PO fai2asPOI --PO fai1fixed"
         repmap["savemu"] = ""
     else:
@@ -494,12 +499,18 @@ def runcombine(analysis, foldername, **kwargs):
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
         if scanranges != [defaultscanrange]:
             plotname += "".join("_{},{},{}".format(*scanrange) for scanrange in sorted(scanranges))
-        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai)
+
+        if is2dscan:
+            plotlimitsfunction = plotlimits2D
+        else:
+            plotlimitsfunction = plotlimits
+
+        plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai)
         for nuisance in plotnuisances:
             if plottitle(nuisance) == plottitle(POI): continue
             if nuisance == "CMS_zz4l_fai1" and fixfai: continue
             nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-            plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext)
+            plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext)
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
