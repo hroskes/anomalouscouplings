@@ -303,8 +303,6 @@ def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, xsize=.1, ysize=
 
     return line68, line95, oneSig, twoSig
 
-from plotlimits2D import plotlimits2D
-
 if __name__ == "__main__":
     args, kwargs = [], {}
     for arg in sys.argv[1:]:
@@ -473,6 +471,8 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
     if xaxisrange(POI2) is not None:
         g.GetYaxis().SetRangeUser(*xaxisrange(POI2))
     g.GetHistogram().GetZaxis().SetTitle(yaxistitle(nuisance, analysis))
+    g.GetHistogram().GetZaxis().SetTitleOffset(1.4)
+    g.GetHistogram().GetZaxis().SetRangeUser(0, 800)
 
     gL, gR = feLfeRgraphs()
 
@@ -482,6 +482,7 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
     mg.Draw("C")
 
     style.applycanvasstyle(c1)
+    c1.SetRightMargin(0.15)
     style.applyaxesstyle(g)
     style.CMS(CMStext, luminosity, drawCMS=drawCMS)
 
