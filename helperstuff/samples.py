@@ -462,7 +462,7 @@ class SampleBase(object):
         return copysign(
                         numerator / denominator,
                         #mixturesign: multiply by -1 for fL1
-                        mixturesign(analysis)*getattr(self, hypothesis.couplingname)
+                        mixturesign(analysis)*getattr(self, hypothesis.couplingname)*self.g1
                        )
 
     @property
@@ -478,12 +478,12 @@ class SampleBase(object):
     @property
     def feL(self):
         a1, eL, eR = self.a1eLeR
-        return eL**2 * constants.JHUXSggH2L2leL / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
+        return (1 if a1*eL>0 else -1) * eL**2 * constants.JHUXSggH2L2leL / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
 
     @property
     def feR(self):
         a1, eL, eR = self.a1eLeR
-        return eR**2 * constants.JHUXSggH2L2leR / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
+        return (1 if a1*eR>0 else -1) * eR**2 * constants.JHUXSggH2L2leR / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, photoncut=False):

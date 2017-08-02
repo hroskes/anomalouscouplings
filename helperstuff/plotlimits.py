@@ -16,6 +16,7 @@ import stylefunctions as style
 from combinehelpers import Luminosity
 from enums import Analysis, EnumItem, MyEnum
 from extendedcounter import ExtendedCounter
+from samples import samplewithfeLfeR
 from utilities import cache
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
@@ -186,6 +187,170 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     for ext in "png eps root pdf".split():
         c1.SaveAs("{}.{}".format(outputfilename, ext))
 
+#https://root.cern.ch/phpBB3/viewtopic.php?t=10159
+def GetNDC(x, y, logscale=False):
+    ROOT.gPad.Update()#this is necessary!
+    if logscale:
+        y = math.log10(y)
+
+    xndc = (x - ROOT.gPad.GetX1())/(ROOT.gPad.GetX2()-ROOT.gPad.GetX1())
+    yndc = (y - ROOT.gPad.GetY1()) / (ROOT.gPad.GetY2() - ROOT.gPad.GetY1())
+    return xndc, yndc
+
+class XPos(MyEnum):
+    enumitems = (
+                 EnumItem("right"),
+                 EnumItem("left"),
+                 EnumItem("custom"),
+                )
+    def __init__(self, value):
+        try:
+            value = float(value)
+        except (TypeError, ValueError):
+            super(XPos, self).__init__(value)
+        else:
+            super(XPos, self).__init__("custom")
+            self.custompos = value
+    def __nonzero__(self):
+        return self == "right" or self == "left" or -1 <= self.custompos <= 1
+    def TPaveText(self, ypos, logscale=False, yshift=.01, xsize=.1, ysize=.03):
+        xsize = .1
+        ysize = .03
+        if self == "right":
+            x2, y1 = GetNDC(.95, ypos, logscale)
+            x1 = x2 - xsize
+        elif self == "left":
+            x1, y1 = GetNDC(-.95, ypos, logscale)
+            x2 = x1 + xsize
+        elif self == "custom":
+            x1, y1 = GetNDC(self.custompos, ypos, logscale)
+            x2 = x1 + xsize
+        else:
+            assert False
+
+        y1 += yshift  #make some room between the text and the line
+        y2 = y1 + ysize
+
+        ymax = 1-ROOT.gPad.GetTopMargin()
+        if y1 < ymax < y2:
+            y1 -= (y2-ymax)
+            y2 -= (y2-ymax)
+        if y1 > ymax:
+            y1 += 100  #so it doesn't get in the CMS header
+            y2 += 100
+
+        return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
+
+@cache
+def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, xsize=.1, ysize=.03, yshift=0, yshift68=None, yshift95=None, textsize=None, PRL=False, CLbelow=False, arbitraryparameter=None):
+    """
+    xpostext: "left", "right", or a float, determines where the text 68% CL and 95% CL goes
+    xmin: minimum of plot
+    xmax: maximum of plot
+    logscale: is the plot in logscale
+    xsize, ysize, textsize: xsize of text
+    yshift, yshift68, yshift95: y shift of text from lines
+    PRL: quick switch for big text for PRL
+      CLbelow: for PRL, put CL text below the lines rather than above
+    arbitraryparameter: doesn't do anything, but the lines are stored separately in the cache
+    """
+    xpostext = XPos(xpostext)
+    line68 = ROOT.TLine()
+    line68.SetLineStyle(9)
+    line68.DrawLine(xmin,1,xmax,1)
+    line95 = ROOT.TLine()
+    line95.SetLineStyle(9)
+    line95.DrawLine(xmin,3.84,xmax,3.84)
+
+    if CLbelow and not PRL:
+        raise ValueError("CLbelow only works with PRL.  Turn it on, or set yshift yourself")
+    if PRL and not (xsize == .1 and ysize == .03 and yshift == 0 and textsize is yshift68 is yshift95 is None):
+        raise ValueError("To set PRL options, keep xsize, ysize, yshift, and textsize as their defaults!")
+
+    if PRL:
+        xsize = .15
+        textsize = .044
+        if CLbelow:
+            yshift=-.04
+        else:
+            yshift=.01
+
+    if yshift68 is None: yshift68 = yshift
+    if yshift95 is None: yshift95 = yshift
+
+    oneSig = xpostext.TPaveText(1, logscale=logscale, xsize=xsize, ysize=ysize, yshift=yshift68)
+    oneSig.SetFillColor(0)
+    oneSig.SetFillStyle(0)
+    oneSig.SetTextFont(42)
+    oneSig.SetBorderSize(0)
+
+    twoSig = xpostext.TPaveText(3.84, logscale=logscale, xsize=xsize, ysize=ysize, yshift=yshift95)
+    twoSig.SetFillColor(0)
+    twoSig.SetFillStyle(0)
+    twoSig.SetTextFont(42)
+    twoSig.SetBorderSize(0)
+
+    if textsize is not None:
+        oneSig.SetTextSize(textsize)
+        twoSig.SetTextSize(textsize)
+
+    if xpostext:
+        oneSig.AddText("68% CL")
+        twoSig.AddText("95% CL")
+
+    oneSig.Draw()
+    twoSig.Draw()
+
+    return line68, line95, oneSig, twoSig
+
+from plotlimits2D import plotlimits2D
+
+if __name__ == "__main__":
+    args, kwargs = [], {}
+    for arg in sys.argv[1:]:
+        if "=" in arg:
+            kw, kwarg = arg.split("=")
+            if kw in kwargs:
+                raise TypeError("Duplicate kwarg {}!".format(kw))
+            if kw == "scanranges":
+                kwarg = kwarg.replace(";", ":")
+                kwarg = [tuple(float(_2) for _2 in _.split(",")) for _ in kwarg.split(":")]
+                assert all(len(_) == 3 for _ in kwarg)
+            if kw == "productions":
+                kwarg = kwarg.split(",")
+            kwargs[kw] = kwarg
+        else:
+            args.append(arg)
+
+    plotlimits(*args, **kwargs)
+
+    outputfilename = kwargs.get("outputfilename", args[0])
+
+    for ext in "png eps root pdf".split():
+        outputfilename = outputfilename.replace("."+ext, "")
+    with open(outputfilename+".txt", 'w') as f:
+        f.write("cd {} &&\n".format(os.getcwd()))
+        f.write("python " + " ".join(sys.argv))
+
+@cache
+def arrowatminimum(graph, abovexaxis=True):
+  minimum = (float("nan"), float("inf"))
+  for i, x, y in zip(xrange(graph.GetN()), graph.GetX(), graph.GetY()):
+    if y < minimum[1]:
+      minimum = x, y
+
+  x = minimum[0]
+  if abovexaxis:
+    y1, y2 = .15, .1
+  else:
+    y1, y2 = .1**2/.15, .1
+  arrow = ROOT.TArrow(x, y1, x, y2, .01, "|>")
+  arrow.SetLineStyle(graph.GetLineStyle())
+  arrow.SetLineColor(graph.GetLineColor())
+  arrow.SetFillColor(graph.GetLineColor())
+  arrow.SetLineWidth(graph.GetLineWidth())
+  return arrow
+
 def plotlimits2D(outputfilename, analysis, *args, **kwargs):
     if not args: return
     analysis = Analysis(analysis)
@@ -309,6 +474,13 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
         g.GetYaxis().SetRangeUser(*xaxisrange(POI2))
     g.GetHistogram().GetZaxis().SetTitle(yaxistitle(nuisance, analysis))
 
+    gL, gR = feLfeRgraphs()
+
+    mg = ROOT.TMultiGraph()
+    mg.Add(gL)
+    mg.Add(gR)
+    mg.Draw("C")
+
     style.applycanvasstyle(c1)
     style.applyaxesstyle(g)
     style.CMS(CMStext, luminosity, drawCMS=drawCMS)
@@ -318,164 +490,19 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
     for ext in "png eps root pdf".split():
         c1.SaveAs("{}.{}".format(outputfilename, ext))
 
-#https://root.cern.ch/phpBB3/viewtopic.php?t=10159
-def GetNDC(x, y, logscale=False):
-    ROOT.gPad.Update()#this is necessary!
-    if logscale:
-        y = math.log10(y)
-
-    xndc = (x - ROOT.gPad.GetX1())/(ROOT.gPad.GetX2()-ROOT.gPad.GetX1())
-    yndc = (y - ROOT.gPad.GetY1()) / (ROOT.gPad.GetY2() - ROOT.gPad.GetY1())
-    return xndc, yndc
-
-class XPos(MyEnum):
-    enumitems = (
-                 EnumItem("right"),
-                 EnumItem("left"),
-                 EnumItem("custom"),
-                )
-    def __init__(self, value):
-        try:
-            value = float(value)
-        except (TypeError, ValueError):
-            super(XPos, self).__init__(value)
-        else:
-            super(XPos, self).__init__("custom")
-            self.custompos = value
-    def __nonzero__(self):
-        return self == "right" or self == "left" or -1 <= self.custompos <= 1
-    def TPaveText(self, ypos, logscale=False, yshift=.01, xsize=.1, ysize=.03):
-        xsize = .1
-        ysize = .03
-        if self == "right":
-            x2, y1 = GetNDC(.95, ypos, logscale)
-            x1 = x2 - xsize
-        elif self == "left":
-            x1, y1 = GetNDC(-.95, ypos, logscale)
-            x2 = x1 + xsize
-        elif self == "custom":
-            x1, y1 = GetNDC(self.custompos, ypos, logscale)
-            x2 = x1 + xsize
-        else:
-            assert False
-
-        y1 += yshift  #make some room between the text and the line
-        y2 = y1 + ysize
-
-        ymax = 1-ROOT.gPad.GetTopMargin()
-        if y1 < ymax < y2:
-            y1 -= (y2-ymax)
-            y2 -= (y2-ymax)
-        if y1 > ymax:
-            y1 += 100  #so it doesn't get in the CMS header
-            y2 += 100
-
-        return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
-
 @cache
-def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, xsize=.1, ysize=.03, yshift=0, yshift68=None, yshift95=None, textsize=None, PRL=False, CLbelow=False, arbitraryparameter=None):
-    """
-    xpostext: "left", "right", or a float, determines where the text 68% CL and 95% CL goes
-    xmin: minimum of plot
-    xmax: maximum of plot
-    logscale: is the plot in logscale
-    xsize, ysize, textsize: xsize of text
-    yshift, yshift68, yshift95: y shift of text from lines
-    PRL: quick switch for big text for PRL
-      CLbelow: for PRL, put CL text below the lines rather than above
-    arbitraryparameter: doesn't do anything, but the lines are stored separately in the cache
-    """
-    xpostext = XPos(xpostext)
-    line68 = ROOT.TLine()
-    line68.SetLineStyle(9)
-    line68.DrawLine(xmin,1,xmax,1)
-    line95 = ROOT.TLine()
-    line95.SetLineStyle(9)
-    line95.DrawLine(xmin,3.84,xmax,3.84)
+def feLfeRgraphs():
+    fL1 = array.array("d", (samplewithfeLfeR(i/100., 0).fai("ggH", "fL1") for i in range(-100, 101)))
+    fL1Zg = array.array("d", (samplewithfeLfeR(i/100., 0).fai("ggH", "fL1Zg") for i in range(-100, 101)))
+    gL = ROOT.TGraph(len(fL1), fL1, fL1Zg)
+    gL.SetLineColor(2)
+    gL.SetLineWidth(4)
 
-    if CLbelow and not PRL:
-        raise ValueError("CLbelow only works with PRL.  Turn it on, or set yshift yourself")
-    if PRL and not (xsize == .1 and ysize == .03 and yshift == 0 and textsize is yshift68 is yshift95 is None):
-        raise ValueError("To set PRL options, keep xsize, ysize, yshift, and textsize as their defaults!")
+    fL1 = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1") for i in range(-100, 101)))
+    fL1Zg = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1Zg") for i in range(-100, 101)))
+    for _ in zip(range(-100, 101), fL1, fL1Zg): print _
+    gR = ROOT.TGraph(len(fL1), fL1, fL1Zg)
+    gR.SetLineColor(3)
+    gR.SetLineWidth(4)
 
-    if PRL:
-        xsize = .15
-        textsize = .044
-        if CLbelow:
-            yshift=-.04
-        else:
-            yshift=.01
-
-    if yshift68 is None: yshift68 = yshift
-    if yshift95 is None: yshift95 = yshift
-
-    oneSig = xpostext.TPaveText(1, logscale=logscale, xsize=xsize, ysize=ysize, yshift=yshift68)
-    oneSig.SetFillColor(0)
-    oneSig.SetFillStyle(0)
-    oneSig.SetTextFont(42)
-    oneSig.SetBorderSize(0)
-
-    twoSig = xpostext.TPaveText(3.84, logscale=logscale, xsize=xsize, ysize=ysize, yshift=yshift95)
-    twoSig.SetFillColor(0)
-    twoSig.SetFillStyle(0)
-    twoSig.SetTextFont(42)
-    twoSig.SetBorderSize(0)
-
-    if textsize is not None:
-        oneSig.SetTextSize(textsize)
-        twoSig.SetTextSize(textsize)
-
-    if xpostext:
-        oneSig.AddText("68% CL")
-        twoSig.AddText("95% CL")
-
-    oneSig.Draw()
-    twoSig.Draw()
-
-    return line68, line95, oneSig, twoSig
-
-if __name__ == "__main__":
-    args, kwargs = [], {}
-    for arg in sys.argv[1:]:
-        if "=" in arg:
-            kw, kwarg = arg.split("=")
-            if kw in kwargs:
-                raise TypeError("Duplicate kwarg {}!".format(kw))
-            if kw == "scanranges":
-                kwarg = kwarg.replace(";", ":")
-                kwarg = [tuple(float(_2) for _2 in _.split(",")) for _ in kwarg.split(":")]
-                assert all(len(_) == 3 for _ in kwarg)
-            if kw == "productions":
-                kwarg = kwarg.split(",")
-            kwargs[kw] = kwarg
-        else:
-            args.append(arg)
-
-    plotlimits(*args, **kwargs)
-
-    outputfilename = kwargs.get("outputfilename", args[0])
-
-    for ext in "png eps root pdf".split():
-        outputfilename = outputfilename.replace("."+ext, "")
-    with open(outputfilename+".txt", 'w') as f:
-        f.write("cd {} &&\n".format(os.getcwd()))
-        f.write("python " + " ".join(sys.argv))
-
-@cache
-def arrowatminimum(graph, abovexaxis=True):
-  minimum = (float("nan"), float("inf"))
-  for i, x, y in zip(xrange(graph.GetN()), graph.GetX(), graph.GetY()):
-    if y < minimum[1]:
-      minimum = x, y
-
-  x = minimum[0]
-  if abovexaxis:
-    y1, y2 = .15, .1
-  else:
-    y1, y2 = .1**2/.15, .1
-  arrow = ROOT.TArrow(x, y1, x, y2, .01, "|>")
-  arrow.SetLineStyle(graph.GetLineStyle())
-  arrow.SetLineColor(graph.GetLineColor())
-  arrow.SetFillColor(graph.GetLineColor())
-  arrow.SetLineWidth(graph.GetLineWidth())
-  return arrow
+    return gL, gR
