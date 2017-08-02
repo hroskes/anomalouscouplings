@@ -24,8 +24,8 @@ g1prime2decay_gen = -12110.20   #for the sample
 g1prime2decay_reco = 12110.20   #for discriminants
 ghzgs1prime2decay_gen = -7613.351302119843
 ghzgs1prime2decay_reco = 7613.351302119843
-eLdecay = sqrt(1.4347981E+01 / 1.4604303E+01)
-eRdecay = sqrt(1.3952140E+01 / 1.4604303E+01)
+eLdecay = sqrt(7.2310297E+00 / 1.4347981E+01)
+eRdecay = sqrt(7.2310297E+00 / 1.3952140E+00)
 
 g2VBF = 0.271965
 g4VBF = 0.297979
