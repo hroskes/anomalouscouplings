@@ -37,8 +37,8 @@ class TemplatesFile(MultiEnum):
             if self.templategroup in ("vbf", "zh", "wh", "tth"):
                 raise ValueError("2D analysis is only done with decay information!\n{}".format(args))
         if config.LHE:
-            if self.channel != "2e2mu":
-                raise ValueError("2D analysis is only done for 2e2mu for now!\n{}".format(args))
+            if self.channel == "4mu":
+                raise ValueError("LHE analysis is done with 4e+4mu together!\n{}".format(args))
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
@@ -364,7 +364,7 @@ def listfromiterator(function):
 @listfromiterator
 def templatesfiles():
     for channel in channels:
-        if channel != "2e2mu" and config.LHE: continue
+        if channel == "4mu" and config.LHE: continue
         for production in productions:
             for analysis in analyses:
                 for category in categories:
@@ -812,7 +812,12 @@ class Template(TemplateBase, MultiEnum):
     @property
     def selection(self):
         result = ["ZZMass>{}".format(config.m4lmin), "ZZMass<{}".format(config.m4lmax)]
-        if not config.LHE:
+        if config.LHE:
+            if self.channel == "2e2mu":
+                result.append("ZZFlav == {}".format(self.channel.ZZFlav))
+            elif self.channel == "4e":
+                result.append("(ZZFlav == {} || ZZFlav == {})".format(self.channel.ZZFlav, Channel("4mu").ZZFlav))
+        else:
             result.append("Z1Flav*Z2Flav == {}".format(self.ZZFlav))
             result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")")
         return " && ".join(result)
@@ -1055,8 +1060,8 @@ class DataTree(MultiEnum):
             if self.category != "Untagged":
                 raise ValueError("2D analysis is only done for untagged!\n{}".format(args))
         if config.LHE:
-            if self.channel != "2e2mu":
-                raise ValueError("2D analysis is only done for 2e2mu for now!\n{}".format(args))
+            if self.channel == "4mu":
+                raise ValueError("LHE analysis is done with 4e+4mu together!\n{}".format(args))
 
     @property
     def originaltreefile(self):
@@ -1070,7 +1075,7 @@ class DataTree(MultiEnum):
 @listfromiterator
 def datatrees():
     for channel in channels:
-        if channel != "2e2mu" and config.LHE: continue
+        if channel == "4mu" and config.LHE: continue
         for production in productions:
             for category in categories:
                 for analysis in analyses:
