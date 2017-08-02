@@ -188,6 +188,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_decay")
             if self.analysis == "fL1fL1Zg_DL1_DL1L1Zgint":
                 return discriminant("D_L1_decay")
+            if self.analysis == "fL1fL1Zg_DL1_DL1Zgint":
+                return discriminant("D_L1_decay")
             if self.analysis == "fL1fL1Zg_DeR_DeLeR":
                 return discriminant("D_eR_decay")
             if self.analysis == "fL1fL1Zg_m1_m2":
@@ -239,6 +241,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_decay")
             if self.analysis == "fL1fL1Zg_DL1_DL1L1Zgint":
                 return discriminant("D_L1L1Zgint_decay")
+            if self.analysis == "fL1fL1Zg_DL1_DL1Zgint":
+                return discriminant("D_L1Zgint_decay")
             if self.analysis == "fL1fL1Zg_DeR_DeLeR":
                 return discriminant("D_eLeR_decay")
             if self.analysis == "fL1fL1Zg_m1_m2":

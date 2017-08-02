@@ -110,8 +110,8 @@ def mergeplots(analysis, **kwargs):
     subdir = ""
     plotname = "limit_lumi150.0.root"
     folders = [
-               Folder(".oO[analysis]Oo._allsysts", "Now", 2, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
-               Folder(".oO[analysis]Oo._fullRun2", "150 fb^{-1}", 4, analysis, subdir, plotname="limit_lumi150.0_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+               Folder("fL1fL1Zg_DL1_DL1L1Zgint_firsttest/", "D_{#epsilonR}, D_{#epsilonL#epsilonR}", 2, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+               Folder("fL1fL1Zg_DeR_DeLeR_firsttest/", "D_{#epsilonR}, D_{#epsilonL#epsilonR}", 2, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
               ]
     outdir = ".oO[analysis]Oo._fullRun2"
 

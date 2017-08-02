@@ -472,7 +472,7 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
         g.GetYaxis().SetRangeUser(*xaxisrange(POI2))
     g.GetHistogram().GetZaxis().SetTitle(yaxistitle(nuisance, analysis))
     g.GetHistogram().GetZaxis().SetTitleOffset(1.4)
-    g.GetHistogram().GetZaxis().SetRangeUser(0, 800)
+    g.GetHistogram().GetZaxis().SetRangeUser(0, 300)
 
     gL, gR = feLfeRgraphs()
 
