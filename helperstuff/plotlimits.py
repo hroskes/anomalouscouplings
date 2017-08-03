@@ -57,6 +57,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     analysis = Analysis(analysis)
     productions = None
     legendposition = (.2, .7, .6, .9)
+    CLtextposition = "left"
     moreappend = ""
     luminosity = None
     scanranges = None
@@ -65,6 +66,11 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     fixfai = False
     CMStext = "Preliminary"
     drawCMS = True
+    contactterms = False
+    infilename = filenametemplate
+    xtitle = None
+    scanfai = analysis
+    killpoints = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -90,6 +96,15 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             drawCMS = kwarg
         elif kw == "scanfai":
             scanfai = kwarg
+        elif kw == "contactterms":
+            contactterms = kwarg
+        elif kw == "infilename":
+            infilename = kwarg
+        elif kw == "xtitle":
+            xtitle = kwarg
+        elif kw == "killpoints":
+            assert len(kwarg) == 2
+            killpoints = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -138,7 +153,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                 scanrangeappend = ""
             else:
                 scanrangeappend = "_{},{},{}".format(*scanrange)
-            f = ROOT.TFile(filenametemplate.format(append=scan.name, scanrangeappend=scanrangeappend))
+            f = ROOT.TFile(infilename.format(append=scan.name, scanrangeappend=scanrangeappend))
             assert f
             t = f.Get("limit")
             assert t
@@ -150,11 +165,12 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
             for entry in islice(t, startfrom, None):
                 fa3 = getattr(t, POI)
+                if killpoints is not None and killpoints[0] < fa3 < killpoints[1]: continue
                 if nuisance is None:
                     deltaNLL = t.deltaNLL+t.nll+t.nll0
                     NLL[fa3] = 2*deltaNLL
                 else:
-                     NLL[fa3] = getattr(t, nuisance)
+                    NLL[fa3] = getattr(t, nuisance)
             if 1 not in NLL and -1 in NLL:
                 NLL[1] = NLL[-1]
 
@@ -170,7 +186,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         l.AddEntry(g, scan.title, "l")
 
     mg.Draw("AL")
-    mg.GetXaxis().SetTitle(xaxistitle(POI, analysis))
+    if xtitle is None: xtitle = xaxistitle(POI, analysis)
+    mg.GetXaxis().SetTitle(xtitle)
     if xaxisrange(POI) is not None:
         mg.GetXaxis().SetRangeUser(*xaxisrange(POI))
     mg.GetYaxis().SetTitle(yaxistitle(nuisance, analysis))
