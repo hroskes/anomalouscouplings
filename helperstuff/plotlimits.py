@@ -474,12 +474,14 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
     g.GetHistogram().GetZaxis().SetTitleOffset(1.4)
     g.GetHistogram().GetZaxis().SetRangeUser(0, 300)
 
-    gL, gR = feLfeRgraphs()
+    gL, gLpoint, gR, gRpoint = feLfeRgraphs()
 
     mg = ROOT.TMultiGraph()
-    mg.Add(gL)
-    mg.Add(gR)
-    mg.Draw("C")
+    mg.Add(gL, "C")
+    mg.Add(gLpoint, "P")
+    mg.Add(gR, "C")
+    mg.Add(gRpoint, "P")
+    mg.Draw()
 
     style.applycanvasstyle(c1)
     c1.SetRightMargin(0.15)
@@ -499,6 +501,13 @@ def feLfeRgraphs():
     gL.SetLineColor(2)
     gL.SetLineWidth(4)
 
+    fL1 = array.array("d", (samplewithfeLfeR(i/100., 0).fai("ggH", "fL1") for i in range(100, 101)))
+    fL1Zg = array.array("d", (samplewithfeLfeR(i/100., 0).fai("ggH", "fL1Zg") for i in range(100, 101)))
+    gLpoint = ROOT.TGraph(len(fL1), fL1, fL1Zg)
+    gLpoint.SetMarkerColor(2)
+    gLpoint.SetMarkerStyle(20)
+    gLpoint.SetMarkerSize(gLpoint.GetMarkerSize()+2)
+
     fL1 = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1") for i in range(-100, 101)))
     fL1Zg = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1Zg") for i in range(-100, 101)))
     for _ in zip(range(-100, 101), fL1, fL1Zg): print _
@@ -506,4 +515,11 @@ def feLfeRgraphs():
     gR.SetLineColor(3)
     gR.SetLineWidth(4)
 
-    return gL, gR
+    fL1 = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1") for i in range(100, 101)))
+    fL1Zg = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1Zg") for i in range(100, 101)))
+    gRpoint = ROOT.TGraph(len(fL1), fL1, fL1Zg)
+    gRpoint.SetMarkerColor(3)
+    gRpoint.SetMarkerStyle(20)
+    gRpoint.SetMarkerSize(gRpoint.GetMarkerSize()+2)
+
+    return gL, gLpoint, gR, gRpoint
