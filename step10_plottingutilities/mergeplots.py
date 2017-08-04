@@ -109,7 +109,7 @@ def mergeplots(analysis, **kwargs):
     analysis = Analysis(analysis)
     repmap = {"analysis": str(analysis)}
     subdir = ""
-    plotname = "limit_lumi300.0_2e2mu_Untagged_scan.oO[analysis]Oo..root"
+    plotname = "limit_feR.root"
     folders = [
                Folder("fL1fL1Zg_DL1_DL1Zgint_firsttest/", "D_{#Lambda1}, D_{#Lambda1Z#gammaint}", 2, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
                Folder("fL1fL1Zg_DeR_DeLeR_firsttest/", "D_{#epsilonR}, D_{#epsilonL#epsilonR}", 4, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
