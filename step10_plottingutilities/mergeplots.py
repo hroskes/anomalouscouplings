@@ -112,7 +112,7 @@ def mergeplots(analysis, **kwargs):
     plotname = "limit_feR.root"
     folders = [
                Folder("fL1fL1Zg_DL1_DL1Zgint_firsttest/", "D_{#Lambda1}, D_{#Lambda1Z#gammaint}", 2, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
-               Folder("fL1fL1Zg_DeR_DeLeR_firsttest/", "D_{#epsilonR}, D_{#epsilonL#epsilonR}", 4, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
+               Folder("fL1fL1Zg_DeR_DeLint_firsttest/", "D_{#epsilonR}, D_{#epsilonLint}", 4, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
                Folder("fL1fL1Zg_m1_m2_firsttest/", "m_{1}, m_{2}", 1, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
                Folder("fL1fL1Zg_m1_phi_firsttest/", "m_{1}, #phi", ROOT.kGreen+3, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
                Folder("fL1fL1Zg_m2_phi_firsttest/", "m_{2}, #phi", 6, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),

@@ -51,6 +51,7 @@ def maketree(g, line):
 if __name__ == "__main__":
   plotcontactterms("fL1fL1Zg_DL1_DL1Zgint_firsttest")
   plotcontactterms("fL1fL1Zg_DeR_DeLeR_firsttest")
+  plotcontactterms("fL1fL1Zg_DeR_DeLint_firsttest")
   plotcontactterms("fL1fL1Zg_m1_m2_firsttest")
   plotcontactterms("fL1fL1Zg_m1_phi_firsttest")
   plotcontactterms("fL1fL1Zg_m2_phi_firsttest")
