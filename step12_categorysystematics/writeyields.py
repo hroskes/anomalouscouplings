@@ -9,6 +9,7 @@ import yaml
 
 from helperstuff import config
 from helperstuff.categorization import MultiCategorization
+from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import AlternateWeight, analyses, categories, Category, channels, flavors, ProductionMode, pythiasystematics
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
 from helperstuff.treewrapper import TreeWrapper
@@ -23,6 +24,7 @@ production = config.productionsforcombine[0]
 SampleCount = namedtuple("SampleCount", "productionmode samples")
 
 def writeyields():
+  if not config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
   tosamples_foryields = [
     SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
@@ -226,5 +228,16 @@ def writeyields():
     YieldValue.writedict()
     YieldSystematicValue.writedict()
 
+def writeyields_LHE():
+  if not config.LHE: raise ValueError("For non-LHE you want writeyields()")
+  for analysis in analyses:
+    if not analysis.isfL1fL1Zg: continue
+    YieldValue("ggH", "2e2mu", "Untagged", analysis).value = 1.5258744890164022
+    YieldValue("qqZZ", "2e2mu", "Untagged", analysis).value = 1.6250924214670268
+  YieldValue.writedict()
+
 if __name__ == "__main__":
-  writeyields()
+  if config.LHE:
+    writeyields_LHE()
+  else:
+    writeyields()

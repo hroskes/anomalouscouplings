@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import abstractmethod, abstractproperty
 from array import array
 from collections import Counter, Iterator
 import inspect
 from itertools import chain
-import re
 import resource
 import sys
 
@@ -16,126 +15,481 @@ import CJLSTscripts
 import config
 import constants
 import enums
+from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import callclassinitfunctions
+from utilities import cache_instancemethod, callclassinitfunctions, getmembernames
+import xrd
 import ZX
 
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
-sys.setrecursionlimit(10000)
+sys.setrecursionlimit(100000)
 
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
 
-class MakeSystematics(object):
-    __metaclass__ = ABCMeta
-    def __init__(self, function):
-        while isinstance(function, MakeSystematics):
-            function = function.function
-        self.function = function
+if not config.LHE:
+    definitelyexists = Sample("VBF", "0+", config.productionsforcombine[0], "POWHEG")
+    if not xrd.exists(definitelyexists.CJLSTfile()):
+        raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
 
-    @property
-    def name(self): return self.function.__name__
-    @abstractproperty
-    def upname(self): pass
-    @abstractproperty
-    def dnname(self): pass
-
-    def getnominal(self): return self.function
-
-    def getupdn(self):
-        #python is magic!
-        sourcelines = inspect.getsourcelines(self.function)[0]
-        for i, line in enumerate(sourcelines):
-            if "@" not in line:
-                break
-        del sourcelines[0:i]
-        lookfor = "def "+self.name+"("
-        replacewith = "def {UpDn}("
-        if lookfor not in sourcelines[0]:
-            raise ValueError("function '{}' is defined with weird syntax:\n\n{}\n\nWant to have '{}' in the first line and '{}' in the second".format(self.name, "".join(sourcelines), lookfordecorator, lookfor))
-        sourcelines[0] = sourcelines[0].replace(lookfor, replacewith)
-        code = "".join(sourcelines) #they already have '\n' in them
-
-        code = self.doreplacements(code)
-
-        code = re.sub("^ *(def )", r"\1", code) #so that we don't get IndentationError in exec
-
-        exec code.format(UpDn="Up")
-        exec code.format(UpDn="Dn")
-
-        Up.__name__ = self.upname
-        Dn.__name__ = self.dnname
-
-        return Up, Dn
-
-    @abstractmethod
-    def doreplacements(self, code):
-        return code
-
-class MakeJECSystematics(MakeSystematics):
-    @property
-    def upname(self): return self.name+"_JECUp"
-    @property
-    def dnname(self): return self.name+"_JECDn"
-
-    def doreplacements(self, code):
-        for thing in (
-            r"(self[.]M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))",
-            r"(self[.]notdijet)",
-        ):
-            code = re.sub(thing, r"\1_JEC{UpDn}", code)
-        result = re.findall("(self[.][\w]*)[^\w{]", code)
-        for variable in result:
-            if re.match("self[.]M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay", variable): continue
-            raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
-
-        return code
-
-@callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
-class TreeWrapper(Iterator):
-
-    def __init__(self, tree, treesample, Counters, failedtree=None, minevent=0, maxevent=None, isdummy=False):
-        """
-        tree - a TTree object
-        treesample - which sample the TTree was created from
-        Counters - from the CJLST file
-        """
-        self.tree = tree
+class TreeWrapperBase(Iterator):
+    def __init__(self, treesample, minevent=0, maxevent=None):
         self.treesample = treesample
-        self.failedtree = failedtree
         self.productionmode = str(treesample.productionmode)
         self.hypothesis = str(treesample.hypothesis)
-        self.isdata = treesample.isdata()
-        self.isbkg = not self.isdata and treesample.isbkg
-        self.isZX = treesample.isZX()
-        self.isalternate = treesample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or treesample.pythiasystematic is not None
-        self.isdummy = isdummy
+
+        if self.isZX:
+            ZX.setup(treesample.production)
+
         if self.isdata:
             self.unblind = config.unblinddistributions
         else:
             self.unblind = True
 
-        if self.isZX and not config.usedata: self.isdummy = True
-        if self.isdata and not config.showblinddistributions: self.isdummy = True
+        self.printevery = 10000
+        if self.isZX:
+            self.printevery = 1000
 
-        self.nevents = self.nevents2L2l = self.cutoffs = None
-        if Counters is not None:
-            self.nevents = Counters.GetBinContent(40)
+        self.cconstantforDbkg = self.cconstantforD2jet = self.cconstantforDHadWH = self.cconstantforDHadZH = None
 
         self.minevent = minevent
-
-        if self.isdummy:
-            self.__length = 0
-        elif maxevent is None or maxevent >= self.tree.GetEntries():
-            self.__length = self.tree.GetEntries() - minevent
-        else:
-            self.__length = maxevent - minevent + 1
-
-        if self.isZX:
-            ZX.setup(treesample.production)
+        self.maxevent = maxevent
 
         self.initlists()
         if treesample.onlyweights(): self.onlyweights()
+        self.checkfunctions()
+
+    @abstractmethod
+    def __len__(self): pass
+    @abstractmethod
+    def initlists(self): pass
+    @abstractmethod
+    def Show(self): pass
+
+    @property
+    @cache_instancemethod
+    def isdummy(self):
+        if self.isZX and not config.usedata: return True
+        if self.isdata and not config.showblinddistributions: return True
+        return False
+
+    @property
+    @cache_instancemethod
+    def isdata(self): return self.treesample.isdata()
+    @property
+    @cache_instancemethod
+    def isbkg(self): return not self.isdata and self.treesample.isbkg
+    @property
+    @cache_instancemethod
+    def isZX(self): return self.treesample.isZX()
+    @property
+    @cache_instancemethod
+    def isalternate(self): return self.treesample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.treesample.pythiasystematic is not None
+
+
+    def checkfunctions(self):
+        #some cross checking in case of stupid mistakes
+        #if a function is added in the class but not added to toaddtotree
+        #all member variables, unless they have __, should be added to either toaddtotree or exceptions
+        notanywhere, inboth, nonexistent, multipletimes = [], [], [], []
+        toaddtotree = self.toaddtotree+self.toaddtotree_int+self.toaddtotree_float
+        for key in set(getmembernames(self) + toaddtotree + self.exceptions):
+            if key.startswith("__"): continue
+            if key.startswith("_abc"): continue
+            if any(key.startswith("_{}__".format(cls.__name__)) for cls in type(self).__mro__):
+                continue
+            if key not in self.exceptions and key not in toaddtotree and (key in self.__dict__ or key in type(self).__dict__):
+                notanywhere.append(key)
+            if key in toaddtotree and key in self.exceptions:
+                inboth.append(key)
+            if key not in getmembernames(self):
+                nonexistent.append(key)
+        for key, occurences in Counter(toaddtotree + self.exceptions).iteritems():
+            if occurences >= 2 and key not in inboth or occurences >= 3: multipletimes.append(key)
+        error = ""
+        if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(notanywhere) + "\n"
+        if inboth: error += "the following items are in both toaddtotree and exceptions! " + ", ".join(inboth) + "\n"
+        if nonexistent: error += "the following items are in toaddtotree or exceptions, but don't exist! " + ", ".join(nonexistent) + "\n"
+        if multipletimes: error += "the following items appear multiple times in toaddtotree or exceptions! " + ", ".join(multipletimes) + "\n"
+        if error:
+            raise SyntaxError(error)
+
+##########################
+#background discriminants#
+##########################
+
+    def D_bkg(self):
+        try:
+            return self.M2g1_decay*self.p_m4l_SIG / (self.M2g1_decay*self.p_m4l_SIG  + self.M2qqZZ*self.p_m4l_BKG*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
+    def D_bkg_ResUp(self):
+        try:
+            return self.M2g1_decay*self.p_m4l_SIG_ResUp / (self.M2g1_decay*self.p_m4l_SIG_ResUp  + self.M2qqZZ*self.p_m4l_BKG_ResUp*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
+    def D_bkg_ResDown(self):
+        try:
+            return self.M2g1_decay*self.p_m4l_SIG_ResDown / (self.M2g1_decay*self.p_m4l_SIG_ResDown  + self.M2qqZZ*self.p_m4l_BKG_ResDown*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
+    def D_bkg_ScaleUp(self):
+        try:
+            return self.M2g1_decay*self.p_m4l_SIG_ScaleUp / (self.M2g1_decay*self.p_m4l_SIG_ScaleUp  + self.M2qqZZ*self.p_m4l_BKG_ScaleUp*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
+    def D_bkg_ScaleDown(self):
+        try:
+            return self.M2g1_decay*self.p_m4l_SIG_ScaleDown / (self.M2g1_decay*self.p_m4l_SIG_ScaleDown  + self.M2qqZZ*self.p_m4l_BKG_ScaleDown*self.cconstantforDbkg)
+        except ZeroDivisionError:
+            return 0
+
+    def D_2jet_0plus(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_HJJ*self.cconstantforD2jet)
+    def D_2jet_0minus(self):
+        if self.notdijet: return -999
+        return self.M2g4_VBF*constants.g4VBF**2 / (self.M2g4_VBF*constants.g4VBF**2 + self.M2g2_HJJ*self.cconstantforD2jet)
+    def D_2jet_a2(self):
+        if self.notdijet: return -999
+        return self.M2g2_VBF*constants.g2VBF**2 / (self.M2g2_VBF*constants.g2VBF**2 + self.M2g2_HJJ*self.cconstantforD2jet)
+    def D_2jet_L1(self):
+        if self.notdijet: return -999
+        return self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 / (self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 + self.M2g2_HJJ*self.cconstantforD2jet)
+    def D_2jet_L1Zg(self):
+        if self.notdijet: return -999
+        return self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2 / (self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2 + self.M2g2_HJJ*self.cconstantforD2jet)
+
+    def D_HadWH_0plus(self):
+        if self.notdijet: return -999
+        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g2_HJJ*self.cconstantforDHadWH)
+    def D_HadWH_0minus(self):
+        if self.notdijet: return -999
+        return self.M2g4_HadWH*constants.g4WH**2 / (self.M2g4_HadWH*constants.g4WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+    def D_HadWH_a2(self):
+        if self.notdijet: return -999
+        return self.M2g2_HadWH*constants.g2WH**2 / (self.M2g2_HadWH*constants.g2WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+    def D_HadWH_L1(self):
+        if self.notdijet: return -999
+        return self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 / (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+    def D_HadWH_L1Zg(self):
+        if self.notdijet: return -999
+        return self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 / (self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+
+    def D_HadZH_0plus(self):
+        if self.notdijet: return -999
+        return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2g2_HJJ*self.cconstantforDHadZH)
+    def D_HadZH_0minus(self):
+        if self.notdijet: return -999
+        return self.M2g4_HadZH*constants.g4ZH**2 / (self.M2g4_HadZH*constants.g4ZH**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
+    def D_HadZH_a2(self):
+        if self.notdijet: return -999
+        return self.M2g2_HadZH*constants.g2ZH**2 / (self.M2g2_HadZH*constants.g2ZH**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
+    def D_HadZH_L1(self):
+        if self.notdijet: return -999
+        return self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 / (self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
+    def D_HadZH_L1Zg(self):
+        if self.notdijet: return -999
+        return self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2 / (self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
+
+###################################
+#anomalous couplings discriminants#
+###################################
+
+    def D_0minus_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2g4_decay*constants.g4decay**2)
+    def D_CP_decay(self):
+        return self.M2g1g4_decay*constants.g4decay / (self.M2g1_decay + self.M2g4_decay*constants.g4decay**2)
+    def D_0hplus_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2g2_decay*constants.g2decay**2)
+    def D_int_decay(self):
+        return self.M2g1g2_decay*constants.g2decay / (self.M2g1_decay + self.M2g2_decay*constants.g2decay**2)
+    def D_L1_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+    def D_L1int_decay(self):
+        return self.M2g1g1prime2_decay*constants.g1prime2decay_reco / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
+    def D_L1Zg_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
+    def D_L1Zgint_decay(self):
+        return self.M2g1ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
+    def D_L1L1Zg_decay(self):
+        return self.M2g1prime2_decay*constants.g1prime2decay_reco**2 / (self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
+    def D_L1L1Zgint_decay(self):
+        return self.M2g1prime2ghzgs1prime2_decay*constants.g1prime2decay_reco*constants.ghzgs1prime2decay_reco / (self.M2g1prime2_decay*constants.g1prime2decay_reco**2 + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
+
+############################
+#contact term discriminants#
+############################
+
+    def D_eL_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2eL_decay*constants.eLdecay**2)
+    def D_eLint_decay(self):
+        return self.M2g1eL_decay*constants.eLdecay / (self.M2g1_decay + self.M2eL_decay*constants.eLdecay**2)
+    def D_eR_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2eR_decay*constants.eRdecay**2)
+    def D_eRint_decay(self):
+        return self.M2g1eR_decay*constants.eRdecay / (self.M2g1_decay + self.M2eR_decay*constants.eRdecay**2)
+    def D_eLeR_decay(self):
+        return self.M2eL_decay*constants.eLdecay**2 / (self.M2eR_decay*constants.eRdecay**2 + self.M2eL_decay*constants.eLdecay**2)
+    def D_eLeRint_decay(self):
+        return self.M2eLeR_decay*constants.eLdecay*constants.eRdecay / (self.M2eR_decay*constants.eRdecay**2 + self.M2eL_decay*constants.eLdecay**2)
+
+#######################################
+#VBF anomalous couplings discriminants#
+#######################################
+
+    @MakeJECSystematics
+    def D_0minus_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
+    @MakeJECSystematics
+    def D_CP_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1g4_VBF*constants.g4VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
+    @MakeJECSystematics
+    def D_0hplus_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
+    @MakeJECSystematics
+    def D_int_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1g2_VBF*constants.g2VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
+    @MakeJECSystematics
+    def D_L1_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
+    @MakeJECSystematics
+    def D_L1int_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
+    @MakeJECSystematics
+    def D_L1Zg_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2)
+    @MakeJECSystematics
+    def D_L1Zgint_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2)
+
+###############################################
+#VH hadronic anomalous couplings discriminants#
+###############################################
+
+    @MakeJECSystematics
+    def D_0minus_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_CP_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1g4_HadWH + self.M2g1g4_HadZH)*constants.g4VH
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_0hplus_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_int_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1g2_HadWH + self.M2g1g2_HadZH)*constants.g2VH
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_L1_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_L1int_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1g1prime2_HadWH + self.M2g1g1prime2_HadZH)*constants.g1prime2VH_reco
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_L1Zg_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)
+                          * constants.ghzgs1prime2VH_reco**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_L1Zgint_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1ghzgs1prime2_HadWH + self.M2g1ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco**2
+                 )
+               )
+
+############################################
+#VBFdecay anomalous couplings discriminants#
+############################################
+
+    @MakeJECSystematics
+    def D_0minus_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4_VBF*self.M2g4_decay*(constants.g4VBF*constants.g4decay)**2)
+    @MakeJECSystematics
+    def D_0hplus_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2_VBF*self.M2g2_decay * (constants.g2VBF*constants.g2decay)**2)
+    @MakeJECSystematics
+    def D_L1_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g1prime2_VBF*self.M2g1prime2_decay * (constants.g1prime2VBF_reco*constants.g1prime2decay_reco)**2)
+    @MakeJECSystematics
+    def D_L1Zg_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2ghzgs1prime2_VBF*self.M2ghzgs1prime2_decay * (constants.ghzgs1prime2VBF_reco*constants.ghzgs1prime2decay_reco)**2)
+
+####################################################
+#VHdecay hadronic anomalous couplings discriminants#
+####################################################
+
+    @MakeJECSystematics
+    def D_0minus_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                        *self.M2g1_decay
+                 + (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
+                        *self.M2g4_decay*constants.g4decay**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_0hplus_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                        *self.M2g1_decay
+                 + (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
+                        *self.M2g2_decay*constants.g2decay**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_L1_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                        *self.M2g1_decay
+                 + (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
+                        *self.M2g1prime2_decay*constants.g1prime2decay_reco**2
+                 )
+               )
+    @MakeJECSystematics
+    def D_L1Zg_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_HadWH + self.M2g1_HadZH)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                        *self.M2g1_decay
+                 + (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco**2
+                        *self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2
+                 )
+               )
+
+@callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
+class TreeWrapper(TreeWrapperBase):
+
+    def __init__(self, treesample, minevent=0, maxevent=None):
+        """
+        tree - a TTree object
+        treesample - which sample the TTree was created from
+        Counters - from the CJLST file
+        """
+        filename = treesample.CJLSTfile()
+
+        if self.isdummy:
+            print "{} does not exist or is bad, using {}".format(filename, definitelyexists.CJLSTfile())
+            #give it a tree so that it can get the format, but not fill any entries
+            filename = definitelyexists.CJLSTfile()
+            self.f = ROOT.TFile.Open(filename)
+
+        self.Counters = self.f.Get("{}/Counters".format(sample.TDirectoryname()))
+        if not self.Counters:
+            raise ValueError("No Counters in file "+filename)
+
+        self.tree = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
+        self.tree.Add(filename)
+
+        if self.f.Get("{}/candTree_failed".format(sample.TDirectoryname())):
+            self.failedtree = ROOT.TChain("{}/candTree_failed".format(sample.TDirectoryname()))
+            self.failedtree.Add(filename)
+        else:
+            self.failedtree = None
+
+        self.nevents = self.nevents2L2l = self.cutoffs = None
+        self.xsec = None
+        self.effectiveentriestree = None
+
+        super(TreeWrapperBase, self).__init__(treesample, minevent, maxevent)
+
+        if Counters is not None:
+            self.nevents = Counters.GetBinContent(40)
 
         tree.GetEntry(0)
         if self.isdata or self.isZX:
@@ -143,15 +497,18 @@ class TreeWrapper(Iterator):
         else:
             self.xsec = tree.xsec * 1000 #pb to fb
 
-        self.cconstantforDbkg = self.cconstantforD2jet = self.cconstantforDHadWH = self.cconstantforDHadZH = None
-        self.checkfunctions()
-        self.effectiveentriestree = None
-
-        self.printevery = 10000
-        if self.isZX:
-            self.printevery = 1000
-
         self.preliminaryloop()
+
+    @property
+    @cache_instancemethod
+    def isdummy(self):
+        if not xrd.exists(filename):
+            return True
+        else:
+            self.f = ROOT.TFile.Open(filename)
+            if not self.f.Get("{}/candTree".format(sample.TDirectoryname())):
+                return True
+        return super(TreeWrapper, self).isdummy
 
     def __iter__(self):
         self.__i = 0                               #at the beginning of next self.__i and self.__treeentry are
@@ -417,328 +774,17 @@ class TreeWrapper(Iterator):
         self.notdijet_JECDn = self.M2g1_VBF_JECDn <= 0
         return self
 
+    @cache_instancemethod
     def __len__(self):
-        return self.__length
+        if self.isdummy:
+            return 0
+        elif self.maxevent is None or self.maxevent >= self.tree.GetEntries():
+            return self.tree.GetEntries() - self.minevent
+        else:
+            return self.maxevent - self.minevent + 1
 
     def Show(self, *args, **kwargs):
         self.tree.Show(*args, **kwargs)
-
-##########################
-#background discriminants#
-##########################
-
-    def D_bkg(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG / (self.M2g1_decay*self.p_m4l_SIG  + self.M2qqZZ*self.p_m4l_BKG*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
-    def D_bkg_ResUp(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG_ResUp / (self.M2g1_decay*self.p_m4l_SIG_ResUp  + self.M2qqZZ*self.p_m4l_BKG_ResUp*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
-    def D_bkg_ResDown(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG_ResDown / (self.M2g1_decay*self.p_m4l_SIG_ResDown  + self.M2qqZZ*self.p_m4l_BKG_ResDown*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
-    def D_bkg_ScaleUp(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG_ScaleUp / (self.M2g1_decay*self.p_m4l_SIG_ScaleUp  + self.M2qqZZ*self.p_m4l_BKG_ScaleUp*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
-    def D_bkg_ScaleDown(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG_ScaleDown / (self.M2g1_decay*self.p_m4l_SIG_ScaleDown  + self.M2qqZZ*self.p_m4l_BKG_ScaleDown*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
-
-    def D_2jet_0plus(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_HJJ*self.cconstantforD2jet)
-    def D_2jet_0minus(self):
-        if self.notdijet: return -999
-        return self.M2g4_VBF*constants.g4VBF**2 / (self.M2g4_VBF*constants.g4VBF**2 + self.M2g2_HJJ*self.cconstantforD2jet)
-    def D_2jet_a2(self):
-        if self.notdijet: return -999
-        return self.M2g2_VBF*constants.g2VBF**2 / (self.M2g2_VBF*constants.g2VBF**2 + self.M2g2_HJJ*self.cconstantforD2jet)
-    def D_2jet_L1(self):
-        if self.notdijet: return -999
-        return self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 / (self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2 + self.M2g2_HJJ*self.cconstantforD2jet)
-    def D_2jet_L1Zg(self):
-        if self.notdijet: return -999
-        return self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2 / (self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2 + self.M2g2_HJJ*self.cconstantforD2jet)
-
-    def D_HadWH_0plus(self):
-        if self.notdijet: return -999
-        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g2_HJJ*self.cconstantforDHadWH)
-    def D_HadWH_0minus(self):
-        if self.notdijet: return -999
-        return self.M2g4_HadWH*constants.g4WH**2 / (self.M2g4_HadWH*constants.g4WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
-    def D_HadWH_a2(self):
-        if self.notdijet: return -999
-        return self.M2g2_HadWH*constants.g2WH**2 / (self.M2g2_HadWH*constants.g2WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
-    def D_HadWH_L1(self):
-        if self.notdijet: return -999
-        return self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 / (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
-    def D_HadWH_L1Zg(self):
-        if self.notdijet: return -999
-        return self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 / (self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
-
-    def D_HadZH_0plus(self):
-        if self.notdijet: return -999
-        return self.M2g1_HadZH / (self.M2g1_HadZH + self.M2g2_HJJ*self.cconstantforDHadZH)
-    def D_HadZH_0minus(self):
-        if self.notdijet: return -999
-        return self.M2g4_HadZH*constants.g4ZH**2 / (self.M2g4_HadZH*constants.g4ZH**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
-    def D_HadZH_a2(self):
-        if self.notdijet: return -999
-        return self.M2g2_HadZH*constants.g2ZH**2 / (self.M2g2_HadZH*constants.g2ZH**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
-    def D_HadZH_L1(self):
-        if self.notdijet: return -999
-        return self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 / (self.M2g1prime2_HadZH*constants.g1prime2ZH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
-    def D_HadZH_L1Zg(self):
-        if self.notdijet: return -999
-        return self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2 / (self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
-
-###################################
-#anomalous couplings discriminants#
-###################################
-
-    def D_0minus_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g4_decay*constants.g4decay**2)
-    def D_CP_decay(self):
-        return self.M2g1g4_decay*constants.g4decay / (self.M2g1_decay + self.M2g4_decay*constants.g4decay**2)
-    def D_0hplus_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g2_decay*constants.g2decay**2)
-    def D_int_decay(self):
-        return self.M2g1g2_decay*constants.g2decay / (self.M2g1_decay + self.M2g2_decay*constants.g2decay**2)
-    def D_L1_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
-    def D_L1int_decay(self):
-        return self.M2g1g1prime2_decay*constants.g1prime2decay_reco / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2decay_reco**2)
-    def D_L1Zg_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
-    def D_L1Zgint_decay(self):
-        return self.M2g1ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2)
-
-#######################################
-#VBF anomalous couplings discriminants#
-#######################################
-
-    @MakeJECSystematics
-    def D_0minus_VBF(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
-    @MakeJECSystematics
-    def D_CP_VBF(self):
-        if self.notdijet: return -999
-        return self.M2g1g4_VBF*constants.g4VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
-    @MakeJECSystematics
-    def D_0hplus_VBF(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
-    @MakeJECSystematics
-    def D_int_VBF(self):
-        if self.notdijet: return -999
-        return self.M2g1g2_VBF*constants.g2VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
-    @MakeJECSystematics
-    def D_L1_VBF(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
-    @MakeJECSystematics
-    def D_L1int_VBF(self):
-        if self.notdijet: return -999
-        return self.M2g1g1prime2_VBF*constants.g1prime2VBF_reco / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF_reco**2)
-    @MakeJECSystematics
-    def D_L1Zg_VBF(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2)
-    @MakeJECSystematics
-    def D_L1Zgint_VBF(self):
-        if self.notdijet: return -999
-        return self.M2g1ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF_reco**2)
-
-###############################################
-#VH hadronic anomalous couplings discriminants#
-###############################################
-
-    @MakeJECSystematics
-    def D_0minus_HadVH(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1_HadWH + self.M2g1_HadZH)
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 +
-                   (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_CP_HadVH(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1g4_HadWH + self.M2g1g4_HadZH)*constants.g4VH
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 +
-                   (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_0hplus_HadVH(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1_HadWH + self.M2g1_HadZH)
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 +
-                   (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_int_HadVH(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1g2_HadWH + self.M2g1g2_HadZH)*constants.g2VH
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 +
-                   (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_L1_HadVH(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1_HadWH + self.M2g1_HadZH)
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 +
-                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_L1int_HadVH(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1g1prime2_HadWH + self.M2g1g1prime2_HadZH)*constants.g1prime2VH_reco
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 +
-                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_L1Zg_HadVH(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1_HadWH + self.M2g1_HadZH)
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 +
-                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)
-                          * constants.ghzgs1prime2VH_reco**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_L1Zgint_HadVH(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1ghzgs1prime2_HadWH + self.M2g1ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 +
-                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco**2
-                 )
-               )
-
-############################################
-#VBFdecay anomalous couplings discriminants#
-############################################
-
-    @MakeJECSystematics
-    def D_0minus_VBFdecay(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4_VBF*self.M2g4_decay*(constants.g4VBF*constants.g4decay)**2)
-    @MakeJECSystematics
-    def D_0hplus_VBFdecay(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2_VBF*self.M2g2_decay * (constants.g2VBF*constants.g2decay)**2)
-    @MakeJECSystematics
-    def D_L1_VBFdecay(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g1prime2_VBF*self.M2g1prime2_decay * (constants.g1prime2VBF_reco*constants.g1prime2decay_reco)**2)
-    @MakeJECSystematics
-    def D_L1Zg_VBFdecay(self):
-        if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2ghzgs1prime2_VBF*self.M2ghzgs1prime2_decay * (constants.ghzgs1prime2VBF_reco*constants.ghzgs1prime2decay_reco)**2)
-
-####################################################
-#VHdecay hadronic anomalous couplings discriminants#
-####################################################
-
-    @MakeJECSystematics
-    def D_0minus_HadVHdecay(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                        *self.M2g1_decay
-                 + (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
-                        *self.M2g4_decay*constants.g4decay**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_0hplus_HadVHdecay(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                        *self.M2g1_decay
-                 + (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
-                        *self.M2g2_decay*constants.g2decay**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_L1_HadVHdecay(self):
-        if self.notdijet: return -999
-        return (
-                 (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                        *self.M2g1_decay
-                 + (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
-                        *self.M2g1prime2_decay*constants.g1prime2decay_reco**2
-                 )
-               )
-    @MakeJECSystematics
-    def D_L1Zg_HadVHdecay(self):
-        if self.notdijet: return -999
-        return (
-                 ((self.M2g1_HadWH + self.M2g1_HadZH)
-                    *self.M2g1_decay)
-               /
-                 (
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                        *self.M2g1_decay
-                 + (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco**2
-                        *self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2
-                 )
-               )
 
 ##########
 #Category#
@@ -773,6 +819,7 @@ class TreeWrapper(Iterator):
 
     @classmethod
     def initweightfunctions(cls):
+        if config.LHE: return
         for sample in cls.allsamples:
             setattr(cls, sample.weightname(), sample.get_MC_weight_function())
     @classmethod
@@ -827,6 +874,7 @@ class TreeWrapper(Iterator):
             "D_L1int_decay",
             "D_L1Zg_decay",
             "D_L1Zgint_decay",
+            "D_L1L1Zg_decay",
         ]
 
         self.exceptions = [
@@ -838,6 +886,7 @@ class TreeWrapper(Iterator):
             "cconstantforDHadZH",
             "checkfunctions",
             "cutoffs",
+            "D_L1L1Zgint_decay",
             "exceptions",
             "failedtree",
             "genMEs",
@@ -853,15 +902,18 @@ class TreeWrapper(Iterator):
             "isdummy",
             "isZX",
             "kfactors",
+            "maxevent",
             "minevent",
             "nevents",
             "nevents2L2l",
             "next",
             "onlyweights",
             "passesblindcut",
+            "printevery",
             "productionmode",
             "preliminaryloop",
             "toaddtotree",
+            "toaddtotree_float",
             "toaddtotree_int",
             "tree",
             "treesample",
@@ -889,6 +941,7 @@ class TreeWrapper(Iterator):
                 self.toaddtotree += [_.format(prod=prod)+JEC for _ in proddiscriminants]
 
         self.toaddtotree_int = []
+        self.toaddtotree_float = []
 
         for _ in self.categorizations:
             self.toaddtotree_int.append(_.category_function_name)
@@ -968,33 +1021,6 @@ class TreeWrapper(Iterator):
             self.tree.SetBranchStatus(variable, 1)
         for variable in self.treesample.weightingredients():
             self.tree.SetBranchStatus(variable, 1)
-
-    def checkfunctions(self):
-
-        #some cross checking in case of stupid mistakes
-        #if a function is added in the class but not added to toaddtotree
-        #all member variables, unless they have __, should be added to either toaddtotree or exceptions
-        notanywhere, inboth, nonexistent, multipletimes = [], [], [], []
-        for key in set(list(type(self).__dict__) + list(self.__dict__) + self.toaddtotree+self.toaddtotree_int + self.exceptions):
-            if key.startswith("__"): continue
-            if key.startswith("_abc"): continue
-            if any(key.startswith("_{}__".format(cls.__name__)) for cls in type(self).__mro__):
-                continue
-            if key not in self.exceptions and key not in self.toaddtotree+self.toaddtotree_int and (key in self.__dict__ or key in type(self).__dict__):
-                notanywhere.append(key)
-            if key in self.toaddtotree+self.toaddtotree_int and key in self.exceptions:
-                inboth.append(key)
-            if key not in type(self).__dict__ and key not in self.__dict__:
-                nonexistent.append(key)
-        for key, occurences in Counter(self.toaddtotree+self.toaddtotree_int + self.exceptions).iteritems():
-            if occurences >= 2 and key not in inboth or occurences >= 3: multipletimes.append(key)
-        error = ""
-        if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(notanywhere) + "\n"
-        if inboth: error += "the following items are in both toaddtotree and exceptions! " + ", ".join(inboth) + "\n"
-        if nonexistent: error += "the following items are in toaddtotree or exceptions, but don't exist! " + ", ".join(nonexistent) + "\n"
-        if multipletimes: error += "the following items appear multiple times in toaddtotree or exceptions! " + ", ".join(multipletimes) + "\n"
-        if error:
-            raise SyntaxError(error)
 
     def preliminaryloop(self):
         """

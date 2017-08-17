@@ -134,14 +134,13 @@ def plotfromtree(**kwargs):
 
   wt = "*".join("("+_+")" for _ in weightfactors)
 
-  if o.transformation is None:
-    formula = discname
-  else:
-    formula = o.transformation.format(disc=discname)
+  formula = "min(max({}, {}), {})".format(discname, o.min, o.max - (o.max-o.min)/100)
+  if o.transformation is not None:
+    formula = o.transformation.format(formula)
 
   todraw = ""
   if o.disc2 is not None:
-    todraw += "{}:".format(disc2name)
+    todraw += "min(max({}, {}), {}):".format(disc2name, o.min2, o.max2 - (o.max2-o.min2)/100)
   todraw += "{}".format(formula)
   todraw += ">>{}".format(o.hname)
   if o.bins != 0:
@@ -160,9 +159,6 @@ def plotfromtree(**kwargs):
     print
     raise
   h.GetXaxis().SetTitle(title)
-  if isinstance(h, ROOT.TH1) and not isinstance(h, ROOT.TH2):
-    h.SetBinContent(h.GetNbinsX(), h.GetBinContent(h.GetNbinsX()+1) + h.GetBinContent(h.GetNbinsX()))
-    h.SetBinContent(1, h.GetBinContent(0) + h.GetBinContent(1))
   if o.disc2 is not None:
     h.GetYaxis().SetTitle(disc2title)
   h.Floor()

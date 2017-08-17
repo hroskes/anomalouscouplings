@@ -137,21 +137,24 @@ class Hypothesis(MyEnum):
                  EnumItem("fL1proddec-0.5"),
                  EnumItem("fL1Zgproddec-0.5"),
                  EnumItem("fa2dec-0.9", "fa2-0.9"),
+                 EnumItem("L1_photoncut"),
+                 EnumItem("fL10.5_photoncut", "fL1dec0.5_photoncut"),
+                 EnumItem("fL10.5fL1Zg0.5", "fL1Zg0.5fL10.5"),
                 )
     @property
     def ispure(self):
-        return self in ("0+", "0+_photoncut", "0-", "0h+", "L1", "L1Zg")
+        return self in ("0+", "0+_photoncut", "0-", "0h+", "L1", "L1_photoncut", "L1Zg")
     @property
     def couplingname(self):
         if self in ("0+", "0+_photoncut"): return "g1"
         if self == "a2": return "g2"
         if self == "0-": return "g4"
-        if self == "L1": return "g1prime2"
+        if self in ("L1", "L1_photoncut"): return "g1prime2"
         if self == "L1Zg": return "ghzgs1prime2"
-        assert False
+        assert False, self
     @property
     def photoncut(self):
-        if self in ("0+_photoncut", "L1Zg"): return True
+        if self in ("0+_photoncut", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5", "L1Zg"): return True
         if self in ("0+", "0-", "a2", "L1"): return False
         for b in "prod", "dec", "proddec":
             for c in "+-":
@@ -227,8 +230,10 @@ class ProductionMode(MyEnum):
         return not self.isbkg
     @property
     def validhypotheses(self):
-        if self in ("ggH", "ttH", "HJJ"):
+        if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
+        if self in ("ttH", "HJJ"):
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses and x not in fL1fL1Zghypotheses)
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses)
         if self == "ZH":
@@ -240,13 +245,17 @@ class ProductionMode(MyEnum):
         assert False
     @property
     def generatedhypotheses(self):
-        if self == "ggH":
-            return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5"))
-        if self in ("VBF", "ZH", "WH"):
-            return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"))
-        if self in ("WplusH", "WminusH", "ttH", "HJJ"):
-            return Hypothesis.items(lambda x: x == "0+")
-        assert False
+        if not config.LHE:
+            if self == "ggH":
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5"))
+            if self in ("VBF", "ZH", "WH"):
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"))
+            if self in ("WplusH", "WminusH", "ttH", "HJJ"):
+                return Hypothesis.items(lambda x: x == "0+")
+        else:
+            if self == "ggH":
+                return Hypothesis.items(lambda x: x in ("0+_photoncut", "L1_photoncut", "L1Zg", "fL10.5_photoncut", "fL1Zg0.5", "fL10.5fL1Zg0.5"))
+        assert False, self
     @generatortolist_condition(lambda x: tfiles[x.withdiscriminantsfile()].candTree.GetEntries())
     def allsamples(self, production):
         from samples import Sample
@@ -416,8 +425,17 @@ class Analysis(MyEnum):
                  EnumItem("fa2"),
                  EnumItem("fL1"),
                  EnumItem("fL1Zg"),
+                 EnumItem("fL1fL1Zg_DL1_DL1L1Zgint"),
+                 EnumItem("fL1fL1Zg_DL1_DL1Zgint"),
+                 EnumItem("fL1fL1Zg_DeR_DeLeR"),
+                 EnumItem("fL1fL1Zg_DeR_DeLint"),
+                 EnumItem("fL1fL1Zg_m1_m2"),
+                 EnumItem("fL1fL1Zg_m1_phi"),
+                 EnumItem("fL1fL1Zg_m2_phi"),
                 )
     def title(self, latex=False, superscript=None):
+        if self.is2d: return self.fais[0].title(latex=latex, superscript=superscript)
+
         if self == "fa3":
             result = "f_{{a3}}"
         elif self == "fa2":
@@ -445,6 +463,7 @@ class Analysis(MyEnum):
 
     @property
     def phi(self):
+        if self.is2d: return self.fais[0].phi
         if self == "fa3":
             return "#phi_{a3}"
         if self == "fa2":
@@ -463,6 +482,11 @@ class Analysis(MyEnum):
         if self == "fa2": return "g2"
         if self == "fL1": return "g1prime2"
         if self == "fL1Zg": return "ghzgs1prime2"
+        assert False, self
+    @property
+    def couplingnames(self):
+        if self.isfL1fL1Zg: return "g1prime2", "ghzgs1prime2"
+        assert False, self
     @property
     def couplingtitle(self):
         if self == "fa3": return "a_{3}"
@@ -479,6 +503,9 @@ class Analysis(MyEnum):
             return Hypothesis("0+"), Hypothesis("L1")
         if self == "fL1Zg":
             return Hypothesis("0+_photoncut"), Hypothesis("L1Zg")
+        if self.isfL1fL1Zg:
+            return Hypothesis("0+_photoncut"), Hypothesis("L1_photoncut"), Hypothesis("L1Zg")
+        assert False, self
     @property
     def mixdecayhypothesis(self):
         if self == "fa3":
@@ -513,6 +540,27 @@ class Analysis(MyEnum):
         if self == "fL1Zg": return True
         if self in ("fa2", "fa3", "fL1"): return False
         assert False
+    @property
+    def is2d(self):
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+        if self.isfL1fL1Zg: return True
+        assert False, self
+    @property
+    def doLHE(self):
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+        if self.isfL1fL1Zg: return True
+        assert False, self
+    def doCMS(self):
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
+        if self.isfL1fL1Zg: return False
+        assert False, self
+    @property
+    def fais(self):
+        if not self.is2d: return self,
+        if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
+    @property
+    def isfL1fL1Zg(self):
+        return "fL1fL1Zg" in str(self)
 
 class Production(MyEnum):
     enumname = "production"
@@ -520,6 +568,7 @@ class Production(MyEnum):
                  EnumItem("170203"),
                  EnumItem("170222"),
                  EnumItem("170712"),
+                 EnumItem("LHE_170509"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -558,6 +607,7 @@ class Production(MyEnum):
     @property
     def dataluminosity(self):
         if self in ("170203", "170222"): return 35.8671
+        if self == "LHE_170509": return 300
         assert False
     def __int__(self):
         return int(str(self))
@@ -570,6 +620,9 @@ class Production(MyEnum):
     def productionforsmoothingparameters(self):
         if self == "170222": return type(self)("170203")
         return self
+    @property
+    def LHE(self):
+        return "LHE" in str(self)
 
 class Category(MyEnum):
     """
@@ -669,17 +722,24 @@ btagsystematics = BTagSystematic.items()
 pythiasystematics = PythiaSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
-decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5", "fa2dec-0.9"))
+decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5", "fa2dec-0.9", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"))
 prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5", "fa2prod-0.5", "fa3prod-0.5", "fL1prod-0.5", "fL1Zgprod-0.5"))
-proddechypotheses = Hypothesis.items()
+fL1fL1Zghypotheses = Hypothesis.items(lambda x: x in ("L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"))
+proddechypotheses = Hypothesis.items(lambda x: x not in fL1fL1Zghypotheses)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
-analyses = Analysis.items()
+if config.LHE:
+    analyses = Analysis.items(lambda x: x.doLHE)
+else:
+    analyses = Analysis.items(lambda x: x.doCMS)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in ("170203", "170222", "170712"))
+if not config.LHE:
+    productions = Production.items(lambda x: x in ("170203", "170222", "170712"))
+else:
+    productions = Production.items(lambda x: x.LHE == True)
 #productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
 

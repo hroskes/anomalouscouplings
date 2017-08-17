@@ -31,6 +31,15 @@ class TemplatesFile(MultiEnum):
         if self.category is None:
             self.category = Category("Untagged")
 
+        if self.analysis.is2d:
+            if self.category != "Untagged":
+                raise ValueError("2D analysis is only done for untagged!\n{}".format(args))
+            if self.templategroup in ("vbf", "zh", "wh", "tth"):
+                raise ValueError("2D analysis is only done with decay information!\n{}".format(args))
+        if config.LHE:
+            if self.channel != "2e2mu":
+                raise ValueError("2D analysis is only done for 2e2mu for now!\n{}".format(args))
+
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
         if not self.shapesystematic.appliesto(self.templategroup):
@@ -41,7 +50,7 @@ class TemplatesFile(MultiEnum):
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic, self.production]
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.category, self.shapesystematic, self.production]
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".json")
@@ -58,7 +67,7 @@ class TemplatesFile(MultiEnum):
             if not os.path.exists(folder):
                 raise IOError("No folder {}".format(folder))
 
-        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.categorynamepart, self.shapesystematic, self.production]
+        nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.category, self.shapesystematic, self.production]
         if firststep: nameparts.append("firststep")
 
         nameparts = [str(x) for x in nameparts if x]
@@ -83,6 +92,8 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
             if self.analysis == "fL1Zg":
                 reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL1Zg-0.5")]
+            if self.analysis.isfL1fL1Zg:
+                reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL10.5_photoncut"), ReweightingSample("ggH", "fL1Zg0.5"), ReweightingSample("ggH", "fL10.5fL1Zg0.5")]
 
         elif self.templategroup == "vbf":
             if self.analysis == "fa3":
@@ -130,6 +141,7 @@ class TemplatesFile(MultiEnum):
         if self.templategroup in ["ggh", "vbf", "zh", "wh", "tth"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
+            if config.LHE: return [Template(self, "qqZZ")]
             result = ["qqZZ", "ggZZ"]
             if config.usedata:
                 result.append("ZX")
@@ -141,7 +153,10 @@ class TemplatesFile(MultiEnum):
 
     def inttemplates(self):
         if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM":
-            return [IntTemplate(self, "ggH", "g11gi1")]
+            if self.analysis.is2d:
+                return [IntTemplate(self, "ggH", _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
+            else:
+                return [IntTemplate(self, "ggH", "g11gi1")]
         elif self.templategroup == "vbf":
             return [IntTemplate(self, "VBF", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup == "zh":
@@ -171,6 +186,20 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1_decay")
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_decay")
+            if self.analysis == "fL1fL1Zg_DL1_DL1L1Zgint":
+                return discriminant("D_L1_decay")
+            if self.analysis == "fL1fL1Zg_DL1_DL1Zgint":
+                return discriminant("D_L1_decay")
+            if self.analysis == "fL1fL1Zg_DeR_DeLeR":
+                return discriminant("D_eR_decay")
+            if self.analysis == "fL1fL1Zg_DeR_DeLint":
+                return discriminant("D_eR_decay")
+            if self.analysis == "fL1fL1Zg_m1_m2":
+                return discriminant("Z1Mass")
+            if self.analysis == "fL1fL1Zg_m1_phi":
+                return discriminant("Z1Mass")
+            if self.analysis == "fL1fL1Zg_m2_phi":
+                return discriminant("Z2Mass")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -212,6 +241,20 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_decay")
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_decay")
+            if self.analysis == "fL1fL1Zg_DL1_DL1L1Zgint":
+                return discriminant("D_L1L1Zgint_decay")
+            if self.analysis == "fL1fL1Zg_DL1_DL1Zgint":
+                return discriminant("D_L1Zgint_decay")
+            if self.analysis == "fL1fL1Zg_DeR_DeLeR":
+                return discriminant("D_eLeR_decay")
+            if self.analysis == "fL1fL1Zg_DeR_DeLint":
+                return discriminant("D_eLint_decay")
+            if self.analysis == "fL1fL1Zg_m1_m2":
+                return discriminant("Z2Mass")
+            if self.analysis == "fL1fL1Zg_m1_phi":
+                return discriminant("Phi")
+            if self.analysis == "fL1fL1Zg_m2_phi":
+                return discriminant("Phi")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -246,19 +289,8 @@ class TemplatesFile(MultiEnum):
         return (self.purediscriminant, self.mixdiscriminant, self.bkgdiscriminant)
 
     @property
-    def categorynamepart(self):
-        if self.category == "Untagged":
-            return "Untagged"
-        if self.category == "VBFtagged":
-            return "VBFtag"
-        if self.category == "VHHadrtagged":
-            return "VHhadrtag"
-        assert False
-
-    @property
     @cache
     def invertedmatrix(self):
-        ganomalous = self.analysis.couplingname
         productionmode = str(self.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH")
         basis = SampleBasis([template.hypothesis for template in self.templates()], productionmode, self.analysis)
         invertedmatrix = basis.invertedmatrix
@@ -282,8 +314,17 @@ class TemplatesFile(MultiEnum):
             assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
 
         if self.templategroup in ("ggh", "tth"):
-            assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,3))
-            assert invertedmatrix[2,0] == 0 and invertedmatrix[2,2] == 0 #can't assert invertedmatrix[2,1] == 1 because different convention :(
+            if self.analysis.is2d:
+                assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
+                assert all(invertedmatrix[1,i] == 0 for i in (2, 4, 5))
+                assert all(invertedmatrix[2,i] == 0 for i in (0, 2, 3, 4, 5))
+                assert all(invertedmatrix[3,i] == 0 for i in (1, 3, 5))
+                assert all(invertedmatrix[4,i] == 0 for i in (0, 3, 4))
+                assert all(invertedmatrix[5,i] == 0 for i in (0, 1, 3, 4, 5))
+                assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
+            else:
+                assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,3))
+                assert invertedmatrix[2,0] == 0 and invertedmatrix[2,2] == 0 #can't assert invertedmatrix[2,1] == 1 because different convention :(
 
         return invertedmatrix
 
@@ -335,19 +376,23 @@ def listfromiterator(function):
 @listfromiterator
 def templatesfiles():
     for channel in channels:
+        if channel != "2e2mu" and config.LHE: continue
         for production in productions:
             for analysis in analyses:
                 for category in categories:
+                    if category != "Untagged" and analysis.is2d: continue
                     for shapesystematic in treeshapesystematics:
                         if category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+                        if config.LHE and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
                         if shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+                        yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
+                        if analysis.is2d: continue
                         yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
-                    if config.showblinddistributions:
+                    if config.showblinddistributions and not config.LHE:
                         yield TemplatesFile(channel, "DATA", analysis, production, category)
                     if category != "Untagged" and config.applyMINLOsystematics:
                         yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
@@ -493,14 +538,28 @@ class Template(TemplateBase, MultiEnum):
                 name = "template0MinusAdapSmooth"
             elif self.hypothesis == "a2":
                 name = "template0HPlusAdapSmooth"
-            elif self.hypothesis == "L1":
+            elif self.hypothesis in ("L1", "L1_photoncut"):
                 name = "template0L1AdapSmooth"
             elif self.hypothesis == "L1Zg":
                 name = "template0L1ZgAdapSmooth"
-            elif self.hypothesis in ("fa20.5", "fa30.5", "fL10.5", "fL1Zg0.5"):
-                name = "templateMixAdapSmooth"
-            elif self.hypothesis in ("fa2-0.5", "fa3-0.5", "fL1-0.5", "fL1Zg-0.5"):
-                name = "templateMixPiAdapSmooth"
+            elif self.hypothesis == "fa20.5":
+                name = "templateMixa1a2AdapSmooth"
+            elif self.hypothesis == "fa30.5":
+                name = "templateMixa1a3AdapSmooth"
+            elif self.hypothesis in ("fL10.5", "fL10.5_photoncut"):
+                name = "templateMixa1L1AdapSmooth"
+            elif self.hypothesis == "fL1Zg0.5":
+                name = "templateMixa1L1ZgAdapSmooth"
+            elif self.hypothesis == "fa2-0.5":
+                name = "templateMixa1a2PiAdapSmooth"
+            elif self.hypothesis == "fa3-0.5":
+                name = "templateMixa1a3PiAdapSmooth"
+            elif self.hypothesis == "fL1-0.5":
+                name = "templateMixa1L1PiAdapSmooth"
+            elif self.hypothesis == "fL1Zg-0.5":
+                name = "templateMixa1L1ZgPiAdapSmooth"
+            elif self.hypothesis == "fL10.5fL1Zg0.5":
+                name = "templateMixL1L1ZgAdapSmooth"
         elif self.productionmode in ("VBF", "ZH", "WH"):
             if self.hypothesis in ("0+", "0+_photoncut"):
                 name = "template0PlusAdapSmooth"
@@ -568,7 +627,9 @@ class Template(TemplateBase, MultiEnum):
 
     def reweightfrom(self):
         if self.productionmode == "ggH":
-            if self.shapesystematic == "MINLO_SM":
+            if config.LHE:
+                result = {Sample(self.production, self.productionmode, self.hypothesis)}
+            elif self.shapesystematic == "MINLO_SM":
                 result = {Sample(self.production, self.productionmode, self.hypothesis, "MINLO")}
             else:
                 result={
@@ -762,12 +823,15 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def selection(self):
-        result = "ZZMass>{} && ZZMass<{} && Z1Flav*Z2Flav == {}".format(config.m4lmin, config.m4lmax, self.ZZFlav)
-        result += " && (" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")"
-        return result
+        result = ["ZZMass>{}".format(config.m4lmin), "ZZMass<{}".format(config.m4lmax)]
+        if not config.LHE:
+            result.append("Z1Flav*Z2Flav == {}".format(self.ZZFlav))
+            result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")")
+        return " && ".join(result)
 
     @property
     def ZZFlav(self):
+        assert not config.LHE
         result = self.channel.ZZFlav
         if self.productionmode == "ZX": result *= -1
         return result
@@ -823,6 +887,8 @@ class IntTemplate(TemplateBase, MultiEnum):
         enumname = "interferencetype"
         enumitems = (
                      EnumItem("g11gi1"),
+                     EnumItem("g11gj1"),
+                     EnumItem("gi1gj1"),
                      EnumItem("g11gi3"),
                      EnumItem("g12gi2"),
                      EnumItem("g13gi1"),
@@ -833,8 +899,11 @@ class IntTemplate(TemplateBase, MultiEnum):
 
         dontcheck = []
 
+        if self.interferencetype in ("g11gj1", "gi1gj1") and not self.analysis.is2d:
+            raise ValueError("Invalid interferencetype {} for 1D analysis\n{}".format(self.interferencetype, args))
+
         if self.productionmode in ("ggH", "ttH"):
-            if self.interferencetype != "g11gi1":
+            if self.interferencetype not in ("g11gi1", "g11gj1", "gi1gj1"):
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
         elif self.productionmode in ("VBF", "ZH", "WH"):
             if self.interferencetype not in ("g11gi3", "g12gi2", "g13gi1"):
@@ -855,7 +924,20 @@ class IntTemplate(TemplateBase, MultiEnum):
     def templatename(self, final=True):
         if self.productionmode in ("ggH", "ttH"):
             if self.interferencetype == "g11gi1":
-                result = "templateIntAdapSmooth"
+                if self.analysis == "fa3":
+                    result = "templatea1a3IntAdapSmooth"
+                elif self.analysis == "fa2":
+                    result = "templatea1a2IntAdapSmooth"
+                elif self.analysis == "fL1" or self.analysis.isfL1fL1Zg:
+                    result = "templatea1L1IntAdapSmooth"
+                elif self.analysis == "fL1Zg":
+                    result = "templatea1L1ZgIntAdapSmooth"
+            elif self.interferencetype == "g11gj1":
+                if self.analysis.isfL1fL1Zg:
+                    result = "templatea1L1ZgIntAdapSmooth"
+            elif self.interferencetype == "gi1gj1":
+                if self.analysis.isfL1fL1Zg:
+                    result = "templateL1L1ZgIntAdapSmooth"
         if self.productionmode in ("VBF", "ZH", "WH"):
             if self.interferencetype == "g11gi3":
                 result = "templateg11{}3AdapSmooth".format(self.analysis.couplingname)
@@ -898,15 +980,33 @@ class IntTemplate(TemplateBase, MultiEnum):
     def templatesandfactors(self):
         if self.interferencetype == "g11gi1":
             g1exp = giexp = 1
+            rowofinvertedmatrix = giexp #first row is labeled 0
             hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
-            multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.couplingname)
+            multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
+
+        if self.interferencetype == "g11gj1":
+            assert self.analysis.is2d
+            rowofinvertedmatrix = 3 #first row is labeled 0
+            hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
+            multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[2], hffhypothesis), self.analysis.purehypotheses[2].couplingname)
+
+        if self.interferencetype == "gi1gj1":
+            assert self.analysis.is2d
+            rowofinvertedmatrix = 4 #first row is labeled 0
+            hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
+            multiplyby = (
+                          getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
+                         *
+                          getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[2], hffhypothesis), self.analysis.purehypotheses[2].couplingname)
+                         )
+
         if self.interferencetype in ("g11gi3", "g12gi2", "g13gi1"):
             g1exp, giexp = (int(i) for i in str(self.interferencetype).replace("g1", "").replace("gi", ""))
+            rowofinvertedmatrix = giexp #first row is labeled 0
             multiplyby = 1
 
         invertedmatrix = self.templatesfile.invertedmatrix
         vectoroftemplates = self.templatesfile.templates()  #ok technically it's a list not a vector
-        rowofinvertedmatrix = giexp  #first row is labeled 0
         templatesandfactors = []
 
         for j, template in enumerate(vectoroftemplates):
@@ -961,6 +1061,15 @@ class IntTemplate(TemplateBase, MultiEnum):
 class DataTree(MultiEnum):
     enums = [Channel, Production, Category, Analysis]
     enumname = "datatree"
+    def check(self, *args):
+        super(DataTree, self).check(*args)
+        if self.analysis.is2d:
+            if self.category != "Untagged":
+                raise ValueError("2D analysis is only done for untagged!\n{}".format(args))
+        if config.LHE:
+            if self.channel != "2e2mu":
+                raise ValueError("2D analysis is only done for 2e2mu for now!\n{}".format(args))
+
     @property
     def originaltreefile(self):
         return Sample("data", self.production).withdiscriminantsfile()
@@ -970,12 +1079,15 @@ class DataTree(MultiEnum):
     def passescut(self, t):
         return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblinddistributions and getattr(t, "category_"+self.analysis.categoryname) in self.category
 
-datatrees = []
-for channel in channels:
-    for production in productions:
-        for category in categories:
-            for analysis in analyses:
-                datatrees.append(DataTree(channel, production, category, analysis))
+@listfromiterator
+def datatrees():
+    for channel in channels:
+        if channel != "2e2mu" and config.LHE: continue
+        for production in productions:
+            for category in categories:
+                for analysis in analyses:
+                    if category != "Untagged" and analysis.is2d: continue
+                    yield DataTree(channel, production, category, analysis)
 
 
 

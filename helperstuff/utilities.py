@@ -3,12 +3,15 @@ import collections
 import contextlib
 import errno
 from functools import wraps
+import inspect
 from itertools import tee, izip
 import logging
 import operator
 import json
 import os
+import pipes
 import shutil
+import subprocess
 import sys
 import tempfile
 import time
@@ -72,6 +75,18 @@ def cache(function):
             cache[args, tuple(sorted(kwargs.iteritems()))] = function(*args, **kwargs)
             return newfunction(*args, **kwargs)
     return newfunction
+
+def cache_instancemethod(function):
+    """
+    This one can't take arguments.
+    But the cache clears when self is deleted (as opposed to the cache keeping self alive).
+    Probably could be modified to take arguments without too much trouble.
+    """
+    @wraps(function)
+    def newfunction(self):
+        if not hasattr(self, "__cache_instancemethod_{}".format(function.__name__)):
+            setattr(self, "__cache_instancemethod_{}".format(function.__name__), function(self))
+        return getattr(self, "__cache_instancemethod_{}".format(function.__name__))
 
 def multienumcache(function, haskwargs=False, multienumforkey=None):
     from enums import MultiEnum
@@ -513,3 +528,76 @@ def mkdtemp(**kwargs):
             else:
                 assert False, config.host
     return tempfile.mkdtemp(**kwargs)
+
+def getmembernames(*args, **kwargs):
+    return [_[0] for _ in inspect.getmembers(*args, **kwargs)]
+
+lastcmsswbase = None
+
+"""
+this doesn't work
+def cmsenv(folder="."):
+    global lastcmsswbase
+    #pythonpath needs special handling
+    oldpythonpath = os.environ["PYTHONPATH"].split(":")
+    indexinsyspath = sys.path.index(oldpythonpath[0])
+
+    with cd(folder):
+        scram = subprocess.check_output(["scram", "ru", "-sh"])
+        for line in scram.splitlines():
+            potentialerror = ValueError("Unknown scram b output:\n{}".format(line))
+            if line.split()[0] == "unset":
+                if line[-1] != ';': raise potentialerror
+                line = line[:-1]
+                for variable in line.split()[1:]:
+                    del os.environ[variable]
+            elif line.split()[0] == "export":
+                afterexport = line.split(None, 1)[1]
+                variable, value = afterexport.split("=", 1)
+                if value[0] != '"' or value[-2:] != '";': raise potentialerror
+                value = value[1:-2]
+                if "\\" in value or '"' in value or "'" in line: raise potentialerror
+                os.environ[variable] = value
+            else:
+                raise potentialerror
+
+    newpythonpath = os.environ["PYTHONPATH"].split(":")
+    for _ in oldpythonpath: sys.path.remove(_)
+    sys.path[indexinsyspath:indexinsyspath] = newpythonpath
+
+    if lastcmsswbase is not None and os.environ["CMSSW_BASE"] != lastcmsswbase:
+        raise ValueError("Can't cmsenv in both {} and {}!".format(lastcmsswbase, os.environ["CMSSW_BASE"]))
+    lastcmsswbase = os.environ["CMSSW_BASE"]
+"""
+
+def requirecmsenv(folder):
+    needcmsswbase = subprocess.check_output("cd {} && eval $(scram ru -sh) >& /dev/null && echo $CMSSW_BASE".format(pipes.quote(folder)), shell=True).strip()
+    cmsswbase = os.environ["CMSSW_BASE"]
+    if cmsswbase != needcmsswbase:
+        raise ValueError("Need to cmsenv in {}!".format(needcmsswbase))
+
+def deletemelastuff():
+    if os.path.exists("Pdfdata"):
+        shutil.rmtree("Pdfdata")
+    for thing in "br.sm1", "br.sm2", "ffwarn.dat", "input.DAT", "process.DAT":
+        if os.path.exists(thing):
+            os.remove(thing)
+
+class cdtemp_slurm(object):
+    def __enter__(self):
+        import config
+        self.cd = None
+        if config.host == "lxplus":
+            return
+        elif config.host == "MARCC":
+            if LSB_JOBID() is not None:
+                self.cd = cd(mkdtemp())
+                return self.cd.__enter__()
+            else:
+                return
+        else:
+            assert False, config.host
+
+    def __exit__(self, *args, **kwargs):
+        if self.cd is not None:
+            return self.cd.__exit__(*args, **kwargs)

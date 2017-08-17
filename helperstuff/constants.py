@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 from math import sqrt
 
+M_Z = 91.1876
+Ga_Z = 2.4952
+aL = -0.53762
+aR = 0.46238
+e = 0.8431872482432357  # = cL_lep = cR_lep from mod_Parameters
+L1 = 10000.
+
 #https://github.com/cms-analysis/HiggsAnalysis-ZZMatrixElement/blob/c6d45de/MELA/src/Mela.cc#L307
 CJLSTg4decay_mix = 2.521
 CJLSTg2decay_mix = 1.638
@@ -17,6 +24,8 @@ g1prime2decay_gen = -12110.20   #for the sample
 g1prime2decay_reco = 12110.20   #for discriminants
 ghzgs1prime2decay_gen = -7613.351302119843
 ghzgs1prime2decay_reco = 7613.351302119843
+eLdecay = sqrt(7.2310297E+00 / 1.4347981E+01)
+eRdecay = sqrt(7.2310297E+00 / 1.3952140E+00)
 
 g2VBF = 0.271965
 g4VBF = 0.297979
@@ -68,16 +77,20 @@ SMXSWpH2L2l = SMXSWpH * SMBR2L2l
 SMXSWmH2L2l = SMXSWmH * SMBR2L2l
 SMXSttH2L2l = SMXSttH * SMBR2L2l
 
-JHUXSggH2L2la1           = 7.1517173;      JHUXSggH2L2la1err            = 0.23044650E-03
-JHUXSggH2L2la2           = 2.5849908;      JHUXSggH2L2la2err            = 0.77294379E-04
-JHUXSggH2L2la3           = 1.0954288;      JHUXSggH2L2la3err            = 0.43443941E-04
-JHUXSggH2L2lL1           = 0.48754258E-07; JHUXSggH2L2lL1err            = 0.15112345E-11
-JHUXSggH2L2la1a2         = 26.073377;      JHUXSggH2L2la1a2err          = 0.74026916E-03
-JHUXSggH2L2la1a3         = 14.278034;      JHUXSggH2L2la1a3err          = 0.45318122E-03
-JHUXSggH2L2la1L1         = 0.23727827;     JHUXSggH2L2la1L1err          = 0.15982277E-04    #using g1prime2 = -12100.42
-JHUXSggH2L2la1_photoncut = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27583899E-03    #This is bigger than the uncut xsec.  Fix below.
-JHUXSggH2L2lL1Zg         = 0.12338393E-06; JHUXSggH2L2lL1Zgerr          = 0.58002047E-11
-JHUXSggH2L2la1L1Zg       = 13.145473;      JHUXSggH2L2la1L1Zgerr        = 0.53550812E-03
+JHUXSggH2L2la1             = 7.1517173;      JHUXSggH2L2la1err            = 0.23044650E-03
+JHUXSggH2L2la2             = 2.5849908;      JHUXSggH2L2la2err            = 0.77294379E-04
+JHUXSggH2L2la3             = 1.0954288;      JHUXSggH2L2la3err            = 0.43443941E-04
+JHUXSggH2L2lL1             = 0.48754258E-07; JHUXSggH2L2lL1err            = 0.15112345E-11
+JHUXSggH2L2la1a2           = 26.073377;      JHUXSggH2L2la1a2err          = 0.74026916E-03
+JHUXSggH2L2la1a3           = 14.278034;      JHUXSggH2L2la1a3err          = 0.45318122E-03
+JHUXSggH2L2la1L1           = 0.23727827;     JHUXSggH2L2la1L1err          = 0.15982277E-04    #using g1prime2 = -12100.42
+JHUXSggH2L2la1_photoncut   = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27583899E-03    #This is bigger than the uncut xsec.  Fix below.
+JHUXSggH2L2lL1Zg           = 0.12338393E-06; JHUXSggH2L2lL1Zgerr          = 0.58002047E-11
+JHUXSggH2L2la1L1Zg         = 13.145473;      JHUXSggH2L2la1L1Zgerr        = 0.53550812E-03
+JHUXSggH2L2lL1L1Zg         = 1.6472524E+01;  JHUXSggH2L2lL1L1Zgerr        = 2.2689281E-02
+
+JHUXSggH2L2leL = 1.4347981E+01
+JHUXSggH2L2leR = 1.3952140E+01
 
 JHUXSVBFa1           = 968.674284006;      JHUXSVBFa1err            = 0.075115702763
 JHUXSVBFa2           = 13102.7106117;      JHUXSVBFa2err            = 0.522399748272
@@ -206,6 +219,10 @@ JHUXSggH2L2la1a3, JHUXSggH2L2la1a3err = JHUXSggH2L2la1*2, JHUXSggH2L2la1err*2
 if photoncutsame:
     JHUXSggH2L2la1_photoncut = JHUXSggH2L2la1
     JHUXSggH2L2la1err_photoncut = JHUXSggH2L2la1err
+    JHUXSggH2L2lL1_photoncut = JHUXSggH2L2lL1
+    JHUXSggH2L2lL1err_photoncut = JHUXSggH2L2lL1err
+    JHUXSggH2L2la1L1_photoncut = JHUXSggH2L2la1L1
+    JHUXSggH2L2la1L1err_photoncut = JHUXSggH2L2la1L1err
 
 #VBF
 
@@ -295,7 +312,9 @@ del values, errors
 JHUXSggH2L2la1a2,   JHUXSggH2L2la1a2err   = JHUXSggH2L2la1a2   - 2*JHUXSggH2L2la1, sqrt(JHUXSggH2L2la1a2err  **2 + 4*JHUXSggH2L2la1err**2)
 JHUXSggH2L2la1a3,   JHUXSggH2L2la1a3err   = JHUXSggH2L2la1a3   - 2*JHUXSggH2L2la1, 0
 JHUXSggH2L2la1L1,   JHUXSggH2L2la1L1err   = JHUXSggH2L2la1L1   - 2*JHUXSggH2L2la1, sqrt(JHUXSggH2L2la1L1err  **2 + 4*JHUXSggH2L2la1err**2)
+JHUXSggH2L2la1L1_photoncut, JHUXSggH2L2la1L1err_photoncut = JHUXSggH2L2la1L1_photoncut - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la1L1err_photoncut **2 + 4*JHUXSggH2L2la1err**2)
 JHUXSggH2L2la1L1Zg, JHUXSggH2L2la1L1Zgerr = JHUXSggH2L2la1L1Zg - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la1L1Zgerr**2 + 4*JHUXSggH2L2la1err_photoncut**2)
+JHUXSggH2L2lL1L1Zg, JHUXSggH2L2lL1L1Zgerr = JHUXSggH2L2lL1L1Zg - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2lL1L1Zgerr**2 + 4*JHUXSggH2L2la1err_photoncut**2)
 
 JHUXSVBFa1a2,   JHUXSVBFa1a2err   = JHUXSVBFa1a2   - 2*JHUXSVBFa1, sqrt(JHUXSVBFa1a2err  **2 + 4*JHUXSVBFa1err**2)
 JHUXSVBFa1a3,   JHUXSVBFa1a3err   = JHUXSVBFa1a3   - 2*JHUXSVBFa1, 0

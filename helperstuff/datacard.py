@@ -1,13 +1,14 @@
 from collections import Counter
 import inspect
 import itertools
+from math import pi
 import os
 import time
 
 import ROOT
 
 import combineinclude
-from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1
+from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1, zerotemplate
 import config
 from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
 import utilities
@@ -127,7 +128,17 @@ class _Datacard(MultiEnum):
 
     @property
     def productionmodes(self):
-        return [ProductionMode(p) for p in ("ggH", "qqH", "WH", "ZH", "ttH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets")]
+        result = [ProductionMode(p) for p in ("ggH", "qqH", "WH", "ZH", "ttH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets")]
+        if self.analysis.is2d:
+            result.remove("VBF")
+            result.remove("WH")
+            result.remove("ZH")
+            result.remove("ttH")
+        if config.LHE:
+            result.remove("ggZZ")
+            result.remove("VBFbkg")
+            result.remove("ZX")
+        return result
 
     @property
     def imax(self):
@@ -190,6 +201,9 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
+        if config.LHE:
+            if yieldsystematic == "QCDscale_VV": return " ".join(["lnN"] + ["1.1" if p=="qqZZ" else "-" for p in self.productionmodes])
+            else: return None
         return " ".join(
                         ["lnN"] +
                         [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, p))
@@ -238,9 +252,13 @@ class _Datacard(MultiEnum):
                 return "param 0 1 [-3,3]"
 
     @property
-    def muV_scaled(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
+    def muV_scaled(self):
+        if config.LHE: return None
+        return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
     @property
-    def muf_scaled(self): return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
+    def muf_scaled(self):
+        if config.LHE: return None
+        return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
 
     section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, "muV_scaled", "muf_scaled")
 
@@ -265,6 +283,27 @@ class _Datacard(MultiEnum):
         fai = ROOT.RooRealVar(name, name, -1., 1.)
         fai.setBins(1000)
         return fai
+    @classmethod
+    @cache
+    def faj(cls):
+        name = makename("CMS_zz4l_fai2")
+        faj = ROOT.RooRealVar(name, name, -1., 1.)
+        faj.setBins(1000)
+        return faj
+    @classmethod
+    @cache
+    def phiai(cls):
+        name = makename("CMS_zz4l_phiai1")
+        phiai = ROOT.RooRealVar(name, name, -pi, pi)
+        phiai.setBins(1000)
+        return phiai
+    @classmethod
+    @cache
+    def phiaj(cls):
+        name = makename("CMS_zz4l_phiai2")
+        phiaj = ROOT.RooRealVar(name, name, -pi, pi)
+        phiaj.setBins(1000)
+        return phiaj
     @classmethod
     @cache
     def mixturesign_constvar(cls, analysis):
@@ -292,12 +331,18 @@ class _Datacard(MultiEnum):
         ## -------------------------- SIGNAL SHAPE ----------------------------------- ##
 
         fai = self.fai()
-        mixturesign_constvar = self.mixturesign_constvar(self.analysis)
-        sigmaioversigma1_constvar = self.sigmaioversigma1_constvar(self.analysis)
-        a1 = self.a1()
-        ai = self.ai(self.analysis)
+        if self.analysis.is2d:
+            a1 = ai = None
+            faj = self.faj()
+            phiai = self.phiai()
+            phiaj = self.phiaj()
+        else:
+            mixturesign_constvar = self.mixturesign_constvar(self.analysis)
+            sigmaioversigma1_constvar = self.sigmaioversigma1_constvar(self.analysis)
+            a1 = self.a1()
+            ai = self.ai(self.analysis)
+            faj = phiai = phiaj = None
 
-        #add category name in case the same discriminant is used in multiple categories
         discs = discriminants(self.analysis, self.category)
         D1Name, D2Name, D3Name = (d.name for d in discs)
         dBinsX, dBinsY, dBinsZ = (d.bins for d in discs)
@@ -314,7 +359,7 @@ class _Datacard(MultiEnum):
         self.pdfs = []
 
         for p in self.productionmodes:
-            pdfkwargs = {"fai": fai, "a1": a1, "ai": ai, "D1": D1, "D2": D2, "D3": D3}
+            pdfkwargs = {"fai": fai, "a1": a1, "ai": ai, "D1": D1, "D2": D2, "D3": D3, "faj": faj, "phiai": phiai, "phiaj": phiaj}
             self.pdfs.append(Pdf(self, p, **pdfkwargs))
             for systematic in p.workspaceshapesystematics(self.category):
                 self.pdfs.append(Pdf(self, p, systematic, "Up", **pdfkwargs))
@@ -337,9 +382,11 @@ class _Datacard(MultiEnum):
 
         if config.usefastpdf:
             w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf_1D_fast.Class(),True)
+            w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf_2D_fast.Class(),True)
             w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf_fast.Class(),True)
         else:
             w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf.Class(),True)
+            w.importClassCode(ROOT.HZZ4L_RooSpinZeroPdf_2D.Class(),True)
             w.importClassCode(ROOT.VBFHZZ4L_RooSpinZeroPdf.Class(),True)
 
         getattr(w,'import')(self.data_obs,ROOT.RooFit.Rename("data_obs")) ### Should this be renamed?
@@ -348,7 +395,8 @@ class _Datacard(MultiEnum):
             getattr(w, 'import')(pdf.pdf, ROOT.RooFit.RecycleConflictNodes())
             if pdf.productionmode.issignal and pdf.shapesystematic == "":
                 getattr(w, 'import')(pdf.norm, ROOT.RooFit.RecycleConflictNodes())
-                getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
+                if not self.analysis.is2d:
+                    getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
 
         w.writeToFile(self.rootfile_base)
 
@@ -360,6 +408,8 @@ class _Datacard(MultiEnum):
         mkdir_p(outdir)
         with cd(outdir), Tee(self.logfile, 'w'):
             for channel, category in itertools.product(channels, categories):
+                if config.LHE and channel != "2e2mu": continue
+                if self.analysis.is2d and category != "Untagged": continue
                 Datacard(channel, category, self.analysis, self.luminosity).makepdfs()
             self.writeworkspace()
             self.linkworkspace()
@@ -384,7 +434,8 @@ class PdfBase(MultiEnum):
 
 class _Pdf(PdfBase):
     def __init__(self, *args, **kwargs):
-        for thing in "fai", "a1", "ai", "D1", "D2", "D3":
+        for thing in "fai", "a1", "ai", "D1", "D2", "D3", "faj", "phiai", "phiaj":
+            assert not hasattr(self, thing)
             setattr(self, thing, kwargs[thing])
             del kwargs[thing]
         super(_Pdf, self).__init__(*args, **kwargs)
@@ -517,27 +568,39 @@ class _Pdf(PdfBase):
     @classmethod
     @cache
     def RV(cls):
-        return ROOT.RooRealVar(makename("RV"), "RV", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("RV"), "RV", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def RF(cls):
-        return ROOT.RooRealVar(makename("RF"), "RF", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("RF"), "RF", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def R(cls):
-        return ROOT.RooRealVar(makename("R"), "R", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("R"), "R", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def RV_13TeV(cls):
-        return ROOT.RooRealVar(makename("RV_13TeV"), "RV_13TeV", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("RV_13TeV"), "RV_13TeV", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def RF_13TeV(cls):
-        return ROOT.RooRealVar(makename("RF_13TeV"), "RF_13TeV", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("RF_13TeV"), "RF_13TeV", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def R_13TeV(cls):
-        return ROOT.RooRealVar(makename("R_13TeV"), "R_13TeV", 1, 0, 400)
+        result = ROOT.RooRealVar(makename("R_13TeV"), "R_13TeV", 1, 0, 400)
+        result.setConstant()
+        return result
     @classmethod
     @cache
     def muV(cls):
@@ -576,6 +639,51 @@ class _Pdf(PdfBase):
             self.r_fai_pures_norm = ROOT.RooFormulaVar(self.puresnormname, "", "( (1-abs(@0))*@1+abs(@0)*@2 )",ROOT.RooArgList(self.fai, self.T_integral[0], self.T_integral[1]))
             self.r_fai_realints_norm = ROOT.RooFormulaVar(self.realintsnormname, "", "(sign(@0)*sqrt(abs(@0)*(1-abs(@0)))*@1)",ROOT.RooArgList(self.fai, self.T_integral[2]))
             self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@2))>1 ? 0. : TMath::Max((@0+@1),0)", ROOT.RooArgList(self.r_fai_pures_norm, self.r_fai_realints_norm, self.fai))
+            self.norm_SM = self.T_integral[0]
+            self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1 * @2", ROOT.RooArgList(self.individualnorm, self.norm_SM, self.muf()))
+
+    @cache
+    def makepdf_decayonly_2D(self):
+        #https://github.com/hroskes/HiggsAnalysis-CombinedLimit/blob/e828bd35a5b27dda1ae31a00154053e3d2b6fe89/src/HZZ4L_RooSpinZeroPdf_2D_fast.cc#L89-L97
+        self.T = [
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[0], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[1], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, self.analysis.purehypotheses[2], self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "g11gj1", self.channel, self.shapesystematic),
+                  gettemplate(self.productionmode, self.analysis, self.production, self.category, "gi1gj1", self.channel, self.shapesystematic),
+                  zerotemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                  zerotemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                  zerotemplate(self.productionmode, self.analysis, self.production, self.category, "g11gi1", self.channel, self.shapesystematic),
+                 ]
+        for i, t in enumerate(self.T, start=1):
+            t.SetName(self.templatename(i))
+
+        if config.usefastpdf:
+            if config.usefastpdfdouble:
+                self.T_datahist = [ROOT.FastHisto3D_d(t) for i, t in enumerate(self.T, start=1)]
+                self.T_histfunc = [ROOT.FastHisto3DFunc_d(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+            else:
+                self.T_datahist = [ROOT.FastHisto3D_f(t) for i, t in enumerate(self.T, start=1)]
+                self.T_histfunc = [ROOT.FastHisto3DFunc_f(self.histfuncname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+        else:
+            self.T_datahist = [ROOT.RooDataHist(self.datahistname(i), "", ROOT.RooArgList(self.D1,self.D2,self.D3), t) for i, t in enumerate(self.T, start=1)]
+            self.T_histfunc = [ROOT.RooHistFunc(self.histfuncname(i), "", ROOT.RooArgSet(self.D1,self.D2,self.D3), datahist) for i, datahist in enumerate(self.T_datahist, start=1)]
+
+        if self.shapesystematic == "":
+            self.T_integral = [ROOT.RooConstVar(self.integralname(i), "", t.Integral()) for i, t in enumerate(self.T, start=1)]
+            for i, integral in enumerate(self.T_integral, start=1):
+                print "{} T{}".format(self.productionmode, i), integral.getVal()
+
+            self.individualnorm = ROOT.RooFormulaVar(self.individualnormname, "", "(abs(@0)+abs(@1))>1 ? 0. : TMath::Max(0, "
+                                                                                    "(1-abs(@0)-abs(@1)) * @2 + "
+                                                                                    "abs(@0) * @3 + "
+                                                                                    "abs(@1) * @4 + "
+                                                                                    "(@0>0?1:-1)   * sqrt((1-abs(@0)-abs(@1))*abs(@0)) * @5 + "
+                                                                                    "(@1>0?1:-1)   * sqrt((1-abs(@0)-abs(@1))*abs(@1)) * @6 + "
+                                                                                    "(@0*@1>0?1:-1)* sqrt(abs(@0*@1)) * @7"
+                                                                                  ")",
+                                                     utilities.RooArgList(self.fai, self.faj, *self.T_integral))
             self.norm_SM = self.T_integral[0]
             self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "@0/@1 * @2", ROOT.RooArgList(self.individualnorm, self.norm_SM, self.muf()))
 
@@ -682,7 +790,10 @@ class _Pdf(PdfBase):
 
     def makepdf(self):
         if self.productionmode in ("ggH", "ttH"):
-            self.makepdf_decayonly()
+            if self.analysis.is2d:
+                self.makepdf_decayonly_2D()
+            else:
+                self.makepdf_decayonly()
         elif self.productionmode in ("VBF", "ZH", "WH"):
             self.makepdf_proddec()
         elif self.productionmode == "ZX":
@@ -702,6 +813,12 @@ class _Pdf(PdfBase):
         else:
             return ROOT.HZZ4L_RooSpinZeroPdf(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.fai, ROOT.RooArgList(*self.T_histfunc))
     @cache
+    def getpdf_decayonly_2D(self):
+        if config.usefastpdf:
+            return ROOT.HZZ4L_RooSpinZeroPdf_2D_fast(self.pdfname, self.pdfname, self.fai, self.faj, self.phiai, self.phiaj, ROOT.RooArgList(self.D1, self.D2, self.D3), ROOT.RooArgList(*self.T_histfunc))
+        else:
+            return ROOT.HZZ4L_RooSpinZeroPdf_2D(self.pdfname, self.pdfname, self.D1, self.D2, self.D3, self.fai, self.faj, self.phiai, self.phiaj, ROOT.RooArgList(*self.T_histfunc))
+    @cache
     def getpdf_proddec(self):
         if config.usefastpdf:
             return ROOT.VBFHZZ4L_RooSpinZeroPdf_fast(self.pdfname, self.pdfname, self.a1, self.ai, ROOT.RooArgList(self.D1, self.D2, self.D3), ROOT.RooArgList(*self.T_histfunc))
@@ -717,7 +834,10 @@ class _Pdf(PdfBase):
     def getpdf(self):
         self.makepdf()
         if self.productionmode in ("ggH", "ttH"):
-            return self.getpdf_decayonly()
+            if self.analysis.is2d:
+                return self.getpdf_decayonly_2D()
+            else:
+                return self.getpdf_decayonly()
         elif self.productionmode in ("VBF", "ZH", "WH"):
             return self.getpdf_proddec()
         elif self.productionmode == "ZX":
@@ -743,6 +863,8 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
         if all(os.path.exists(thing) for dc in dcs for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)):
             return
         for dc in dcs:
+            if config.LHE and dc.channel != "2e2mu": continue
+            if dc.analysis.is2d and dc.category != "Untagged": continue
             dc.makeCardsWorkspaces(**kwargs)
             for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
                 if not os.path.exists(thing):

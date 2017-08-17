@@ -16,6 +16,7 @@ import stylefunctions as style
 from combinehelpers import Luminosity
 from enums import Analysis, EnumItem, MyEnum
 from extendedcounter import ExtendedCounter
+from samples import samplewithfeLfeR
 from utilities import cache
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
@@ -25,6 +26,7 @@ Scan = namedtuple("Scan", "name title color style")
 def plottitle(nuisance):
     nuisance = actualvariable(nuisance)
     if nuisance == "CMS_zz4l_fai1": return "fai"
+    if nuisance == "CMS_zz4l_fai2": return "faj"
     if nuisance == "muV_scaled": return "muV"
     if nuisance == "muf_scaled": return "muf"
     if nuisance == "JES": return nuisance
@@ -32,6 +34,7 @@ def plottitle(nuisance):
 def xaxistitle(POI, analysis):
     POI = actualvariable(POI)
     if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(), analysis.phi_lower)
+    if POI == "CMS_zz4l_fai2": return "{} cos({})".format(analysis.fais[1].title(), analysis.fais[1].phi_lower)
     if POI == "muV_scaled": return "#mu_{V}"
     if POI == "muf_scaled": return "#mu_{f}"
     if nuisance == "JES": return nuisance
@@ -39,6 +42,7 @@ def xaxistitle(POI, analysis):
 def xaxisrange(POI):
     POI = actualvariable(POI)
     if POI == "CMS_zz4l_fai1": return -1.0, 1.0
+    if POI == "CMS_zz4l_fai2": return -1.0, 1.0
 def yaxistitle(nuisance, analysis):
     nuisance = actualvariable(nuisance)
     if nuisance is None: return "#minus2 #Deltaln L"
@@ -53,6 +57,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     analysis = Analysis(analysis)
     productions = None
     legendposition = (.2, .7, .6, .9)
+    CLtextposition = "left"
     moreappend = ""
     luminosity = None
     scanranges = None
@@ -61,6 +66,11 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     fixfai = False
     CMStext = "Preliminary"
     drawCMS = True
+    contactterms = False
+    infilename = filenametemplate
+    xtitle = None
+    scanfai = analysis
+    killpoints = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -84,8 +94,23 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             CMStext = kwarg
         elif kw == "drawCMS":
             drawCMS = kwarg
+        elif kw == "scanfai":
+            scanfai = kwarg
+        elif kw == "contactterms":
+            contactterms = kwarg
+        elif kw == "infilename":
+            infilename = kwarg
+        elif kw == "xtitle":
+            xtitle = kwarg
+        elif kw == "killpoints":
+            assert len(kwarg) == 2
+            killpoints = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    if scanfai == analysis.fais[0]: pass
+    elif scanfai == analysis.fais[1]: POI = "CMS_zz4l_fai2"
+    else: assert False
 
     xmin = min(scanrange[1] for scanrange in scanranges)
     xmax = max(scanrange[2] for scanrange in scanranges)
@@ -93,14 +118,12 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     scans = []
     uptocolor = 1
     for arg in args:
-        print fixfai
         if fixfai:
             phipart = "{} = 0".format(analysis.title())
         else:
             phipart = "{} = 0 or #pi".format(analysis.phi)
         if arg == "obs":
             scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1))
-            print "Observed, {}".format(phipart)
             if productions is None:
                 raise ValueError("No productions provided!")
         else:
@@ -130,19 +153,24 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                 scanrangeappend = ""
             else:
                 scanrangeappend = "_{},{},{}".format(*scanrange)
-            f = ROOT.TFile(filenametemplate.format(append=scan.name, scanrangeappend=scanrangeappend))
+            f = ROOT.TFile(infilename.format(append=scan.name, scanrangeappend=scanrangeappend))
             assert f
             t = f.Get("limit")
             assert t
 
 
-            for entry in islice(t, 1, None):
+            t.GetEntry(0)
+            if getattr(t, POI) == -1: startfrom = 0
+            else: startfrom = 1
+
+            for entry in islice(t, startfrom, None):
                 fa3 = getattr(t, POI)
+                if killpoints is not None and killpoints[0] < fa3 < killpoints[1]: continue
                 if nuisance is None:
                     deltaNLL = t.deltaNLL+t.nll+t.nll0
                     NLL[fa3] = 2*deltaNLL
                 else:
-                     NLL[fa3] = getattr(t, nuisance)
+                    NLL[fa3] = getattr(t, nuisance)
             if 1 not in NLL and -1 in NLL:
                 NLL[1] = NLL[-1]
 
@@ -158,7 +186,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         l.AddEntry(g, scan.title, "l")
 
     mg.Draw("AL")
-    mg.GetXaxis().SetTitle(xaxistitle(POI, analysis))
+    if xtitle is None: xtitle = xaxistitle(POI, analysis)
+    mg.GetXaxis().SetTitle(xtitle)
     if xaxisrange(POI) is not None:
         mg.GetXaxis().SetRangeUser(*xaxisrange(POI))
     mg.GetYaxis().SetTitle(yaxistitle(nuisance, analysis))
@@ -336,3 +365,178 @@ def arrowatminimum(graph, abovexaxis=True):
   arrow.SetFillColor(graph.GetLineColor())
   arrow.SetLineWidth(graph.GetLineWidth())
   return arrow
+
+def plotlimits2D(outputfilename, analysis, *args, **kwargs):
+    if not args: return
+    analysis = Analysis(analysis)
+    productions = None
+    legendposition = (.2, .7, .6, .9)
+    moreappend = ""
+    luminosity = None
+    scanranges = None
+    nuisance = None
+    POI = "CMS_zz4l_fai1"
+    POI2 = "CMS_zz4l_fai2"
+    fixfai = False
+    CMStext = "Preliminary"
+    drawCMS = True
+    for kw, kwarg in kwargs.iteritems():
+        if kw == "productions":
+            productions = kwarg
+        elif kw == "legendposition":
+            legendposition = kwarg
+        elif kw == "CLtextposition":
+            CLtextposition = kwarg
+        elif kw == "moreappend":
+            moreappend = kwarg
+        elif kw == "luminosity":
+            luminosity = kwarg
+        elif kw == "scanranges":
+            scanranges = kwarg
+        elif kw == "nuisance":
+            nuisance = actualvariable(kwarg)
+        elif kw == "POI":
+            POI = actualvariable(kwarg)
+        elif kw == "POI2":
+            POI2 = actualvariable(kwarg)
+        elif kw == "fixfai":
+            fixfai = kwarg
+        elif kw == "CMStext":
+            CMStext = kwarg
+        elif kw == "drawCMS":
+            drawCMS = kwarg
+        elif kw == "scanfai":
+            scanfai = kwarg
+        else:
+            raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
+
+    xmin = ymin = min(scanrange[1] for scanrange in scanranges)
+    xmax = ymax = max(scanrange[2] for scanrange in scanranges)
+
+    scans = []
+    uptocolor = 1
+    assert len(args) == 1, args
+    for arg in args:
+        if fixfai:
+            phipart = "{} = 0".format(analysis.title())
+        else:
+            phipart = "{} = 0 or #pi".format(analysis.phi)
+        if arg == "obs":
+            scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1))
+            if productions is None:
+                raise ValueError("No productions provided!")
+        else:
+            try:
+                arg = float(arg)
+            except ValueError:
+                raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
+            if arg == 0:
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2), uptocolor, 2))
+            else:
+                assert not fixfai
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
+            uptocolor += 1
+
+    if luminosity is None:
+        luminosity = sum(float(Luminosity("fordata", production)) for production in productions)
+
+    l = ROOT.TLegend(*legendposition)
+    l.SetFillStyle(0)
+    l.SetBorderSize(0)
+
+    for scan in scans:
+        NLL = ExtendedCounter()
+        for scanrange in scanranges:
+            if scanrange == (100, -1, 1):
+                scanrangeappend = ""
+            else:
+                scanrangeappend = "_{},{},{}".format(*scanrange)
+            f = ROOT.TFile(filenametemplate.format(append=scan.name, scanrangeappend=scanrangeappend))
+            assert f
+            t = f.Get("limit")
+            assert t
+
+
+            t.GetEntry(0)
+            if getattr(t, POI) == -1: startfrom = 0
+            else: startfrom = 1
+
+            for entry in islice(t, startfrom, None):
+                if abs(t.CMS_zz4l_fai1) + abs(t.CMS_zz4l_fai2) > 1+1e-14: continue
+                fa3 = getattr(t, POI), getattr(t, POI2)
+                if nuisance is None:
+                    deltaNLL = t.deltaNLL+t.nll+t.nll0
+                    NLL[fa3] = 2*deltaNLL
+                else:
+                     NLL[fa3] = getattr(t, nuisance)
+
+        c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+        if nuisance is None: NLL.zero()
+        g = NLL.TGraph2D()
+
+        g.SetLineColor(scan.color)
+        g.SetLineStyle(scan.style)
+        g.SetLineWidth(2)
+
+        l.AddEntry(g, scan.title, "l")
+
+    g.Draw("COLZ")
+    g.GetHistogram().GetXaxis().SetTitle(xaxistitle(POI, analysis))
+    if xaxisrange(POI) is not None:
+        g.GetXaxis().SetRangeUser(*xaxisrange(POI))
+    g.GetHistogram().GetYaxis().SetTitle(xaxistitle(POI2, analysis))
+    if xaxisrange(POI2) is not None:
+        g.GetYaxis().SetRangeUser(*xaxisrange(POI2))
+    g.GetHistogram().GetZaxis().SetTitle(yaxistitle(nuisance, analysis))
+    g.GetHistogram().GetZaxis().SetTitleOffset(1.4)
+    g.GetHistogram().GetZaxis().SetRangeUser(0, 300)
+
+    gL, gLpoint, gR, gRpoint = feLfeRgraphs()
+
+    mg = ROOT.TMultiGraph()
+    mg.Add(gL, "C")
+    mg.Add(gLpoint, "P")
+    mg.Add(gR, "C")
+    mg.Add(gRpoint, "P")
+    mg.Draw()
+
+    style.applycanvasstyle(c1)
+    c1.SetRightMargin(0.15)
+    style.applyaxesstyle(g)
+    style.CMS(CMStext, luminosity, drawCMS=drawCMS)
+
+    for ext in "png eps root pdf".split():
+        outputfilename = outputfilename.replace("."+ext, "")
+    for ext in "png eps root pdf".split():
+        c1.SaveAs("{}.{}".format(outputfilename, ext))
+
+@cache
+def feLfeRgraphs():
+    fL1 = array.array("d", (samplewithfeLfeR(i/100., 0).fai("ggH", "fL1") for i in range(-100, 101)))
+    fL1Zg = array.array("d", (samplewithfeLfeR(i/100., 0).fai("ggH", "fL1Zg") for i in range(-100, 101)))
+    gL = ROOT.TGraph(len(fL1), fL1, fL1Zg)
+    gL.SetLineColor(2)
+    gL.SetLineWidth(4)
+
+    fL1 = array.array("d", (samplewithfeLfeR(i/100., 0).fai("ggH", "fL1") for i in range(100, 101)))
+    fL1Zg = array.array("d", (samplewithfeLfeR(i/100., 0).fai("ggH", "fL1Zg") for i in range(100, 101)))
+    gLpoint = ROOT.TGraph(len(fL1), fL1, fL1Zg)
+    gLpoint.SetMarkerColor(2)
+    gLpoint.SetMarkerStyle(20)
+    gLpoint.SetMarkerSize(gLpoint.GetMarkerSize()+2)
+
+    fL1 = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1") for i in range(-100, 101)))
+    fL1Zg = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1Zg") for i in range(-100, 101)))
+    for _ in zip(range(-100, 101), fL1, fL1Zg): print _
+    gR = ROOT.TGraph(len(fL1), fL1, fL1Zg)
+    gR.SetLineColor(3)
+    gR.SetLineWidth(4)
+
+    fL1 = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1") for i in range(100, 101)))
+    fL1Zg = array.array("d", (samplewithfeLfeR(0, i/100.).fai("ggH", "fL1Zg") for i in range(100, 101)))
+    gRpoint = ROOT.TGraph(len(fL1), fL1, fL1Zg)
+    gRpoint.SetMarkerColor(3)
+    gRpoint.SetMarkerStyle(20)
+    gRpoint.SetMarkerSize(gRpoint.GetMarkerSize()+2)
+
+    return gL, gLpoint, gR, gRpoint

@@ -177,6 +177,7 @@ def applyaxesstyle(h):
     h.GetXaxis().SetTitleSize(0.06)
     h.GetXaxis().SetTitleOffset(0.9)
     h.GetXaxis().SetTitleFont(42)
+
     h.GetYaxis().SetNdivisions(505)
     h.GetYaxis().SetLabelFont(42)
     h.GetYaxis().SetLabelOffset(0.007)

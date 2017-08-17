@@ -11,6 +11,7 @@ import ROOT
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
 
 from helperstuff import config
+from helperstuff.copyplots import copyplots
 from helperstuff.enums import Analysis, Production
 from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
@@ -108,12 +109,15 @@ def mergeplots(analysis, **kwargs):
     analysis = Analysis(analysis)
     repmap = {"analysis": str(analysis)}
     subdir = ""
-    plotname = "limit_lumi150.0.root"
+    plotname = "limit_feR.root"
     folders = [
-               Folder(".oO[analysis]Oo._allsysts", "Now", 2, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
-               Folder(".oO[analysis]Oo._fullRun2", "150 fb^{-1}", 4, analysis, subdir, plotname="limit_lumi150.0_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+               Folder("fL1fL1Zg_DL1_DL1Zgint_firsttest/", "D_{#Lambda1}, D_{#Lambda1Z#gammaint}", 2, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
+               Folder("fL1fL1Zg_DeR_DeLint_firsttest/", "D_{#epsilonR}, D_{#epsilonLint}", 4, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
+               Folder("fL1fL1Zg_m1_m2_firsttest/", "m_{1}, m_{2}", 1, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
+               Folder("fL1fL1Zg_m1_phi_firsttest/", "m_{1}, #phi", ROOT.kGreen+3, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
+               Folder("fL1fL1Zg_m2_phi_firsttest/", "m_{2}, #phi", 6, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
               ]
-    outdir = ".oO[analysis]Oo._fullRun2"
+    outdir = "fL1fL1Zg_comparison"
 
     if logscale and config.minimainlegend:
         for folder in folders:
@@ -226,6 +230,7 @@ def mergeplots(analysis, **kwargs):
         f.write(subprocess.check_output(["git", "status"]))
         f.write("\n")
         f.write(subprocess.check_output(["git", "diff"]))
+    copyplots(os.path.relpath(saveasdir, config.plotsbasedir))
 
 if __name__ == "__main__":
     args = []

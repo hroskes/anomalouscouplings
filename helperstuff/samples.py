@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from abc import ABCMeta, abstractproperty
 from collections import Counter
-import itertools
+from itertools import product as cartesianproduct
 from math import copysign, sqrt
 import numpy
 import os
@@ -11,7 +11,7 @@ import ROOT
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
-from utilities import cache, product
+from utilities import cache, mkdtemp, product, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 
@@ -53,12 +53,16 @@ class SampleBase(object):
     def JHUxsec(self):
         if self.photoncut:
             JHUXSggH2L2la1 = constants.JHUXSggH2L2la1_photoncut
+            JHUXSggH2L2lL1 = constants.JHUXSggH2L2lL1_photoncut
+            JHUXSggH2L2la1L1 = constants.JHUXSggH2L2la1L1_photoncut
             JHUXSVBFa1 = constants.JHUXSVBFa1_photoncut
             JHUXSZHa1 = constants.JHUXSZHa1_photoncut
             JHUXSWHa1 = constants.JHUXSWHa1_photoncut
-            assert self.g2 == self.g4 == self.g1prime2 == 0, self
+            assert self.g2 == self.g4 == 0, self
         else:
             JHUXSggH2L2la1 = constants.JHUXSggH2L2la1
+            JHUXSggH2L2lL1 = constants.JHUXSggH2L2lL1
+            JHUXSggH2L2la1L1 = constants.JHUXSggH2L2la1L1
             JHUXSVBFa1 = constants.JHUXSVBFa1
             JHUXSZHa1 = constants.JHUXSZHa1
             JHUXSWHa1 = constants.JHUXSWHa1
@@ -68,12 +72,13 @@ class SampleBase(object):
                                 JHUXSggH2L2la1*self.g1**2
                     + constants.JHUXSggH2L2la2*self.g2**2
                     + constants.JHUXSggH2L2la3*self.g4**2
-                    + constants.JHUXSggH2L2lL1*self.g1prime2**2
+                    +           JHUXSggH2L2lL1*self.g1prime2**2
                     + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
                     + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
                     + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
                     + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
 
         if self.productionmode == "VBF":
@@ -88,15 +93,16 @@ class SampleBase(object):
                     + constants.JHUXSVBFa1L1 * self.g1*self.g1prime2 / constants.g1prime2VBF_gen
                     + constants.JHUXSVBFa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2VBF_gen
                    ) * (
-                                JHUXSggH2L2la1 * self.g1**2
-                    + constants.JHUXSggH2L2la2 * self.g2**2
-                    + constants.JHUXSggH2L2la3 * self.g4**2
-                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg * self.ghzgs1prime2**2
+                                JHUXSggH2L2la1*self.g1**2
+                    + constants.JHUXSggH2L2la2*self.g2**2
+                    + constants.JHUXSggH2L2la3*self.g4**2
+                    +           JHUXSggH2L2lL1*self.g1prime2**2
+                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
                     + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
                     + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
                     + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
 
         if self.productionmode == "ZH":
@@ -111,15 +117,16 @@ class SampleBase(object):
                     + constants.JHUXSZHa1L1 * self.g1*self.g1prime2 / constants.g1prime2ZH_gen
                     + constants.JHUXSZHa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2ZH_gen
                    ) * (
-                                JHUXSggH2L2la1 * self.g1**2
-                    + constants.JHUXSggH2L2la2 * self.g2**2
-                    + constants.JHUXSggH2L2la3 * self.g4**2
-                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg * self.ghzgs1prime2**2
+                                JHUXSggH2L2la1*self.g1**2
+                    + constants.JHUXSggH2L2la2*self.g2**2
+                    + constants.JHUXSggH2L2la3*self.g4**2
+                    +           JHUXSggH2L2lL1*self.g1prime2**2
+                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
                     + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
                     + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
                     + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
 
         if self.productionmode == "WH":
@@ -134,15 +141,16 @@ class SampleBase(object):
                     + constants.JHUXSWHa1L1 * self.g1*self.g1prime2 / constants.g1prime2WH_gen
                     + constants.JHUXSWHa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2WH_gen
                    ) * (
-                                JHUXSggH2L2la1 * self.g1**2
-                    + constants.JHUXSggH2L2la2 * self.g2**2
-                    + constants.JHUXSggH2L2la3 * self.g4**2
-                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg * self.ghzgs1prime2**2
+                                JHUXSggH2L2la1*self.g1**2
+                    + constants.JHUXSggH2L2la2*self.g2**2
+                    + constants.JHUXSggH2L2la3*self.g4**2
+                    +           JHUXSggH2L2lL1*self.g1prime2**2
+                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
                     + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
                     + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
                     + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
         if self.productionmode == "HJJ":
             return (
@@ -150,15 +158,16 @@ class SampleBase(object):
                     + constants.JHUXSHJJa3 * self.ghg4**2
                     + constants.JHUXSHJJa2a3 * self.ghg2*self.ghg4 / constants.ghg4HJJ
                    ) * (
-                                JHUXSggH2L2la1 * self.g1**2
-                    + constants.JHUXSggH2L2la2 * self.g2**2
-                    + constants.JHUXSggH2L2la3 * self.g4**2
-                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg * self.ghzgs1prime2**2
+                                JHUXSggH2L2la1*self.g1**2
+                    + constants.JHUXSggH2L2la2*self.g2**2
+                    + constants.JHUXSggH2L2la3*self.g4**2
+                    +           JHUXSggH2L2lL1*self.g1prime2**2
+                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
                     + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
                     + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
                     + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
         if self.productionmode == "ttH":
             return (
@@ -166,15 +175,16 @@ class SampleBase(object):
                     + constants.JHUXSttHkappatilde * self.kappa_tilde**2
                     + constants.JHUXSttHkappakappatilde * self.kappa*self.kappa_tilde / constants.kappa_tilde_ttH
                    ) * (
-                                JHUXSggH2L2la1 * self.g1**2
-                    + constants.JHUXSggH2L2la2 * self.g2**2
-                    + constants.JHUXSggH2L2la3 * self.g4**2
-                    + constants.JHUXSggH2L2lL1 * self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg * self.ghzgs1prime2**2
+                                JHUXSggH2L2la1*self.g1**2
+                    + constants.JHUXSggH2L2la2*self.g2**2
+                    + constants.JHUXSggH2L2la3*self.g4**2
+                    +           JHUXSggH2L2lL1*self.g1prime2**2
+                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
                     + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
                     + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    + constants.JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
                     + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
         assert False
 
@@ -312,21 +322,74 @@ class SampleBase(object):
 
         strsample = str(self_sample)
 
-        if self_sample.productionmode == "ggZZ":
-            def MC_weight_function(self_tree):
-                KFactor = self_tree.KFactor_QCD_ggZZ_Nominal
-                return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
+        if not config.LHE:
 
-        elif self_sample.productionmode == "qqZZ":
-            def MC_weight_function(self_tree):
-                if hasattr(self_tree, "KFactor_EW_qqZZ"): #qqZZ->itself
-                    KFactor = self_tree.KFactor_EW_qqZZ * self_tree.KFactor_QCD_qqZZ_M
-                    return self_tree.overallEventWeight * self_tree.xsec * KFactor #/ self_tree.nevents
-                                                                                   #Do NOT divide by nevents.  This will happen
-                                                                                   #in creating the templates when we divide by
-                                                                                   #sum(effectiveentries[==nevents])
-                else:                                     #VBFbkg->qqZZ
-                    result = self_tree.p_Gen_JJQCD_BKG_MCFM
+            if self_sample.productionmode == "ggZZ":
+                def MC_weight_function(self_tree):
+                    KFactor = self_tree.KFactor_QCD_ggZZ_Nominal
+                    return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
+
+            elif self_sample.productionmode == "qqZZ":
+                def MC_weight_function(self_tree):
+                    if hasattr(self_tree, "KFactor_EW_qqZZ"): #qqZZ->itself
+                        KFactor = self_tree.KFactor_EW_qqZZ * self_tree.KFactor_QCD_qqZZ_M
+                        return self_tree.overallEventWeight * self_tree.xsec * KFactor #/ self_tree.nevents
+                                                                                       #Do NOT divide by nevents.  This will happen
+                                                                                       #in creating the templates when we divide by
+                                                                                       #sum(effectiveentries[==nevents])
+                    else:                                     #VBFbkg->qqZZ
+                        result = self_tree.p_Gen_JJQCD_BKG_MCFM
+                        if not reweightingonly and result != 0:
+                            cutoff = self_tree.cutoffs[strsample]
+                            if result > cutoff:
+                                result = cutoff**2 / result
+                            result *= (
+                                         self_tree.overallEventWeight
+                                       * self_tree.multiplyweight[strsample]
+                                      )
+                        return result
+
+
+            elif self_sample.productionmode == "ZX":
+                import ZX
+                def MC_weight_function(self_tree):
+                    LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
+                    return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
+
+            elif (self_sample.productionmode == "VBF bkg"
+                       or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS")
+                       or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
+                def MC_weight_function(self_tree):
+                    return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
+
+            elif self_sample.issignal:
+
+                factors = self_sample.MC_weight_terms
+
+                photoncut_decay = self_sample.photoncut
+                photoncut_ZH = self_sample.photoncut and self_sample.productionmode == "ZH"
+                photoncut_VBF = self_sample.photoncut and self_sample.productionmode == "VBF"
+
+                def MC_weight_function(self_tree):
+                    if photoncut_decay:
+                        leptons = [(id, tlvfromptetaphim(pt, eta, phi, m)) for id, pt, eta, phi, m in zip(self_tree.LHEDaughterId, self_tree.LHEDaughterPt, self_tree.LHEDaughterEta, self_tree.LHEDaughterPhi, self_tree.LHEDaughterMass)]
+                        for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
+                            if id1 == -id2 and (p1+p2).M() < 4: return 0
+                    if photoncut_ZH:
+                        Zdecay = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
+                        assert len(Zdecay) == 2
+                        if (Zdecay[0]+Zdecay[1]).M() < 4: return 0
+                    if photoncut_VBF:
+                        jets = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
+                        assert len(jets) == 2
+                        if any(jet.Pt() < 15 for jet in jets): return 0
+                    result = product(
+                                     sum(
+                                         getattr(self_tree, weightname) * couplingsq
+                                               for weightname, couplingsq in factor
+                                        ) for factor in factors
+                                    )
+
                     if not reweightingonly and result != 0:
                         cutoff = self_tree.cutoffs[strsample]
                         if result > cutoff:
@@ -337,62 +400,30 @@ class SampleBase(object):
                                   )
                     return result
 
+            else:
+                raise ValueError("No MC weight function defined for {}".format(self_sample))
 
-        elif self_sample.productionmode == "ZX":
-            import ZX
-            def MC_weight_function(self_tree):
-                LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
-                return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
-
-        elif (self_sample.productionmode == "VBF bkg"
-                   or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS")
-                   or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
-            def MC_weight_function(self_tree):
-                return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
-
-        elif self_sample.issignal:
-
-            factors = self_sample.MC_weight_terms
-
+        else: #config.LHE
             photoncut_decay = self_sample.photoncut
-            photoncut_ZH = self_sample.photoncut and self_sample.productionmode == "ZH"
-            photoncut_VBF = self_sample.photoncut and self_sample.productionmode == "VBF"
-
-            from utilities import tlvfromptetaphim
-            from itertools import product as cartesianproduct
-
-            def MC_weight_function(self_tree):
-                if photoncut_decay:
-                    leptons = [(id, tlvfromptetaphim(pt, eta, phi, m)) for id, pt, eta, phi, m in zip(self_tree.LHEDaughterId, self_tree.LHEDaughterPt, self_tree.LHEDaughterEta, self_tree.LHEDaughterPhi, self_tree.LHEDaughterMass)]
-                    for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
-                        if id1 == -id2 and (p1+p2).M() < 4: return 0
-                if photoncut_ZH:
-                    Zdecay = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
-                    assert len(Zdecay) == 2
-                    if (Zdecay[0]+Zdecay[1]).M() < 4: return 0
-                if photoncut_VBF:
-                    jets = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
-                    assert len(jets) == 2
-                    if any(jet.Pt() < 15 for jet in jets): return 0
-                result = product(
-                                 sum(
-                                     getattr(self_tree, weightname) * couplingsq
-                                           for weightname, couplingsq in factor
-                                    ) for factor in factors
-                                )
-
-                if not reweightingonly and result != 0:
-                    cutoff = self_tree.cutoffs[strsample]
-                    if result > cutoff:
-                        result = cutoff**2 / result
-                    result *= (
-                                 self_tree.overallEventWeight
-                               * self_tree.multiplyweight[strsample]
-                              )
-                return result
-
-        else:
-            raise ValueError("No MC weight function defined for {}".format(self_sample))
+            if self_sample.productionmode == "ggH":
+                def MC_weight_function(self_tree):
+                    if photoncut_decay:
+                        leptons = [(id, tlv) for id, tlv in self_tree.event.gendaughters]
+                        for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
+                            if id1 == -id2 and (p1+p2).M() < 4: return 0
+                    result = self_tree.event.weight
+                    if not reweightingonly and result != 0:
+                        result *= self_sample.SMxsec / self_tree.sumofweights
+                    return result
+            elif self_sample.productionmode == "qqZZ":
+                xsec = 1.256 * 1000
+                def MC_weight_function(self_tree):
+                    result = self_tree.event.weight
+                    if not reweightingonly and result != 0:
+                        result *= xsec / self_tree.sumofweights
+                    return result
+            else:
+                raise ValueError("No MC weight function defined for {}".format(self_sample))
 
         MC_weight_function.__name__ = functionname
         return MC_weight_function
@@ -415,8 +446,8 @@ class SampleBase(object):
         denominator = 0
         for h in purehypotheses:
             if not getattr(self, h.couplingname) and h != hypothesis: continue
-            if analysis.photoncut and h == "0+": continue
-            if not analysis.photoncut and h == "0+_photoncut": continue
+            if analysis.photoncut and h in ("0+", "L1"): continue
+            if not analysis.photoncut and h in ("0+_photoncut", "L1_photoncut"): continue
             kwargs = {_.couplingname: 0 for _ in purehypotheses}
             kwargs[h.couplingname] = 1
             kwargs["photoncut"] = analysis.photoncut
@@ -431,8 +462,28 @@ class SampleBase(object):
         return copysign(
                         numerator / denominator,
                         #mixturesign: multiply by -1 for fL1
-                        mixturesign(analysis)*getattr(self, hypothesis.couplingname)
+                        mixturesign(analysis)*getattr(self, hypothesis.couplingname)*self.g1
                        )
+
+    @property
+    def a1eLeR(self):
+        assert self.g2 == self.g4 == 0
+        ghz1 = self.g1 + 2 * self.g1prime2 * (constants.M_Z**2 - 1j*constants.M_Z*constants.Ga_Z)/constants.L1**2
+        ghz1 = ghz1.real  #<-- !!!
+        ghzzp1 = constants.M_Z**2/constants.L1**2
+        ezp_L = constants.aL * self.g1prime2 + constants.e * self.ghzgs1prime2
+        ezp_R = constants.aR * self.g1prime2 + constants.e * self.ghzgs1prime2
+        return ghz1, ghzzp1*ezp_L, ghzzp1*ezp_R
+
+    @property
+    def feL(self):
+        a1, eL, eR = self.a1eLeR
+        return (1 if a1*eL>0 else -1) * eL**2 * constants.JHUXSggH2L2leL / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
+
+    @property
+    def feR(self):
+        a1, eL, eR = self.a1eLeR
+        return (1 if a1*eR>0 else -1) * eR**2 * constants.JHUXSggH2L2leR / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, photoncut=False):
@@ -441,8 +492,8 @@ class ArbitraryCouplingsSample(SampleBase):
         self.photoncut = photoncut or (ghzgs1prime2 != 0)
         if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH"):
             raise ValueError("Bad productionmode {}".format(self.productionmode))
-        if sum(bool(g) for g in (g2, g4, g1prime2, ghzgs1prime2)) > 1:
-            raise ValueError("Can only set at most one of g2, g4, g1prime2, ghzgs1prime2")
+        if sum(bool(g) for g in (g2, g4, g1prime2 or ghzgs1prime2)) > 1:
+            raise ValueError("Can only set at most one of g2, g4, or g1prime2 and/or ghzgs1prime2")
 
         if self.productionmode == "HJJ":
             self.__ghg2, self.__ghg4 = ghg2, ghg4
@@ -553,6 +604,31 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
                                             )
     return ArbitraryCouplingsSample(productionmode, **kwargs)
 
+def samplewitha1eLeR(a1, eL, eR):
+    kwargs = {
+      "g1": a1 - 2/(constants.aL - constants.aR) * (eL - eR),
+      "g1prime2": constants.L1**2 / (constants.M_Z**2 * (constants.aL - constants.aR)) * (eL-eR),
+      "ghzgs1prime2": -constants.L1**2 / (constants.M_Z**2 * constants.e * (constants.aL - constants.aR)) * (constants.aR*eL-constants.aL*eR),
+      "g2": 0,
+      "g4": 0,
+    }
+    result = ArbitraryCouplingsSample("ggH", **kwargs)
+    return result
+
+def samplewithfeLfeR(feL, feR):
+    fa1 = 1-abs(feL)-abs(feR)
+    a1 = sqrt(fa1)
+    eL = (1 if feL>0 else -1) * sqrt(abs(feL) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2leL)
+    eR = (1 if feR>0 else -1) * sqrt(abs(feR) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2leR)
+    return samplewitha1eLeR(a1, eL, eR)
+
+def samplewithfL1fL1Zg(fL1, fL1Zg):
+    fa1 = 1-abs(fL1)-abs(fL1Zg)
+    a1 = sqrt(fa1)
+    L1 = -(1 if fL1>0 else -1) * sqrt(abs(fL1) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2lL1)
+    L1Zg = -(1 if fL1Zg>0 else -1) * sqrt(abs(fL1Zg) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2lL1Zg)
+    return ArbitraryCouplingsSample("ggH", g1=a1, g1prime2=L1, ghzgs1prime2=L1Zg, g2=0, g4=0)
+
 class ReweightingSample(MultiEnum, SampleBase):
     __metaclass__ = MultiEnumABCMeta
     enumname = "reweightingsample"
@@ -630,9 +706,11 @@ class ReweightingSample(MultiEnum, SampleBase):
                             for hypothesis in self.productionmode.validhypotheses
                             for hffhypothesis in (hffhypotheses if hypothesis in ("0+", "0-", "fa30.5") else ("Hff0+",))
                    ]
-        elif self.productionmode in ("ggH", "VBF", "ZH", "WH"):
+        if self.productionmode == "ggH" and config.LHE:
+            return [self]
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
-        elif self.productionmode == "data":
+        if self.productionmode == "data":
             return []
         raise self.ValueError("reweightingsamples")
 
@@ -669,6 +747,8 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_ggH_g4"
             elif self.hypothesis == "L1":
                 return "MC_weight_ggH_g1prime2"
+            elif self.hypothesis == "L1_photoncut":
+                return "MC_weight_ggH_g1prime2_photoncut"
             elif self.hypothesis == "L1Zg":
                 return "MC_weight_ggH_ghzgs1prime2"
             elif self.hypothesis == "fa20.5":
@@ -679,8 +759,12 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_ggH_g1g4"
             elif self.hypothesis == "fL10.5":
                 return "MC_weight_ggH_g1g1prime2"
+            elif self.hypothesis == "fL10.5_photoncut":
+                return "MC_weight_ggH_g1g1prime2_photoncut"
             elif self.hypothesis == "fL1Zg0.5":
                 return "MC_weight_ggH_g1ghzgs1prime2"
+            elif self.hypothesis == "fL10.5fL1Zg0.5":
+                return "MC_weight_ggH_g1prime2ghzgs1prime2"
             for a in analyses:
                 if self.hypothesis == "{}-0.5".format(a):
                     return ReweightingSample(self.productionmode, "{}0.5".format(a)).weightname()+"_pi"
@@ -774,7 +858,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             for a in analyses:
                 if self.hypothesis == "{}-0.5".format(a):
                     return ReweightingSample(self.productionmode, self.hffhypothesis, "{}0.5".format(a)).weightname()+"_pi"
-            
+
         elif self.productionmode == "ggZZ":
             return "MC_weight_ggZZ"
         elif self.productionmode == "qqZZ":
@@ -838,17 +922,17 @@ class ReweightingSample(MultiEnum, SampleBase):
                                       "{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1", "fL1Zg")
                                                                   for b in ("dec", "prod", "proddec")
                                                                   for c in ("+", "-")
-                                     ] + ["fa2dec-0.9"]
+                                     ] + ["fa2dec-0.9", "fL10.5_photoncut"]
                                   ):
                 return 1
-            if self.hypothesis in ("a2", "0-", "L1", "L1Zg"):
+            if self.hypothesis in ("a2", "0-", "L1", "L1Zg", "L1_photoncut", "fL10.5fL1Zg0.5"):
                 return 0
         raise self.ValueError("g1")
 
     @property
     def g2(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "0-", "L1", "L1Zg"]
+                               ["0+", "0+_photoncut", "0-", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"]
                              + ["{}{}{}0.5".format(a, b, c) for a in ("fa3", "fL1", "fL1Zg") for b in ("dec", "prod", "proddec") for c in ("+", "-")]
                               ):
             return 0
@@ -891,7 +975,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g4(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "a2", "L1", "L1Zg"]
+                               ["0+", "0+_photoncut", "a2", "L1", "L1Zg", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"]
                              + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fL1", "fL1Zg") for b in ("dec", "prod", "proddec") for c in "+-"]
                              + ["fa2dec-0.9"]
                               ):
@@ -938,13 +1022,13 @@ class ReweightingSample(MultiEnum, SampleBase):
                               ):
             return 0
 
-        if self.hypothesis == "L1":
+        if self.hypothesis in ("L1", "L1_photoncut"):
             if self.productionmode in ("ggH", "ttH"):
                 return constants.g1prime2decay_gen
             else:
                 return 1
 
-        if self.hypothesis == "fL1dec0.5":
+        if self.hypothesis in ("fL1dec0.5", "fL1dec0.5_photoncut", "fL10.5fL1Zg0.5"):
             return constants.g1prime2decay_gen
 
         if self.productionmode == "VBF":
@@ -974,7 +1058,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def ghzgs1prime2(self):
         if self.hypothesis in (
-                               ["0+", "0+_photoncut", "a2", "0-", "L1"]
+                               ["0+", "0+_photoncut", "a2", "0-", "L1", "L1_photoncut", "fL10.5_photoncut"]
                              + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1") for b in ("dec", "prod", "proddec") for c in "+-"]
                              + ["fa2dec-0.9"]
                               ):
@@ -986,7 +1070,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             else:
                 return 1
 
-        if self.hypothesis == "fL1Zgdec0.5":
+        if self.hypothesis in ("fL1Zgdec0.5", "fL10.5fL1Zg0.5"):
             return constants.ghzgs1prime2decay_gen
 
         if self.productionmode == "VBF":
@@ -1208,7 +1292,31 @@ class Sample(ReweightingSamplePlus):
         raise self.ValueError("CJLSTdirname")
 
     def CJLSTfile(self):
+        if config.LHE: raise ValueError("Can't get the CJLST file when in LHE mode!")
         return os.path.join(self.CJLSTmaindir(), self.CJLSTdirname(), "ZZ4lAnalysis.root")
+
+    @property
+    def LHEfile(self):
+        if not config.LHE: raise ValueError("Can't get the lhe file when not in LHE mode!")
+        if self.production == "LHE_170509":
+            if self.productionmode == "ggH":
+                folder = "/work-zfs/lhc/heshy/LHEanomalouscouplings/processlhe/fL1fL1Zg"
+                if self.hypothesis == "0+_photoncut": filename = "ggHa1.lhe"
+                if self.hypothesis == "L1_photoncut": filename = "ggHL1.lhe"
+                if self.hypothesis == "fL10.5_photoncut": filename = "ggHa1L1.lhe"
+                if self.hypothesis == "L1Zg": filename = "ggHL1Zg.lhe"
+                if self.hypothesis == "fL1Zg0.5": filename = "ggHa1L1Zg.lhe"
+                if self.hypothesis == "fL10.5fL1Zg0.5": filename = "ggHL1L1Zg.lhe"
+                return os.path.join(folder, filename)
+            if self.productionmode == "qqZZ":
+                return "/work-zfs/lhc/ianderso/hep/LHEFiles/qqZZ/MG/8T/ZZJetsTo4L_TuneZ2_8TeV-madgraph-tauola.lhe"
+            if self.productionmode == "data":
+                tmpdir = mkdtemp()
+                filename = os.path.join(tmpdir, "empty.lhe")
+                with open(filename, 'w') as f:
+                    pass
+                return filename
+        raise self.ValueError("LHEfile")
 
     def withdiscriminantsfile(self):
         result = os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
@@ -1219,7 +1327,9 @@ class Sample(ReweightingSamplePlus):
     @cache
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
-        if reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data") or reweightfrom.alternategenerator is not None:
+        if (reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data")
+                or reweightfrom.alternategenerator is not None
+                or config.LHE):
             assert reweightfrom.reweightingsample == reweightto
             return 1
         f = tfiles[reweightfrom.withdiscriminantsfile()]
@@ -1247,7 +1357,7 @@ class Sample(ReweightingSamplePlus):
 
     @property
     def copyfromothersample(self):
-        if self == Sample("170203", "ggH", "MINLO", "0+"):
+        if not config.LHE and self == Sample("170203", "ggH", "MINLO", "0+"):
             return Sample("170222", "ggH", "MINLO", "0+")
         if self.production == "170712" and self.productionmode in ("ggH", "HJJ", "VBF", "WH", "ZH", "ttH") and self.alternategenerator is None:
             args = [self.reweightingsampleplus, self.flavor, "170222"]
@@ -1260,10 +1370,16 @@ class SampleBasis(MultiEnum):
         self.hypotheses = [Hypothesis(_) for _ in hypotheses]
         super(SampleBasis, self).__init__(*args)
 
+    def __hash__(self):
+        return hash((super(SampleBasis, self).__hash__(), tuple(self.hypotheses)))
+
     def check(self, *args):
         args = (self.hypotheses,)+args
         if self.productionmode in ("ggH", "ttH"):
-            dimension = 3
+            if self.analysis.is2d:
+                dimension = 6
+            else:
+                dimension = 3
         elif self.productionmode in ("VBF", "WH", "ZH"):
             dimension = 5
         else:
@@ -1280,17 +1396,33 @@ class SampleBasis(MultiEnum):
         hffhypothesis = None
         if self.productionmode == "ttH": hffhypothesis = "Hff0+"
         dimension = len(self.hypotheses)
-        maxpower = dimension-1
         samples = [ReweightingSample(self.productionmode, _, hffhypothesis) for _ in self.hypotheses]
-        return numpy.matrix(
-                            [
-                             [
-                              sample.g1**(maxpower-i) * getattr(sample, self.analysis.couplingname)**i
-                                  for i in range(dimension)
-                             ]
-                                 for sample in samples
-                            ]
-                           )
+        if self.analysis.is2d:
+            assert dimension == 6  #not VBF or VH
+            maxpower = 2
+            return numpy.matrix(
+                                [
+                                 [
+                                  sample.g1**(maxpower-i-j)
+                                  * getattr(sample, self.analysis.couplingnames[0])**i
+                                  * getattr(sample, self.analysis.couplingnames[1])**j
+                                     for j in range(maxpower+1)
+                                     for i in range(maxpower+1-j)
+                                 ]
+                                    for sample in samples
+                                ]
+                               )
+        else:
+            maxpower = dimension-1
+            return numpy.matrix(
+                                [
+                                 [
+                                  sample.g1**(maxpower-i) * getattr(sample, self.analysis.couplingname)**i
+                                      for i in range(dimension)
+                                 ]
+                                     for sample in samples
+                                ]
+                               )
     @property
     @cache
     def invertedmatrix(self):
@@ -1322,16 +1454,27 @@ def allsamples():
         yield Sample("ZX", production)
         yield Sample("data", production)
 
+if config.LHE:
+    def allsamples():
+        for production in productions:
+            for hypothesis in "0+_photoncut", "L1_photoncut", "fL10.5_photoncut", "L1Zg", "fL1Zg0.5", "fL10.5fL1Zg0.5":
+                yield Sample("ggH", hypothesis, production)
+            yield Sample("qqZZ", production)
+            yield Sample("data", production)
+
 def xcheck():
-    CJLST = {_: _.CJLSTfile() for _ in allsamples()}
+    if config.LHE:
+        CJLST = {_: _.LHEfile for _ in allsamples()}
+    else:
+        CJLST = {_: _.CJLSTfile() for _ in allsamples()}
     withdiscs = {_: _.withdiscriminantsfile() for _ in allsamples()}
 
-    for (k1, v1), (k2, v2) in itertools.product(CJLST.iteritems(), CJLST.iteritems()):
+    for (k1, v1), (k2, v2) in cartesianproduct(CJLST.iteritems(), CJLST.iteritems()):
         if k1.productionmode == "ZX" and k2.productionmode == "data" or k2.productionmode == "ZX" and k1.productionmode == "data": continue
         if k1 != k2 and v1 == v2:
             raise ValueError("CJLST files for {} and {} are the same:\n{}".format(k1, k2, v1))
 
-    for (k1, v1), (k2, v2) in itertools.product(withdiscs.iteritems(), withdiscs.iteritems()):
+    for (k1, v1), (k2, v2) in cartesianproduct(withdiscs.iteritems(), withdiscs.iteritems()):
         if k1 != k2 and v1 == v2:
             raise ValueError("with discriminants files for {} and {} are the same:\n{}".format(k1, k2, v1))
 
