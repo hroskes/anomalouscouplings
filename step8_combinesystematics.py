@@ -3,6 +3,7 @@
 combine ScaleUp, ResUp --> ScaleResUp
 ZX systematics templates from qqZZ
 """
+import sys
 from itertools import product
 
 import ROOT
@@ -14,9 +15,8 @@ from helperstuff import config
 from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import analyses, categories, channels, productions
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
-from helperstuff.utilities import tfiles
 
-dom4lshapes = any(config.applym4lshapesystematicsUntagged, config.applym4lshapesystematicsVBFVHtagged, config.applym4lshapesystematicsggH, config.applym4lshapesystematicsggHUntagged, config.applym4lshapesystematicsdiagonal)
+dom4lshapes = any((config.applym4lshapesystematicsUntagged, config.applym4lshapesystematicsVBFVHtagged, config.applym4lshapesystematicsggH, config.applym4lshapesystematicsggHUntagged, config.applym4lshapesystematicsdiagonal))
 
 def combinesystematics(channel, analysis, production, category):
     thetemplatesfiles = []
@@ -173,6 +173,7 @@ def combinesystematics(channel, analysis, production, category):
 if __name__ == "__main__":
     for production in productions:
         for analysis in analyses:
+            if analysis != sys.argv[1]: continue
             for channel in channels:
                 for category in categories:
                     print production, analysis, channel, category
