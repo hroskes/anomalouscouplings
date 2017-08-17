@@ -7,17 +7,17 @@ def getconfiguration(hostname, username):
   if (".cern.ch" in hostname or "lxplus" in hostname) and username == "hroskes":
     return dict(
       host = "lxplus",
-      repositorydir = "/afs/cern.ch/work/h/hroskes/LHEanomalouscouplings/",
-      plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/LHEanomalouscouplings/",
+      repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings/",
+      plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings/",
       svndir = "/afs/cern.ch/work/h/hroskes/AN/",
     )
 
   elif ("login-node" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
     return dict(
       host = "MARCC",
-      repositorydir = "/work-zfs/lhc/heshy/LHEanomalouscouplings/fL1fL1Zg/",
+      repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/",
       repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/",
-      plotsbasedir = "/work-zfs/lhc/heshy/LHEanomalouscouplings/fL1fL1Zg/plots/",
+      plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/",
       lxplususername = "hroskes",
       email = "heshyr@gmail.com",
     )
@@ -35,7 +35,7 @@ try:
 except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
-LHE = True
+LHE = False
 usedata = False
 showblinddistributions = False
 unblinddistributions = False
