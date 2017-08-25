@@ -687,8 +687,8 @@ class ReweightingSample(MultiEnum, SampleBase):
         return self.hypothesis.photoncut
 
     def reweightingsamples(self):
-        if self.productionmode == "qqZZ":
-            return [self]
+        if self.productionmode == "qqZZ":      #self == ReweightingSample("qqZZ") or ReweightingSamplePlus("qqZZ", "ext")
+            return [ReweightingSample("qqZZ")]
         if self.productionmode in ("ggZZ", "qqZZ", "ZX") or self.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.pythiasystematic is not None:
             return [self]
         if self.productionmode == "VBF bkg":
@@ -1181,6 +1181,14 @@ class ReweightingSamplePlus(ReweightingSample):
            ):
             raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hffhypothesis, self.alternategenerator, args))
 
+        if (
+            self.alternategenerator == "ext"
+            and (
+                 self.productionmode != "qqZZ"
+                )
+           ):
+            raise ValueError("No extra {} sample produced\n{}".format(self.productionmode, args))
+
         if self.pythiasystematic is not None:
             if (
                 self.hypothesis != "0+"
@@ -1286,7 +1294,10 @@ class Sample(ReweightingSamplePlus):
         if self.productionmode == "VBF bkg":
             return "VBFTo{}JJ_Contin_phantom128".format(self.flavor)
         if self.productionmode == "qqZZ":
-            return "ZZTo4l"
+            if self.alternategenerator == "ext":
+                return "ZZTo4lext"
+            else:
+                return "ZZTo4l"
         if self.productionmode == "ZX" or self.productionmode == "data":
             return "AllData"
         raise self.ValueError("CJLSTdirname")
@@ -1451,6 +1462,7 @@ def allsamples():
             yield Sample("ttH", "Hff0+", "0+", "POWHEG", production, systematic)
             yield Sample("ggH", "0+", "MINLO", production, systematic)
         yield Sample("qqZZ", production)
+        yield Sample("qqZZ", "ext", production)
         yield Sample("ZX", production)
         yield Sample("data", production)
 

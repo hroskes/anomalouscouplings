@@ -38,7 +38,7 @@ class TemplatesFile(MultiEnum):
                 raise ValueError("2D analysis is only done with decay information!\n{}".format(args))
         if config.LHE:
             if self.channel != "2e2mu":
-                raise ValueError("2D analysis is only done for 2e2mu for now!\n{}".format(args))
+                raise ValueError("LHE analysis is only done for 2e2mu for now!\n{}".format(args))
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
@@ -392,7 +392,7 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
-                    if config.showblinddistributions and not config.LHE:
+                    if config.showblinddistributions:
                         yield TemplatesFile(channel, "DATA", analysis, production, category)
                     if category != "Untagged" and config.applyMINLOsystematics:
                         yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
@@ -645,8 +645,10 @@ class Template(TemplateBase, MultiEnum):
             result={
                     Sample(self.production, self.productionmode, "0+", self.hffhypothesis)
                    }
-        if self.productionmode in ("qqZZ", "ZX"):
+        if self.productionmode == "ZX":
             result = {Sample(self.production, self.productionmode)}
+        if self.productionmode == "qqZZ":
+            result = {Sample(self.production, self.productionmode), Sample(self.production, self.productionmode, "ext")}
         if self.productionmode == "ggZZ":
             result = {Sample(self.production, self.productionmode, flavor) for flavor in flavors}
         if self.productionmode == "VBF bkg":
