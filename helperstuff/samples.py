@@ -275,7 +275,7 @@ class SampleBase(object):
         weightshelper = WeightsHelper(self)
         if weightshelper.weightprodstring is not None:
             prod = Counter()
-            SMcoupling  = getattr(self, weightshelper.prodSMcoupling )
+            SMcoupling  = getattr(self, weightshelper.prodSMcoupling ) / float(weightshelper.prodSMcouplingvalue)
             BSMcoupling = getattr(self, weightshelper.prodBSMcoupling) / float(weightshelper.prodBSMcouplingvalue)
             prod[weightshelper.prodweightSM]  += SMcoupling**2            - SMcoupling * BSMcoupling
             prod[weightshelper.prodweightmix] += SMcoupling * BSMcoupling
@@ -289,7 +289,7 @@ class SampleBase(object):
 
         if weightshelper.weightdecaystring is not None:
             decay = Counter()
-            SMcoupling  = getattr(self, weightshelper.decaySMcoupling )
+            SMcoupling  = getattr(self, weightshelper.decaySMcoupling ) / float(weightshelper.decaySMcouplingvalue)
             BSMcoupling = getattr(self, weightshelper.decayBSMcoupling) / float(weightshelper.decayBSMcouplingvalue)
             decay[weightshelper.decayweightSM]  += SMcoupling**2            - SMcoupling * BSMcoupling
             decay[weightshelper.decayweightmix] += SMcoupling * BSMcoupling
@@ -305,7 +305,7 @@ class SampleBase(object):
 
     @property
     def MC_weight(self):
-        if self.photoncut: raise NotImplementedError
+        #if self.photoncut: raise NotImplementedError
         result = "*".join(
                           "("+
                           "+".join(

@@ -12,6 +12,7 @@ class WeightsHelper(MultiEnum):
             elif sample.g4 == sample.g1prime2 == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fa2")
             elif sample.g2 == sample.g4       == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fL1")
             elif sample.g2 == sample.g4       == sample.g1prime2     == 0: args = (sample.productionmode, "fL1Zg")
+            elif sample.g1 == sample.g2       == sample.g4           == 0: args = (sample.productionmode, "fL1fL1Zg")
             else: assert False
         return super(WeightsHelper, self).__init__(*args, **kwargs)
 
@@ -38,14 +39,20 @@ class WeightsHelper(MultiEnum):
 
     @property
     def decaySMcouplingname(self):
+        if self.analysis.isfL1fL1Zg: return self.analysis.couplingnames[0].replace("g", "ghz")
         return "ghz1"
+    @property
+    def decaySMcouplingvalue(self):
+        if self.analysis.isfL1fL1Zg: return "1E4"
+        return "1"
     @property
     def decayBSMcouplingname(self):
         if self.analysis == "fL1Zg": return self.analysis.couplingname.replace("ghzgs", "ghza")
+        if self.analysis.isfL1fL1Zg: return self.analysis.couplingnames[1].replace("ghzgs", "ghza")
         return self.analysis.couplingname.replace("g", "ghz")
     @property
     def decayBSMcouplingvalue(self):
-        if self.analysis in ("fL1", "fL1Zg"): return "1E4"
+        if self.analysis in ("fL1", "fL1Zg") or self.analysis.isfL1fL1Zg: return "1E4"
         else: return "1"
 
     @property
@@ -55,6 +62,9 @@ class WeightsHelper(MultiEnum):
         if self.productionmode == "WH": return "ghw1"
         if self.productionmode == "ZH": return "ghz1"
         if self.productionmode == "ttH": return "kappa"
+    @property
+    def prodSMcouplingvalue(self):
+        return "1"
     @property
     def prodBSMcouplingname(self):
         if self.productionmode == "ttH": return "kappa_tilde"
@@ -76,6 +86,8 @@ class WeightsHelper(MultiEnum):
                 "prod": self.weightprodstring,
                 "decaySM": self.decaySMcouplingname,
                 "prodSM": self.prodSMcouplingname,
+                "decaySMvalue": self.decaySMcouplingvalue,
+                "prodSMvalue": self.prodSMcouplingvalue,
                 "decayBSM": self.decayBSMcouplingname,
                 "prodBSM": self.prodBSMcouplingname,
                 "decayBSMvalue": self.decayBSMcouplingvalue,
@@ -86,33 +98,35 @@ class WeightsHelper(MultiEnum):
     def decayweightSM(self):
         result = "p_Gen_{decay}_SIG_"
         if self.productionmode=="ggH":
-            result += "{prodSM}_1_"
-        result += "{decaySM}_1_JHUGen"
+            result += "{prodSM}_{prodSMvalue}_"
+        result += "{decaySM}_{decaySMvalue}_JHUGen"
         return result.format(**self.formatdict)
     @property
     def decayweightBSM(self):
         result = "p_Gen_{decay}_SIG_"
         if self.productionmode=="ggH":
-            result += "{prodSM}_1_"
+            result += "{prodSM}_{prodSMvalue}_"
         result += "{decayBSM}_{decayBSMvalue}_JHUGen"
         return result.format(**self.formatdict)
     @property
     def decayweightmix(self):
         result = "p_Gen_{decay}_SIG_"
         if self.productionmode=="ggH":
-            result += "{prodSM}_1_"
-        result += "{decaySM}_1_{decayBSM}_{decayBSMvalue}_JHUGen".format(**self.formatdict)
+            result += "{prodSM}_{prodSMvalue}_"
+        result += "{decaySM}_{decaySMvalue}_{decayBSM}_{decayBSMvalue}_JHUGen".format(**self.formatdict)
         return result.format(**self.formatdict)
     @property
     def decaySMcoupling(self):
+        if self.analysis.isfL1fL1Zg: return self.analysis.couplingnames[0]
         return "g1"
     @property
     def decayBSMcoupling(self):
+        if self.analysis.isfL1fL1Zg: return self.analysis.couplingnames[1]
         return self.analysis.couplingname
 
     @property
     def prodweightSM(self):
-        return "p_Gen_{prod}_SIG_{prodSM}_1_JHUGen".format(**self.formatdict)
+        return "p_Gen_{prod}_SIG_{prodSM}_{prodSMvalue}_JHUGen".format(**self.formatdict)
     @property
     def prodweightBSM(self):
         if self.productionmode == "WH" and self.analysis == "fL1Zg": return None
@@ -120,7 +134,7 @@ class WeightsHelper(MultiEnum):
     @property
     def prodweightmix(self):
         if self.productionmode == "WH" and self.analysis == "fL1Zg": return self.prodweightSM
-        return "p_Gen_{prod}_SIG_{prodSM}_1_{prodBSM}_{prodBSMvalue}_JHUGen".format(**self.formatdict)
+        return "p_Gen_{prod}_SIG_{prodSM}_{prodSMvalue}_{prodBSM}_{prodBSMvalue}_JHUGen".format(**self.formatdict)
     @property
     def prodSMcoupling(self):
         if self.productionmode in ("VBF", "ZH", "WH"): return "g1"
@@ -135,3 +149,5 @@ class WeightsHelper(MultiEnum):
 if __name__ == "__main__":
     from samples import ArbitraryCouplingsSample, ReweightingSample
     print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, kappa=1, kappa_tilde=4).MC_weight
+    print ArbitraryCouplingsSample("ggH", g1=0, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=23456, ghg2=1, ghg4=0).MC_weight
+

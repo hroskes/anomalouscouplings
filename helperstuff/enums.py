@@ -426,7 +426,7 @@ class Analysis(MyEnum):
                  EnumItem("fL1"),
                  EnumItem("fL1Zg"),
                  EnumItem("fL1fL1Zg_DL1_DL1L1Zgint"),
-                 EnumItem("fL1fL1Zg_DL1_DL1Zgint"),
+                 EnumItem("fL1fL1Zg", "fL1fL1Zg_DL1_DL1Zgint"),
                  EnumItem("fL1fL1Zg_DeR_DeLeR"),
                  EnumItem("fL1fL1Zg_DeR_DeLint"),
                  EnumItem("fL1fL1Zg_m1_m2"),
@@ -551,8 +551,8 @@ class Analysis(MyEnum):
         if self.isfL1fL1Zg: return True
         assert False, self
     def doCMS(self):
-        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
-        if self.isfL1fL1Zg: return False
+        if self in ("fa2", "fa3", "fL1", "fL1Zg", "fL1fL1Zg"): return True
+        if self.isfL1fL1Zg: return False  #but not the main fL1fL1Zg
         assert False, self
     @property
     def fais(self):
@@ -568,6 +568,7 @@ class Production(MyEnum):
                  EnumItem("170203"),
                  EnumItem("170222"),
                  EnumItem("170712"),
+                 EnumItem("170825"),
                  EnumItem("LHE_170509"),
                 )
     def __cmp__(self, other):
@@ -588,6 +589,9 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/170623"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/170623"
+        if self == "170825":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/170825_Heshy_fL1fL1Zg"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -619,6 +623,7 @@ class Production(MyEnum):
     @property
     def productionforsmoothingparameters(self):
         if self == "170222": return type(self)("170203")
+        if self == "170825": return type(self)("170203")
         return self
     @property
     def LHE(self):

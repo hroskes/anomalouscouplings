@@ -564,15 +564,16 @@ class TreeWrapper(TreeWrapperBase):
         #express in terms of |M|^2, this will make life easier
         self.M2qqZZ = t.p_QQB_BKG_MCFM
 
-        self.M2g1_decay             = t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
-        self.M2g4_decay             = t.p_GG_SIG_ghg2_1_ghz4_1_JHUGen
-        self.M2g1g4_decay           = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen
-        self.M2g2_decay             = t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
-        self.M2g1g2_decay           = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen
-        self.M2g1prime2_decay       = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_JHUGen / 1e4**2
-        self.M2g1g1prime2_decay     = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1E4_JHUGen / 1e4
-        self.M2ghzgs1prime2_decay   = t.p_GG_SIG_ghg2_1_ghza1prime2_1E4_JHUGen / 1e4**2
-        self.M2g1ghzgs1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1_1_ghza1prime2_1E4_JHUGen / 1e4
+        self.M2g1_decay                   = t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
+        self.M2g4_decay                   = t.p_GG_SIG_ghg2_1_ghz4_1_JHUGen
+        self.M2g1g4_decay                 = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen
+        self.M2g2_decay                   = t.p_GG_SIG_ghg2_1_ghz2_1_JHUGen
+        self.M2g1g2_decay                 = t.p_GG_SIG_ghg2_1_ghz1_1_ghz2_1_JHUGen
+        self.M2g1prime2_decay             = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_JHUGen / 1e4**2
+        self.M2g1g1prime2_decay           = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1E4_JHUGen / 1e4
+        self.M2ghzgs1prime2_decay         = t.p_GG_SIG_ghg2_1_ghza1prime2_1E4_JHUGen / 1e4**2
+        self.M2g1ghzgs1prime2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghza1prime2_1E4_JHUGen / 1e4
+        self.M2g1prime2ghzgs1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_ghza1prime2_1E4_JHUGen / 1e4**2
 
         #JECNominal
         self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal               = self.M2g1_VBF                     = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal
@@ -875,9 +876,17 @@ class TreeWrapper(TreeWrapperBase):
             "D_L1Zg_decay",
             "D_L1Zgint_decay",
             "D_L1L1Zg_decay",
+            "D_L1L1Zgint_decay",
         ]
 
         self.exceptions = [
+            "D_eL_decay",
+            "D_eLint_decay",
+            "D_eR_decay",
+            "D_eRint_decay",
+            "D_eLeR_decay",
+            "D_eLeRint_decay",
+
             "allsamples",
             "categorizations",
             "cconstantforDbkg",
@@ -886,7 +895,6 @@ class TreeWrapper(TreeWrapperBase):
             "cconstantforDHadZH",
             "checkfunctions",
             "cutoffs",
-            "D_L1L1Zgint_decay",
             "exceptions",
             "failedtree",
             "genMEs",
