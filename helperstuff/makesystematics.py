@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
+import constants
 import inspect
 import re
 
@@ -66,4 +67,3 @@ class MakeJECSystematics(MakeSystematics):
             raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
 
         return code
-

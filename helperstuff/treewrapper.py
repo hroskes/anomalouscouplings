@@ -457,27 +457,27 @@ class TreeWrapper(TreeWrapperBase):
 
     def __init__(self, treesample, minevent=0, maxevent=None):
         """
-        tree - a TTree object
         treesample - which sample the TTree was created from
-        Counters - from the CJLST file
         """
-        filename = treesample.CJLSTfile()
+        self.treesample = treesample
+        self.filename = filename = treesample.CJLSTfile()
 
+        if xrd.exists(self.filename): self.f = ROOT.TFile.Open(filename)
         if self.isdummy:
             print "{} does not exist or is bad, using {}".format(filename, definitelyexists.CJLSTfile())
             #give it a tree so that it can get the format, but not fill any entries
             filename = definitelyexists.CJLSTfile()
-            self.f = ROOT.TFile.Open(filename)
+        self.f = ROOT.TFile.Open(filename)
 
-        self.Counters = self.f.Get("{}/Counters".format(sample.TDirectoryname()))
-        if not self.Counters:
+        self.counters = self.f.Get("{}/Counters".format(treesample.TDirectoryname()))
+        if not self.counters:
             raise ValueError("No Counters in file "+filename)
 
-        self.tree = ROOT.TChain("{}/candTree".format(sample.TDirectoryname()))
+        self.tree = ROOT.TChain("{}/candTree".format(treesample.TDirectoryname()))
         self.tree.Add(filename)
 
-        if self.f.Get("{}/candTree_failed".format(sample.TDirectoryname())):
-            self.failedtree = ROOT.TChain("{}/candTree_failed".format(sample.TDirectoryname()))
+        if self.f.Get("{}/candTree_failed".format(treesample.TDirectoryname())):
+            self.failedtree = ROOT.TChain("{}/candTree_failed".format(treesample.TDirectoryname()))
             self.failedtree.Add(filename)
         else:
             self.failedtree = None
@@ -486,27 +486,26 @@ class TreeWrapper(TreeWrapperBase):
         self.xsec = None
         self.effectiveentriestree = None
 
-        super(TreeWrapperBase, self).__init__(treesample, minevent, maxevent)
+        super(TreeWrapper, self).__init__(treesample, minevent, maxevent)
 
-        if Counters is not None:
-            self.nevents = Counters.GetBinContent(40)
+        if self.counters is not None:
+            self.nevents = self.counters.GetBinContent(40)
 
-        tree.GetEntry(0)
+        self.tree.GetEntry(0)
         if self.isdata or self.isZX:
             self.xsec = 0
         else:
-            self.xsec = tree.xsec * 1000 #pb to fb
+            self.xsec = self.tree.xsec * 1000 #pb to fb
 
         self.preliminaryloop()
 
     @property
     @cache_instancemethod
     def isdummy(self):
-        if not xrd.exists(filename):
+        if not xrd.exists(self.filename):
             return True
         else:
-            self.f = ROOT.TFile.Open(filename)
-            if not self.f.Get("{}/candTree".format(sample.TDirectoryname())):
+            if not self.f.Get("{}/candTree".format(self.treesample.TDirectoryname())):
                 return True
         return super(TreeWrapper, self).isdummy
 
@@ -894,9 +893,13 @@ class TreeWrapper(TreeWrapperBase):
             "cconstantforDHadWH",
             "cconstantforDHadZH",
             "checkfunctions",
+            "counters",
             "cutoffs",
+            "effectiveentriestree",
             "exceptions",
+            "f",
             "failedtree",
+            "filename",
             "genMEs",
             "getweightfunction",
             "hypothesis",
@@ -1153,6 +1156,9 @@ class TreeWrapper(TreeWrapperBase):
         ReweightingSample("ggH", "fL1-0.5"),
         ReweightingSample("ggH", "fL1Zg-0.5"),
         ReweightingSample("ggH", "fa2dec-0.9"),
+        ReweightingSample("ggH", "L1_photoncut"),
+        ReweightingSample("ggH", "fL10.5_photoncut"),
+        ReweightingSample("ggH", "fL10.5fL1Zg0.5"),
         ReweightingSample("VBF", "0+"),
         ReweightingSample("VBF", "0+_photoncut"),
         ReweightingSample("VBF", "a2"),
