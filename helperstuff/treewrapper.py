@@ -17,7 +17,7 @@ import constants
 import enums
 from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import cache_instancemethod, callclassinitfunctions, getmembernames
+from utilities import cache_instancemethod, callclassinitfunctions, getmembernames, tlvfromptetaphim
 import xrd
 import ZX
 
@@ -452,6 +452,50 @@ class TreeWrapperBase(Iterator):
                  )
                )
 
+######
+#STXS#
+######
+
+#https://arxiv.org/pdf/1610.07922.pdf
+#starting on page 462
+
+    def D_STXS_stage0(self):
+        if abs(self.ZZEta) < 2.5: return 0
+        return 1
+
+    @MakeJECSystematics
+    def D_STXS_ggH_stage1(self):
+        if abs(self.ZZEta) < 2.5:
+            if self.nCleanedJetsPt30 == 0: return 0
+            if self.nCleanedJetsPt30 == 1:
+                if self.ZZPt < 60: return 1
+                if self.ZZPt < 120: return 2
+                if self.ZZPt < 200: return 3
+                return 4
+            if self.nCleanedJetsPt30 >= 2:
+                #note this is out of order, to stay consistent with the order in the picture on page 463
+                if self.DiJetMass > 400 and self.DiJetDEta > 2.8 and self.ZZPt < 200:  #"VBF cuts"
+                    if self.HjjPt < 25: return 9
+                    return 10
+                if self.ZZPt < 60: return 5
+                if self.ZZPt < 120: return 6
+                if self.ZZPt < 200: return 7
+                return 8
+            assert False
+        return 11
+
+    @MakeJECSystematics
+    def D_STXS_VBF_stage1(self):
+        if abs(self.ZZEta) < 2.5:
+            if self.nCleanedJetsPt30 == 0 or self.Jet1Pt < 200:
+                if self.nCleanedJetsPt30 >= 2 and self.DiJetMass > 400 and self.DiJetDEta > 2.8:
+                    if self.HjjPt < 25: return 0
+                    return 1
+                if self.nCleanedJetsPt30 >= 2 and 60 < self.DiJetMass < 120: return 2
+                return 3
+            return 4
+        return 5
+
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
@@ -544,6 +588,9 @@ class TreeWrapper(TreeWrapperBase):
 
         #I prefer this to defining __getattr__ because it's faster
         self.ZZMass = t.ZZMass
+        self.ZZPt = t.ZZPt
+        self.ZZEta = t.ZZEta
+        Hvector = tlvfromptetaphim(self.ZZPt, self.ZZEta, t.ZZPhi, self.ZZMass)
 
         #self.cconstantforDbkgkin = CJLSTscripts.getDbkgkinConstant(self.flavor, self.ZZMass)
         self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.flavor, self.ZZMass)
@@ -712,11 +759,31 @@ class TreeWrapper(TreeWrapperBase):
         self.nCleanedJetsPt30BTagged_bTagSFDn = t.nCleanedJetsPt30BTagged_bTagSFDn
         self.jetQGLikelihood = t.JetQGLikelihood.data()
         self.jetPhi = t.JetPhi.data()
+        jets = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(t.JetPt, t.JetEta, t.JetPhi, t.JetMass)[:2]]
 
         if nCleanedJets == 0:
             self.jetQGLikelihood = self.jetPhi = dummyfloatstar
+            self.Jet1Pt = None
+        else:
+            self.Jet1Pt = t.JetPt[0]
+
+        self.DiJetMass = t.DiJetMass
+        self.DiJetDEta = t.DiJetDEta
+        self.HjjPt = (Hvector + jets[0] + jets[1]).Pt() if nCleanedJets >= 2 else -99
 
         self.nCleanedJetsPt30_jecUp = t.nCleanedJetsPt30_jecUp
+        ptUp = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma))), reverse=True)
+        jecUpIndices = [i for pt, i in ptUp if pt>30]
+
+        self.Jet1Pt_jecUp = ptUp[0][0] if ptUp else None
+        if self.nCleanedJetsPt30_jecUp < 2:
+            self.DiJetMass_jecUp = self.DiJetDEta_jecUp = self.HjjPt_jecUp = -99
+        else:
+            jets_jecUp = [tlvfromptetaphim(pt, t.JetEta[i], t.JetPhi[i], t.JetMass[i]) for pt, i in ptUp[:2]]
+            self.DiJetMass_jecUp = (jets_jecUp[0]+jets_jecUp[1]).M()
+            self.DiJetDEta_jecUp = jets_jecUp[0].Eta() - jets_jecUp[1].Eta()
+            self.HjjPt_jecUp = (Hvector + jets_jecUp[0] + jets_jecUp[1]).Pt() if nCleanedJets >= 2 else -99
+
         if self.nCleanedJetsPt30 == self.nCleanedJetsPt30_jecUp:
             self.nCleanedJetsPt30BTagged_bTagSF_jecUp = self.nCleanedJetsPt30BTagged_bTagSF
             self.jetQGLikelihood_jecUp = self.jetQGLikelihood
@@ -724,7 +791,6 @@ class TreeWrapper(TreeWrapperBase):
             #note that this automatically takes care of the dummyfloatstar case, since if there are no jets
             # nCleanedJetsPt30 will be the same as nCleanedJetsPt30_jecUp
         else:
-            jecUpIndices = [i for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma)) if pt*(1+sigma)>30]
             self.nCleanedJetsPt30BTagged_bTagSF_jecUp = int(sum(t.JetIsBtaggedWithSF[i] for i in jecUpIndices))
             if jecUpIndices == range(self.nCleanedJetsPt30_jecUp):
                 #should happen almost always
@@ -735,6 +801,18 @@ class TreeWrapper(TreeWrapperBase):
                 self.jetPhi_jecUp = array("f", [t.JetPhi[i] for i in jecUpIndices])
 
         self.nCleanedJetsPt30_jecDn = t.nCleanedJetsPt30_jecDn
+        ptDn = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma))), reverse=True)
+        jecDnIndices = [i for pt, i in ptDn if pt>30]
+
+        self.Jet1Pt_jecDn = ptDn[0][0] if ptDn else None
+        if self.nCleanedJetsPt30_jecDn < 2:
+            self.DiJetMass_jecDn = self.DiJetDEta_jecDn = self.HjjPt_jecDn = -99
+        else:
+            jets_jecDn = [tlvfromptetaphim(pt, t.JetEta[i], t.JetPhi[i], t.JetMass[i]) for pt, i in ptDn[:2]]
+            self.DiJetMass_jecDn = (jets_jecDn[0]+jets_jecDn[1]).M()
+            self.DiJetDEta_jecDn = jets_jecDn[0].Eta() - jets_jecDn[1].Eta()
+            self.HjjPt_jecDn = (Hvector + jets_jecDn[0] + jets_jecDn[1]).Pt() if nCleanedJets >= 2 else -99
+
         if self.nCleanedJetsPt30 == self.nCleanedJetsPt30_jecDn:
             self.nCleanedJetsPt30BTagged_bTagSF_jecDn = self.nCleanedJetsPt30BTagged_bTagSF
             self.jetQGLikelihood_jecDn = self.jetQGLikelihood
@@ -742,7 +820,6 @@ class TreeWrapper(TreeWrapperBase):
             #note that this automatically takes care of the dummyfloatstar case, since if there are no jets
             # nCleanedJetsPt30 will be the same as nCleanedJetsPt30_jecDn
         else:
-            jecDnIndices = [i for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma)) if pt*(1-sigma)>30]
             self.nCleanedJetsPt30BTagged_bTagSF_jecDn = int(sum(t.JetIsBtaggedWithSF[i] for i in jecDnIndices))
             if jecDnIndices == range(self.nCleanedJetsPt30_jecDn):
                 #should happen almost always
@@ -932,6 +1009,10 @@ class TreeWrapper(TreeWrapperBase):
             "unblind",
             "xsec",
         ]
+        self.toaddtotree_float = []
+        self.toaddtotree_int = [
+            "D_STXS_stage0",
+        ]
 
         proddiscriminants = [
             "D_0minus_{prod}",
@@ -947,12 +1028,15 @@ class TreeWrapper(TreeWrapperBase):
             "D_L1_{prod}decay",
             "D_L1Zg_{prod}decay",
         ]
-        for prod in ("VBF", "HadVH"):
-            for JEC in "", "_JECUp", "_JECDn":
-                self.toaddtotree += [_.format(prod=prod)+JEC for _ in proddiscriminants]
+        STXSdiscriminants = [
+            "D_STXS_ggH_stage1",
+            "D_STXS_VBF_stage1",
+        ]
 
-        self.toaddtotree_int = []
-        self.toaddtotree_float = []
+        for JEC in "", "_JECUp", "_JECDn":
+            for prod in ("VBF", "HadVH"):
+                self.toaddtotree += [_.format(prod=prod)+JEC for _ in proddiscriminants]
+            self.toaddtotree_int += [_+JEC for _ in STXSdiscriminants]
 
         for _ in self.categorizations:
             self.toaddtotree_int.append(_.category_function_name)

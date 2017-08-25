@@ -61,9 +61,16 @@ class MakeJECSystematics(MakeSystematics):
             r"(self[.]notdijet)",
         ):
             code = re.sub(thing, r"\1_JEC{UpDn}", code)
+        for thing in (
+            r"(self[.](Hjj|Jet1)Pt)",
+            r"(self[.]DiJet(Mass|DEta))",
+            r"(self[.]nCleanedJetsPt30)",
+        ):
+            code = re.sub(thing, r"\1_jec{UpDn}", code)
+
         result = re.findall("(self[.][\w]*)[^\w{]", code)
         for variable in result:
-            if re.match("self[.]M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay", variable): continue
+            if re.match("self[.](M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay|ZZ(Eta|Pt))", variable): continue
             raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
 
         return code
