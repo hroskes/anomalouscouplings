@@ -601,3 +601,9 @@ class cdtemp_slurm(object):
     def __exit__(self, *args, **kwargs):
         if self.cd is not None:
             return self.cd.__exit__(*args, **kwargs)
+
+def recursivesubclasses(cls):
+    result = [cls]
+    for subcls in cls.__subclasses__():
+        result += recursivesubclasses(subcls)
+    return result
