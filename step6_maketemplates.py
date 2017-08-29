@@ -30,7 +30,7 @@ def buildtemplates(*args):
                         subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
                     except:
                         try:
-                            os.remove(templatesfile.templatesfile(firststep=True))
+                            os.remove(templatesfile.templatesfile(firststep=templatesfile.hascustomsmoothing))
                         except:
                             pass
                         raise
