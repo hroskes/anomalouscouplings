@@ -5,10 +5,11 @@ example script to copy smoothing parameters from one set of templates to another
 
 from templates import *
 
-for hypothesis in "0+_photoncut", "L1_photoncut", "L1Zg", "fL10.5_photoncut", "fL1Zg0.5", "fL10.5fL1Zg0.5":
-  Template('2e2mu', 'ggH', "fL1fL1Zg_DeR_DeLint", 'LHE_170509', 'Untagged', hypothesis).smoothingparameters = \
-  Template('2e2mu', 'ggH', "fL1fL1Zg_DL1_DL1L1Zgint", 'LHE_170509', 'Untagged', hypothesis).smoothingparameters
-Template('2e2mu', 'qqZZ', "fL1fL1Zg_DeR_DeLint", 'LHE_170509', 'Untagged').smoothingparameters = \
-Template('2e2mu', 'qqZZ', "fL1fL1Zg_DL1_DL1L1Zgint", 'LHE_170509', 'Untagged').smoothingparameters
+for channel in channels:
+  for hypothesis in "0+_photoncut", "L1_photoncut", "L1Zg", "fL10.5_photoncut", "fL1Zg0.5", "fL10.5fL1Zg0.5":
+    Template(channel, "ggH", "fL1fL1Zg", "170825", "Untagged", hypothesis).smoothentriesperbin = 200
+  Template(channel, "qqZZ", "fL1fL1Zg", "170825", "Untagged").smoothentriesperbin = 200
+  Template(channel, "ggZZ", "fL1fL1Zg", "170825", "Untagged").smoothentriesperbin = 200
+  Template(channel, "VBF bkg", "fL1fL1Zg", "170825", "Untagged").smoothentriesperbin = 200
 
 Template.writedict()

@@ -738,7 +738,7 @@ productionmodes = ProductionMode.items()
 if config.LHE:
     analyses = Analysis.items(lambda x: x.doLHE)
 else:
-    analyses = Analysis.items(lambda x: x.doCMS)
+    analyses = Analysis.items(lambda x: x.doCMS and x == "fL1fL1Zg")
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)

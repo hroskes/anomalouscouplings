@@ -828,6 +828,7 @@ class Template(TemplateBase, MultiEnum):
         result = ["ZZMass>{}".format(config.m4lmin), "ZZMass<{}".format(config.m4lmax)]
         if not config.LHE:
             result.append("Z1Flav*Z2Flav == {}".format(self.ZZFlav))
+        if not self.analysis.is2d:
             result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")")
         return " && ".join(result)
 
