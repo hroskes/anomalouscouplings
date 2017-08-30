@@ -77,6 +77,9 @@ def writeyields():
     #                  TreeWrapper.categorizations,
     #                 )
 
+  for _ in ReweightingSamplePlus("ggH", "0+", "POWHEG"), ReweightingSamplePlus("VBF", "0+", "POWHEG"), ReweightingSamplePlus("ZH", "0+", "POWHEG"), ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG"), ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG"):
+    print result[_, NoCategorization(), AlternateWeight("1")]
+
   for key in result.keys():
     tosample, categorization, rest = key[0], key[1], key[2:]
     if tosample.productionmode != "ggH" or categorization.category_function_name != "category_nocategorization": continue
@@ -90,6 +93,8 @@ def writeyields():
       assert result[otherkey]
       result[key] += result[otherkey]
       del result[otherkey]
+
+  print result[ReweightingSamplePlus("ggH", "0+", "POWHEG"), NoCategorization(), AlternateWeight("1")]
 
   print
   result.freeze()
@@ -170,7 +175,10 @@ def writeyields():
               YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "ggH", systname).value
           elif productionmode == "VBF bkg":
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
+              if analysis.isdecayonly:
+                YieldSystematicValue(channel, category, analysis, productionmode, systname).value = 1
+              else:
+                YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
           elif systname == productionmode.QCDsystematicname or systname == productionmode.pdfsystematicname:
             if systname == productionmode.QCDsystematicname: first, second = "muR", "muF"
             if systname == productionmode.pdfsystematicname: first, second = "PDF", "alphaS"
