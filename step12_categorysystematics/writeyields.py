@@ -8,7 +8,7 @@ import os
 import yaml
 
 from helperstuff import config
-from helperstuff.categorization import MultiCategorization
+from helperstuff.categorization import MultiCategorization, NoCategorization
 from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import AlternateWeight, analyses, categories, Category, channels, flavors, ProductionMode, pythiasystematics
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
@@ -34,10 +34,11 @@ def writeyields():
     SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
     SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
     SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}),
-    SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}),
   ]
+  if config.usedata:
+    tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
 
-  categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, MultiCategorization)]
+  categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, (MultiCategorization, NoCategorization))]
 
   result = MultiplyCounter()
   for productionmode, samples in tosamples_foryields:
@@ -69,27 +70,30 @@ def writeyields():
 
       result += tmpresult
 
-    print
-    result.freeze()
-
-    for key in result.keys():
-      tosample, categorization, rest = key[0], key[1], key[2:]
-      if tosample.productionmode != "ggH" or categorization.category_function_name != "category_nocategorization": continue
-      sampleargs = list(getattr(tosample, enum.enumname) for enum in type(tosample).enums)
-      sampleargs = list(_ for _ in sampleargs if _ is not None and _ != "ggH")
-      for otherproductionmode in "VBF", "ZH", "WH", "ttH":
-        othersample = type(tosample)(otherproductionmode, *sampleargs)
-        otherkey = tuple((othersample, categorization)+rest)
-        assert result[otherkey]
-        result[key] += result[otherkey]
-        del result[otherkey]
-
     #if productionmode.issignal():
     #  result += count(
     #                  {ReweightingSample(productionmode, "0+")},
     #                  {Sample(productionmode, h, production) for h in productionmode.generatedhypotheses},
     #                  TreeWrapper.categorizations,
     #                 )
+
+  for key in result.keys():
+    tosample, categorization, rest = key[0], key[1], key[2:]
+    if tosample.productionmode != "ggH" or categorization.category_function_name != "category_nocategorization": continue
+    for otherproductionmode in "VBF", "ZH", "WplusH", "WminusH", "ttH":
+      assert "ggH" in repr(tosample)
+      othersamplestring = repr(tosample).replace("ggH", otherproductionmode)
+      if "ttH" in othersamplestring:
+          othersamplestring = othersamplestring.replace("ReweightingSample(", "ReweightingSample('Hff0+', ")
+      othersample = eval(othersamplestring)
+      otherkey = tuple((othersample, categorization)+rest)
+      assert result[otherkey]
+      result[key] += result[otherkey]
+      del result[otherkey]
+
+  print
+  result.freeze()
+
 
   for productionmode, samples in tosamples_foryields:
     print productionmode
@@ -144,7 +148,7 @@ def writeyields():
         nominal = sum(result[tosample, categorization, AlternateWeight("1"), category] for tosample in samples)
         nominaluntagged = sum(result[tosample, categorization, AlternateWeight("1"), Category("Untagged")] for tosample in samples)
         nominalyield = sum(result[tosample, categorization, AlternateWeight("1")] for tosample in samples)
-        if productionmode == "ZX":
+        if productionmode == "ZX" or analysis.isdecayonly:
           JECUp = JECDn = btSFUp = btSFDn = 1
         else:
           JECUp = sum(result[tosample, findsystematic(categorizations, categorization, "JECUp", "Nominal"), AlternateWeight("1"), category] for tosample in samples) / nominal

@@ -162,9 +162,8 @@ class YieldSystematicValue(MultiEnum, JsonDict):
 
         super(YieldSystematicValue, self).setvalue(value)
 
-    @property
-    def value(self):
-        result = super(YieldSystematicValue, self).value
+    def getvalue(self):
+        result = super(YieldSystematicValue, self).getvalue()
         if isinstance(result, list) and len(result) == 2:
           result = tuple(result)
         return result

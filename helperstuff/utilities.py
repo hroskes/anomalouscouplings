@@ -352,8 +352,9 @@ class JsonDict(object):
     __dictscache = collections.defaultdict(lambda: None)
 
     def setvalue(self, value):
+        if isinstance(value, list): value = tuple(value)
         self.setnesteddictvalue(self.getdict(), *self.keys, value=value)
-        assert self.value == value
+        assert self.value == value, (self.value, value)
 
     def getvalue(self):
         try:
