@@ -42,25 +42,43 @@ class TFilesDict(KeyDefaultDict):
 tfiles = TFilesDict()
 
 class MultiplyCounter(collections.Counter):
+    def __init__(self, *args, **kwargs):
+        self.__frozen = False
+        super(MultiplyCounter, self).__init__(*args, **kwargs)
+
+    def __setitem__(self, *args, **kwargs):
+        if self.__frozen: raise TypeError("MultiplyCounter is already frozen!")
+        super(MultiplyCounter, self).__setitem__(*args, **kwargs)
+
     def __add__(self, other):
+        if self.__frozen: raise TypeError("MultiplyCounter is already frozen!")
         return type(self)(super(MultiplyCounter, self).__add__(other))
     def __sub__(self, other):
+        if self.__frozen: raise TypeError("MultiplyCounter is already frozen!")
         return type(self)(super(MultiplyCounter, self).__sub__(other))
     def __mul__(self, other):
+        if self.__frozen: raise TypeError("MultiplyCounter is already frozen!")
         return type(self)({k: v*other for k, v in self.iteritems()})
     def __rmul__(self, other):
+        if self.__frozen: raise TypeError("MultiplyCounter is already frozen!")
         return type(self)({k: other*v for k, v in self.iteritems()})
     def __div__(self, other):
+        if self.__frozen: raise TypeError("MultiplyCounter is already frozen!")
         return type(self)({k: v/other for k, v in self.iteritems()})
 
     def __imul__(self, other):
+        if self.__frozen: raise TypeError("MultiplyCounter is already frozen!")
         for key in self:
             self[key] *= other
         return self
     def __idiv__(self, other):
+        if self.__frozen: raise TypeError("MultiplyCounter is already frozen!")
         for key in self:
             self[key] /= other
         return self
+
+    def freeze(self):
+        self.__frozen = True
 
 def cache(function):
     cache = {}

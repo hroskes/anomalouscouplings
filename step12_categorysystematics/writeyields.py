@@ -24,14 +24,14 @@ production = config.productionsforcombine[0]
 SampleCount = namedtuple("SampleCount", "productionmode samples")
 
 def writeyields():
-  if not config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
+  if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
   tosamples_foryields = [
     SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
     SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("WH"), {ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("ttH"), {ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")}),
-    SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ")}),
+    SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
     SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
     SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}),
     SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}),
@@ -39,9 +39,9 @@ def writeyields():
 
   categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, MultiCategorization)]
 
+  result = MultiplyCounter()
   for productionmode, samples in tosamples_foryields:
     print productionmode
-    result = MultiplyCounter()
     samplegroups = [samples]
     if productionmode.issignal:
       samplegroups += [{ReweightingSamplePlus(s, systematic) for s in samples} for systematic in pythiasystematics]
@@ -69,6 +69,20 @@ def writeyields():
 
       result += tmpresult
 
+    print
+    result.freeze()
+
+    for key in result.keys():
+      tosample, categorization, rest = key[0], key[1], key[2:]
+      if tosample.productionmode != "ggH" or categorization.category_function_name != "category_nocategorization": continue
+      sampleargs = list(getattr(tosample, enum.enumname) for enum in type(tosample).enums)
+      sampleargs = list(_ for _ in sampleargs if _ is not None and _ != "ggH")
+      for otherproductionmode in "VBF", "ZH", "WH", "ttH":
+        othersample = type(tosample)(otherproductionmode, *sampleargs)
+        otherkey = tuple((othersample, categorization)+rest)
+        assert result[otherkey]
+        result[key] += result[otherkey]
+        del result[otherkey]
 
     #if productionmode.issignal():
     #  result += count(
@@ -77,7 +91,10 @@ def writeyields():
     #                  TreeWrapper.categorizations,
     #                 )
 
+  for productionmode, samples in tosamples_foryields:
+    print productionmode
     for analysis in analyses:
+      if analysis.isdecayonly and productionmode in ("VBF", "ZH", "WH", "ttH"): continue
       categorization = {_ for _ in categorizations if _.category_function_name == "category_"+analysis.categoryname}
       assert len(categorization) == 1, categorization
       categorization = categorization.pop()
@@ -122,6 +139,7 @@ def writeyields():
 
       #same for all channels
       for category in categories:
+        if analysis.isdecayonly and category != "Untagged": continue
         #variations on category definition: JEC and btagging
         nominal = sum(result[tosample, categorization, AlternateWeight("1"), category] for tosample in samples)
         nominaluntagged = sum(result[tosample, categorization, AlternateWeight("1"), Category("Untagged")] for tosample in samples)
