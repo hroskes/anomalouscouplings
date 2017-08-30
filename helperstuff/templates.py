@@ -84,7 +84,7 @@ class TemplatesFile(MultiEnum):
         if self.templategroup == "ggh":
             if self.shapesystematic == "MINLO_SM":
                 return [ReweightingSamplePlus("ggH", "0+", "MINLO")]
-            if self.analysis == "fa3":
+            if self.analysis in ("fa3", "fa3_STXS"):
                 reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "0-"), ReweightingSample("ggH", "fa30.5")]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "a2"), ReweightingSample("ggH", "fa2-0.5")]
@@ -96,7 +96,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL10.5_photoncut"), ReweightingSample("ggH", "fL1Zg0.5"), ReweightingSample("ggH", "fL10.5fL1Zg0.5")]
 
         elif self.templategroup == "vbf":
-            if self.analysis == "fa3":
+            if self.analysis in ("fa3", "fa3_STXS"):
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "0-"), ReweightingSample("VBF", "fa3prod0.5"), ReweightingSample("VBF", "fa3dec0.5"), ReweightingSample("VBF", "fa3proddec-0.5")]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod0.5"), ReweightingSample("VBF", "fa2dec-0.5"), ReweightingSample("VBF", "fa2proddec-0.5")]
@@ -106,7 +106,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("VBF", "0+_photoncut"), ReweightingSample("VBF", "L1Zg"), ReweightingSample("VBF", "fL1Zgprod0.5"), ReweightingSample("VBF", "fL1Zgdec0.5"), ReweightingSample("VBF", "fL1Zgproddec-0.5")]
 
         elif self.templategroup == "zh":
-            if self.analysis == "fa3":
+            if self.analysis in ("fa3", "fa3_STXS"):
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "0-"), ReweightingSample("ZH", "fa3prod0.5"), ReweightingSample("ZH", "fa3dec0.5"), ReweightingSample("ZH", "fa3proddec-0.5")]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod0.5"), ReweightingSample("ZH", "fa2dec-0.5"), ReweightingSample("ZH", "fa2proddec-0.5")]
@@ -116,7 +116,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("ZH", "0+_photoncut"), ReweightingSample("ZH", "L1Zg"), ReweightingSample("ZH", "fL1Zgprod0.5"), ReweightingSample("ZH", "fL1Zgdec0.5"), ReweightingSample("ZH", "fL1Zgproddec-0.5")]
 
         elif self.templategroup == "wh":
-            if self.analysis == "fa3":
+            if self.analysis in ("fa3", "fa3_STXS"):
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "0-"), ReweightingSample("WH", "fa3prod0.5"), ReweightingSample("WH", "fa3dec0.5"), ReweightingSample("WH", "fa3proddec-0.5")]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod0.5"), ReweightingSample("WH", "fa2dec-0.5"), ReweightingSample("WH", "fa2proddec-0.5")]
@@ -126,7 +126,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("WH", "0+_photoncut"), ReweightingSample("WH", "L1Zg"), ReweightingSample("WH", "fL1Zgprod0.5"), ReweightingSample("WH", "fL1Zgdec0.5"), ReweightingSample("WH", "fL1Zgproddec-0.5")]
 
         elif self.templategroup == "tth":
-            if self.analysis == "fa3":
+            if self.analysis in ("fa3", "fa3_STXS"):
                 reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "0-", "Hff0+"), ReweightingSample("ttH", "fa30.5", "Hff0+")]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "a2", "Hff0+"), ReweightingSample("ttH", "fa2-0.5", "Hff0+")]
@@ -189,6 +189,11 @@ class TemplatesFile(MultiEnum):
     def purediscriminant(self):
         from discriminants import discriminant
 
+        if self.shapesystematic in ("JECUp", "JECDn"):
+            JECappend = "_{}".format(self.shapesystematic)
+        else:
+            JECappend = ""
+
         if self.category == "Untagged":
             if self.analysis == "fa3":
                 return discriminant("D_0minus_decay")
@@ -212,11 +217,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z1Mass")
             if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Z2Mass")
-
-        if self.shapesystematic in ("JECUp", "JECDn"):
-            JECappend = "_{}".format(self.shapesystematic)
-        else:
-            JECappend = ""
+            if self.analysis == "fa3_STXS":
+                return discriminant("D_STXS_ggH_stage1"+JECappend)
 
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
@@ -227,6 +229,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1_VBFdecay"+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_VBFdecay"+JECappend)
+            if self.analysis == "fa3_STXS":
+                return discriminant("D_STXS_VBF_stage1"+JECappend)
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -237,6 +241,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1_HadVHdecay"+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_HadVHdecay"+JECappend)
+            if self.analysis == "fa3_STXS":
+                return discriminant("D_STXS_VBF_stage1"+JECappend)
 
         assert False
 
@@ -267,6 +273,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Phi")
+            if self.analysis == "fa3_STXS":
+                return discriminant("phistarZ2")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -282,6 +290,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_VBFdecay"+JECappend)
+            if self.analysis == "fa3_STXS":
+                return discriminant("phistarZ2")
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -292,6 +302,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_HadVHdecay"+JECappend)
+            if self.analysis == "fa3_STXS":
+                return discriminant("phistarZ2")
 
         assert False
 
@@ -697,7 +709,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def domirror(self):
-        if self.analysis != "fa3": return False
+        if self.analysis not in ("fa3", "fa3_STXS"): return False
         if self.productionmode == "data": return False
 
         if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
@@ -939,7 +951,7 @@ class IntTemplate(TemplateBase, MultiEnum):
     def templatename(self, final=True):
         if self.productionmode in ("ggH", "ttH"):
             if self.interferencetype == "g11gi1":
-                if self.analysis == "fa3":
+                if self.analysis in ("fa3", "fa3_STXS"):
                     result = "templatea1a3IntAdapSmooth"
                 elif self.analysis == "fa2":
                     result = "templatea1a2IntAdapSmooth"
@@ -966,7 +978,7 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     @property
     def mirrorjsn(self):
-        if self.analysis != "fa3": return None
+        if self.analysis not in ("fa3", "fa3_STXS"): return None  #for STXS mirror over the dummy variable on the y axis
 
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH"):

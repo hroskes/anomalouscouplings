@@ -33,6 +33,9 @@ decaydiscriminants = [
     Discriminant("Z1Mass", "m_{1}", defaultnbins, 20, 100),
     Discriminant("Z2Mass", "m_{2}", defaultnbins, 0, 62),
     Discriminant("Phi", "#Phi", defaultnbins, -pi, pi),
+    Discriminant("phistarZ2", "dummy", 1, -pi, pi),
+
+    Discriminant("D_STXS_stage0", "D_{STXS0}", 2, 0, 2),
 ]
 VBFdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),
@@ -47,6 +50,9 @@ VBFdiscriminants = [
     Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBF+dec}", defaultnbins, 0, 1),
     Discriminant("D_L1_VBFdecay", "D_{#Lambda1}^{VBF+dec}", defaultnbins, 0, 1),
     Discriminant("D_L1Zg_VBFdecay", "D_{#Lambda1}^{Z#gamma,VBF+dec}", defaultnbins, 0, 1),
+
+    Discriminant("D_STXS_ggH_stage1", "D_{STXS1}^{ggH}", 12, 0, 12),
+    Discriminant("D_STXS_VBF_stage1", "D_{STXS1}^{VBF}", 6, 0, 6),
 ]
 VHdiscriminants = [
     Discriminant("D_0minus_HadVH", "D_{0-}^{VH}", defaultnbins, 0, 1),

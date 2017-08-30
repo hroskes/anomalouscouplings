@@ -27,6 +27,7 @@ def makecontrolplots(*args, **kwargs):
             os.remove(filename)
 
     axistitles = [_.name for _ in templatesfile.discriminants]
+    nbins = [_.bins for _ in templatesfile.discriminants]
 
     for key in d.GetListOfKeys():
       c = key.ReadObj()
@@ -34,6 +35,7 @@ def makecontrolplots(*args, **kwargs):
         raise TypeError("Unknown object {} in {}/controlPlots".format(key.GetName(), templatesfile.templatesfile(**kwargs)))
       c.GetListOfPrimitives()[1].SetLineColor(2)  #put the line back to red, importing style breaks this for some reason
       axisnumber = int(c.GetName().split("_")[-2].replace("projAxis", ""))
+      if nbins[axisnumber] == 1: continue
       hstack = ROOT.THStack()
       hstack.Add(c.GetListOfPrimitives()[0], "P E X0")
       hstack.Add(c.GetListOfPrimitives()[1], "hist")

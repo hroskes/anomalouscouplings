@@ -432,11 +432,12 @@ class Analysis(MyEnum):
                  EnumItem("fL1fL1Zg_m1_m2"),
                  EnumItem("fL1fL1Zg_m1_phi"),
                  EnumItem("fL1fL1Zg_m2_phi"),
+                 EnumItem("fa3_STXS"),
                 )
     def title(self, latex=False, superscript=None):
         if self.is2d: return self.fais[0].title(latex=latex, superscript=superscript)
 
-        if self == "fa3":
+        if self == "fa3" or self == "fa3_STXS":
             result = "f_{{a3}}"
         elif self == "fa2":
             result = "f_{{a2}}"
@@ -464,7 +465,7 @@ class Analysis(MyEnum):
     @property
     def phi(self):
         if self.is2d: return self.fais[0].phi
-        if self == "fa3":
+        if self == "fa3" or self == "fa3_STXS":
             return "#phi_{a3}"
         if self == "fa2":
             return "#phi_{a2}"
@@ -478,7 +479,7 @@ class Analysis(MyEnum):
         return self.phi.replace("{", "{#lower[-0.25]{").replace("}", "}}")
     @property
     def couplingname(self):
-        if self == "fa3": return "g4"
+        if self == "fa3" or self == "fa3_STXS": return "g4"
         if self == "fa2": return "g2"
         if self == "fL1": return "g1prime2"
         if self == "fL1Zg": return "ghzgs1prime2"
@@ -489,13 +490,13 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def couplingtitle(self):
-        if self == "fa3": return "a_{3}"
+        if self == "fa3" or self == "fa3_STXS": return "a_{3}"
         if self == "fa2": return "a_{2}"
         if self == "fL1": return "#Lambda_{1}"
         if self == "fL1Zg": return "#Lambda_{1}^{Z#gamma}"
     @property
     def purehypotheses(self):
-        if self == "fa3":
+        if self == "fa3" or self == "fa3_STXS":
             return Hypothesis("0+"), Hypothesis("0-")
         if self == "fa2":
             return Hypothesis("0+"), Hypothesis("a2")
@@ -508,7 +509,7 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def mixdecayhypothesis(self):
-        if self == "fa3":
+        if self == "fa3" or self == "fa3_STXS":
             return Hypothesis("fa3dec0.5")
         if self == "fa2":
             return Hypothesis("fa2dec0.5")
@@ -519,7 +520,7 @@ class Analysis(MyEnum):
         assert False
     @property
     def mixprodhypothesis(self):
-        if self == "fa3":
+        if self == "fa3" or self == "fa3_STXS":
             return Hypothesis("fa3prod0.5")
         if self == "fa2":
             return Hypothesis("fa2prod0.5")
@@ -530,7 +531,7 @@ class Analysis(MyEnum):
         assert False
     @property
     def categoryname(self):
-        if self == "fa3": return "0P_or_0M"
+        if self == "fa3" or self == "fa3_STXS": return "0P_or_0M"
         if self == "fa2": return "0P_or_a2"
         if self == "fL1": return "0P_or_L1"
         if self == "fL1Zg": return "0P_or_L1Zg"
@@ -538,11 +539,11 @@ class Analysis(MyEnum):
     @property
     def photoncut(self):
         if self == "fL1Zg": return True
-        if self in ("fa2", "fa3", "fL1"): return False
+        if self in ("fa2", "fa3", "fa3_STXS", "fL1"): return False
         assert False
     @property
     def is2d(self):
-        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+        if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return True
         assert False, self
     @property
@@ -552,17 +553,18 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def doLHE(self):
-        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+        if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return True
         assert False, self
     def doCMS(self):
-        if self in ("fa2", "fa3", "fL1", "fL1Zg", "fL1fL1Zg"): return True
+        if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg", "fL1fL1Zg"): return True
         if self.isfL1fL1Zg: return False  #but not the main fL1fL1Zg
         assert False, self
     @property
     def fais(self):
         if not self.is2d: return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
+        assert False, self
     @property
     def isfL1fL1Zg(self):
         return "fL1fL1Zg" in str(self)
@@ -615,7 +617,7 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222"): return 35.8671
+        if self in ("170203", "170222", "170825"): return 35.8671
         if self == "LHE_170509": return 300
         assert False
     def __int__(self):
@@ -743,7 +745,7 @@ productionmodes = ProductionMode.items()
 if config.LHE:
     analyses = Analysis.items(lambda x: x.doLHE)
 else:
-    analyses = Analysis.items(lambda x: x.doCMS and x == "fL1fL1Zg")
+    analyses = Analysis.items(lambda x: x.doCMS and x in ("fL1fL1Zg", "fa3_STXS"))
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)

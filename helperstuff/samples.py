@@ -765,7 +765,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_ggH_g1ghzgs1prime2"
             elif self.hypothesis == "fL10.5fL1Zg0.5":
                 return "MC_weight_ggH_g1prime2ghzgs1prime2"
-            for a in analyses:
+            for a in "fa3", "fa2", "fL1", "fL1Zg":
                 if self.hypothesis == "{}-0.5".format(a):
                     return ReweightingSample(self.productionmode, "{}0.5".format(a)).weightname()+"_pi"
         elif self.productionmode in ("VBF", "ZH", "WH", "WplusH", "WminusH"):
@@ -812,7 +812,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             elif self.hypothesis == "fa2dec-0.9":
                 return "MC_weight_{}_g1g2_dec_minuspoint9".format(self.productionmode)
 
-            for a in analyses:
+            for a in "fa3", "fa2", "fL1", "fL1Zg":
                 for b in "prod", "dec", "proddec":
                     if self.hypothesis == "{}{}-0.5".format(a, b):
                         return ReweightingSample(self.productionmode, "{}{}0.5".format(a, b)).weightname()+"_pi"
@@ -855,7 +855,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return result + "g1ghzgs1prime2"
             elif self.hypothesis == "fa2dec-0.9":
                 return result + "g1g2_minuspoint9"
-            for a in analyses:
+            for a in "fa3", "fa2", "fL1", "fL1Zg":
                 if self.hypothesis == "{}-0.5".format(a):
                     return ReweightingSample(self.productionmode, self.hffhypothesis, "{}0.5".format(a)).weightname()+"_pi"
 
@@ -1202,20 +1202,10 @@ class ReweightingSamplePlus(ReweightingSample):
 
     def weightname(self):
         result = super(ReweightingSamplePlus, self).weightname()
-        if self.alternategenerator:
+        if self.alternategenerator and self.alternategenerator != "ext":
             result += "_" + str(self.alternategenerator)
         if self.pythiasystematic:
             result += "_" + str(self.pythiasystematic)
-        #############################################################
-#        import datetime
-#        if self.productionmode == "ggH" and self.alternategenerator == "POWHEG":
-#            if self.pythiasystematic is None:
-#                result = result.replace("POWHEG", "NNLOPS")
-#            else:
-#                result = result.replace("_POWHEG", "")
-#            if datetime.date.today() > datetime.date(year=2017, month=2, day=27):
-#                raise ValueError("fix this!!")
-        #############################################################
         return result
 
 class Sample(ReweightingSamplePlus):
@@ -1339,7 +1329,7 @@ class Sample(ReweightingSamplePlus):
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
         if (reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data")
-                or reweightfrom.alternategenerator is not None
+                or reweightfrom.alternategenerator is not None and reweightfrom.alternategenerator != "ext"
                 or config.LHE):
             assert reweightfrom.reweightingsample == reweightto
             return 1
