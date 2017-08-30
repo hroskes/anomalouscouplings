@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-from CJLSTscripts import categoryMor17, VBF2jTaggedMor17, VHHadrTaggedMor17
+from CJLSTscripts import categoryMor17, UntaggedMor17, VBF2jTaggedMor17, VHHadrTaggedMor17
 import config
 from enums import BTagSystematic, Category, categories, HffHypothesis, Hypothesis, JECSystematic
 from samples import ArbitraryCouplingsSample
@@ -23,8 +23,8 @@ class NoCategorization(BaseCategorization):
     @property
     def category_function_name(self): return "category_nocategorization"
     def get_category_function(self_categorization):
-        def function(self_tree): return 0
-        function.__name__ = self.category_function_name
+        def function(self_tree): return UntaggedMor17
+        function.__name__ = self_categorization.category_function_name
         return function
     @property
     def issystematic(self): return False

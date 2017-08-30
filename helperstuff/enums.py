@@ -535,6 +535,7 @@ class Analysis(MyEnum):
         if self == "fa2": return "0P_or_a2"
         if self == "fL1": return "0P_or_L1"
         if self == "fL1Zg": return "0P_or_L1Zg"
+        if self.isdecayonly: return "nocategorization"
         assert False
     @property
     def photoncut(self):

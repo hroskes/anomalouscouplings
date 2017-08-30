@@ -84,12 +84,14 @@ def writeyields():
 
       total = totalrate(productionmode, production, 1.0)
       for channel, category in itertools.product(channels, categories):
+        if analysis.isdecayonly and category != "Untagged": continue
         YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
 
       #same for all categories and channels
       #from yaml
       for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_qq", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV":
         for category, channel in itertools.product(categories, channels):
+          if analysis.isdecayonly and category != "Untagged": continue
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
 
@@ -97,6 +99,7 @@ def writeyields():
       #from yaml
       for systname in "CMS_eff_e", "CMS_eff_m":
         for category, channel in itertools.product(categories, channels):
+          if analysis.isdecayonly and category != "Untagged": continue
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           if channel == "4e" and systname == "CMS_eff_m" or channel == "4mu" and systname == "CMS_eff_e":
             values = {}
@@ -110,6 +113,7 @@ def writeyields():
       #Z+X, for now
       for systname in "CMS_zz2e2mu_zjets", "CMS_zz4e_zjets", "CMS_zz4mu_zjets":
         for category, channel in itertools.product(categories, channels):
+          if analysis.isdecayonly and category != "Untagged": continue
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           if str(channel) in systname and productionmode == "ZX":
             syst.value = 0.4
