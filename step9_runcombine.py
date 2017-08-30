@@ -342,8 +342,8 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.is2d and not is2dscan:
         workspacefileappend += "_scan{}".format(scanfai)
 
-    if set(usecategories) != {Category("Untagged")} and analysis.is2d:
-        raise ValueError("For 2D analysis have to specify categories=Untagged")
+    if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
+        raise ValueError("For decay only analysis have to specify categories=Untagged")
     if set(usechannels) != {Channel("2e2mu")} and config.LHE:
         raise ValueError("For LHE analysis have to specify channels=2e2mu")
 
@@ -384,17 +384,21 @@ def runcombine(analysis, foldername, **kwargs):
               "physicsmodel": None,
               "physicsoptions": None,
              }
-    if analysis.is2d:
+    if analysis.is2d and analysis.isdecayonly:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
         repmap["physicsoptions"] = "--PO allowPMF"
         if scanfai == analysis: repmap["physicsoptions"] += " --PO fai2asPOI"
         elif scanfai == analysis.fais[0]: pass
         elif scanfai == analysis.fais[1]: repmap["physicsoptions"] += " --PO fai2asPOI --PO fai1fixed"
         repmap["savemu"] = ""
+    elif analysis.is2d and not analysis.isdecayonly:
+        assert False
+    elif not analysis.is2d and analysis.isdecayonly:
+        assert False
     else:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs"
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF"
-        repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI and not analysis.is2d)
+        repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
 
     folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)

@@ -19,6 +19,16 @@ class BaseCategorization(object):
     def __eq__(self, other): return self.category_function_name == other.category_function_name
     def __ne__(self, other): return not self == other
 
+class NoCategorization(BaseCategorization):
+    @property
+    def category_function_name(self): return "category_nocategorization"
+    def get_category_function(self_categorization):
+        def function(self_tree): return 0
+        function.__name__ = self.category_function_name
+        return function
+    @property
+    def issystematic(self): return False
+
 class BaseSingleCategorization(BaseCategorization):
     def __init__(self, JEC, btag):
         self.JEC = JECSystematic(JEC)

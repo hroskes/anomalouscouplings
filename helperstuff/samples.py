@@ -1392,7 +1392,10 @@ class SampleBasis(MultiEnum):
             else:
                 dimension = 3
         elif self.productionmode in ("VBF", "WH", "ZH"):
-            dimension = 5
+            if self.analysis.is2d:
+                assert False  #have to figure this out
+            else:
+                dimension = 5
         else:
             raise ValueError("Bad productionmode {}\n{}".format(self.productionmode, args))
 

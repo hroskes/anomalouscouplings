@@ -885,6 +885,7 @@ class TreeWrapper(TreeWrapperBase):
                for other in append[1:]
         ]
         categorizations += append
+    categorizations.append(categorization.NoCategorization())
     del append, btag, JEC, other
 
 #############

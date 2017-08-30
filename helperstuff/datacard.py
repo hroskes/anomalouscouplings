@@ -129,7 +129,7 @@ class _Datacard(MultiEnum):
     @property
     def productionmodes(self):
         result = [ProductionMode(p) for p in ("ggH", "qqH", "WH", "ZH", "ttH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets")]
-        if self.analysis.is2d:
+        if self.analysis.isdecayonly:
             result.remove("VBF")
             result.remove("WH")
             result.remove("ZH")
@@ -332,16 +332,17 @@ class _Datacard(MultiEnum):
 
         fai = self.fai()
         if self.analysis.is2d:
-            a1 = ai = None
             faj = self.faj()
             phiai = self.phiai()
             phiaj = self.phiaj()
         else:
-            mixturesign_constvar = self.mixturesign_constvar(self.analysis)
-            sigmaioversigma1_constvar = self.sigmaioversigma1_constvar(self.analysis)
+            faj = phiai = phiaj = None
+
+        if self.analysis.isdecayonly:
+            a1 = ai = None
+        else:
             a1 = self.a1()
             ai = self.ai(self.analysis)
-            faj = phiai = phiaj = None
 
         discs = discriminants(self.analysis, self.category)
         D1Name, D2Name, D3Name = (d.name for d in discs)
@@ -395,7 +396,7 @@ class _Datacard(MultiEnum):
             getattr(w, 'import')(pdf.pdf, ROOT.RooFit.RecycleConflictNodes())
             if pdf.productionmode.issignal and pdf.shapesystematic == "":
                 getattr(w, 'import')(pdf.norm, ROOT.RooFit.RecycleConflictNodes())
-                if not self.analysis.is2d:
+                if not self.analysis.isdecayonly:
                     getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
 
         w.writeToFile(self.rootfile_base)
@@ -409,7 +410,7 @@ class _Datacard(MultiEnum):
         with cd(outdir), Tee(self.logfile, 'w'):
             for channel, category in itertools.product(channels, categories):
                 if config.LHE and channel != "2e2mu": continue
-                if self.analysis.is2d and category != "Untagged": continue
+                if self.analysis.isdecayonly and category != "Untagged": continue
                 Datacard(channel, category, self.analysis, self.luminosity).makepdfs()
             self.writeworkspace()
             self.linkworkspace()
@@ -795,7 +796,10 @@ class _Pdf(PdfBase):
             else:
                 self.makepdf_decayonly()
         elif self.productionmode in ("VBF", "ZH", "WH"):
-            self.makepdf_proddec()
+            if self.analysis.is2d:
+                self.makepdf_proddec_2D()
+            else:
+                self.makepdf_proddec()
         elif self.productionmode == "ZX":
             if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category in ("VBFtagged" ,"VHHadrtagged"):
                 self.makepdf_ZX()
@@ -839,7 +843,10 @@ class _Pdf(PdfBase):
             else:
                 return self.getpdf_decayonly()
         elif self.productionmode in ("VBF", "ZH", "WH"):
-            return self.getpdf_proddec()
+            if self.analysis.is2d:
+                return self.getpdf_proddec_2D()
+            else:
+                return self.getpdf_proddec()
         elif self.productionmode == "ZX":
             if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category in ("VBFtagged" ,"VHHadrtagged"):
                 return self.getpdf_ZX()
@@ -864,7 +871,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
             return
         for dc in dcs:
             if config.LHE and dc.channel != "2e2mu": continue
-            if dc.analysis.is2d and dc.category != "Untagged": continue
+            if dc.analysis.isdecayonly and dc.category != "Untagged": continue
             dc.makeCardsWorkspaces(**kwargs)
             for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
                 if not os.path.exists(thing):

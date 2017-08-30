@@ -31,11 +31,11 @@ class TemplatesFile(MultiEnum):
         if self.category is None:
             self.category = Category("Untagged")
 
-        if self.analysis.is2d:
+        if self.analysis.isdecayonly:
             if self.category != "Untagged":
-                raise ValueError("2D analysis is only done for untagged!\n{}".format(args))
+                raise ValueError("decay only analysis is only done for untagged!\n{}".format(args))
             if self.templategroup in ("vbf", "zh", "wh", "tth"):
-                raise ValueError("2D analysis is only done with decay information!\n{}".format(args))
+                raise ValueError("decay only analysis is only done with decay information!\n{}".format(args))
         if config.LHE:
             if self.channel != "2e2mu":
                 raise ValueError("LHE analysis is only done for 2e2mu for now!\n{}".format(args))
@@ -158,13 +158,25 @@ class TemplatesFile(MultiEnum):
             else:
                 return [IntTemplate(self, "ggH", "g11gi1")]
         elif self.templategroup == "vbf":
-            return [IntTemplate(self, "VBF", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
+            if self.analysis.is2d:
+                assert False
+            else:
+                return [IntTemplate(self, "VBF", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup == "zh":
-            return [IntTemplate(self, "ZH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
+            if self.analysis.is2d:
+                assert False
+            else:
+                return [IntTemplate(self, "ZH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup == "wh":
-            return [IntTemplate(self, "WH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
+            if self.analysis.is2d:
+                assert False
+            else:
+                return [IntTemplate(self, "WH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup == "tth":
-            return [IntTemplate(self, "ttH", "g11gi1")]
+            if self.analysis.is2d:
+                return [IntTemplate(self, "ttH", _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
+            else:
+                return [IntTemplate(self, "ttH", "g11gi1")]
         elif self.templategroup in ("bkg", "DATA") or self.shapesystematic == "MINLO_SM":
             return []
         assert False
@@ -380,14 +392,14 @@ def templatesfiles():
         for production in productions:
             for analysis in analyses:
                 for category in categories:
-                    if category != "Untagged" and analysis.is2d: continue
+                    if category != "Untagged" and analysis.isdecayonly: continue
                     for shapesystematic in treeshapesystematics:
                         if category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         if config.LHE and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
                         if shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
-                        if analysis.is2d: continue
+                        if analysis.isdecayonly: continue
                         yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
@@ -828,7 +840,7 @@ class Template(TemplateBase, MultiEnum):
         result = ["ZZMass>{}".format(config.m4lmin), "ZZMass<{}".format(config.m4lmax)]
         if not config.LHE:
             result.append("Z1Flav*Z2Flav == {}".format(self.ZZFlav))
-        if not self.analysis.is2d:
+        if not self.analysis.isdecayonly:
             result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")")
         return " && ".join(result)
 
@@ -1066,12 +1078,12 @@ class DataTree(MultiEnum):
     enumname = "datatree"
     def check(self, *args):
         super(DataTree, self).check(*args)
-        if self.analysis.is2d:
+        if self.analysis.isdecayonly:
             if self.category != "Untagged":
-                raise ValueError("2D analysis is only done for untagged!\n{}".format(args))
+                raise ValueError("decayonly analysis is only done for untagged!\n{}".format(args))
         if config.LHE:
             if self.channel != "2e2mu":
-                raise ValueError("2D analysis is only done for 2e2mu for now!\n{}".format(args))
+                raise ValueError("LHE analysis is only done for 2e2mu for now!\n{}".format(args))
 
     @property
     def originaltreefile(self):
@@ -1089,7 +1101,7 @@ def datatrees():
         for production in productions:
             for category in categories:
                 for analysis in analyses:
-                    if category != "Untagged" and analysis.is2d: continue
+                    if category != "Untagged" and analysis.isdecayonly: continue
                     yield DataTree(channel, production, category, analysis)
 
 
