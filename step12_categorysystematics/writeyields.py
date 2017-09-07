@@ -10,7 +10,7 @@ import yaml
 from helperstuff import config
 from helperstuff.categorization import MultiCategorization, NoCategorization
 from helperstuff.combinehelpers import gettemplate
-from helperstuff.enums import AlternateWeight, analyses, categories, Category, channels, flavors, ProductionMode, pythiasystematics
+from helperstuff.enums import AlternateWeight, analyses, categories, Category, Channel, channels, flavors, ProductionMode, pythiasystematics
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import MultiplyCounter
@@ -26,11 +26,11 @@ SampleCount = namedtuple("SampleCount", "productionmode samples")
 def writeyields():
   if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
   tosamples_foryields = [
-    SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
     SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("WH"), {ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("ttH"), {ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")}),
+    SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
     SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
     SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
     SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}),
@@ -58,6 +58,30 @@ def writeyields():
 
         tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
+      """
+      if productionmode == "ggH":
+        for _ in ReweightingSamplePlus("ggH", "0+", "POWHEG"), ReweightingSamplePlus("VBF", "0+", "POWHEG"), ReweightingSamplePlus("ZH", "0+", "POWHEG"), ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG"), ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG"):
+          print (result if _.productionmode != "ggH" else tmpresult)[_, NoCategorization(), AlternateWeight("1"), Category("Untagged"), Channel("2e2mu")]
+
+        for key in tmpresult.keys():
+          tosample, categorization, rest = key[0], key[1], key[2:]
+          if categorization.category_function_name != "category_nocategorization": continue
+          for otherproductionmode in "VBF", "ZH", "WplusH", "WminusH", "ttH":
+            assert "ggH" in repr(tosample)
+            othersamplestring = repr(tosample).replace("ggH", otherproductionmode)
+            if "ttH" in othersamplestring:
+                othersamplestring = othersamplestring.replace("ReweightingSample(", "ReweightingSample('Hff0+', ")
+            othersample = eval(othersamplestring)
+            otherkey = tuple((othersample, categorization)+rest)
+            assert result[otherkey]
+            tmpresult[key] += result[otherkey]
+            del result[otherkey]
+
+        print tmpresult[ReweightingSamplePlus("ggH", "0+", "POWHEG"), NoCategorization(), AlternateWeight("1"), Category("Untagged"), Channel("2e2mu")]
+
+        print
+        """
+
       for key in tmpresult:
         if len(key) == 3: continue
         elif 4 <= len(key) <= 5:
@@ -77,26 +101,6 @@ def writeyields():
     #                  TreeWrapper.categorizations,
     #                 )
 
-  for _ in ReweightingSamplePlus("ggH", "0+", "POWHEG"), ReweightingSamplePlus("VBF", "0+", "POWHEG"), ReweightingSamplePlus("ZH", "0+", "POWHEG"), ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG"), ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG"):
-    print result[_, NoCategorization(), AlternateWeight("1")]
-
-  for key in result.keys():
-    tosample, categorization, rest = key[0], key[1], key[2:]
-    if tosample.productionmode != "ggH" or categorization.category_function_name != "category_nocategorization": continue
-    for otherproductionmode in "VBF", "ZH", "WplusH", "WminusH", "ttH":
-      assert "ggH" in repr(tosample)
-      othersamplestring = repr(tosample).replace("ggH", otherproductionmode)
-      if "ttH" in othersamplestring:
-          othersamplestring = othersamplestring.replace("ReweightingSample(", "ReweightingSample('Hff0+', ")
-      othersample = eval(othersamplestring)
-      otherkey = tuple((othersample, categorization)+rest)
-      assert result[otherkey]
-      result[key] += result[otherkey]
-      del result[otherkey]
-
-  print result[ReweightingSamplePlus("ggH", "0+", "POWHEG"), NoCategorization(), AlternateWeight("1")]
-
-  print
   result.freeze()
 
 
@@ -109,6 +113,7 @@ def writeyields():
       categorization = categorization.pop()
 
       total = totalrate(productionmode, production, 1.0)
+      if analysis.isdecayonly and productionmode == "ggH": total += sum(totalrate(_, production, 1.0) for _ in ("VBF", "ZH", "WH", "ttH"))
       for channel, category in itertools.product(channels, categories):
         if analysis.isdecayonly and category != "Untagged": continue
         YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)

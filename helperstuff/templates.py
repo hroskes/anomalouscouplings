@@ -710,6 +710,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def domirror(self):
         if self.analysis not in ("fa3", "fa3_STXS"): return False
+        if self.analysis == "fa3_STXS": return False #for now... could do it later
         if self.productionmode == "data": return False
 
         if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
@@ -978,13 +979,21 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     @property
     def mirrorjsn(self):
-        if self.analysis not in ("fa3", "fa3_STXS"): return None  #for STXS mirror over the dummy variable on the y axis
+        if self.analysis not in ("fa3", "fa3_STXS"): return None
 
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH"):
-            #ggH has no production information, and only using SM ttH, so mirror symmetric
+            assert self.interferencetype == "g11gi1"
+            #ggH has no production information, and only using SM ttH, so mirror antisymmetric
+            #over the (pretend) D_CP_decay axis, which sets the whole thing to 0
             #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
-            return {"type":"mirror", "antisymmetric":False, "axis":1}
+            return {"type":"rescale", "factor":0}
+
+        if self.analysis == "fa3_STXS" and self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
+            #same (antimirror over D_CP_whatever, which doesn't exist in STXS)
+            return {"type":"rescale", "factor":0}
+
+        if self.analysis == "fa3_STXS": return None #for now... could do it later
 
         #Mirror antisymmetric for VH in VBF category and VBF in VH category
         #the interference templates are 0 to within error bars anyway,

@@ -137,6 +137,7 @@ class _Datacard(MultiEnum):
         if config.LHE:
             result.remove("ggZZ")
             result.remove("VBFbkg")
+        if not config.usedata:
             result.remove("ZX")
         return result
 
@@ -253,11 +254,11 @@ class _Datacard(MultiEnum):
 
     @property
     def muV_scaled(self):
-        if config.LHE: return None
+        if self.analysis.isdecayonly: return None
         return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
     @property
     def muf_scaled(self):
-        if config.LHE: return None
+        if self.analysis.isdecayonly: return None
         return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
 
     section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, "muV_scaled", "muf_scaled")
