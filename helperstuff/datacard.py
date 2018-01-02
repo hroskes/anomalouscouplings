@@ -332,7 +332,7 @@ class _Datacard(MultiEnum):
         ## -------------------------- SIGNAL SHAPE ----------------------------------- ##
 
         fai = self.fai()
-        if self.analysis.is2d:
+        if self.analysis.dimensions == 2:
             faj = self.faj()
             phiai = self.phiai()
             phiaj = self.phiaj()
@@ -792,12 +792,12 @@ class _Pdf(PdfBase):
 
     def makepdf(self):
         if self.productionmode in ("ggH", "ttH"):
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 self.makepdf_decayonly_2D()
             else:
                 self.makepdf_decayonly()
         elif self.productionmode in ("VBF", "ZH", "WH"):
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 self.makepdf_proddec_2D()
             else:
                 self.makepdf_proddec()
@@ -839,12 +839,12 @@ class _Pdf(PdfBase):
     def getpdf(self):
         self.makepdf()
         if self.productionmode in ("ggH", "ttH"):
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 return self.getpdf_decayonly_2D()
             else:
                 return self.getpdf_decayonly()
         elif self.productionmode in ("VBF", "ZH", "WH"):
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 return self.getpdf_proddec_2D()
             else:
                 return self.getpdf_proddec()

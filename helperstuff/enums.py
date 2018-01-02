@@ -433,9 +433,10 @@ class Analysis(MyEnum):
                  EnumItem("fL1fL1Zg_m1_phi"),
                  EnumItem("fL1fL1Zg_m2_phi"),
                  EnumItem("fa3_STXS"),
+                 EnumItem("fa2fa3fL1fL1Zg"),
                 )
     def title(self, latex=False, superscript=None):
-        if self.is2d: return self.fais[0].title(latex=latex, superscript=superscript)
+        if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
 
         if self == "fa3" or self == "fa3_STXS":
             result = "f_{{a3}}"
@@ -464,7 +465,7 @@ class Analysis(MyEnum):
 
     @property
     def phi(self):
-        if self.is2d: return self.fais[0].phi
+        if self.dimensions > 1: return self.fais[0].phi
         if self == "fa3" or self == "fa3_STXS":
             return "#phi_{a3}"
         if self == "fa2":
@@ -543,9 +544,9 @@ class Analysis(MyEnum):
         if self in ("fa2", "fa3", "fa3_STXS", "fL1"): return False
         assert False
     @property
-    def is2d(self):
-        if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
-        if self.isfL1fL1Zg: return True
+    def dimensions(self):
+        if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return 1
+        if self.isfL1fL1Zg: return 2
         assert False, self
     @property
     def isdecayonly(self):
@@ -563,7 +564,7 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def fais(self):
-        if not self.is2d: return self,
+        if self.dimesions == 1: return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
         assert False, self
     @property

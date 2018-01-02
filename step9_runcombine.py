@@ -273,7 +273,7 @@ def runcombine(analysis, foldername, **kwargs):
         elif kw == "drawCMS":
             drawCMS = bool(int(kwarg))
         elif kw == "scanfai":
-            if not analysis.is2d:
+            if analysis.dimensions != 2:
                 raise ValueError("scanfai is only for 2D analyses")
             scanfai = Analysis(kwarg)
         else:
@@ -286,7 +286,7 @@ def runcombine(analysis, foldername, **kwargs):
     if scanfai != analysis and scanfai not in analysis.fais:
         raise ValueError("scanfai for {} has to be ".format(analysis) + " or ".join(str(_) for _ in list(analysis.fais)+[analysis]))
 
-    is2dscan = (scanfai == analysis and analysis.is2d)
+    is2dscan = (scanfai == analysis and analysis.dimensions == 2)
     if is2dscan:
       scanranges = list((points**2, min, max) for points, min, max in scanranges)
 
@@ -331,7 +331,7 @@ def runcombine(analysis, foldername, **kwargs):
     if robustfit:
         moreappend += "_robustfit"
     if POI != defaultPOI:
-        if analysis.is2d: assert False
+        if analysis.dimensions == 2: assert False
         moreappend += "_scan"+plottitle(POI)
     if fixfai:
         moreappend += "_fixfai"
@@ -339,7 +339,7 @@ def runcombine(analysis, foldername, **kwargs):
         combinecardsappend += "_" + alsocombinename
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
-    if analysis.is2d and not is2dscan:
+    if analysis.dimensions == 2 and not is2dscan:
         workspacefileappend += "_scan{}".format(scanfai)
 
     if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
@@ -384,16 +384,16 @@ def runcombine(analysis, foldername, **kwargs):
               "physicsmodel": None,
               "physicsoptions": None,
              }
-    if analysis.is2d and analysis.isdecayonly:
+    if analysis.dimensions == 2 and analysis.isdecayonly:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
         repmap["physicsoptions"] = "--PO allowPMF"
         if scanfai == analysis: repmap["physicsoptions"] += " --PO fai2asPOI"
         elif scanfai == analysis.fais[0]: pass
         elif scanfai == analysis.fais[1]: repmap["physicsoptions"] += " --PO fai2asPOI --PO fai1fixed"
         repmap["savemu"] = ""
-    elif analysis.is2d and not analysis.isdecayonly:
+    elif analysis.dimensions == 2 and not analysis.isdecayonly:
         assert False
-    elif not analysis.is2d and analysis.isdecayonly:
+    elif analysis.dimensions != 2 and analysis.isdecayonly:
         assert False
     else:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs"

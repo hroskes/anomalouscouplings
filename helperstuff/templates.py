@@ -153,27 +153,27 @@ class TemplatesFile(MultiEnum):
 
     def inttemplates(self):
         if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM":
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 return [IntTemplate(self, "ggH", _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
             else:
                 return [IntTemplate(self, "ggH", "g11gi1")]
         elif self.templategroup == "vbf":
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 assert False
             else:
                 return [IntTemplate(self, "VBF", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup == "zh":
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 assert False
             else:
                 return [IntTemplate(self, "ZH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup == "wh":
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 assert False
             else:
                 return [IntTemplate(self, "WH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
         elif self.templategroup == "tth":
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 return [IntTemplate(self, "ttH", _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
             else:
                 return [IntTemplate(self, "ttH", "g11gi1")]
@@ -338,7 +338,7 @@ class TemplatesFile(MultiEnum):
             assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
 
         if self.templategroup in ("ggh", "tth"):
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
                 assert all(invertedmatrix[1,i] == 0 for i in (2, 4, 5))
                 assert all(invertedmatrix[2,i] == 0 for i in (0, 2, 3, 4, 5))
@@ -927,7 +927,7 @@ class IntTemplate(TemplateBase, MultiEnum):
 
         dontcheck = []
 
-        if self.interferencetype in ("g11gj1", "gi1gj1") and not self.analysis.is2d:
+        if self.interferencetype in ("g11gj1", "gi1gj1") and self.analysis.dimensions != 2:
             raise ValueError("Invalid interferencetype {} for 1D analysis\n{}".format(self.interferencetype, args))
 
         if self.productionmode in ("ggH", "ttH"):
@@ -1021,13 +1021,13 @@ class IntTemplate(TemplateBase, MultiEnum):
             multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
 
         if self.interferencetype == "g11gj1":
-            assert self.analysis.is2d
+            assert self.analysis.dimensions == 2
             rowofinvertedmatrix = 3 #first row is labeled 0
             hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
             multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[2], hffhypothesis), self.analysis.purehypotheses[2].couplingname)
 
         if self.interferencetype == "gi1gj1":
-            assert self.analysis.is2d
+            assert self.analysis.dimensions == 2
             rowofinvertedmatrix = 4 #first row is labeled 0
             hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
             multiplyby = (

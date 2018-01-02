@@ -1377,12 +1377,12 @@ class SampleBasis(MultiEnum):
     def check(self, *args):
         args = (self.hypotheses,)+args
         if self.productionmode in ("ggH", "ttH"):
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 dimension = 6
             else:
                 dimension = 3
         elif self.productionmode in ("VBF", "WH", "ZH"):
-            if self.analysis.is2d:
+            if self.analysis.dimensions == 2:
                 assert False  #have to figure this out
             else:
                 dimension = 5
@@ -1401,7 +1401,7 @@ class SampleBasis(MultiEnum):
         if self.productionmode == "ttH": hffhypothesis = "Hff0+"
         dimension = len(self.hypotheses)
         samples = [ReweightingSample(self.productionmode, _, hffhypothesis) for _ in self.hypotheses]
-        if self.analysis.is2d:
+        if self.analysis.dimensions == 2:
             assert dimension == 6  #not VBF or VH
             maxpower = 2
             return numpy.matrix(
