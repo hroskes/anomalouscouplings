@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from abc import ABCMeta, abstractproperty
 from collections import Counter
-from itertools import product as cartesianproduct
+from itertools import combinations, permutations, product as cartesianproduct
 from math import copysign, sqrt
 import numpy
 import os
@@ -739,16 +739,12 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode == "ggH":
             if self.hypothesis == "0+":
                 return "MC_weight_ggH_g1"
-            elif self.hypothesis == "0+_photoncut":
-                return "MC_weight_ggH_g1_photoncut"
             elif self.hypothesis == "a2":
                 return "MC_weight_ggH_g2"
             elif self.hypothesis == "0-":
                 return "MC_weight_ggH_g4"
             elif self.hypothesis == "L1":
                 return "MC_weight_ggH_g1prime2"
-            elif self.hypothesis == "L1_photoncut":
-                return "MC_weight_ggH_g1prime2_photoncut"
             elif self.hypothesis == "L1Zg":
                 return "MC_weight_ggH_ghzgs1prime2"
             elif self.hypothesis == "fa20.5":
@@ -759,8 +755,6 @@ class ReweightingSample(MultiEnum, SampleBase):
                 return "MC_weight_ggH_g1g4"
             elif self.hypothesis == "fL10.5":
                 return "MC_weight_ggH_g1g1prime2"
-            elif self.hypothesis == "fL10.5_photoncut":
-                return "MC_weight_ggH_g1g1prime2_photoncut"
             elif self.hypothesis == "fL1Zg0.5":
                 return "MC_weight_ggH_g1ghzgs1prime2"
             elif self.hypothesis == "fL10.5fL1Zg0.5":
@@ -768,11 +762,18 @@ class ReweightingSample(MultiEnum, SampleBase):
             for a in "fa3", "fa2", "fL1", "fL1Zg":
                 if self.hypothesis == "{}-0.5".format(a):
                     return ReweightingSample(self.productionmode, "{}0.5".format(a)).weightname()+"_pi"
+            for a in "fa3dec0.5", "fa2dec0.5", "fL1dec0.5", "0+", "0-", "a2", "L1":
+                if self.hypothesis == a+"_photoncut":
+                    return ReweightingSample(self.productionmode, a).weightname()+"_photoncut"
+            for a, b in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 2):
+                if "fL1Zg" in (a, b) and self.hypothesis == a+"dec0.5"+b+"dec0.5":
+                    return "MC_weight_ggH_{}{}".format(Analysis(a).couplingname, Analysis(b).couplingname)
+                if "fL1Zg" not in (a, b) and self.hypothesis == a+"dec0.5"+b+"dec0.5_photoncut":
+                    return "MC_weight_ggH_{}{}_photoncut".format(Analysis(a).couplingname, Analysis(b).couplingname)
+
         elif self.productionmode in ("VBF", "ZH", "WH", "WplusH", "WminusH"):
             if self.hypothesis == "0+":
                 return "MC_weight_{}_g1".format(self.productionmode)
-            elif self.hypothesis == "0+_photoncut":
-                return "MC_weight_{}_g1_photoncut".format(self.productionmode)
             elif self.hypothesis == "a2":
                 return "MC_weight_{}_g2".format(self.productionmode)
             elif self.hypothesis == "0-":
@@ -816,6 +817,71 @@ class ReweightingSample(MultiEnum, SampleBase):
                 for b in "prod", "dec", "proddec":
                     if self.hypothesis == "{}{}-0.5".format(a, b):
                         return ReweightingSample(self.productionmode, "{}{}0.5".format(a, b)).weightname()+"_pi"
+
+            for a in (
+                      "fa3dec0.5", "fa2dec0.5", "fL1dec0.5",
+                      "fa3prod0.5", "fa2prod0.5", "fL1prod0.5",
+                      "fa3proddec-0.5", "fa2proddec-0.5", "fL1proddec-0.5",
+                      "0+", "0-", "a2", "L1",
+                     ):
+                if self.hypothesis == a+"_photoncut":
+                    return ReweightingSample(self.productionmode, a).weightname()+"_photoncut"
+
+            for proddec in "prod", "dec", "proddec":
+                sign = "-" if proddec == "proddec" else ""
+                for a, b in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 2):
+                    hypsuffix = wtsuffix = ""
+                    if sign == "-": wtsuffix += "_pi"
+                    if "fL1Zg" not in (a, b): wtsuffix += "_photoncut"; hypsuffix += "_photoncut"
+                    if self.hypothesis == a+proddec+"0.5"+b+proddec+sign+"0.5"+hypsuffix:
+                        return "MC_weight_{}_{}{}_{}".format(
+                          self.productionmode,
+                          Analysis(a).couplingname,
+                          Analysis(b).couplingname,
+                          proddec,
+                        ) + wtsuffix
+                    if self.hypothesis == a+proddec+"0.33"+b+proddec+sign+"0.33"+hypsuffix:
+                        return "MC_weight_{}_g1{}{}_{}".format(
+                          self.productionmode,
+                          Analysis(a).couplingname,
+                          Analysis(b).couplingname,
+                          proddec,
+                        ) + wtsuffix
+                for a, b, c in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 3):
+                    hypsuffix = wtsuffix = ""
+                    if sign == "-": wtsuffix += "_pi"
+                    if "fL1Zg" not in (a, b, c): wtsuffix += "_photoncut"; hypsuffix += "_photoncut"
+                    if self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+sign+"0.33"+hypsuffix:
+                        return "MC_weight_{}_{}{}{}_{}".format(
+                          self.productionmode,
+                          Analysis(a).couplingname,
+                          Analysis(b).couplingname,
+                          Analysis(c).couplingname,
+                          proddec,
+                        ) + wtsuffix
+                    if proddec != "proddec": continue
+                    wtsuffix = hypsuffix
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+hypsuffix:
+                        return "MC_weight_{}_g1{}{}{}_{}".format(
+                          self.productionmode,
+                          Analysis(a).couplingname,
+                          Analysis(b).couplingname,
+                          Analysis(c).couplingname,
+                          proddec,
+                        ) + wtsuffix
+                for a, b, c, d in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 4):
+                    suffix = ""
+                    if "fL1Zg" not in (a, b, c, d): suffix += "_photoncut"
+                    if proddec != "proddec": continue
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25"+suffix:
+                        return "MC_weight_{}_{}{}{}{}_{}".format(
+                          self.productionmode,
+                          Analysis(a).couplingname,
+                          Analysis(b).couplingname,
+                          Analysis(c).couplingname,
+                          Analysis(d).couplingname,
+                          proddec,
+                        ) + suffix
 
         elif self.productionmode in ("HJJ", "ttH"):
             if self.productionmode == "HJJ":

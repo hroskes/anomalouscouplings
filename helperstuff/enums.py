@@ -1,6 +1,8 @@
 import abc
 from collections import OrderedDict
+from itertools import combinations, permutations
 import os
+import re
 
 import config
 import constants
@@ -103,6 +105,82 @@ class Flavor(MyEnum):
         if self == "4tau": return 9
         assert False
 
+def _mixturepermutations_4d(enumitemsalreadythere):
+  def inner():
+    pures = "a3", "a2", "L1", "L1Zg"
+
+    #pure hypotheses
+    yield "0+",
+    for _ in pures:
+      yield _,
+
+    for proddec in "dec", "prod", "proddec":
+      kwargs = {"proddec": proddec, "sign": "-" if proddec == "proddec" else ""}
+      #mixtures with SM
+      for kwargs["ai"] in pures:
+        yield "f{ai}{proddec}{sign}0.5".format(**kwargs),
+      #mixtures with each other
+      for kwargs["ai"], kwargs["aj"] in combinations(pures, 2):
+        yield (
+          "f{ai}{proddec}0.5f{aj}{proddec}{sign}0.5".format(**kwargs),
+          "f{aj}{proddec}{sign}0.5f{ai}{proddec}0.5".format(**kwargs),
+        )
+
+      if proddec == "dec": yield None, "decay is done"
+
+      #to get the terms with 3 unique couplings:
+      #  there are 3 different new terms for each set of 3 couplings,
+      #  since exactly one of the couplings is squared
+      #  so we need 3 more mixtures
+      #  prod, dec, proddec (with a minus sign somewhere for variety) will work
+      for kwargs["ai"], kwargs["aj"] in combinations(pures, 2):
+        yield (
+          "f{ai}{proddec}0.33f{aj}{proddec}{sign}0.33".format(**kwargs),
+          "f{aj}{proddec}{sign}0.33f{ai}{proddec}0.33".format(**kwargs),
+        )
+
+      for kwargs["ai"], kwargs["aj"], kwargs["ak"] in combinations(pures, 3):
+        yield tuple(
+          "".join(permutation).format(**kwargs)
+            for permutation
+            in permutations(("f{ai}{proddec}0.33", "f{aj}{proddec}0.33", "f{ak}{proddec}{sign}0.33"))
+        )
+
+    #for each set of 4 couplings, there's only one possible new term
+    #proddec is the way to go, since it includes both
+    #I'll keep it general using combinations, just in case that ever becomes necessary
+    #it's not clear that a minus sign would help, so I'll leave it out
+    kwargs = {}
+    for kwargs["ai"], kwargs["aj"], kwargs["ak"] in combinations(pures, 3):
+      yield tuple(
+        "".join(permutation).format(**kwargs)
+          for permutation
+          in permutations(("f{ai}proddec0.25", "f{aj}proddec0.25", "f{ak}proddec0.25"))
+      )
+    for kwargs["ai"], kwargs["aj"], kwargs["ak"], kwargs["al"] in combinations(pures, 4):
+      yield tuple(
+        "".join(permutation).format(**kwargs)
+          for permutation
+          in permutations(("f{ai}proddec0.25", "f{aj}proddec0.25", "f{ak}proddec0.25", "f{al}proddec0.25"))
+      )
+
+  result = []
+  allofthem = 0
+  for enumitemnames in inner():
+    if enumitemnames == (None, "decay is done"):
+      assert allofthem == len(list(combinations(range(6), 2))), (allofthem, len(list(combinations(range(6), 2))))
+      continue
+
+    allofthem += 1
+    enumitemnames_modified = [_ if "L1Zg" in _ else _+"_photoncut" for _ in enumitemnames]
+    enumitemnames_modified += [re.sub("(?<!prod)dec", "", _) for _ in enumitemnames_modified]
+    if any(_ in enumitemsalreadythere for _ in enumitemnames_modified):
+      continue
+    result.append(EnumItem(*enumitemnames_modified))
+
+  assert allofthem == len(list(combinations(range(8), 4))), (allofthem, len(list(combinations(range(8), 4))))
+  return tuple(result)
+
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
     enumitems = (
@@ -137,10 +215,12 @@ class Hypothesis(MyEnum):
                  EnumItem("fL1proddec-0.5"),
                  EnumItem("fL1Zgproddec-0.5"),
                  EnumItem("fa2dec-0.9", "fa2-0.9"),
+                 EnumItem("0-_photoncut", "a3_photoncut"),
+                 EnumItem("a2_photoncut", "0h+_photoncut"),
                  EnumItem("L1_photoncut"),
-                 EnumItem("fL10.5_photoncut", "fL1dec0.5_photoncut"),
-                 EnumItem("fL10.5fL1Zg0.5", "fL1Zg0.5fL10.5"),
                 )
+    enumitems = enumitems + _mixturepermutations_4d(enumitems)
+
     @property
     def ispure(self):
         return self in ("0+", "0+_photoncut", "0-", "0h+", "L1", "L1_photoncut", "L1Zg")
@@ -233,7 +313,7 @@ class ProductionMode(MyEnum):
         if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
         if self in ("ttH", "HJJ"):
-            return Hypothesis.items(lambda x: x in decayonlyhypotheses and x not in fL1fL1Zghypotheses)
+            return Hypothesis.items(lambda x: x in decayonlyhypotheses)
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses)
         if self == "ZH":
@@ -433,7 +513,7 @@ class Analysis(MyEnum):
                  EnumItem("fL1fL1Zg_m1_phi"),
                  EnumItem("fL1fL1Zg_m2_phi"),
                  EnumItem("fa3_STXS"),
-                 EnumItem("fa2fa3fL1fL1Zg"),
+                 EnumItem("fa3fa2fL1fL1Zg"),
                 )
     def title(self, latex=False, superscript=None):
         if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -488,6 +568,7 @@ class Analysis(MyEnum):
     @property
     def couplingnames(self):
         if self.isfL1fL1Zg: return "g1prime2", "ghzgs1prime2"
+        if self == "fa3fa2fL1fL1Zg": return "g4", "g2", "g1prime2", "ghzgs1prime2"
         assert False, self
     @property
     def couplingtitle(self):
@@ -507,6 +588,8 @@ class Analysis(MyEnum):
             return Hypothesis("0+_photoncut"), Hypothesis("L1Zg")
         if self.isfL1fL1Zg:
             return Hypothesis("0+_photoncut"), Hypothesis("L1_photoncut"), Hypothesis("L1Zg")
+        if self == "fa3fa2fL1fL1Zg":
+            return Hypothesis("0+_photoncut"), Hypothesis("a3_photoncut"), Hypothesis("a2_photoncut"), Hypothesis("L1_photoncut"), Hypothesis("L1Zg")
         assert False, self
     @property
     def mixdecayhypothesis(self):
@@ -537,6 +620,7 @@ class Analysis(MyEnum):
         if self == "fL1": return "0P_or_L1"
         if self == "fL1Zg": return "0P_or_L1Zg"
         if self.isdecayonly: return "nocategorization"
+        if self == "fa3fa2fL1fL1Zg": return "0P_or_0M_or_a2_or_L1_or_L1Zg"
         assert False
     @property
     def photoncut(self):
@@ -547,25 +631,30 @@ class Analysis(MyEnum):
     def dimensions(self):
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return 1
         if self.isfL1fL1Zg: return 2
+        if self == "fa3fa2fL1fL1Zg": return 4
         assert False, self
     @property
     def isdecayonly(self):
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return True
+        if self == "fa3fa2fL1fL1Zg": return False
         assert False, self
     @property
     def doLHE(self):
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return True
+        if self == "fa3fa2fL1fL1Zg": return True
         assert False, self
     def doCMS(self):
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg", "fL1fL1Zg"): return True
         if self.isfL1fL1Zg: return False  #but not the main fL1fL1Zg
+        if self == "fa3fa2fL1fL1Zg": return False
         assert False, self
     @property
     def fais(self):
         if self.dimesions == 1: return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
+        if self == "fa3fa2fL1fL1Zg": return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
         assert False, self
     @property
     def isfL1fL1Zg(self):
@@ -737,8 +826,8 @@ btagsystematics = BTagSystematic.items()
 pythiasystematics = PythiaSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
-decayonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5", "fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5", "fa2dec-0.9", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"))
-prodonlyhypotheses = Hypothesis.items(lambda x: x in ("0+", "0+_photoncut", "a2", "0-", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5", "fa2prod-0.5", "fa3prod-0.5", "fL1prod-0.5", "fL1Zgprod-0.5"))
+decayonlyhypotheses = Hypothesis.items(lambda x: all("prod" not in name for name in x.names))
+prodonlyhypotheses = Hypothesis.items(lambda x: all("dec" not in name for name in x.names))
 fL1fL1Zghypotheses = Hypothesis.items(lambda x: x in ("L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"))
 proddechypotheses = Hypothesis.items(lambda x: x not in fL1fL1Zghypotheses)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
