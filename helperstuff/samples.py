@@ -53,104 +53,229 @@ class SampleBase(object):
     def JHUxsec(self):
         if self.photoncut:
             JHUXSggH2L2la1 = constants.JHUXSggH2L2la1_photoncut
+            JHUXSggH2L2la3 = constants.JHUXSggH2L2la3_photoncut
+            JHUXSggH2L2la1a3 = constants.JHUXSggH2L2la1a3_photoncut
+            JHUXSggH2L2la2 = constants.JHUXSggH2L2la2_photoncut
+            JHUXSggH2L2la1a2 = constants.JHUXSggH2L2la1a2_photoncut
             JHUXSggH2L2lL1 = constants.JHUXSggH2L2lL1_photoncut
             JHUXSggH2L2la1L1 = constants.JHUXSggH2L2la1L1_photoncut
+            JHUXSggH2L2lL1Zg = constants.JHUXSggH2L2lL1Zg_photoncut
+            JHUXSggH2L2la1L1Zg = constants.JHUXSggH2L2la1L1Zg_photoncut
             JHUXSVBFa1 = constants.JHUXSVBFa1_photoncut
+            JHUXSVBFa3 = constants.JHUXSVBFa3_photoncut
+            JHUXSVBFa1a3 = constants.JHUXSVBFa1a3_photoncut
+            JHUXSVBFa2 = constants.JHUXSVBFa2_photoncut
+            JHUXSVBFa1a2 = constants.JHUXSVBFa1a2_photoncut
+            JHUXSVBFL1 = constants.JHUXSVBFL1_photoncut
+            JHUXSVBFa1L1 = constants.JHUXSVBFa1L1_photoncut
+            JHUXSVBFL1Zg = constants.JHUXSVBFL1Zg_photoncut
+            JHUXSVBFa1L1Zg = constants.JHUXSVBFa1L1Zg_photoncut
             JHUXSZHa1 = constants.JHUXSZHa1_photoncut
+            JHUXSZHa3 = constants.JHUXSZHa3_photoncut
+            JHUXSZHa1a3 = constants.JHUXSZHa1a3_photoncut
+            JHUXSZHa2 = constants.JHUXSZHa2_photoncut
+            JHUXSZHa1a2 = constants.JHUXSZHa1a2_photoncut
+            JHUXSZHL1 = constants.JHUXSZHL1_photoncut
+            JHUXSZHa1L1 = constants.JHUXSZHa1L1_photoncut
+            JHUXSZHL1Zg = constants.JHUXSZHL1Zg_photoncut
+            JHUXSZHa1L1Zg = constants.JHUXSZHa1L1Zg_photoncut
             JHUXSWHa1 = constants.JHUXSWHa1_photoncut
-            assert self.g2 == self.g4 == 0, self
+            JHUXSWHa3 = constants.JHUXSWHa3_photoncut
+            JHUXSWHa1a3 = constants.JHUXSWHa1a3_photoncut
+            JHUXSWHa2 = constants.JHUXSWHa2_photoncut
+            JHUXSWHa1a2 = constants.JHUXSWHa1a2_photoncut
+            JHUXSWHL1 = constants.JHUXSWHL1_photoncut
+            JHUXSWHa1L1 = constants.JHUXSWHa1L1_photoncut
+            JHUXSWHL1Zg = constants.JHUXSWHL1Zg_photoncut
+            JHUXSWHa1L1Zg = constants.JHUXSWHa1L1Zg_photoncut
         else:
             JHUXSggH2L2la1 = constants.JHUXSggH2L2la1
+            JHUXSggH2L2la3 = constants.JHUXSggH2L2la3
+            JHUXSggH2L2la1a3 = constants.JHUXSggH2L2la1a3
+            JHUXSggH2L2la2 = constants.JHUXSggH2L2la2
+            JHUXSggH2L2la1a2 = constants.JHUXSggH2L2la1a2
             JHUXSggH2L2lL1 = constants.JHUXSggH2L2lL1
             JHUXSggH2L2la1L1 = constants.JHUXSggH2L2la1L1
+            JHUXSggH2L2lL1Zg = constants.JHUXSggH2L2lL1Zg
+            JHUXSggH2L2la1L1Zg = 0
             JHUXSVBFa1 = constants.JHUXSVBFa1
+            JHUXSVBFa3 = constants.JHUXSVBFa3
+            JHUXSVBFa1a3 = constants.JHUXSVBFa1a3
+            JHUXSVBFa2 = constants.JHUXSVBFa2
+            JHUXSVBFa1a2 = constants.JHUXSVBFa1a2
+            JHUXSVBFL1 = constants.JHUXSVBFL1
+            JHUXSVBFa1L1 = constants.JHUXSVBFa1L1
+            JHUXSVBFL1Zg = 0
+            JHUXSVBFa1L1Zg = 0
             JHUXSZHa1 = constants.JHUXSZHa1
+            JHUXSZHa3 = constants.JHUXSZHa3
+            JHUXSZHa1a3 = constants.JHUXSZHa1a3
+            JHUXSZHa2 = constants.JHUXSZHa2
+            JHUXSZHa1a2 = constants.JHUXSZHa1a2
+            JHUXSZHL1 = constants.JHUXSZHL1
+            JHUXSZHa1L1 = constants.JHUXSZHa1L1
+            JHUXSZHL1Zg = 0
+            JHUXSZHa1L1Zg = 0
             JHUXSWHa1 = constants.JHUXSWHa1
+            JHUXSWHa3 = constants.JHUXSWHa3
+            JHUXSWHa1a3 = constants.JHUXSWHa1a3
+            JHUXSWHa2 = constants.JHUXSWHa2
+            JHUXSWHa1a2 = constants.JHUXSWHa1a2
+            JHUXSWHL1 = constants.JHUXSWHL1
+            JHUXSWHa1L1 = constants.JHUXSWHa1L1
+            JHUXSWHL1Zg = 0
+            JHUXSWHa1L1Zg = 0
             assert self.ghzgs1prime2 == 0
         if self.productionmode == "ggH":
             return (
-                                JHUXSggH2L2la1*self.g1**2
-                    + constants.JHUXSggH2L2la2*self.g2**2
-                    + constants.JHUXSggH2L2la3*self.g4**2
-                    +           JHUXSggH2L2lL1*self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                    + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
-                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
+                      JHUXSggH2L2la1*self.g1**2
+                    + JHUXSggH2L2la2*self.g2**2
+                    + JHUXSggH2L2la3*self.g4**2
+                    + JHUXSggH2L2lL1*self.g1prime2**2
+                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+
+                    + JHUXSggH2L2la3a2 * self.g4*self.g2 / (constants.g4decay*constants.g2decay)
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2 / (constants.g4decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2 / (constants.g2decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
 
         if self.productionmode == "VBF":
             return (
-                                JHUXSVBFa1 * self.g1**2
-                    + constants.JHUXSVBFa2 * self.g2**2
-                    + constants.JHUXSVBFa3 * self.g4**2
-                    + constants.JHUXSVBFL1 * self.g1prime2**2
-                    + constants.JHUXSVBFL1Zg * self.ghzgs1prime2**2
-                    + constants.JHUXSVBFa1a2 * self.g1*self.g2 / constants.g2VBF
-                    + constants.JHUXSVBFa1a3 * self.g1*self.g4 / constants.g4VBF
-                    + constants.JHUXSVBFa1L1 * self.g1*self.g1prime2 / constants.g1prime2VBF_gen
-                    + constants.JHUXSVBFa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2VBF_gen
+                      JHUXSVBFa1*self.g1**2
+                    + JHUXSVBFa2*self.g2**2
+                    + JHUXSVBFa3*self.g4**2
+                    + JHUXSVBFL1*self.g1prime2**2
+                    + JHUXSVBFL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSVBFa1a2 * self.g1*self.g2 / constants.g2VBF
+                    + JHUXSVBFa1a3 * self.g1*self.g4 / constants.g4VBF
+                    + JHUXSVBFa1L1 * self.g1*self.g1prime2 / constants.g1prime2VBF_gen
+                    + JHUXSVBFa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2VBF_gen
+
+                    + JHUXSVBFa3a2 * self.g4*self.g2 / (constants.g4VBF*constants.g2VBF)
+                    + JHUXSVBFa3L1 * self.g4*self.g1prime2 / (constants.g4VBF*constants.g1prime2VBF_gen)
+                    + JHUXSVBFa3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4VBF*constants.ghzgs1prime2VBF_gen)
+
+                    + JHUXSVBFa2L1 * self.g2*self.g1prime2 / (constants.g2VBF*constants.g1prime2VBF_gen)
+                    + JHUXSVBFa2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2VBF*constants.ghzgs1prime2VBF_gen)
+
+                    + JHUXSVBFL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2VBF_gen*constants.ghzgs1prime2VBF_gen)
                    ) * (
-                                JHUXSggH2L2la1*self.g1**2
-                    + constants.JHUXSggH2L2la2*self.g2**2
-                    + constants.JHUXSggH2L2la3*self.g4**2
-                    +           JHUXSggH2L2lL1*self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                    + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
-                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
+                      JHUXSggH2L2la1*self.g1**2
+                    + JHUXSggH2L2la2*self.g2**2
+                    + JHUXSggH2L2la3*self.g4**2
+                    + JHUXSggH2L2lL1*self.g1prime2**2
+                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+
+                    + JHUXSggH2L2la3a2 * self.g4*self.g2 / (constants.g4decay*constants.g2decay)
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2 / (constants.g4decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2 / (constants.g2decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
 
         if self.productionmode == "ZH":
             return (
-                                JHUXSZHa1 * self.g1**2
-                    + constants.JHUXSZHa2 * self.g2**2
-                    + constants.JHUXSZHa3 * self.g4**2
-                    + constants.JHUXSZHL1 * self.g1prime2**2
-                    + constants.JHUXSZHL1Zg * self.ghzgs1prime2**2
-                    + constants.JHUXSZHa1a2 * self.g1*self.g2 / constants.g2ZH
-                    + constants.JHUXSZHa1a3 * self.g1*self.g4 / constants.g4ZH
-                    + constants.JHUXSZHa1L1 * self.g1*self.g1prime2 / constants.g1prime2ZH_gen
-                    + constants.JHUXSZHa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2ZH_gen
+                      JHUXSZHa1*self.g1**2
+                    + JHUXSZHa2*self.g2**2
+                    + JHUXSZHa3*self.g4**2
+                    + JHUXSZHL1*self.g1prime2**2
+                    + JHUXSZHL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSZHa1a2 * self.g1*self.g2 / constants.g2ZH
+                    + JHUXSZHa1a3 * self.g1*self.g4 / constants.g4ZH
+                    + JHUXSZHa1L1 * self.g1*self.g1prime2 / constants.g1prime2ZH_gen
+                    + JHUXSZHa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2ZH_gen
+
+                    + JHUXSZHa3a2 * self.g4*self.g2 / (constants.g4ZH*constants.g2ZH)
+                    + JHUXSZHa3L1 * self.g4*self.g1prime2 / (constants.g4ZH*constants.g1prime2ZH_gen)
+                    + JHUXSZHa3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4ZH*constants.ghzgs1prime2ZH_gen)
+
+                    + JHUXSZHa2L1 * self.g2*self.g1prime2 / (constants.g2ZH*constants.g1prime2ZH_gen)
+                    + JHUXSZHa2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2ZH*constants.ghzgs1prime2ZH_gen)
+
+                    + JHUXSZHL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2ZH_gen*constants.ghzgs1prime2ZH_gen)
                    ) * (
-                                JHUXSggH2L2la1*self.g1**2
-                    + constants.JHUXSggH2L2la2*self.g2**2
-                    + constants.JHUXSggH2L2la3*self.g4**2
-                    +           JHUXSggH2L2lL1*self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                    + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
-                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
+                      JHUXSggH2L2la1*self.g1**2
+                    + JHUXSggH2L2la2*self.g2**2
+                    + JHUXSggH2L2la3*self.g4**2
+                    + JHUXSggH2L2lL1*self.g1prime2**2
+                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+
+                    + JHUXSggH2L2la3a2 * self.g4*self.g2 / (constants.g4decay*constants.g2decay)
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2 / (constants.g4decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2 / (constants.g2decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
 
         if self.productionmode == "WH":
             return (
-                                JHUXSWHa1 * self.g1**2
-                    + constants.JHUXSWHa2 * self.g2**2
-                    + constants.JHUXSWHa3 * self.g4**2
-                    + constants.JHUXSWHL1 * self.g1prime2**2
-                    + constants.JHUXSWHL1Zg * self.ghzgs1prime2**2
-                    + constants.JHUXSWHa1a2 * self.g1*self.g2 / constants.g2WH
-                    + constants.JHUXSWHa1a3 * self.g1*self.g4 / constants.g4WH
-                    + constants.JHUXSWHa1L1 * self.g1*self.g1prime2 / constants.g1prime2WH_gen
-                    + constants.JHUXSWHa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2WH_gen
+                      JHUXSWHa1*self.g1**2
+                    + JHUXSWHa2*self.g2**2
+                    + JHUXSWHa3*self.g4**2
+                    + JHUXSWHL1*self.g1prime2**2
+                    + JHUXSWHL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSWHa1a2 * self.g1*self.g2 / constants.g2WH
+                    + JHUXSWHa1a3 * self.g1*self.g4 / constants.g4WH
+                    + JHUXSWHa1L1 * self.g1*self.g1prime2 / constants.g1prime2WH_gen
+                    + JHUXSWHa1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2WH_gen
+
+                    + JHUXSWHa3a2 * self.g4*self.g2 / (constants.g4WH*constants.g2WH)
+                    + JHUXSWHa3L1 * self.g4*self.g1prime2 / (constants.g4WH*constants.g1prime2WH_gen)
+                    + JHUXSWHa3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4WH*constants.ghzgs1prime2WH_gen)
+
+                    + JHUXSWHa2L1 * self.g2*self.g1prime2 / (constants.g2WH*constants.g1prime2WH_gen)
+                    + JHUXSWHa2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2WH*constants.ghzgs1prime2WH_gen)
+
+                    + JHUXSWHL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2WH_gen*constants.ghzgs1prime2WH_gen)
                    ) * (
-                                JHUXSggH2L2la1*self.g1**2
-                    + constants.JHUXSggH2L2la2*self.g2**2
-                    + constants.JHUXSggH2L2la3*self.g4**2
-                    +           JHUXSggH2L2lL1*self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                    + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
-                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
+                      JHUXSggH2L2la1*self.g1**2
+                    + JHUXSggH2L2la2*self.g2**2
+                    + JHUXSggH2L2la3*self.g4**2
+                    + JHUXSggH2L2lL1*self.g1prime2**2
+                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+
+                    + JHUXSggH2L2la3a2 * self.g4*self.g2 / (constants.g4decay*constants.g2decay)
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2 / (constants.g4decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2 / (constants.g2decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
         if self.productionmode == "HJJ":
             return (
@@ -158,16 +283,25 @@ class SampleBase(object):
                     + constants.JHUXSHJJa3 * self.ghg4**2
                     + constants.JHUXSHJJa2a3 * self.ghg2*self.ghg4 / constants.ghg4HJJ
                    ) * (
-                                JHUXSggH2L2la1*self.g1**2
-                    + constants.JHUXSggH2L2la2*self.g2**2
-                    + constants.JHUXSggH2L2la3*self.g4**2
-                    +           JHUXSggH2L2lL1*self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                    + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
-                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
+                      JHUXSggH2L2la1*self.g1**2
+                    + JHUXSggH2L2la2*self.g2**2
+                    + JHUXSggH2L2la3*self.g4**2
+                    + JHUXSggH2L2lL1*self.g1prime2**2
+                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+
+                    + JHUXSggH2L2la3a2 * self.g4*self.g2 / (constants.g4decay*constants.g2decay)
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2 / (constants.g4decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2 / (constants.g2decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
         if self.productionmode == "ttH":
             return (
@@ -175,16 +309,25 @@ class SampleBase(object):
                     + constants.JHUXSttHkappatilde * self.kappa_tilde**2
                     + constants.JHUXSttHkappakappatilde * self.kappa*self.kappa_tilde / constants.kappa_tilde_ttH
                    ) * (
-                                JHUXSggH2L2la1*self.g1**2
-                    + constants.JHUXSggH2L2la2*self.g2**2
-                    + constants.JHUXSggH2L2la3*self.g4**2
-                    +           JHUXSggH2L2lL1*self.g1prime2**2
-                    + constants.JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
-                    + constants.JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
-                    + constants.JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
-                    +           JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
-                    + constants.JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
-                    + constants.JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
+                      JHUXSggH2L2la1*self.g1**2
+                    + JHUXSggH2L2la2*self.g2**2
+                    + JHUXSggH2L2la3*self.g4**2
+                    + JHUXSggH2L2lL1*self.g1prime2**2
+                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSggH2L2la1a2 * self.g1*self.g2 / constants.g2decay
+                    + JHUXSggH2L2la1a3 * self.g1*self.g4 / constants.g4decay
+                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2 / constants.g1prime2decay_gen
+                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2 / constants.ghzgs1prime2decay_gen
+
+                    + JHUXSggH2L2la3a2 * self.g4*self.g2 / (constants.g4decay*constants.g2decay)
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2 / (constants.g4decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2 / (constants.g4decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2 / (constants.g2decay*constants.g1prime2decay_gen)
+                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2 / (constants.g2decay*constants.ghzgs1prime2decay_gen)
+
+                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2 / (constants.g1prime2decay_gen*constants.ghzgs1prime2decay_gen)
                    )
         assert False
 

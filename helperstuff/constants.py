@@ -219,6 +219,14 @@ JHUXSggH2L2la1a3, JHUXSggH2L2la1a3err = JHUXSggH2L2la1*2, JHUXSggH2L2la1err*2
 if photoncutsame:
     JHUXSggH2L2la1_photoncut = JHUXSggH2L2la1
     JHUXSggH2L2la1err_photoncut = JHUXSggH2L2la1err
+    JHUXSggH2L2la3_photoncut = JHUXSggH2L2la3
+    JHUXSggH2L2la3err_photoncut = JHUXSggH2L2la3err
+    JHUXSggH2L2la1a3_photoncut = JHUXSggH2L2la1a3
+    JHUXSggH2L2la1a3err_photoncut = JHUXSggH2L2la1a3err
+    JHUXSggH2L2la2_photoncut = JHUXSggH2L2la2
+    JHUXSggH2L2la2err_photoncut = JHUXSggH2L2la2err
+    JHUXSggH2L2la1a2_photoncut = JHUXSggH2L2la1a2
+    JHUXSggH2L2la1a2err_photoncut = JHUXSggH2L2la1a2err
     JHUXSggH2L2lL1_photoncut = JHUXSggH2L2lL1
     JHUXSggH2L2lL1err_photoncut = JHUXSggH2L2lL1err
     JHUXSggH2L2la1L1_photoncut = JHUXSggH2L2la1L1
@@ -248,6 +256,18 @@ JHUXSVBFL1Zg, JHUXSVBFL1Zgerr = JHUXSVBFa1_photoncut / ghzgs1prime2VBF_gen**2, J
 if photoncutsame:
     JHUXSVBFa1_photoncut = JHUXSVBFa1
     JHUXSVBFa1err_photoncut = JHUXSVBFa1err
+    JHUXSVBFa3_photoncut = JHUXSVBFa3
+    JHUXSVBFa3err_photoncut = JHUXSVBFa3err
+    JHUXSVBFa1a3_photoncut = JHUXSVBFa1a3
+    JHUXSVBFa1a3err_photoncut = JHUXSVBFa1a3err
+    JHUXSVBFa2_photoncut = JHUXSVBFa2
+    JHUXSVBFa2err_photoncut = JHUXSVBFa2err
+    JHUXSVBFa1a2_photoncut = JHUXSVBFa1a2
+    JHUXSVBFa1a2err_photoncut = JHUXSVBFa1a2err
+    JHUXSVBFL1_photoncut = JHUXSVBFL1
+    JHUXSVBFL1err_photoncut = JHUXSVBFL1err
+    JHUXSVBFa1L1_photoncut = JHUXSVBFa1L1
+    JHUXSVBFa1L1err_photoncut = JHUXSVBFa1L1err
 
 #ZH
 
@@ -268,6 +288,18 @@ JHUXSZHa1a3, JHUXSZHa1a3err = JHUXSZHa1*2, JHUXSZHa1err*2
 if photoncutsame:
     JHUXSZHa1_photoncut = JHUXSZHa1
     JHUXSZHa1err_photoncut = JHUXSZHa1err
+    JHUXSZHa3_photoncut = JHUXSZHa3
+    JHUXSZHa3err_photoncut = JHUXSZHa3err
+    JHUXSZHa1a3_photoncut = JHUXSZHa1a3
+    JHUXSZHa1a3err_photoncut = JHUXSZHa1a3err
+    JHUXSZHa2_photoncut = JHUXSZHa2
+    JHUXSZHa2err_photoncut = JHUXSZHa2err
+    JHUXSZHa1a2_photoncut = JHUXSZHa1a2
+    JHUXSZHa1a2err_photoncut = JHUXSZHa1a2err
+    JHUXSZHL1_photoncut = JHUXSZHL1
+    JHUXSZHL1err_photoncut = JHUXSZHL1err
+    JHUXSZHa1L1_photoncut = JHUXSZHa1L1
+    JHUXSZHa1L1err_photoncut = JHUXSZHa1L1err
 del photoncutsame
 
 #WH
