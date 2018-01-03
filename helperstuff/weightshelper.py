@@ -2,149 +2,92 @@
 from enums import Analysis, MultiEnum, ProductionMode
 
 class WeightsHelper(MultiEnum):
-    enums = (ProductionMode, Analysis)
+    enums = (ProductionMode)
 
     def __init__(self, *args, **kwargs):
         from samples import SampleBase
         if len(args) == 1 and not kwargs and isinstance(args[0], SampleBase):
             sample = args[0]
-            if   sample.g2 == sample.g1prime2 == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fa3")
-            elif sample.g4 == sample.g1prime2 == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fa2")
-            elif sample.g2 == sample.g4       == sample.ghzgs1prime2 == 0: args = (sample.productionmode, "fL1")
-            elif sample.g2 == sample.g4       == sample.g1prime2     == 0: args = (sample.productionmode, "fL1Zg")
-            elif sample.g1 == sample.g2       == sample.g4           == 0: args = (sample.productionmode, "fL1fL1Zg")
-            else: assert False
+            args = sample.productionmode
         return super(WeightsHelper, self).__init__(*args, **kwargs)
-
 
     def check(self, *args):
         if self.productionmode in ("WplusH", "WminusH"): self.productionmode = ProductionMode("WH")
         if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ"):
             raise ValueError("Has to be a signal productionmode, not {}!\n{}".format(self.productionmode, args))
 
-    @property
-    def weightdecaystring(self):
-        if self.productionmode == "ggH":
-            return "GG"
-        if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ"):
-            return "Dec"
-    @property
-    def weightprodstring(self):
-        if self.productionmode == "ggH":
-            return None
-        if self.productionmode == "ttH": #production reweighting for ttH doesn't work unfortunately
-            return None
-        if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ"):
-            return str(self.productionmode)
+    def weightstring(self, prodordec):
+        if prodordec == "dec":
+            if self.productionmode == "ggH":
+                return "GG"
+            if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ"):
+                return "Dec"
+        if prodordec == "prod":
+            if self.productionmode == "ggH":
+                return None
+            if self.productionmode == "ttH": #production reweighting for ttH doesn't work unfortunately
+                return None
+            if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ"):
+                return str(self.productionmode)
+
+    def useproddec(self, prodordec):
+      return bool(self.weightstring(prodordec))
+      assert False
+
+    def allcouplings(self, prodordec):
+      if not self.useproddec(prodordec): return None
+      if prodordec == "dec" or prodordec == "prod" and self.productionmode == "ZH":
+        return "ghz1", "ghz2", "ghz4", "ghz1_prime2", "ghza1_prime2"
+      if prodordec == "prod" and self.productionmode == "VBF":
+        return "ghv1", "ghv2", "ghv4", "ghv1_prime2", "ghza1_prime2"
+      if prodordec == "prod" and self.productionmode == "WH":
+        return "ghw1", "ghw2", "ghw4", "ghw1_prime2"
+      if prodordec == "prod" and self.productionmode == "ttH":
+        return "kappa", "kappa_tilde"
+      if prodordec == "prod" and self.productionmode == "HJJ":
+        return "ghg2", "ghg4"
+      assert False
+
+    @staticmethod
+    def couplingvalue(coupling):
+      if "_prime2" in coupling: return "1E4"
+      return "1"
+
+    def couplingsandweights(self, prodordec, mix):
+      if not mix:
+        for coupling in self.allcouplings(prodordec):
+          couplingvalue = self.couplingvalue(coupling)
+          dct = {
+            "weightstring": self.weightstring(prodordec),
+            "coupling": coupling,
+            "couplingvalue": couplingvalue,
+          }
+        yield coupling, couplingvalue, self.weight(prodordec).format(**dct)
+      else:
+        for (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2) in combinations(self.couplingsandweights(prodordec, False), 2):
+          dct = {
+            "weightstring": self.weightstring(prodordec),
+            "coupling1": coupling1,
+            "coupling1value": coupling1value,
+            "coupling2": coupling2,
+            "coupling2value": coupling2value,
+          }
+          yield (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2), self.weightmix(prodordec).format(**dct)
 
     @property
-    def decaySMcouplingname(self):
-        if self.analysis.isfL1fL1Zg: return self.analysis.couplingnames[0].replace("g", "ghz")
-        return "ghz1"
+    def weight(self):
+        result = "p_Gen_{weightstring}_SIG_"
+        if prodordec == "dec" and self.productionmode=="ggH":
+            result += "ghg2_1_"
+        result += "{coupling}_{couplingvalue}_JHUGen"
+        return result
     @property
-    def decaySMcouplingvalue(self):
-        if self.analysis.isfL1fL1Zg: return "1E4"
-        return "1"
-    @property
-    def decayBSMcouplingname(self):
-        if self.analysis == "fL1Zg": return self.analysis.couplingname.replace("ghzgs", "ghza")
-        if self.analysis.isfL1fL1Zg: return self.analysis.couplingnames[1].replace("ghzgs", "ghza")
-        return self.analysis.couplingname.replace("g", "ghz")
-    @property
-    def decayBSMcouplingvalue(self):
-        if self.analysis in ("fL1", "fL1Zg") or self.analysis.isfL1fL1Zg: return "1E4"
-        else: return "1"
-
-    @property
-    def prodSMcouplingname(self):
-        if self.productionmode in ("ggH", "HJJ"): return "ghg2"
-        if self.productionmode == "VBF": return "ghv1"
-        if self.productionmode == "WH": return "ghw1"
-        if self.productionmode == "ZH": return "ghz1"
-        if self.productionmode == "ttH": return "kappa"
-    @property
-    def prodSMcouplingvalue(self):
-        return "1"
-    @property
-    def prodBSMcouplingname(self):
-        if self.productionmode == "ttH": return "kappa_tilde"
-        if self.productionmode == "HJJ": return "ghg4"
-        if self.productionmode == "ggH": return None
-        if self.analysis == "fL1Zg": return self.analysis.couplingname.replace("ghzgs", "ghza")
-        if self.productionmode == "VBF": return self.analysis.couplingname.replace("g", "ghv")
-        if self.productionmode == "WH": return self.analysis.couplingname.replace("g", "ghw")
-        if self.productionmode == "ZH": return self.analysis.couplingname.replace("g", "ghz")
-    @property
-    def prodBSMcouplingvalue(self):
-        if self.analysis in ["fL1", "fL1Zg"] and self.productionmode in ("VBF", "WH", "ZH"): return "1E4"
-        else: return "1"
-
-    @property
-    def formatdict(self):
-        return {
-                "decay": self.weightdecaystring,
-                "prod": self.weightprodstring,
-                "decaySM": self.decaySMcouplingname,
-                "prodSM": self.prodSMcouplingname,
-                "decaySMvalue": self.decaySMcouplingvalue,
-                "prodSMvalue": self.prodSMcouplingvalue,
-                "decayBSM": self.decayBSMcouplingname,
-                "prodBSM": self.prodBSMcouplingname,
-                "decayBSMvalue": self.decayBSMcouplingvalue,
-                "prodBSMvalue": self.prodBSMcouplingvalue,
-               }
-
-    @property
-    def decayweightSM(self):
-        result = "p_Gen_{decay}_SIG_"
-        if self.productionmode=="ggH":
-            result += "{prodSM}_{prodSMvalue}_"
-        result += "{decaySM}_{decaySMvalue}_JHUGen"
-        return result.format(**self.formatdict)
-    @property
-    def decayweightBSM(self):
-        result = "p_Gen_{decay}_SIG_"
-        if self.productionmode=="ggH":
-            result += "{prodSM}_{prodSMvalue}_"
-        result += "{decayBSM}_{decayBSMvalue}_JHUGen"
-        return result.format(**self.formatdict)
-    @property
-    def decayweightmix(self):
-        result = "p_Gen_{decay}_SIG_"
-        if self.productionmode=="ggH":
-            result += "{prodSM}_{prodSMvalue}_"
-        result += "{decaySM}_{decaySMvalue}_{decayBSM}_{decayBSMvalue}_JHUGen".format(**self.formatdict)
-        return result.format(**self.formatdict)
-    @property
-    def decaySMcoupling(self):
-        if self.analysis.isfL1fL1Zg: return self.analysis.couplingnames[0]
-        return "g1"
-    @property
-    def decayBSMcoupling(self):
-        if self.analysis.isfL1fL1Zg: return self.analysis.couplingnames[1]
-        return self.analysis.couplingname
-
-    @property
-    def prodweightSM(self):
-        return "p_Gen_{prod}_SIG_{prodSM}_{prodSMvalue}_JHUGen".format(**self.formatdict)
-    @property
-    def prodweightBSM(self):
-        if self.productionmode == "WH" and self.analysis == "fL1Zg": return None
-        return "p_Gen_{prod}_SIG_{prodBSM}_{prodBSMvalue}_JHUGen".format(**self.formatdict)
-    @property
-    def prodweightmix(self):
-        if self.productionmode == "WH" and self.analysis == "fL1Zg": return self.prodweightSM
-        return "p_Gen_{prod}_SIG_{prodSM}_{prodSMvalue}_{prodBSM}_{prodBSMvalue}_JHUGen".format(**self.formatdict)
-    @property
-    def prodSMcoupling(self):
-        if self.productionmode in ("VBF", "ZH", "WH"): return "g1"
-        if self.productionmode == "HJJ":               return "ghg2"
-        if self.productionmode == "ttH":               return "kappa"
-    @property
-    def prodBSMcoupling(self):
-        if self.productionmode in ("VBF", "ZH", "WH"): return self.analysis.couplingname
-        if self.productionmode == "HJJ":               return "ghg4"
-        if self.productionmode == "ttH":               return "kappa_tilde"
+    def weightmix(self):
+        result = "p_Gen_{weightstring}_SIG_"
+        if prodordec == "dec" and self.productionmode=="ggH":
+            result += "ghg2_1_"
+        result += "{coupling1}_{coupling1value}_{coupling2}_{coupling2value}_JHUGen".format(**self.formatdict)
+        return result
 
 if __name__ == "__main__":
     from samples import ArbitraryCouplingsSample, ReweightingSample

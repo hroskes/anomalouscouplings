@@ -416,34 +416,30 @@ class SampleBase(object):
         factors = []
 
         weightshelper = WeightsHelper(self)
-        if weightshelper.weightprodstring is not None:
-            prod = Counter()
-            SMcoupling  = getattr(self, weightshelper.prodSMcoupling ) / float(weightshelper.prodSMcouplingvalue)
-            BSMcoupling = getattr(self, weightshelper.prodBSMcoupling) / float(weightshelper.prodBSMcouplingvalue)
-            prod[weightshelper.prodweightSM]  += SMcoupling**2            - SMcoupling * BSMcoupling
-            prod[weightshelper.prodweightmix] += SMcoupling * BSMcoupling
-            prod[weightshelper.prodweightBSM] += BSMcoupling**2           - SMcoupling * BSMcoupling
+
+        for prodordec in "prod", "dec":
+          if weightshelper.useproddec(prodordec):
+            counter = Counter()
+            for couplingname, couplingvalue, weight in weightshelper.couplingsandweights(prodordec, int=False)
+              coupling = getattr(self, couplingname) / float(couplingvalue)
+              counter[weight] += coupling**2
+            for ((coupling1name, coupling1value, weight1),
+                 (coupling2name, coupling2value, weight2),
+                 weightint) in weightshelper.couplingsandweights(prodordec, int=True):
+              coupling1 = getattr(self, coupling1name ) / float(coupling1value)
+              coupling2 = getattr(self, coupling2name ) / float(coupling2value)
+              counter[weight1]   -= coupling1*coupling2
+              counter[weight2]   -= coupling1*coupling2
+              counter[weightint] += coupling1*coupling2
+
             factors.append([
                             (weightname, couplingsq)
-                                  for weightname, couplingsq in prod.iteritems()
+                                  for weightname, couplingsq in counter.iteritems()
                                    if couplingsq
                                          and weightname is not None
                            ])
 
-        if weightshelper.weightdecaystring is not None:
-            decay = Counter()
-            SMcoupling  = getattr(self, weightshelper.decaySMcoupling ) / float(weightshelper.decaySMcouplingvalue)
-            BSMcoupling = getattr(self, weightshelper.decayBSMcoupling) / float(weightshelper.decayBSMcouplingvalue)
-            decay[weightshelper.decayweightSM]  += SMcoupling**2            - SMcoupling * BSMcoupling
-            decay[weightshelper.decayweightmix] += SMcoupling * BSMcoupling
-            decay[weightshelper.decayweightBSM] += BSMcoupling**2           - SMcoupling * BSMcoupling
-            factors.append([
-                            (weightname, couplingsq)
-                                  for weightname, couplingsq in decay.iteritems()
-                                   if couplingsq
-                                         and weightname is not None
-                           ])
-
+        assert factors
         return factors
 
     @property
