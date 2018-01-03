@@ -384,33 +384,65 @@ JHUXSggH2L2la1a3,   JHUXSggH2L2la1a3err   = JHUXSggH2L2la1a3   - 2*JHUXSggH2L2la
 JHUXSggH2L2la1L1,   JHUXSggH2L2la1L1err   = JHUXSggH2L2la1L1   - 2*JHUXSggH2L2la1, sqrt(JHUXSggH2L2la1L1err  **2 + 4*JHUXSggH2L2la1err**2)
 JHUXSggH2L2la2a3,   JHUXSggH2L2la2a3err   = JHUXSggH2L2la2a3   - 2*JHUXSggH2L2la1, 0
 JHUXSggH2L2la2L1,   JHUXSggH2L2la2L1err   = JHUXSggH2L2la2L1   - 2*JHUXSggH2L2la1, sqrt(JHUXSggH2L2la2L1err  **2 + 4*JHUXSggH2L2la1err**2)
-JHUXSggH2L2la3L1,   JHUXSggH2L2la3L1err   = JHUXSggH2L2la3L1   - 2*JHUXSggH2L2la1, sqrt(JHUXSggH2L2la3L1err  **2 + 4*JHUXSggH2L2la1err**2)
+JHUXSggH2L2la3L1,   JHUXSggH2L2la3L1err   = JHUXSggH2L2la3L1   - 2*JHUXSggH2L2la1, 0
 
 JHUXSggH2L2la1a2_photoncut, JHUXSggH2L2la1a2err_photoncut = JHUXSggH2L2la1a2_photoncut - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la1a2err_photoncut **2 + 4*JHUXSggH2L2la1err_photoncut**2)
 JHUXSggH2L2la1a3_photoncut, JHUXSggH2L2la1a3err_photoncut = JHUXSggH2L2la1a3_photoncut - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la1a3err_photoncut **2 + 4*JHUXSggH2L2la1err_photoncut**2)
 JHUXSggH2L2la1L1_photoncut, JHUXSggH2L2la1L1err_photoncut = JHUXSggH2L2la1L1_photoncut - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la1L1err_photoncut **2 + 4*JHUXSggH2L2la1err_photoncut**2)
 JHUXSggH2L2la1L1Zg,         JHUXSggH2L2la1L1Zgerr         = JHUXSggH2L2la1L1Zg - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la1L1Zgerr**2 + 4*JHUXSggH2L2la1err_photoncut**2)
-JHUXSggH2L2la2a3_photoncut, JHUXSggH2L2la2a3err_photoncut = JHUXSggH2L2la2a3_photoncut - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la2a3err_photoncut **2 + 4*JHUXSggH2L2la1err_photoncut**2)
+JHUXSggH2L2la2a3_photoncut, JHUXSggH2L2la2a3err_photoncut = JHUXSggH2L2la2a3_photoncut - 2*JHUXSggH2L2la1_photoncut, 0
 JHUXSggH2L2la2L1_photoncut, JHUXSggH2L2la2L1err_photoncut = JHUXSggH2L2la2L1_photoncut - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la2L1err_photoncut **2 + 4*JHUXSggH2L2la1err_photoncut**2)
 JHUXSggH2L2la2L1Zg,         JHUXSggH2L2la2L1Zgerr         = JHUXSggH2L2la2L1Zg - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la2L1Zgerr**2 + 4*JHUXSggH2L2la1err_photoncut**2)
-JHUXSggH2L2la3L1_photoncut, JHUXSggH2L2la3L1err_photoncut = JHUXSggH2L2la3L1_photoncut - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la3L1err_photoncut **2 + 4*JHUXSggH2L2la1err_photoncut**2)
-JHUXSggH2L2la3L1Zg,         JHUXSggH2L2la3L1Zgerr         = JHUXSggH2L2la3L1Zg - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2la3L1Zgerr**2 + 4*JHUXSggH2L2la1err_photoncut**2)
+JHUXSggH2L2la3L1_photoncut, JHUXSggH2L2la3L1err_photoncut = JHUXSggH2L2la3L1_photoncut - 2*JHUXSggH2L2la1_photoncut, 0
+JHUXSggH2L2la3L1Zg,         JHUXSggH2L2la3L1Zgerr         = JHUXSggH2L2la3L1Zg - 2*JHUXSggH2L2la1_photoncut, 0
 JHUXSggH2L2lL1L1Zg,         JHUXSggH2L2lL1L1Zgerr         = JHUXSggH2L2lL1L1Zg - 2*JHUXSggH2L2la1_photoncut, sqrt(JHUXSggH2L2lL1L1Zgerr**2 + 4*JHUXSggH2L2la1err_photoncut**2)
 
 JHUXSVBFa1a2,   JHUXSVBFa1a2err   = JHUXSVBFa1a2   - 2*JHUXSVBFa1, sqrt(JHUXSVBFa1a2err  **2 + 4*JHUXSVBFa1err**2)
 JHUXSVBFa1a3,   JHUXSVBFa1a3err   = JHUXSVBFa1a3   - 2*JHUXSVBFa1, 0
 JHUXSVBFa1L1,   JHUXSVBFa1L1err   = JHUXSVBFa1L1   - 2*JHUXSVBFa1, sqrt(JHUXSVBFa1L1err  **2 + 4*JHUXSVBFa1err**2)
-JHUXSVBFa1L1Zg, JHUXSVBFa1L1Zgerr = JHUXSVBFa1L1Zg - 2*JHUXSVBFa1_photoncut, sqrt(JHUXSVBFa1L1Zgerr**2 + 4*JHUXSVBFa1err_photoncut**2)
+JHUXSVBFa2a3,   JHUXSVBFa2a3err   = JHUXSVBFa2a3   - 2*JHUXSVBFa1, 0
+JHUXSVBFa2L1,   JHUXSVBFa2L1err   = JHUXSVBFa2L1   - 2*JHUXSVBFa1, sqrt(JHUXSVBFa2L1err  **2 + 4*JHUXSVBFa1err**2)
+JHUXSVBFa3L1,   JHUXSVBFa3L1err   = JHUXSVBFa3L1   - 2*JHUXSVBFa1, 0
+
+JHUXSVBFa1a2_photoncut, JHUXSVBFa1a2err_photoncut = JHUXSVBFa1a2_photoncut - 2*JHUXSVBFa1_photoncut, sqrt(JHUXSVBFa1a2err_photoncut **2 + 4*JHUXSVBFa1err_photoncut**2)
+JHUXSVBFa1a3_photoncut, JHUXSVBFa1a3err_photoncut = JHUXSVBFa1a3_photoncut - 2*JHUXSVBFa1_photoncut, sqrt(JHUXSVBFa1a3err_photoncut **2 + 4*JHUXSVBFa1err_photoncut**2)
+JHUXSVBFa1L1_photoncut, JHUXSVBFa1L1err_photoncut = JHUXSVBFa1L1_photoncut - 2*JHUXSVBFa1_photoncut, sqrt(JHUXSVBFa1L1err_photoncut **2 + 4*JHUXSVBFa1err_photoncut**2)
+JHUXSVBFa1L1Zg,         JHUXSVBFa1L1Zgerr         = JHUXSVBFa1L1Zg - 2*JHUXSVBFa1_photoncut, sqrt(JHUXSVBFa1L1Zgerr**2 + 4*JHUXSVBFa1err_photoncut**2)
+JHUXSVBFa2a3_photoncut, JHUXSVBFa2a3err_photoncut = JHUXSVBFa2a3_photoncut - 2*JHUXSVBFa1_photoncut, 0
+JHUXSVBFa2L1_photoncut, JHUXSVBFa2L1err_photoncut = JHUXSVBFa2L1_photoncut - 2*JHUXSVBFa1_photoncut, sqrt(JHUXSVBFa2L1err_photoncut **2 + 4*JHUXSVBFa1err_photoncut**2)
+JHUXSVBFa2L1Zg,         JHUXSVBFa2L1Zgerr         = JHUXSVBFa2L1Zg - 2*JHUXSVBFa1_photoncut, sqrt(JHUXSVBFa2L1Zgerr**2 + 4*JHUXSVBFa1err_photoncut**2)
+JHUXSVBFa3L1_photoncut, JHUXSVBFa3L1err_photoncut = JHUXSVBFa3L1_photoncut - 2*JHUXSVBFa1_photoncut, 0
+JHUXSVBFa3L1Zg,         JHUXSVBFa3L1Zgerr         = JHUXSVBFa3L1Zg - 2*JHUXSVBFa1_photoncut, 0
+JHUXSVBFL1L1Zg,         JHUXSVBFL1L1Zgerr         = JHUXSVBFL1L1Zg - 2*JHUXSVBFa1_photoncut, sqrt(JHUXSVBFL1L1Zgerr**2 + 4*JHUXSVBFa1err_photoncut**2)
 
 JHUXSZHa1a2,   JHUXSZHa1a2err   = JHUXSZHa1a2   - 2*JHUXSZHa1, sqrt(JHUXSZHa1a2err  **2 + 4*JHUXSZHa1err**2)
 JHUXSZHa1a3,   JHUXSZHa1a3err   = JHUXSZHa1a3   - 2*JHUXSZHa1, 0
 JHUXSZHa1L1,   JHUXSZHa1L1err   = JHUXSZHa1L1   - 2*JHUXSZHa1, sqrt(JHUXSZHa1L1err  **2 + 4*JHUXSZHa1err**2)
-JHUXSZHa1L1Zg, JHUXSZHa1L1Zgerr = JHUXSZHa1L1Zg - 2*JHUXSZHa1_photoncut, sqrt(JHUXSZHa1L1Zgerr**2 + 4*JHUXSZHa1err_photoncut**2)
+JHUXSZHa2a3,   JHUXSZHa2a3err   = JHUXSZHa2a3   - 2*JHUXSZHa1, 0
+JHUXSZHa2L1,   JHUXSZHa2L1err   = JHUXSZHa2L1   - 2*JHUXSZHa1, sqrt(JHUXSZHa2L1err  **2 + 4*JHUXSZHa1err**2)
+JHUXSZHa3L1,   JHUXSZHa3L1err   = JHUXSZHa3L1   - 2*JHUXSZHa1, 0
+
+JHUXSZHa1a2_photoncut, JHUXSZHa1a2err_photoncut = JHUXSZHa1a2_photoncut - 2*JHUXSZHa1_photoncut, sqrt(JHUXSZHa1a2err_photoncut **2 + 4*JHUXSZHa1err_photoncut**2)
+JHUXSZHa1a3_photoncut, JHUXSZHa1a3err_photoncut = JHUXSZHa1a3_photoncut - 2*JHUXSZHa1_photoncut, sqrt(JHUXSZHa1a3err_photoncut **2 + 4*JHUXSZHa1err_photoncut**2)
+JHUXSZHa1L1_photoncut, JHUXSZHa1L1err_photoncut = JHUXSZHa1L1_photoncut - 2*JHUXSZHa1_photoncut, sqrt(JHUXSZHa1L1err_photoncut **2 + 4*JHUXSZHa1err_photoncut**2)
+JHUXSZHa1L1Zg,         JHUXSZHa1L1Zgerr         = JHUXSZHa1L1Zg - 2*JHUXSZHa1_photoncut, sqrt(JHUXSZHa1L1Zgerr**2 + 4*JHUXSZHa1err_photoncut**2)
+JHUXSZHa2a3_photoncut, JHUXSZHa2a3err_photoncut = JHUXSZHa2a3_photoncut - 2*JHUXSZHa1_photoncut, 0
+JHUXSZHa2L1_photoncut, JHUXSZHa2L1err_photoncut = JHUXSZHa2L1_photoncut - 2*JHUXSZHa1_photoncut, sqrt(JHUXSZHa2L1err_photoncut **2 + 4*JHUXSZHa1err_photoncut**2)
+JHUXSZHa2L1Zg,         JHUXSZHa2L1Zgerr         = JHUXSZHa2L1Zg - 2*JHUXSZHa1_photoncut, sqrt(JHUXSZHa2L1Zgerr**2 + 4*JHUXSZHa1err_photoncut**2)
+JHUXSZHa3L1_photoncut, JHUXSZHa3L1err_photoncut = JHUXSZHa3L1_photoncut - 2*JHUXSZHa1_photoncut, 0
+JHUXSZHa3L1Zg,         JHUXSZHa3L1Zgerr         = JHUXSZHa3L1Zg - 2*JHUXSZHa1_photoncut, 0
+JHUXSZHL1L1Zg,         JHUXSZHL1L1Zgerr         = JHUXSZHL1L1Zg - 2*JHUXSZHa1_photoncut, sqrt(JHUXSZHL1L1Zgerr**2 + 4*JHUXSZHa1err_photoncut**2)
 
 JHUXSWHa1a2,   JHUXSWHa1a2err   = JHUXSWHa1a2   - 2*JHUXSWHa1, sqrt(JHUXSWHa1a2err  **2 + 4*JHUXSWHa1err**2)
 JHUXSWHa1a3,   JHUXSWHa1a3err   = JHUXSWHa1a3   - 2*JHUXSWHa1, 0
 JHUXSWHa1L1,   JHUXSWHa1L1err   = JHUXSWHa1L1   - 2*JHUXSWHa1, sqrt(JHUXSWHa1L1err  **2 + 4*JHUXSWHa1err**2)
 JHUXSWHa1L1Zg, JHUXSWHa1L1Zgerr = 0, 0
+JHUXSWHa2a3,   JHUXSWHa2a3err   = JHUXSWHa2a3   - 2*JHUXSWHa1, 0
+JHUXSWHa2L1,   JHUXSWHa2L1err   = JHUXSWHa2L1   - 2*JHUXSWHa1, sqrt(JHUXSWHa2L1err  **2 + 4*JHUXSWHa1err**2)
+JHUXSWHa2L1Zg, JHUXSWHa2L1Zgerr = 0, 0
+JHUXSWHa3L1,   JHUXSWHa3L1err   = JHUXSWHa3L1   - 2*JHUXSWHa1, 0
+JHUXSWHa3L1Zg, JHUXSWHa3L1Zgerr = 0, 0
+JHUXSWHL1L1Zg, JHUXSWHL1L1Zgerr = 0, 0
 
 JHUXSHJJa2a3, JHUXSHJJa2a3err = JHUXSHJJa2a3 - 2*JHUXSHJJa2, 0
 JHUXSttHkappakappatilde, JHUXSttHkappakappatildeerr = JHUXSttHkappakappatilde - 2*JHUXSttHkappa, 0
@@ -423,8 +455,15 @@ ghzgs1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHL1Zg + JHUXSWHL1Zg)
 ghzgs1prime2VH_reco = -ghzgs1prime2VH_gen
 
 #defined this way, just make sure
-assert (JHUXSggH2L2la1a3 == JHUXSVBFa1a3 == JHUXSZHa1a3 == JHUXSWHa1a3 == JHUXSHJJa2a3 == JHUXSttHkappakappatilde
-              == JHUXSWHL1Zg == JHUXSWHa1L1Zg == 0)
+assert (
+  JHUXSggH2L2la1a3 == JHUXSggH2L2la2a3 == JHUXSggH2L2la3L1 == JHUXSggH2L2la1a3_photoncut == JHUXSggH2L2la2a3_photoncut == JHUXSggH2L2la3L1_photoncut == JHUXSggH2L2la3L1Zg ==
+  JHUXSVBFa1a3 == JHUXSVBFa2a3 == JHUXSVBFa3L1 == JHUXSVBFa1a3_photoncut == JHUXSVBFa2a3_photoncut == JHUXSVBFa3L1_photoncut == JHUXSVBFa3L1Zg ==
+  JHUXSZHa1a3 == JHUXSZHa2a3 == JHUXSZHa3L1 == JHUXSZHa1a3_photoncut == JHUXSZHa2a3_photoncut == JHUXSZHa3L1_photoncut == JHUXSZHa3L1Zg ==
+  JHUXSWHa1a3 == JHUXSWHa2a3 == JHUXSWHa3L1 == JHUXSWHa1a3_photoncut == JHUXSWHa2a3_photoncut == JHUXSWHa3L1_photoncut == JHUXSWHa3L1Zg ==
+  JHUXSHJJa2a3 == JHUXSttHkappakappatilde ==
+  JHUXSWHL1Zg == JHUXSWHa1L1Zg ==
+  0
+)
 for k, v in globals().items():
     if "__" in k: continue
     assert v is not None, k
