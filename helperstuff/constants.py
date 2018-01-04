@@ -84,9 +84,9 @@ JHUXSggH2L2lL1             = 0.48754258E-07; JHUXSggH2L2lL1err             = 0.1
 JHUXSggH2L2la1a2           = 26.073377;      JHUXSggH2L2la1a2err           = 0.74026916E-03
 JHUXSggH2L2la1a3           = 14.278034;      JHUXSggH2L2la1a3err           = 0.45318122E-03
 JHUXSggH2L2la1L1           = 0.23727827;     JHUXSggH2L2la1L1err           = 0.15982277E-04    #using g1prime2 = -12100.42
-JHUXSggH2L2la2a3           = None;           JHUXSggH2L2la2a3err           = None
-JHUXSggH2L2la2L1           = None;           JHUXSggH2L2la2L1err           = None
-JHUXSggH2L2la3L1           = None;           JHUXSggH2L2la3L1err           = None
+JHUXSggH2L2la2a3           = 14.3016;        JHUXSggH2L2la2a3err           = 0.000642865
+JHUXSggH2L2la2L1           = 2.33083;        JHUXSggH2L2la2L1err           = 0.000141056
+JHUXSggH2L2la3L1           = 14.3016;        JHUXSggH2L2la3L1err           = 0.000521711
 
 JHUXSggH2L2la1_photoncut   = 7.1542865;      JHUXSggH2L2la1err_photoncut   = 0.27583899E-03    #This is bigger than the uncut xsec.  Fix below.
 JHUXSggH2L2la2_photoncut   = None;           JHUXSggH2L2la2err_photoncut   = None
@@ -99,9 +99,9 @@ JHUXSggH2L2la1L1_photoncut = None;           JHUXSggH2L2la1L1err_photoncut = Non
 JHUXSggH2L2la1L1Zg         = 13.145473;      JHUXSggH2L2la1L1Zgerr         = 0.53550812E-03
 JHUXSggH2L2la2a3_photoncut = None;           JHUXSggH2L2la2a3err_photoncut = None
 JHUXSggH2L2la2L1_photoncut = None;           JHUXSggH2L2la2L1err_photoncut = None
-JHUXSggH2L2la2L1Zg         = None;           JHUXSggH2L2la2L1Zgerr         = None
+JHUXSggH2L2la2L1Zg         = 2.33096;        JHUXSggH2L2la2L1Zgerr         = 0.000140816
 JHUXSggH2L2la3L1_photoncut = None;           JHUXSggH2L2la3L1err_photoncut = None
-JHUXSggH2L2la3L1Zg         = None;           JHUXSggH2L2la3L1Zgerr         = None
+JHUXSggH2L2la3L1Zg         = 14.3019;        JHUXSggH2L2la3L1Zgerr         = 0.000521397
 JHUXSggH2L2lL1L1Zg         = 1.6472524E+01;  JHUXSggH2L2lL1L1Zgerr         = 2.2689281E-02
 
 JHUXSggH2L2leL = 1.4347981E+01
@@ -141,28 +141,25 @@ JHUXSZHL1             = 33652.46e-6;    JHUXSZHL1err             = 4.19e-6
 JHUXSZHa1a2           = 4258.966;       JHUXSZHa1a2err           = 0.783
 JHUXSZHa1a3           = 18040.66;       JHUXSZHa1a3err           = 2.73
 JHUXSZHa1L1           = 6852.307;       JHUXSZHa1L1err           = 0.929
-JHUXSZHa2a3           = 2873397.7;      JHUXSZHa2a3err           = 410.01247
-JHUXSZHa2L1           = 4486589.3;      JHUXSZHa2L1err           = 1490.3749
-JHUXSZHa3L1           = None;           JHUXSZHa3L1err           = None
-#########
-JHUXSZHa3L1, JHUXSZHa3L1err = JHUXSZHa2a3, JHUXSZHa2a3err
-#########
+JHUXSZHa2a3           = 2.87412e+06;    JHUXSZHa2a3err           = 166.887
+JHUXSZHa2L1           = 4.48796e+06;    JHUXSZHa2L1err           = 215.167
+JHUXSZHa3L1           = 2.87379e+06;    JHUXSZHa3L1err           = 207.548
 
 JHUXSZHa1_photoncut   = 1437150.9;      JHUXSZHa1err_photoncut   = 289.72492
-JHUXSZHa2_photoncut   = None;           JHUXSZHa2err_photoncut   = None
-JHUXSZHa3_photoncut   = None;           JHUXSZHa3err_photoncut   = None
-JHUXSZHL1_photoncut   = None;           JHUXSZHL1err_photoncut   = None
+JHUXSZHa2_photoncut   = 1.13607e+08;    JHUXSZHa2err_photoncut   = 9576.74
+JHUXSZHa3_photoncut   = 6.92498e+07;    JHUXSZHa3err_photoncut   = 8947.25
+JHUXSZHL1_photoncut   = 5.36026;        JHUXSZHL1err_photoncut   = 0.000470241
 JHUXSZHL1Zg           = 3.4592597;      JHUXSZHL1Zgerr           = 0.56602360E-03
-JHUXSZHa1a2_photoncut = None;           JHUXSZHa1a2err_photoncut = None
-JHUXSZHa1a3_photoncut = None;           JHUXSZHa1a3err_photoncut = None
+JHUXSZHa1a2_photoncut = 678294;         JHUXSZHa1a2err_photoncut = 84.8159
+JHUXSZHa1a3_photoncut = 2.87306e+06;    JHUXSZHa1a3err_photoncut = 619.515
 JHUXSZHa1L1_photoncut = None;           JHUXSZHa1L1err_photoncut = None
 JHUXSZHa1L1Zg         = 3479412.2;      JHUXSZHa1L1Zgerr         = 486.4
-JHUXSZHa2a3_photoncut = None;           JHUXSZHa2a3err_photoncut = None
-JHUXSZHa2L1_photoncut = None;           JHUXSZHa2L1err_photoncut = None
-JHUXSZHa2L1Zg         = None;           JHUXSZHa2L1Zgerr         = None
-JHUXSZHa3L1_photoncut = None;           JHUXSZHa3L1err_photoncut = None
-JHUXSZHa3L1Zg         = None;           JHUXSZHa3L1Zgerr         = None
-JHUXSZHL1L1Zg         = None;           JHUXSZHL1L1Zgerr         = None
+JHUXSZHa2a3_photoncut = 2.87439e+06;    JHUXSZHa2a3err_photoncut = 379.502
+JHUXSZHa2L1_photoncut = 4.48761e+06;    JHUXSZHa2L1err_photoncut = 729.939
+JHUXSZHa2L1Zg         = 4.48622e+06;    JHUXSZHa2L1Zgerr         = 1502.75
+JHUXSZHa3L1_photoncut = 2.87439e+06;    JHUXSZHa3L1err_photoncut = 436.918
+JHUXSZHa3L1Zg         = 2.8737e+06;     JHUXSZHa3L1Zgerr         = 614.514
+JHUXSZHL1L1Zg         = 1.43739e+06;    JHUXSZHL1L1Zgerr         = 239.856
 
 JHUXSWHa1           = 30998.54;       JHUXSWHa1err           = 2.50
 JHUXSWHa2           = 3106339;        JHUXSWHa2err           = 308
@@ -172,13 +169,9 @@ JHUXSWHL1Zg         = 0;              JHUXSWHL1Zgerr         = 0
 JHUXSWHa1a2         = 16486.68;       JHUXSWHa1a2err         = 2.01
 JHUXSWHa1a3         = 62001.57;       JHUXSWHa1a3err         = 5.54
 JHUXSWHa1L1         = 25302.37;       JHUXSWHa1L1err         = 2.67
-JHUXSWHa1L1Zg       = None;           JHUXSWHa1errL1Zg       = None
-JHUXSWHa2a3         = None;           JHUXSWHa2a3err         = None
-JHUXSWHa2L1         = None;           JHUXSWHa2L1err         = None
-JHUXSWHa2L1Zg       = None;           JHUXSWHa2L1Zgerr       = None
-JHUXSWHa3L1         = None;           JHUXSWHa3L1err         = None
-JHUXSWHa3L1Zg       = None;           JHUXSWHa3L1Zgerr       = None
-JHUXSWHL1L1Zg       = None;           JHUXSWHL1L1Zgerr       = None
+JHUXSWHa2a3         = 2.19171e+06;    JHUXSWHa2a3err         = 111.038
+JHUXSWHa2L1         = 4.06647e+06;    JHUXSWHa2L1err         = 213.417
+JHUXSWHa3L1         = 2.53696e+06;    JHUXSWHa3L1err         = 146.184
 
 #VH cross sections changed somewhere between c85a387eaf3a8a92f5893e5293ed3c3d36107e16 and fbf449150f4df49f66b21c1638adb02b68a308d0
 #correct for that
@@ -350,12 +343,15 @@ JHUXSZHa1a3, JHUXSZHa1a3err = JHUXSZHa1*2, JHUXSZHa1err*2
 
 if photoncutsame:
     JHUXSZHa1_photoncut, JHUXSZHa1err_photoncut = JHUXSZHa1, JHUXSZHa1err
-    JHUXSZHa3_photoncut, JHUXSZHa3err_photoncut = JHUXSZHa3, JHUXSZHa3err
-    JHUXSZHa1a3_photoncut, JHUXSZHa1a3err_photoncut = JHUXSZHa1a3, JHUXSZHa1a3err
     JHUXSZHa2_photoncut, JHUXSZHa2err_photoncut = JHUXSZHa2, JHUXSZHa2err
-    JHUXSZHa1a2_photoncut, JHUXSZHa1a2err_photoncut = JHUXSZHa1a2, JHUXSZHa1a2err
+    JHUXSZHa3_photoncut, JHUXSZHa3err_photoncut = JHUXSZHa3, JHUXSZHa3err
     JHUXSZHL1_photoncut, JHUXSZHL1err_photoncut = JHUXSZHL1, JHUXSZHL1err
+    JHUXSZHa1a2_photoncut, JHUXSZHa1a2err_photoncut = JHUXSZHa1a2, JHUXSZHa1a2err
+    JHUXSZHa1a3_photoncut, JHUXSZHa1a3err_photoncut = JHUXSZHa1a3, JHUXSZHa1a3err
     JHUXSZHa1L1_photoncut, JHUXSZHa1L1err_photoncut = JHUXSZHa1L1, JHUXSZHa1L1err
+    JHUXSZHa2a3_photoncut, JHUXSZHa2a3err_photoncut = JHUXSZHa2a3, JHUXSZHa2a3err
+    JHUXSZHa2L1_photoncut, JHUXSZHa2L1err_photoncut = JHUXSZHa2L1, JHUXSZHa2L1err
+    JHUXSZHa3L1_photoncut, JHUXSZHa3L1err_photoncut = JHUXSZHa3L1, JHUXSZHa3L1err
 del photoncutsame
 
 #WH
@@ -473,16 +469,16 @@ ghzgs1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHL1Zg + JHUXSWHL1Zg)
 ghzgs1prime2VH_reco = -ghzgs1prime2VH_gen
 
 #defined this way, just make sure
-assert (
-  JHUXSggH2L2la1a3 == JHUXSggH2L2la2a3 == JHUXSggH2L2la3L1 == JHUXSggH2L2la1a3_photoncut == JHUXSggH2L2la2a3_photoncut == JHUXSggH2L2la3L1_photoncut == JHUXSggH2L2la3L1Zg ==
-  JHUXSVBFa1a3 == JHUXSVBFa2a3 == JHUXSVBFa3L1 == JHUXSVBFa1a3_photoncut == JHUXSVBFa2a3_photoncut == JHUXSVBFa3L1_photoncut == JHUXSVBFa3L1Zg ==
-  JHUXSZHa1a3 == JHUXSZHa2a3 == JHUXSZHa3L1 == JHUXSZHa1a3_photoncut == JHUXSZHa2a3_photoncut == JHUXSZHa3L1_photoncut == JHUXSZHa3L1Zg ==
-  JHUXSWHa1a3 == JHUXSWHa2a3 == JHUXSWHa3L1 == JHUXSWHa1a3_photoncut == JHUXSWHa2a3_photoncut == JHUXSWHa3L1_photoncut == JHUXSWHa3L1Zg ==
-  JHUXSHJJa2a3 == JHUXSttHkappakappatilde ==
-  JHUXSWHL1Zg == JHUXSWHa1L1Zg ==
-  0
-)
+for _ in """
+  JHUXSggH2L2la1a3 JHUXSggH2L2la2a3 JHUXSggH2L2la3L1 JHUXSggH2L2la1a3_photoncut JHUXSggH2L2la2a3_photoncut JHUXSggH2L2la3L1_photoncut JHUXSggH2L2la3L1Zg
+  JHUXSVBFa1a3 JHUXSVBFa2a3 JHUXSVBFa3L1 JHUXSVBFa1a3_photoncut JHUXSVBFa2a3_photoncut JHUXSVBFa3L1_photoncut JHUXSVBFa3L1Zg
+  JHUXSZHa1a3 JHUXSZHa2a3 JHUXSZHa3L1 JHUXSZHa1a3_photoncut JHUXSZHa2a3_photoncut JHUXSZHa3L1_photoncut JHUXSZHa3L1Zg
+  JHUXSWHa1a3 JHUXSWHa2a3 JHUXSWHa3L1
+  JHUXSHJJa2a3 JHUXSttHkappakappatilde
+  JHUXSWHL1Zg JHUXSWHa1L1Zg JHUXSWHa2L1Zg JHUXSWHa3L1Zg JHUXSWHL1L1Zg
+""".split():
+  assert globals()[_] == 0, (_, globals()[_])
 for k, v in globals().items():
     if "__" in k: continue
     assert v is not None, k
-del k, v
+del k, v, _
