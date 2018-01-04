@@ -169,9 +169,9 @@ JHUXSWHL1Zg         = 0;              JHUXSWHL1Zgerr         = 0
 JHUXSWHa1a2         = 16486.68;       JHUXSWHa1a2err         = 2.01
 JHUXSWHa1a3         = 62001.57;       JHUXSWHa1a3err         = 5.54
 JHUXSWHa1L1         = 25302.37;       JHUXSWHa1L1err         = 2.67
-JHUXSWHa2a3         = 2.19171e+06;    JHUXSWHa2a3err         = 111.038
-JHUXSWHa2L1         = 4.06647e+06;    JHUXSWHa2L1err         = 213.417
-JHUXSWHa3L1         = 2.53696e+06;    JHUXSWHa3L1err         = 146.184
+JHUXSWHa2a3         = None;           JHUXSWHa2a3err         = None
+JHUXSWHa2L1         = None;           JHUXSWHa2L1err         = None
+JHUXSWHa3L1         = None;           JHUXSWHa3L1err         = None
 
 #VH cross sections changed somewhere between c85a387eaf3a8a92f5893e5293ed3c3d36107e16 and fbf449150f4df49f66b21c1638adb02b68a308d0
 #correct for that
