@@ -99,9 +99,9 @@ JHUXSVBFL1             = 2.083097999e-4;     JHUXSVBFL1err             = 1.24640
 JHUXSVBFa1a2           = 2207.72848655;      JHUXSVBFa1a2err           = 0.126379327428
 JHUXSVBFa1a3           = 1937.20646111;      JHUXSVBFa1a3err           = 0.122617320785
 JHUXSVBFa1L1           = 2861.21349769;      JHUXSVBFa1L1err           = 0.0771278408768
-JHUXSVBFa2a3           = None;               JHUXSVBFa2a3err           = None
-JHUXSVBFa2L1           = None;               JHUXSVBFa2L1err           = None
-JHUXSVBFa3L1           = None;               JHUXSVBFa3L1err           = None
+JHUXSVBFa2a3           = 1936.8416;          JHUXSVBFa2a3err           = 0.55683416
+JHUXSVBFa2L1           = 2507.0486;          JHUXSVBFa2L1err           = 0.79805153
+JHUXSVBFa3L1           = 1939.6777;          JHUXSVBFa3L1err           = 0.72505911
 
 JHUXSVBFa1_photoncut   = 834.24595;          JHUXSVBFa1err_photoncut   = 0.41631690
 JHUXSVBFa2_photoncut   = 12877.222;          JHUXSVBFa2err_photoncut   = 3.3757809
@@ -114,10 +114,10 @@ JHUXSVBFa1L1_photoncut = 2610.2745;          JHUXSVBFa1L1err_photoncut = 0.98053
 JHUXSVBFa1L1Zg         = 1410.5494;          JHUXSVBFa1L1Zgerr         = 0.68216715
 JHUXSVBFa2a3_photoncut = 1901.9215;          JHUXSVBFa2a3err_photoncut = 0.55413647
 JHUXSVBFa2L1_photoncut = 2432.2096;          JHUXSVBFa2L1err_photoncut = 0.78807404
-JHUXSVBFa2L1Zg         = None;               JHUXSVBFa2L1Zgerr         = None
+JHUXSVBFa2L1Zg         = 2433.0553;          JHUXSVBFa2L1Zgerr         = 0.78466670
 JHUXSVBFa3L1_photoncut = 1866.9467;          JHUXSVBFa3L1err_photoncut = 0.72075447
-JHUXSVBFa3L1Zg         = None;               JHUXSVBFa3L1Zgerr         = None
-JHUXSVBFL1L1Zg         = None;               JHUXSVBFL1L1Zgerr         = None
+JHUXSVBFa3L1Zg         = 1865.6689;          JHUXSVBFa3L1Zgerr         = 0.71037371
+JHUXSVBFL1L1Zg         = 916.21310;          JHUXSVBFL1L1Zgerr         = 0.34424016
 
 JHUXSZHa1             = 9022.36;        JHUXSZHa1err             = 1.17
 JHUXSZHa2             = 713123;         JHUXSZHa2err             = 103
@@ -126,9 +126,12 @@ JHUXSZHL1             = 33652.46e-6;    JHUXSZHL1err             = 4.19e-6
 JHUXSZHa1a2           = 4258.966;       JHUXSZHa1a2err           = 0.783
 JHUXSZHa1a3           = 18040.66;       JHUXSZHa1a3err           = 2.73
 JHUXSZHa1L1           = 6852.307;       JHUXSZHa1L1err           = 0.929
-JHUXSZHa2a3           = None;           JHUXSZHa2a3err           = None
-JHUXSZHa2L1           = None;           JHUXSZHa2L1err           = None
+JHUXSZHa2a3           = 2873397.7;      JHUXSZHa2a3err           = 410.01247
+JHUXSZHa2L1           = 4486589.3;      JHUXSZHa2L1err           = 1490.3749
 JHUXSZHa3L1           = None;           JHUXSZHa3L1err           = None
+#########
+JHUXSZHa3L1, JHUXSZHa3L1err = JHUXSZHa2a3, JHUXSZHa2a3err
+#########
 
 JHUXSZHa1_photoncut   = 1437150.9;      JHUXSZHa1err_photoncut   = 289.72492
 JHUXSZHa2_photoncut   = None;           JHUXSZHa2err_photoncut   = None

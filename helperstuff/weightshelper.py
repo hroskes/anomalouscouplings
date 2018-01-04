@@ -37,11 +37,11 @@ class WeightsHelper(MultiEnum):
     def allcouplings(self, prodordec):
       if not self.useproddec(prodordec): return None
       if prodordec == "dec" or prodordec == "prod" and self.productionmode == "ZH":
-        return "ghz1", "ghz2", "ghz4", "ghz1_prime2", "ghza1_prime2"
+        return "ghz1", "ghz1_prime2", "ghz2", "ghz4", "ghza1_prime2"
       if prodordec == "prod" and self.productionmode == "VBF":
-        return "ghv1", "ghv2", "ghv4", "ghv1_prime2", "ghza1_prime2"
+        return "ghv1", "ghv1_prime2", "ghv2", "ghv4", "ghza1_prime2"
       if prodordec == "prod" and self.productionmode == "WH":
-        return "ghw1", "ghw2", "ghw4", "ghw1_prime2"
+        return "ghw1", "ghw1_prime2", "ghw2", "ghw4"
       if prodordec == "prod" and self.productionmode == "ttH":
         return "kappa", "kappa_tilde"
       if prodordec == "prod" and self.productionmode == "HJJ":
