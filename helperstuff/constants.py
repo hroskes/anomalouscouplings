@@ -77,17 +77,32 @@ SMXSWpH2L2l = SMXSWpH * SMBR2L2l
 SMXSWmH2L2l = SMXSWmH * SMBR2L2l
 SMXSttH2L2l = SMXSttH * SMBR2L2l
 
-JHUXSggH2L2la1             = 7.1517173;      JHUXSggH2L2la1err            = 0.23044650E-03
-JHUXSggH2L2la2             = 2.5849908;      JHUXSggH2L2la2err            = 0.77294379E-04
-JHUXSggH2L2la3             = 1.0954288;      JHUXSggH2L2la3err            = 0.43443941E-04
-JHUXSggH2L2lL1             = 0.48754258E-07; JHUXSggH2L2lL1err            = 0.15112345E-11
-JHUXSggH2L2la1a2           = 26.073377;      JHUXSggH2L2la1a2err          = 0.74026916E-03
-JHUXSggH2L2la1a3           = 14.278034;      JHUXSggH2L2la1a3err          = 0.45318122E-03
-JHUXSggH2L2la1L1           = 0.23727827;     JHUXSggH2L2la1L1err          = 0.15982277E-04    #using g1prime2 = -12100.42
-JHUXSggH2L2la1_photoncut   = 7.1542865;      JHUXSggH2L2la1err_photoncut  = 0.27583899E-03    #This is bigger than the uncut xsec.  Fix below.
-JHUXSggH2L2lL1Zg           = 0.12338393E-06; JHUXSggH2L2lL1Zgerr          = 0.58002047E-11
-JHUXSggH2L2la1L1Zg         = 13.145473;      JHUXSggH2L2la1L1Zgerr        = 0.53550812E-03
-JHUXSggH2L2lL1L1Zg         = 1.6472524E+01;  JHUXSggH2L2lL1L1Zgerr        = 2.2689281E-02
+JHUXSggH2L2la1             = 7.1517173;      JHUXSggH2L2la1err             = 0.23044650E-03
+JHUXSggH2L2la2             = 2.5849908;      JHUXSggH2L2la2err             = 0.77294379E-04
+JHUXSggH2L2la3             = 1.0954288;      JHUXSggH2L2la3err             = 0.43443941E-04
+JHUXSggH2L2lL1             = 0.48754258E-07; JHUXSggH2L2lL1err             = 0.15112345E-11
+JHUXSggH2L2la1a2           = 26.073377;      JHUXSggH2L2la1a2err           = 0.74026916E-03
+JHUXSggH2L2la1a3           = 14.278034;      JHUXSggH2L2la1a3err           = 0.45318122E-03
+JHUXSggH2L2la1L1           = 0.23727827;     JHUXSggH2L2la1L1err           = 0.15982277E-04    #using g1prime2 = -12100.42
+JHUXSggH2L2la2a3           = None;           JHUXSggH2L2la2a3err           = None
+JHUXSggH2L2la2L1           = None;           JHUXSggH2L2la2L1err           = None
+JHUXSggH2L2la3L1           = None;           JHUXSggH2L2la3L1err           = None
+
+JHUXSggH2L2la1_photoncut   = 7.1542865;      JHUXSggH2L2la1err_photoncut   = 0.27583899E-03    #This is bigger than the uncut xsec.  Fix below.
+JHUXSggH2L2la2_photoncut   = None;           JHUXSggH2L2la2err_photoncut   = None
+JHUXSggH2L2la3_photoncut   = None;           JHUXSggH2L2la3err_photoncut   = None
+JHUXSggH2L2lL1_photoncut   = None;           JHUXSggH2L2lL1err_photoncut   = None
+JHUXSggH2L2lL1Zg           = 0.12338393E-06; JHUXSggH2L2lL1Zgerr           = 0.58002047E-11
+JHUXSggH2L2la1a2_photoncut = None;           JHUXSggH2L2la1a2err_photoncut = None
+JHUXSggH2L2la1a3_photoncut = None;           JHUXSggH2L2la1a3err_photoncut = None
+JHUXSggH2L2la1L1_photoncut = None;           JHUXSggH2L2la1L1err_photoncut = None
+JHUXSggH2L2la1L1Zg         = 13.145473;      JHUXSggH2L2la1L1Zgerr         = 0.53550812E-03
+JHUXSggH2L2la2a3_photoncut = None;           JHUXSggH2L2la2a3err_photoncut = None
+JHUXSggH2L2la2L1_photoncut = None;           JHUXSggH2L2la2L1err_photoncut = None
+JHUXSggH2L2la2L1Zg         = None;           JHUXSggH2L2la2L1Zgerr         = None
+JHUXSggH2L2la3L1_photoncut = None;           JHUXSggH2L2la3L1err_photoncut = None
+JHUXSggH2L2la3L1Zg         = None;           JHUXSggH2L2la3L1Zgerr         = None
+JHUXSggH2L2lL1L1Zg         = 1.6472524E+01;  JHUXSggH2L2lL1L1Zgerr         = 2.2689281E-02
 
 JHUXSggH2L2leL = 1.4347981E+01
 JHUXSggH2L2leR = 1.3952140E+01
