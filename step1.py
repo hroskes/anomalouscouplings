@@ -14,6 +14,13 @@ if os.path.realpath(os.getcwd()) != os.path.realpath(helperstuff.config.reposito
 print """Yes, config is set up!
 """
 
+print """Checking that python dependencies are installed..."""
+try:
+  import uncertainties
+except ImportError:
+  print "Installing uncertainties..."
+  subprocess.check_call(["pip", "install", "--user", "uncertainties"])
+
 print "Initiating git submodules..."
 subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 

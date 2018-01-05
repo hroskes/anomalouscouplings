@@ -88,7 +88,7 @@ elif config.host == "MARCC":
         """).strip()
 
         repmap = {
-                  "jobtext": "cd .oO[CMSSW_BASE]Oo. && eval $(scram ru -sh) && cd .oO[pwd]Oo. && "+jobtext,
+                  "jobtext": jobtext,
                   "CMSSW_BASE": os.environ["CMSSW_BASE"],
                   "pwd": os.getcwd(),
                   "jobname": jobname,
