@@ -50,7 +50,8 @@ This is what you get when you import these constants and use them
 in python.
 """
 
-from math import sqrt
+from uncertainties import ufloat
+from uncertainties.umath import sqrt
 
 M_Z = 91.1876
 Ga_Z = 2.4952
@@ -118,95 +119,93 @@ SMXSWpH2L2l = SMXSWpH * SMBR2L2l
 SMXSWmH2L2l = SMXSWmH * SMBR2L2l
 SMXSttH2L2l = SMXSttH * SMBR2L2l
 
-JHUXSggH2L2la1             = 7.1517173;      JHUXSggH2L2la1err             = 0.23044650E-03
-JHUXSggH2L2la2             = 2.5849908;      JHUXSggH2L2la2err             = 0.77294379E-04
-JHUXSggH2L2la3             = 1.0954288;      JHUXSggH2L2la3err             = 0.43443941E-04
-JHUXSggH2L2lL1             = 0.48754258E-07; JHUXSggH2L2lL1err             = 0.15112345E-11
-JHUXSggH2L2lL1Zg           = 0.12338393E-06; JHUXSggH2L2lL1Zgerr           = 0.58002047E-11
-JHUXSggH2L2la1a2           = 26.073377;      JHUXSggH2L2la1a2err           = 0.74026916E-03
-JHUXSggH2L2la1a3           = 14.278034;      JHUXSggH2L2la1a3err           = 0.45318122E-03
-JHUXSggH2L2la1L1           = 0.23727827;     JHUXSggH2L2la1L1err           = 0.15982277E-04    #using g1prime2 = -12100.42
-JHUXSggH2L2la1L1Zg         = 13.145473;      JHUXSggH2L2la1L1Zgerr         = 0.53550812E-03
-JHUXSggH2L2la2a3           = 14.3016;        JHUXSggH2L2la2a3err           = 0.000642865
-JHUXSggH2L2la2L1           = 2.33083;        JHUXSggH2L2la2L1err           = 0.000141056
-JHUXSggH2L2la2L1Zg         = 2.33096;        JHUXSggH2L2la2L1Zgerr         = 0.000140816
-JHUXSggH2L2la3L1           = 14.3016;        JHUXSggH2L2la3L1err           = 0.000521711
-JHUXSggH2L2la3L1Zg         = 14.3019;        JHUXSggH2L2la3L1Zgerr         = 0.000521397
-JHUXSggH2L2lL1L1Zg         = 1.6472524E+01;  JHUXSggH2L2lL1L1Zgerr         = 2.2689281E-02
+JHUXSggH2L2la1             = ufloat(7.1517173,      0.23044650E-03)
+JHUXSggH2L2la2             = ufloat(2.5849908,      0.77294379E-04)
+JHUXSggH2L2la3             = ufloat(1.0954288,      0.43443941E-04)
+JHUXSggH2L2lL1             = ufloat(0.48754258E-07, 0.15112345E-11)
+JHUXSggH2L2lL1Zg           = ufloat(0.12338393E-06, 0.58002047E-11)
+JHUXSggH2L2la1a2           = ufloat(26.073377,      0.74026916E-03)
+JHUXSggH2L2la1a3           = ufloat(14.278034,      0.45318122E-03)
+JHUXSggH2L2la1L1           = ufloat(0.23727827,     0.15982277E-04)    #using g1prime2 = -12100.42
+JHUXSggH2L2la1L1Zg         = ufloat(13.145473,      0.53550812E-03)
+JHUXSggH2L2la2a3           = ufloat(14.3016,        0.000642865)
+JHUXSggH2L2la2L1           = ufloat(2.33083,        0.000141056)
+JHUXSggH2L2la2L1Zg         = ufloat(2.33096,        0.000140816)
+JHUXSggH2L2la3L1           = ufloat(14.3016,        0.000521711)
+JHUXSggH2L2la3L1Zg         = ufloat(14.3019,        0.000521397)
+JHUXSggH2L2lL1L1Zg         = ufloat(1.6472524E+01,  2.2689281E-02)
 
 JHUXSggH2L2leL = 1.4347981E+01
 JHUXSggH2L2leR = 1.3952140E+01
 
-JHUXSVBFa1             = 968.674284006;      JHUXSVBFa1err             = 0.075115702763
-JHUXSVBFa2             = 13102.7106117;      JHUXSVBFa2err             = 0.522399748272
-JHUXSVBFa3             = 10909.5390002;      JHUXSVBFa3err             = 0.50975030067
-JHUXSVBFL1             = 2.083097999e-4;     JHUXSVBFL1err             = 1.24640942579e-08
-JHUXSVBFL1Zg           = 0.49845301E-04;     JHUXSVBFL1Zgerr           = 0.21806623E-07
-JHUXSVBFa1a2           = 2207.72848655;      JHUXSVBFa1a2err           = 0.126379327428
-JHUXSVBFa1a3           = 1937.20646111;      JHUXSVBFa1a3err           = 0.122617320785
-JHUXSVBFa1L1           = 2861.21349769;      JHUXSVBFa1L1err           = 0.0771278408768
-JHUXSVBFa1L1Zg         = 1410.5494;          JHUXSVBFa1L1Zgerr         = 0.68216715
-JHUXSVBFa2a3           = 1936.8416;          JHUXSVBFa2a3err           = 0.55683416
-JHUXSVBFa2L1           = 2507.0486;          JHUXSVBFa2L1err           = 0.79805153
-JHUXSVBFa2L1Zg         = 2433.0553;          JHUXSVBFa2L1Zgerr         = 0.78466670
-JHUXSVBFa3L1           = 1939.6777;          JHUXSVBFa3L1err           = 0.72505911
-JHUXSVBFa3L1Zg         = 1865.6689;          JHUXSVBFa3L1Zgerr         = 0.71037371
-JHUXSVBFL1L1Zg         = 916.21310;          JHUXSVBFL1L1Zgerr         = 0.34424016
+JHUXSVBFa1                 = ufloat(968.674284006,      0.075115702763)
+JHUXSVBFa2                 = ufloat(13102.7106117,      0.522399748272)
+JHUXSVBFa3                 = ufloat(10909.5390002,      0.50975030067)
+JHUXSVBFL1                 = ufloat(2.083097999e-4,     1.24640942579e-08)
+JHUXSVBFL1Zg               = ufloat(0.49845301E-04,     0.21806623E-07)
+JHUXSVBFa1a2               = ufloat(2207.72848655,      0.126379327428)
+JHUXSVBFa1a3               = ufloat(1937.20646111,      0.122617320785)
+JHUXSVBFa1L1               = ufloat(2861.21349769,      0.0771278408768)
+JHUXSVBFa1L1Zg             = ufloat(1410.5494,          0.68216715)
+JHUXSVBFa2a3               = ufloat(1936.8416,          0.55683416)
+JHUXSVBFa2L1               = ufloat(2507.0486,          0.79805153)
+JHUXSVBFa2L1Zg             = ufloat(2433.0553,          0.78466670)
+JHUXSVBFa3L1               = ufloat(1939.6777,          0.72505911)
+JHUXSVBFa3L1Zg             = ufloat(1865.6689,          0.71037371)
+JHUXSVBFL1L1Zg             = ufloat(916.21310,          0.34424016)
 
-JHUXSZHa1             = 9022.36;        JHUXSZHa1err             = 1.17
-JHUXSZHa2             = 713123;         JHUXSZHa2err             = 103
-JHUXSZHa3             = 434763.7;       JHUXSZHa3err             = 62.2
-JHUXSZHL1             = 33652.46e-6;    JHUXSZHL1err             = 4.19e-6
-JHUXSZHL1Zg           = 3.4592597;      JHUXSZHL1Zgerr           = 0.56602360E-03
-JHUXSZHa1a2           = 4258.966;       JHUXSZHa1a2err           = 0.783
-JHUXSZHa1a3           = 18040.66;       JHUXSZHa1a3err           = 2.73
-JHUXSZHa1L1           = 6852.307;       JHUXSZHa1L1err           = 0.929
-JHUXSZHa1L1Zg         = 3479412.2;      JHUXSZHa1L1Zgerr         = 486.4
-JHUXSZHa2a3           = 2.87412e+06;    JHUXSZHa2a3err           = 166.887
-JHUXSZHa2L1           = 4.48796e+06;    JHUXSZHa2L1err           = 215.167
-JHUXSZHa2L1Zg         = 4.48622e+06;    JHUXSZHa2L1Zgerr         = 1502.75
-JHUXSZHa3L1           = 2.87379e+06;    JHUXSZHa3L1err           = 207.548
-JHUXSZHa3L1Zg         = 2.8737e+06;     JHUXSZHa3L1Zgerr         = 614.514
-JHUXSZHL1L1Zg         = 1.43739e+06;    JHUXSZHL1L1Zgerr         = 239.856
+JHUXSZHa1                  = ufloat(9022.36,        1.17)
+JHUXSZHa2                  = ufloat(713123,         103)
+JHUXSZHa3                  = ufloat(434763.7,       62.2)
+JHUXSZHL1                  = ufloat(33652.46e-6,    4.19e-6)
+JHUXSZHL1Zg                = ufloat(3.4592597,      0.56602360E-03)
+JHUXSZHa1a2                = ufloat(4258.966,       0.783)
+JHUXSZHa1a3                = ufloat(18040.66,       2.73)
+JHUXSZHa1L1                = ufloat(6852.307,       0.929)
+JHUXSZHa1L1Zg              = ufloat(3479412.2,      486.4)
+JHUXSZHa2a3                = ufloat(2.87412e+06,    166.887)
+JHUXSZHa2L1                = ufloat(4.48796e+06,    215.167)
+JHUXSZHa2L1Zg              = ufloat(4.48622e+06,    1502.75)
+JHUXSZHa3L1                = ufloat(2.87379e+06,    207.548)
+JHUXSZHa3L1Zg              = ufloat(2.8737e+06,     614.514)
+JHUXSZHL1L1Zg              = ufloat(1.43739e+06,    239.856)
 
-JHUXSWHa1           = 30998.54;       JHUXSWHa1err           = 2.50
-JHUXSWHa2           = 3106339;        JHUXSWHa2err           = 308
-JHUXSWHa3           = 2028656;        JHUXSWHa3err           = 191
-JHUXSWHL1           = 11234.91e-5;    JHUXSWHL1err           = 1.10e-5
-JHUXSWHL1Zg         = 0;              JHUXSWHL1Zgerr         = 0
-JHUXSWHa1a2         = 16486.68;       JHUXSWHa1a2err         = 2.01
-JHUXSWHa1a3         = 62001.57;       JHUXSWHa1a3err         = 5.54
-JHUXSWHa1L1         = 25302.37;       JHUXSWHa1L1err         = 2.67
-JHUXSWHa2a3         = 2.96308e+07;    JHUXSWHa2a3err         = 2132.86
-JHUXSWHa2L1         = 4.47663e+07;    JHUXSWHa2L1err         = 4985.14
-JHUXSWHa3L1         = 2.96285e+07;    JHUXSWHa3L1err         = 3423.37
+JHUXSWHa1                  = ufloat(30998.54,       2.50)
+JHUXSWHa2                  = ufloat(3106339,        308)
+JHUXSWHa3                  = ufloat(2028656,        191)
+JHUXSWHL1                  = ufloat(11234.91e-5,    1.10e-5)
+JHUXSWHL1Zg                = ufloat(0,              0)
+JHUXSWHa1a2                = ufloat(16486.68,       2.01)
+JHUXSWHa1a3                = ufloat(62001.57,       5.54)
+JHUXSWHa1L1                = ufloat(25302.37,       2.67)
+JHUXSWHa2a3                = ufloat(2.96308e+07,    2132.86)
+JHUXSWHa2L1                = ufloat(4.47663e+07,    4985.14)
+JHUXSWHa3L1                = ufloat(2.96285e+07,    3423.37)
 
 #VH cross sections changed somewhere between c85a387eaf3a8a92f5893e5293ed3c3d36107e16 and fbf449150f4df49f66b21c1638adb02b68a308d0
 #correct for that
 def fixVH():
-    ZHxsecratio = 158.49737883504775; ZHxsecratioerr = 0.39826108447619935
-    WHxsecratio = ZHxsecratio*3;      WHxsecratioerr = ZHxsecratioerr*3
+    ZHxsecratio = ufloat(158.49737883504775, 0.39826108447619935)
+    WHxsecratio = ZHxsecratio*3
     for V in "Z", "W":
-        VHxsecratio, VHxsecratioerr = locals()[V+"Hxsecratio"], locals()[V+"Hxsecratioerr"]
+        VHxsecratio = locals()[V+"Hxsecratio"]
         for coupling in "a1", "a2", "a3", "L1", "a1a2", "a1a3", "a1L1":
-            name = "JHUXS{}H{}".format(V, coupling); errorname = name+"err"
+            name = "JHUXS{}H{}".format(V, coupling)
             newvalue = globals()[name] * VHxsecratio
-            newerror = sqrt(globals()[name] * VHxsecratioerr + VHxsecratio * globals()[errorname])
             globals()[name] = newvalue
-            globals()[errorname] = newerror
 fixVH(); del fixVH
-JHUXSWHa1L1Zg       = JHUXSWHa1;      JHUXSWHa1L1Zgerr       = JHUXSWHa1err
-JHUXSWHa2L1Zg       = JHUXSWHa1;      JHUXSWHa2L1Zgerr       = JHUXSWHa1err
-JHUXSWHa3L1Zg       = JHUXSWHa1;      JHUXSWHa3L1Zgerr       = JHUXSWHa1err
-JHUXSWHL1L1Zg       = JHUXSWHa1;      JHUXSWHL1L1Zgerr       = JHUXSWHa1err
+JHUXSWHa1L1Zg       = JHUXSWHa1
+JHUXSWHa2L1Zg       = g2WH**2 * JHUXSWHa2
+JHUXSWHa3L1Zg       = g4WH**2 * JHUXSWHa3
+JHUXSWHL1L1Zg       = g1prime2WH_gen**2 * JHUXSWHL1
 
-JHUXSHJJa2       = 14583.61;       JHUXSHJJa2err       = 0.94
-JHUXSHJJa3       = 14397.13;       JHUXSHJJa3err       = 0.97
-JHUXSHJJa2a3     = 29169.2;        JHUXSHJJa2a3err     = 2.1
+JHUXSHJJa2       = ufloat(14583.61,       0.94)
+JHUXSHJJa3       = ufloat(14397.13,       0.97)
+JHUXSHJJa2a3     = ufloat(29169.2,        2.1)
 
-JHUXSttHkappa    = 0.912135589;    JHUXSttHkappaerr    = 0.00143032
-JHUXSttHkappatilde = 0.35609194;   JHUXSttHkappatildeerr = 0.000492662
-JHUXSttHkappakappatilde = 1.8231162489;   JHUXSttHkappakappatildeerr = 0.00254131
+JHUXSttHkappa    = ufloat(0.912135589,    0.00143032)
+JHUXSttHkappatilde = ufloat(0.35609194,   0.000492662)
+JHUXSttHkappakappatilde = ufloat(1.8231162489,   0.00254131)
 
 
 #Subtract the pure component from the interference, then divide by (gi*gj)
@@ -262,84 +261,84 @@ if __name__ == "__main__":
     print "All of the following should be 0:"
     print
     print "  decay:"
-    print "    a1XS -           g2**2*    a2XS = {}%".format((JHUXSggH2L2la1 - g2decay**2               * JHUXSggH2L2la2    ) / JHUXSggH2L2la1 * 100)
-    print "    a1XS -           g4**2*    a3XS = {}%".format((JHUXSggH2L2la1 - g4decay**2               * JHUXSggH2L2la3    ) / JHUXSggH2L2la1 * 100)
-    print "    a1XS -     g1prime2**2*    L1XS = {}%".format((JHUXSggH2L2la1 - g1prime2decay_gen**2     * JHUXSggH2L2lL1    ) / JHUXSggH2L2la1 * 100)
-    print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {}%".format((JHUXSggH2L2la1 - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg  ) / JHUXSggH2L2la1 * 100)
-    print "                        g4*  a1a3XS = {}%".format((                 g4decay                  * JHUXSggH2L2la1a3  ) / JHUXSggH2L2la1 * 100)
-    print "                     g2*g4*  a2a3XS = {}%".format((                 g2decay*g4decay          * JHUXSggH2L2la2a3  ) / JHUXSggH2L2la1 * 100)
-    print "               g1prime2*g4*  a3L1XS = {}%".format((                g1prime2decay_gen*g4decay * JHUXSggH2L2la3L1  ) / JHUXSggH2L2la1 * 100)
-    print "           ghzgs1prime2*g4*a3L1ZgXS = {}%".format((            ghzgs1prime2decay_gen*g4decay * JHUXSggH2L2la3L1Zg) / JHUXSggH2L2la1 * 100)
+    print "    a1XS -           g2**2*    a2XS = {:%}".format((JHUXSggH2L2la1 - g2decay**2               * JHUXSggH2L2la2    ) / JHUXSggH2L2la1)
+    print "    a1XS -           g4**2*    a3XS = {:%}".format((JHUXSggH2L2la1 - g4decay**2               * JHUXSggH2L2la3    ) / JHUXSggH2L2la1)
+    print "    a1XS -     g1prime2**2*    L1XS = {:%}".format((JHUXSggH2L2la1 - g1prime2decay_gen**2     * JHUXSggH2L2lL1    ) / JHUXSggH2L2la1)
+    print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {:%}".format((JHUXSggH2L2la1 - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg  ) / JHUXSggH2L2la1)
+    print "                        g4*  a1a3XS = {:%}".format((                 g4decay                  * JHUXSggH2L2la1a3  ) / JHUXSggH2L2la1)
+    print "                     g2*g4*  a2a3XS = {:%}".format((                 g2decay*g4decay          * JHUXSggH2L2la2a3  ) / JHUXSggH2L2la1)
+    print "               g1prime2*g4*  a3L1XS = {:%}".format((                g1prime2decay_gen*g4decay * JHUXSggH2L2la3L1  ) / JHUXSggH2L2la1)
+    print "           ghzgs1prime2*g4*a3L1ZgXS = {:%}".format((            ghzgs1prime2decay_gen*g4decay * JHUXSggH2L2la3L1Zg) / JHUXSggH2L2la1)
     print
     print "  VBF:"
-    print "    a1XS -           g2**2*    a2XS = {}%".format((JHUXSVBFa1     - g2VBF**2                 * JHUXSVBFa2        ) / JHUXSVBFa1     * 100)
-    print "    a1XS -           g4**2*    a3XS = {}%".format((JHUXSVBFa1     - g4VBF**2                 * JHUXSVBFa3        ) / JHUXSVBFa1     * 100)
-    print "    a1XS -     g1prime2**2*    L1XS = {}%".format((JHUXSVBFa1     - g1prime2VBF_gen**2       * JHUXSVBFL1        ) / JHUXSVBFa1     * 100)
-#   print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {}%".format((JHUXSVBFa1     - ghzgs1prime2VBF_gen**2   * JHUXSVBFL1Zg      ) / JHUXSVBFa1     * 100)
-    print "                        g4*  a1a3XS = {}%".format((                 g4VBF                    * JHUXSVBFa1a3      ) / JHUXSVBFa1     * 100)
-    print "                     g2*g4*  a2a3XS = {}%".format((                 g2VBF  *g4VBF            * JHUXSVBFa2a3      ) / JHUXSVBFa1     * 100)
-    print "               g1prime2*g4*  a3L1XS = {}%".format((                g1prime2VBF_gen  *g4VBF   * JHUXSVBFa3L1      ) / JHUXSVBFa1     * 100)
-#   print "           ghzgs1prime2*g4*a3L1ZgXS = {}%".format((            ghzgs1prime2VBF_gen  *g4VBF   * JHUXSVBFa3L1Zg    ) / JHUXSVBFa1     * 100)
+    print "    a1XS -           g2**2*    a2XS = {:%}".format((JHUXSVBFa1     - g2VBF**2                 * JHUXSVBFa2        ) / JHUXSVBFa1    )
+    print "    a1XS -           g4**2*    a3XS = {:%}".format((JHUXSVBFa1     - g4VBF**2                 * JHUXSVBFa3        ) / JHUXSVBFa1    )
+    print "    a1XS -     g1prime2**2*    L1XS = {:%}".format((JHUXSVBFa1     - g1prime2VBF_gen**2       * JHUXSVBFL1        ) / JHUXSVBFa1    )
+#   print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {:%}".format((JHUXSVBFa1     - ghzgs1prime2VBF_gen**2   * JHUXSVBFL1Zg      ) / JHUXSVBFa1    )
+    print "                        g4*  a1a3XS = {:%}".format((                 g4VBF                    * JHUXSVBFa1a3      ) / JHUXSVBFa1    )
+    print "                     g2*g4*  a2a3XS = {:%}".format((                 g2VBF  *g4VBF            * JHUXSVBFa2a3      ) / JHUXSVBFa1    )
+    print "               g1prime2*g4*  a3L1XS = {:%}".format((                g1prime2VBF_gen  *g4VBF   * JHUXSVBFa3L1      ) / JHUXSVBFa1    )
+#   print "           ghzgs1prime2*g4*a3L1ZgXS = {:%}".format((            ghzgs1prime2VBF_gen  *g4VBF   * JHUXSVBFa3L1Zg    ) / JHUXSVBFa1    )
     print
     print "  ZH:"
-    print "    a1XS -           g2**2*    a2XS = {}%".format((JHUXSZHa1      - g2ZH**2                  * JHUXSZHa2         ) / JHUXSZHa1      * 100)
-    print "    a1XS -           g4**2*    a3XS = {}%".format((JHUXSZHa1      - g4ZH**2                  * JHUXSZHa3         ) / JHUXSZHa1      * 100)
-    print "    a1XS -     g1prime2**2*    L1XS = {}%".format((JHUXSZHa1      - g1prime2ZH_gen**2        * JHUXSZHL1         ) / JHUXSZHa1      * 100)
-    print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {}%".format((JHUXSZHa1      - ghzgs1prime2ZH_gen**2    * JHUXSZHL1Zg       ) / JHUXSZHa1      * 100)
-    print "                        g4*  a1a3XS = {}%".format((                 g4ZH                     * JHUXSZHa1a3       ) / JHUXSZHa1      * 100)
-    print "                     g2*g4*  a2a3XS = {}%".format((                 g2ZH   *g4ZH             * JHUXSZHa2a3       ) / JHUXSZHa1      * 100)
-    print "               g1prime2*g4*  a3L1XS = {}%".format((                g1prime2ZH_gen   *g4ZH    * JHUXSZHa3L1       ) / JHUXSZHa1      * 100)
-    print "           ghzgs1prime2*g4*a3L1ZgXS = {}%".format((            ghzgs1prime2ZH_gen   *g4ZH    * JHUXSZHa3L1Zg     ) / JHUXSZHa1      * 100)
+    print "    a1XS -           g2**2*    a2XS = {:%}".format((JHUXSZHa1      - g2ZH**2                  * JHUXSZHa2         ) / JHUXSZHa1     )
+    print "    a1XS -           g4**2*    a3XS = {:%}".format((JHUXSZHa1      - g4ZH**2                  * JHUXSZHa3         ) / JHUXSZHa1     )
+    print "    a1XS -     g1prime2**2*    L1XS = {:%}".format((JHUXSZHa1      - g1prime2ZH_gen**2        * JHUXSZHL1         ) / JHUXSZHa1     )
+    print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {:%}".format((JHUXSZHa1      - ghzgs1prime2ZH_gen**2    * JHUXSZHL1Zg       ) / JHUXSZHa1     )
+    print "                        g4*  a1a3XS = {:%}".format((                 g4ZH                     * JHUXSZHa1a3       ) / JHUXSZHa1     )
+    print "                     g2*g4*  a2a3XS = {:%}".format((                 g2ZH   *g4ZH             * JHUXSZHa2a3       ) / JHUXSZHa1     )
+    print "               g1prime2*g4*  a3L1XS = {:%}".format((                g1prime2ZH_gen   *g4ZH    * JHUXSZHa3L1       ) / JHUXSZHa1     )
+    print "           ghzgs1prime2*g4*a3L1ZgXS = {:%}".format((            ghzgs1prime2ZH_gen   *g4ZH    * JHUXSZHa3L1Zg     ) / JHUXSZHa1     )
     print
     print "  WH:"
-    print "    a1XS -           g2**2*    a2XS = {}%".format((JHUXSWHa1      - g2WH**2                  * JHUXSWHa2         ) / JHUXSWHa1      * 100)
-    print "    a1XS -           g4**2*    a3XS = {}%".format((JHUXSWHa1      - g4WH**2                  * JHUXSWHa3         ) / JHUXSWHa1      * 100)
-    print "    a1XS -     g1prime2**2*    L1XS = {}%".format((JHUXSWHa1      - g1prime2WH_gen**2        * JHUXSWHL1         ) / JHUXSWHa1      * 100)
-#   print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {}%".format((JHUXSWHa1      - ghzgs1prime2WH_gen**2    * JHUXSWHL1Zg       ) / JHUXSWHa1      * 100)
-    print "                        g4*  a1a3XS = {}%".format((                 g4WH                     * JHUXSWHa1a3       ) / JHUXSWHa1      * 100)
-    print "                     g2*g4*  a2a3XS = {}%".format((                 g2WH   *g4WH             * JHUXSWHa2a3       ) / JHUXSWHa1      * 100)
-    print "               g1prime2*g4*  a3L1XS = {}%".format((                g1prime2WH_gen   *g4WH    * JHUXSWHa3L1       ) / JHUXSWHa1      * 100)
-#   print "           ghzgs1prime2*g4*a3L1ZgXS = {}%".format((            ghzgs1prime2WH_gen   *g4WH    * JHUXSWHa3L1Zg     ) / JHUXSWHa1      * 100)
-    print "    WpHXS + WmHXS - WHXS            = {}%".format((SMXSWpH2L2l + SMXSWmH2L2l - SMXSWH2L2l                        ) / SMXSWH2L2l     * 100)
+    print "    a1XS -           g2**2*    a2XS = {:%}".format((JHUXSWHa1      - g2WH**2                  * JHUXSWHa2         ) / JHUXSWHa1     )
+    print "    a1XS -           g4**2*    a3XS = {:%}".format((JHUXSWHa1      - g4WH**2                  * JHUXSWHa3         ) / JHUXSWHa1     )
+    print "    a1XS -     g1prime2**2*    L1XS = {:%}".format((JHUXSWHa1      - g1prime2WH_gen**2        * JHUXSWHL1         ) / JHUXSWHa1     )
+#   print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {:%}".format((JHUXSWHa1      - ghzgs1prime2WH_gen**2    * JHUXSWHL1Zg       ) / JHUXSWHa1     )
+    print "                        g4*  a1a3XS = {:%}".format((                 g4WH                     * JHUXSWHa1a3       ) / JHUXSWHa1     )
+    print "                     g2*g4*  a2a3XS = {:%}".format((                 g2WH   *g4WH             * JHUXSWHa2a3       ) / JHUXSWHa1     )
+    print "               g1prime2*g4*  a3L1XS = {:%}".format((                g1prime2WH_gen   *g4WH    * JHUXSWHa3L1       ) / JHUXSWHa1     )
+#   print "           ghzgs1prime2*g4*a3L1ZgXS = {:%}".format((            ghzgs1prime2WH_gen   *g4WH    * JHUXSWHa3L1Zg     ) / JHUXSWHa1     )
+    print "    WpHXS + WmHXS - WHXS            = {:%}".format((SMXSWpH2L2l + SMXSWmH2L2l - SMXSWH2L2l                        ) / SMXSWH2L2l    )
     print
     print "  HJJ:"
-    print "    a2XS -           g4**2*    a3XS = {}%".format((JHUXSHJJa2     - ghg4HJJ**2               * JHUXSHJJa3        ) / JHUXSHJJa2     * 100)
-    print "                        g4*  a2a3XS = {}%".format((                 ghg4HJJ                  * JHUXSHJJa2a3      ) / JHUXSHJJa2     * 100)
+    print "    a2XS -           g4**2*    a3XS = {:%}".format((JHUXSHJJa2     - ghg4HJJ**2               * JHUXSHJJa3        ) / JHUXSHJJa2    )
+    print "                        g4*  a2a3XS = {:%}".format((                 ghg4HJJ                  * JHUXSHJJa2a3      ) / JHUXSHJJa2    )
     print
     print "  ttH:"
     kt = kappa_tilde_ttH
     JHUXSttHk = JHUXSttHkappa
     JHUXSttHkt = JHUXSttHkappatilde
     JHUXSttHkkt = JHUXSttHkappakappatilde
-    print "     kXS -           k~**2*    k~XS = {}%".format((JHUXSttHk      - kt**2                    * JHUXSttHkt        ) / JHUXSttHk      * 100)
-    print "                        k~*   kk~XS = {}%".format((                 kt                       * JHUXSttHkkt       ) / JHUXSttHk      * 100)
+    print "     kXS -           k~**2*    k~XS = {:%}".format((JHUXSttHk      - kt**2                    * JHUXSttHkt        ) / JHUXSttHk     )
+    print "                        k~*   kk~XS = {:%}".format((                 kt                       * JHUXSttHkkt       ) / JHUXSttHk     )
     del kt, JHUXSttHk, JHUXSttHkt, JHUXSttHkkt
 
 #Set them to exactly 0
 
-JHUXSggH2L2la1a3   = JHUXSggH2L2la1a3err   = \
-JHUXSggH2L2la2a3,  = JHUXSggH2L2la2a3err   = \
-JHUXSggH2L2la3L1,  = JHUXSggH2L2la3L1err   = \
-JHUXSggH2L2la3L1Zg = JHUXSggH2L2la3L1Zgerr = 0
+JHUXSggH2L2la1a3   = \
+JHUXSggH2L2la2a3   = \
+JHUXSggH2L2la3L1   = \
+JHUXSggH2L2la3L1Zg = 0
 
-JHUXSVBFa1a3   = JHUXSVBFa1a3err   = \
-JHUXSVBFa2a3   = JHUXSVBFa2a3err   = \
-JHUXSVBFa3L1   = JHUXSVBFa3L1err   = \
-JHUXSVBFa3L1Zg = JHUXSVBFa3L1Zgerr = 0
+JHUXSVBFa1a3   = \
+JHUXSVBFa2a3   = \
+JHUXSVBFa3L1   = \
+JHUXSVBFa3L1Zg = 0
 
-JHUXSZHa1a3   = JHUXSZHa1a3err   = \
-JHUXSZHa2a3   = JHUXSZHa2a3err   = \
-JHUXSZHa3L1   = JHUXSZHa3L1err   = \
-JHUXSZHa3L1Zg = JHUXSZHa3L1Zgerr = 0
+JHUXSZHa1a3   = \
+JHUXSZHa2a3   = \
+JHUXSZHa3L1   = \
+JHUXSZHa3L1Zg = 0
 
-JHUXSWHa1a3   = JHUXSWHa1a3err   = \
-JHUXSWHa2a3   = JHUXSWHa2a3err   = \
-JHUXSWHa3L1   = JHUXSWHa3L1err   = \
-JHUXSWHa3L1Zg = JHUXSWHa3L1Zgerr = 0
+JHUXSWHa1a3   = \
+JHUXSWHa2a3   = \
+JHUXSWHa3L1   = \
+JHUXSWHa3L1Zg = 0
 
-JHUXSHJJa2a3 = JHUXSHJJa2a3err = 0
+JHUXSHJJa2a3 = 0
 
-JHUXSttHkappakappatilde = JHUXSttHkappakappatildeerr = 0
+JHUXSttHkappakappatilde = 0
 
 g2VH = sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHa2 + JHUXSWHa2))
 g4VH = sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHa3 + JHUXSWHa3))
@@ -350,9 +349,9 @@ ghzgs1prime2VH_reco = -ghzgs1prime2VH_gen
 
 #defined this way, just make sure
 for _ in """
-  JHUXSggH2L2la1a3 JHUXSggH2L2la2a3 JHUXSggH2L2la3L1 JHUXSggH2L2la1a3_photoncut JHUXSggH2L2la2a3_photoncut JHUXSggH2L2la3L1_photoncut JHUXSggH2L2la3L1Zg
-  JHUXSVBFa1a3 JHUXSVBFa2a3 JHUXSVBFa3L1 JHUXSVBFa1a3_photoncut JHUXSVBFa2a3_photoncut JHUXSVBFa3L1_photoncut JHUXSVBFa3L1Zg
-  JHUXSZHa1a3 JHUXSZHa2a3 JHUXSZHa3L1 JHUXSZHa1a3_photoncut JHUXSZHa2a3_photoncut JHUXSZHa3L1_photoncut JHUXSZHa3L1Zg
+  JHUXSggH2L2la1a3 JHUXSggH2L2la2a3 JHUXSggH2L2la3L1 JHUXSggH2L2la3L1Zg
+  JHUXSVBFa1a3 JHUXSVBFa2a3 JHUXSVBFa3L1 JHUXSVBFa3L1Zg
+  JHUXSZHa1a3 JHUXSZHa2a3 JHUXSZHa3L1 JHUXSZHa3L1Zg
   JHUXSWHa1a3 JHUXSWHa2a3 JHUXSWHa3L1
   JHUXSHJJa2a3 JHUXSttHkappakappatilde
   JHUXSWHL1Zg JHUXSWHa1L1Zg JHUXSWHa2L1Zg JHUXSWHa3L1Zg JHUXSWHL1L1Zg
