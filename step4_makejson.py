@@ -1,9 +1,6 @@
 #!/usr/bin/env python
-from helperstuff import constants
-from helperstuff.samples import Sample
 from helperstuff.templates import TemplatesFile, templatesfiles
 import json
-import os
 
 def makejson(*args):
     templatesfile = TemplatesFile(*args)

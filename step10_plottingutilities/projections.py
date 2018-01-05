@@ -13,7 +13,7 @@ import sys
 
 import ROOT
 
-from helperstuff import config, constants, run1info, stylefunctions as style
+from helperstuff import config, run1info, stylefunctions as style
 from helperstuff.combinehelpers import getdatatree2015, getrate, getrate2015, gettemplate, Luminosity
 from helperstuff.enums import analyses, Analysis, categories, Category, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic
 from helperstuff.samples import ReweightingSample, samplewithfai

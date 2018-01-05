@@ -5,7 +5,6 @@ import os
 import re
 
 import config
-import constants
 from utilities import generatortolist_condition, tfiles
 
 class EnumItem(object):

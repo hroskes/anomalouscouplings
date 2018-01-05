@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-import constants
 import inspect
 import re
 
@@ -29,7 +28,7 @@ class MakeSystematics(object):
         lookfor = "def "+self.name+"("
         replacewith = "def {UpDn}("
         if lookfor not in sourcelines[0]:
-            raise ValueError("function '{}' is defined with weird syntax:\n\n{}\n\nWant to have '{}' in the first line and '{}' in the second".format(self.name, "".join(sourcelines), lookfordecorator, lookfor))
+            raise ValueError("function '{}' is defined with weird syntax:\n\n{}\n\nWant to have '{}' in the first line".format(self.name, "".join(sourcelines), lookfor))
         sourcelines[0] = sourcelines[0].replace(lookfor, replacewith)
         code = "".join(sourcelines) #they already have '\n' in them
 
