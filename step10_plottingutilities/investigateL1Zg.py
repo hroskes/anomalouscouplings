@@ -22,7 +22,7 @@ def investigateL1Zg():
 
   discriminants = TemplatesFile("2e2mu", "ggh", "fL1Zg", production, "Untagged").discriminants
 
-  ggHSM     = TemplateFromFile(   0, "ggH", "Untagged", "fullrange", "rescalemixtures", production, "2e2mu", "fL1Zg", "0+_photoncut")
+  ggHSM     = TemplateFromFile(   0, "ggH", "Untagged", "fullrange", "rescalemixtures", production, "2e2mu", "fL1Zg", "0+")
   ggHBSM    = TemplateFromFile(   0, "ggH", "Untagged", "fullrange", "rescalemixtures", production, "2e2mu", "fL1Zg", "L1Zg")
   ggHint    = IntTemplateFromFile(0, "ggH", "Untagged", "fullrange", "rescalemixtures", production, "2e2mu", "fL1Zg", "g11gi1")
 

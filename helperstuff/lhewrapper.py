@@ -571,9 +571,9 @@ class LHEWrapper(TreeWrapperMELA):
     print self.event
 
   allsamples = [
-    ReweightingSample("ggH", "0+_photoncut"),
-    ReweightingSample("ggH", "L1_photoncut"),
-    ReweightingSample("ggH", "fL10.5_photoncut"),
+    ReweightingSample("ggH", "0+"),
+    ReweightingSample("ggH", "L1"),
+    ReweightingSample("ggH", "fL10.5"),
     ReweightingSample("ggH", "L1Zg"),
     ReweightingSample("ggH", "fL1Zg0.5"),
     ReweightingSample("ggH", "fL10.5fL1Zg0.5"),

@@ -24,7 +24,7 @@ c = ROOT.TCanvas()
 hs = {}
 
 productionmode = "ggH"
-hypothesis = "0+_photoncut"
+hypothesis = "0+"
 reweightto = None
 bins = min = max = bins2 = min2 = max2 = channel = category = analysis = hname = cut = None
 enrich = False
@@ -48,7 +48,7 @@ def mutualinformation(h2):
 #discriminants = "D_L1_decay", "D_L1int_decay", "D_L1Zg_decay", "D_L1Zgint_decay", "D_L1L1Zg_decay", "D_L1L1Zgint_decay"
 discriminants = "D_eL_decay", "D_eLint_decay", "D_eR_decay", "D_eRint_decay", "D_eLeR_decay", "D_eLeRint_decay"
 
-hypotheses = ("0+_photoncut", "fL10.5_photoncut", "L1Zg"), ("SM", "fL1=0.5", "L1Zg")
+hypotheses = ("0+", "fL10.5", "L1Zg"), ("SM", "fL1=0.5", "L1Zg")
 
 print "{:20} {:20}      {:>6} {:>6} {:>6}".format("", "", *hypotheses[1])
 
@@ -97,7 +97,7 @@ for (i1, disc), (i2, disc2) in itertools.product(enumerate(discriminants), enume
 for disc in discriminants:
   hstack = ROOT.THStack("hstack{}".format(disc), "")
   l = ROOT.TLegend(.6, .7, .9, .9)
-  for color, (hypothesis, title) in enumerate(zip(("0+_photoncut", "fL10.5_photoncut", "L1Zg"), ("SM", "f_{#Lambda1}=0.5", "#Lambda_{1}^{Z#gamma}")), start=1):
+  for color, (hypothesis, title) in enumerate(zip(("0+", "fL10.5", "L1Zg"), ("SM", "f_{#Lambda1}=0.5", "#Lambda_{1}^{Z#gamma}")), start=1):
     hname = "h{}{}".format(disc, hypothesis)
 
     h = plotfromtree(

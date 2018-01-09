@@ -2,7 +2,7 @@
 from enums import Analysis, MultiEnum, ProductionMode
 
 class WeightsHelper(MultiEnum):
-    enums = (ProductionMode)
+    enums = (ProductionMode,)
 
     def __init__(self, *args, **kwargs):
         from samples import SampleBase

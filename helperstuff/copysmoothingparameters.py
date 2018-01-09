@@ -8,7 +8,7 @@ from templates import *
 templates = []
 
 for channel in channels:
-  for hypothesis in "0+_photoncut", "L1_photoncut", "L1Zg", "fL10.5_photoncut", "fL1Zg0.5", "fL10.5fL1Zg0.5":
+  for hypothesis in "0+", "L1", "L1Zg", "fL10.5", "fL1Zg0.5", "fL10.5fL1Zg0.5":
     templates.append(Template(channel, "ggH", "fL1fL1Zg", "170825", "Untagged", hypothesis))
   templates.append(Template(channel, "qqZZ", "fL1fL1Zg", "170825", "Untagged"))
   templates.append(Template(channel, "ggZZ", "fL1fL1Zg", "170825", "Untagged"))

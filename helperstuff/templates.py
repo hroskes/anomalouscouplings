@@ -91,9 +91,9 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL1Zg-0.5")]
+                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL1Zg-0.5")]
             if self.analysis.isfL1fL1Zg:
-                reweightingsamples = [ReweightingSample("ggH", "0+_photoncut"), ReweightingSample("ggH", "L1_photoncut"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL10.5_photoncut"), ReweightingSample("ggH", "fL1Zg0.5"), ReweightingSample("ggH", "fL10.5fL1Zg0.5")]
+                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL10.5"), ReweightingSample("ggH", "fL1Zg0.5"), ReweightingSample("ggH", "fL10.5fL1Zg0.5")]
 
         elif self.templategroup == "vbf":
             if self.analysis in ("fa3", "fa3_STXS"):
@@ -103,7 +103,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1"), ReweightingSample("VBF", "fL1prod0.5"), ReweightingSample("VBF", "fL1dec0.5"), ReweightingSample("VBF", "fL1proddec0.5")]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("VBF", "0+_photoncut"), ReweightingSample("VBF", "L1Zg"), ReweightingSample("VBF", "fL1Zgprod0.5"), ReweightingSample("VBF", "fL1Zgdec0.5"), ReweightingSample("VBF", "fL1Zgproddec-0.5")]
+                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1Zg"), ReweightingSample("VBF", "fL1Zgprod0.5"), ReweightingSample("VBF", "fL1Zgdec0.5"), ReweightingSample("VBF", "fL1Zgproddec-0.5")]
 
         elif self.templategroup == "zh":
             if self.analysis in ("fa3", "fa3_STXS"):
@@ -113,7 +113,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "L1"), ReweightingSample("ZH", "fL1prod0.5"), ReweightingSample("ZH", "fL1dec0.5"), ReweightingSample("ZH", "fL1proddec0.5")]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("ZH", "0+_photoncut"), ReweightingSample("ZH", "L1Zg"), ReweightingSample("ZH", "fL1Zgprod0.5"), ReweightingSample("ZH", "fL1Zgdec0.5"), ReweightingSample("ZH", "fL1Zgproddec-0.5")]
+                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "L1Zg"), ReweightingSample("ZH", "fL1Zgprod0.5"), ReweightingSample("ZH", "fL1Zgdec0.5"), ReweightingSample("ZH", "fL1Zgproddec-0.5")]
 
         elif self.templategroup == "wh":
             if self.analysis in ("fa3", "fa3_STXS"):
@@ -123,7 +123,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "L1"), ReweightingSample("WH", "fL1prod0.5"), ReweightingSample("WH", "fL1dec0.5"), ReweightingSample("WH", "fL1proddec0.5")]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("WH", "0+_photoncut"), ReweightingSample("WH", "L1Zg"), ReweightingSample("WH", "fL1Zgprod0.5"), ReweightingSample("WH", "fL1Zgdec0.5"), ReweightingSample("WH", "fL1Zgproddec-0.5")]
+                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "L1Zg"), ReweightingSample("WH", "fL1Zgprod0.5"), ReweightingSample("WH", "fL1Zgdec0.5"), ReweightingSample("WH", "fL1Zgproddec-0.5")]
 
         elif self.templategroup == "tth":
             if self.analysis in ("fa3", "fa3_STXS"):
@@ -133,7 +133,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "L1", "Hff0+"), ReweightingSample("ttH", "fL10.5", "Hff0+")]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("ttH", "0+_photoncut", "Hff0+"), ReweightingSample("ttH", "L1Zg", "Hff0+"), ReweightingSample("ttH", "fL1Zg-0.5", "Hff0+")]
+                reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "L1Zg", "Hff0+"), ReweightingSample("ttH", "fL1Zg-0.5", "Hff0+")]
 
         return reweightingsamples
 
@@ -556,13 +556,13 @@ class Template(TemplateBase, MultiEnum):
 
     def templatename(self, final=True):
         if self.productionmode in ("ggH", "ttH"):
-            if self.hypothesis in ("0+", "0+_photoncut"):
+            if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
             elif self.hypothesis == "0-":
                 name = "template0MinusAdapSmooth"
             elif self.hypothesis == "a2":
                 name = "template0HPlusAdapSmooth"
-            elif self.hypothesis in ("L1", "L1_photoncut"):
+            elif self.hypothesis == "L1":
                 name = "template0L1AdapSmooth"
             elif self.hypothesis == "L1Zg":
                 name = "template0L1ZgAdapSmooth"
@@ -570,7 +570,7 @@ class Template(TemplateBase, MultiEnum):
                 name = "templateMixa1a2AdapSmooth"
             elif self.hypothesis == "fa30.5":
                 name = "templateMixa1a3AdapSmooth"
-            elif self.hypothesis in ("fL10.5", "fL10.5_photoncut"):
+            elif self.hypothesis == "fL10.5":
                 name = "templateMixa1L1AdapSmooth"
             elif self.hypothesis == "fL1Zg0.5":
                 name = "templateMixa1L1ZgAdapSmooth"
@@ -585,7 +585,7 @@ class Template(TemplateBase, MultiEnum):
             elif self.hypothesis == "fL10.5fL1Zg0.5":
                 name = "templateMixL1L1ZgAdapSmooth"
         elif self.productionmode in ("VBF", "ZH", "WH"):
-            if self.hypothesis in ("0+", "0+_photoncut"):
+            if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
             elif self.hypothesis == "0-":
                 name = "template0MinusAdapSmooth"

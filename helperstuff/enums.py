@@ -171,7 +171,7 @@ def _mixturepermutations_4d(enumitemsalreadythere):
       continue
 
     allofthem += 1
-    enumitemnames_modified = [_ if "L1Zg" in _ else _+"_photoncut" for _ in enumitemnames]
+    enumitemnames_modified = [_ for _ in enumitemnames]
     enumitemnames_modified += [re.sub("(?<!prod)dec", "", _) for _ in enumitemnames_modified]
     if any(_ in enumitemsalreadythere for _ in enumitemnames_modified):
       continue
@@ -184,7 +184,6 @@ class Hypothesis(MyEnum):
     enumname = "hypothesis"
     enumitems = (
                  EnumItem("0+", "SM", "scalar"),
-                 EnumItem("0+_photoncut", "SM_photoncut"),
                  EnumItem("a2", "0h+"),
                  EnumItem("0-", "a3", "PS", "pseudoscalar"),
                  EnumItem("L1", "Lambda1"),
@@ -214,34 +213,20 @@ class Hypothesis(MyEnum):
                  EnumItem("fL1proddec-0.5"),
                  EnumItem("fL1Zgproddec-0.5"),
                  EnumItem("fa2dec-0.9", "fa2-0.9"),
-                 EnumItem("0-_photoncut", "a3_photoncut"),
-                 EnumItem("a2_photoncut", "0h+_photoncut"),
-                 EnumItem("L1_photoncut"),
                 )
     enumitems = enumitems + _mixturepermutations_4d(enumitems)
 
     @property
     def ispure(self):
-        return self in ("0+", "0+_photoncut", "0-", "0h+", "L1", "L1_photoncut", "L1Zg")
+        return self in ("0+", "0-", "0h+", "L1", "L1Zg")
     @property
     def couplingname(self):
-        if self in ("0+", "0+_photoncut"): return "g1"
+        if self == "0+": return "g1"
         if self == "a2": return "g2"
         if self == "0-": return "g4"
-        if self in ("L1", "L1_photoncut"): return "g1prime2"
+        if self == "L1": return "g1prime2"
         if self == "L1Zg": return "ghzgs1prime2"
         assert False, self
-    @property
-    def photoncut(self):
-        if self in ("0+_photoncut", "L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5", "L1Zg"): return True
-        if self in ("0+", "0-", "a2", "L1"): return False
-        for b in "prod", "dec", "proddec":
-            for c in "+-":
-                for a in "fa2", "fa3", "fL1":
-                    if self == "{}{}{}0.5".format(a, b, c): return False
-                if self == "{}{}{}0.5".format("fL1Zg", b, c): return True
-        if self == "fa2dec-0.9": return False
-        assert False
 
 class HffHypothesis(MyEnum):
     enumname = "hffhypothesis"
@@ -333,7 +318,7 @@ class ProductionMode(MyEnum):
                 return Hypothesis.items(lambda x: x == "0+")
         else:
             if self == "ggH":
-                return Hypothesis.items(lambda x: x in ("0+_photoncut", "L1_photoncut", "L1Zg", "fL10.5_photoncut", "fL1Zg0.5", "fL10.5fL1Zg0.5"))
+                return Hypothesis.items(lambda x: x in ("0+", "L1", "L1Zg", "fL10.5", "fL1Zg0.5", "fL10.5fL1Zg0.5"))
         assert False, self
     @generatortolist_condition(lambda x: tfiles[x.withdiscriminantsfile()].candTree.GetEntries())
     def allsamples(self, production):
@@ -584,11 +569,11 @@ class Analysis(MyEnum):
         if self == "fL1":
             return Hypothesis("0+"), Hypothesis("L1")
         if self == "fL1Zg":
-            return Hypothesis("0+_photoncut"), Hypothesis("L1Zg")
+            return Hypothesis("0+"), Hypothesis("L1Zg")
         if self.isfL1fL1Zg:
-            return Hypothesis("0+_photoncut"), Hypothesis("L1_photoncut"), Hypothesis("L1Zg")
+            return Hypothesis("0+"), Hypothesis("L1"), Hypothesis("L1Zg")
         if self == "fa3fa2fL1fL1Zg":
-            return Hypothesis("0+_photoncut"), Hypothesis("a3_photoncut"), Hypothesis("a2_photoncut"), Hypothesis("L1_photoncut"), Hypothesis("L1Zg")
+            return Hypothesis("0+"), Hypothesis("a3"), Hypothesis("a2"), Hypothesis("L1"), Hypothesis("L1Zg")
         assert False, self
     @property
     def mixdecayhypothesis(self):
@@ -620,11 +605,6 @@ class Analysis(MyEnum):
         if self == "fL1Zg": return "0P_or_L1Zg"
         if self.isdecayonly: return "nocategorization"
         if self == "fa3fa2fL1fL1Zg": return "0P_or_0M_or_a2_or_L1_or_L1Zg"
-        assert False
-    @property
-    def photoncut(self):
-        if self == "fL1Zg": return True
-        if self in ("fa2", "fa3", "fa3_STXS", "fL1"): return False
         assert False
     @property
     def dimensions(self):
@@ -827,7 +807,7 @@ flavors = Flavor.items()
 hypotheses = Hypothesis.items()
 decayonlyhypotheses = Hypothesis.items(lambda x: all("prod" not in name for name in x.names))
 prodonlyhypotheses = Hypothesis.items(lambda x: all("dec" not in name for name in x.names))
-fL1fL1Zghypotheses = Hypothesis.items(lambda x: x in ("L1_photoncut", "fL10.5_photoncut", "fL10.5fL1Zg0.5"))
+fL1fL1Zghypotheses = Hypothesis.items(lambda x: x in ("fL10.5fL1Zg0.5",))
 proddechypotheses = Hypothesis.items(lambda x: x not in fL1fL1Zghypotheses)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()

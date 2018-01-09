@@ -42,7 +42,7 @@ if os.path.exists(os.path.join(config.plotsbasedir, "categorization")):
   tmpdir = utilities.mkdtemp()
   for a in analyses:
     for h in a.purehypotheses:
-      h = str(h).replace("0+", "0plus").replace("0-", "0minus").replace("_photoncut", "")
+      h = str(h).replace("0+", "0plus").replace("0-", "0minus")
       for p in "2jet", "HadWH", "HadZH":
         if a == "fL1Zg" and p == "HadWH" and h == "L1Zg": continue
         filename = os.path.join(config.plotsbasedir, "categorization", str(a), "D_{}_{}.pdf".format(p, h))
