@@ -60,35 +60,35 @@ aR = 0.46238
 e = 0.8431872482432357  # = cL_lep = cR_lep from mod_Parameters
 L1 = 10000.
 
-g2decay = 1.663195
-g4decay = 2.55502
-g1prime2decay_gen = -12110.20   #for the sample
-g1prime2decay_reco = 12110.20   #for discriminants
+g2decay = 1.65684
+g4decay = 2.55052
+g1prime2decay_gen = -12100.42   #for the sample
+g1prime2decay_reco = -g1prime2decay_gen   #for discriminants
 ghzgs1prime2decay_gen = -7613.351302119843
-ghzgs1prime2decay_reco = 7613.351302119843
+ghzgs1prime2decay_reco = -ghzgs1prime2decay_gen
 eLdecay = sqrt(7.2310297E+00 / 1.4347981E+01)
 eRdecay = sqrt(7.2310297E+00 / 1.3952140E+00)
 
-g2VBF = 0.271965
-g4VBF = 0.297979
-g1prime2VBF_gen = -2158.21
-g1prime2VBF_reco = 2158.21
+g2VBF = 0.27196538
+g4VBF = 0.297979018705
+g1prime2VBF_gen = -2158.21307286
+g1prime2VBF_reco = -g1prime2VBF_gen
 ghzgs1prime2VBF_gen = -4091.051456694223
-ghzgs1prime2VBF_reco = 4091.051456694223
+ghzgs1prime2VBF_reco = -ghzgs1prime2VBF_gen
 
 g2ZH = 0.112481
 g4ZH = 0.144057
 g1prime2ZH_gen = -517.788
 g1prime2ZH_reco = 517.788
 ghzgs1prime2ZH_gen = -642.9534550379002
-ghzgs1prime2ZH_reco = 642.9534550379002
+ghzgs1prime2ZH_reco = -ghzgs1prime2ZH_gen
 
 g2WH = 0.0998956
 g4WH = 0.1236136
 g1prime2WH_gen = -525.274
-g1prime2WH_reco = 525.274
+g1prime2WH_reco = -g1prime2WH_gen
 ghzgs1prime2WH_gen = -1
-ghzgs1prime2WH_reco = 1
+ghzgs1prime2WH_reco = -ghzgs1prime2WH_gen
 
 ghg4HJJ = 1.0062
 kappa_tilde_ttH = 1.6
