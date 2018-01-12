@@ -496,6 +496,63 @@ class TreeWrapperBase(Iterator):
             return 4
         return 5
 
+#########################
+#4 coupling discriminant#
+#########################
+    def D_4couplings_general(self, *variables_and_bins):
+        """
+        variables_and_bins is something like:
+          ("D_0minus_decay", [.333, .667]), ("D_CP_decay", [0]), ...
+          do not include either endpoint in the binning.
+        """
+        result = 0
+        for variablename, binning in self.variables_and_bins():
+          variable = getattr(self, variablename)()
+          for bin in binning:
+            if variable > bin:
+              result += 1
+          result *= len(bins)+1
+
+    #here we specify the discriminants and bin separations.
+    #Note D_CP is NOT here.  It's used as the third dimension
+    #so that mirroring is easier.
+    binning_4couplings_decay = (
+      ("D_0minus_decay", [.333, .667]),
+      ("D_0hplus_decay", [.5, .7]),
+      ("D_L1_decay", [.55, .8]),
+      ("D_L1Zg_decay", [.4, .55]),
+      ("D_int_decay", [.8]),
+    )
+
+    binning_4couplings_VBFdecay = (
+      ("D_0minus_VBFdecay", [.1, .9]),
+      ("D_0hplus_VBFdecay", [.1, .9]),
+      ("D_L1_VBFdecay", [.1, .9]),
+      ("D_L1Zg_VBFdecay", [.1, .8]),
+      ("D_int_VBF", [0]),
+    )
+    binning_4couplings_VBFdecay_JECUp = tuple((name+"_JECUp", bins) for name, bins in binning_4couplings_VBFdecay)
+    binning_4couplings_VBFdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_VBFdecay)
+
+    binning_4couplings_HadVHdecay = (
+      ("D_0minus_HadVHdecay", [.2, .8]),
+      ("D_0hplus_HadVHdecay", [.333, .667]),
+      ("D_L1_HadVHdecay", [.333, .667]),
+      ("D_L1Zg_HadVHdecay", [.1, .9]),
+      ("D_int_HadVH", [-.6]),
+    )
+    binning_4couplings_HadVHdecay_JECUp = tuple((name+"_JECUp", bins) for name, bins in binning_4couplings_HadVHdecay)
+    binning_4couplings_HadVHdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_HadVHdecay)
+
+    def D_4couplings_decay(self):
+      return self.D_4couplings_general(*self.binning_4couplings_decay)
+    @MakeJECSystematics
+    def D_4couplings_VBFdecay(self):
+      return self.D_4couplings_general(*self.binning_4couplings_VBFdecay)
+    @MakeJECSystematics
+    def D_4couplings_HadVHdecay(self):
+      return self.D_4couplings_general(*self.binning_4couplings_HadVHdecay)
+
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
