@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from itertools import combinations
+
 from enums import Analysis, MultiEnum, ProductionMode
 
 class WeightsHelper(MultiEnum):
@@ -8,7 +10,7 @@ class WeightsHelper(MultiEnum):
         from samples import SampleBase
         if len(args) == 1 and not kwargs and isinstance(args[0], SampleBase):
             sample = args[0]
-            args = sample.productionmode
+            args = sample.productionmode,
         return super(WeightsHelper, self).__init__(*args, **kwargs)
 
     def check(self, *args):
@@ -49,6 +51,11 @@ class WeightsHelper(MultiEnum):
       assert False
 
     @staticmethod
+    def couplingname(coupling):
+      if coupling == "ghza1_prime2": return "ghzgs1prime2"
+      return coupling.replace("ghv", "g").replace("ghw", "g").replace("ghz", "z").replace("_", "")
+
+    @staticmethod
     def couplingvalue(coupling):
       if "_prime2" in coupling: return "1E4"
       return "1"
@@ -62,7 +69,7 @@ class WeightsHelper(MultiEnum):
             "coupling": coupling,
             "couplingvalue": couplingvalue,
           }
-        yield coupling, couplingvalue, self.weight(prodordec).format(**dct)
+        yield self.couplingname(coupling), couplingvalue, self.weight(prodordec).format(**dct)
       else:
         for (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2) in combinations(self.couplingsandweights(prodordec, False), 2):
           dct = {
@@ -72,17 +79,15 @@ class WeightsHelper(MultiEnum):
             "coupling2": coupling2,
             "coupling2value": coupling2value,
           }
-          yield (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2), self.weightmix(prodordec).format(**dct)
+          yield (self.couplingname(coupling1), coupling1value, weight1), (self.couplingname(coupling2), coupling2value, weight2), self.weightmix(prodordec).format(**dct)
 
-    @property
-    def weight(self):
+    def weight(self, prodordec):
         result = "p_Gen_{weightstring}_SIG_"
         if prodordec == "dec" and self.productionmode=="ggH":
             result += "ghg2_1_"
         result += "{coupling}_{couplingvalue}_JHUGen"
         return result
-    @property
-    def weightmix(self):
+    def weightmix(self, prodordec):
         result = "p_Gen_{weightstring}_SIG_"
         if prodordec == "dec" and self.productionmode=="ggH":
             result += "ghg2_1_"

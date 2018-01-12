@@ -362,12 +362,12 @@ class SampleBase(object):
         for prodordec in "prod", "dec":
           if weightshelper.useproddec(prodordec):
             counter = Counter()
-            for couplingname, couplingvalue, weight in weightshelper.couplingsandweights(prodordec, int=False):
+            for couplingname, couplingvalue, weight in weightshelper.couplingsandweights(prodordec, mix=False):
               coupling = getattr(self, couplingname) / float(couplingvalue)
               counter[weight] += coupling**2
             for ((coupling1name, coupling1value, weight1),
                  (coupling2name, coupling2value, weight2),
-                 weightint) in weightshelper.couplingsandweights(prodordec, int=True):
+                 weightint) in weightshelper.couplingsandweights(prodordec, mix=True):
               coupling1 = getattr(self, coupling1name ) / float(coupling1value)
               coupling2 = getattr(self, coupling2name ) / float(coupling2value)
               counter[weight1]   -= coupling1*coupling2
