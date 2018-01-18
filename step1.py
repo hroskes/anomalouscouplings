@@ -14,13 +14,6 @@ if os.path.realpath(os.getcwd()) != os.path.realpath(helperstuff.config.reposito
 print """Yes, config is set up!
 """
 
-print """Checking that python dependencies are installed..."""
-try:
-  import uncertainties
-except ImportError:
-  print "Installing uncertainties..."
-  subprocess.check_call(["pip", "install", "--user", "uncertainties"])
-
 print "Initiating git submodules..."
 subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
@@ -44,6 +37,9 @@ else:
 
     print """CMSSW area is set up"""
 
+print
+print """Compiling CMSSW..."""
+
 with utilities.cd("CMSSW_7_6_5/src"):
     subprocess.check_call(["scram", "b", "-j", "10"])
 
@@ -57,7 +53,7 @@ else:
     shutil.move("CMSSW_8_0_20/.gitignore", os.path.join(tmpdir, ".gitignore"))
     try:
         os.rmdir("CMSSW_8_0_20")
-        os.environ["SCRAM_ARCH"] = "slc6_amd64_gcc493"
+        os.environ["SCRAM_ARCH"] = "slc6_amd64_gcc530"
         subprocess.check_call(["scram", "p", "CMSSW", "CMSSW_8_0_20"])
     finally:
         if os.path.exists("CMSSW_8_0_20/src"):
@@ -68,13 +64,11 @@ else:
     print """CMSSW area is set up"""
     print
 
-print """Compiling CMSSW..."""
-
 print
 print "Compiling MELA..."
 
 with utilities.cd("CMSSW_8_0_20/src/ZZMatrixElement"):
-    subprocess.check_call(["./setup.sh", "-j", "10"])
+    os.system("eval $(scram ru -sh) && ./setup.sh -j 10")
 
 print "Compiling TemplateBuilder..."
 
@@ -89,3 +83,11 @@ with open("TemplateBuilder/.gitignore", "w") as f:
 
 print "Compiling NIS_summary..."
 subprocess.check_call("cd CMSSW_7_6_5 && eval $(scram ru -sh) && cd ../step10_plottingutilities/NIS_summary && make", shell=True)
+
+print """Checking that python dependencies are installed..."""
+try:
+  import uncertainties
+except ImportError:
+  print "Installing uncertainties..."
+  with cd("CMSSW_7_6_5"):
+    subprocess.check_call("eval $(scram ru -sh) && pip install --user uncertainties", shell=True)

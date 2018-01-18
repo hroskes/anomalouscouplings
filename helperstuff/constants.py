@@ -50,6 +50,11 @@ This is what you get when you import these constants and use them
 in python.
 """
 
+try:
+  import uncertainties
+except ImportError:
+  raise ImportError("Need to install uncertainties!  Try running step1.")
+
 from uncertainties import ufloat
 from uncertainties.umath import sqrt
 
