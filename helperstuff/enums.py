@@ -646,6 +646,7 @@ class Production(MyEnum):
                  EnumItem("170222"),
                  EnumItem("170712"),
                  EnumItem("170825"),
+                 EnumItem("171217"),
                  EnumItem("LHE_170509"),
                 )
     def __cmp__(self, other):
