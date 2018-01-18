@@ -68,7 +68,7 @@ print
 print "Compiling MELA..."
 
 with utilities.cd("CMSSW_8_0_20/src/ZZMatrixElement"):
-    os.system("eval $(scram ru -sh) && ./setup.sh -j 10")
+    subprocess.check_call("eval $(scram ru -sh) && ./setup.sh -j 10", shell=True)
 
 print "Compiling TemplateBuilder..."
 
@@ -89,5 +89,5 @@ try:
   import uncertainties
 except ImportError:
   print "Installing uncertainties..."
-  with cd("CMSSW_7_6_5"):
+  with utilities.cd("CMSSW_7_6_5"):
     subprocess.check_call("eval $(scram ru -sh) && pip install --user uncertainties", shell=True)
