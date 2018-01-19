@@ -345,11 +345,13 @@ JHUXSHJJa2a3 = 0
 
 JHUXSttHkappakappatilde = 0
 
-g2VH = sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHa2 + JHUXSWHa2))
-g4VH = sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHa3 + JHUXSWHa3))
-g1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHL1 + JHUXSWHL1))
+normalize_WH_to_ZH = SMXSWH / JHUXSWHa1 / (SMXSZH / JHUXSZHa1)
+
+g2VH = sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa2 + JHUXSWHa2*normalize_WH_to_ZH))
+g4VH = sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa3 + JHUXSWHa3*normalize_WH_to_ZH))
+g1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHL1 + JHUXSWHL1*normalize_WH_to_ZH))
 g1prime2VH_reco = -g1prime2VH_gen
-ghzgs1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1) / (JHUXSZHL1Zg + JHUXSWHL1Zg))
+ghzgs1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHL1Zg + JHUXSWHL1Zg*normalize_WH_to_ZH))
 ghzgs1prime2VH_reco = -ghzgs1prime2VH_gen
 
 #defined this way, just make sure

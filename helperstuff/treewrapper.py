@@ -162,19 +162,19 @@ class TreeWrapperBase(Iterator):
 
     def D_HadWH_0plus(self):
         if self.notdijet: return -999
-        return self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g2_HJJ*self.cconstantforDHadWH)
+        return (self.M2g1_HadWH / (self.M2g1_HadWH + self.M2g2_HJJ*self.cconstantforDHadWH)).nominal_value
     def D_HadWH_0minus(self):
         if self.notdijet: return -999
-        return self.M2g4_HadWH*constants.g4WH**2 / (self.M2g4_HadWH*constants.g4WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+        return (self.M2g4_HadWH*constants.g4WH**2 / (self.M2g4_HadWH*constants.g4WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)).nominal_value
     def D_HadWH_a2(self):
         if self.notdijet: return -999
-        return self.M2g2_HadWH*constants.g2WH**2 / (self.M2g2_HadWH*constants.g2WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+        return (self.M2g2_HadWH*constants.g2WH**2 / (self.M2g2_HadWH*constants.g2WH**2 + self.M2g2_HJJ*self.cconstantforDHadWH)).nominal_value
     def D_HadWH_L1(self):
         if self.notdijet: return -999
-        return self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 / (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+        return (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 / (self.M2g1prime2_HadWH*constants.g1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)).nominal_value
     def D_HadWH_L1Zg(self):
         if self.notdijet: return -999
-        return self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 / (self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)
+        return (self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 / (self.M2ghzgs1prime2_HadWH*constants.ghzgs1prime2WH_reco**2 + self.M2g2_HJJ*self.cconstantforDHadWH)).nominal_value
 
     def D_HadZH_0plus(self):
         if self.notdijet: return -999
@@ -286,7 +286,7 @@ class TreeWrapperBase(Iterator):
                  +
                    (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_CP_HadVH(self):
         if self.notdijet: return -999
@@ -298,7 +298,7 @@ class TreeWrapperBase(Iterator):
                  +
                    (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_0hplus_HadVH(self):
         if self.notdijet: return -999
@@ -310,7 +310,7 @@ class TreeWrapperBase(Iterator):
                  +
                    (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_int_HadVH(self):
         if self.notdijet: return -999
@@ -322,7 +322,7 @@ class TreeWrapperBase(Iterator):
                  +
                    (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_L1_HadVH(self):
         if self.notdijet: return -999
@@ -334,7 +334,7 @@ class TreeWrapperBase(Iterator):
                  +
                    (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_L1int_HadVH(self):
         if self.notdijet: return -999
@@ -346,7 +346,7 @@ class TreeWrapperBase(Iterator):
                  +
                    (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_L1Zg_HadVH(self):
         if self.notdijet: return -999
@@ -359,7 +359,7 @@ class TreeWrapperBase(Iterator):
                    (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)
                           * constants.ghzgs1prime2VH_reco**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_L1Zgint_HadVH(self):
         if self.notdijet: return -999
@@ -371,7 +371,7 @@ class TreeWrapperBase(Iterator):
                  +
                    (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco**2
                  )
-               )
+               ).nominal_value
 
 ############################################
 #VBFdecay anomalous couplings discriminants#
@@ -410,7 +410,7 @@ class TreeWrapperBase(Iterator):
                  + (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
                         *self.M2g4_decay*constants.g4decay**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_0hplus_HadVHdecay(self):
         if self.notdijet: return -999
@@ -423,7 +423,7 @@ class TreeWrapperBase(Iterator):
                  + (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                         *self.M2g2_decay*constants.g2decay**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_L1_HadVHdecay(self):
         if self.notdijet: return -999
@@ -436,7 +436,7 @@ class TreeWrapperBase(Iterator):
                  + (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH_reco**2
                         *self.M2g1prime2_decay*constants.g1prime2decay_reco**2
                  )
-               )
+               ).nominal_value
     @MakeJECSystematics
     def D_L1Zg_HadVHdecay(self):
         if self.notdijet: return -999
@@ -450,7 +450,7 @@ class TreeWrapperBase(Iterator):
                  + (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH_reco**2
                         *self.M2ghzgs1prime2_decay*constants.ghzgs1prime2decay_reco**2
                  )
-               )
+               ).nominal_value
 
 ######
 #STXS#
@@ -653,7 +653,7 @@ class TreeWrapper(TreeWrapperBase):
         #self.cconstantforDbkgkin = CJLSTscripts.getDbkgkinConstant(self.flavor, self.ZZMass)
         self.cconstantforDbkg = CJLSTscripts.getDbkgConstant(self.flavor, self.ZZMass)
         self.cconstantforD2jet = CJLSTscripts.getDVBF2jetsConstant_shiftWP(self.ZZMass, config.useQGTagging, 0.5)
-        self.cconstantforDHadWH = CJLSTscripts.getDWHhConstant_shiftWP(self.ZZMass, config.useQGTagging, 0.5)
+        self.cconstantforDHadWH = CJLSTscripts.getDWHhConstant_shiftWP(self.ZZMass, config.useQGTagging, 0.5) * constants.normalize_WH_to_ZH
         self.cconstantforDHadZH = CJLSTscripts.getDZHhConstant_shiftWP(self.ZZMass, config.useQGTagging, 0.5)
 
         self.p_m4l_BKG = t.p_m4l_BKG
@@ -704,15 +704,25 @@ class TreeWrapper(TreeWrapperBase):
         self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECNominal        = self.M2ghzgs1prime2_HadZH         = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECNominal / 1e4**2
         self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_HadZH       = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECNominal / 1e4
 
-        self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal               = self.M2g1_HadWH                   = t.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal               = self.M2g4_HadWH                   = t.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal        = self.M2g1g4_HadWH                 = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal               = self.M2g2_HadWH                   = t.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal        = self.M2g1g2_HadWH                 = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal
-        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECNominal         = self.M2g1prime2_HadWH             = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECNominal / 1e4**2
-        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECNominal  = self.M2g1g1prime2_HadWH           = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECNominal / 1e4
-        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECNominal        = self.M2ghzgs1prime2_HadWH         = 0
-        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_HadWH       = 0
+        self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal                                                   = t.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal                                                   = t.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal                                            = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal                                                   = t.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal                                            = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal
+        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECNominal                                             = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECNominal / 1e4**2
+        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECNominal                                      = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECNominal                                            = 0
+        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECNominal                                     = 0
+
+        self.M2g1_HadWH                   = self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal               * constants.normalize_WH_to_ZH
+        self.M2g4_HadWH                   = self.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal               * constants.normalize_WH_to_ZH
+        self.M2g1g4_HadWH                 = self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECNominal        * constants.normalize_WH_to_ZH
+        self.M2g2_HadWH                   = self.p_HadWH_SIG_ghw2_1_JHUGen_JECNominal               * constants.normalize_WH_to_ZH
+        self.M2g1g2_HadWH                 = self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECNominal        * constants.normalize_WH_to_ZH
+        self.M2g1prime2_HadWH             = self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECNominal         * constants.normalize_WH_to_ZH
+        self.M2g1g1prime2_HadWH           = self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECNominal  * constants.normalize_WH_to_ZH
+        self.M2ghzgs1prime2_HadWH         = self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECNominal        * constants.normalize_WH_to_ZH
+        self.M2g1ghzgs1prime2_HadWH       = self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECNominal * constants.normalize_WH_to_ZH
 
         self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal                                                    = t.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal
         self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal                                                    = t.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal
@@ -743,15 +753,25 @@ class TreeWrapper(TreeWrapperBase):
         self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECUp             = self.M2ghzgs1prime2_HadZH_JECUp   = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECUp / 1e4**2
         self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECUp      = self.M2g1ghzgs1prime2_HadZH_JECUp = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECUp / 1e4
 
-        self.p_HadWH_SIG_ghw1_1_JHUGen_JECUp                    = self.M2g1_HadWH_JECUp             = t.p_HadWH_SIG_ghw1_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw4_1_JHUGen_JECUp                    = self.M2g4_HadWH_JECUp             = t.p_HadWH_SIG_ghw4_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp             = self.M2g1g4_HadWH_JECUp           = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw2_1_JHUGen_JECUp                    = self.M2g2_HadWH_JECUp             = t.p_HadWH_SIG_ghw2_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp             = self.M2g1g2_HadWH_JECUp           = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp
-        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECUp              = self.M2g1prime2_HadWH_JECUp       = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECUp / 1e4**2
-        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECUp       = self.M2g1g1prime2_HadWH_JECUp     = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECUp / 1e4
-        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECUp             = self.M2ghzgs1prime2_HadWH_JECUp   = 0
-        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECUp      = self.M2g1ghzgs1prime2_HadWH_JECUp = 0
+        self.p_HadWH_SIG_ghw1_1_JHUGen_JECUp                                                        = t.p_HadWH_SIG_ghw1_1_JHUGen_JECUp     
+        self.p_HadWH_SIG_ghw4_1_JHUGen_JECUp                                                        = t.p_HadWH_SIG_ghw4_1_JHUGen_JECUp     
+        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp                                                 = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp     
+        self.p_HadWH_SIG_ghw2_1_JHUGen_JECUp                                                        = t.p_HadWH_SIG_ghw2_1_JHUGen_JECUp     
+        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp                                                 = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp     
+        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECUp                                                  = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECUp      / 1e4**2
+        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECUp                                           = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECUp      / 1e4
+        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECUp                                                 = 0
+        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECUp                                          = 0
+
+        self.M2g1_HadWH_JECUp             = self.p_HadWH_SIG_ghw1_1_JHUGen_JECUp                    * constants.normalize_WH_to_ZH
+        self.M2g4_HadWH_JECUp             = self.p_HadWH_SIG_ghw4_1_JHUGen_JECUp                    * constants.normalize_WH_to_ZH
+        self.M2g1g4_HadWH_JECUp           = self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECUp             * constants.normalize_WH_to_ZH
+        self.M2g2_HadWH_JECUp             = self.p_HadWH_SIG_ghw2_1_JHUGen_JECUp                    * constants.normalize_WH_to_ZH
+        self.M2g1g2_HadWH_JECUp           = self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECUp             * constants.normalize_WH_to_ZH
+        self.M2g1prime2_HadWH_JECUp       = self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECUp              * constants.normalize_WH_to_ZH
+        self.M2g1g1prime2_HadWH_JECUp     = self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECUp       * constants.normalize_WH_to_ZH
+        self.M2ghzgs1prime2_HadWH_JECUp   = self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECUp             * constants.normalize_WH_to_ZH
+        self.M2g1ghzgs1prime2_HadWH_JECUp = self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECUp      * constants.normalize_WH_to_ZH
 
         self.p_JQCD_SIG_ghg2_1_JHUGen_JECUp                                                         = t.p_JQCD_SIG_ghg2_1_JHUGen_JECUp
         self.p_JVBF_SIG_ghv1_1_JHUGen_JECUp                                                         = t.p_JVBF_SIG_ghv1_1_JHUGen_JECUp
@@ -782,15 +802,25 @@ class TreeWrapper(TreeWrapperBase):
         self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECDn             = self.M2ghzgs1prime2_HadZH_JECDn   = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECDn / 1e4**2
         self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn      = self.M2g1ghzgs1prime2_HadZH_JECDn = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECDn / 1e4
 
-        self.p_HadWH_SIG_ghw1_1_JHUGen_JECDn                    = self.M2g1_HadWH_JECDn             = t.p_HadWH_SIG_ghw1_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw4_1_JHUGen_JECDn                    = self.M2g4_HadWH_JECDn             = t.p_HadWH_SIG_ghw4_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn             = self.M2g1g4_HadWH_JECDn           = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw2_1_JHUGen_JECDn                    = self.M2g2_HadWH_JECDn             = t.p_HadWH_SIG_ghw2_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn             = self.M2g1g2_HadWH_JECDn           = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn
-        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECDn              = self.M2g1prime2_HadWH_JECDn       = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECDn / 1e4**2
-        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECDn       = self.M2g1g1prime2_HadWH_JECDn     = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECDn / 1e4
-        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECDn             = self.M2ghzgs1prime2_HadWH_JECDn   = 0
-        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn      = self.M2g1ghzgs1prime2_HadWH_JECDn = 0
+        self.p_HadWH_SIG_ghw1_1_JHUGen_JECDn                                                        = t.p_HadWH_SIG_ghw1_1_JHUGen_JECDn     
+        self.p_HadWH_SIG_ghw4_1_JHUGen_JECDn                                                        = t.p_HadWH_SIG_ghw4_1_JHUGen_JECDn     
+        self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn                                                 = t.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn     
+        self.p_HadWH_SIG_ghw2_1_JHUGen_JECDn                                                        = t.p_HadWH_SIG_ghw2_1_JHUGen_JECDn     
+        self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn                                                 = t.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn     
+        self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECDn                                                  = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECDn      / 1e4**2
+        self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECDn                                           = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECDn      / 1e4
+        self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECDn                                                 = 0
+        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn                                          = 0
+
+        self.M2g1_HadWH_JECDn             = self.p_HadWH_SIG_ghw1_1_JHUGen_JECDn                    * constants.normalize_WH_to_ZH
+        self.M2g4_HadWH_JECDn             = self.p_HadWH_SIG_ghw4_1_JHUGen_JECDn                    * constants.normalize_WH_to_ZH
+        self.M2g1g4_HadWH_JECDn           = self.p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_JECDn             * constants.normalize_WH_to_ZH
+        self.M2g2_HadWH_JECDn             = self.p_HadWH_SIG_ghw2_1_JHUGen_JECDn                    * constants.normalize_WH_to_ZH
+        self.M2g1g2_HadWH_JECDn           = self.p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_JECDn             * constants.normalize_WH_to_ZH
+        self.M2g1prime2_HadWH_JECDn       = self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECDn              * constants.normalize_WH_to_ZH
+        self.M2g1g1prime2_HadWH_JECDn     = self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECDn       * constants.normalize_WH_to_ZH
+        self.M2ghzgs1prime2_HadWH_JECDn   = self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECDn             * constants.normalize_WH_to_ZH
+        self.M2g1ghzgs1prime2_HadWH_JECDn = self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn      * constants.normalize_WH_to_ZH
 
         self.p_JQCD_SIG_ghg2_1_JHUGen_JECDn                                                         = t.p_JQCD_SIG_ghg2_1_JHUGen_JECDn
         self.p_JVBF_SIG_ghv1_1_JHUGen_JECDn                                                         = t.p_JVBF_SIG_ghv1_1_JHUGen_JECDn

@@ -14,8 +14,8 @@ import os
 #========================
 #inputs
 productionmode = "ggH"
-disc           = "D_L1_decay"
-reweightto     = None
+disc           = "D_0minus_decay"
+reweightto     = ReweightingSample(productionmode, "fa30.5fa20.5")
 bins           = None
 min            = None
 max            = None
@@ -31,7 +31,7 @@ analysis       = None
 
 cut            = None
 
-disc2          = "D_L1L1Zg_decay"
+disc2          = None
 bins2          = None
 min2           = None
 max2           = None

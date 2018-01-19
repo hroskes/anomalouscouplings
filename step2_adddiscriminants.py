@@ -63,7 +63,11 @@ def adddiscriminants(*args):
         try:
             for entry in treewrapper:
                 for discriminant in discriminants:
-                    discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
+                    try:
+                        discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
+                    except:
+                        print "Error while calculating", discriminant
+                        raise
                 newt.Fill()
         except:
             treewrapper.Show()

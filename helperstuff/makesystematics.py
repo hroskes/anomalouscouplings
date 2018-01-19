@@ -2,6 +2,11 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import inspect
 import re
 
+#The following imports are not needed for any of the code written explicitly here,
+#but when the functions are defined with exec, it looks for the global variables
+#in this module, rather than where the original function was defined.
+import constants
+
 class MakeSystematics(object):
     __metaclass__ = ABCMeta
     def __init__(self, function):

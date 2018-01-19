@@ -91,7 +91,7 @@ class BaseSingleCategorization(BaseCategorization):
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=1, ghg4=0).JHUxsec / ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=self.ghg2, ghg4=self.ghg4).JHUxsec
-        return self.get_p_function(terms, multiplier, self.pHJJ_function_name)
+        return self.get_p_function(terms, multiplier.nominal_value, self.pHJJ_function_name)
 
     def get_pVBF_function(self):
         terms = {
@@ -111,7 +111,7 @@ class BaseSingleCategorization(BaseCategorization):
                      /
                       (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      )
-        return self.get_p_function(terms, multiplier, self.pVBF_function_name)
+        return self.get_p_function(terms, multiplier.nominal_value, self.pVBF_function_name)
 
     def get_pZH_function(self):
         terms = {
@@ -131,7 +131,7 @@ class BaseSingleCategorization(BaseCategorization):
                      /
                       (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      )
-        return self.get_p_function(terms, multiplier, self.pZH_function_name)
+        return self.get_p_function(terms, multiplier.nominal_value, self.pZH_function_name)
 
     def get_pWH_function(self):
         if self.ghzgs1prime2 != 0:
@@ -153,7 +153,7 @@ class BaseSingleCategorization(BaseCategorization):
                      /
                       (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0).xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2).xsec)
                      )
-        return self.get_p_function(terms, multiplier, self.pWH_function_name)
+        return self.get_p_function(terms, multiplier.nominal_value, self.pWH_function_name)
 
     def get_category_function(self_categorization):
         pHJJ_function_name = self_categorization.pHJJ_function_name
