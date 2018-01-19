@@ -14,8 +14,8 @@ import os
 #========================
 #inputs
 productionmode = "ggH"
-disc           = "D_0minus_decay"
-reweightto     = ReweightingSample(productionmode, "fa30.5fa20.5")
+disc           = "D_4couplings_decay"
+reweightto     = None
 bins           = None
 min            = None
 max            = None
@@ -37,6 +37,9 @@ min2           = None
 max2           = None
 
 skip           = []
+
+logscale       = True
+setminimum     = None
 #========================
 
 hstack = ROOT.THStack()
@@ -46,6 +49,7 @@ cache = []
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
 c = ROOT.TCanvas()
+if logscale: c.SetLogy()
 hs = {}
 
 productionmode = ProductionMode(productionmode)
@@ -95,7 +99,8 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       hname=hname,
       cut=cut
     )
-    h.SetMinimum(0)
+    if not logscale: h.SetMinimum(0)
+    if minimum: h.SetMinimum(minimum)
 
     hstack.Add(h)
     cache.append(h)
