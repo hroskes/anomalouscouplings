@@ -625,7 +625,7 @@ class TreeWrapper(TreeWrapperBase):
                 raise StopIteration
             if i % self.printevery == 0 or i == len(self):
                 print i, "/", len(self)
-                #raise StopIteration
+                raise StopIteration
 
             if self.isdata:
                 self.overallEventWeight = 1
@@ -1070,6 +1070,7 @@ class TreeWrapper(TreeWrapperBase):
         self.toaddtotree_float = []
         self.toaddtotree_int = [
             "D_STXS_stage0",
+            "D_4couplings_decay",
         ]
 
         proddiscriminants = [
@@ -1089,6 +1090,8 @@ class TreeWrapper(TreeWrapperBase):
         STXSdiscriminants = [
             "D_STXS_ggH_stage1",
             "D_STXS_VBF_stage1",
+            "D_4couplings_VBFdecay",
+            "D_4couplings_HadVHdecay",
         ]
 
         for JEC in "", "_JECUp", "_JECDn":
@@ -1225,7 +1228,7 @@ class TreeWrapper(TreeWrapperBase):
                 weightarray.append(function(entry))
             if i % self.printevery == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
-                #break
+                break
 
         self.cutoffs = {}
         self.nevents2L2l = {}
@@ -1288,46 +1291,127 @@ class TreeWrapper(TreeWrapperBase):
         ReweightingSample("ggH", "0-"),
         ReweightingSample("ggH", "L1"),
         ReweightingSample("ggH", "L1Zg"),
+
         ReweightingSample("ggH", "fa20.5"),
         ReweightingSample("ggH", "fa30.5"),
         ReweightingSample("ggH", "fL10.5"),
         ReweightingSample("ggH", "fL1Zg0.5"),
+
         ReweightingSample("ggH", "fa2-0.5"),
         ReweightingSample("ggH", "fa3-0.5"),
         ReweightingSample("ggH", "fL1-0.5"),
         ReweightingSample("ggH", "fL1Zg-0.5"),
         ReweightingSample("ggH", "fa2dec-0.9"),
+
+        ReweightingSample("ggH", "fa30.5fa20.5"),
+        ReweightingSample("ggH", "fa20.5fL10.5"),
+        ReweightingSample("ggH", "fa20.5fL1Zg0.5"),
+
+        ReweightingSample("ggH", "fa30.5fL10.5"),
+        ReweightingSample("ggH", "fa30.5fL1Zg0.5"),
+
         ReweightingSample("ggH", "fL10.5fL1Zg0.5"),
+
         ReweightingSample("VBF", "0+"),
         ReweightingSample("VBF", "a2"),
         ReweightingSample("VBF", "0-"),
         ReweightingSample("VBF", "L1"),
         ReweightingSample("VBF", "L1Zg"),
+
         ReweightingSample("VBF", "fa2dec0.5"),
         ReweightingSample("VBF", "fa3dec0.5"),
         ReweightingSample("VBF", "fL1dec0.5"),
         ReweightingSample("VBF", "fL1Zgdec0.5"),
+
         ReweightingSample("VBF", "fa2prod0.5"),
         ReweightingSample("VBF", "fa3prod0.5"),
         ReweightingSample("VBF", "fL1prod0.5"),
         ReweightingSample("VBF", "fL1Zgprod0.5"),
+
         ReweightingSample("VBF", "fa2proddec0.5"),
         ReweightingSample("VBF", "fa3proddec0.5"),
         ReweightingSample("VBF", "fL1proddec0.5"),
         ReweightingSample("VBF", "fL1Zgproddec0.5"),
+
         ReweightingSample("VBF", "fa2dec-0.5"),
         ReweightingSample("VBF", "fa3dec-0.5"),
         ReweightingSample("VBF", "fL1dec-0.5"),
         ReweightingSample("VBF", "fL1Zgdec-0.5"),
+        ReweightingSample("VBF", "fa2dec-0.9"),
+
         ReweightingSample("VBF", "fa2prod-0.5"),
         ReweightingSample("VBF", "fa3prod-0.5"),
         ReweightingSample("VBF", "fL1prod-0.5"),
         ReweightingSample("VBF", "fL1Zgprod-0.5"),
+
         ReweightingSample("VBF", "fa2proddec-0.5"),
         ReweightingSample("VBF", "fa3proddec-0.5"),
         ReweightingSample("VBF", "fL1proddec-0.5"),
         ReweightingSample("VBF", "fL1Zgproddec-0.5"),
-        ReweightingSample("VBF", "fa2dec-0.9"),
+
+        ReweightingSample("VBF", "fa3dec0.5fa2dec0.5"),
+        ReweightingSample("VBF", "fa3dec0.5fL1dec0.5"),
+        ReweightingSample("VBF", "fa3dec0.5fL1Zgdec0.5"),
+        ReweightingSample("VBF", "fa2dec0.5fL1dec0.5"),
+        ReweightingSample("VBF", "fa2dec0.5fL1Zgdec0.5"),
+        ReweightingSample("VBF", "fL1dec0.5fL1Zgdec0.5"),
+
+        ReweightingSample("VBF", "fa3prod0.5fa2prod0.5"),
+        ReweightingSample("VBF", "fa3prod0.5fL1prod0.5"),
+        ReweightingSample("VBF", "fa3prod0.5fL1Zgprod0.5"),
+        ReweightingSample("VBF", "fa2prod0.5fL1prod0.5"),
+        ReweightingSample("VBF", "fa2prod0.5fL1Zgprod0.5"),
+        ReweightingSample("VBF", "fL1prod0.5fL1Zgprod0.5"),
+
+        ReweightingSample("VBF", "fa3proddec0.5fa2proddec-0.5"),
+        ReweightingSample("VBF", "fa3proddec0.5fL1proddec-0.5"),
+        ReweightingSample("VBF", "fa3proddec0.5fL1Zgproddec-0.5"),
+        ReweightingSample("VBF", "fa2proddec0.5fL1proddec-0.5"),
+        ReweightingSample("VBF", "fa2proddec0.5fL1Zgproddec-0.5"),
+        ReweightingSample("VBF", "fL1proddec0.5fL1Zgproddec-0.5"),
+
+        ReweightingSample("VBF", "fa3dec0.33fa2dec0.33"),
+        ReweightingSample("VBF", "fa3dec0.33fL1dec0.33"),
+        ReweightingSample("VBF", "fa3dec0.33fL1Zgdec0.33"),
+        ReweightingSample("VBF", "fa2dec0.33fL1dec0.33"),
+        ReweightingSample("VBF", "fa2dec0.33fL1Zgdec0.33"),
+        ReweightingSample("VBF", "fL1dec0.33fL1Zgdec0.33"),
+
+        ReweightingSample("VBF", "fa3prod0.33fa2prod0.33"),
+        ReweightingSample("VBF", "fa3prod0.33fL1prod0.33"),
+        ReweightingSample("VBF", "fa3prod0.33fL1Zgprod0.33"),
+        ReweightingSample("VBF", "fa2prod0.33fL1prod0.33"),
+        ReweightingSample("VBF", "fa2prod0.33fL1Zgprod0.33"),
+        ReweightingSample("VBF", "fL1prod0.33fL1Zgprod0.33"),
+
+        ReweightingSample("VBF", "fa3proddec0.33fa2proddec-0.33"),
+        ReweightingSample("VBF", "fa3proddec0.33fL1proddec-0.33"),
+        ReweightingSample("VBF", "fa3proddec0.33fL1Zgproddec-0.33"),
+        ReweightingSample("VBF", "fa2proddec0.33fL1proddec-0.33"),
+        ReweightingSample("VBF", "fa2proddec0.33fL1Zgproddec-0.33"),
+        ReweightingSample("VBF", "fL1proddec0.33fL1Zgproddec-0.33"),
+
+        ReweightingSample("VBF", "fa3dec0.33fa2dec0.33fL1dec0.33"),
+        ReweightingSample("VBF", "fa3dec0.33fa2dec0.33fL1Zgdec0.33"),
+        ReweightingSample("VBF", "fa3dec0.33fL1dec0.33fL1Zgdec0.33"),
+        ReweightingSample("VBF", "fa2dec0.33fL1dec0.33fL1Zgdec0.33"),
+
+        ReweightingSample("VBF", "fa3prod0.33fa2prod0.33fL1prod0.33"),
+        ReweightingSample("VBF", "fa3prod0.33fa2prod0.33fL1Zgprod0.33"),
+        ReweightingSample("VBF", "fa3prod0.33fL1prod0.33fL1Zgprod0.33"),
+        ReweightingSample("VBF", "fa2prod0.33fL1prod0.33fL1Zgprod0.33"),
+
+        ReweightingSample("VBF", "fa3proddec0.33fa2proddec0.33fL1proddec-0.33"),
+        ReweightingSample("VBF", "fa3proddec0.33fa2proddec0.33fL1Zgproddec-0.33"),
+        ReweightingSample("VBF", "fa3proddec0.33fL1proddec0.33fL1Zgproddec-0.33"),
+        ReweightingSample("VBF", "fa2proddec0.33fL1proddec0.33fL1Zgproddec-0.33"),
+
+        ReweightingSample("VBF", "fa3proddec0.25fa2proddec0.25fL1proddec0.25"),
+        ReweightingSample("VBF", "fa3proddec0.25fa2proddec0.25fL1Zgproddec0.25"),
+        ReweightingSample("VBF", "fa3proddec0.25fL1proddec0.25fL1Zgproddec0.25"),
+        ReweightingSample("VBF", "fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25"),
+        ReweightingSample("VBF", "fa3proddec0.25fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25"),
+
         ReweightingSample("ZH", "0+"),
         ReweightingSample("ZH", "a2"),
         ReweightingSample("ZH", "0-"),

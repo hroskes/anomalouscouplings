@@ -670,6 +670,11 @@ class Production(MyEnum):
         if self == "170825":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/170825_Heshy_fL1fL1Zg"
+        if self == "171217":
+            if config.host == "lxplus":
+                return "root://lxcms03//data3/Higgs/171217"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/171217"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -688,20 +693,21 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222", "170825"): return 35.8671
+        if self in ("170203", "170222", "170825", "171217"): return 35.8671
         if self == "LHE_170509": return 300
         assert False
     def __int__(self):
         return int(str(self))
     @property
     def year(self):
-        if "170222" <= self:
+        if "171217" <= self:
             return 2016
         assert False
     @property
     def productionforsmoothingparameters(self):
         if self == "170222": return type(self)("170203")
         if self == "170825": return type(self)("170203")
+        if self == "171217": return type(self)("170203")
         return self
     @property
     def LHE(self):
@@ -806,10 +812,9 @@ btagsystematics = BTagSystematic.items()
 pythiasystematics = PythiaSystematic.items()
 flavors = Flavor.items()
 hypotheses = Hypothesis.items()
-decayonlyhypotheses = Hypothesis.items(lambda x: all("prod" not in name for name in x.names))
+decayonlyhypotheses = Hypothesis.items(lambda x: all("prod" not in name and "0.33" not in name and "0.25" not in name for name in x.names))
 prodonlyhypotheses = Hypothesis.items(lambda x: all("dec" not in name for name in x.names))
-fL1fL1Zghypotheses = Hypothesis.items(lambda x: x in ("fL10.5fL1Zg0.5",))
-proddechypotheses = Hypothesis.items(lambda x: x not in fL1fL1Zghypotheses)
+proddechypotheses = Hypothesis.items(lambda x: True)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()

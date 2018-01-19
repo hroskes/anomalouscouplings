@@ -39,11 +39,11 @@ class WeightsHelper(MultiEnum):
     def allcouplings(self, prodordec):
       if not self.useproddec(prodordec): return None
       if prodordec == "dec" or prodordec == "prod" and self.productionmode == "ZH":
-        return "ghz1", "ghz1_prime2", "ghz2", "ghz4", "ghza1_prime2"
+        return "ghz1", "ghz1prime2", "ghz2", "ghz4", "ghza1prime2"
       if prodordec == "prod" and self.productionmode == "VBF":
-        return "ghv1", "ghv1_prime2", "ghv2", "ghv4", "ghza1_prime2"
+        return "ghv1", "ghv1prime2", "ghv2", "ghv4", "ghza1prime2"
       if prodordec == "prod" and self.productionmode == "WH":
-        return "ghw1", "ghw1_prime2", "ghw2", "ghw4"
+        return "ghw1", "ghw1prime2", "ghw2", "ghw4"
       if prodordec == "prod" and self.productionmode == "ttH":
         return "kappa", "kappa_tilde"
       if prodordec == "prod" and self.productionmode == "HJJ":
@@ -52,12 +52,12 @@ class WeightsHelper(MultiEnum):
 
     @staticmethod
     def couplingname(coupling):
-      if coupling == "ghza1_prime2": return "ghzgs1prime2"
+      if coupling == "ghza1prime2": return "ghzgs1prime2"
       return coupling.replace("ghv", "g").replace("ghw", "g").replace("ghz", "z").replace("_", "")
 
     @staticmethod
     def couplingvalue(coupling):
-      if "_prime2" in coupling: return "1E4"
+      if "prime2" in coupling: return "1E4"
       return "1"
 
     def couplingsandweights(self, prodordec, mix):

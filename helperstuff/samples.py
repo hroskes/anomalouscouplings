@@ -54,19 +54,19 @@ class SampleBase(object):
         from constants import JHUXSggH2L2la1, JHUXSggH2L2la2, JHUXSggH2L2la3, JHUXSggH2L2lL1, JHUXSggH2L2lL1Zg,\
                               JHUXSggH2L2la1a2, JHUXSggH2L2la1a3, JHUXSggH2L2la1L1, JHUXSggH2L2la1L1Zg,        \
                               JHUXSggH2L2la2a3, JHUXSggH2L2la2L1, JHUXSggH2L2la2L1Zg, JHUXSggH2L2la3L1,        \
-                              JHUXSggH2L2la3L1Zg, JHUXSggH2L2la3L1L1Zg,                                        \
+                              JHUXSggH2L2la3L1Zg, JHUXSggH2L2lL1L1Zg,                                          \
                               JHUXSVBFa1, JHUXSVBFa2, JHUXSVBFa3, JHUXSVBFL1, JHUXSVBFL1Zg,                    \
                               JHUXSVBFa1a2, JHUXSVBFa1a3, JHUXSVBFa1L1, JHUXSVBFa1L1Zg,                        \
                               JHUXSVBFa2a3, JHUXSVBFa2L1, JHUXSVBFa2L1Zg, JHUXSVBFa3L1,                        \
-                              JHUXSVBFa3L1Zg, JHUXSVBFa3L1L1Zg,                                                \
+                              JHUXSVBFa3L1Zg, JHUXSVBFL1L1Zg,                                                  \
                               JHUXSZHa1, JHUXSZHa2, JHUXSZHa3, JHUXSZHL1, JHUXSZHL1Zg,                         \
                               JHUXSZHa1a2, JHUXSZHa1a3, JHUXSZHa1L1, JHUXSZHa1L1Zg,                            \
                               JHUXSZHa2a3, JHUXSZHa2L1, JHUXSZHa2L1Zg, JHUXSZHa3L1,                            \
-                              JHUXSZHa3L1Zg, JHUXSZHa3L1L1Zg,                                                  \
+                              JHUXSZHa3L1Zg, JHUXSZHL1L1Zg,                                                    \
                               JHUXSWHa1, JHUXSWHa2, JHUXSWHa3, JHUXSWHL1, JHUXSWHL1Zg,                         \
                               JHUXSWHa1a2, JHUXSWHa1a3, JHUXSWHa1L1, JHUXSWHa1L1Zg,                            \
                               JHUXSWHa2a3, JHUXSWHa2L1, JHUXSWHa2L1Zg, JHUXSWHa3L1,                            \
-                              JHUXSWHa3L1Zg, JHUXSWHa3L1L1Zg,                                                  \
+                              JHUXSWHa3L1Zg, JHUXSWHL1L1Zg,                                                    \
                               JHUXSHJJa2, JHUXSHJJa3, JHUXSHJJa2a3,                                            \
                               JHUXSttHkappa, JHUXSttHkappatilde, JHUXSttHkappakappatilde
         if self.productionmode == "ggH":
@@ -82,12 +82,12 @@ class SampleBase(object):
                     + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
                     + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3a2 * self.g4*self.g2
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSggH2L2la2a3 * self.g4*self.g2
                     + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
                     + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
@@ -105,12 +105,12 @@ class SampleBase(object):
                     + JHUXSVBFa1L1 * self.g1*self.g1prime2
                     + JHUXSVBFa1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSVBFa3a2 * self.g4*self.g2
-                    + JHUXSVBFa3L1 * self.g4*self.g1prime2
-                    + JHUXSVBFa3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSVBFa2a3 * self.g4*self.g2
                     + JHUXSVBFa2L1 * self.g2*self.g1prime2
                     + JHUXSVBFa2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSVBFa3L1 * self.g4*self.g1prime2
+                    + JHUXSVBFa3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSVBFL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
@@ -125,12 +125,12 @@ class SampleBase(object):
                     + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
                     + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3a2 * self.g4*self.g2
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSggH2L2la2a3 * self.g4*self.g2
                     + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
                     + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
@@ -148,12 +148,12 @@ class SampleBase(object):
                     + JHUXSZHa1L1 * self.g1*self.g1prime2
                     + JHUXSZHa1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSZHa3a2 * self.g4*self.g2
-                    + JHUXSZHa3L1 * self.g4*self.g1prime2
-                    + JHUXSZHa3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSZHa2a3 * self.g4*self.g2
                     + JHUXSZHa2L1 * self.g2*self.g1prime2
                     + JHUXSZHa2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSZHa3L1 * self.g4*self.g1prime2
+                    + JHUXSZHa3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSZHL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
@@ -168,12 +168,12 @@ class SampleBase(object):
                     + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
                     + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3a2 * self.g4*self.g2
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSggH2L2la2a3 * self.g4*self.g2
                     + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
                     + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
@@ -191,12 +191,12 @@ class SampleBase(object):
                     + JHUXSWHa1L1 * self.g1*self.g1prime2
                     + JHUXSWHa1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSWHa3a2 * self.g4*self.g2
-                    + JHUXSWHa3L1 * self.g4*self.g1prime2
-                    + JHUXSWHa3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSWHa2a3 * self.g4*self.g2
                     + JHUXSWHa2L1 * self.g2*self.g1prime2
                     + JHUXSWHa2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSWHa3L1 * self.g4*self.g1prime2
+                    + JHUXSWHa3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSWHL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
@@ -211,12 +211,12 @@ class SampleBase(object):
                     + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
                     + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3a2 * self.g4*self.g2
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSggH2L2la2a3 * self.g4*self.g2
                     + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
                     + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
@@ -237,12 +237,12 @@ class SampleBase(object):
                     + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
                     + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3a2 * self.g4*self.g2
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSggH2L2la2a3 * self.g4*self.g2
                     + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
                     + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
@@ -263,12 +263,12 @@ class SampleBase(object):
                     + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
                     + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3a2 * self.g4*self.g2
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
-
+                    + JHUXSggH2L2la2a3 * self.g4*self.g2
                     + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
                     + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
                     + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
@@ -833,7 +833,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 if self.hypothesis == "{}-0.5".format(a):
                     return ReweightingSample(self.productionmode, "{}0.5".format(a)).weightname()+"_pi"
             for a, b in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 2):
-                if "fL1Zg" in (a, b) and self.hypothesis == a+"dec0.5"+b+"dec0.5":
+                if self.hypothesis == a+"dec0.5"+b+"dec0.5":
                     return "MC_weight_ggH_{}{}".format(Analysis(a).couplingname, Analysis(b).couplingname)
 
         elif self.productionmode in ("VBF", "ZH", "WH", "WplusH", "WminusH"):
@@ -1033,184 +1033,255 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g1(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
-            if self.hypothesis in (
-                                   ["0+"]
-                                   + [
-                                      "{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1", "fL1Zg")
-                                                                  for b in ("dec", "prod", "proddec")
-                                                                  for c in ("+", "-")
-                                     ] + ["fa2dec-0.9"]
-                                  ):
-                return 1
-            if self.hypothesis in ("a2", "0-", "L1", "L1Zg", "fL10.5fL1Zg0.5"):
-                return 0
+            if self.hypothesis == "0+": return 1
+            if self.hypothesis in ("0-", "a2", "L1", "L1Zg"): return 0
+            couplings = "fa3", "fa2", "fL1", "fL1Zg"
+            for proddec in "prod", "dec", "proddec":
+                minus = "-" if proddec == "proddec" else ""
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        return 1
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis == a+proddec+"0.5"+b+proddec+minus+"0.5":
+                        return 0
+                    if self.hypothesis == a+proddec+"0.33"+b+proddec+minus+"0.33":
+                        return 1
+                for a, b, c in combinations(couplings, 3):
+                    if self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33":
+                        return 0
+                    if proddec != "proddec": continue
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25":
+                        return 1
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        return 0
+
+            if self.hypothesis == "fa2dec-0.9": return 1
+
         raise self.ValueError("g1")
 
     @property
     def g2(self):
-        if self.hypothesis in (
-                               ["0+", "0-", "L1", "L1Zg", "fL10.5fL1Zg0.5"]
-                             + ["{}{}{}0.5".format(a, b, c) for a in ("fa3", "fL1", "fL1Zg") for b in ("dec", "prod", "proddec") for c in ("+", "-")]
-                              ):
-            return 0
-        if self.hypothesis == "a2":
-            if self.productionmode in ("ggH", "ttH"):
-                return constants.g2decay
-            else:
-                return 1
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
+            if self.hypothesis == "a2": return constants.g2decay
+            if self.hypothesis in ("0+", "0-", "L1", "L1Zg"): return 0
 
-        if self.hypothesis == "fa2dec0.5":
-            return constants.g2decay
+            g2 = {"dec": constants.g2decay}
+            if self.productionmode == "VBF": g2["prod"] = constants.g2VBF
+            elif self.productionmode == "ZH":  g2["prod"] = constants.g2ZH
+            elif self.productionmode == "WH":  g2["prod"] = constants.g2WH
+            else: g2["prod"] = None
+            g2["proddec"] = None if g2["prod"] is None else sqrt(g2["prod"]*g2["dec"])
 
-        if self.hypothesis == "fa2dec-0.9":
-            return -constants.g2decay * 3
+            couplings = "fa3", "fa2", "fL1", "fL1Zg"
+            for proddec in "prod", "dec", "proddec":
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        if a == "fa2":
+                            return g2[proddec]
+                        return 0
+                    if self.hypothesis == a+proddec+"-0.5":
+                        if a == "fa2":
+                            return -g2[proddec]
+                        return 0
 
-        if self.productionmode == "VBF":
-            if self.hypothesis == "fa2prod0.5":
-                return constants.g2VBF
-            if self.hypothesis == "fa2proddec0.5":
-                return sqrt(constants.g2VBF*constants.g2decay)
+                minus = "-" if proddec == "proddec" else ""
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
+                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
+                        if a == "fa2":
+                            return g2[proddec]
+                        if b == "fa2":
+                            return float(minus+"1") * g2[proddec]
+                        return 0
+                for a, b, c in combinations(couplings, 3):
+                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
+                          or proddec=="proddec"
+                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
+                    ):
+                        if a == "fa2" or b == "fa2" or "0.25" in str(self.hypothesis) and c == "fa2":
+                            return g2[proddec]
+                        if c == "fa2":
+                            return float(minus+"1") * g2[proddec]
+                        return 0
 
-        if self.productionmode == "ZH":
-            if self.hypothesis == "fa2prod0.5":
-                return constants.g2ZH
-            if self.hypothesis == "fa2proddec0.5":
-                return sqrt(constants.g2ZH*constants.g2decay)
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        if a == "fa2" or b == "fa2" or c == "fa2" or d == "fa2":
+                            return g2[proddec]
+                        return 0
 
-        if self.productionmode == "WH":
-            if self.hypothesis == "fa2prod0.5":
-                return constants.g2WH
-            if self.hypothesis == "fa2proddec0.5":
-                return sqrt(constants.g2WH*constants.g2decay)
-
-        if self.hypothesis == "fa2prod-0.5": return -ReweightingSample(self.productionmode, "fa2prod0.5", self.hffhypothesis).g2
-        if self.hypothesis == "fa2dec-0.5": return -ReweightingSample(self.productionmode, "fa2dec0.5", self.hffhypothesis).g2
-        if self.hypothesis == "fa2proddec-0.5": return -ReweightingSample(self.productionmode, "fa2proddec0.5", self.hffhypothesis).g2
+            if self.hypothesis == "fa2dec-0.9": return -constants.g2decay * 3
 
         raise self.ValueError("g2")
 
     @property
     def g4(self):
-        if self.hypothesis in (
-                               ["0+", "a2", "L1", "L1Zg", "fL10.5fL1Zg0.5"]
-                             + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fL1", "fL1Zg") for b in ("dec", "prod", "proddec") for c in "+-"]
-                             + ["fa2dec-0.9"]
-                              ):
-            return 0
-        if self.hypothesis == "0-":
-            if self.productionmode in ("ggH", "ttH"):
-                return constants.g4decay
-            else:
-                return 1
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
+            if self.hypothesis == "0-": return constants.g2decay
+            if self.hypothesis in ("0+", "a2", "L1", "L1Zg"): return 0
 
-        if self.hypothesis == "fa3dec0.5":
-            return constants.g4decay
+            g4 = {"dec": constants.g4decay}
+            if self.productionmode == "VBF": g4["prod"] = constants.g4VBF
+            elif self.productionmode == "ZH":  g4["prod"] = constants.g4ZH
+            elif self.productionmode == "WH":  g4["prod"] = constants.g4WH
+            else: g4["prod"] = None
+            g4["proddec"] = None if g4["prod"] is None else sqrt(g4["prod"]*g4["dec"])
 
-        if self.productionmode == "VBF":
-            if self.hypothesis == "fa3prod0.5":
-                return constants.g4VBF
-            if self.hypothesis == "fa3proddec0.5":
-                return sqrt(constants.g4VBF*constants.g4decay)
+            couplings = "fa3", "fa2", "fL1", "fL1Zg"
+            for proddec in "prod", "dec", "proddec":
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        if a == "fa3":
+                            return g4[proddec]
+                        return 0
+                    if self.hypothesis == a+proddec+"-0.5":
+                        if a == "fa3":
+                            return -g4[proddec]
+                        return 0
 
-        if self.productionmode == "ZH":
-            if self.hypothesis == "fa3prod0.5":
-                return constants.g4ZH
-            if self.hypothesis == "fa3proddec0.5":
-                return sqrt(constants.g4ZH*constants.g4decay)
+                minus = "-" if proddec == "proddec" else ""
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
+                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
+                        if a == "fa3":
+                            return g4[proddec]
+                        if b == "fa3":
+                            return float(minus+"1") * g4[proddec]
+                        return 0
+                for a, b, c in combinations(couplings, 3):
+                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
+                          or proddec=="proddec"
+                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
+                    ):
+                        if a == "fa3" or b == "fa3" or "0.25" in str(self.hypothesis) and c == "fa3":
+                            return g4[proddec]
+                        if c == "fa3":
+                            return float(minus+"1") * g4[proddec]
+                        return 0
 
-        if self.productionmode == "WH":
-            if self.hypothesis == "fa3prod0.5":
-                return constants.g4WH
-            if self.hypothesis == "fa3proddec0.5":
-                return sqrt(constants.g4WH*constants.g4decay)
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        if a == "fa3" or b == "fa3" or c == "fa3" or d == "fa3":
+                            return g4[proddec]
+                        return 0
 
-        if self.hypothesis == "fa3prod-0.5": return -ReweightingSample(self.productionmode, "fa3prod0.5", self.hffhypothesis).g4
-        if self.hypothesis == "fa3dec-0.5": return -ReweightingSample(self.productionmode, "fa3dec0.5", self.hffhypothesis).g4
-        if self.hypothesis == "fa3proddec-0.5": return -ReweightingSample(self.productionmode, "fa3proddec0.5", self.hffhypothesis).g4
+            if self.hypothesis == "fa2dec-0.9": return 0
 
         raise self.ValueError("g4")
 
     @property
     def g1prime2(self):
-        if self.hypothesis in (
-                               ["0+", "a2", "0-", "L1Zg"]
-                             + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1Zg") for b in ("dec", "prod", "proddec") for c in "+-"]
-                             + ["fa2dec-0.9"]
-                              ):
-            return 0
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
+            if self.hypothesis == "L1": return constants.g1prime2decay_gen
+            if self.hypothesis in ("0+", "a2", "0-", "L1Zg"): return 0
 
-        if self.hypothesis in ("L1"):
-            if self.productionmode in ("ggH", "ttH"):
-                return constants.g1prime2decay_gen
-            else:
-                return 1
+            g1prime2 = {"dec": constants.g1prime2decay_gen}
+            if self.productionmode == "VBF": g1prime2["prod"] = constants.g1prime2VBF_gen
+            elif self.productionmode == "ZH":  g1prime2["prod"] = constants.g1prime2ZH_gen
+            elif self.productionmode == "WH":  g1prime2["prod"] = constants.g1prime2WH_gen
+            else: g1prime2["prod"] = None
+            g1prime2["proddec"] = None if g1prime2["prod"] is None else -sqrt(g1prime2["prod"]*g1prime2["dec"])
 
-        if self.hypothesis in ("fL1dec0.5", "fL10.5fL1Zg0.5"):
-            return constants.g1prime2decay_gen
+            couplings = "fa3", "fa2", "fL1", "fL1Zg"
+            for proddec in "prod", "dec", "proddec":
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        if a == "fL1":
+                            return g1prime2[proddec]
+                        return 0
+                    if self.hypothesis == a+proddec+"-0.5":
+                        if a == "fL1":
+                            return -g1prime2[proddec]
+                        return 0
 
-        if self.productionmode == "VBF":
-            if self.hypothesis == "fL1prod0.5":
-                return constants.g1prime2VBF_gen
-            if self.hypothesis == "fL1proddec0.5":
-                return -sqrt(constants.g1prime2VBF_gen*constants.g1prime2decay_gen)
+                minus = "-" if proddec == "proddec" else ""
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
+                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
+                        if a == "fL1":
+                            return g1prime2[proddec]
+                        if b == "fL1":
+                            return float(minus+"1") * g1prime2[proddec]
+                        return 0
+                for a, b, c in combinations(couplings, 3):
+                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
+                          or proddec=="proddec"
+                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
+                    ):
+                        if a == "fL1" or b == "fL1" or "0.25" in str(self.hypothesis) and c == "fL1":
+                            return g1prime2[proddec]
+                        if c == "fL1":
+                            return float(minus+"1") * g1prime2[proddec]
+                        return 0
 
-        if self.productionmode == "ZH":
-            if self.hypothesis == "fL1prod0.5":
-                return constants.g1prime2ZH_gen
-            if self.hypothesis == "fL1proddec0.5":
-                return -sqrt(constants.g1prime2ZH_gen*constants.g1prime2decay_gen)
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        if a == "fL1" or b == "fL1" or c == "fL1" or d == "fL1":
+                            return g1prime2[proddec]
+                        return 0
 
-        if self.productionmode == "WH":
-            if self.hypothesis == "fL1prod0.5":
-                return constants.g1prime2WH_gen
-            if self.hypothesis == "fL1proddec0.5":
-                return -sqrt(constants.g1prime2WH_gen*constants.g1prime2decay_gen)
-
-        if self.hypothesis == "fL1prod-0.5": return -ReweightingSample(self.productionmode, "fL1prod0.5", self.hffhypothesis).g1prime2
-        if self.hypothesis == "fL1dec-0.5": return -ReweightingSample(self.productionmode, "fL1dec0.5", self.hffhypothesis).g1prime2
-        if self.hypothesis == "fL1proddec-0.5": return -ReweightingSample(self.productionmode, "fL1proddec0.5", self.hffhypothesis).g1prime2
+            if self.hypothesis == "fa2dec-0.9": return 0
 
         raise self.ValueError("g1prime2")
 
     @property
     def ghzgs1prime2(self):
-        if self.hypothesis in (
-                               ["0+", "a2", "0-", "L1"]
-                             + ["{}{}{}0.5".format(a, b, c) for a in ("fa2", "fa3", "fL1") for b in ("dec", "prod", "proddec") for c in "+-"]
-                             + ["fa2dec-0.9"]
-                              ):
-            return 0
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
+            if self.hypothesis == "L1Zg": return constants.ghzgs1prime2decay_gen
+            if self.hypothesis in ("0+", "a2", "0-", "L1"): return 0
 
-        if self.hypothesis == "L1Zg":
-            if self.productionmode in ("ggH", "ttH"):
-                return constants.ghzgs1prime2decay_gen
-            else:
-                return 1
+            ghzgs1prime2 = {"dec": constants.ghzgs1prime2decay_gen}
+            if self.productionmode == "VBF": ghzgs1prime2["prod"] = constants.ghzgs1prime2VBF_gen
+            elif self.productionmode == "ZH":  ghzgs1prime2["prod"] = constants.ghzgs1prime2ZH_gen
+            elif self.productionmode == "WH":  ghzgs1prime2["prod"] = constants.ghzgs1prime2WH_gen
+            else: ghzgs1prime2["prod"] = None
+            ghzgs1prime2["proddec"] = None if ghzgs1prime2["prod"] is None else -sqrt(ghzgs1prime2["prod"]*ghzgs1prime2["dec"])
 
-        if self.hypothesis in ("fL1Zgdec0.5", "fL10.5fL1Zg0.5"):
-            return constants.ghzgs1prime2decay_gen
+            couplings = "fa3", "fa2", "fL1", "fL1Zg"
+            for proddec in "prod", "dec", "proddec":
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        if a == "fL1Zg":
+                            return ghzgs1prime2[proddec]
+                        return 0
+                    if self.hypothesis == a+proddec+"-0.5":
+                        if a == "fL1Zg":
+                            return -ghzgs1prime2[proddec]
+                        return 0
 
-        if self.productionmode == "VBF":
-            if self.hypothesis == "fL1Zgprod0.5":
-                return constants.ghzgs1prime2VBF_gen
-            if self.hypothesis == "fL1Zgproddec0.5":
-                return -sqrt(constants.ghzgs1prime2VBF_gen*constants.ghzgs1prime2decay_gen)
+                minus = "-" if proddec == "proddec" else ""
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
+                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
+                        if a == "fL1Zg":
+                            return ghzgs1prime2[proddec]
+                        if b == "fL1Zg":
+                            return float(minus+"1") * ghzgs1prime2[proddec]
+                        return 0
+                for a, b, c in combinations(couplings, 3):
+                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
+                          or proddec=="proddec"
+                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
+                    ):
+                        if a == "fL1Zg" or b == "fL1Zg" or "0.25" in str(self.hypothesis) and c == "fL1Zg":
+                            return ghzgs1prime2[proddec]
+                        if c == "fL1Zg":
+                            return float(minus+"1") * ghzgs1prime2[proddec]
+                        return 0
 
-        if self.productionmode == "ZH":
-            if self.hypothesis == "fL1Zgprod0.5":
-                return constants.ghzgs1prime2ZH_gen
-            if self.hypothesis == "fL1Zgproddec0.5":
-                return -sqrt(constants.ghzgs1prime2ZH_gen*constants.ghzgs1prime2decay_gen)
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        if a == "fL1Zg" or b == "fL1Zg" or c == "fL1Zg" or d == "fL1Zg":
+                            return ghzgs1prime2[proddec]
+                        return 0
 
-        if self.productionmode == "WH":        #use the ZH numbers.  Shouldn't matter whatever we use.
-            if self.hypothesis == "fL1Zgprod0.5":
-                return constants.ghzgs1prime2ZH_gen
-            if self.hypothesis == "fL1Zgproddec0.5":
-                return -sqrt(constants.ghzgs1prime2ZH_gen*constants.ghzgs1prime2decay_gen)
-
-        if self.hypothesis == "fL1Zgprod-0.5": return -ReweightingSample(self.productionmode, "fL1Zgprod0.5", self.hffhypothesis).ghzgs1prime2
-        if self.hypothesis == "fL1Zgdec-0.5": return -ReweightingSample(self.productionmode, "fL1Zgdec0.5", self.hffhypothesis).ghzgs1prime2
-        if self.hypothesis == "fL1Zgproddec-0.5": return -ReweightingSample(self.productionmode, "fL1Zgproddec0.5", self.hffhypothesis).ghzgs1prime2
+            if self.hypothesis == "fa2dec-0.9": return 0
 
         raise self.ValueError("ghzgs1prime2")
 
@@ -1602,3 +1673,12 @@ def xcheck():
 
 xcheck()
 del xcheck
+
+if __name__ == "__main__":
+    for s in (
+      ReweightingSample("ggH", "fa2dec0.5fa3dec0.5"),
+      ReweightingSample("VBF", "fa2prod0.5fa3prod0.5"),
+      ReweightingSample("ZH",  "fa2proddec-0.33fa3proddec0.33"),
+      ReweightingSample("VBF", "fa2proddec0.25fa3proddec0.25fL1proddec0.25"),
+    ):
+        print s, s.g1, s.g2, s.g4, s.g1prime2, s.ghzgs1prime2
