@@ -1041,6 +1041,8 @@ class ReweightingSample(MultiEnum, SampleBase):
                 for a in couplings:
                     if self.hypothesis == a+proddec+"0.5":
                         return 1
+                    if self.hypothesis == a+proddec+"-0.5":
+                        return 1
                 for a, b in combinations(couplings, 2):
                     if self.hypothesis == a+proddec+"0.5"+b+proddec+minus+"0.5":
                         return 0

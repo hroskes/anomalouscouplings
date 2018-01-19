@@ -98,7 +98,7 @@ class TreeWrapperBase(Iterator):
             if key.startswith("_abc"): continue
             if any(key.startswith("_{}__".format(cls.__name__)) for cls in type(self).__mro__):
                 continue
-            if key not in self.exceptions and key not in toaddtotree and (key in self.__dict__ or key in type(self).__dict__):
+            if key not in self.exceptions and key not in toaddtotree and key in getmembernames(self):
                 notanywhere.append(key)
             if key in toaddtotree and key in self.exceptions:
                 inboth.append(key)
@@ -506,12 +506,13 @@ class TreeWrapperBase(Iterator):
           do not include either endpoint in the binning.
         """
         result = 0
-        for variablename, binning in self.variables_and_bins():
+        for variablename, binning in variables_and_bins:
           variable = getattr(self, variablename)()
           for bin in binning:
             if variable > bin:
               result += 1
-          result *= len(bins)+1
+          result *= len(binning)+1
+        return result
 
     #here we specify the discriminants and bin separations.
     #Note D_CP is NOT here.  It's used as the third dimension
@@ -1020,6 +1021,15 @@ class TreeWrapper(TreeWrapperBase):
             "D_eRint_decay",
             "D_eLeR_decay",
             "D_eLeRint_decay",
+
+            "D_4couplings_general",
+            "binning_4couplings_decay",
+            "binning_4couplings_VBFdecay",
+            "binning_4couplings_VBFdecay_JECUp",
+            "binning_4couplings_VBFdecay_JECDn",
+            "binning_4couplings_HadVHdecay",
+            "binning_4couplings_HadVHdecay_JECUp",
+            "binning_4couplings_HadVHdecay_JECDn",
 
             "allsamples",
             "categorizations",

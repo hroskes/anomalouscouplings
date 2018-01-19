@@ -53,14 +53,14 @@ class WeightsHelper(MultiEnum):
     @staticmethod
     def couplingname(coupling):
       if coupling == "ghza1prime2": return "ghzgs1prime2"
-      return coupling.replace("ghv", "g").replace("ghw", "g").replace("ghz", "z").replace("_", "")
+      return coupling.replace("ghv", "g").replace("ghw", "g").replace("ghz", "g").replace("_", "")
 
     @staticmethod
     def couplingvalue(coupling):
       if "prime2" in coupling: return "1E4"
       return "1"
 
-    def couplingsandweights(self, prodordec, mix):
+    def couplingsandweights(self, prodordec, mix, __forrecursivecall=False):
       if not mix:
         for coupling in self.allcouplings(prodordec):
           couplingvalue = self.couplingvalue(coupling)
@@ -69,9 +69,11 @@ class WeightsHelper(MultiEnum):
             "coupling": coupling,
             "couplingvalue": couplingvalue,
           }
-        yield self.couplingname(coupling), couplingvalue, self.weight(prodordec).format(**dct)
+          if not __forrecursivecall: coupling = self.couplingname(coupling)
+          yield coupling, couplingvalue, self.weight(prodordec).format(**dct)
       else:
-        for (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2) in combinations(self.couplingsandweights(prodordec, False), 2):
+        assert not __forrecursivecall
+        for (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2) in combinations(self.couplingsandweights(prodordec, False, True), 2):
           dct = {
             "weightstring": self.weightstring(prodordec),
             "coupling1": coupling1,
@@ -79,7 +81,9 @@ class WeightsHelper(MultiEnum):
             "coupling2": coupling2,
             "coupling2value": coupling2value,
           }
-          yield (self.couplingname(coupling1), coupling1value, weight1), (self.couplingname(coupling2), coupling2value, weight2), self.weightmix(prodordec).format(**dct)
+          coupling1 = self.couplingname(coupling1)
+          coupling2 = self.couplingname(coupling2)
+          yield (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2), self.weightmix(prodordec).format(**dct)
 
     def weight(self, prodordec):
         result = "p_Gen_{weightstring}_SIG_"
@@ -91,7 +95,7 @@ class WeightsHelper(MultiEnum):
         result = "p_Gen_{weightstring}_SIG_"
         if prodordec == "dec" and self.productionmode=="ggH":
             result += "ghg2_1_"
-        result += "{coupling1}_{coupling1value}_{coupling2}_{coupling2value}_JHUGen".format(**self.formatdict)
+        result += "{coupling1}_{coupling1value}_{coupling2}_{coupling2value}_JHUGen"
         return result
 
 if __name__ == "__main__":
