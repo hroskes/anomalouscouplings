@@ -767,14 +767,14 @@ class ReweightingSample(MultiEnum, SampleBase):
             return [
                     ReweightingSample(self.productionmode, hypothesis, hffhypothesis)
                             for hypothesis in self.productionmode.validhypotheses
-                            for hffhypothesis in (hffhypotheses if hypothesis in ("0+", "0-", "fa30.5") else ("Hff0+",))
+                            for hffhypothesis in hffhypotheses
                             if hffhypothesis == self.hffhypothesis
                    ]
         if self.productionmode in ("ttH", "HJJ"):
             return [
                     ReweightingSample(self.productionmode, hypothesis, hffhypothesis)
                             for hypothesis in self.productionmode.validhypotheses
-                            for hffhypothesis in (hffhypotheses if hypothesis in ("0+", "0-", "fa30.5") else ("Hff0+",))
+                            for hffhypothesis in hffhypotheses
                    ]
         if self.productionmode == "ggH" and config.LHE:
             return [self]

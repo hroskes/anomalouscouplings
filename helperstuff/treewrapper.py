@@ -507,12 +507,11 @@ class TreeWrapperBase(Iterator):
         """
         result = 0
         for variablename, binning in variables_and_bins:
+          result *= len(binning)+1
           variable = getattr(self, variablename)()
           for bin in binning:
             if variable > bin:
               result += 1
-          result *= len(binning)+1
-        result /= len(binning)+1
         return result
 
     #here we specify the discriminants and bin separations.
