@@ -951,30 +951,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                     result = "MC_weight_ttH_kappatilde"
                 elif self.hffhypothesis == "fCP0.5":
                     result = "MC_weight_ttH_kappakappatilde"
-            result += "_"
-            if self.hypothesis == "0+":
-                return result + "g1"
-            elif self.hypothesis == "a2":
-                return result + "g2"
-            elif self.hypothesis == "0-":
-                return result + "g4"
-            elif self.hypothesis == "L1":
-                return result + "g1prime2"
-            elif self.hypothesis == "L1Zg":
-                return result + "ghzgs1prime2"
-            elif self.hypothesis == "fa20.5":
-                return result + "g1g2"
-            elif self.hypothesis == "fa30.5":
-                return result + "g1g4"
-            elif self.hypothesis == "fL10.5":
-                return result + "g1g1prime2"
-            elif self.hypothesis == "fL1Zg0.5":
-                return result + "g1ghzgs1prime2"
-            elif self.hypothesis == "fa2dec-0.9":
-                return result + "g1g2_minuspoint9"
-            for a in "fa3", "fa2", "fL1", "fL1Zg":
-                if self.hypothesis == "{}-0.5".format(a):
-                    return ReweightingSample(self.productionmode, self.hffhypothesis, "{}0.5".format(a)).weightname()+"_pi"
+            return result + ReweightingSample("ggH", self.hypothesis).weightname().replace("MC_weight_ggH", "")
 
         elif self.productionmode == "ggZZ":
             return "MC_weight_ggZZ"
