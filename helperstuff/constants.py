@@ -92,8 +92,16 @@ g2WH = 0.0998956
 g4WH = 0.1236136
 g1prime2WH_gen = -525.274
 g1prime2WH_reco = -g1prime2WH_gen
-ghzgs1prime2WH_gen = -1
-ghzgs1prime2WH_reco = -ghzgs1prime2WH_gen
+ghzgs1prime2WH_gen = -float("inf")
+ghzgs1prime2WH_reco = ghzgs1prime2WH_gen
+
+g2VH = 0.10430356645812816 #sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa2 + JHUXSWHa2*normalize_WH_to_ZH))
+g4VH = 0.13053750671388425 #sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa3 + JHUXSWHa3*normalize_WH_to_ZH))
+g1prime2VH_gen = -522.3034453633128 #-sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHL1 + JHUXSWHL1*normalize_WH_to_ZH))
+g1prime2VH_reco = -g1prime2VH_gen
+ghzgs1prime2VH_gen = -1027.387141119873 #-sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHL1Zg + JHUXSWHL1Zg*normalize_WH_to_ZH))
+ghzgs1prime2VH_reco = -ghzgs1prime2VH_gen
+nominal_normalize_WH_to_ZH = 0.15070409765374365
 
 ghg4HJJ = 1.0062
 kappa_tilde_ttH = 1.6
@@ -250,17 +258,19 @@ JHUXSZHL1L1Zg      = (JHUXSZHL1L1Zg      - g1prime2ZH_gen   **2 * JHUXSZHL1     
 JHUXSWHa1a2        = (JHUXSWHa1a2        -                        JHUXSWHa1      - g2WH                 **2 * JHUXSWHa2       ) / (g2WH                                         )
 JHUXSWHa1a3        = (JHUXSWHa1a3        -                        JHUXSWHa1      - g4WH                 **2 * JHUXSWHa3       ) / (g4WH                                         )
 JHUXSWHa1L1        = (JHUXSWHa1L1        -                        JHUXSWHa1      - g1prime2WH_gen       **2 * JHUXSWHL1       ) / (g1prime2WH_gen                               )
-JHUXSWHa1L1Zg      = (JHUXSWHa1L1Zg      -                        JHUXSWHa1      - ghzgs1prime2WH_gen   **2 * JHUXSWHL1Zg     ) / (ghzgs1prime2WH_gen                           )
+JHUXSWHa1L1Zg      = 0
 JHUXSWHa2a3        = (JHUXSWHa2a3        - g2WH             **2 * JHUXSWHa2      - g4WH                 **2 * JHUXSWHa3       ) / (g2WH                  * g4WH                 )
 JHUXSWHa2L1        = (JHUXSWHa2L1        - g2WH             **2 * JHUXSWHa2      - g1prime2WH_gen       **2 * JHUXSWHL1       ) / (g2WH                  * g1prime2WH_gen       )
-JHUXSWHa2L1Zg      = (JHUXSWHa2L1Zg      - g2WH             **2 * JHUXSWHa2      - ghzgs1prime2WH_gen   **2 * JHUXSWHL1Zg     ) / (g2WH                  * ghzgs1prime2WH_gen   )
+JHUXSWHa2L1Zg      = 0
 JHUXSWHa3L1        = (JHUXSWHa3L1        - g4WH             **2 * JHUXSWHa3      - g1prime2WH_gen       **2 * JHUXSWHL1       ) / (g4WH                  * g1prime2WH_gen       )
-JHUXSWHa3L1Zg      = (JHUXSWHa3L1Zg      - g4WH             **2 * JHUXSWHa3      - ghzgs1prime2WH_gen   **2 * JHUXSWHL1Zg     ) / (g4WH                  * ghzgs1prime2WH_gen   )
-JHUXSWHL1L1Zg      = (JHUXSWHL1L1Zg      - g1prime2WH_gen   **2 * JHUXSWHL1      - ghzgs1prime2WH_gen   **2 * JHUXSWHL1Zg     ) / (g1prime2WH_gen        * ghzgs1prime2WH_gen   )
+JHUXSWHa3L1Zg      = 0
+JHUXSWHL1L1Zg      = 0
 
 JHUXSHJJa2a3       = (JHUXSHJJa2a3       -                        JHUXSHJJa2     - ghg4HJJ              **2 * JHUXSHJJa3      ) / (ghg4HJJ                                      )
 
 JHUXSttHkappakappatilde = (JHUXSttHkappakappatilde - JHUXSttHkappa - kappa_tilde_ttH**2 * JHUXSttHkappatilde) / kappa_tilde_ttH
+
+normalize_WH_to_ZH = SMXSWH / JHUXSWHa1 / (SMXSZH / JHUXSZHa1)
 
 if __name__ == "__main__":
     print "All of the following should be 0:"
@@ -317,6 +327,12 @@ if __name__ == "__main__":
     JHUXSttHkkt = JHUXSttHkappakappatilde
     print "     kXS -           k~**2*    k~XS = {:%}".format((JHUXSttHk      - kt**2                    * JHUXSttHkt        ) / JHUXSttHk     )
     print "                        k~*   kk~XS = {:%}".format((                 kt                       * JHUXSttHkkt       ) / JHUXSttHk     )
+    print
+    print "  VH:"
+    print "    a1XS -           g2**2*    a2XS  = {:%}".format((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH - g2VH              **2 * (JHUXSZHa2   + JHUXSWHa2  *normalize_WH_to_ZH)) / (JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH))
+    print "    a1XS -           g4**2*    a3XS  = {:%}".format((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH - g4VH              **2 * (JHUXSZHa3   + JHUXSWHa3  *normalize_WH_to_ZH)) / (JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH))
+    print "    a1XS -     g1prime2**2*    L1XS  = {:%}".format((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH - g1prime2VH_gen    **2 * (JHUXSZHL1   + JHUXSWHL1  *normalize_WH_to_ZH)) / (JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH))
+    print "    a1XS - ghzgs1prime2**2*  L1ZgXS  = {:%}".format((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH - ghzgs1prime2VH_gen**2 * (JHUXSZHL1Zg + JHUXSWHL1Zg*normalize_WH_to_ZH)) / (JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH))
     del kt, JHUXSttHk, JHUXSttHkt, JHUXSttHkkt
 
 #Set them to exactly 0
@@ -344,15 +360,6 @@ JHUXSWHa3L1Zg = 0
 JHUXSHJJa2a3 = 0
 
 JHUXSttHkappakappatilde = 0
-
-normalize_WH_to_ZH = SMXSWH / JHUXSWHa1 / (SMXSZH / JHUXSZHa1)
-
-g2VH = sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa2 + JHUXSWHa2*normalize_WH_to_ZH))
-g4VH = sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa3 + JHUXSWHa3*normalize_WH_to_ZH))
-g1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHL1 + JHUXSWHL1*normalize_WH_to_ZH))
-g1prime2VH_reco = -g1prime2VH_gen
-ghzgs1prime2VH_gen = -sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHL1Zg + JHUXSWHL1Zg*normalize_WH_to_ZH))
-ghzgs1prime2VH_reco = -ghzgs1prime2VH_gen
 
 #defined this way, just make sure
 for _ in """

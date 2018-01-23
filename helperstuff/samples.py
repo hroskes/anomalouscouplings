@@ -50,6 +50,90 @@ class SampleBase(object):
         return ValueError("invalid sample {} in function {}".format(self, functionname))
 
     @property
+    def nominalJHUxsec(self):
+        result = constants.JHUXSggH2L2la1.nominal_value
+        if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            result *= self.g1**2
+        elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            result *= self.g2**2 / constants.g2decay**2
+        elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            result *= self.g4**2 / constants.g4decay**2
+        elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
+            result *= self.g1prime2**2 / constants.g1prime2decay_gen**2
+        elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
+            result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2decay_gen**2
+        else:
+            raise ValueError("Nominal xsec is only defined for samples with no interference")
+
+        if self.productionmode == "ggH":
+            pass
+        elif self.productionmode == "VBF":
+            result *= constants.JHUXSVBFa1.nominal_value
+            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g1**2
+            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g2**2 / constants.g2VBF**2
+            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g4**2 / constants.g4VBF**2
+            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
+                result *= self.g1prime2**2 / constants.g1prime2VBF_gen**2
+            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
+                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2VBF_gen**2
+            else:
+                raise ValueError("Nominal xsec is only defined for samples with no interference")
+        elif self.productionmode == "ZH":
+            result *= constants.JHUXSZHa1.nominal_value
+            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g1**2
+            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g2**2 / constants.g2ZH**2
+            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g4**2 / constants.g4ZH**2
+            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
+                result *= self.g1prime2**2 / constants.g1prime2ZH_gen**2
+            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
+                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2ZH_gen**2
+            else:
+                raise ValueError("Nominal xsec is only defined for samples with no interference")
+        elif self.productionmode == "WH":
+            result *= constants.JHUXSWHa1.nominal_value
+            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g1**2
+            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g2**2 / constants.g2WH**2
+            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
+                result *= self.g4**2 / constants.g4WH**2
+            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
+                result *= self.g1prime2**2 / constants.g1prime2WH_gen**2
+            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
+                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2WH_gen**2
+            else:
+                raise ValueError("Nominal xsec is only defined for samples with no interference")
+        elif self.productionmode == "HJJ":
+            result *= constants.JHUXSHJJa2.nominal_value
+            if self.ghg4 == 0:
+                result *= self.ghg2**2
+            elif self.ghg2 == 0:
+                result *= self.ghg4**2 / constants.ghg4HJJ**2
+            else:
+                raise ValueError("Nominal xsec is only defined for samples with no interference")
+        elif self.productionmode == "ttH":
+            result *= constants.JHUXSttHkappa.nominal_value
+            if self.kappa_tilde == 0:
+                result *= self.kappa**2
+            elif self.kappa == 0:
+                result *= self.kappa_tilde**2 / constants.kappa_tilde_ttH**2
+            else:
+                raise ValueError("Nominal xsec is only defined for samples with no interference")
+        else:
+            raise self.ValueError("nominalJHUxsec")
+
+        if result == 0 != self.JHUxsec:
+            raise ValueError("Something is wrong")
+
+        return result
+
+    @property
     def JHUxsec(self):
         from constants import JHUXSggH2L2la1, JHUXSggH2L2la2, JHUXSggH2L2la3, JHUXSggH2L2lL1, JHUXSggH2L2lL1Zg,\
                               JHUXSggH2L2la1a2, JHUXSggH2L2la1a3, JHUXSggH2L2la1L1, JHUXSggH2L2la1L1Zg,        \
@@ -530,9 +614,10 @@ class SampleBase(object):
             kwargs[h.couplingname] = 1
             term = 0
             for productionmode in productionmodes:
-                term += getattr(self, h.couplingname)**power * ArbitraryCouplingsSample(productionmode, **kwargs).xsec
+                term += getattr(self, h.couplingname)**power * ArbitraryCouplingsSample(productionmode, **kwargs).nominalJHUxsec \
+                         * (constants.nominal_normalize_WH_to_ZH if productionmode == "WH" else 1)
             if not withdecay:
-                term /= ArbitraryCouplingsSample("ggH", **kwargs).xsec
+                term /= ArbitraryCouplingsSample("ggH", **kwargs).nominalJHUxsec
             denominator += term
             if h == hypothesis:
                 numerator = term
@@ -1043,7 +1128,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
-            if self.hypothesis == "a2": return constants.g2decay
+            if self.hypothesis == "a2": return constants.g2decay if self.productionmode in ("ggH", "ttH", "HJJ") else 1
             if self.hypothesis in ("0+", "0-", "L1", "L1Zg"): return 0
 
             g2 = {"dec": constants.g2decay}
@@ -1099,7 +1184,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g4(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
-            if self.hypothesis == "0-": return constants.g2decay
+            if self.hypothesis == "0-": return constants.g4decay if self.productionmode in ("ggH", "ttH", "HJJ") else 1
             if self.hypothesis in ("0+", "a2", "L1", "L1Zg"): return 0
 
             g4 = {"dec": constants.g4decay}
@@ -1155,7 +1240,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
-            if self.hypothesis == "L1": return constants.g1prime2decay_gen
+            if self.hypothesis == "L1": return constants.g1prime2decay_gen if self.productionmode in ("ggH", "ttH", "HJJ") else 1
             if self.hypothesis in ("0+", "a2", "0-", "L1Zg"): return 0
 
             g1prime2 = {"dec": constants.g1prime2decay_gen}
@@ -1211,7 +1296,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def ghzgs1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
-            if self.hypothesis == "L1Zg": return constants.ghzgs1prime2decay_gen
+            if self.hypothesis == "L1Zg": return constants.ghzgs1prime2decay_gen if self.productionmode in ("ggH", "ttH", "HJJ") else 1
             if self.hypothesis in ("0+", "a2", "0-", "L1"): return 0
 
             ghzgs1prime2 = {"dec": constants.ghzgs1prime2decay_gen}
