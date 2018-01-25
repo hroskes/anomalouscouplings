@@ -199,25 +199,25 @@ class TemplatesFile(MultiEnum):
             if self.analysis.dimensions == 4:
                 return [
                     "g{}3g{}1".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 2):
+                        for indices in itertools.combinations("1ijkl", 2)
                 ] + [
                     "g{}2g{}2".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 2):
+                        for indices in itertools.combinations("1ijkl", 2)
                 ] + [
                     "g{}1g{}3".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 2):
+                        for indices in itertools.combinations("1ijkl", 2)
                 ] + [
                     "g{}2g{}1g{}1".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 3):
+                        for indices in itertools.combinations("1ijkl", 3)
                 ] + [
                     "g{}1g{}2g{}1".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 3):
+                        for indices in itertools.combinations("1ijkl", 3)
                 ] + [
                     "g{}1g{}1g{}2".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 3):
+                        for indices in itertools.combinations("1ijkl", 3)
                 ] + [
                     "g{}1g{}1g{}1g{}1".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 4):
+                        for indices in itertools.combinations("1ijkl", 4)
                 ]
             elif self.analysis.dimensions == 2:
                 assert False

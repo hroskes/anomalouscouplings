@@ -17,7 +17,7 @@ import constants
 import enums
 from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import cache_instancemethod, callclassinitfunctions, getmembernames, tlvfromptetaphim
+from utilities import cache_instancemethod, callclassinitfunctions, getmembernames, product, tlvfromptetaphim
 import xrd
 import ZX
 
@@ -499,7 +499,7 @@ class TreeWrapperBase(Iterator):
 #########################
 #4 coupling discriminant#
 #########################
-    def D_4couplings_general(self, *variables_and_bins):
+    def D_4couplings_general_raw(self, *variables_and_bins):
         """
         variables_and_bins is something like:
           ("D_0minus_decay", [.333, .667]), ("D_CP_decay", [0]), ...
@@ -514,6 +514,14 @@ class TreeWrapperBase(Iterator):
               result += 1
         return result
 
+    def D_4couplings_general(self, variables_and_bins, foldbins):
+      result = self.D_4couplings_general_raw(*variables_and_bins)
+      if result in foldbins: result = product(len(bins)+1 for variable, bins in variables_and_bins)
+      for foldbin in foldbins:
+          if result > foldbin:
+              result -= 1
+      return result
+
     #here we specify the discriminants and bin separations.
     #Note D_CP is NOT here.  It's used as the third dimension
     #so that mirroring is easier.
@@ -524,6 +532,9 @@ class TreeWrapperBase(Iterator):
       ("D_L1Zg_decay", [.4, .55]),
       ("D_int_decay", [.8]),
     )
+    foldbins_4couplings_decay = tuple(sorted((  #bins with <100 entries, summed over all trees we process (not data or Z+X)
+      19, 35, 36, 37, 39, 41, 42, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 68, 91, 95, 120, 121, 122, 123, 124, 125, 140,
+    ), reverse=True))
 
     binning_4couplings_VBFdecay = (
       ("D_0minus_VBFdecay", [.1, .9]),
@@ -535,6 +546,10 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_VBFdecay_JECUp = tuple((name+"_JECUp", bins) for name, bins in binning_4couplings_VBFdecay)
     binning_4couplings_VBFdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_VBFdecay)
 
+    foldbins_4couplings_VBFdecay = tuple(sorted((  #bins with <100 entries, summed over all trees we process (not data or Z+X)
+      12, 13, 30, 31, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 66, 67, 68, 69, 70, 71, 84, 85, 92, 93, 94, 95, 96, 97, 102, 103, 108, 110, 112, 113, 114, 115, 118, 120, 121, 122, 123, 124, 125, 130, 131, 132, 138, 139, 144, 145, 146, 147, 148, 149, 150, 151, 156, 157,
+    ), reverse=True))
+
     binning_4couplings_HadVHdecay = (
       ("D_0minus_HadVHdecay", [.2, .8]),
       ("D_0hplus_HadVHdecay", [.333, .667]),
@@ -545,16 +560,31 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_HadVHdecay_JECUp = tuple((name+"_JECUp", bins) for name, bins in binning_4couplings_HadVHdecay)
     binning_4couplings_HadVHdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_HadVHdecay)
 
+    foldbins_4couplings_HadVHdecay = tuple(sorted((  #bins with <100 entries, summed over all trees we process (not data or Z+X)
+      12, 17, 24, 30, 31, 34, 35, 40, 42, 43, 46, 47, 48, 49, 50, 51, 52, 53, 66, 71, 94, 108, 114, 120, 125, 126, 130, 131, 132, 138, 144, 148, 149, 150, 151, 156, 157,
+    ), reverse=True))
+
+    def D_4couplings_decay_raw(self):
+      return self.D_4couplings_general_raw(*self.binning_4couplings_decay)
+    @MakeJECSystematics
+    def D_4couplings_VBFdecay_raw(self):
+      if self.notdijet: return -999
+      return self.D_4couplings_general_raw(*self.binning_4couplings_VBFdecay)
+    @MakeJECSystematics
+    def D_4couplings_HadVHdecay_raw(self):
+      if self.notdijet: return -999
+      return self.D_4couplings_general_raw(*self.binning_4couplings_HadVHdecay)
+
     def D_4couplings_decay(self):
-      return self.D_4couplings_general(*self.binning_4couplings_decay)
+      return self.D_4couplings_general(self.binning_4couplings_decay, self.foldbins_4couplings_decay)
     @MakeJECSystematics
     def D_4couplings_VBFdecay(self):
       if self.notdijet: return -999
-      return self.D_4couplings_general(*self.binning_4couplings_VBFdecay)
+      return self.D_4couplings_general(self.binning_4couplings_VBFdecay, self.foldbins_4couplings_VBFdecay)
     @MakeJECSystematics
     def D_4couplings_HadVHdecay(self):
       if self.notdijet: return -999
-      return self.D_4couplings_general(*self.binning_4couplings_HadVHdecay)
+      return self.D_4couplings_general(self.binning_4couplings_HadVHdecay, self.foldbins_4couplings_HadVHdecay)
 
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
@@ -1057,6 +1087,7 @@ class TreeWrapper(TreeWrapperBase):
             "D_eLeRint_decay",
 
             "D_4couplings_general",
+            "D_4couplings_general_raw",
             "binning_4couplings_decay",
             "binning_4couplings_VBFdecay",
             "binning_4couplings_VBFdecay_JECUp",
@@ -1064,6 +1095,9 @@ class TreeWrapper(TreeWrapperBase):
             "binning_4couplings_HadVHdecay",
             "binning_4couplings_HadVHdecay_JECUp",
             "binning_4couplings_HadVHdecay_JECDn",
+            "foldbins_4couplings_decay",
+            "foldbins_4couplings_VBFdecay",
+            "foldbins_4couplings_HadVHdecay",
 
             "allsamples",
             "categorizations",
@@ -1114,6 +1148,7 @@ class TreeWrapper(TreeWrapperBase):
         self.toaddtotree_float = []
         self.toaddtotree_int = [
             "D_STXS_stage0",
+            "D_4couplings_decay_raw",
             "D_4couplings_decay",
         ]
 
@@ -1134,7 +1169,9 @@ class TreeWrapper(TreeWrapperBase):
         STXSdiscriminants = [
             "D_STXS_ggH_stage1",
             "D_STXS_VBF_stage1",
+            "D_4couplings_VBFdecay_raw",
             "D_4couplings_VBFdecay",
+            "D_4couplings_HadVHdecay_raw",
             "D_4couplings_HadVHdecay",
         ]
 
