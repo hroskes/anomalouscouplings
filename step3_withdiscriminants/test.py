@@ -20,7 +20,7 @@ from helperstuff.copyplots import copyplots
 from helperstuff.discriminants import discriminant
 from helperstuff.treewrapper import TreeWrapper
 
-disc = "D_4couplings_"+process
+disc = "D_4couplings_"+process+"_raw"
 disc = discriminant(disc)
 
 t = ROOT.TChain("candTree")
@@ -30,7 +30,7 @@ for filename in glob.iglob("*.root"):
 
 c = ROOT.TCanvas()
 c.SetLogy()
-t.Draw(disc.name+">>h({},{},{})".format(disc.bins, disc.min, disc.max), disc.name.replace("D_4couplings", "D_0minus")+">-998")
+t.Draw(disc.name+">>h({},{},{})".format(disc.bins, disc.min, disc.max), "D_0minus_"+process+">-998")
 h = ROOT.h
 
 numbersofbins = [(variablename, len(binning)+1) for variablename, binning in getattr(TreeWrapper, "binning_4couplings_"+process)]
