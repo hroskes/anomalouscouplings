@@ -104,7 +104,7 @@ class Flavor(MyEnum):
         if self == "4tau": return 9
         assert False
 
-def _mixturepermutations_4d(enumitemsalreadythere):
+def mixturepermutations_4d(enumitemsalreadythere):
   def inner():
     pures = "a3", "a2", "L1", "L1Zg"
 
@@ -214,7 +214,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fL1Zgproddec-0.5"),
                  EnumItem("fa2dec-0.9", "fa2-0.9"),
                 )
-    enumitems = enumitems + _mixturepermutations_4d(enumitems)
+    enumitems = enumitems + mixturepermutations_4d(enumitems)
 
     @property
     def ispure(self):

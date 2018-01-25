@@ -81,59 +81,89 @@ class TemplatesFile(MultiEnum):
         return os.path.join(config.plotsbasedir, "templateprojections", "controlplots", relpath.replace(".root", "").replace("bkp_", ""))
 
     def signalsamples(self):
-        if self.templategroup == "ggh":
-            if self.shapesystematic == "MINLO_SM":
-                return [ReweightingSamplePlus("ggH", "0+", "MINLO")]
+        if self.templategroup == "ggh" and self.shapesystematic == "MINLO_SM":
+            return [ReweightingSamplePlus("ggH", "0+", "MINLO")]
+
+        elif self.templategroup in ("ggh", "tth"):
+            if self.templategroup == "ggh":
+                args = "ggH",
+            elif self.templategroup == "tth":
+                args = "ttH", "Hff0+"
+            else:
+                assert False, self.templategroup
+
             if self.analysis in ("fa3", "fa3_STXS"):
-                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "0-"), ReweightingSample("ggH", "fa30.5")]
+                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("0-", *args), ReweightingSample("fa30.5", *args)]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "a2"), ReweightingSample("ggH", "fa2-0.5")]
+                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("a2", *args), ReweightingSample("fa2-0.5", *args)]
             if self.analysis == "fL1":
-                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "fL10.5")]
+                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("fL10.5", *args)]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL1Zg-0.5")]
+                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL1Zg-0.5", *args)]
             if self.analysis.isfL1fL1Zg:
-                reweightingsamples = [ReweightingSample("ggH", "0+"), ReweightingSample("ggH", "L1"), ReweightingSample("ggH", "L1Zg"), ReweightingSample("ggH", "fL10.5"), ReweightingSample("ggH", "fL1Zg0.5"), ReweightingSample("ggH", "fL10.5fL1Zg0.5")]
+                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL10.5", *args), ReweightingSample("fL1Zg0.5", *args), ReweightingSample("fL10.5fL1Zg0.5", *args)]
+            if self.analysis == "fa2fa3fL1fL1Zg":
+                hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
+                              "fa30.5", "fa2-0.5", "fL10.5", "fL1Zg-0.5",
+                              "fa30.5fa20.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5",
+                                              "fa20.5fL10.5", "fa20.5fL1Zg0.5",
+                                                              "fL10.5fL1Zg0.5",
+                             ]
+                reweightingsamples = [
+                  ReweightingSample(h, *args) for h in hypotheses
+                ]
 
-        elif self.templategroup == "vbf":
+        elif self.templategroup in ("vbf", "zh", "wh"):
+            p = str(self.templategroup).upper()
             if self.analysis in ("fa3", "fa3_STXS"):
-                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "0-"), ReweightingSample("VBF", "fa3prod0.5"), ReweightingSample("VBF", "fa3dec0.5"), ReweightingSample("VBF", "fa3proddec-0.5")]
+                reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "0-"), ReweightingSample(p, "fa3prod0.5"), ReweightingSample(p, "fa3dec0.5"), ReweightingSample(p, "fa3proddec-0.5")]
             if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "a2"), ReweightingSample("VBF", "fa2prod0.5"), ReweightingSample("VBF", "fa2dec-0.5"), ReweightingSample("VBF", "fa2proddec-0.5")]
+                reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "a2"), ReweightingSample(p, "fa2prod0.5"), ReweightingSample(p, "fa2dec-0.5"), ReweightingSample(p, "fa2proddec-0.5")]
             if self.analysis == "fL1":
-                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1"), ReweightingSample("VBF", "fL1prod0.5"), ReweightingSample("VBF", "fL1dec0.5"), ReweightingSample("VBF", "fL1proddec0.5")]
+                reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1"), ReweightingSample(p, "fL1prod0.5"), ReweightingSample(p, "fL1dec0.5"), ReweightingSample(p, "fL1proddec-0.5")]
             if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("VBF", "0+"), ReweightingSample("VBF", "L1Zg"), ReweightingSample("VBF", "fL1Zgprod0.5"), ReweightingSample("VBF", "fL1Zgdec0.5"), ReweightingSample("VBF", "fL1Zgproddec-0.5")]
+                reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1Zg"), ReweightingSample(p, "fL1Zgprod0.5"), ReweightingSample(p, "fL1Zgdec0.5"), ReweightingSample(p, "fL1Zgproddec-0.5")]
+            if self.analysis == "fa2fa3fL1fL1Zg":
+                hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
+                              "fa30.5",        "fa2-0.5",       "fL10.5",        "fL1Zg-0.5",
+                              "fa3prod0.5",    "fa2prod0.5",    "fL1prod0.5",    "fL1Zgprod0.5",
+                              "fa3proddec0.5", "fa2proddec0.5", "fL1proddec0.5", "fL1Zgproddec0.5",
 
-        elif self.templategroup == "zh":
-            if self.analysis in ("fa3", "fa3_STXS"):
-                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "0-"), ReweightingSample("ZH", "fa3prod0.5"), ReweightingSample("ZH", "fa3dec0.5"), ReweightingSample("ZH", "fa3proddec-0.5")]
-            if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "a2"), ReweightingSample("ZH", "fa2prod0.5"), ReweightingSample("ZH", "fa2dec-0.5"), ReweightingSample("ZH", "fa2proddec-0.5")]
-            if self.analysis == "fL1":
-                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "L1"), ReweightingSample("ZH", "fL1prod0.5"), ReweightingSample("ZH", "fL1dec0.5"), ReweightingSample("ZH", "fL1proddec0.5")]
-            if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("ZH", "0+"), ReweightingSample("ZH", "L1Zg"), ReweightingSample("ZH", "fL1Zgprod0.5"), ReweightingSample("ZH", "fL1Zgdec0.5"), ReweightingSample("ZH", "fL1Zgproddec-0.5")]
+                              "fa30.5fa20.5",                  "fa30.5fL10.5",                  "fa30.5fL1Zg0.5",
+                                                               "fa20.5fL10.5",                  "fa20.5fL1Zg0.5",
+                                                                                                "fL10.5fL1Zg0.5",
+                              "fa3prod0.5fa2prod0.5",          "fa3prod0.5fL1prod0.5",          "fa3prod0.5fL1Zgprod0.5",
+                                                               "fa2prod0.5fL1prod0.5",          "fa2prod0.5fL1Zgprod0.5",
+                                                                                                "fL1prod0.5fL1Zgprod0.5",
+                              "fa3proddec0.5fa2proddec-0.5",   "fa3proddec0.5fL1proddec-0.5",   "fa3proddec0.5fL1Zgproddec-0.5",
+                                                               "fa2proddec0.5fL1proddec-0.5",   "fa2proddec0.5fL1Zgproddec-0.5",
+                                                                                                "fL1proddec0.5fL1Zgproddec-0.5",
 
-        elif self.templategroup == "wh":
-            if self.analysis in ("fa3", "fa3_STXS"):
-                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "0-"), ReweightingSample("WH", "fa3prod0.5"), ReweightingSample("WH", "fa3dec0.5"), ReweightingSample("WH", "fa3proddec-0.5")]
-            if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "a2"), ReweightingSample("WH", "fa2prod0.5"), ReweightingSample("WH", "fa2dec-0.5"), ReweightingSample("WH", "fa2proddec-0.5")]
-            if self.analysis == "fL1":
-                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "L1"), ReweightingSample("WH", "fL1prod0.5"), ReweightingSample("WH", "fL1dec0.5"), ReweightingSample("WH", "fL1proddec0.5")]
-            if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("WH", "0+"), ReweightingSample("WH", "L1Zg"), ReweightingSample("WH", "fL1Zgprod0.5"), ReweightingSample("WH", "fL1Zgdec0.5"), ReweightingSample("WH", "fL1Zgproddec-0.5")]
+                              "fa30.33fa20.33",                "fa30.33fL10.33",                "fa30.33fL1Zg0.33",
+                                                               "fa20.33fL10.33",                "fa20.33fL1Zg0.33",
+                                                                                                "fL10.33fL1Zg0.33",
+                              "fa3prod0.33fa2prod0.33",        "fa3prod0.33fL1prod0.33",        "fa3prod0.33fL1Zgprod0.33",
+                                                               "fa2prod0.33fL1prod0.33",        "fa2prod0.33fL1Zgprod0.33",
+                                                                                                "fL1prod0.33fL1Zgprod0.33",
+                              "fa3proddec0.33fa2proddec-0.33", "fa3proddec0.33fL1proddec-0.33", "fa3proddec0.33fL1Zgproddec-0.33",
+                                                               "fa2proddec0.33fL1proddec-0.33", "fa2proddec0.33fL1Zgproddec-0.33",
+                                                                                                "fL1proddec0.33fL1Zgproddec-0.33",
 
-        elif self.templategroup == "tth":
-            if self.analysis in ("fa3", "fa3_STXS"):
-                reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "0-", "Hff0+"), ReweightingSample("ttH", "fa30.5", "Hff0+")]
-            if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "a2", "Hff0+"), ReweightingSample("ttH", "fa2-0.5", "Hff0+")]
-            if self.analysis == "fL1":
-                reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "L1", "Hff0+"), ReweightingSample("ttH", "fL10.5", "Hff0+")]
-            if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("ttH", "0+", "Hff0+"), ReweightingSample("ttH", "L1Zg", "Hff0+"), ReweightingSample("ttH", "fL1Zg-0.5", "Hff0+")]
+                              "fa30.33fa20.33fL10.33",                         "fa30.33fa20.33fL1Zg0.33",
+                              "fa30.33fL10.33fL1Zg0.33",                       "fa20.33fL10.33fL1Zg0.33",
+                              "fa3prod0.33fa2prod0.33fL1prod0.33",             "fa3prod0.33fa2prod0.33fL1Zgprod0.33",
+                              "fa3prod0.33fL1prod0.33fL1Zgprod0.33",           "fa2prod0.33fL1prod0.33fL1Zgprod0.33",
+                              "fa3proddec0.33fa2proddec0.33fL1proddec-0.33",   "fa3proddec0.33fa2proddec0.33fL1Zgproddec-0.33",
+                              "fa3proddec0.33fL1proddec0.33fL1Zgproddec-0.33", "fa2proddec0.33fL1proddec0.33fL1Zgproddec-0.33",
+
+                              "fa3proddec0.25fa2proddec0.25fL1proddec0.25",   "fa3proddec0.25fa2proddec0.25fL1Zgproddec0.25",
+                              "fa3proddec0.25fL1proddec0.25fL1Zgproddec0.25", "fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25",
+
+                              "fa3proddec0.25fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25",
+                             ]
+                reweightingsamples = [
+                  ReweightingSample(h, p) for h in hypotheses
+                ]
 
         return reweightingsamples
 
@@ -152,34 +182,51 @@ class TemplatesFile(MultiEnum):
         assert False
 
     def inttemplates(self):
-        if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM":
-            if self.analysis.dimensions == 2:
-                return [IntTemplate(self, "ggH", _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
-            else:
-                return [IntTemplate(self, "ggH", "g11gi1")]
-        elif self.templategroup == "vbf":
-            if self.analysis.dimensions == 2:
+        if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM" or self.templategroup == "tth":
+            h = str(self.templategroup).replace("h", "H")
+            if self.analysis.dimensions == 4:
+                return [
+                    "g{}1g{}1".format(i1, i2)
+                        for i1, i2 in itertools.combinations("1ijkl", 2):
+                ]
+            elif self.analysis.dimensions == 2:
+                return [IntTemplate(self, h, _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
+            elif self.analysis.dimensions == 1:
+                return [IntTemplate(self, h, "g11gi1")]
+
+        elif self.templategroup in ("vbf", "zh", "wh"):
+            h = str(self.templategroup).upper()
+            if self.analysis.dimensions == 4:
+                return [
+                    "g{}3g{}1".format(*indices)
+                        for indices in itertools.combinations("1ijkl", 2):
+                ] + [
+                    "g{}2g{}2".format(*indices)
+                        for indices in itertools.combinations("1ijkl", 2):
+                ] + [
+                    "g{}1g{}3".format(*indices)
+                        for indices in itertools.combinations("1ijkl", 2):
+                ] + [
+                    "g{}2g{}1g{}1".format(*indices)
+                        for indices in itertools.combinations("1ijkl", 3):
+                ] + [
+                    "g{}1g{}2g{}1".format(*indices)
+                        for indices in itertools.combinations("1ijkl", 3):
+                ] + [
+                    "g{}1g{}1g{}2".format(*indices)
+                        for indices in itertools.combinations("1ijkl", 3):
+                ] + [
+                    "g{}1g{}1g{}1g{}1".format(*indices)
+                        for indices in itertools.combinations("1ijkl", 4):
+                ]
+            elif self.analysis.dimensions == 2:
                 assert False
-            else:
-                return [IntTemplate(self, "VBF", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
-        elif self.templategroup == "zh":
-            if self.analysis.dimensions == 2:
-                assert False
-            else:
-                return [IntTemplate(self, "ZH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
-        elif self.templategroup == "wh":
-            if self.analysis.dimensions == 2:
-                assert False
-            else:
-                return [IntTemplate(self, "WH", "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
-        elif self.templategroup == "tth":
-            if self.analysis.dimensions == 2:
-                return [IntTemplate(self, "ttH", _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
-            else:
-                return [IntTemplate(self, "ttH", "g11gi1")]
+            elif self.analysis.dimensions == 1:
+                return [IntTemplate(self, h, "g1{}gi{}".format(i, 4-i)) for i in (1, 2, 3)]
+
         elif self.templategroup in ("bkg", "DATA") or self.shapesystematic == "MINLO_SM":
             return []
-        assert False
+        assert False, self
 
     @property
     def bkgdiscriminant(self):
@@ -219,6 +266,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z2Mass")
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_ggH_stage1"+JECappend)
+            if self.analysis == "fa3fa2fL1fL1Zg":
+                return disciminant("D_4couplings_decay")
 
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
@@ -231,6 +280,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_VBFdecay"+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
+            if self.analysis == "fa3fa2fL1fL1Zg":
+                return disciminant("D_4couplings_VBFdecay"+JECappend)
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -243,6 +294,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_HadVHdecay"+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
+            if self.analysis == "fa3fa2fL1fL1Zg":
+                return disciminant("D_4couplings_HadVHdecay"+JECappend)
 
         assert False
 
@@ -275,6 +328,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
+            if self.analysis == "fa3fa2fL1fL1Zg":
+                return discriminant("D_CP_decay_2bins")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -292,6 +347,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
+            if self.analysis == "fa3fa2fL1fL1Zg":
+                return discriminant("D_CP_VBFdecay_2bins")
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -304,6 +361,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
+            if self.analysis == "fa3fa2fL1fL1Zg":
+                return discriminant("D_CP_HadVHdecay_2bins")
 
         assert False
 
@@ -331,14 +390,29 @@ class TemplatesFile(MultiEnum):
                templates for each respective term (g1^4g4^0, g1^3g4^1, ...)
             In the PDF, the templates need to be multiplied by (g1^i)(g4^(4-i))
             """
-            #make sure the two pure templates can be used as is
-            #these assertions should be equivalent to asserting that SMtemplate.g1 == anomaloustemplate.ganomalous == 1
-            # and that the two pure samples are in the right places on the list
-            assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
-            assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
+            if self.analysis.dimensions == 1:
+                #make sure the two pure templates can be used as is
+                #these assertions should be equivalent to asserting that SMtemplate.g1 == anomaloustemplate.ganomalous == 1
+                # and that the two pure samples are in the right places on the list
+                assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
+                assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
+            elif self.analysis.dimensions == 4:
+                assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
+                assert invertedmatrix[4, 1] == 1 and all(invertedmatrix[4, i] == 0 for i in range(0, 1)+range(2, 70))
+                assert invertedmatrix[14,2] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 2)+range(3, 70))
+                assert invertedmatrix[34,3] == 1 and all(invertedmatrix[34,i] == 0 for i in range(0, 3)+range(4, 70))
+                assert invertedmatrix[69,4] == 1 and all(invertedmatrix[69,i] == 0 for i in range(0, 4)+range(5, 70))
+            else:
+                assert False
 
         if self.templategroup in ("ggh", "tth"):
-            if self.analysis.dimensions == 2:
+            if self.analysis.dimensions == 4:
+                assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
+                assert                               all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 70))
+                assert                               all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 70))
+                assert                               all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 70))
+                assert                               all(invertedmatrix[14,i] == 0 for i in range(0, 4)+range(5, 70))
+            elif self.analysis.dimensions == 2:
                 assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
                 assert all(invertedmatrix[1,i] == 0 for i in (2, 4, 5))
                 assert all(invertedmatrix[2,i] == 0 for i in (0, 2, 3, 4, 5))
@@ -346,9 +420,11 @@ class TemplatesFile(MultiEnum):
                 assert all(invertedmatrix[4,i] == 0 for i in (0, 3, 4))
                 assert all(invertedmatrix[5,i] == 0 for i in (0, 1, 3, 4, 5))
                 assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
-            else:
+            elif self.analysis.dimensions == 1:
                 assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,3))
                 assert invertedmatrix[2,0] == 0 and invertedmatrix[2,2] == 0 #can't assert invertedmatrix[2,1] == 1 because different convention :(
+            else:
+                assert False
 
         return invertedmatrix
 

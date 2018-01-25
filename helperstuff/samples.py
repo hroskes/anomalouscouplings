@@ -1654,7 +1654,27 @@ class SampleBasis(MultiEnum):
         if self.productionmode == "ttH": hffhypothesis = "Hff0+"
         dimension = len(self.hypotheses)
         samples = [ReweightingSample(self.productionmode, _, hffhypothesis) for _ in self.hypotheses]
-        if self.analysis.dimensions == 2:
+        if self.analysis.dimensions == 4:
+            maxpower = dimension-1
+            assert len(self.analysis.couplingnames) == 4
+            return numpy.matrix(
+                                [
+                                 [
+                                  sample.g1**(maxpower-i-j-k-l)
+                                  * getattr(sample, self.analysis.couplingnames[0])**i
+                                  * getattr(sample, self.analysis.couplingnames[1])**j
+                                  * getattr(sample, self.analysis.couplingnames[2])**k
+                                  * getattr(sample, self.analysis.couplingnames[3])**l
+                                     for l in range(maxpower+1)
+                                     for k in range(maxpower+1-l)
+                                     for j in range(maxpower+1-k-l)
+                                     for i in range(maxpower+1-j-k-l)
+                                 ]
+                                    for sample in samples
+                                ]
+                               )
+
+        elif self.analysis.dimensions == 2:
             assert dimension == 6  #not VBF or VH
             maxpower = 2
             return numpy.matrix(
