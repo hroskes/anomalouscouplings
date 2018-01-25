@@ -163,8 +163,8 @@ class SigmaIOverSigma1(MultiEnum):
             return 1/gi**2
         if self.productionmode in ("VBF", "ZH", "WH"):
             #for VBF, ZH, and WH, gi for the pure BSM sample is defined = 1
-            sigmai = ReweightingSample(self.analysis.purehypotheses[1], self.productionmode).xsec
-            sigma1 = ReweightingSample(self.analysis.purehypotheses[0], self.productionmode).xsec
+            sigmai = ReweightingSample(self.analysis.purehypotheses[1], self.productionmode).nominalJHUxsec
+            sigma1 = ReweightingSample(self.analysis.purehypotheses[0], self.productionmode).nominalJHUxsec
             return sigmai/sigma1
         assert False
 
@@ -172,9 +172,18 @@ class SigmaIOverSigma1_VH(MultiEnum):
     enums = (Analysis,)
     @property
     def result(self):
-        sigmai = sum(ReweightingSample(self.analysis.purehypotheses[1], VH).xsec for VH in ("ZH", "WH"))
-        sigma1 = sum(ReweightingSample(self.analysis.purehypotheses[0], VH).xsec for VH in ("ZH", "WH"))
-        return sigmai/sigma1
+        import constants
+        if self.analysis == "fa3":
+            coupling = constants.g4VH
+        elif self.analysis == "fa2":
+            coupling = constants.g2VH
+        elif self.analysis == "fL1":
+            coupling = constants.g1prime2VH_gen
+        elif self.analysis == "fL1Zg":
+            coupling = constants.ghzgs1prime2VH_gen
+        else:
+            assert False, self.analysis
+        return 1/coupling**2 * sigmaioversigma1("ggH", self.analysis)
 
 def sigmaioversigma1(*args):
     if "VH" in [str(_) for _ in args]:

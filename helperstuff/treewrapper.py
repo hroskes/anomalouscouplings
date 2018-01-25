@@ -507,11 +507,11 @@ class TreeWrapperBase(Iterator):
         """
         result = 0
         for variablename, binning in variables_and_bins:
+          result *= len(binning)+1
           variable = getattr(self, variablename)()
           for bin in binning:
             if variable > bin:
               result += 1
-          result *= len(binning)+1
         return result
 
     #here we specify the discriminants and bin separations.
@@ -971,7 +971,9 @@ class TreeWrapper(TreeWrapperBase):
         append += [
             categorization.MultiCategorization("0P_or_{}".format(other.hypothesisname) + btag.appendname + JEC.appendname, append[0], other)
                for other in append[1:]
-        ]
+        ] + [
+            categorization.MultiCategorization("0P_or_0M_or_a2_or_L1_or_L1Zg"+btag.appendname+JEC.appendname, *append)
+        ]  #note can't do this with two separate +=, since they both refer to the original append
         categorizations += append
     categorizations.append(categorization.NoCategorization())
     del append, btag, JEC, other
