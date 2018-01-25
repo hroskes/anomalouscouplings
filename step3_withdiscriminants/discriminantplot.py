@@ -38,7 +38,7 @@ max2           = None
 
 skip           = []
 
-logscale       = True
+logscale       = False
 setminimum     = None
 #========================
 
@@ -100,7 +100,6 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       cut=cut
     )
     if not logscale: h.SetMinimum(0)
-    if minimum: h.SetMinimum(minimum)
 
     hstack.Add(h)
     cache.append(h)
