@@ -549,9 +549,11 @@ class TreeWrapperBase(Iterator):
       return self.D_4couplings_general(*self.binning_4couplings_decay)
     @MakeJECSystematics
     def D_4couplings_VBFdecay(self):
+      if self.notdijet: return -999
       return self.D_4couplings_general(*self.binning_4couplings_VBFdecay)
     @MakeJECSystematics
     def D_4couplings_HadVHdecay(self):
+      if self.notdijet: return -999
       return self.D_4couplings_general(*self.binning_4couplings_HadVHdecay)
 
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
@@ -1304,10 +1306,10 @@ class TreeWrapper(TreeWrapperBase):
                                                      if isthis2L2l
                                                )
             #https://root.cern.ch/doc/master/classTH1.html#a79f9811dc6c4b9e68e683342bfc96f5e
-            try:
+            if self.nevents2L2l[strsample]:
                 self.effectiveentries[strsample] = sum(weightarray)**2 / sum(weightarray**2)
                 self.multiplyweight[strsample] = SMxsec / self.nevents2L2l[strsample] * self.effectiveentries[strsample]
-            except ZeroDivisionError:
+            else:
                 self.effectiveentries[strsample] = self.multiplyweight[strsample] = 0
 
             branch = array('d', [self.effectiveentries[strsample]])
