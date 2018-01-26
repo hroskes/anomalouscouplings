@@ -22,7 +22,7 @@ max            = None
 
 enrich         = False
 masscut        = True
-normalizeto1   = False
+normalizeto1   = True
 
 channel        = None
 
@@ -38,8 +38,8 @@ max2           = None
 
 skip           = []
 
-logscale       = False
-setminimum     = None
+logscale       = True
+setminimum     = 1e-7
 #========================
 
 hstack = ROOT.THStack()
@@ -56,9 +56,7 @@ productionmode = ProductionMode(productionmode)
 
 def hypothesestouse():
     for hypothesis in hypotheses:
-        if hypothesis not in productionmode.generatedhypotheses: continue
-        if skip is not None and hypothesis in skip: continue
-        yield hypothesis
+        if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa30.5", "fa2-0.5", "fL1Zg0.5", "fL10.5"): yield hypothesis
 
 def hffhypothesistouse():
     if productionmode == "ttH":
@@ -67,7 +65,7 @@ def hffhypothesistouse():
         return None
 
 for hypothesis in hypotheses:
-    if hypothesis not in hypothesestouse():
+    if hypothesis not in list(hypothesestouse()):
         try:
             os.remove(os.path.join(config.plotsbasedir, "TEST", "reweighting", "{}.png".format(hypothesis)))
         except OSError:
@@ -77,10 +75,12 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     if color == 5: color = ROOT.kYellow+3
 
     hname = "h{}".format(hypothesis)
+    rwtfrom = hypothesis
+    if hypothesis in ("fa2-0.5", "L1Zg", "fL1Zg0.5"): rwtfrom = "0+"
 
     h = hs[hypothesis] = plotfromtree(
-      reweightfrom=ReweightingSample(productionmode, hypothesis, hffhypothesistouse()),
-      reweightto=reweightto,
+      reweightfrom=ReweightingSample(productionmode, rwtfrom, hffhypothesistouse()),
+      reweightto=ReweightingSample(productionmode, hypothesis, hffhypothesistouse()),
       disc=disc,
       bins=bins,
       min=min,
@@ -100,6 +100,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       cut=cut
     )
     if not logscale: h.SetMinimum(0)
+    if setminimum is not None: h.SetMinimum(setminimum)
 
     hstack.Add(h)
     cache.append(h)

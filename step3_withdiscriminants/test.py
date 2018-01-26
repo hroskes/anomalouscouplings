@@ -30,7 +30,7 @@ for filename in glob.iglob("*.root"):
 
 c = ROOT.TCanvas()
 c.SetLogy()
-t.Draw(disc.name+">>h({},{},{})".format(disc.bins, disc.min, disc.max), "D_0minus_"+process+">-998")
+t.Draw(disc.name+">>h({},{},{})".format(disc.bins, disc.min, disc.max), "D_0minus_"+process+">-998 && 105 <= ZZMass && ZZMass <= 140")
 h = ROOT.h
 
 numbersofbins = [(variablename, len(binning)+1) for variablename, binning in getattr(TreeWrapper, "binning_4couplings_"+process)]

@@ -533,7 +533,7 @@ class TreeWrapperBase(Iterator):
       ("D_int_decay", [.8]),
     )
     foldbins_4couplings_decay = tuple(sorted((  #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      19, 35, 36, 37, 39, 41, 42, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 68, 91, 95, 120, 121, 122, 123, 124, 125, 140,
+      18, 19, 33, 35, 36, 37, 38, 39, 40, 41, 42, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 68, 69, 90, 91, 95, 107, 108, 110, 116, 120, 121, 122, 123, 124, 125, 126, 140, 141, 161
     ), reverse=True))
 
     binning_4couplings_VBFdecay = (
@@ -547,7 +547,7 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_VBFdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_VBFdecay)
 
     foldbins_4couplings_VBFdecay = tuple(sorted((  #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      12, 13, 30, 31, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 66, 67, 68, 69, 70, 71, 84, 85, 92, 93, 94, 95, 96, 97, 102, 103, 108, 110, 112, 113, 114, 115, 118, 120, 121, 122, 123, 124, 125, 130, 131, 132, 138, 139, 144, 145, 146, 147, 148, 149, 150, 151, 156, 157,
+      4, 5, 12, 13, 14, 15, 16, 17, 22, 23, 30, 31, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 67, 68, 69, 70, 71, 76, 77, 84, 85, 92, 93, 94, 95, 96, 97, 102, 103, 108, 110, 112, 113, 114, 115, 118, 119, 120, 121, 122, 123, 124, 125, 130, 131, 132, 133, 138, 139, 144, 145, 146, 147, 148, 149, 150, 151, 156, 157
     ), reverse=True))
 
     binning_4couplings_HadVHdecay = (
@@ -561,7 +561,7 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_HadVHdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_HadVHdecay)
 
     foldbins_4couplings_HadVHdecay = tuple(sorted((  #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      12, 17, 24, 30, 31, 34, 35, 40, 42, 43, 46, 47, 48, 49, 50, 51, 52, 53, 66, 71, 94, 108, 114, 120, 125, 126, 130, 131, 132, 138, 144, 148, 149, 150, 151, 156, 157,
+      4, 5, 11, 12, 17, 22, 23, 24, 28, 29, 30, 31, 34, 35, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 71, 76, 77, 83, 84, 85, 89, 94, 95, 101, 102, 103, 108, 112, 113, 114, 119, 120, 121, 125, 126, 130, 131, 132, 137, 138, 139, 143, 144, 145, 148, 149, 150, 151, 155, 156, 157
     ), reverse=True))
 
     def D_4couplings_decay_raw(self):

@@ -1,6 +1,9 @@
+#!/usr/bin/env python
+
 import config
 import os
 import subprocess
+import sys
 
 from utilities import cd
 
@@ -19,3 +22,6 @@ def copyplots(folder):
       subprocess.check_call(["rsync", "-azvP", "--relative", copyfrom, copyto])
   else:
     assert False, config.host
+
+if __name__ == "__main__":
+  copyplots(sys.argv[1])

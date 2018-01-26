@@ -92,7 +92,7 @@ g2WH = 0.0998956
 g4WH = 0.1236136
 g1prime2WH_gen = -525.274
 g1prime2WH_reco = -g1prime2WH_gen
-ghzgs1prime2WH_gen = -float("inf")
+ghzgs1prime2WH_gen = -1000
 ghzgs1prime2WH_reco = ghzgs1prime2WH_gen
 
 g2VH = 0.10430356645812816 #sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa2 + JHUXSWHa2*normalize_WH_to_ZH))

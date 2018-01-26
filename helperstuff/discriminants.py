@@ -38,7 +38,7 @@ decaydiscriminants = [
     Discriminant("D_STXS_stage0", "D_{STXS0}", 2, 0, 2),
 
     Discriminant("D_4couplings_decay_raw", "D_{4}^{dec,raw}", 162, 0, 162),
-    Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-27, 0, 162-27),
+    Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-40, 0, 162-40),
 ]
 VBFdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),
@@ -58,7 +58,7 @@ VBFdiscriminants = [
     Discriminant("D_STXS_VBF_stage1", "D_{STXS1}^{VBF}", 6, 0, 6),
 
     Discriminant("D_4couplings_VBFdecay_raw", "D_{4}^{VBF+dec,raw}", 162, 0, 162),
-    Discriminant("D_4couplings_VBFdecay", "D_{4}^{VBF+dec}", 162-66, 0, 162-66),
+    Discriminant("D_4couplings_VBFdecay", "D_{4}^{VBF+dec}", 162-80, 0, 162-80),
 ]
 VHdiscriminants = [
     Discriminant("D_0minus_HadVH", "D_{0-}^{VH}", defaultnbins, 0, 1),
@@ -75,7 +75,7 @@ VHdiscriminants = [
     Discriminant("D_L1Zg_HadVHdecay", "D_{#Lambda1}^{Z#gamma,VH+dec}", defaultnbins, 0, 1),
 
     Discriminant("D_4couplings_HadVHdecay_raw", "D_{4}^{VH+dec,raw}", 162, 0, 162),
-    Discriminant("D_4couplings_HadVHdecay", "D_{4}^{VH+dec}", 162-37, 0, 162-37),
+    Discriminant("D_4couplings_HadVHdecay", "D_{4}^{VH+dec}", 162-67, 0, 162-67),
 ]
 categorydiscriminants = [
     Discriminant("D_2jet_0plus", "D_{2jet}^{VBF, 0+}", defaultnbins, 0, 1),
