@@ -13,8 +13,8 @@ import os
 
 #========================
 #inputs
-productionmode = "ggH"
-disc           = "D_4couplings_decay"
+productionmode = "ZH"
+disc           = "D_4couplings_HadVHdecay"
 reweightto     = None
 bins           = None
 min            = None
@@ -55,8 +55,15 @@ hs = {}
 productionmode = ProductionMode(productionmode)
 
 def hypothesestouse():
-    for hypothesis in hypotheses:
-        if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa30.5", "fa2-0.5", "fL1Zg0.5", "fL10.5"): yield hypothesis
+    if productionmode == "VBF":
+        for hypothesis in hypotheses:
+            if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa3prod0.5", "fa2prod0.5", "fL1Zgprod0.5", "fL1prod0.5"): yield hypothesis
+    elif productionmode == "ZH":
+        for hypothesis in hypotheses:
+            if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa3prod0.5", "fa2prod0.5", "fL1Zgprod0.5", "fL1prod0.5"): yield hypothesis
+    else:
+        for hypothesis in hypotheses:
+            if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa30.5", "fa2-0.5", "fL1Zg0.5", "fL10.5"): yield hypothesis
 
 def hffhypothesistouse():
     if productionmode == "ttH":
@@ -76,7 +83,7 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
 
     hname = "h{}".format(hypothesis)
     rwtfrom = hypothesis
-    if hypothesis in ("fa2-0.5", "L1Zg", "fL1Zg0.5"): rwtfrom = "0+"
+    if hypothesis in ("fa2-0.5", "L1Zg", "fL1Zg0.5", "fL1Zgprod0.5"): rwtfrom = "0+" if productionmode == "ggH" else "a2"
 
     h = hs[hypothesis] = plotfromtree(
       reweightfrom=ReweightingSample(productionmode, rwtfrom, hffhypothesistouse()),
