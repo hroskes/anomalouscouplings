@@ -187,7 +187,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis.dimensions == 4:
                 return [
                     "g{}1g{}1".format(i1, i2)
-                        for i1, i2 in itertools.combinations("1ijkl", 2):
+                        for i1, i2 in itertools.combinations("1ijkl", 2)
                 ]
             elif self.analysis.dimensions == 2:
                 return [IntTemplate(self, h, _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
@@ -407,11 +407,11 @@ class TemplatesFile(MultiEnum):
 
         if self.templategroup in ("ggh", "tth"):
             if self.analysis.dimensions == 4:
-                assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
-                assert                               all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 70))
-                assert                               all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 70))
-                assert                               all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 70))
-                assert                               all(invertedmatrix[14,i] == 0 for i in range(0, 4)+range(5, 70))
+                assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 15))
+                assert                               all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 15))
+                assert                               all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 15))
+                assert                               all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 15))
+                assert                               all(invertedmatrix[14,i] == 0 for i in range(0, 4)+range(5, 15))
             elif self.analysis.dimensions == 2:
                 assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
                 assert all(invertedmatrix[1,i] == 0 for i in (2, 4, 5))
