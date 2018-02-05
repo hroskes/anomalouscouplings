@@ -1,11 +1,17 @@
+#!/usr/bin/env python
+
 import abc
-from itertools import product
+from collections import Counter
+from itertools import combinations, product
 import json
 from math import isnan
 import os
-import ROOT
+import re
+import uncertainties
 
 import numpy
+
+import ROOT
 
 import config
 import customsmoothing
@@ -102,7 +108,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL1Zg-0.5", *args)]
             if self.analysis.isfL1fL1Zg:
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL10.5", *args), ReweightingSample("fL1Zg0.5", *args), ReweightingSample("fL10.5fL1Zg0.5", *args)]
-            if self.analysis == "fa2fa3fL1fL1Zg":
+            if self.analysis == "fa3fa2fL1fL1Zg":
                 hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
                               "fa30.5", "fa2-0.5", "fL10.5", "fL1Zg-0.5",
                               "fa30.5fa20.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5",
@@ -123,7 +129,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1"), ReweightingSample(p, "fL1prod0.5"), ReweightingSample(p, "fL1dec0.5"), ReweightingSample(p, "fL1proddec-0.5")]
             if self.analysis == "fL1Zg":
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1Zg"), ReweightingSample(p, "fL1Zgprod0.5"), ReweightingSample(p, "fL1Zgdec0.5"), ReweightingSample(p, "fL1Zgproddec-0.5")]
-            if self.analysis == "fa2fa3fL1fL1Zg":
+            if self.analysis == "fa3fa2fL1fL1Zg":
                 hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
                               "fa30.5",        "fa2-0.5",       "fL10.5",        "fL1Zg-0.5",
                               "fa3prod0.5",    "fa2prod0.5",    "fL1prod0.5",    "fL1Zgprod0.5",
@@ -185,9 +191,8 @@ class TemplatesFile(MultiEnum):
         if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM" or self.templategroup == "tth":
             h = str(self.templategroup).replace("h", "H")
             if self.analysis.dimensions == 4:
-                return [
-                    "g{}1g{}1".format(i1, i2)
-                        for i1, i2 in itertools.combinations("1ijkl", 2)
+                return [IntTemplate(self, h, "g{}1g{}1".format(i1, i2))
+                        for i1, i2 in combinations("1ijkl", 2)
                 ]
             elif self.analysis.dimensions == 2:
                 return [IntTemplate(self, h, _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
@@ -197,28 +202,28 @@ class TemplatesFile(MultiEnum):
         elif self.templategroup in ("vbf", "zh", "wh"):
             h = str(self.templategroup).upper()
             if self.analysis.dimensions == 4:
-                return [
+                return [IntTemplate(self, h, _) for _ in [
                     "g{}3g{}1".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 2)
+                        for indices in combinations("1ijkl", 2)
                 ] + [
                     "g{}2g{}2".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 2)
+                        for indices in combinations("1ijkl", 2)
                 ] + [
                     "g{}1g{}3".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 2)
+                        for indices in combinations("1ijkl", 2)
                 ] + [
                     "g{}2g{}1g{}1".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 3)
+                        for indices in combinations("1ijkl", 3)
                 ] + [
                     "g{}1g{}2g{}1".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 3)
+                        for indices in combinations("1ijkl", 3)
                 ] + [
                     "g{}1g{}1g{}2".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 3)
+                        for indices in combinations("1ijkl", 3)
                 ] + [
                     "g{}1g{}1g{}1g{}1".format(*indices)
-                        for indices in itertools.combinations("1ijkl", 4)
-                ]
+                        for indices in combinations("1ijkl", 4)
+                ]]
             elif self.analysis.dimensions == 2:
                 assert False
             elif self.analysis.dimensions == 1:
@@ -267,7 +272,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_ggH_stage1"+JECappend)
             if self.analysis == "fa3fa2fL1fL1Zg":
-                return disciminant("D_4couplings_decay")
+                return discriminant("D_4couplings_decay")
 
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
@@ -281,7 +286,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
             if self.analysis == "fa3fa2fL1fL1Zg":
-                return disciminant("D_4couplings_VBFdecay"+JECappend)
+                return discriminant("D_4couplings_VBFdecay"+JECappend)
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -295,7 +300,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
             if self.analysis == "fa3fa2fL1fL1Zg":
-                return disciminant("D_4couplings_HadVHdecay"+JECappend)
+                return discriminant("D_4couplings_HadVHdecay"+JECappend)
 
         assert False
 
@@ -632,6 +637,8 @@ class Template(TemplateBase, MultiEnum):
 
     def templatename(self, final=True):
         if self.productionmode in ("ggH", "ttH"):
+            match1 = re.match("f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5", str(self.hypothesis))
+            match2 = re.match("f(a2|a3|L1|L1Zg)(?:dec)?0.5f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5", str(self.hypothesis))
             if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
             elif self.hypothesis == "0-":
@@ -642,24 +649,12 @@ class Template(TemplateBase, MultiEnum):
                 name = "template0L1AdapSmooth"
             elif self.hypothesis == "L1Zg":
                 name = "template0L1ZgAdapSmooth"
-            elif self.hypothesis == "fa20.5":
-                name = "templateMixa1a2AdapSmooth"
-            elif self.hypothesis == "fa30.5":
-                name = "templateMixa1a3AdapSmooth"
-            elif self.hypothesis == "fL10.5":
-                name = "templateMixa1L1AdapSmooth"
-            elif self.hypothesis == "fL1Zg0.5":
-                name = "templateMixa1L1ZgAdapSmooth"
-            elif self.hypothesis == "fa2-0.5":
-                name = "templateMixa1a2PiAdapSmooth"
-            elif self.hypothesis == "fa3-0.5":
-                name = "templateMixa1a3PiAdapSmooth"
-            elif self.hypothesis == "fL1-0.5":
-                name = "templateMixa1L1PiAdapSmooth"
-            elif self.hypothesis == "fL1Zg-0.5":
-                name = "templateMixa1L1ZgPiAdapSmooth"
-            elif self.hypothesis == "fL10.5fL1Zg0.5":
-                name = "templateMixL1L1ZgAdapSmooth"
+            elif match1:
+                name = "templateMixa1{}{}AdapSmooth".format(match1.group(1), "Pi" if match1.group(2) else "")
+            elif match2:
+                name = "templateMix{}{}{}AdapSmooth".format(match2.group(1), match2.group(2), "Pi" if match2.group(3) else "")
+            else:
+                print self.hypothesis
         elif self.productionmode in ("VBF", "ZH", "WH"):
             if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
@@ -764,9 +759,9 @@ class Template(TemplateBase, MultiEnum):
         if self.shapesystematic == "MINLO_SM":
             result = len(self.reweightfrom())
         elif self.productionmode in ("VBF", "ggH", "ZH", "WH"):
-            result = ReweightingSample(self.productionmode, self.hypothesis).xsec / ReweightingSample(self.productionmode, "SM").xsec
+            result = uncertainties.nominal_value(ReweightingSample(self.productionmode, self.hypothesis).xsec) / uncertainties.nominal_value(ReweightingSample(self.productionmode, "SM").xsec)
         elif self.productionmode == "ttH":
-            result = ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis).xsec / ReweightingSample(self.productionmode, "SM", "Hff0+").xsec
+            result = uncertainties.nominal_value(ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis).xsec) / uncertainties.nominal_value(ReweightingSample(self.productionmode, "SM", "Hff0+").xsec)
         elif self.productionmode in ("VBF bkg", "ggZZ", "ZX", "data"):
             result = len(self.reweightfrom())
         elif self.productionmode == "qqZZ":
@@ -785,14 +780,16 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def domirror(self):
-        if self.analysis not in ("fa3", "fa3_STXS"): return False
+        if self.analysis not in ("fa3", "fa3_STXS", "fa3fa2fL1fL1Zg"): return False
         if self.analysis == "fa3_STXS": return False #for now... could do it later
         if self.productionmode == "data": return False
 
         if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
         if self.hypothesis in ("0+", "0-"): return True
+        if self.hypothesis in ("a2", "L1", "L1Zg", "fa20.5", "fa2-0.5", "fL10.5", "fL1Zg0.5", "fL1Zg-0.5", "fa20.5fL10.5", "fa20.5fL1Zg0.5", "fL10.5fL1Zg0.5"): return True
+        if self.hypothesis in ("fa20.5fa30.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5"): return False
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
-        assert False
+        assert False, self
 
     @property
     def smoothingparameters(self):
@@ -989,28 +986,56 @@ class IntTemplate(TemplateBase, MultiEnum):
     enumname = "inttemplate"
     class InterferenceType(MyEnum):
         enumname = "interferencetype"
-        enumitems = (
-                     EnumItem("g11gi1"),
-                     EnumItem("g11gj1"),
-                     EnumItem("gi1gj1"),
-                     EnumItem("g11gi3"),
-                     EnumItem("g12gi2"),
-                     EnumItem("g13gi1"),
-                    )
+        enumitems = tuple(EnumItem(_) for _ in [
+                    "g{}1g{}1".format(*indices)
+                        for indices in combinations("1ijkl", 2)
+                ] + [
+                    "g{}3g{}1".format(*indices)
+                        for indices in combinations("1ijkl", 2)
+                ] + [
+                    "g{}2g{}2".format(*indices)
+                        for indices in combinations("1ijkl", 2)
+                ] + [
+                    "g{}1g{}3".format(*indices)
+                        for indices in combinations("1ijkl", 2)
+                ] + [
+                    "g{}2g{}1g{}1".format(*indices)
+                        for indices in combinations("1ijkl", 3)
+                ] + [
+                    "g{}1g{}2g{}1".format(*indices)
+                        for indices in combinations("1ijkl", 3)
+                ] + [
+                    "g{}1g{}1g{}2".format(*indices)
+                        for indices in combinations("1ijkl", 3)
+                ] + [
+                    "g{}1g{}1g{}1g{}1".format(*indices)
+                        for indices in combinations("1ijkl", 4)
+                ])
+
+        @property
+        def couplingpowers(self):
+            return Counter({coupling: int(power) for coupling, power in re.findall("g(.)([1-9][0-9]*)", str(self))})
+        @property
+        def mindimensions(self):
+            return max({"1": 0, "i": 1, "j": 2, "k": 3, "l": 4}[g] for g in self.couplingpowers.elements())
+        @property
+        def totalpower(self):
+            return sum(self.couplingpowers.values())
+
     enums = [TemplatesFile, ProductionMode, InterferenceType, HffHypothesis]
 
     def check(self, *args):
 
         dontcheck = []
 
-        if self.interferencetype in ("g11gj1", "gi1gj1") and self.analysis.dimensions != 2:
-            raise ValueError("Invalid interferencetype {} for 1D analysis\n{}".format(self.interferencetype, args))
+        if self.interferencetype.mindimensions > self.analysis.dimensions:
+            raise ValueError("Invalid interferencetype {} for {}D analysis\n{}".format(self.interferencetype, self.analysis.dimensions, args))
 
         if self.productionmode in ("ggH", "ttH"):
-            if self.interferencetype not in ("g11gi1", "g11gj1", "gi1gj1"):
+            if self.interferencetype.totalpower != 2:
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
         elif self.productionmode in ("VBF", "ZH", "WH"):
-            if self.interferencetype not in ("g11gi3", "g12gi2", "g13gi1"):
+            if self.interferencetype.totalpower != 4:
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
         else:
             raise ValueError("Invalid productionmode {}!\n{}".format(self.productionmode, args))
@@ -1026,7 +1051,13 @@ class IntTemplate(TemplateBase, MultiEnum):
         super(IntTemplate, self).check(*args, dontcheck=dontcheck)
 
     def templatename(self, final=True):
-        if self.productionmode in ("ggH", "ttH"):
+        if self.analysis.dimensions == 4:
+            result = "template"+str(self.interferencetype)+"IntAdapSmooth"
+            result = result.replace("gi", self.analysis.couplingnames[0])
+            result = result.replace("gj", self.analysis.couplingnames[1])
+            result = result.replace("gk", self.analysis.couplingnames[2])
+            result = result.replace("gl", self.analysis.couplingnames[3])
+        elif self.productionmode in ("ggH", "ttH"):
             if self.interferencetype == "g11gi1":
                 if self.analysis in ("fa3", "fa3_STXS"):
                     result = "templatea1a3IntAdapSmooth"
@@ -1042,20 +1073,21 @@ class IntTemplate(TemplateBase, MultiEnum):
             elif self.interferencetype == "gi1gj1":
                 if self.analysis.isfL1fL1Zg:
                     result = "templateL1L1ZgIntAdapSmooth"
-        if self.productionmode in ("VBF", "ZH", "WH"):
+        elif self.productionmode in ("VBF", "ZH", "WH"):
             if self.interferencetype == "g11gi3":
                 result = "templateg11{}3AdapSmooth".format(self.analysis.couplingname)
             if self.interferencetype == "g12gi2":
                 result = "templateg12{}2AdapSmooth".format(self.analysis.couplingname)
             if self.interferencetype == "g13gi1":
                 result = "templateg13{}1AdapSmooth".format(self.analysis.couplingname)
+
         if self.domirror:
             result += "Mirror"
         return result
 
     @property
     def mirrorjsn(self):
-        if self.analysis not in ("fa3", "fa3_STXS"): return None
+        if self.analysis not in ("fa3", "fa3_STXS", "fa3fa2fL1fL1Zg"): return None
 
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH"):
@@ -1077,9 +1109,11 @@ class IntTemplate(TemplateBase, MultiEnum):
 
         #cross talk to the untagged category is exactly correct, since the decay is the same
 
-        if self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
+        if (self.interferencetype in ("g11gi1", "g11gi3", "g13gi1")
+            or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] in (1, 3)):
             return {"type":"mirror", "antisymmetric":True, "axis":1}
-        elif self.interferencetype == "g12gi2":
+        elif (self.interferencetype == "g12gi2"
+              or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] in (0, 2, 4)):
             return {"type":"mirror", "antisymmetric":False, "axis":1}
         assert False
 
@@ -1090,39 +1124,73 @@ class IntTemplate(TemplateBase, MultiEnum):
     @property
     @cache
     def templatesandfactors(self):
-        if self.interferencetype == "g11gi1":
-            g1exp = giexp = 1
-            rowofinvertedmatrix = giexp #first row is labeled 0
-            hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
-            multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
+        if self.analysis.dimensions == 4:
+            maxpower = self.interferencetype.totalpower
+            def rowofinvertedmatrix():
+                index = 0
+                for l in range(maxpower+1):
+                    for k in range(maxpower+1-l):
+                        for j in range(maxpower+1-k-l):
+                            for i in range(maxpower+1-j-k-l):
+                                dct = Counter({"i": i, "j": j, "k": k, "l": l})
+                                dct["1"] = maxpower - sum(dct.values())
+                                for key, val in dct.items():
+                                    if not val:
+                                        del dct[key]
+                                if dct == self.interferencetype.couplingpowers:
+                                    return index
+                                index += 1
+                assert False, self.interferencetype.couplingpowers
 
-        if self.interferencetype == "g11gj1":
-            assert self.analysis.dimensions == 2
-            rowofinvertedmatrix = 3 #first row is labeled 0
+            rowofinvertedmatrix = rowofinvertedmatrix()
             hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
-            multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[2], hffhypothesis), self.analysis.purehypotheses[2].couplingname)
-
-        if self.interferencetype == "gi1gj1":
-            assert self.analysis.dimensions == 2
-            rowofinvertedmatrix = 4 #first row is labeled 0
-            hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
-            multiplyby = (
-                          getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
-                         *
-                          getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[2], hffhypothesis), self.analysis.purehypotheses[2].couplingname)
-                         )
-
-        if self.interferencetype in ("g11gi3", "g12gi2", "g13gi1"):
-            g1exp, giexp = (int(i) for i in str(self.interferencetype).replace("g1", "").replace("gi", ""))
-            rowofinvertedmatrix = giexp #first row is labeled 0
             multiplyby = 1
+
+        elif self.interferencetype == "g11gi1":
+            if self.analysis.dimensions in (1, 2):
+                g1exp = giexp = 1
+                rowofinvertedmatrix = giexp #first row is labeled 0
+                hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
+                multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
+            else:
+                assert False, analysis.dimensions
+
+        elif self.interferencetype == "g11gj1":
+            if self.analysis.dimensions == 2:
+                rowofinvertedmatrix = 3 #first row is labeled 0
+                hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
+                multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[2], hffhypothesis), self.analysis.purehypotheses[2].couplingname)
+            else:
+                assert False, analysis.dimensions
+
+        elif self.interferencetype == "gi1gj1":
+            if self.analysis.dimensions == 2:
+                rowofinvertedmatrix = 4 #first row is labeled 0
+                hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
+                multiplyby = (
+                              getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
+                             *
+                              getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[2], hffhypothesis), self.analysis.purehypotheses[2].couplingname)
+                             )
+            else:
+                assert False, analysis.dimensions
+
+        elif self.interferencetype in ("g11gi3", "g12gi2", "g13gi1"):
+            if self.analysis.dimensions == 1:
+                g1exp, giexp = (int(i) for i in str(self.interferencetype).replace("g1", "").replace("gi", ""))
+                rowofinvertedmatrix = giexp #first row is labeled 0
+                multiplyby = 1
+            else:
+                assert False, analysis.dimensions
 
         invertedmatrix = self.templatesfile.invertedmatrix
         vectoroftemplates = self.templatesfile.templates()  #ok technically it's a list not a vector
         templatesandfactors = []
 
         for j, template in enumerate(vectoroftemplates):
-            templatesandfactors.append((template, invertedmatrix[rowofinvertedmatrix,j] * multiplyby))
+            factor = invertedmatrix[rowofinvertedmatrix,j] * multiplyby
+            if factor:
+                templatesandfactors.append((template, factor))
 
         return templatesandfactors
 
@@ -1232,3 +1300,12 @@ class SubtractDataTree(DataTree, MultiEnum):
 #for channel in channels:
 #    if "160729" in productions:
 #        datatrees.append(SubtractDataTree("160729", "subtract160720", channel))
+
+if __name__ == "__main__":
+    numpy.set_printoptions(edgeitems=35)
+    tf = TemplatesFile("vbf", "2e2mu", "Untagged", "fa3fa2fL1fL1Zg")
+    productionmode = str(tf.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH")
+    basis = SampleBasis([template.hypothesis for template in tf.templates()], productionmode, tf.analysis)
+    print basis.matrix
+    print numpy.linalg.det(basis.matrix)
+    print basis.invertedmatrix

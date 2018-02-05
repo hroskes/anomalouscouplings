@@ -637,7 +637,7 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def isfL1fL1Zg(self):
-        return "fL1fL1Zg" in str(self)
+        return "fL1fL1Zg" in str(self) and self != "fa3fa2fL1fL1Zg"
 
 class Production(MyEnum):
     enumname = "production"
@@ -821,7 +821,7 @@ productionmodes = ProductionMode.items()
 if config.LHE:
     analyses = Analysis.items(lambda x: x.doLHE)
 else:
-    analyses = Analysis.items(lambda x: x.doCMS and x in ("fL1fL1Zg", "fa3_STXS"))
+    analyses = Analysis.items(lambda x: x.doCMS and x == "fa3fa2fL1fL1Zg")
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)

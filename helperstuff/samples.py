@@ -1630,12 +1630,16 @@ class SampleBasis(MultiEnum):
     def check(self, *args):
         args = (self.hypotheses,)+args
         if self.productionmode in ("ggH", "ttH"):
-            if self.analysis.dimensions == 2:
+            if self.analysis.dimensions == 4:
+                dimension = 15
+            elif self.analysis.dimensions == 2:
                 dimension = 6
             else:
                 dimension = 3
         elif self.productionmode in ("VBF", "WH", "ZH"):
-            if self.analysis.dimensions == 2:
+            if self.analysis.dimensions == 4:
+                dimension = 70
+            elif self.analysis.dimensions == 2:
                 assert False  #have to figure this out
             else:
                 dimension = 5
@@ -1655,7 +1659,12 @@ class SampleBasis(MultiEnum):
         dimension = len(self.hypotheses)
         samples = [ReweightingSample(self.productionmode, _, hffhypothesis) for _ in self.hypotheses]
         if self.analysis.dimensions == 4:
-            maxpower = dimension-1
+            if dimension == 15:
+                maxpower = 2
+            elif dimension == 70:
+                maxpower = 4
+            else:
+                assert False, dimension
             assert len(self.analysis.couplingnames) == 4
             return numpy.matrix(
                                 [

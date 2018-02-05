@@ -4,7 +4,10 @@ from math import pi
 from config import defaultnbins
 from utilities import rreplace
 
-Discriminant = namedtuple("Discriminant", "name title bins min max")
+class Discriminant(namedtuple("Discriminant", "name title bins min max identifier")):
+    def __new__(cls, name, title, bins, min, max, identifier=None):
+        if identifier is None: identifier = name
+        return super(Discriminant, cls).__new__(cls, name=name, title=title, bins=bins, min=min, max=max, identifier=identifier)
 
 decaydiscriminants = [
     Discriminant("D_bkg", "D_{bkg}", defaultnbins, 0, 1),
@@ -39,6 +42,7 @@ decaydiscriminants = [
 
     Discriminant("D_4couplings_decay_raw", "D_{4}^{dec,raw}", 162, 0, 162),
     Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-40, 0, 162-40),
+    Discriminant("D_CP_decay", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_decay_2bins"),
 ]
 VBFdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),
@@ -97,30 +101,30 @@ categorydiscriminants = [
 
 discriminants = decaydiscriminants + VBFdiscriminants + VHdiscriminants + categorydiscriminants
 discriminants += list(
-    Discriminant(name+"_"+JEC, rreplace(title, "}", ", "+JEC, 1), nbins, min, max)
-        for name, title, nbins, min, max in VBFdiscriminants+VHdiscriminants
+    Discriminant(name+"_"+JEC, rreplace(title, "}", ", "+JEC, 1), nbins, min, max, identifier+"_"+JEC)
+        for name, title, nbins, min, max, identifier in VBFdiscriminants+VHdiscriminants
         for JEC in ("JECUp", "JECDn")
 )
-if len(discriminants) != len({d.name for d in discriminants}):
-    raise ValueError("Multiple discriminants have the same name")
+if len(discriminants) != len({d.identifier for d in discriminants}):
+    raise ValueError("Multiple discriminants have the same identifier")
 
-discriminants = {d.name: d for d in discriminants}
+discriminants = {d.identifier: d for d in discriminants}
 
 del decaydiscriminants, VBFdiscriminants, VHdiscriminants, categorydiscriminants
 
 otherplottablethings = {
-    d.name: d for d in [
+    d.identifier: d for d in [
         Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
         Discriminant("DiJetMass", "m_{JJ}", 50, 0, 150),
     ]
 }
 
-def discriminant(name):
-    if isinstance(name, Discriminant): return name
-    if name in discriminants:
-        return discriminants[name]
-    if name in otherplottablethings:
-        return otherplottablethings[name]
-    raise KeyError("Unknown discriminant {}".format(name))
+def discriminant(identifier):
+    if isinstance(identifier, Discriminant): return identifier
+    if identifier in discriminants:
+        return discriminants[identifier]
+    if identifier in otherplottablethings:
+        return otherplottablethings[identifier]
+    raise KeyError("Unknown discriminant {}".format(identifier))
 
-assert not any(_ in otherplottablethings for _ in discriminants)
+assert not set(otherplottablethings) & set(discriminants), set(otherplottablethings) & set(discriminants)
