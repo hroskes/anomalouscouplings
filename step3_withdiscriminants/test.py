@@ -12,9 +12,9 @@ import os
 
 #========================
 #inputs
-productionmode = "ttH"
-disc           = "D_CP_VBF"
-reweightto     = ReweightingSample(productionmode, "0+", "Hff0+")
+productionmode = "VBF"
+disc           = "D_0minus_VBF"
+reweightto     = ReweightingSample(productionmode, "0+")
 bins           = None
 min            = None
 max            = None
@@ -28,7 +28,7 @@ channel        = None
 category       = "VBFtagged"
 analysis       = "fa3"
 
-cut            = "D_bkg<1./40"
+cut            = None
 
 skip           = []
 #========================

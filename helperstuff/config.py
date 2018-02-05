@@ -14,7 +14,7 @@ elif ("login-node" in socket.gethostname() or "compute" in socket.gethostname() 
     host = "MARCC"
     repositorydir = "/work-zfs/lhc/heshy/bkpanomalouscouplings/HIG-17-011"
     repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/"
-    plotsbasedir = "/work-zfs/lhc/heshy/bkpanomalouscouplings/HIG-17-011/"
+    plotsbasedir = "/work-zfs/lhc/heshy/bkpanomalouscouplings/HIG-17-011/plots/"
     email = "heshyr@gmail.com"
 
 repositorydir = os.path.realpath(repositorydir)
