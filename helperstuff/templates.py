@@ -433,6 +433,7 @@ class TemplatesFile(MultiEnum):
                     assert False
 
         except:
+            numpy.set_printoptions(edgeitems=35)
             print invertedmatrix
             raise
 
@@ -661,6 +662,13 @@ class Template(TemplateBase, MultiEnum):
             else:
                 print self.hypothesis
         elif self.productionmode in ("VBF", "ZH", "WH"):
+            match1 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?(?P<sign>-?)0.5$", str(self.hypothesis))
+            match2 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.5f(P<aj>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.5$", str(self.hypothesis))
+            match3 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.33f(P<aj>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.33$", str(self.hypothesis))
+            match4 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.33f(?P<aj>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.33f(P<ak>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.33$", str(self.hypothesis))
+            match5 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(?P<aj>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(P<ak>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.25$", str(self.hypothesis))
+            match6 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(?P<aj>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(?P<ak>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(P<al>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.25$", str(self.hypothesis))
+            pddict = {"prod": "Prod", "dec": "Decay", "proddec": "ProdDec"}
             if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
             elif self.hypothesis == "0-":
@@ -671,18 +679,51 @@ class Template(TemplateBase, MultiEnum):
                 name = "template0L1AdapSmooth"
             elif self.hypothesis == "L1Zg":
                 name = "template0L1ZgAdapSmooth"
-            elif self.hypothesis in ("fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5"):
-                name = "templateMixDecayAdapSmooth"
-            elif self.hypothesis in ("fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5"):
-                name = "templateMixProdAdapSmooth"
-            elif self.hypothesis in ("fa2proddec-0.5", "fa3proddec-0.5", "fL1proddec-0.5", "fL1Zgproddec-0.5"):
-                name = "templateMixProdDecPiAdapSmooth"
-            elif self.hypothesis in ("fa2dec-0.5", "fa3dec-0.5", "fL1dec-0.5", "fL1Zgdec-0.5"):
-                name = "templateMixDecayPiAdapSmooth"
-            elif self.hypothesis in ("fa2prod-0.5", "fa3prod-0.5", "fL1prod-0.5", "fL1Zgprod-0.5"):
-                name = "templateMixProdPiAdapSmooth"
-            elif self.hypothesis in ("fa2proddec0.5", "fa3proddec0.5", "fL1proddec0.5", "fL1Zgproddec0.5"):
-                name = "templateMixProdDecAdapSmooth"
+            elif match1:
+                name = "templateMixa1{}{}{}AdapSmooth".format(
+                    match1.group("ai"),
+                    pddict[match1.group("proddec")],
+                    "Pi" if match1.group("sign") else ""
+                )
+            elif match2:
+                name = "templateMix{}{}{}{}AdapSmooth".format(
+                    match2.group("ai"),
+                    match2.group("aj"),
+                    pddict[match2.group("proddec")],
+                    "Pi" if match2.group("sign") else ""
+                )
+            elif match3:
+                name = "templateMixa1{}{}{}{}AdapSmooth".format(
+                    match3.group("ai"),
+                    match3.group("aj"),
+                    pddict[match3.group("proddec")],
+                    "Pi" if match3.group("sign") else ""
+                )
+            elif match4:
+                name = "templateMix{}{}{}{}{}AdapSmooth".format(
+                    match4.group("ai"),
+                    match4.group("aj"),
+                    match4.group("ak"),
+                    pddict[match4.group("proddec")],
+                    "Pi" if match4.group("sign") else ""
+                )
+            elif match5:
+                name = "templateMixa1{}{}{}{}{}AdapSmooth".format(
+                    match5.group("ai"),
+                    match5.group("aj"),
+                    match5.group("ak"),
+                    pddict[match5.group("proddec")],
+                    "Pi" if match5.group("sign") else ""
+                )
+            elif match6:
+                name = "templateMix{}{}{}{}{}{}AdapSmooth".format(
+                    match6.group("ai"),
+                    match6.group("aj"),
+                    match6.group("ak"),
+                    match6.group("al"),
+                    pddict[match6.group("proddec")],
+                    "Pi" if match6.group("sign") else ""
+                )
         elif self.productionmode == "ZX" and not config.usedata:
             name = "templateqqZZAdapSmooth"
         elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
