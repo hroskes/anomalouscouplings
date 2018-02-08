@@ -382,54 +382,59 @@ class TemplatesFile(MultiEnum):
         productionmode = str(self.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH")
         basis = SampleBasis([template.hypothesis for template in self.templates()], productionmode, self.analysis)
         invertedmatrix = basis.invertedmatrix
-        if self.templategroup in ("vbf", "zh", "wh"):
-            """
-            basis.matrix looks something like this:
-            1,    0,      0,        0,      0
-            0,    0,      0,        0,      g4^4
-            g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
-            g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
-            g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
+        try:
+            if self.templategroup in ("vbf", "zh", "wh"):
+                """
+                basis.matrix looks something like this:
+                1,    0,      0,        0,      0
+                0,    0,      0,        0,      g4^4
+                g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
+                g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
+                g1^4, g1^3g4, g1^2g4^2, g1g4^3, g4^4
 
-            multiply inverted matrix by the vector of templates.  This should give back
-               templates for each respective term (g1^4g4^0, g1^3g4^1, ...)
-            In the PDF, the templates need to be multiplied by (g1^i)(g4^(4-i))
-            """
-            if self.analysis.dimensions == 1:
-                #make sure the two pure templates can be used as is
-                #these assertions should be equivalent to asserting that SMtemplate.g1 == anomaloustemplate.ganomalous == 1
-                # and that the two pure samples are in the right places on the list
-                assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
-                assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
-            elif self.analysis.dimensions == 4:
-                assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
-                assert invertedmatrix[4, 1] == 1 and all(invertedmatrix[4, i] == 0 for i in range(0, 1)+range(2, 70))
-                assert invertedmatrix[14,2] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 2)+range(3, 70))
-                assert invertedmatrix[34,3] == 1 and all(invertedmatrix[34,i] == 0 for i in range(0, 3)+range(4, 70))
-                assert invertedmatrix[69,4] == 1 and all(invertedmatrix[69,i] == 0 for i in range(0, 4)+range(5, 70))
-            else:
-                assert False
+                multiply inverted matrix by the vector of templates.  This should give back
+                   templates for each respective term (g1^4g4^0, g1^3g4^1, ...)
+                In the PDF, the templates need to be multiplied by (g1^i)(g4^(4-i))
+                """
+                if self.analysis.dimensions == 1:
+                    #make sure the two pure templates can be used as is
+                    #these assertions should be equivalent to asserting that SMtemplate.g1 == anomaloustemplate.ganomalous == 1
+                    # and that the two pure samples are in the right places on the list
+                    assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
+                    assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
+                elif self.analysis.dimensions == 4:
+                    assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
+                    assert invertedmatrix[4, 1] == 1 and all(invertedmatrix[4, i] == 0 for i in range(0, 1)+range(2, 70))
+                    assert invertedmatrix[14,2] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 2)+range(3, 70))
+                    assert invertedmatrix[34,3] == 1 and all(invertedmatrix[34,i] == 0 for i in range(0, 3)+range(4, 70))
+                    assert invertedmatrix[69,4] == 1 and all(invertedmatrix[69,i] == 0 for i in range(0, 4)+range(5, 70))
+                else:
+                    assert False
 
-        if self.templategroup in ("ggh", "tth"):
-            if self.analysis.dimensions == 4:
-                assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 15))
-                assert                               all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 15))
-                assert                               all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 15))
-                assert                               all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 15))
-                assert                               all(invertedmatrix[14,i] == 0 for i in range(0, 4)+range(5, 15))
-            elif self.analysis.dimensions == 2:
-                assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
-                assert all(invertedmatrix[1,i] == 0 for i in (2, 4, 5))
-                assert all(invertedmatrix[2,i] == 0 for i in (0, 2, 3, 4, 5))
-                assert all(invertedmatrix[3,i] == 0 for i in (1, 3, 5))
-                assert all(invertedmatrix[4,i] == 0 for i in (0, 3, 4))
-                assert all(invertedmatrix[5,i] == 0 for i in (0, 1, 3, 4, 5))
-                assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
-            elif self.analysis.dimensions == 1:
-                assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,3))
-                assert invertedmatrix[2,0] == 0 and invertedmatrix[2,2] == 0 #can't assert invertedmatrix[2,1] == 1 because different convention :(
-            else:
-                assert False
+            if self.templategroup in ("ggh", "tth"):
+                if self.analysis.dimensions == 4:
+                    assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 15))
+                    assert                               all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 15))
+                    assert                               all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 15))
+                    assert                               all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 15))
+                    assert                               all(invertedmatrix[14,i] == 0 for i in range(0, 4)+range(5, 15))
+                elif self.analysis.dimensions == 2:
+                    assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
+                    assert all(invertedmatrix[1,i] == 0 for i in (2, 4, 5))
+                    assert all(invertedmatrix[2,i] == 0 for i in (0, 2, 3, 4, 5))
+                    assert all(invertedmatrix[3,i] == 0 for i in (1, 3, 5))
+                    assert all(invertedmatrix[4,i] == 0 for i in (0, 3, 4))
+                    assert all(invertedmatrix[5,i] == 0 for i in (0, 1, 3, 4, 5))
+                    assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
+                elif self.analysis.dimensions == 1:
+                    assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,3))
+                    assert invertedmatrix[2,0] == 0 and invertedmatrix[2,2] == 0 #can't assert invertedmatrix[2,1] == 1 because different convention :(
+                else:
+                    assert False
+
+        except:
+            print invertedmatrix
+            raise
 
         return invertedmatrix
 
@@ -637,8 +642,8 @@ class Template(TemplateBase, MultiEnum):
 
     def templatename(self, final=True):
         if self.productionmode in ("ggH", "ttH"):
-            match1 = re.match("f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5", str(self.hypothesis))
-            match2 = re.match("f(a2|a3|L1|L1Zg)(?:dec)?0.5f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5", str(self.hypothesis))
+            match1 = re.match("^f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5$", str(self.hypothesis))
+            match2 = re.match("^f(a2|a3|L1|L1Zg)(?:dec)?0.5f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5$", str(self.hypothesis))
             if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
             elif self.hypothesis == "0-":
@@ -1198,7 +1203,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         templatesum = [{
                         "name": template.templatename(final=False),
                         "factor": factor,
-                       } for template, factor in self.templatesandfactors]
+                       } for template, factor in self.templatesandfactors if factor]
         intjsn = [
                   {
                    "name": self.templatename(),

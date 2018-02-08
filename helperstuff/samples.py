@@ -1626,6 +1626,9 @@ class SampleBasis(MultiEnum):
 
     def __hash__(self):
         return hash((super(SampleBasis, self).__hash__(), tuple(self.hypotheses)))
+    def __eq__(self, other):
+        return super(SampleBasis, self).__eq__(other) and self.hypotheses == other.hypotheses
+    #__ne__ is already defined as not == in MultiEnum
 
     def check(self, *args):
         args = (self.hypotheses,)+args
