@@ -7,4 +7,5 @@
 *.root.tmp
 *.C.tmp
 *.cc.tmp
+*.json.tmp
 .__afs*
