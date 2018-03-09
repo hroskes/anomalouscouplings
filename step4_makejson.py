@@ -1,6 +1,10 @@
 #!/usr/bin/env python
-from helperstuff.templates import TemplatesFile, templatesfiles
+
 import json
+import os
+
+from helperstuff.templates import TemplatesFile, templatesfiles
+from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID
 
 def makejson(*args):
   templatesfile = TemplatesFile(*args)

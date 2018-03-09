@@ -403,6 +403,11 @@ class TemplatesFile(MultiEnum):
                     assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
                     assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
                 elif self.analysis.dimensions == 4:
+                    for (i, matrixmultiplies), matrixreturns in itertools.product(enumerate(self.signalsamples()), self.inttemplates()):
+                        j = matrixreturns.rowofinvertedmatrix
+                        hypothesispowers = {self.analysis.purehypotheses["1ijkl".index(k)]: v for k, v in matrixreturns.interferencetype.couplingpowers.iteritems()}
+                        threshold = 1e-10 * matrixmultiplies.xsec / (1e4**sum(hypothesispowers[Hypothesis(_)] for _ in ("L1", "L1Zg")))
+                        if invertedmatrix[i,j] < threshold: invertedmatrix[i,j] = 0
                     assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
                     assert invertedmatrix[4, 1] == 1 and all(invertedmatrix[4, i] == 0 for i in range(0, 1)+range(2, 70))
                     assert invertedmatrix[14,2] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 2)+range(3, 70))
