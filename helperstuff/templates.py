@@ -1173,6 +1173,7 @@ class IntTemplate(TemplateBase, MultiEnum):
     def domirror(self):
         return bool(self.mirrorjsn)
 
+    @property
     def rowofinvertedmatrix(self):
         index = 0
         maxpower = self.interferencetype.totalpower
@@ -1194,7 +1195,7 @@ class IntTemplate(TemplateBase, MultiEnum):
     @cache
     def templatesandfactors(self):
         if self.analysis.dimensions == 4:
-            rowofinvertedmatrix = rowofinvertedmatrix()
+            rowofinvertedmatrix = self.rowofinvertedmatrix
             hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
             multiplyby = 1
 
