@@ -86,6 +86,7 @@ class TemplatesFile(MultiEnum):
         assert ".." not in relpath
         return os.path.join(config.plotsbasedir, "templateprojections", "controlplots", relpath.replace(".root", "").replace("bkp_", ""))
 
+    @cache
     def signalsamples(self):
         if self.templategroup == "ggh" and self.shapesystematic == "MINLO_SM":
             return [ReweightingSamplePlus("ggH", "0+", "MINLO")]
@@ -403,7 +404,7 @@ class TemplatesFile(MultiEnum):
                     assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
                     assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
                 elif self.analysis.dimensions == 4:
-                    for (i, matrixmultiplies), matrixreturns in itertools.product(enumerate(self.signalsamples()), self.inttemplates()):
+                    for (i, matrixmultiplies), matrixreturns in product(enumerate(self.signalsamples()), self.inttemplates()):
                         j = matrixreturns.rowofinvertedmatrix
                         hypothesispowers = {self.analysis.purehypotheses["1ijkl".index(k)]: v for k, v in matrixreturns.interferencetype.couplingpowers.iteritems()}
                         threshold = 1e-10 * matrixmultiplies.xsec / (1e4**sum(hypothesispowers[Hypothesis(_)] for _ in ("L1", "L1Zg")))
@@ -1172,27 +1173,27 @@ class IntTemplate(TemplateBase, MultiEnum):
     def domirror(self):
         return bool(self.mirrorjsn)
 
+    def rowofinvertedmatrix(self):
+        index = 0
+        maxpower = self.interferencetype.totalpower
+        for l in range(maxpower+1):
+            for k in range(maxpower+1-l):
+                for j in range(maxpower+1-k-l):
+                    for i in range(maxpower+1-j-k-l):
+                        dct = Counter({"i": i, "j": j, "k": k, "l": l})
+                        dct["1"] = maxpower - sum(dct.values())
+                        for key, val in dct.items():
+                            if not val:
+                                del dct[key]
+                        if dct == self.interferencetype.couplingpowers:
+                            return index
+                        index += 1
+        assert False, self.interferencetype.couplingpowers
+
     @property
     @cache
     def templatesandfactors(self):
         if self.analysis.dimensions == 4:
-            maxpower = self.interferencetype.totalpower
-            def rowofinvertedmatrix():
-                index = 0
-                for l in range(maxpower+1):
-                    for k in range(maxpower+1-l):
-                        for j in range(maxpower+1-k-l):
-                            for i in range(maxpower+1-j-k-l):
-                                dct = Counter({"i": i, "j": j, "k": k, "l": l})
-                                dct["1"] = maxpower - sum(dct.values())
-                                for key, val in dct.items():
-                                    if not val:
-                                        del dct[key]
-                                if dct == self.interferencetype.couplingpowers:
-                                    return index
-                                index += 1
-                assert False, self.interferencetype.couplingpowers
-
             rowofinvertedmatrix = rowofinvertedmatrix()
             hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
             multiplyby = 1
