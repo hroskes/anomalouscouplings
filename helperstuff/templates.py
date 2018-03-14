@@ -420,6 +420,7 @@ class TemplatesFile(MultiEnum):
                             if matrixmultiplies.hypothesis in ("L1", "L1Zg"): multiplyby = 1e16
                             threshold = 1e-10 * multiplyby / divideby
                             if abs(invertedmatrix[j,i]) < threshold: invertedmatrix[j,i] = 0
+                            if abs(invertedmatrix[j,i] - 1) < 1e-10: invertedmatrix[j,i] = 1
 
                     assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
                     assert invertedmatrix[4, 1] == 1 and all(invertedmatrix[4, i] == 0 for i in range(0, 1)+range(2, 70))
