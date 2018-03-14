@@ -132,9 +132,9 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1Zg"), ReweightingSample(p, "fL1Zgprod0.5"), ReweightingSample(p, "fL1Zgdec0.5"), ReweightingSample(p, "fL1Zgproddec-0.5")]
             if self.analysis == "fa3fa2fL1fL1Zg":
                 hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
-                              "fa30.5",        "fa2-0.5",       "fL10.5",        "fL1Zg-0.5",
-                              "fa3prod0.5",    "fa2prod0.5",    "fL1prod0.5",    "fL1Zgprod0.5",
-                              "fa3proddec0.5", "fa2proddec0.5", "fL1proddec0.5", "fL1Zgproddec0.5",
+                              "fa30.5",         "fa2-0.5",        "fL10.5",         "fL1Zg-0.5",
+                              "fa3prod0.5",     "fa2prod0.5",     "fL1prod0.5",     "fL1Zgprod0.5",
+                              "fa3proddec-0.5", "fa2proddec-0.5", "fL1proddec-0.5", "fL1Zgproddec-0.5",
 
                               "fa30.5fa20.5",                  "fa30.5fL10.5",                  "fa30.5fL1Zg0.5",
                                                                "fa20.5fL10.5",                  "fa20.5fL1Zg0.5",
@@ -681,13 +681,13 @@ class Template(TemplateBase, MultiEnum):
             else:
                 print self.hypothesis
         elif self.productionmode in ("VBF", "ZH", "WH"):
-            match1 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?(?P<sign>-?)0.5$", str(self.hypothesis))
-            match2 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.5f(P<aj>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.5$", str(self.hypothesis))
-            match3 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.33f(P<aj>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.33$", str(self.hypothesis))
-            match4 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.33f(?P<aj>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.33f(P<ak>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.33$", str(self.hypothesis))
-            match5 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(?P<aj>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(P<ak>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.25$", str(self.hypothesis))
-            match6 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(?P<aj>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(?P<ak>a2|a3|L1|L1Zg)(?P<proddec>prod|dec|proddec)?0.25f(P<al>a2|a3|L1|L1Zg)(?P=proddec)?(P<sign>-?)0.25$", str(self.hypothesis))
-            pddict = {"prod": "Prod", "dec": "Decay", "proddec": "ProdDec"}
+            match1 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)(?P<sign>-?)0[.]5$", str(self.hypothesis))
+            match2 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]5f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]5$", str(self.hypothesis))
+            match3 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]33f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]33$", str(self.hypothesis))
+            match4 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]33f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)0[.]33f(?P<ak>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]33$", str(self.hypothesis))
+            match5 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]25f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)0[.]25f(?P<ak>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]25$", str(self.hypothesis))
+            match6 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]25f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)0[.]25f(?P<ak>a2|a3|L1|L1Zg)(?P=proddec)0[.]25f(?P<al>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]25$", str(self.hypothesis))
+            pddict = {"prod": "Prod", "dec": "Decay", "": "Decay", "proddec": "ProdDec"}
             if self.hypothesis == "0+":
                 name = "template0PlusAdapSmooth"
             elif self.hypothesis == "0-":
@@ -850,10 +850,44 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "data": return False
 
         if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
-        if self.hypothesis in ("0+", "0-"): return True
-        if self.hypothesis in ("a2", "L1", "L1Zg", "fa20.5", "fa2-0.5", "fL10.5", "fL1Zg0.5", "fL1Zg-0.5", "fa20.5fL10.5", "fa20.5fL1Zg0.5", "fL10.5fL1Zg0.5"): return True
-        if self.hypothesis in ("fa20.5fa30.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5"): return False
+        if self.hypothesis in ("0+", "0-", "a2", "L1", "L1Zg"): return True
+
+        if self.hypothesis in ("fa20.5", "fa2-0.5", "fL10.5", "fL1Zg0.5", "fL1Zg-0.5"): return True
+        if self.hypothesis in ("fa2prod0.5", "fa2prod-0.5", "fL1prod0.5", "fL1Zgprod0.5", "fL1Zgprod-0.5"): return True
+        if self.hypothesis in ("fa2proddec0.5", "fa2proddec-0.5", "fL1proddec-0.5", "fL1Zgproddec0.5", "fL1Zgproddec-0.5"): return True
+
+        if self.hypothesis in ("fa20.5fL10.5", "fa20.5fL1Zg0.5", "fL10.5fL1Zg0.5"): return True
+        if self.hypothesis in ("fa2prod0.5fL1prod0.5", "fa2prod0.5fL1Zgprod0.5", "fL1prod0.5fL1Zgprod0.5"): return True
+        if self.hypothesis in ("fa2proddec0.5fL1proddec-0.5", "fa2proddec0.5fL1Zgproddec-0.5", "fL1proddec0.5fL1Zgproddec-0.5"): return True
+
+        if self.hypothesis in ("fa20.33fL10.33", "fa20.33fL1Zg0.33", "fL10.33fL1Zg0.33"): return True
+        if self.hypothesis in ("fa2prod0.33fL1prod0.33", "fa2prod0.33fL1Zgprod0.33", "fL1prod0.33fL1Zgprod0.33"): return True
+        if self.hypothesis in ("fa2proddec0.33fL1proddec-0.33", "fa2proddec0.33fL1Zgproddec-0.33", "fL1proddec0.33fL1Zgproddec-0.33"): return True
+
+        if self.hypothesis in ("fa20.33fL10.33fL1Zg0.33",): return True
+        if self.hypothesis in ("fa2prod0.33fL1prod0.33fL1Zgprod0.33",): return True
+        if self.hypothesis in ("fa2proddec0.33fL1proddec0.33fL1Zgproddec-0.33",): return True
+
+        if self.hypothesis in ("fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25",): return True
+
+        if self.hypothesis in ("fa30.5fa20.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5"): return False
+        if self.hypothesis in ("fa3prod0.5fa2prod0.5", "fa3prod0.5fL1prod0.5", "fa3prod0.5fL1Zgprod0.5"): return False
+        if self.hypothesis in ("fa3proddec0.5fa2proddec-0.5", "fa3proddec0.5fL1proddec-0.5", "fa3proddec0.5fL1Zgproddec-0.5"): return False
+
+        if self.hypothesis in ("fa30.33fa20.33", "fa30.33fL10.33", "fa30.33fL1Zg0.33"): return False
+        if self.hypothesis in ("fa3prod0.33fa2prod0.33", "fa3prod0.33fL1prod0.33", "fa3prod0.33fL1Zgprod0.33"): return False
+        if self.hypothesis in ("fa3proddec0.33fa2proddec-0.33", "fa3proddec0.33fL1proddec-0.33", "fa3proddec0.33fL1Zgproddec-0.33"): return False
+
+        if self.hypothesis in ("fa30.33fa20.33fL10.33", "fa30.33fa20.33fL1Zg0.33", "fa30.33fL10.33fL1Zg0.33"): return False
+        if self.hypothesis in ("fa3prod0.33fa2prod0.33fL1prod0.33", "fa3prod0.33fa2prod0.33fL1Zgprod0.33", "fa3prod0.33fL1prod0.33fL1Zgprod0.33"): return False
+        if self.hypothesis in ("fa3proddec0.33fa2proddec0.33fL1proddec-0.33", "fa3proddec0.33fa2proddec0.33fL1Zgproddec-0.33", "fa3proddec0.33fL1proddec0.33fL1Zgproddec-0.33"): return False
+
+        if self.hypothesis in ("fa3proddec0.25fa2proddec0.25fL1proddec0.25", "fa3proddec0.25fa2proddec0.25fL1Zgproddec0.25", "fa3proddec0.25fL1proddec0.25fL1Zgproddec0.25"): return False
+
+        if self.hypothesis in ("fa3proddec0.25fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25",): return False
+
         if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
+
         assert False, self
 
     @property
