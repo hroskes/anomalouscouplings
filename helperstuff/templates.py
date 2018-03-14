@@ -2,7 +2,7 @@
 
 import abc
 from collections import Counter
-from itertools import combinations, product
+from itertools import combinations, izip, product
 import json
 from math import isnan
 import os
@@ -404,11 +404,23 @@ class TemplatesFile(MultiEnum):
                     assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,5))
                     assert invertedmatrix[4,1] == 1 and invertedmatrix[4,0] == 0 and all(invertedmatrix[4,i] == 0 for i in range(2,5))
                 elif self.analysis.dimensions == 4:
-                    for (i, matrixmultiplies), matrixreturns in product(enumerate(self.signalsamples()), self.inttemplates()):
-                        j = matrixreturns.rowofinvertedmatrix
-                        hypothesispowers = {self.analysis.purehypotheses["1ijkl".index(k)]: v for k, v in matrixreturns.interferencetype.couplingpowers.iteritems()}
-                        threshold = 1e-10 * matrixmultiplies.xsec / (1e4**sum(hypothesispowers[Hypothesis(_)] for _ in ("L1", "L1Zg")))
-                        if invertedmatrix[i,j] < threshold: invertedmatrix[i,j] = 0
+                    def rows():
+                        for matrixreturns in self.inttemplates():
+                            j = matrixreturns.rowofinvertedmatrix
+                            hypothesispowers = Counter({self.analysis.purehypotheses["1ijkl".index(k)]: v for k, v in matrixreturns.interferencetype.couplingpowers.iteritems()})
+                            yield j, matrixreturns, hypothesispowers
+                        for index, h in izip((0, 4, 14, 34, 69), self.analysis.purehypotheses):
+                            yield index, h, Counter({h: 4})
+
+                    for j, matrixreturns, hypothesispowers in rows():
+                        print j
+                        divideby = 1e4**sum(hypothesispowers[Hypothesis(_)] for _ in ("L1", "L1Zg"))
+                        for i, matrixmultiplies in enumerate(self.signalsamples()):
+                            multiplyby = 1
+                            if matrixmultiplies.hypothesis in ("L1", "L1Zg"): multiplyby = 1e16
+                            threshold = 1e-10 * multiplyby / divideby
+                            if abs(invertedmatrix[j,i]) < threshold: invertedmatrix[j,i] = 0
+
                     assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
                     assert invertedmatrix[4, 1] == 1 and all(invertedmatrix[4, i] == 0 for i in range(0, 1)+range(2, 70))
                     assert invertedmatrix[14,2] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 2)+range(3, 70))
