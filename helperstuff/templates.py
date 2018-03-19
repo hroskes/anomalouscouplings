@@ -830,13 +830,16 @@ class Template(TemplateBase, MultiEnum):
             result = len(self.reweightfrom())
         elif self.productionmode == "qqZZ":
             result = 1
-        result /= sum(
-                      Sample.effectiveentries(
-                                              reweightfrom=reweightfrom,
-                                              reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis)
-                                             )
-                       for reweightfrom in self.reweightfrom()
-                     )
+        try:
+            result /= sum(
+                          Sample.effectiveentries(
+                                                  reweightfrom=reweightfrom,
+                                                  reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis)
+                                                 )
+                           for reweightfrom in self.reweightfrom()
+                         )
+        except ZeroDivisionError:
+            result = 0
         if isnan(result): result = 0
         if self.productionmode in ("VBF bkg", "ggZZ", "ZX", "data"):
             assert result == 1
