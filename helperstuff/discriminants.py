@@ -43,6 +43,8 @@ decaydiscriminants = [
     Discriminant("D_4couplings_decay_raw", "D_{4}^{dec,raw}", 162, 0, 162),
     Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-40, 0, 162-40),
     Discriminant("D_CP_decay", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_decay_2bins"),
+    Discriminant("D_CP_VBF", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_VBF_2bins"),
+    Discriminant("D_CP_HadVH", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_HadVH_2bins"),
     Discriminant("D_bkg", "D_{bkg}", 10, 0, 1, identifier="D_bkg_10bins"),
 ]
 VBFdiscriminants = [

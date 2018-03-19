@@ -354,7 +354,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
             if self.analysis == "fa3fa2fL1fL1Zg":
-                return discriminant("D_CP_VBFdecay_2bins")
+                return discriminant("D_CP_VBF_2bins")
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -368,7 +368,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
             if self.analysis == "fa3fa2fL1fL1Zg":
-                return discriminant("D_CP_HadVHdecay_2bins")
+                return discriminant("D_CP_HadVH_2bins")
 
         assert False
 
@@ -413,7 +413,6 @@ class TemplatesFile(MultiEnum):
                             yield index, h, Counter({h: 4})
 
                     for j, matrixreturns, hypothesispowers in rows():
-                        print j
                         divideby = 1e4**sum(hypothesispowers[Hypothesis(_)] for _ in ("L1", "L1Zg"))
                         for i, matrixmultiplies in enumerate(self.signalsamples()):
                             multiplyby = 1
@@ -1190,11 +1189,15 @@ class IntTemplate(TemplateBase, MultiEnum):
 
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH"):
-            assert self.interferencetype == "g11gi1"
-            #ggH has no production information, and only using SM ttH, so mirror antisymmetric
-            #over the (pretend) D_CP_decay axis, which sets the whole thing to 0
-            #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
-            return {"type":"rescale", "factor":0}
+            if (self.interferencetype == "g11gi1"
+                or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] == 1):
+                #ggH has no production information, and only using SM ttH, so mirror antisymmetric
+                #over the (pretend) D_CP_decay axis, which sets the whole thing to 0
+                #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
+                return {"type":"rescale", "factor":0}
+            if self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] == 0:
+                return {"type":"mirror", "antisymmetric":False, "axis":1}
+            assert False
 
         if self.analysis == "fa3_STXS" and self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
             #same (antimirror over D_CP_whatever, which doesn't exist in STXS)

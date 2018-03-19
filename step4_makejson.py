@@ -5,7 +5,8 @@ import json
 def makejson(*args):
     templatesfile = TemplatesFile(*args)
     if templatesfile.copyfromothertemplatesfile is not None: return
-    print templatesfile
+    import datetime
+    print templatesfile, datetime.datetime.now()
 
     jsonstring = json.dumps(templatesfile.getjson(), sort_keys=True, indent=4, separators=(',', ': '))
     filename = templatesfile.jsonfile()
