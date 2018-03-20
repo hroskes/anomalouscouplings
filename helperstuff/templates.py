@@ -63,7 +63,7 @@ class TemplatesFile(MultiEnum):
 
         return result
 
-    def templatesfile(self, iteration=None, firststep=False):
+    def templatesfile(self, iteration=None, firststep=False, splitinterference=False):
         if self.copyfromothertemplatesfile is not None:
             return self.copyfromothertemplatesfile.templatesfile()
 
@@ -75,6 +75,7 @@ class TemplatesFile(MultiEnum):
 
         nameparts = ["templates", self.templategroup, self.analysis, self.channel, self.category, self.shapesystematic, self.production]
         if firststep: nameparts.append("firststep")
+        if splitinterference: nameparts.append("splitint")
 
         nameparts = [str(x) for x in nameparts if x]
         result = os.path.join(folder, "_".join(x for x in nameparts if x) + ".root")

@@ -18,6 +18,25 @@ from helperstuff.templates import IntTemplate, Template, TemplatesFile
 
 dom4lshapes = any((config.applym4lshapesystematicsUntagged, config.applym4lshapesystematicsVBFVHtagged, config.applym4lshapesystematicsggH, config.applym4lshapesystematicsggHUntagged, config.applym4lshapesystematicsdiagonal))
 
+def splitinterference(*templatesfile):
+    templatesfile = TemplatesFile(*templatesfile)
+    newf = ROOT.TFile(templatesfile.templatesfile(splitinterference=True), "RECREATE")
+    cache = []
+    for template in templatesfile.templates():
+        template.SetDirectory(newf)
+        cache += template
+    for inttemplate in templatesfile.inttemplates():
+        positive = inttemplate.gettemplate().Clone(inttemplate.templatename()+"_positive")
+        positive.Floor(0)
+        positive.SetDirectory(newf)
+        negative = inttemplate.gettemplate().Clone(inttemplate.templatename()+"_negative")
+        negative.Scale(-1)
+        negative.Floor(0)
+        negative.SetDirectory(newf)
+        cache += [positive, negative]
+    newf.Write()
+    newf.Close()
+
 def combinesystematics(channel, analysis, production, category):
     thetemplatesfiles = []
 

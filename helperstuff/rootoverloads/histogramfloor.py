@@ -1,6 +1,8 @@
 from itertools import product
 import ROOT
 
+assert not hasattr(ROOT.TH1, "Floor")
+
 def Floor(self, floorvalue=1e-18):
     if isinstance(self, ROOT.TH3):
         bins = product(range(self.GetNbinsX()+2), range(self.GetNbinsY()+2), range(self.GetNbinsZ()+2))
