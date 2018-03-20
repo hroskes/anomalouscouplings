@@ -53,7 +53,7 @@ in python.
 try:
   import uncertainties
 except ImportError:
-  raise ImportError("Need to install uncertainties!  Try running step1.")
+  raise ImportError("Need to install uncertainties!")
 
 from uncertainties import ufloat
 from uncertainties.umath import sqrt
