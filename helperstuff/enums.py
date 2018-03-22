@@ -641,6 +641,11 @@ class Analysis(MyEnum):
     def isfL1fL1Zg(self):
         return "fL1fL1Zg" in str(self) and self != "fa3fa2fL1fL1Zg"
 
+    @property
+    def usehistogramsforcombine(self):
+        if self == "fa3fa2fL1fL1Zg": return True
+        return False
+
 class Production(MyEnum):
     enumname = "production"
     enumitems = (

@@ -15,6 +15,7 @@ from helperstuff import config
 from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import analyses, categories, channels, productions
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
+from helperstuff.utilities import tfiles
 
 dom4lshapes = any((config.applym4lshapesystematicsUntagged, config.applym4lshapesystematicsVBFVHtagged, config.applym4lshapesystematicsggH, config.applym4lshapesystematicsggHUntagged, config.applym4lshapesystematicsdiagonal))
 
@@ -23,8 +24,8 @@ def splitinterference(*templatesfile):
     newf = ROOT.TFile(templatesfile.templatesfile(splitinterference=True), "RECREATE")
     cache = []
     for template in templatesfile.templates():
-        template.SetDirectory(newf)
-        cache += template
+        template.gettemplate().SetDirectory(newf)
+        cache.append(template)
     for inttemplate in templatesfile.inttemplates():
         positive = inttemplate.gettemplate().Clone(inttemplate.templatename()+"_positive")
         positive.Floor(0)
@@ -36,6 +37,7 @@ def splitinterference(*templatesfile):
         cache += [positive, negative]
     newf.Write()
     newf.Close()
+    tfiles.clear()
 
 def combinesystematics(channel, analysis, production, category):
     thetemplatesfiles = []
@@ -197,3 +199,7 @@ if __name__ == "__main__":
                 for category in categories:
                     print production, analysis, channel, category
                     combinesystematics(channel, analysis, production, category)
+
+    for templatesfile in templatesfiles:
+        if templatesfile.analysis.usehistogramsforcombine:
+            splitinterference(channel, analysis, production, category, templategroup)
