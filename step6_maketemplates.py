@@ -35,9 +35,9 @@ def buildtemplates(*args):
                             pass
                         raise
             if (
-                templatesfile.hascustomsmoothing
-                 and os.path.exists(templatesfile.templatesfile(firststep=True))
+                os.path.exists(templatesfile.templatesfile(firststep=True))
                  and not os.path.exists(templatesfile.templatesfile())
+                 and templatesfile.hascustomsmoothing
                ):
                 try:
                     templatesfile.docustomsmoothing()
@@ -62,9 +62,10 @@ def copydata(*args):
     t = f.candTree
 
     discriminants_forcerange = {d: array('d', [0]) for d in discriminants.values() if hasattr(t, d.name)}
-    for (dname, dtitle, dbins, dmin, dmax), branchaddress in discriminants_forcerange.iteritems():
+    epsilon = float("inf")
+    for (dname, dtitle, dbins, dmin, dmax, didentifier), branchaddress in discriminants_forcerange.iteritems():
         t.SetBranchAddress(dname, branchaddress)
-    epsilon = (dmax-dmin)/dbins/1000
+        epsilon = min(epsilon, (dmax-dmin)/dbins/1000)
 
     newfilename = datatree.treefile
     if os.path.exists(newfilename): f.Close(); return
@@ -72,7 +73,7 @@ def copydata(*args):
     newf = ROOT.TFile(newfilename, "recreate")
     newt = t.CloneTree(0)
     for entry in t:
-        for (dname, dtitle, dbins, dmin, dmax), branchaddress in discriminants_forcerange.iteritems():
+        for (dname, dtitle, dbins, dmin, dmax, didentifier), branchaddress in discriminants_forcerange.iteritems():
             branchaddress[0] = min(branchaddress[0], dmax-epsilon)
             branchaddress[0] = max(branchaddress[0], dmin)
             assert dmin <= branchaddress[0] <= dmax-epsilon
@@ -118,7 +119,7 @@ def submitjobs(*args):
             if os.path.exists(filename):
                 os.remove(filename)
         for i in range(njobs):
-            submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0")
+            submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0", docd=True)
 
 if __name__ == "__main__":
     if sys.argv[1:]:
