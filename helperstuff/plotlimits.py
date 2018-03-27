@@ -3,6 +3,7 @@
 import array
 import math
 import os
+import random
 import sys
 
 from collections import namedtuple
@@ -13,10 +14,12 @@ import ROOT
 import config
 import stylefunctions as style
 
-from combinehelpers import Luminosity
-from enums import Analysis, EnumItem, MyEnum
+from combinehelpers import Luminosity, mixturesign, sigmaioversigma1
+from enums import Analysis, Category, channels, EnumItem, MyEnum, ProductionMode
+from samples import ReweightingSample, Sample, samplewithfai
 from extendedcounter import ExtendedCounter
 from utilities import cache
+from yields import YieldValue
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
 
@@ -29,9 +32,10 @@ def plottitle(nuisance):
     if nuisance == "muf_scaled": return "muf"
     if nuisance == "JES": return nuisance
     assert False, nuisance
-def xaxistitle(POI, analysis):
+def xaxistitle(POI, analysis, faifor=None):
     POI = actualvariable(POI)
-    if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(), analysis.phi_lower)
+    if faifor == "decay": faifor = None
+    if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(superscript=faifor), analysis.phi_lower)
     if POI == "muV_scaled": return "#mu_{V}"
     if POI == "muf_scaled": return "#mu_{f}"
     if nuisance == "JES": return nuisance
@@ -48,6 +52,43 @@ def actualvariable(variable):
     if variable in ("r_ffH", "muf", "RF"): return "muf_scaled"
     return variable
 
+
+@cache
+def sigmai_VBFreco(analysis, production):
+    #copied from step12_categorysystematics/latextable.py
+    t = ROOT.TChain("candTree")
+    for sample in ProductionMode("VBF").allsamples(production):
+        t.Add(sample.withdiscriminantsfile())
+    weightparts = [
+        "ZZMass>{}".format(config.m4lmin),
+        "ZZMass<{}".format(config.m4lmax),
+        ReweightingSample("VBF", analysis.purehypotheses[1]).weightname(),
+        "||".join("(category_{}=={})".format(analysis.categoryname, idnumber) for idnumber in Category("VBFtagged").idnumbers),
+    ]
+    wt = " * ".join("("+_+")" for _ in weightparts)
+    hname = "h{}".format(random.getrandbits(100))
+    success = t.Draw("1>>{}".format(hname), wt)
+    assert success
+    return getattr(ROOT, hname).Integral() / sum(
+        Sample.effectiveentries(
+            reweightfrom=reweightfrom,
+            reweightto=ReweightingSample("VBF", analysis.purehypotheses[1]),
+        ) for reweightfrom in ProductionMode("VBF").allsamples(production)
+    ) * ReweightingSample("VBF", analysis.purehypotheses[1]).xsec / ReweightingSample("VBF", analysis.purehypotheses[0]).xsec
+
+@cache
+def fai_VBFreco(analysis, production, faidecay):
+    s = samplewithfai("ggH", analysis, faidecay)
+    a1 = s.g1
+    ai = getattr(s, analysis.couplingname)
+    sigma1 = sum(YieldValue("VBF", analysis, "VBFtagged", c).value for c in channels)
+    sigmai = sigmai_VBFreco(analysis, production)
+    sigmai /= sigmaioversigma1(analysis, "ggH")
+    print sigma1, sigmai, a1, ai
+    return mixturesign(analysis) * math.copysign(1, a1*ai) * ai**2*sigmai / (a1**2*sigma1 + ai**2*sigmai)
+
+
+
 def plotlimits(outputfilename, analysis, *args, **kwargs):
     if not args: return
     analysis = Analysis(analysis)
@@ -61,6 +102,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     fixfai = False
     CMStext = "Preliminary"
     drawCMS = True
+    faifor = "decay"
+    xaxislimits = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -84,6 +127,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             CMStext = kwarg
         elif kw == "drawCMS":
             drawCMS = kwarg
+        elif kw == "faifor":
+            faifor = kwarg
+        elif kw == "xaxislimits":
+            xaxislimits = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -138,12 +185,19 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
             for entry in islice(t, 1, None):
                 fa3 = getattr(t, POI)
+                if POI == "CMS_zz4l_fai1":
+                    if faifor == "decay": pass
+                    elif faifor in ("VBF", "VH", "ZH", "WH"): fa3 = samplewithfai("ggH", analysis, fa3).fai(faifor, analysis)
+                    elif faifor in ("VBF+dec", "VH+dec", "ZH+dec", "WH+dec"): fa3 = samplewithfai("ggH", analysis, fa3).fai(faifor, analysis, withdecay=True)
+                    elif faifor == "VBFreco": assert len(productions) == 1; fa3 = fai_VBFreco(analysis, productions[0], fa3)
+                    else: assert False
+                    if xaxislimits is not None and not (xaxislimits[0] <= fa3 <= xaxislimits[1]): continue
                 if nuisance is None:
                     deltaNLL = t.deltaNLL+t.nll+t.nll0
                     NLL[fa3] = 2*deltaNLL
                 else:
                      NLL[fa3] = getattr(t, nuisance)
-            if 1 not in NLL and -1 in NLL:
+            if 1 not in NLL and -1 in NLL and xaxislimits is None and POI == "CMS_zz4l_fai1":
                 NLL[1] = NLL[-1]
 
         c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
@@ -158,7 +212,9 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         l.AddEntry(g, scan.title, "l")
 
     mg.Draw("AL")
-    mg.GetXaxis().SetTitle(xaxistitle(POI, analysis))
+    mg.GetXaxis().SetTitle(xaxistitle(POI, analysis, faifor=faifor))
+    if xaxislimits is not None:
+        mg.GetXaxis().SetRangeUser(*xaxislimits)
     if xaxisrange(POI) is not None:
         mg.GetXaxis().SetRangeUser(*xaxisrange(POI))
     mg.GetYaxis().SetTitle(yaxistitle(nuisance, analysis))

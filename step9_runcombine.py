@@ -162,6 +162,8 @@ def runcombine(analysis, foldername, **kwargs):
     lumitype = "fordata"
     CMStext = "Preliminary"
     drawCMS = True
+    faifor = "decay"
+    xaxislimits = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -268,6 +270,15 @@ def runcombine(analysis, foldername, **kwargs):
             CMStext = kwarg
         elif kw == "drawCMS":
             drawCMS = bool(int(kwarg))
+        elif kw == "faifor":
+            faifor = kwarg
+        elif kw == "xaxislimits":
+            try:
+                xaxislimits = [float(_) for _ in kwarg.split(",")]
+                if len(xaxislimits) != 2:
+                    raise ValueError
+            except ValueError:
+                raise ValueError("xaxislimits has to be 2 floats separated by commas")
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -464,12 +475,14 @@ def runcombine(analysis, foldername, **kwargs):
         plotname += replaceByMap(".oO[moreappend]Oo.", repmap)
         if scanranges != [defaultscanrange]:
             plotname += "".join("_{},{},{}".format(*scanrange) for scanrange in sorted(scanranges))
-        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext)
+        if faifor != "decay":
+            plotname += "_"+faifor
+        plotlimits(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits)
         for nuisance in plotnuisances:
             if plottitle(nuisance) == plottitle(POI): continue
             if nuisance == "CMS_zz4l_fai1" and fixfai: continue
             nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-            plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext)
+            plotlimits(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits)
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
