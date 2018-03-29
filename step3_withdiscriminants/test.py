@@ -17,6 +17,7 @@ import ROOT
 
 from helperstuff import config, style
 from helperstuff.copyplots import copyplots
+from helperstuff.enums import Category
 from helperstuff.discriminants import discriminant
 from helperstuff.treewrapper import TreeWrapper
 
@@ -30,7 +31,18 @@ for filename in glob.iglob("*.root"):
 
 c = ROOT.TCanvas()
 c.SetLogy()
-t.Draw(disc.name+">>h({},{},{})".format(disc.bins, disc.min, disc.max), "D_0minus_"+process+">-998 && 105 <= ZZMass && ZZMass <= 140")
+
+category = {
+  "decay": "Untagged",
+  "VBFdecay": "VBFtagged",
+  "HadVHdecay": "VHHadrtagged",
+}[process]
+
+weightfactors = ["D_0minus_"+process+">-998", "105 <= ZZMass", "ZZMass <= 140",
+                 " || ".join("category_0P_or_0M_or_a2_or_L1_or_L1Zg == {}".format(_) for _ in Category(category).idnumbers)]
+weight = " && ".join("(" + _ + ")" for _ in weightfactors)
+
+t.Draw(disc.name+">>h({},{},{})".format(disc.bins, disc.min, disc.max), weight)
 h = ROOT.h
 
 numbersofbins = [(variablename, len(binning)+1) for variablename, binning in getattr(TreeWrapper, "binning_4couplings_"+process)]
