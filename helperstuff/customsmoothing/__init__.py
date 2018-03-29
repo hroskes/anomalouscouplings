@@ -7,12 +7,13 @@ from justcopy import justcopy
 from redointerference import redointerference
 from reweightthingwithobviouspeak import reweightthingwithobviouspeak
 from setbinstozero import setbinstozero
+from useDbkgorthogonal import useDbkgorthogonal
 
 def donothing(hsmooth, rawprojections, **kwargs):
    """do nothing"""
    return False #don't make new control plots
 
-functions = {_.__name__: _ for _ in [donothing, redointerference, reweightthingwithobviouspeak, setbinstozero, flatten, justcopy]}
+functions = {_.__name__.lower(): _ for _ in [donothing, redointerference, reweightthingwithobviouspeak, setbinstozero, flatten, justcopy, useDbkgorthogonal]}
 
 def callfunction(hsmooth, rawprojections, **kwargs):
     if "name" in kwargs:
