@@ -146,7 +146,7 @@ class _Datacard(MultiEnum):
         return 1
     @property
     def jmax(self):
-        return len(self.productionmodes)-1
+        return len(self.process(Counter()).split())
     @property
     def kmax(self):
         return "*"
@@ -155,7 +155,10 @@ class _Datacard(MultiEnum):
 
     @property
     def shapes(self):
-        return "* * {} w:$PROCESS w:$PROCESS_$SYSTEMATIC".format(self.rootfile)
+        if self.analysis.usehistogramsforcombine:
+            return "* * $CHANNEL.input.root $PROCESS $PROCESS_$SYSTEMATIC"
+        else:
+            return "* * $CHANNEL.input.root w:$PROCESS w:$PROCESS_$SYSTEMATIC"
 
     section2 = Section("shapes")
 
@@ -163,12 +166,12 @@ class _Datacard(MultiEnum):
     def bin(self, counter=Counter()):
         counter[self] += 1
 
-        bin = "a{}".format(len(channels) * channels.index(self.channel) + categories.index(self.category))
+        bin = "hzz4l_{}S_{}_{}".format(self.channel, self.category, self.year)
 
         if counter[self] == 1:
             return bin
         elif counter[self] == 2:
-            return " ".join([str(bin)]*len(self.productionmodes))
+            return " ".join([str(bin)]*len(self.process(Counter())))
         assert False
 
     @property
@@ -178,30 +181,85 @@ class _Datacard(MultiEnum):
     section3 = Section("bin", "observation")
 
     @property
+    @cache
+    def histograms(self):
+        if not self.analysis.usehistogramsforcombine:
+            raise ValueError("Should not be calling this function for {}".format(self.analysis))
+        for p in self.productionmodes:
+            if p.isbkg:
+                yield p.combinename
+            elif p.issignal:
+                templategroup = str(p).lower()
+                templatesfile = TemplatesFile(p, self.analysis, self.production, self.channel, self.category)
+                for t in templatesfile.templates():
+                    if not t.hypothesis.ispure(): continue
+                    yield p.combinename+"_"+t.hypothesis.combinename
+                for t in templatesfile.inttemplates():
+                    for "sign" in positive, negative:
+                        yield p.combinename+"_"+template.templatename+"_"+sign
+            else:
+                assert False
+
+    @property
     def process(self, counter=Counter()):
         counter[self] += 1
 
-        if counter[self] == 1:
-            return " ".join(_.combinename for _ in self.productionmodes)
+        if self.analysis.usehistogramsforcombine:
+            result = {1: [], 2: []}
 
-        if counter[self] == 2:
-            nsignal = sum(_.issignal for _ in self.productionmodes)
-            nbkg = sum(_.isbkg for _ in self.productionmodes)
-            assert nsignal+nbkg == len(self.productionmodes)
+            nsignal = nbkg = 0
+            for h in self.histograms:
+                if "bkg_" in h:
+                    assert ProductionMode(h).isbkg
+                    result[1].append(h)
+                    result[2].append(1 + nbkg)
+                    nbkg += 1
+                else:
+                    assert ProductionMode(h.split("_")[0]).issignal
+                    result[1].append(h)
+                    result[2].append(-nsignal)
+                    nsignal += 1
+            return " ".join(str(_) for _ in result[counter[self]])
+        else:
+            if counter[self] == 1:
+                return " ".join(_.combinename for _ in self.productionmodes)
 
-            return " ".join(str(_) for _ in range(-nsignal+1, nbkg+1))
+            if counter[self] == 2:
+                nsignal = sum(_.issignal for _ in self.productionmodes)
+                nbkg = sum(_.isbkg for _ in self.productionmodes)
+                assert nsignal+nbkg == len(self.productionmodes)
+
+                return " ".join(str(_) for _ in range(-nsignal+1, nbkg+1))
 
         assert False
 
     @property
     def rate(self):
-        return " ".join(str(getrate(p, self.channel, self.category, self.analysis, self.luminosity)) for p in self.productionmodes)
+        if self.analysis.usehistogramsforcombine:
+            raise NotImplementedError
+        else:
+            return " ".join(str(getrate(p, self.channel, self.category, self.analysis, self.luminosity)) for p in self.productionmodes)
 
     section4 = Section("## mass window [{},{}]".format(config.m4lmin, config.m4lmax),
                        "bin", "process", "process", "rate")
 
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
+        if self.analysis.usehistogramsforcombine:
+            if config.LHE:
+                if yieldsystematic == "QCDscale_VV":
+                    result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in self.histograms]
+                    assert "1.1" in result
+                    return result
+                else: return None
+            return " ".join(
+                            ["lnN"] +
+                            [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis,
+                                                      h if "bkg_" in h else h.split("_")[0]
+                                )                    )
+                                for h in self.histograms]
+                           )
+
         if config.LHE:
             if yieldsystematic == "QCDscale_VV": return " ".join(["lnN"] + ["1.1" if p=="qqZZ" else "-" for p in self.productionmodes])
             else: return None
@@ -214,15 +272,31 @@ class _Datacard(MultiEnum):
     @MakeSystematicFromEnums(WorkspaceShapeSystematic, Channel)
     def workspaceshapesystematicchannel(self, workspaceshapesystematic, channel):
       if workspaceshapesystematic.isperchannel and channel == self.channel:
+        if self.analysis.usehistogramsforcombine:
+          return " ".join(
+                          ["lnN"] +
+                          ["1" if workspaceshapesystematic in
+                                  ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
+                               else "-"
+                              for h in self.histograms]
+                         )
         return " ".join(
                         ["shape1"] +
-                        ["1" if workspaceshapesystematic in p.workspaceshapesystematics(self.category) else "-"
+                        [
                             for p in self.productionmodes]
                        )
 
     @MakeSystematicFromEnums(WorkspaceShapeSystematic)
     def workspaceshapesystematic(self, workspaceshapesystematic):
       if workspaceshapesystematic.isperchannel: return None
+      if self.analysis.usehistogramsforcombine:
+        return " ".join(
+                        ["lnN"] +
+                        ["1" if workspaceshapesystematic in
+                                ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
+                             else "-"
+                            for h in self.histograms]
+                       )
       return " ".join(
                       ["shape1"] +
                       ["1" if workspaceshapesystematic in p.workspaceshapesystematics(self.category) else "-"
@@ -293,6 +367,20 @@ class _Datacard(MultiEnum):
         return faj
     @classmethod
     @cache
+    def fak(cls):
+        name = makename("CMS_zz4l_fai3")
+        fak = ROOT.RooRealVar(name, name, -1., 1.)
+        fak.setBins(1000)
+        return fak
+    @classmethod
+    @cache
+    def fal(cls):
+        name = makename("CMS_zz4l_fai4")
+        fal = ROOT.RooRealVar(name, name, -1., 1.)
+        fal.setBins(1000)
+        return fal
+    @classmethod
+    @cache
     def phiai(cls):
         name = makename("CMS_zz4l_phiai1")
         phiai = ROOT.RooRealVar(name, name, -pi, pi)
@@ -307,26 +395,41 @@ class _Datacard(MultiEnum):
         return phiaj
     @classmethod
     @cache
-    def mixturesign_constvar(cls, analysis):
-        name = makename("mixturesign_{}".format(analysis))
-        return ROOT.RooConstVar(name, name, mixturesign(analysis))
+    def a1(cls, analysis):
+        if analysis.dimensions == 1:
+            name = makename("a1")
+            return ROOT.RooFormulaVar(name, name, "sqrt(1-abs(@0))", ROOT.RooArgList(cls.fai()))
+        elif analysis.dimensions == 4:
+            name = makename("a1")
+            return ROOT.RooFormulaVar(name, name, "sqrt(1-abs(@0)-abs(@1)-abs(@2)-abs(@3)-abs(@4))", ROOT.RooArgList(
+                cls.fai(), cls.faj(), cls.fak(), cls.fal()
+            ))
     @classmethod
     @cache
-    def sigmaioversigma1_constvar(cls, analysis):
-        name = makename("sigmaioversigma1_{}".format(analysis))
-        return ROOT.RooConstVar(name, name, sigmaioversigma1(analysis, "ggH"))
+    def aletter(cls, analysis, letter):
+        index = "ijkl".index(letter)
+        name = makename("a"+letter)
+        return ROOT.RooFormulaVar(
+            name, name,
+            "{mixturesign} * (@0>0 ? 1 : -1) * sqrt(abs(@0)/{sigmaioversigma1})".format(
+                sigmaioversigma1=sigmaioversigma1(self.analysis.fais[index], "ggH"),
+                mixturesign=mixturesign(self.analysis.fais[index])
+            ),
+            ROOT.RooArgList(getattr(cls, "fa"+letter)())
+        )
+
     @classmethod
-    @cache
-    def a1(cls):
-        name = makename("a1")
-        return ROOT.RooFormulaVar(name, name, "sqrt(1-abs(@0))", ROOT.RooArgList(cls.fai()))
+    def ai(cls, analysis): return aletter(cls, analysis, "i")
     @classmethod
-    @cache
-    def ai(cls, analysis):
-        name = makename("ai")
-        return ROOT.RooFormulaVar(name, name, "@2 * (@0>0 ? 1 : -1) * sqrt(abs(@0)/@1)", ROOT.RooArgList(cls.fai(), cls.sigmaioversigma1_constvar(analysis), cls.mixturesign_constvar(analysis)))
+    def aj(cls, analysis): return aletter(cls, analysis, "j")
+    @classmethod
+    def ak(cls, analysis): return aletter(cls, analysis, "k")
+    @classmethod
+    def al(cls, analysis): return aletter(cls, analysis, "l")
 
     def makepdfs(self):
+        if self.analysis.usehistogramsforcombine:
+            raise ValueError("Should not be calling this function for {}".format(self.analysis))
         if self.pdfs is not None: return
 
         ## -------------------------- SIGNAL SHAPE ----------------------------------- ##
@@ -405,6 +508,45 @@ class _Datacard(MultiEnum):
     def linkworkspace(self):
         if not os.path.exists(self.rootfile):
             os.symlink(self.rootfile_base, self.rootfile)
+
+    def makehistograms(self):
+        if not self.analysis.usehistogramsforcombine:
+            raise ValueError("Should not be calling this function for {}".format(self.analysis))
+
+        f = ROOT.TFile(self.rootfile_base, "RECREATE")
+        cache = []
+        for h in self.histograms:
+            if "bkg_" in h:
+                p = h
+                hypothesis = None
+                sign = None
+            elif "positive" in h or "negative" in h:
+                p, inttype, sign = h.split("_")
+                for letter, name in zip("ijkl", self.analysis.couplingnames):
+                    inttype = inttype.replace(name, "g"+letter)
+                hypothesis = inttype
+            else:
+                p, hypothesis = h.split("_")
+                sign = None
+
+            for systematic, direction in [(None, None)] + itertools.product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
+                if systematic is not None is not direction: systematic = ShapeSystematic(str(systematic)+direction)
+                t = gettemplate(p, self.analysis, self.productionmode, self.category, hypothesis, self.channel, systematic).Clone(h)
+                if sign is not None
+                    if sign == "positive": pass
+                    elif sign == "negative": t.Scale(-1)
+                    else: assert False
+                    rootfunctions.Floor(t)
+
+                name = h
+                if systematic: name += "_"+str(systematic)
+                t.SetName(h+systematic)
+                t.SetDirectory(f)
+                cache.append(t)
+
+            assert len(set(t.name for t in cache)) == len(cache)
+            f.Write()
+            f.Close()
 
     def makeCardsWorkspaces(self, outdir="."):
         mkdir_p(outdir)
