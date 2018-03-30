@@ -36,6 +36,7 @@ else:
             os.rmdir("CMSSW_8_1_0/src")
         shutil.move(os.path.join(tmpdir, "src"), "CMSSW_8_1_0/src")
         shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_8_1_0/.gitignore")
+        os.rmdir(tmpdir)
 
     print """CMSSW area is set up"""
     print
