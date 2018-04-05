@@ -173,7 +173,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     for scan in scans:
         NLL = ExtendedCounter()
         for scanrange in scanranges:
-            if scanrange == (100, -1, 1):
+            if scanrange == (101, -1, 1):
                 scanrangeappend = ""
             else:
                 scanrangeappend = "_{},{},{}".format(*scanrange)

@@ -35,10 +35,10 @@ exit ${PIPESTATUS[0]}
 runcombinetemplate = r"""
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
+        --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
         -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
-        --includePOIEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
-        .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
+        --alignEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
+        .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
         -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
 """
 
@@ -146,7 +146,7 @@ def runcombine(analysis, foldername, **kwargs):
     usesystematics = True
     runobs = config.unblindscans
     subdirectory = ""
-    defaultscanrange = (100, -1.0, 1.0)
+    defaultscanrange = (101, -1.0, 1.0)
     scanranges = [defaultscanrange]
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
@@ -372,7 +372,7 @@ def runcombine(analysis, foldername, **kwargs):
               "pointindex": "",
               "sqrts": ",".join("{:d}".format(_) for _ in sqrts),
              }
-    folder = os.path.join(config.repositorydir, "CMSSW_8_1_0/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
+    folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
     with utilities.cd(folder):
         with open(".gitignore", "w") as f:
