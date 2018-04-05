@@ -28,19 +28,20 @@ exit ${PIPESTATUS[0]}
 runcombinetemplate = """
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 \
+        --setParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 \
         -n $1_.oO[append]Oo..oO[moreappend]Oo. -t -1 \
-        --setPhysicsModelParameters r=1,CMS_zz4l_fai1=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 \
+        --setParameters R=1,CMS_zz4l_fai1=.oO[expectfai]Oo. --expectSignal=1 -V -v 3 \
+        --alignEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
         --saveSpecifiedFunc=R --saveSpecifiedNuis all --saveInactivePOI=1 \
         --saveNLL -S .oO[usesystematics]Oo. |& tee log_.oO[expectfai]Oo..oO[moreappend]Oo..exp
 """
 observationcombinetemplate = """
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=grid --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 \
+        --setParameterRanges CMS_zz4l_fai1=.oO[scanrange]Oo. -m 125 \
         -n $1_.oO[append]Oo..oO[moreappend]Oo.       \
-        --setPhysicsModelParameters R=1,CMS_zz4l_fai1=.oO[expectfai]Oo.                  -V -v 3 \
-        --includePOIEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
+        --setParameters R=1,CMS_zz4l_fai1=.oO[expectfai]Oo.                  -V -v 3 \
+        --alignEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
         --saveSpecifiedFunc=R --saveSpecifiedNuis all --saveInactivePOI=1 \
         --saveNLL -S .oO[usesystematics]Oo. |& tee log.oO[moreappend]Oo..obs
 """
@@ -61,7 +62,7 @@ def runcombine(analysis, foldername, **kwargs):
     usebkg = True
     runobs = True
     defaultscanrange = scanrange = (-1.0, 1.0)
-    defaultnpoints = npoints = 100
+    defaultnpoints = npoints = 101
     defaultscenario = scenario = 1
     scalemuvmuftogether = False
 
