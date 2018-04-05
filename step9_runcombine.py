@@ -151,7 +151,7 @@ def runcombine(analysis, foldername, **kwargs):
               "int_XS_VV": str(analysis.int_XS_VV),
               "morePO": "--PO scalemuvmuftogether" if scalemuvmuftogether else "",
              }
-    with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
+    with filemanager.cd(os.path.join(config.repositorydir, "CMSSW_8_1_0/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards")):
         for production in productions:
             production = Production(production)
             if not all(os.path.exists("cards_{}/HCG/125/{}/hzz4l_{}S_{}.input.root".format(foldername, production.year, channel, production.year)) for channel in usechannels):
