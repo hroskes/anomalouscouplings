@@ -129,6 +129,8 @@ def printlimits(analysis, foldername, **kwargs):
         print
         print
 
+        return minimum, results
+
 if __name__ == "__main__":
     analysis = Analysis(sys.argv[1])
     foldername = sys.argv[2]
