@@ -29,4 +29,5 @@ def useDbkgorthogonal(hsmooth, rawprojections):
             hsmooth.SetBinContent(xbin, ybin, zbin, bincontent)
             hsmooth.SetBinError(xbin, ybin, zbin, bincontent)
 
+    print hsmooth.Integral() / totalintegral
     return True #do make new control plots
