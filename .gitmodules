@@ -3,11 +3,11 @@
 	url = git@github.com:hroskes/TemplateBuilder
 	branch = master
 [submodule "CMSSW_7_6_5/src/HiggsAnalysis/CombinedLimit"]
-	path = CMSSW_7_6_5/src/HiggsAnalysis/CombinedLimit
+	path = CMSSW_8_1_0/src/HiggsAnalysis/CombinedLimit
 	url = git@github.com:hroskes/HiggsAnalysis-CombinedLimit
 	branch = FTpl
 [submodule "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination"]
-	path = CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination
+	path = CMSSW_8_1_0/src/HiggsAnalysis/HZZ4l_Combination
 	url = git@github.com:hroskes/HiggsAnalysis-HZZ4l_Combination
 	branch = master
 [submodule "helperstuff/Datacards13TeV_ICHEP2016"]

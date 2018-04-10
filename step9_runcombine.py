@@ -38,10 +38,10 @@ exit ${PIPESTATUS[0]}
 runcombinetemplate = r"""
 eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
-        --setPhysicsModelParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
+        --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
         -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
-        --includePOIEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
-        .oO[-t -1]Oo. --setPhysicsModelParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
+        --alignEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
+        .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
         -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
 """
 
@@ -149,7 +149,7 @@ def runcombine(analysis, foldername, **kwargs):
     usesystematics = True
     runobs = config.unblindscans
     subdirectory = ""
-    defaultscanrange = (100, -1.0, 1.0)
+    defaultscanrange = (101, -1.0, 1.0)
     scanranges = [defaultscanrange]
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
     usebkg = True
@@ -166,6 +166,8 @@ def runcombine(analysis, foldername, **kwargs):
     CMStext = "Preliminary"
     drawCMS = True
     scanfai = analysis
+    faifor = "decay"
+    xaxislimits = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -276,6 +278,15 @@ def runcombine(analysis, foldername, **kwargs):
             if analysis.dimensions != 2:
                 raise ValueError("scanfai is only for 2D analyses")
             scanfai = Analysis(kwarg)
+        elif kw == "faifor":
+            faifor = kwarg
+        elif kw == "xaxislimits":
+            try:
+                xaxislimits = [float(_) for _ in kwarg.split(",")]
+                if len(xaxislimits) != 2:
+                    raise ValueError
+            except ValueError:
+                raise ValueError("xaxislimits has to be 2 floats separated by commas")
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -400,7 +411,7 @@ def runcombine(analysis, foldername, **kwargs):
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF"
         repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
 
-    folder = os.path.join(config.repositorydir, "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination/CreateDatacards", subdirectory, "cards_{}".format(foldername))
+    folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
     with utilities.cd(folder):
         with open(".gitignore", "w") as f:
@@ -509,12 +520,14 @@ def runcombine(analysis, foldername, **kwargs):
         else:
             plotlimitsfunction = plotlimits
 
-        plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai)
+        if faifor != "decay":
+            plotname += "_"+faifor
+        plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits)
         for nuisance in plotnuisances:
             if plottitle(nuisance) == plottitle(POI): continue
             if nuisance == "CMS_zz4l_fai1" and fixfai: continue
             nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-            plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext)
+            plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits)
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))

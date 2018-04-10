@@ -1320,7 +1320,7 @@ class Projections(MultiEnum):
   def scantreeforanimations(cls, analysis):
     analysis = Analysis(analysis)
     scantree = ROOT.TChain("limit")
-    for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_7_6_5", "src", "HiggsAnalysis", "HZZ4l_Combination",
+    for filename in glob.glob(os.path.join(config.repositorydir, "CMSSW_8_1_0", "src", "HiggsAnalysis", "HZZ4l_Combination",
                                        "CreateDatacards", "cards_{}_allsysts".format(analysis), "higgsCombine_obs_*.root")):
         if re.match("higgsCombine_obs_lumi[0-9.]*_7813(_[0-9]*,[-.0-9]*,[-.0-9]*)*.MultiDimFit.mH125.root", os.path.basename(filename)):
             scantree.Add(filename)
