@@ -59,7 +59,7 @@ class SampleBase(object):
         elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
             result *= self.g4**2 / constants.g4HZZ**2
         elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
-            result *= self.g1prime2**2 / constants.g1prime2HZZ_gen**2
+            result *= self.g1prime2**2 / constants.g1prime2HZZ**2
         elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
             result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2HZZ_gen**2
         else:
@@ -76,7 +76,7 @@ class SampleBase(object):
             elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
                 result *= self.g4**2 / constants.g4VBF**2
             elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
-                result *= self.g1prime2**2 / constants.g1prime2VBF_gen**2
+                result *= self.g1prime2**2 / constants.g1prime2VBF**2
             elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
                 result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2VBF_gen**2
             else:
@@ -90,7 +90,7 @@ class SampleBase(object):
             elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
                 result *= self.g4**2 / constants.g4ZH**2
             elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
-                result *= self.g1prime2**2 / constants.g1prime2ZH_gen**2
+                result *= self.g1prime2**2 / constants.g1prime2ZH**2
             elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
                 result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2ZH_gen**2
             else:
@@ -104,7 +104,7 @@ class SampleBase(object):
             elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
                 result *= self.g4**2 / constants.g4WH**2
             elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
-                result *= self.g1prime2**2 / constants.g1prime2WH_gen**2
+                result *= self.g1prime2**2 / constants.g1prime2WH**2
             elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
                 result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2WH_gen**2
             else:
@@ -1241,13 +1241,13 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
-            if self.hypothesis == "L1": return constants.g1prime2HZZ_gen if self.productionmode in ("ggH", "ttH", "HJJ") else 1
+            if self.hypothesis == "L1": return constants.g1prime2HZZ if self.productionmode in ("ggH", "ttH", "HJJ") else 1
             if self.hypothesis in ("0+", "a2", "0-", "L1Zg"): return 0
 
-            g1prime2 = {"dec": constants.g1prime2HZZ_gen}
-            if self.productionmode == "VBF": g1prime2["prod"] = constants.g1prime2VBF_gen
-            elif self.productionmode == "ZH":  g1prime2["prod"] = constants.g1prime2ZH_gen
-            elif self.productionmode == "WH":  g1prime2["prod"] = constants.g1prime2WH_gen
+            g1prime2 = {"dec": constants.g1prime2HZZ}
+            if self.productionmode == "VBF": g1prime2["prod"] = constants.g1prime2VBF
+            elif self.productionmode == "ZH":  g1prime2["prod"] = constants.g1prime2ZH
+            elif self.productionmode == "WH":  g1prime2["prod"] = constants.g1prime2WH
             else: g1prime2["prod"] = None
             g1prime2["proddec"] = None if g1prime2["prod"] is None else -sqrt(g1prime2["prod"]*g1prime2["dec"])
 

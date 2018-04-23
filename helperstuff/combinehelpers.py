@@ -178,7 +178,7 @@ class SigmaIOverSigma1_VH(MultiEnum):
         elif self.analysis == "fa2":
             coupling = constants.g2VH
         elif self.analysis == "fL1":
-            coupling = constants.g1prime2VH_gen
+            coupling = constants.g1prime2VH
         elif self.analysis == "fL1Zg":
             coupling = constants.ghzgs1prime2VH_gen
         else:
