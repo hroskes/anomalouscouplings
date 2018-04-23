@@ -4,7 +4,7 @@ Conventions for the constants here:
 
 The top few constants are directly from JHUGen mod_Parameters.
 
-g2decay and similar: these are from
+g2HZZ and similar: these are from
 https://twiki.cern.ch/twiki/bin/view/CMS/Run2MCProductionforHiggsProperties
 They are sqrt(sigma1/sigmai) for the given process,
 calculated by JHUGen in 2015. They were used for all MC samples,
@@ -65,14 +65,14 @@ aR = 0.46238
 e = 0.8431872482432357  # = cL_lep = cR_lep from mod_Parameters
 L1 = 10000.
 
-g2decay = 1.65684
-g4decay = 2.55052
-g1prime2decay_gen = -12100.42   #for the sample
-g1prime2decay_reco = -g1prime2decay_gen   #for discriminants
-ghzgs1prime2decay_gen = -7613.351302119843
-ghzgs1prime2decay_reco = -ghzgs1prime2decay_gen
-eLdecay = sqrt(7.2310297E+00 / 1.4347981E+01)
-eRdecay = sqrt(7.2310297E+00 / 1.3952140E+00)
+g2HZZ = 1.65684
+g4HZZ = 2.55052
+g1prime2HZZ_gen = -12100.42   #for the sample
+g1prime2HZZ_reco = -g1prime2HZZ_gen   #for discriminants
+ghzgs1prime2HZZ_gen = -7613.351302119843
+ghzgs1prime2HZZ_reco = -ghzgs1prime2HZZ_gen
+eLHZZ = sqrt(7.2310297E+00 / 1.4347981E+01)
+eRHZZ = sqrt(7.2310297E+00 / 1.3952140E+00)
 
 g2VBF = 0.27196538
 g4VBF = 0.297979018705
@@ -222,16 +222,16 @@ JHUXSttHkappakappatilde = ufloat(1.8231162489,   0.00254131)
 
 
 #Subtract the pure component from the interference, then divide by (gi*gj)
-JHUXSggH2L2la1a2   = (JHUXSggH2L2la1a2   -                        JHUXSggH2L2la1 - g2decay              **2 * JHUXSggH2L2la2  ) / (g2decay                                      )
-JHUXSggH2L2la1a3   = (JHUXSggH2L2la1a3   -                        JHUXSggH2L2la1 - g4decay              **2 * JHUXSggH2L2la3  ) / (g4decay                                      )
-JHUXSggH2L2la1L1   = (JHUXSggH2L2la1L1   -                        JHUXSggH2L2la1 - g1prime2decay_gen    **2 * JHUXSggH2L2lL1  ) / (g1prime2decay_gen                            )
-JHUXSggH2L2la1L1Zg = (JHUXSggH2L2la1L1Zg -                        JHUXSggH2L2la1 - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg) / (ghzgs1prime2decay_gen                        )
-JHUXSggH2L2la2a3   = (JHUXSggH2L2la2a3   - g2decay          **2 * JHUXSggH2L2la2 - g4decay              **2 * JHUXSggH2L2la3  ) / (g2decay               * g4decay              )
-JHUXSggH2L2la2L1   = (JHUXSggH2L2la2L1   - g2decay          **2 * JHUXSggH2L2la2 - g1prime2decay_gen    **2 * JHUXSggH2L2lL1  ) / (g2decay               * g1prime2decay_gen    )
-JHUXSggH2L2la2L1Zg = (JHUXSggH2L2la2L1Zg - g2decay          **2 * JHUXSggH2L2la2 - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg) / (g2decay               * ghzgs1prime2decay_gen)
-JHUXSggH2L2la3L1   = (JHUXSggH2L2la3L1   - g4decay          **2 * JHUXSggH2L2la3 - g1prime2decay_gen    **2 * JHUXSggH2L2lL1  ) / (g4decay               * g1prime2decay_gen    )
-JHUXSggH2L2la3L1Zg = (JHUXSggH2L2la3L1Zg - g4decay          **2 * JHUXSggH2L2la3 - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg) / (g4decay               * ghzgs1prime2decay_gen)
-JHUXSggH2L2lL1L1Zg = (JHUXSggH2L2lL1L1Zg - g1prime2decay_gen**2 * JHUXSggH2L2lL1 - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg) / (g1prime2decay_gen     * ghzgs1prime2decay_gen)
+JHUXSggH2L2la1a2   = (JHUXSggH2L2la1a2   -                        JHUXSggH2L2la1 - g2HZZ              **2 * JHUXSggH2L2la2  ) / (g2HZZ                                      )
+JHUXSggH2L2la1a3   = (JHUXSggH2L2la1a3   -                        JHUXSggH2L2la1 - g4HZZ              **2 * JHUXSggH2L2la3  ) / (g4HZZ                                      )
+JHUXSggH2L2la1L1   = (JHUXSggH2L2la1L1   -                        JHUXSggH2L2la1 - g1prime2HZZ_gen    **2 * JHUXSggH2L2lL1  ) / (g1prime2HZZ_gen                            )
+JHUXSggH2L2la1L1Zg = (JHUXSggH2L2la1L1Zg -                        JHUXSggH2L2la1 - ghzgs1prime2HZZ_gen**2 * JHUXSggH2L2lL1Zg) / (ghzgs1prime2HZZ_gen                        )
+JHUXSggH2L2la2a3   = (JHUXSggH2L2la2a3   - g2HZZ          **2 * JHUXSggH2L2la2 - g4HZZ              **2 * JHUXSggH2L2la3  ) / (g2HZZ               * g4HZZ              )
+JHUXSggH2L2la2L1   = (JHUXSggH2L2la2L1   - g2HZZ          **2 * JHUXSggH2L2la2 - g1prime2HZZ_gen    **2 * JHUXSggH2L2lL1  ) / (g2HZZ               * g1prime2HZZ_gen    )
+JHUXSggH2L2la2L1Zg = (JHUXSggH2L2la2L1Zg - g2HZZ          **2 * JHUXSggH2L2la2 - ghzgs1prime2HZZ_gen**2 * JHUXSggH2L2lL1Zg) / (g2HZZ               * ghzgs1prime2HZZ_gen)
+JHUXSggH2L2la3L1   = (JHUXSggH2L2la3L1   - g4HZZ          **2 * JHUXSggH2L2la3 - g1prime2HZZ_gen    **2 * JHUXSggH2L2lL1  ) / (g4HZZ               * g1prime2HZZ_gen    )
+JHUXSggH2L2la3L1Zg = (JHUXSggH2L2la3L1Zg - g4HZZ          **2 * JHUXSggH2L2la3 - ghzgs1prime2HZZ_gen**2 * JHUXSggH2L2lL1Zg) / (g4HZZ               * ghzgs1prime2HZZ_gen)
+JHUXSggH2L2lL1L1Zg = (JHUXSggH2L2lL1L1Zg - g1prime2HZZ_gen**2 * JHUXSggH2L2lL1 - ghzgs1prime2HZZ_gen**2 * JHUXSggH2L2lL1Zg) / (g1prime2HZZ_gen     * ghzgs1prime2HZZ_gen)
 
 JHUXSVBFa1a2       = (JHUXSVBFa1a2       -                        JHUXSVBFa1     - g2VBF                **2 * JHUXSVBFa2      ) / (g2VBF                                        )
 JHUXSVBFa1a3       = (JHUXSVBFa1a3       -                        JHUXSVBFa1     - g4VBF                **2 * JHUXSVBFa3      ) / (g4VBF                                        )
@@ -276,14 +276,14 @@ if __name__ == "__main__":
     print "All of the following should be 0:"
     print
     print "  decay:"
-    print "    a1XS -           g2**2*    a2XS = {:%}".format((JHUXSggH2L2la1 - g2decay**2               * JHUXSggH2L2la2    ) / JHUXSggH2L2la1)
-    print "    a1XS -           g4**2*    a3XS = {:%}".format((JHUXSggH2L2la1 - g4decay**2               * JHUXSggH2L2la3    ) / JHUXSggH2L2la1)
-    print "    a1XS -     g1prime2**2*    L1XS = {:%}".format((JHUXSggH2L2la1 - g1prime2decay_gen**2     * JHUXSggH2L2lL1    ) / JHUXSggH2L2la1)
-    print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {:%}".format((JHUXSggH2L2la1 - ghzgs1prime2decay_gen**2 * JHUXSggH2L2lL1Zg  ) / JHUXSggH2L2la1)
-    print "                        g4*  a1a3XS = {:%}".format((                 g4decay                  * JHUXSggH2L2la1a3  ) / JHUXSggH2L2la1)
-    print "                     g2*g4*  a2a3XS = {:%}".format((                 g2decay*g4decay          * JHUXSggH2L2la2a3  ) / JHUXSggH2L2la1)
-    print "               g1prime2*g4*  a3L1XS = {:%}".format((                g1prime2decay_gen*g4decay * JHUXSggH2L2la3L1  ) / JHUXSggH2L2la1)
-    print "           ghzgs1prime2*g4*a3L1ZgXS = {:%}".format((            ghzgs1prime2decay_gen*g4decay * JHUXSggH2L2la3L1Zg) / JHUXSggH2L2la1)
+    print "    a1XS -           g2**2*    a2XS = {:%}".format((JHUXSggH2L2la1 - g2HZZ**2               * JHUXSggH2L2la2    ) / JHUXSggH2L2la1)
+    print "    a1XS -           g4**2*    a3XS = {:%}".format((JHUXSggH2L2la1 - g4HZZ**2               * JHUXSggH2L2la3    ) / JHUXSggH2L2la1)
+    print "    a1XS -     g1prime2**2*    L1XS = {:%}".format((JHUXSggH2L2la1 - g1prime2HZZ_gen**2     * JHUXSggH2L2lL1    ) / JHUXSggH2L2la1)
+    print "    a1XS - ghzgs1prime2**2*  L1ZgXS = {:%}".format((JHUXSggH2L2la1 - ghzgs1prime2HZZ_gen**2 * JHUXSggH2L2lL1Zg  ) / JHUXSggH2L2la1)
+    print "                        g4*  a1a3XS = {:%}".format((                 g4HZZ                  * JHUXSggH2L2la1a3  ) / JHUXSggH2L2la1)
+    print "                     g2*g4*  a2a3XS = {:%}".format((                 g2HZZ*g4HZZ          * JHUXSggH2L2la2a3  ) / JHUXSggH2L2la1)
+    print "               g1prime2*g4*  a3L1XS = {:%}".format((                g1prime2HZZ_gen*g4HZZ * JHUXSggH2L2la3L1  ) / JHUXSggH2L2la1)
+    print "           ghzgs1prime2*g4*a3L1ZgXS = {:%}".format((            ghzgs1prime2HZZ_gen*g4HZZ * JHUXSggH2L2la3L1Zg) / JHUXSggH2L2la1)
     print
     print "  VBF:"
     print "    a1XS -           g2**2*    a2XS = {:%}".format((JHUXSVBFa1     - g2VBF**2                 * JHUXSVBFa2        ) / JHUXSVBFa1    )
