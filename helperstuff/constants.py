@@ -68,39 +68,29 @@ L1 = 10000.
 g2HZZ = 1.65684
 g4HZZ = 2.55052
 g1prime2HZZ = -12100.42   #for the sample
-g1prime2HZZ_reco = -g1prime2HZZ   #for discriminants
 ghzgs1prime2HZZ_gen = -7613.351302119843
-ghzgs1prime2HZZ_reco = -ghzgs1prime2HZZ_gen
 eLHZZ = sqrt(7.2310297E+00 / 1.4347981E+01)
 eRHZZ = sqrt(7.2310297E+00 / 1.3952140E+00)
 
 g2VBF = 0.27196538
 g4VBF = 0.297979018705
 g1prime2VBF = -2158.21307286
-g1prime2VBF_reco = -g1prime2VBF
 ghzgs1prime2VBF_gen = -4091.051456694223
-ghzgs1prime2VBF_reco = -ghzgs1prime2VBF_gen
 
 g2ZH = 0.112481
 g4ZH = 0.144057
 g1prime2ZH = -517.788
-g1prime2ZH_reco = 517.788
 ghzgs1prime2ZH_gen = -642.9534550379002
-ghzgs1prime2ZH_reco = -ghzgs1prime2ZH_gen
 
 g2WH = 0.0998956
 g4WH = 0.1236136
 g1prime2WH = -525.274
-g1prime2WH_reco = -g1prime2WH
 ghzgs1prime2WH_gen = -1000
-ghzgs1prime2WH_reco = ghzgs1prime2WH_gen
 
 g2VH = 0.10430356645812816 #sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa2 + JHUXSWHa2*normalize_WH_to_ZH))
 g4VH = 0.13053750671388425 #sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHa3 + JHUXSWHa3*normalize_WH_to_ZH))
 g1prime2VH = -522.3034453633128 #-sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHL1 + JHUXSWHL1*normalize_WH_to_ZH))
-g1prime2VH_reco = -g1prime2VH
 ghzgs1prime2VH_gen = -1027.387141119873 #-sqrt((JHUXSZHa1 + JHUXSWHa1*normalize_WH_to_ZH) / (JHUXSZHL1Zg + JHUXSWHL1Zg*normalize_WH_to_ZH))
-ghzgs1prime2VH_reco = -ghzgs1prime2VH_gen
 nominal_normalize_WH_to_ZH = 0.15070409765374365
 
 ghg4HJJ = 1.0062
