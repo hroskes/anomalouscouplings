@@ -51,7 +51,7 @@ class SampleBase(object):
 
     @property
     def nominalJHUxsec(self):
-        result = constants.JHUXSggH2L2la1.nominal_value
+        result = constants.JHUXSHZZ2L2la1.nominal_value
         if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
             result *= self.g1**2
         elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
@@ -135,10 +135,10 @@ class SampleBase(object):
 
     @property
     def JHUxsec(self):
-        from constants import JHUXSggH2L2la1, JHUXSggH2L2la2, JHUXSggH2L2la3, JHUXSggH2L2lL1, JHUXSggH2L2lL1Zg,\
-                              JHUXSggH2L2la1a2, JHUXSggH2L2la1a3, JHUXSggH2L2la1L1, JHUXSggH2L2la1L1Zg,        \
-                              JHUXSggH2L2la2a3, JHUXSggH2L2la2L1, JHUXSggH2L2la2L1Zg, JHUXSggH2L2la3L1,        \
-                              JHUXSggH2L2la3L1Zg, JHUXSggH2L2lL1L1Zg,                                          \
+        from constants import JHUXSHZZ2L2la1, JHUXSHZZ2L2la2, JHUXSHZZ2L2la3, JHUXSHZZ2L2lL1, JHUXSHZZ2L2lL1Zg,\
+                              JHUXSHZZ2L2la1a2, JHUXSHZZ2L2la1a3, JHUXSHZZ2L2la1L1, JHUXSHZZ2L2la1L1Zg,        \
+                              JHUXSHZZ2L2la2a3, JHUXSHZZ2L2la2L1, JHUXSHZZ2L2la2L1Zg, JHUXSHZZ2L2la3L1,        \
+                              JHUXSHZZ2L2la3L1Zg, JHUXSHZZ2L2lL1L1Zg,                                          \
                               JHUXSVBFa1, JHUXSVBFa2, JHUXSVBFa3, JHUXSVBFL1, JHUXSVBFL1Zg,                    \
                               JHUXSVBFa1a2, JHUXSVBFa1a3, JHUXSVBFa1L1, JHUXSVBFa1L1Zg,                        \
                               JHUXSVBFa2a3, JHUXSVBFa2L1, JHUXSVBFa2L1Zg, JHUXSVBFa3L1,                        \
@@ -155,25 +155,25 @@ class SampleBase(object):
                               JHUXSttHkappa, JHUXSttHkappatilde, JHUXSttHkappakappatilde
         if self.productionmode == "ggH":
             return (
-                      JHUXSggH2L2la1*self.g1**2
-                    + JHUXSggH2L2la2*self.g2**2
-                    + JHUXSggH2L2la3*self.g4**2
-                    + JHUXSggH2L2lL1*self.g1prime2**2
-                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2L2la1*self.g1**2
+                    + JHUXSHZZ2L2la2*self.g2**2
+                    + JHUXSHZZ2L2la3*self.g4**2
+                    + JHUXSHZZ2L2lL1*self.g1prime2**2
+                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSggH2L2la1a2 * self.g1*self.g2
-                    + JHUXSggH2L2la1a3 * self.g1*self.g4
-                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
+                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
+                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la2a3 * self.g4*self.g2
-                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
+                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
 
         if self.productionmode == "VBF":
@@ -198,25 +198,25 @@ class SampleBase(object):
 
                     + JHUXSVBFL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
-                      JHUXSggH2L2la1*self.g1**2
-                    + JHUXSggH2L2la2*self.g2**2
-                    + JHUXSggH2L2la3*self.g4**2
-                    + JHUXSggH2L2lL1*self.g1prime2**2
-                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2L2la1*self.g1**2
+                    + JHUXSHZZ2L2la2*self.g2**2
+                    + JHUXSHZZ2L2la3*self.g4**2
+                    + JHUXSHZZ2L2lL1*self.g1prime2**2
+                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSggH2L2la1a2 * self.g1*self.g2
-                    + JHUXSggH2L2la1a3 * self.g1*self.g4
-                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
+                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
+                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la2a3 * self.g4*self.g2
-                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
+                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
 
         if self.productionmode == "ZH":
@@ -241,25 +241,25 @@ class SampleBase(object):
 
                     + JHUXSZHL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
-                      JHUXSggH2L2la1*self.g1**2
-                    + JHUXSggH2L2la2*self.g2**2
-                    + JHUXSggH2L2la3*self.g4**2
-                    + JHUXSggH2L2lL1*self.g1prime2**2
-                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2L2la1*self.g1**2
+                    + JHUXSHZZ2L2la2*self.g2**2
+                    + JHUXSHZZ2L2la3*self.g4**2
+                    + JHUXSHZZ2L2lL1*self.g1prime2**2
+                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSggH2L2la1a2 * self.g1*self.g2
-                    + JHUXSggH2L2la1a3 * self.g1*self.g4
-                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
+                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
+                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la2a3 * self.g4*self.g2
-                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
+                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
 
         if self.productionmode == "WH":
@@ -284,25 +284,25 @@ class SampleBase(object):
 
                     + JHUXSWHL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
-                      JHUXSggH2L2la1*self.g1**2
-                    + JHUXSggH2L2la2*self.g2**2
-                    + JHUXSggH2L2la3*self.g4**2
-                    + JHUXSggH2L2lL1*self.g1prime2**2
-                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2L2la1*self.g1**2
+                    + JHUXSHZZ2L2la2*self.g2**2
+                    + JHUXSHZZ2L2la3*self.g4**2
+                    + JHUXSHZZ2L2lL1*self.g1prime2**2
+                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSggH2L2la1a2 * self.g1*self.g2
-                    + JHUXSggH2L2la1a3 * self.g1*self.g4
-                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
+                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
+                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la2a3 * self.g4*self.g2
-                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
+                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
         if self.productionmode == "HJJ":
             return (
@@ -310,25 +310,25 @@ class SampleBase(object):
                     + JHUXSHJJa3 * self.ghg4**2
                     + JHUXSHJJa2a3 * self.ghg2*self.ghg4
                    ) * (
-                      JHUXSggH2L2la1*self.g1**2
-                    + JHUXSggH2L2la2*self.g2**2
-                    + JHUXSggH2L2la3*self.g4**2
-                    + JHUXSggH2L2lL1*self.g1prime2**2
-                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2L2la1*self.g1**2
+                    + JHUXSHZZ2L2la2*self.g2**2
+                    + JHUXSHZZ2L2la3*self.g4**2
+                    + JHUXSHZZ2L2lL1*self.g1prime2**2
+                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSggH2L2la1a2 * self.g1*self.g2
-                    + JHUXSggH2L2la1a3 * self.g1*self.g4
-                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
+                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
+                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la2a3 * self.g4*self.g2
-                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
+                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
         if self.productionmode == "ttH":
             return (
@@ -336,25 +336,25 @@ class SampleBase(object):
                     + JHUXSttHkappatilde * self.kappa_tilde**2
                     + JHUXSttHkappakappatilde * self.kappa*self.kappa_tilde
                    ) * (
-                      JHUXSggH2L2la1*self.g1**2
-                    + JHUXSggH2L2la2*self.g2**2
-                    + JHUXSggH2L2la3*self.g4**2
-                    + JHUXSggH2L2lL1*self.g1prime2**2
-                    + JHUXSggH2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2L2la1*self.g1**2
+                    + JHUXSHZZ2L2la2*self.g2**2
+                    + JHUXSHZZ2L2la3*self.g4**2
+                    + JHUXSHZZ2L2lL1*self.g1prime2**2
+                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSggH2L2la1a2 * self.g1*self.g2
-                    + JHUXSggH2L2la1a3 * self.g1*self.g4
-                    + JHUXSggH2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSggH2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
+                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
+                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la2a3 * self.g4*self.g2
-                    + JHUXSggH2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSggH2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
+                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSggH2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSggH2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSggH2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
         assert False
 
@@ -640,12 +640,12 @@ class SampleBase(object):
     @property
     def feL(self):
         a1, eL, eR = self.a1eLeR
-        return (1 if a1*eL>0 else -1) * eL**2 * constants.JHUXSggH2L2leL / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
+        return (1 if a1*eL>0 else -1) * eL**2 * constants.JHUXSHZZ2L2leL / (eL**2 * constants.JHUXSHZZ2L2leL + eR**2 * constants.JHUXSHZZ2L2leR + abs(a1)**2 * constants.JHUXSHZZ2L2la1)
 
     @property
     def feR(self):
         a1, eL, eR = self.a1eLeR
-        return (1 if a1*eR>0 else -1) * eR**2 * constants.JHUXSggH2L2leR / (eL**2 * constants.JHUXSggH2L2leL + eR**2 * constants.JHUXSggH2L2leR + abs(a1)**2 * constants.JHUXSggH2L2la1)
+        return (1 if a1*eR>0 else -1) * eR**2 * constants.JHUXSHZZ2L2leR / (eL**2 * constants.JHUXSHZZ2L2leL + eR**2 * constants.JHUXSHZZ2L2leR + abs(a1)**2 * constants.JHUXSHZZ2L2la1)
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
@@ -778,15 +778,15 @@ def samplewitha1eLeR(a1, eL, eR):
 def samplewithfeLfeR(feL, feR):
     fa1 = 1-abs(feL)-abs(feR)
     a1 = sqrt(fa1)
-    eL = (1 if feL>0 else -1) * sqrt(abs(feL) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2leL)
-    eR = (1 if feR>0 else -1) * sqrt(abs(feR) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2leR)
+    eL = (1 if feL>0 else -1) * sqrt(abs(feL) * constants.JHUXSHZZ2L2la1 / constants.JHUXSHZZ2L2leL)
+    eR = (1 if feR>0 else -1) * sqrt(abs(feR) * constants.JHUXSHZZ2L2la1 / constants.JHUXSHZZ2L2leR)
     return samplewitha1eLeR(a1, eL, eR)
 
 def samplewithfL1fL1Zg(fL1, fL1Zg):
     fa1 = 1-abs(fL1)-abs(fL1Zg)
     a1 = sqrt(fa1)
-    L1 = -(1 if fL1>0 else -1) * sqrt(abs(fL1) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2lL1)
-    L1Zg = -(1 if fL1Zg>0 else -1) * sqrt(abs(fL1Zg) * constants.JHUXSggH2L2la1 / constants.JHUXSggH2L2lL1Zg)
+    L1 = -(1 if fL1>0 else -1) * sqrt(abs(fL1) * constants.JHUXSHZZ2L2la1 / constants.JHUXSHZZ2L2lL1)
+    L1Zg = -(1 if fL1Zg>0 else -1) * sqrt(abs(fL1Zg) * constants.JHUXSHZZ2L2la1 / constants.JHUXSHZZ2L2lL1Zg)
     return ArbitraryCouplingsSample("ggH", g1=a1, g1prime2=L1, ghzgs1prime2=L1Zg, g2=0, g4=0)
 
 class ReweightingSample(MultiEnum, SampleBase):
