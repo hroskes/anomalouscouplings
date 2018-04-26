@@ -61,7 +61,7 @@ class SampleBase(object):
         elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
             result *= self.g1prime2**2 / constants.g1prime2HZZ**2
         elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
-            result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2HZZ_gen**2
+            result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2HZZ**2
         else:
             raise ValueError("Nominal xsec is only defined for samples with no interference")
 
@@ -78,7 +78,7 @@ class SampleBase(object):
             elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
                 result *= self.g1prime2**2 / constants.g1prime2VBF**2
             elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
-                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2VBF_gen**2
+                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2VBF**2
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "ZH":
@@ -92,7 +92,7 @@ class SampleBase(object):
             elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
                 result *= self.g1prime2**2 / constants.g1prime2ZH**2
             elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
-                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2ZH_gen**2
+                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2ZH**2
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "WH":
@@ -106,7 +106,7 @@ class SampleBase(object):
             elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
                 result *= self.g1prime2**2 / constants.g1prime2WH**2
             elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
-                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2WH_gen**2
+                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2WH**2
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "HJJ":
@@ -1297,13 +1297,13 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def ghzgs1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ"):
-            if self.hypothesis == "L1Zg": return constants.ghzgs1prime2HZZ_gen if self.productionmode in ("ggH", "ttH", "HJJ") else 1
+            if self.hypothesis == "L1Zg": return constants.ghzgs1prime2HZZ if self.productionmode in ("ggH", "ttH", "HJJ") else 1
             if self.hypothesis in ("0+", "a2", "0-", "L1"): return 0
 
-            ghzgs1prime2 = {"dec": constants.ghzgs1prime2HZZ_gen}
-            if self.productionmode == "VBF": ghzgs1prime2["prod"] = constants.ghzgs1prime2VBF_gen
-            elif self.productionmode == "ZH":  ghzgs1prime2["prod"] = constants.ghzgs1prime2ZH_gen
-            elif self.productionmode == "WH":  ghzgs1prime2["prod"] = constants.ghzgs1prime2WH_gen
+            ghzgs1prime2 = {"dec": constants.ghzgs1prime2HZZ}
+            if self.productionmode == "VBF": ghzgs1prime2["prod"] = constants.ghzgs1prime2VBF
+            elif self.productionmode == "ZH":  ghzgs1prime2["prod"] = constants.ghzgs1prime2ZH
+            elif self.productionmode == "WH":  ghzgs1prime2["prod"] = constants.ghzgs1prime2WH
             else: ghzgs1prime2["prod"] = None
             ghzgs1prime2["proddec"] = None if ghzgs1prime2["prod"] is None else -sqrt(ghzgs1prime2["prod"]*ghzgs1prime2["dec"])
 
