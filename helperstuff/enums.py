@@ -654,6 +654,7 @@ class Production(MyEnum):
                  EnumItem("170712"),
                  EnumItem("170825"),
                  EnumItem("180121"),
+                 EnumItem("180416"),
                  EnumItem("LHE_170509"),
                 )
     def __cmp__(self, other):
@@ -682,6 +683,11 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/180121"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180121"
+        if self == "180416":
+            if config.host == "lxplus":
+                return "root://lxcms03//data3/Higgs/180416"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/180416"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -701,6 +707,7 @@ class Production(MyEnum):
     @property
     def dataluminosity(self):
         if self in ("170203", "170222", "170825", "180121"): return 35.8671
+        if self == "180416": return 41.4
         if self == "LHE_170509": return 300
         assert False
     def __int__(self):
@@ -709,6 +716,8 @@ class Production(MyEnum):
     def year(self):
         if "180121" <= self:
             return 2016
+        if self == "180416":
+            return 2017
         assert False
     @property
     def productionforsmoothingparameters(self):
