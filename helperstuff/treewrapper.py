@@ -41,6 +41,8 @@ class TreeWrapperBase(Iterator):
         if self.isZX:
             ZX.setup(treesample.production)
 
+        self.year = treesample.production.year
+
         if self.isdata:
             self.unblind = config.unblinddistributions
         else:
@@ -191,6 +193,15 @@ class TreeWrapperBase(Iterator):
     def D_HadZH_L1Zg(self):
         if self.notdijet: return -999
         return self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH**2 / (self.M2ghzgs1prime2_HadZH*constants.ghzgs1prime2ZH**2 + self.M2g2_HJJ*self.cconstantforDHadZH)
+
+    @MakeJECSystematics
+    def D_bkg_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay*self.p_m4l_SIG / (self.M2g1_VBF*self.M2g1_decay*self.p_m4l_SIG + self.M2qqZZJJ*self.p_m4l_BKG*self.cconstantforDbkg)
+    @MakeJECSystematics
+    def D_bkg_HadVHdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay*self.p_m4l_SIG / (self.M2g1_VBF*self.M2g1_decay*self.p_m4l_SIG + self.M2qqZZJJ*self.p_m4l_BKG*self.cconstantforDbkg)
 
 ###################################
 #anomalous couplings discriminants#
@@ -780,6 +791,10 @@ class TreeWrapper(TreeWrapperBase):
         #express in terms of |M|^2, this will make life easier
         self.M2qqZZ = t.p_QQB_BKG_MCFM
 
+        self.M2qqZZJJ       = t.p_JJQCD_BKG_MCFM_JECNominal
+        self.M2qqZZJJ_JECUp = t.p_JJQCD_BKG_MCFM_JECUp
+        self.M2qqZZJJ_JECDn = t.p_JJQCD_BKG_MCFM_JECDn
+
         self.M2g1_decay                   = t.p_GG_SIG_ghg2_1_ghz1_1_JHUGen
         self.M2g4_decay                   = t.p_GG_SIG_ghg2_1_ghz4_1_JHUGen
         self.M2g1g4_decay                 = t.p_GG_SIG_ghg2_1_ghz1_1_ghz4_1_JHUGen
@@ -1232,6 +1247,7 @@ class TreeWrapper(TreeWrapperBase):
             "Show",
             "unblind",
             "xsec",
+            "year",
         ]
         self.toaddtotree_float = []
         self.toaddtotree_int = [
@@ -1241,6 +1257,7 @@ class TreeWrapper(TreeWrapperBase):
         ]
 
         proddiscriminants = [
+            "D_bkg_{prod}decay",
             "D_0minus_{prod}",
             "D_CP_{prod}",
             "D_CP_{prod}_new",

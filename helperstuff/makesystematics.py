@@ -61,9 +61,9 @@ class MakeJECSystematics(MakeSystematics):
 
     def doreplacements(self, code):
         for thing in (
-            r"(self[.]M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))",
-            r"(self[.]notdijet)",
-            r"(self[.]binning_4couplings_(HadVH|VBF|)decay)",
+            r"(self[.]M2(?:(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))|qqZZJJ)\b",
+            r"(self[.]notdijet)\b",
+            r"(self[.]binning_4couplings_(HadVH|VBF|)decay)\b",
         ):
             code = re.sub(thing, r"\1_JEC{UpDn}", code)
         for thing in (
@@ -76,7 +76,8 @@ class MakeJECSystematics(MakeSystematics):
         result = re.findall("(self[.][\w]*)[^\w{]", code)
         for variable in result:
             if re.match("self[.](M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay"
-                        "|ZZ(Eta|Pt)|D_4couplings_general|foldbins_4couplings_(VBF|HadVH)decay)", variable): continue
+                        "|ZZ(?:Eta|Pt)|D_4couplings_general(?:_raw|)|foldbins_4couplings_(?:VBF|HadVH)decay"
+                        "|p_m4l_(?:SIG|BKG)|cconstantforDbkg)$", variable): continue
             raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
 
         return code
