@@ -626,3 +626,14 @@ def recursivesubclasses(cls):
     for subcls in cls.__subclasses__():
         result += recursivesubclasses(subcls)
     return result
+
+@contextlib.contextmanager
+def Closing(thing):
+    try:
+        yield thing
+    finally:
+        thing.Close()
+
+def TFile(*args, **kwargs):
+    with Closing(ROOT.TFile(*args, **kwargs)) as f:
+        yield f
