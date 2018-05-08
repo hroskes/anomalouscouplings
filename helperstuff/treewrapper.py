@@ -200,22 +200,32 @@ class TreeWrapperBase(Iterator):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g4_decay*constants.g4HZZ**2)
     def D_CP_decay(self):
         return self.M2g1g4_decay*constants.g4HZZ / (self.M2g1_decay + self.M2g4_decay*constants.g4HZZ**2)
+    def D_CP_decay_new(self):
+        return self.M2g1g4_decay*constants.g4HZZ / (2 * self.M2g1_decay * self.M2g4_decay*constants.g4HZZ**2)
     def D_0hplus_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g2_decay*constants.g2HZZ**2)
     def D_int_decay(self):
         return self.M2g1g2_decay*constants.g2HZZ / (self.M2g1_decay + self.M2g2_decay*constants.g2HZZ**2)
+    def D_int_decay_new(self):
+        return self.M2g1g2_decay*constants.g2HZZ / (2 * self.M2g1_decay * self.M2g2_decay*constants.g2HZZ**2)
     def D_L1_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2HZZ**2)
     def D_L1int_decay(self):
         return -self.M2g1g1prime2_decay*constants.g1prime2HZZ / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2HZZ**2)
+    def D_L1int_decay_new(self):
+        return -self.M2g1g1prime2_decay*constants.g1prime2HZZ / (2 * self.M2g1_decay * self.M2g1prime2_decay*constants.g1prime2HZZ**2)
     def D_L1Zg_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
     def D_L1Zgint_decay(self):
         return -self.M2g1ghzgs1prime2_decay*constants.ghzgs1prime2HZZ / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
+    def D_L1Zgint_decay_new(self):
+        return -self.M2g1ghzgs1prime2_decay*constants.ghzgs1prime2HZZ / (2 * self.M2g1_decay * self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
     def D_L1L1Zg_decay(self):
         return self.M2g1prime2_decay*constants.g1prime2HZZ**2 / (self.M2g1prime2_decay*constants.g1prime2HZZ**2 + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
     def D_L1L1Zgint_decay(self):
         return self.M2g1prime2ghzgs1prime2_decay*constants.g1prime2HZZ*constants.ghzgs1prime2HZZ / (self.M2g1prime2_decay*constants.g1prime2HZZ**2 + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
+    def D_L1L1Zgint_decay_new(self):
+        return self.M2g1prime2ghzgs1prime2_decay*constants.g1prime2HZZ*constants.ghzgs1prime2HZZ / (2 * self.M2g1prime2_decay*constants.g1prime2HZZ**2 * self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
 
 ############################
 #contact term discriminants#
@@ -225,14 +235,20 @@ class TreeWrapperBase(Iterator):
         return self.M2g1_decay / (self.M2g1_decay + self.M2eL_decay*constants.eLHZZ**2)
     def D_eLint_decay(self):
         return self.M2g1eL_decay*constants.eLHZZ / (self.M2g1_decay + self.M2eL_decay*constants.eLHZZ**2)
+    def D_eLint_decay_new(self):
+        return self.M2g1eL_decay*constants.eLHZZ / (2 * self.M2g1_decay * self.M2eL_decay*constants.eLHZZ**2)
     def D_eR_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2eR_decay*constants.eRHZZ**2)
     def D_eRint_decay(self):
         return self.M2g1eR_decay*constants.eRHZZ / (self.M2g1_decay + self.M2eR_decay*constants.eRHZZ**2)
+    def D_eRint_decay_new(self):
+        return self.M2g1eR_decay*constants.eRHZZ / (2 * self.M2g1_decay * self.M2eR_decay*constants.eRHZZ**2)
     def D_eLeR_decay(self):
         return self.M2eL_decay*constants.eLHZZ**2 / (self.M2eR_decay*constants.eRHZZ**2 + self.M2eL_decay*constants.eLHZZ**2)
     def D_eLeRint_decay(self):
         return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (self.M2eR_decay*constants.eRHZZ**2 + self.M2eL_decay*constants.eLHZZ**2)
+    def D_eLeRint_decay_new(self):
+        return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (2 * self.M2eR_decay*constants.eRHZZ**2 * self.M2eL_decay*constants.eLHZZ**2)
 
 #######################################
 #VBF anomalous couplings discriminants#
@@ -247,6 +263,10 @@ class TreeWrapperBase(Iterator):
         if self.notdijet: return -999
         return self.M2g1g4_VBF*constants.g4VBF / (self.M2g1_VBF + self.M2g4_VBF*constants.g4VBF**2)
     @MakeJECSystematics
+    def D_CP_VBF_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g4_VBF*constants.g4VBF / (2 * self.M2g1_VBF * self.M2g4_VBF*constants.g4VBF**2)
+    @MakeJECSystematics
     def D_0hplus_VBF(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
@@ -254,6 +274,10 @@ class TreeWrapperBase(Iterator):
     def D_int_VBF(self):
         if self.notdijet: return -999
         return self.M2g1g2_VBF*constants.g2VBF / (self.M2g1_VBF + self.M2g2_VBF*constants.g2VBF**2)
+    @MakeJECSystematics
+    def D_int_VBF_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g2_VBF*constants.g2VBF / (2 * self.M2g1_VBF * self.M2g2_VBF*constants.g2VBF**2)
     @MakeJECSystematics
     def D_L1_VBF(self):
         if self.notdijet: return -999
@@ -263,6 +287,10 @@ class TreeWrapperBase(Iterator):
         if self.notdijet: return -999
         return -self.M2g1g1prime2_VBF*constants.g1prime2VBF / (self.M2g1_VBF + self.M2g1prime2_VBF*constants.g1prime2VBF**2)
     @MakeJECSystematics
+    def D_L1int_VBF_new(self):
+        if self.notdijet: return -999
+        return -self.M2g1g1prime2_VBF*constants.g1prime2VBF / (2 * self.M2g1_VBF * self.M2g1prime2_VBF*constants.g1prime2VBF**2)
+    @MakeJECSystematics
     def D_L1Zg_VBF(self):
         if self.notdijet: return -999
         return self.M2g1_VBF / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF**2)
@@ -270,6 +298,10 @@ class TreeWrapperBase(Iterator):
     def D_L1Zgint_VBF(self):
         if self.notdijet: return -999
         return -self.M2g1ghzgs1prime2_VBF*constants.ghzgs1prime2VBF / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF**2)
+    @MakeJECSystematics
+    def D_L1Zgint_VBF_new(self):
+        if self.notdijet: return -999
+        return -self.M2g1ghzgs1prime2_VBF*constants.ghzgs1prime2VBF / (2 * self.M2g1_VBF * self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF**2)
 
 ###############################################
 #VH hadronic anomalous couplings discriminants#
@@ -300,6 +332,18 @@ class TreeWrapperBase(Iterator):
                  )
                ).nominal_value
     @MakeJECSystematics
+    def D_CP_HadVH_new(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1g4_HadWH + self.M2g1g4_HadZH)*constants.g4VH
+               /
+                 (2 *
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 *
+                   (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
+                 )
+               ).nominal_value
+    @MakeJECSystematics
     def D_0hplus_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -320,6 +364,18 @@ class TreeWrapperBase(Iterator):
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
+                   (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
+                 )
+               ).nominal_value
+    @MakeJECSystematics
+    def D_int_HadVH_new(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1g2_HadWH + self.M2g1g2_HadZH)*constants.g2VH
+               /
+                 (2 *
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 *
                    (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
                  )
                ).nominal_value
@@ -348,6 +404,18 @@ class TreeWrapperBase(Iterator):
                  )
                ).nominal_value
     @MakeJECSystematics
+    def D_L1int_HadVH_new(self):
+        if self.notdijet: return -999
+        return (
+                 -(self.M2g1g1prime2_HadWH + self.M2g1g1prime2_HadZH)*constants.g1prime2VH
+               /
+                 (2 *
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 *
+                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH**2
+                 )
+               ).nominal_value
+    @MakeJECSystematics
     def D_L1Zg_HadVH(self):
         if self.notdijet: return -999
         return (
@@ -369,6 +437,18 @@ class TreeWrapperBase(Iterator):
                  (
                    (self.M2g1_HadWH + self.M2g1_HadZH)
                  +
+                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH**2
+                 )
+               ).nominal_value
+    @MakeJECSystematics
+    def D_L1Zgint_HadVH_new(self):
+        if self.notdijet: return -999
+        return (
+                 -(self.M2g1ghzgs1prime2_HadWH + self.M2g1ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH
+               /
+                 (2 *
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 *
                    (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH**2
                  )
                ).nominal_value
@@ -1068,23 +1148,31 @@ class TreeWrapper(TreeWrapperBase):
             "D_HadZH_L1Zg",
             "D_0minus_decay",
             "D_CP_decay",
+            "D_CP_decay_new",
             "D_0hplus_decay",
             "D_int_decay",
+            "D_int_decay_new",
             "D_L1_decay",
             "D_L1int_decay",
+            "D_L1int_decay_new",
             "D_L1Zg_decay",
             "D_L1Zgint_decay",
+            "D_L1Zgint_decay_new",
             "D_L1L1Zg_decay",
             "D_L1L1Zgint_decay",
+            "D_L1L1Zgint_decay_new",
         ]
 
         self.exceptions = [
             "D_eL_decay",
             "D_eLint_decay",
+            "D_eLint_decay_new",
             "D_eR_decay",
             "D_eRint_decay",
+            "D_eRint_decay_new",
             "D_eLeR_decay",
             "D_eLeRint_decay",
+            "D_eLeRint_decay_new",
 
             "D_4couplings_general",
             "D_4couplings_general_raw",
@@ -1155,12 +1243,16 @@ class TreeWrapper(TreeWrapperBase):
         proddiscriminants = [
             "D_0minus_{prod}",
             "D_CP_{prod}",
+            "D_CP_{prod}_new",
             "D_0hplus_{prod}",
             "D_int_{prod}",
+            "D_int_{prod}_new",
             "D_L1_{prod}",
             "D_L1int_{prod}",
+            "D_L1int_{prod}_new",
             "D_L1Zg_{prod}",
             "D_L1Zgint_{prod}",
+            "D_L1Zgint_{prod}_new",
             "D_0minus_{prod}decay",
             "D_0hplus_{prod}decay",
             "D_L1_{prod}decay",
