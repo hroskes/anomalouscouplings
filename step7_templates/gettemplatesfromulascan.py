@@ -2,7 +2,7 @@
 
 import os
 from helperstuff import constants
-from helperstuff.templates import templatesfiles
+from helperstuff.templates import IntTemplate, Template, templatesfiles
 from helperstuff.utilities import KeepWhileOpenFile, TFile
 
 
@@ -26,7 +26,7 @@ def gettemplatefromulascan(template):
   kwargs = {}
   kwargses = [kwargs]
   kwargs["channel"] = template.channel
-  kwargs["category"] = str(template.category).replace("VBF", "JJVBF")
+  kwargs["category"] = str(template.category).replace("VBFt", "JJVBFT").replace("VHHadrt", "HadVHT")
   if template.shapesystematic == "":
     kwargs["systematic"] = "Nominal"
 
@@ -35,8 +35,8 @@ def gettemplatefromulascan(template):
     if isinstance(template, Template) and template.hypothesis == "0+":
       kwargs["_hypothesis"] = "_Sig"
       scalingpower = 0
-    if isinstance(template, IntTemplate) and template.interferencetype == "a11ai1":
-      kwargs["_hypothesis"] = "_Sig_ai1_1"
+    if isinstance(template, IntTemplate) and template.interferencetype == "g11gi1":
+      kwargs["_hypothesis"] = "_Sig_ai1_1_Re"
       scalingpower = 1
     if isinstance(template, Template) and template.hypothesis in ("0-", "a2", "a3", "L1", "L1Zg"):
       kwargs["_hypothesis"] = "_Sig_ai1_2"
@@ -47,14 +47,14 @@ def gettemplatefromulascan(template):
     if isinstance(template, Template) and template.hypothesis == "0+":
       kwargs["_hypothesis"] = "_Sig"
       scalingpower = 0
-    if isinstance(template, IntTemplate) and template.interferencetype == "a13ai1":
-      kwargs["_hypothesis"] = "_Sig_ai1_1"
+    if isinstance(template, IntTemplate) and template.interferencetype == "g13gi1":
+      kwargs["_hypothesis"] = "_Sig_ai1_1_Re"
       scalingpower = 1
-    if isinstance(template, IntTemplate) and template.interferencetype == "a12ai2":
-      kwargs["_hypothesis"] = "_Sig_ai1_2"
+    if isinstance(template, IntTemplate) and template.interferencetype == "g12gi2":
+      kwargs["_hypothesis"] = "_Sig_ai1_2_PosDef"
       scalingpower = 2
-    if isinstance(template, IntTemplate) and template.interferencetype == "a11ai3":
-      kwargs["_hypothesis"] = "_Sig_ai1_3"
+    if isinstance(template, IntTemplate) and template.interferencetype == "g11gi3":
+      kwargs["_hypothesis"] = "_Sig_ai1_3_Re"
       scalingpower = 3
     if isinstance(template, Template) and template.hypothesis in ("0-", "a2", "a3", "L1", "L1Zg"):
       kwargs["_hypothesis"] = "_Sig_ai1_4"
@@ -111,16 +111,19 @@ def gettemplatesfromulascan(tf):
       cache = []
       with TFile(filename, "CREATE") as f:
         for template in tf.templates() + tf.inttemplates():
-          if isinstance(template, Template) and not template.hypothesis.ispure: continue
+          if isinstance(template, Template) and template.hypothesis and not template.hypothesis.ispure: continue
           h = gettemplatefromulascan(template)
           cache.append(h)
           h.SetDirectory(f)
     except:
-      os.remove(filename)
+      if os.path.exists(filename):
+        os.remove(filename)
       raise
 
 def getalltemplatesfromulascan():
   for tf in templatesfiles:
+    if tf.production != "180416": continue
+    if tf.templategroup == "tth": continue
     gettemplatesfromulascan(tf)
 
 if __name__ == "__main__":
