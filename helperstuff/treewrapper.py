@@ -4,6 +4,7 @@ from array import array
 from collections import Counter, Iterator
 import inspect
 from itertools import chain
+from math import sqrt
 import resource
 import sys
 
@@ -212,31 +213,31 @@ class TreeWrapperBase(Iterator):
     def D_CP_decay(self):
         return self.M2g1g4_decay*constants.g4HZZ / (self.M2g1_decay + self.M2g4_decay*constants.g4HZZ**2)
     def D_CP_decay_new(self):
-        return self.M2g1g4_decay*constants.g4HZZ / (2 * self.M2g1_decay * self.M2g4_decay*constants.g4HZZ**2)
+        return self.M2g1g4_decay*constants.g4HZZ / (2 * sqrt(self.M2g1_decay * self.M2g4_decay*constants.g4HZZ**2))
     def D_0hplus_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g2_decay*constants.g2HZZ**2)
     def D_int_decay(self):
         return self.M2g1g2_decay*constants.g2HZZ / (self.M2g1_decay + self.M2g2_decay*constants.g2HZZ**2)
     def D_int_decay_new(self):
-        return self.M2g1g2_decay*constants.g2HZZ / (2 * self.M2g1_decay * self.M2g2_decay*constants.g2HZZ**2)
+        return self.M2g1g2_decay*constants.g2HZZ / (2 * sqrt(self.M2g1_decay * self.M2g2_decay*constants.g2HZZ**2))
     def D_L1_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2HZZ**2)
     def D_L1int_decay(self):
         return -self.M2g1g1prime2_decay*constants.g1prime2HZZ / (self.M2g1_decay + self.M2g1prime2_decay*constants.g1prime2HZZ**2)
     def D_L1int_decay_new(self):
-        return -self.M2g1g1prime2_decay*constants.g1prime2HZZ / (2 * self.M2g1_decay * self.M2g1prime2_decay*constants.g1prime2HZZ**2)
+        return -self.M2g1g1prime2_decay*constants.g1prime2HZZ / (2 * sqrt(self.M2g1_decay * self.M2g1prime2_decay*constants.g1prime2HZZ**2))
     def D_L1Zg_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
     def D_L1Zgint_decay(self):
         return -self.M2g1ghzgs1prime2_decay*constants.ghzgs1prime2HZZ / (self.M2g1_decay + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
     def D_L1Zgint_decay_new(self):
-        return -self.M2g1ghzgs1prime2_decay*constants.ghzgs1prime2HZZ / (2 * self.M2g1_decay * self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
+        return -self.M2g1ghzgs1prime2_decay*constants.ghzgs1prime2HZZ / (2 * sqrt(self.M2g1_decay * self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2))
     def D_L1L1Zg_decay(self):
         return self.M2g1prime2_decay*constants.g1prime2HZZ**2 / (self.M2g1prime2_decay*constants.g1prime2HZZ**2 + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
     def D_L1L1Zgint_decay(self):
         return self.M2g1prime2ghzgs1prime2_decay*constants.g1prime2HZZ*constants.ghzgs1prime2HZZ / (self.M2g1prime2_decay*constants.g1prime2HZZ**2 + self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
     def D_L1L1Zgint_decay_new(self):
-        return self.M2g1prime2ghzgs1prime2_decay*constants.g1prime2HZZ*constants.ghzgs1prime2HZZ / (2 * self.M2g1prime2_decay*constants.g1prime2HZZ**2 * self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2)
+        return self.M2g1prime2ghzgs1prime2_decay*constants.g1prime2HZZ*constants.ghzgs1prime2HZZ / (2 * sqrt(self.M2g1prime2_decay*constants.g1prime2HZZ**2 * self.M2ghzgs1prime2_decay*constants.ghzgs1prime2HZZ**2))
 
 ############################
 #contact term discriminants#
@@ -247,19 +248,19 @@ class TreeWrapperBase(Iterator):
     def D_eLint_decay(self):
         return self.M2g1eL_decay*constants.eLHZZ / (self.M2g1_decay + self.M2eL_decay*constants.eLHZZ**2)
     def D_eLint_decay_new(self):
-        return self.M2g1eL_decay*constants.eLHZZ / (2 * self.M2g1_decay * self.M2eL_decay*constants.eLHZZ**2)
+        return self.M2g1eL_decay*constants.eLHZZ / (2 * sqrt(self.M2g1_decay * self.M2eL_decay*constants.eLHZZ**2))
     def D_eR_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2eR_decay*constants.eRHZZ**2)
     def D_eRint_decay(self):
         return self.M2g1eR_decay*constants.eRHZZ / (self.M2g1_decay + self.M2eR_decay*constants.eRHZZ**2)
     def D_eRint_decay_new(self):
-        return self.M2g1eR_decay*constants.eRHZZ / (2 * self.M2g1_decay * self.M2eR_decay*constants.eRHZZ**2)
+        return self.M2g1eR_decay*constants.eRHZZ / (2 * sqrt(self.M2g1_decay * self.M2eR_decay*constants.eRHZZ**2))
     def D_eLeR_decay(self):
         return self.M2eL_decay*constants.eLHZZ**2 / (self.M2eR_decay*constants.eRHZZ**2 + self.M2eL_decay*constants.eLHZZ**2)
     def D_eLeRint_decay(self):
         return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (self.M2eR_decay*constants.eRHZZ**2 + self.M2eL_decay*constants.eLHZZ**2)
     def D_eLeRint_decay_new(self):
-        return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (2 * self.M2eR_decay*constants.eRHZZ**2 * self.M2eL_decay*constants.eLHZZ**2)
+        return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (2 * sqrt(self.M2eR_decay*constants.eRHZZ**2 * self.M2eL_decay*constants.eLHZZ**2))
 
 #######################################
 #VBF anomalous couplings discriminants#
@@ -276,7 +277,7 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_CP_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g4_VBF*constants.g4VBF / (2 * self.M2g1_VBF * self.M2g4_VBF*constants.g4VBF**2)
+        return self.M2g1g4_VBF*constants.g4VBF / (2 * sqrt(self.M2g1_VBF * self.M2g4_VBF*constants.g4VBF**2))
     @MakeJECSystematics
     def D_0hplus_VBF(self):
         if self.notdijet: return -999
@@ -288,7 +289,7 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_int_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g2_VBF*constants.g2VBF / (2 * self.M2g1_VBF * self.M2g2_VBF*constants.g2VBF**2)
+        return self.M2g1g2_VBF*constants.g2VBF / (2 * sqrt(self.M2g1_VBF * self.M2g2_VBF*constants.g2VBF**2))
     @MakeJECSystematics
     def D_L1_VBF(self):
         if self.notdijet: return -999
@@ -300,7 +301,7 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_L1int_VBF_new(self):
         if self.notdijet: return -999
-        return -self.M2g1g1prime2_VBF*constants.g1prime2VBF / (2 * self.M2g1_VBF * self.M2g1prime2_VBF*constants.g1prime2VBF**2)
+        return -self.M2g1g1prime2_VBF*constants.g1prime2VBF / (2 * sqrt(self.M2g1_VBF * self.M2g1prime2_VBF*constants.g1prime2VBF**2))
     @MakeJECSystematics
     def D_L1Zg_VBF(self):
         if self.notdijet: return -999
@@ -312,7 +313,7 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_L1Zgint_VBF_new(self):
         if self.notdijet: return -999
-        return -self.M2g1ghzgs1prime2_VBF*constants.ghzgs1prime2VBF / (2 * self.M2g1_VBF * self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF**2)
+        return -self.M2g1ghzgs1prime2_VBF*constants.ghzgs1prime2VBF / (2 * sqrt(self.M2g1_VBF * self.M2ghzgs1prime2_VBF*constants.ghzgs1prime2VBF**2))
 
 ###############################################
 #VH hadronic anomalous couplings discriminants#
@@ -345,15 +346,11 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_CP_HadVH_new(self):
         if self.notdijet: return -999
-        return (
-                 (self.M2g1g4_HadWH + self.M2g1g4_HadZH)*constants.g4VH
-               /
-                 (2 *
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 *
-                   (self.M2g4_HadWH + self.M2g4_HadZH)*constants.g4VH**2
-                 )
-               ).nominal_value
+        return .5 * (
+                     self.M2g1g4_HadWH / (2 * sqrt(self.M2g1_HadWH + self.M2g4_HadWH))
+                    +
+                     self.M2g1g4_HadZH / (2 * sqrt(self.M2g1_HadZH + self.M2g4_HadZH))
+                    )
     @MakeJECSystematics
     def D_0hplus_HadVH(self):
         if self.notdijet: return -999
@@ -381,15 +378,11 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_int_HadVH_new(self):
         if self.notdijet: return -999
-        return (
-                 (self.M2g1g2_HadWH + self.M2g1g2_HadZH)*constants.g2VH
-               /
-                 (2 *
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 *
-                   (self.M2g2_HadWH + self.M2g2_HadZH)*constants.g2VH**2
-                 )
-               ).nominal_value
+        return .5 * (
+                     self.M2g1g2_HadWH / (2 * sqrt(self.M2g1_HadWH + self.M2g2_HadWH))
+                    +
+                     self.M2g1g2_HadZH / (2 * sqrt(self.M2g1_HadZH + self.M2g2_HadZH))
+                    )
     @MakeJECSystematics
     def D_L1_HadVH(self):
         if self.notdijet: return -999
@@ -417,15 +410,11 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_L1int_HadVH_new(self):
         if self.notdijet: return -999
-        return (
-                 -(self.M2g1g1prime2_HadWH + self.M2g1g1prime2_HadZH)*constants.g1prime2VH
-               /
-                 (2 *
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 *
-                   (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*constants.g1prime2VH**2
-                 )
-               ).nominal_value
+        return .5 * (
+                     -self.M2g1g1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH + self.M2g1prime2_HadWH))
+                    +
+                     -self.M2g1g1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH + self.M2g1prime2_HadZH))
+                    )
     @MakeJECSystematics
     def D_L1Zg_HadVH(self):
         if self.notdijet: return -999
@@ -454,15 +443,11 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_L1Zgint_HadVH_new(self):
         if self.notdijet: return -999
-        return (
-                 -(self.M2g1ghzgs1prime2_HadWH + self.M2g1ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH
-               /
-                 (2 *
-                   (self.M2g1_HadWH + self.M2g1_HadZH)
-                 *
-                   (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*constants.ghzgs1prime2VH**2
-                 )
-               ).nominal_value
+        return .5 * (
+                     -self.M2g1ghzgs1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH))
+                    +
+                     -self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH + self.M2ghzgs1prime2_HadZH))
+                    )
 
 ############################################
 #VBFdecay anomalous couplings discriminants#
