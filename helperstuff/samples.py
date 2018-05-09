@@ -1735,6 +1735,7 @@ def allsamples():
             yield Sample(productionmode, "0+", "POWHEG", production)
         yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
         for systematic in pythiasystematics:
+            if systematic in ("ScaleUp", "ScaleDown") and production.year >= 2017: continue
             for productionmode in "ggH", "VBF", "ZH", "WplusH", "WminusH":
                 yield Sample(productionmode, "0+", "POWHEG", production, systematic)
             yield Sample("ttH", "Hff0+", "0+", "POWHEG", production, systematic)

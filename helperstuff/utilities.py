@@ -635,5 +635,4 @@ def Closing(thing):
         thing.Close()
 
 def TFile(*args, **kwargs):
-    with Closing(ROOT.TFile(*args, **kwargs)) as f:
-        yield f
+    return Closing(ROOT.TFile(*args, **kwargs))

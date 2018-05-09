@@ -714,7 +714,7 @@ class Production(MyEnum):
         return int(str(self))
     @property
     def year(self):
-        if "180121" <= self:
+        if self <= "180121":
             return 2016
         if self == "180416":
             return 2017
@@ -781,9 +781,9 @@ class PythiaSystematic(MyEnum):
     enumname = "pythiasystematic"
     enumitems = (
                  EnumItem("ScaleUp"),
-                 EnumItem("ScaleDn"),
+                 EnumItem("ScaleDn", "ScaleDown"),
                  EnumItem("TuneUp"),
-                 EnumItem("TuneDn"),
+                 EnumItem("TuneDn", "TuneDown"),
                 )
 
     @property
@@ -837,7 +837,7 @@ productionmodes = ProductionMode.items()
 if config.LHE:
     analyses = Analysis.items(lambda x: x.doLHE)
 else:
-    analyses = Analysis.items(lambda x: x.doCMS and x == "fa3fa2fL1fL1Zg")
+    analyses = Analysis.items(lambda x: x.doCMS and x in ("fa3", "fa2", "fL1"))
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
