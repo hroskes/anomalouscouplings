@@ -109,7 +109,7 @@ def gettemplatesfromulascan(tf):
     if os.path.exists(filename): return
     try:
       cache = []
-      with TFile(filename, "CREATE") as f:
+      with TFile(filename, "CREATE", write=True) as f:
         for template in tf.templates() + tf.inttemplates():
           if isinstance(template, Template) and template.hypothesis and not template.hypothesis.ispure: continue
           h = gettemplatefromulascan(template)

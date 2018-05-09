@@ -628,11 +628,15 @@ def recursivesubclasses(cls):
     return result
 
 @contextlib.contextmanager
-def Closing(thing):
+def Closing(thing, write=False):
     try:
         yield thing
     finally:
-        thing.Close()
+        try:
+            if write: thing.Write()
+        finally:
+            thing.Close()
 
 def TFile(*args, **kwargs):
-    return Closing(ROOT.TFile(*args, **kwargs))
+    write = kwargs.pop("write", False)
+    return Closing(ROOT.TFile(*args, **kwargs), write=write)
