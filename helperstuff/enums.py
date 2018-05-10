@@ -5,7 +5,7 @@ import os
 import re
 
 import config
-from utilities import generatortolist_condition, tfiles
+from utilities import cache, generatortolist_condition, tfiles
 
 class EnumItem(object):
     def __init__(self, name, *other):
@@ -735,9 +735,9 @@ class Category(MyEnum):
     """
     enumname = "category"
     enumitems = (
-                 EnumItem("Untagged", "UntaggedMor17", "VBF1jTaggedMor17", "VHLeptTaggedMor17", "ttHTaggedMor17", "VHMETTaggedMor17"),
-                 EnumItem("VHHadrtagged", "VHHadrTaggedMor17"),
-                 EnumItem("VBFtagged", "VBF2jTaggedMor17"),
+                 EnumItem("Untagged", "UntaggedMor17", "VBF1jTaggedMor17", "VHLeptTaggedMor17", "ttHTaggedMor17", "VHMETTaggedMor17", "UntaggedMor18", "VBF1jTaggedMor18", "VHLeptTaggedMor18", "ttHHadrTaggedMor18", "ttHLeptTaggedMor18", "VHMETTaggedMor18"),
+                 EnumItem("VHHadrtagged", "VHHadrTaggedMor17", "VHHadrTaggedMor18"),
+                 EnumItem("VBFtagged", "VBF2jTaggedMor17", "VBF2jTaggedMor18"),
                 )
     @property
     def idnumbers(self):
@@ -746,7 +746,8 @@ class Category(MyEnum):
         (defined in Category.h)
         """
         import CJLSTscripts
-        return [getattr(CJLSTscripts, name) for name in self.item.names if "Mor17" in name]
+        self.checkidnumbers
+        return {getattr(CJLSTscripts, name) for name in self.item.names if "Mor17" in name}
 
     @property
     def yamlname(self):
@@ -767,6 +768,12 @@ class Category(MyEnum):
             if number in category:
                 return category
         raise ValueError("Invalid id {}".format(number))
+
+    @classmethod
+    @cache
+    def checkidnumbers(cls):
+        for cat1, cat2 in combinations(cls.enumitems, 2):
+            assert not cat1.idnumbers & cat2.idnumbers
 
 class AlternateGenerator(MyEnum):
     enumname = "alternategenerator"

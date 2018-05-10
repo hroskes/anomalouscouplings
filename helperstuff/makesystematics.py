@@ -5,7 +5,9 @@ import re
 #The following imports are not needed for any of the code written explicitly here,
 #but when the functions are defined with exec, it looks for the global variables
 #in this module, rather than where the original function was defined.
+import CJLSTscripts
 import constants
+from math import sqrt
 
 class MakeSystematics(object):
     __metaclass__ = ABCMeta
@@ -61,9 +63,10 @@ class MakeJECSystematics(MakeSystematics):
 
     def doreplacements(self, code):
         for thing in (
+            r"(self[.][\w]*)_JECNominal\b",
             r"(self[.]M2(?:(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))|qqZZJJ)\b",
             r"(self[.]notdijet)\b",
-            r"(self[.]binning_4couplings_(HadVH|VBF|)decay)\b",
+            r"(self[.](?:binning_4couplings|D_bkg_kin)_(?:HadVH|VBF|)decay)\b",
         ):
             code = re.sub(thing, r"\1_JEC{UpDn}", code)
         for thing in (
@@ -76,8 +79,8 @@ class MakeJECSystematics(MakeSystematics):
         result = re.findall("(self[.][\w]*)[^\w{]", code)
         for variable in result:
             if re.match("self[.](M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay"
-                        "|ZZ(?:Eta|Pt)|D_4couplings_general(?:_raw|)|foldbins_4couplings_(?:VBF|HadVH)decay"
-                        "|p_m4l_(?:SIG|BKG)|cconstantforDbkg)$", variable): continue
+                        "|ZZ(?:Eta|Pt|Mass)|D_4couplings_general(?:_raw|)|foldbins_4couplings_(?:VBF|HadVH)decay"
+                        "|p_m4l_(?:SIG|BKG)|cconstantforDbkg(?:kin)?|flavor)$", variable): continue
             raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
 
         return code
