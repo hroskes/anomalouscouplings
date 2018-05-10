@@ -516,11 +516,14 @@ class TreeWrapperBase(Iterator):
     @MakeJECSystematics
     def D_L1Zgint_HadVH_new(self):
         if self.notdijet: return -999
+        return -self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2ghzgs1prime2_HadZH))
+        """
         return .5 * (
                      -self.M2g1ghzgs1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2ghzgs1prime2_HadWH))
                     +
                      -self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2ghzgs1prime2_HadZH))
                     )
+        """
 
 ############################################
 #VBFdecay anomalous couplings discriminants#

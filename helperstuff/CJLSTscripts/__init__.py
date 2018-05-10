@@ -14,7 +14,7 @@ for script in scripts:
     downloader.add("AnalysisStep/interface/{}.h".format(script))
 
 downloader.add("AnalysisStep/test/Macros/ReducibleBackgroundAA_2015.C")
-for rootfile in "FakeRate_SS_Moriond368.root",:
+for rootfile in "FakeRate_SS_Moriond368.root", "FakeRates_SS_Moriond18.root":
     downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile))
 for cconstant in "Dbkgkin_2e2mu", "Dbkgkin_4e", "Dbkgkin_4mu", "DjVBF", "DjjVBF", "DjjWH", "DjjZH", "DbkgjjEWQCD_4l_HadVHTagged_", "DbkgjjEWQCD_4l_JJVBFTagged_", "DbkgjjEWQCD_2l2l_HadVHTagged_", "DbkgjjEWQCD_2l2l_JJVBFTagged_":
     downloader.add("AnalysisStep/data/cconstants/SmoothKDConstant_m4l_{}13TeV.root".format(cconstant))

@@ -36,7 +36,7 @@ except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
 LHE = False
-usedata = False
+usedata = True
 showblinddistributions = False
 unblinddistributions = False
 unblindscans = False
@@ -81,7 +81,7 @@ if LHE:
     smearptmuon = 2.169/6
     smearptjet = 18./6
 else:
-    productionsforcombine = ["180121", "180416"]
+    productionsforcombine = ["180416"]
 
 if len(productionsforcombine) == 1:
     productionforcombine = productionsforcombine[0]

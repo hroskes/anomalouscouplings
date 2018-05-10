@@ -18,6 +18,7 @@ def setup(production):
         raise ValueError("???????")
     from ROOT import fakeRate13TeV
 
-convertTGraphstoTH1Fs.convertTGraphstoTH1Fs(os.path.join(CJLSTscriptsfolder, "FakeRate_SS_Moriond368.root"))
+for rootfile in "FakeRate_SS_Moriond368.root", "FakeRates_SS_Moriond18.root":
+    convertTGraphstoTH1Fs.convertTGraphstoTH1Fs(os.path.join(CJLSTscriptsfolder, rootfile))
 
 from ROOT import CRZLLss, test_bit
