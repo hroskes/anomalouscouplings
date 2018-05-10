@@ -420,9 +420,9 @@ class TreeWrapperBase(Iterator):
     def D_CP_HadVH_new(self):
         if self.notdijet: return -999
         return .5 * (
-                     self.M2g1g4_HadWH / (2 * sqrt(self.M2g1_HadWH + self.M2g4_HadWH))
+                     self.M2g1g4_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2g4_HadWH))
                     +
-                     self.M2g1g4_HadZH / (2 * sqrt(self.M2g1_HadZH + self.M2g4_HadZH))
+                     self.M2g1g4_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g4_HadZH))
                     )
     @MakeJECSystematics
     def D_0hplus_HadVH(self):
@@ -452,9 +452,9 @@ class TreeWrapperBase(Iterator):
     def D_int_HadVH_new(self):
         if self.notdijet: return -999
         return .5 * (
-                     self.M2g1g2_HadWH / (2 * sqrt(self.M2g1_HadWH + self.M2g2_HadWH))
+                     self.M2g1g2_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2g2_HadWH))
                     +
-                     self.M2g1g2_HadZH / (2 * sqrt(self.M2g1_HadZH + self.M2g2_HadZH))
+                     self.M2g1g2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g2_HadZH))
                     )
     @MakeJECSystematics
     def D_L1_HadVH(self):
@@ -484,9 +484,9 @@ class TreeWrapperBase(Iterator):
     def D_L1int_HadVH_new(self):
         if self.notdijet: return -999
         return .5 * (
-                     -self.M2g1g1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH + self.M2g1prime2_HadWH))
+                     -self.M2g1g1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2g1prime2_HadWH))
                     +
-                     -self.M2g1g1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH + self.M2g1prime2_HadZH))
+                     -self.M2g1g1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g1prime2_HadZH))
                     )
     @MakeJECSystematics
     def D_L1Zg_HadVH(self):
@@ -517,9 +517,9 @@ class TreeWrapperBase(Iterator):
     def D_L1Zgint_HadVH_new(self):
         if self.notdijet: return -999
         return .5 * (
-                     -self.M2g1ghzgs1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH + self.M2ghzgs1prime2_HadWH))
+                     -self.M2g1ghzgs1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2ghzgs1prime2_HadWH))
                     +
-                     -self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH + self.M2ghzgs1prime2_HadZH))
+                     -self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2ghzgs1prime2_HadZH))
                     )
 
 ############################################

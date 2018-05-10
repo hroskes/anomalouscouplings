@@ -426,11 +426,6 @@ class ShapeSystematic(MyEnum):
     def appendname(self):
         if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
         return ""
-    def D_bkg(self, analysis):
-        from discriminants import discriminant
-        moreappend = ""
-        if analysis == "fa3fa2fL1fL1Zg": moreappend = "_10bins"
-        return discriminant("D_bkg"+self.appendname()+moreappend)
     def appliesto(self, templategroup):
         if self == "":
             return True

@@ -237,7 +237,25 @@ class TemplatesFile(MultiEnum):
 
     @property
     def bkgdiscriminant(self):
-        return self.shapesystematic.D_bkg(self.analysis)
+        from discriminants import discriminant
+
+        name = "D_bkg"
+        if self.production.year == 2016: pass
+        elif self.production.year == 2017:
+            if self.category == "Untagged": pass
+            elif self.category == "VBFtagged": name += "_VBFdecay"
+            elif self.category == "VHHadrtagged": name += "_HadVHdecay"
+            else: assert False
+        else: assert False
+
+        name += self.shapesystematic.appendname()
+
+        if self.analysis == "fa3fa2fL1fL1Zg":
+            name += "_10bins"
+        elif self.production.year == 2017:
+            name += "_20bins"
+
+        return discriminant(name)
 
     @property
     def purediscriminant(self):
@@ -248,15 +266,20 @@ class TemplatesFile(MultiEnum):
         else:
             JECappend = ""
 
+        if self.production.year == 2016:
+            binsappend = ""
+        elif self.production.year == 2017:
+            binsappend = "_20bins"
+
         if self.category == "Untagged":
             if self.analysis == "fa3":
-                return discriminant("D_0minus_decay")
+                return discriminant("D_0minus_decay"+binsappend)
             if self.analysis == "fa2":
-                return discriminant("D_0hplus_decay")
+                return discriminant("D_0hplus_decay"+binsappend)
             if self.analysis == "fL1":
-                return discriminant("D_L1_decay")
+                return discriminant("D_L1_decay"+binsappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_L1Zg_decay")
+                return discriminant("D_L1Zg_decay"+binsappend)
             if self.analysis == "fL1fL1Zg_DL1_DL1L1Zgint":
                 return discriminant("D_L1_decay")
             if self.analysis == "fL1fL1Zg_DL1_DL1Zgint":
@@ -278,13 +301,13 @@ class TemplatesFile(MultiEnum):
 
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
-                return discriminant("D_0minus_VBFdecay"+JECappend)
+                return discriminant("D_0minus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa2":
-                return discriminant("D_0hplus_VBFdecay"+JECappend)
+                return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fL1":
-                return discriminant("D_L1_VBFdecay"+JECappend)
+                return discriminant("D_L1_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_L1Zg_VBFdecay"+JECappend)
+                return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
             if self.analysis == "fa3fa2fL1fL1Zg":
@@ -292,13 +315,13 @@ class TemplatesFile(MultiEnum):
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
-                return discriminant("D_0minus_HadVHdecay"+JECappend)
+                return discriminant("D_0minus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa2":
-                return discriminant("D_0hplus_HadVHdecay"+JECappend)
+                return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fL1":
-                return discriminant("D_L1_HadVHdecay"+JECappend)
+                return discriminant("D_L1_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_L1Zg_HadVHdecay"+JECappend)
+                return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
             if self.analysis == "fa3fa2fL1fL1Zg":
@@ -310,15 +333,20 @@ class TemplatesFile(MultiEnum):
     def mixdiscriminant(self):
         from discriminants import discriminant
 
+        if self.production.year == 2016:
+            binsappend = ""
+        elif self.production.year == 2017:
+            binsappend = "_20bins"
+
         if self.category == "Untagged":
             if self.analysis == "fa3":
-                return discriminant("D_CP_decay")
+                return discriminant("D_CP_decay"+binsappend)
             if self.analysis == "fa2":
-                return discriminant("D_int_decay")
+                return discriminant("D_int_decay"+binsappend)
             if self.analysis == "fL1":
-                return discriminant("D_0hplus_decay")
+                return discriminant("D_0hplus_decay"+binsappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_0hplus_decay")
+                return discriminant("D_0hplus_decay"+binsappend)
             if self.analysis == "fL1fL1Zg_DL1_DL1L1Zgint":
                 return discriminant("D_L1L1Zgint_decay")
             if self.analysis == "fL1fL1Zg_DL1_DL1Zgint":
@@ -345,13 +373,13 @@ class TemplatesFile(MultiEnum):
 
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
-                return discriminant("D_CP_VBF"+JECappend)
+                return discriminant("D_CP_VBF"+binsappend+JECappend)
             if self.analysis == "fa2":
-                return discriminant("D_int_VBF"+JECappend)
+                return discriminant("D_int_VBF"+binsappend+JECappend)
             if self.analysis == "fL1":
-                return discriminant("D_0hplus_VBFdecay"+JECappend)
+                return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_0hplus_VBFdecay"+JECappend)
+                return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
             if self.analysis == "fa3fa2fL1fL1Zg":
@@ -359,13 +387,13 @@ class TemplatesFile(MultiEnum):
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
-                return discriminant("D_CP_HadVH"+JECappend)
+                return discriminant("D_CP_HadVH"+binsappend+JECappend)
             if self.analysis == "fa2":
-                return discriminant("D_int_HadVH"+JECappend)
+                return discriminant("D_int_HadVH"+binsappend+JECappend)
             if self.analysis == "fL1":
-                return discriminant("D_0hplus_HadVHdecay"+JECappend)
+                return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
-                return discriminant("D_0hplus_HadVHdecay"+JECappend)
+                return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
             if self.analysis == "fa3fa2fL1fL1Zg":

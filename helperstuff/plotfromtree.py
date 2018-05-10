@@ -23,6 +23,7 @@ def plotfromtree(**kwargs):
   o = Options({
     "reweightfrom":   mandatory,
     "reweightto":     None,
+    "production":     None,
 
     "disc":           mandatory,
     "bins":           None,
@@ -58,13 +59,18 @@ def plotfromtree(**kwargs):
       raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
   if not isinstance(o.reweightfrom, Sample):
-    o.reweightfrom = Sample(o.reweightfrom, config.productionsforcombine[0])
+    if o.production is not None: o.reweightfrom = Sample(o.reweightfrom, o.production)
+    elif len(config.productionsforcombine) == 1: o.reweightfrom = Sample(o.reweightfrom, config.productionsforcombine[0])
+    else: raise ValueError("More than one productionforcombine in config, so you have to provide it")
+
+  if o.reweightfrom.production != o.production is not None:
+    raise ValueError("production and reweightfrom.production are inconsistent\n{}, {}".format(o.production, o.reweightfrom.production))
 
   for kw, kwarg in o.iteritems():
     if kwarg is mandatory:
       raise TypeError("kwarg {} is mandatory!".format(kw))
 
-  discname, title, discbins, discmin, discmax = discriminant(o.disc)
+  discname, title, discbins, discmin, discmax, _ = discriminant(o.disc)
   if o.transformation is not None:
     title = "f(" + title + ")"
   if o.xaxislabel is not None:
@@ -77,7 +83,7 @@ def plotfromtree(**kwargs):
     o.max = discmax
 
   if o.disc2 is not None:
-    disc2name, disc2title, disc2bins, disc2min, disc2max = discriminant(o.disc2)
+    disc2name, disc2title, disc2bins, disc2min, disc2max, _ = discriminant(o.disc2)
     if o.bins2 is None:
       o.bins2 = disc2bins
     if o.min2 is None:
@@ -102,7 +108,6 @@ def plotfromtree(**kwargs):
       o.reweightto = re.sub(r"\b"+name+r"\b", value, o.reweightto)
 
   t = ROOT.TChain("candTree", "candTree")
-  assert len(config.productionsforcombine) == 1
 
   t.Add(o.reweightfrom.withdiscriminantsfile())
   if o.hname is None:

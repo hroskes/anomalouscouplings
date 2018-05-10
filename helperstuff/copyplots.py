@@ -2,6 +2,7 @@
 
 import config
 import os
+import pipes
 import subprocess
 import sys
 
@@ -19,7 +20,15 @@ def copyplots(folder):
       copyto = "{}@lxplus.cern.ch:{}".format(config.lxplususername, lxplusconfig["plotsbasedir"])
       #https://stackoverflow.com/a/22908437/5228524
       copyfrom = folder
-      subprocess.check_call(["rsync", "-azvP", "--relative", copyfrom, copyto])
+      command = ["rsync", "-azvP", "--relative", copyfrom, copyto]
+      try:
+        subprocess.check_call(command)
+      except:
+        print
+        print "Failed to copy plots.  To do it yourself, try:"
+        print
+        print " ".join(pipes.quote(_) for _ in command)
+        print
   else:
     assert False, config.host
 
