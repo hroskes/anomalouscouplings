@@ -327,6 +327,10 @@ class TemplatesFile(MultiEnum):
           kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
           kwargs["production"] = "170222"
           return TemplatesFile(*kwargs.values())
+        if self.production == "180224":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "170222"
+          return TemplatesFile(*kwargs.values())
         return None
 
 def listfromiterator(function):

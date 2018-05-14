@@ -520,6 +520,7 @@ class Production(MyEnum):
                  EnumItem("170203"),
                  EnumItem("170222"),
                  EnumItem("170712"),
+                 EnumItem("180224"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -539,6 +540,11 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/170623"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/170623"
+        if self == "180224":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/180224"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -557,18 +563,19 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222"): return 35.8671
+        if self in ("170203", "170222", "180224"): return 35.8671
         assert False
     def __int__(self):
         return int(str(self))
     @property
     def year(self):
-        if "170222" <= self:
+        if self <= "180224":
             return 2016
         assert False
     @property
     def productionforsmoothingparameters(self):
         if self == "170222": return type(self)("170203")
+        if self == "180224": return type(self)("170203")
         return self
 
 class Category(MyEnum):
@@ -679,7 +686,7 @@ analyses = Analysis.items()
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in ("170203", "170222", "170712"))
+productions = Production.items(lambda x: x in ("170203", "170222", "170712", "180224"))
 #productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
 
