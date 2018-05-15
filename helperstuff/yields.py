@@ -87,13 +87,14 @@ class YieldSystematic(MyEnum):
 class YieldValue(MultiEnum, JsonDict):
     __metaclass__ = MultiEnumABCMeta
     enumname = "yieldvalue"
-    enums = (Analysis, Category, Channel, ProductionMode)
+    enums = (Analysis, Category, Channel, ProductionMode, Production)
 
     dictfile = os.path.join(config.repositorydir, "data", "yields.json")
 
     @property
     def keys(self):
         return (
+                str(self.production),
                 str(self.analysis),
                 str(self.category),
                 str(self.channel),
@@ -106,13 +107,14 @@ class YieldValue(MultiEnum, JsonDict):
 class YieldSystematicValue(MultiEnum, JsonDict):
     __metaclass__ = MultiEnumABCMeta
     enumname = "yieldsystematicvalue"
-    enums = (YieldSystematic, Analysis, Category, Channel, ProductionMode)
+    enums = (YieldSystematic, Analysis, Category, Channel, ProductionMode, Production)
 
     dictfile = os.path.join(config.repositorydir, "data", "categorysystematics.json")
 
     @property
     def keys(self):
         return (
+                str(self.production),
                 str(self.yieldsystematic),
                 str(self.analysis),
                 str(self.category),

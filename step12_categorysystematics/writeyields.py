@@ -86,7 +86,7 @@ def writeyields():
       total = totalrate(productionmode, production, 1.0)
       if analysis.isdecayonly and productionmode == "ggH": total += sum(totalrate(_, production, 1.0) for _ in ("VBF", "ZH", "WH", "ttH"))
       for channel, category in itertools.product(channels, categories):
-        YieldValue(channel, category, analysis, productionmode).value = total * (
+        YieldValue(channel, category, analysis, productionmode, production).value = total * (
           sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
         ) / (
           sum(result[tosample, categorization, AlternateWeight("1"), ca, ch] for tosample in samples for ca in categories for ch in channels)
@@ -97,7 +97,7 @@ def writeyields():
       for systname in "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV":
         for category, channel in itertools.product(categories, channels):
           if analysis.isdecayonly and category != "Untagged": continue
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
           syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
 
       #same for all categories
@@ -105,7 +105,7 @@ def writeyields():
       for systname in "CMS_eff_e", "CMS_eff_m":
         for category, channel in itertools.product(categories, channels):
           if analysis.isdecayonly and category != "Untagged": continue
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
           if channel == "4e" and systname == "CMS_eff_m" or channel == "4mu" and systname == "CMS_eff_e":
             values = {}
           else:
@@ -119,7 +119,7 @@ def writeyields():
       for systname in "CMS_zz2e2mu_zjets", "CMS_zz4e_zjets", "CMS_zz4mu_zjets":
         for category, channel in itertools.product(categories, channels):
           if analysis.isdecayonly and category != "Untagged": continue
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
           if str(channel) in systname and productionmode == "ZX":
             syst.value = 1.4
           else:
@@ -141,8 +141,8 @@ def writeyields():
           btSFDn = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), AlternateWeight("1"), category] for tosample in samples) / nominal
 
         for channel in channels:
-          YieldSystematicValue(channel, category, analysis, productionmode, "JES").value = (JECUp, JECDn)
-          YieldSystematicValue(channel, category, analysis, productionmode, "bTagSF").value = (btSFUp, btSFDn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "JES", production).value = (JECUp, JECDn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "bTagSF", production).value = (btSFUp, btSFDn)
 
         allQCDsystematicnames = {ProductionMode(_).QCDsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")}
         allpdfsystematicnames = {ProductionMode(_).pdfsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")}
@@ -151,13 +151,13 @@ def writeyields():
         for systname in allQCDsystematicnames | allpdfsystematicnames:
           if productionmode == "ggZZ":
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "ggH", systname).value
+              YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = YieldSystematicValue(channel, category, analysis, "ggH", systname, production).value
           elif productionmode == "VBF bkg":
             for channel in channels:
               if analysis.isdecayonly:
-                YieldSystematicValue(channel, category, analysis, productionmode, systname).value = 1
+                YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = 1
               else:
-                YieldSystematicValue(channel, category, analysis, productionmode, systname).value = YieldSystematicValue(channel, category, analysis, "VBF", systname).value
+                YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = YieldSystematicValue(channel, category, analysis, "VBF", systname, production).value
           elif systname == productionmode.QCDsystematicname or systname == productionmode.pdfsystematicname:
             if systname == productionmode.QCDsystematicname: first, second = "muR", "muF"
             if systname == productionmode.pdfsystematicname: first, second = "PDF", "alphaS"
@@ -213,10 +213,10 @@ def writeyields():
             QCDDn = 1 + signdn*sqrt((dn[1]-1)**2 + (dn[2]-1)**2)
 
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = (QCDUp, QCDDn)
+              YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = (QCDUp, QCDDn)
           else:
             for channel in channels:
-              YieldSystematicValue(channel, category, analysis, productionmode, systname).value = None
+              YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = None
 
         #pythia scale and tune
         if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
@@ -227,8 +227,8 @@ def writeyields():
         else:
           scaleup = scaledn = tuneup = tunedn = 1
         for channel in channels:
-          YieldSystematicValue(channel, category, analysis, productionmode, "PythiaScale").value = (scaleup, scaledn)
-          YieldSystematicValue(channel, category, analysis, productionmode, "PythiaTune").value = (tuneup, tunedn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "PythiaScale", production).value = (scaleup, scaledn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "PythiaTune", production).value = (tuneup, tunedn)
 
         if productionmode == "qqZZ":
           EWcorrup = sum(result[tosample, categorization, AlternateWeight("EWcorrUp"), category] for tosample in samples) / nominal
@@ -236,7 +236,7 @@ def writeyields():
         else:
           EWcorrup = EWcorrdn = 1
         for channel in channels:
-          YieldSystematicValue(channel, category, analysis, productionmode, "EWcorr_VV").value = (EWcorrup, EWcorrdn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "EWcorr_VV", production).value = (EWcorrup, EWcorrdn)
 
     YieldValue.writedict()
     YieldSystematicValue.writedict()
@@ -245,8 +245,8 @@ def writeyields_LHE():
   if not config.LHE: raise ValueError("For non-LHE you want writeyields()")
   for analysis in analyses:
     if not analysis.isfL1fL1Zg: continue
-    YieldValue("ggH", "2e2mu", "Untagged", analysis).value = 1.5258744890164022
-    YieldValue("qqZZ", "2e2mu", "Untagged", analysis).value = 1.6250924214670268
+    YieldValue("ggH", "2e2mu", "Untagged", analysis, production).value = 1.5258744890164022
+    YieldValue("qqZZ", "2e2mu", "Untagged", analysis, production).value = 1.6250924214670268
   YieldValue.writedict()
 
 if __name__ == "__main__":
