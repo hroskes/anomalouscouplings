@@ -53,6 +53,7 @@ if __name__ == "__main__":
         for category in categories:
           for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ")):
             if productionmode.issignal: hypotheses = analysis.purehypotheses
+            elif productionmode == "qqZZ": hypotheses = "ext",
             else: hypotheses = None,
             for hypothesis in hypotheses:
               for axis in 0, 1, 2:
