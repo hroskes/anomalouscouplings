@@ -12,7 +12,7 @@ enum ZXsetupstatus {
 ZXsetupstatus ZXsetup(int production, TString dir) {
   if (didsetup == production) return ZXsetupsuccess;
   didsetup = production;
-  if (production == 170203 || production == 170222 || production == 170712 || production == 170825 || production == 180121) {
+  if (production == 170203 || production == 170222 || production == 170712 || production == 170825 || production == 180121 || production == 180224) {
     fFakeRates.reset(TFile::Open(dir+"/FakeRate_SS_Moriond368_hists.root"));
   } else if (production == 180416) {
     fFakeRates.reset(TFile::Open(dir+"/FakeRate_SS_Moriond368_hists.root"));

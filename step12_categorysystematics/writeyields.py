@@ -58,6 +58,7 @@ def writeyields():
 
         tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
+<<<<<<< HEAD
       """
       if productionmode == "ggH":
         for _ in ReweightingSamplePlus("ggH", "0+", "POWHEG"), ReweightingSamplePlus("VBF", "0+", "POWHEG"), ReweightingSamplePlus("ZH", "0+", "POWHEG"), ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG"), ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG"):
@@ -94,6 +95,15 @@ def writeyields():
 
       result += tmpresult
 
+=======
+      result += tmpresult
+
+    import pprint
+    pprint.pprint(dict(result))
+    assert False
+
+
+>>>>>>> 1059d39567c8ea61cf5478b9d187d2b3f436feb1
     #if productionmode.issignal():
     #  result += count(
     #                  {ReweightingSample(productionmode, "0+")},
@@ -115,12 +125,20 @@ def writeyields():
       total = totalrate(productionmode, production, 1.0)
       if analysis.isdecayonly and productionmode == "ggH": total += sum(totalrate(_, production, 1.0) for _ in ("VBF", "ZH", "WH", "ttH"))
       for channel, category in itertools.product(channels, categories):
+<<<<<<< HEAD
         if analysis.isdecayonly and category != "Untagged": continue
         YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
+=======
+        YieldValue(channel, category, analysis, productionmode).value = total * (
+          sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
+        ) / (
+          sum(result[tosample, categorization, AlternateWeight("1"), ca, ch] for tosample in samples for ca in categories for ch in channels)
+        )
+>>>>>>> 1059d39567c8ea61cf5478b9d187d2b3f436feb1
 
       #same for all categories and channels
       #from yaml
-      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_qq", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV":
+      for systname in "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV":
         for category, channel in itertools.product(categories, channels):
           if analysis.isdecayonly and category != "Untagged": continue
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
@@ -147,7 +165,7 @@ def writeyields():
           if analysis.isdecayonly and category != "Untagged": continue
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           if str(channel) in systname and productionmode == "ZX":
-            syst.value = 0.4
+            syst.value = 1.4
           else:
             syst.value = None
 
@@ -262,7 +280,7 @@ def writeyields():
         else:
           EWcorrup = EWcorrdn = 1
         for channel in channels:
-          YieldSystematicValue(channel, category, analysis, productionmode, "EWcorr_VV_cat").value = (EWcorrup, EWcorrdn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "EWcorr_VV").value = (EWcorrup, EWcorrdn)
 
     YieldValue.writedict()
     YieldSystematicValue.writedict()

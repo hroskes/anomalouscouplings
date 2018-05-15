@@ -340,19 +340,19 @@ class ProductionMode(MyEnum):
 
     @property
     def QCDsystematicname(self):
-      if self == "ggH": return "QCDscale_ggH_cat"
-      if self == "qqH": return "QCDscale_qqH_cat"
-      if self in ("ZH", "WH"): return "QCDscale_VH_cat"
-      if self == "ttH": return "QCDscale_ttH_cat"
-      if self == "qqZZ": return "QCDscale_VV_cat"
+      if self == "ggH": return "QCDscale_ggH"
+      if self == "qqH": return "QCDscale_qqH"
+      if self in ("ZH", "WH"): return "QCDscale_VH"
+      if self == "ttH": return "QCDscale_ttH"
+      if self == "qqZZ": return "QCDscale_VV"
       return None
 
     @property
     def pdfsystematicname(self):
-      if self == "ggH": return "pdf_Higgs_gg_cat"
-      if self in ("qqH", "ZH", "WH"): return "pdf_Higgs_qq_cat"
-      if self == "ttH": return "pdf_Higgs_ttH_cat"
-      if self == "qqZZ": return "pdf_qq_cat"
+      if self == "ggH": return "pdf_Higgs_gg"
+      if self in ("qqH", "ZH", "WH"): return "pdf_Higgs_qq"
+      if self == "ttH": return "pdf_Higgs_ttH"
+      if self == "qqZZ": return "pdf_qq"
       return None
 
     def workspaceshapesystematics(self, category):
@@ -649,6 +649,7 @@ class Production(MyEnum):
                  EnumItem("170712"),
                  EnumItem("170825"),
                  EnumItem("180121"),
+                 EnumItem("180224"),
                  EnumItem("180416"),
                  EnumItem("LHE_170509"),
                 )
@@ -678,6 +679,11 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/180121"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180121"
+        if self == "180224":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/180224"
         if self == "180416":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/180416"
@@ -701,7 +707,7 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222", "170825", "180121"): return 35.8671
+        if self in ("170203", "170222", "170825", "180121", "180224"): return 35.8671
         if self == "180416": return 41.4
         if self == "LHE_170509": return 300
         assert False
@@ -709,7 +715,7 @@ class Production(MyEnum):
         return int(str(self))
     @property
     def year(self):
-        if self <= "180121":
+        if self <= "180224":
             return 2016
         if self == "180416":
             return 2017
@@ -719,6 +725,7 @@ class Production(MyEnum):
         if self == "170222": return type(self)("170203")
         if self == "170825": return type(self)("170203")
         if self == "180121": return type(self)("170203")
+        if self == "180224": return type(self)("170203")
         return self
     @property
     def LHE(self):
@@ -823,6 +830,18 @@ class AlternateWeight(MyEnum):
       if self == "EWcorrUp": return "(1 + KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
       if self == "EWcorrDn": return "(1 - KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
       assert False
+    @property
+    def kfactorname(self):
+      if self == "1": return "KFactor_QCD_ggZZ_Nominal"
+      if self == "muRUp": return "KFactor_QCD_ggZZ_QCDScaleUp"
+      if self == "muRDn": return "KFactor_QCD_ggZZ_QCDScaleDn"
+      if self == "muFUp": return "KFactor_QCD_ggZZ_PDFScaleUp"
+      if self == "muFDn": return "KFactor_QCD_ggZZ_PDFScaleDn"
+      if self == "PDFUp": return "KFactor_QCD_ggZZ_PDFReplicaUp"
+      if self == "PDFDn": return "KFactor_QCD_ggZZ_PDFReplicaDn"
+      if self == "alphaSUp": return "KFactor_QCD_ggZZ_AsUp"
+      if self == "alphaSDn": return "KFactor_QCD_ggZZ_AsDn"
+      assert False
 
 channels = Channel.items()
 JECsystematics = JECSystematic.items()
@@ -843,7 +862,8 @@ else:
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine)
+productions = Production.items(lambda x: x in config.productionsforcombine + ["180224"])
+#productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
 
 _ = [""]
