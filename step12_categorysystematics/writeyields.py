@@ -58,44 +58,6 @@ def writeyields():
 
         tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
-<<<<<<< HEAD
-      """
-      if productionmode == "ggH":
-        for _ in ReweightingSamplePlus("ggH", "0+", "POWHEG"), ReweightingSamplePlus("VBF", "0+", "POWHEG"), ReweightingSamplePlus("ZH", "0+", "POWHEG"), ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG"), ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG"):
-          print (result if _.productionmode != "ggH" else tmpresult)[_, NoCategorization(), AlternateWeight("1"), Category("Untagged"), Channel("2e2mu")]
-
-        for key in tmpresult.keys():
-          tosample, categorization, rest = key[0], key[1], key[2:]
-          if categorization.category_function_name != "category_nocategorization": continue
-          for otherproductionmode in "VBF", "ZH", "WplusH", "WminusH", "ttH":
-            assert "ggH" in repr(tosample)
-            othersamplestring = repr(tosample).replace("ggH", otherproductionmode)
-            if "ttH" in othersamplestring:
-                othersamplestring = othersamplestring.replace("ReweightingSample(", "ReweightingSample('Hff0+', ")
-            othersample = eval(othersamplestring)
-            otherkey = tuple((othersample, categorization)+rest)
-            assert result[otherkey]
-            tmpresult[key] += result[otherkey]
-            del result[otherkey]
-
-        print tmpresult[ReweightingSamplePlus("ggH", "0+", "POWHEG"), NoCategorization(), AlternateWeight("1"), Category("Untagged"), Channel("2e2mu")]
-
-        print
-        """
-
-      for key in tmpresult:
-        if len(key) == 3: continue
-        elif 4 <= len(key) <= 5:
-#          try:
-            assert key[0] in usesamples
-            tmpresult[key] /= sum(tmpresult[tosample,key[1],key[2]] for tosample in usesamples)
-#          except ZeroDivisionError:
-#            pass
-        else: assert False
-
-      result += tmpresult
-
-=======
       result += tmpresult
 
     import pprint
@@ -103,7 +65,6 @@ def writeyields():
     assert False
 
 
->>>>>>> 1059d39567c8ea61cf5478b9d187d2b3f436feb1
     #if productionmode.issignal():
     #  result += count(
     #                  {ReweightingSample(productionmode, "0+")},
@@ -125,16 +86,11 @@ def writeyields():
       total = totalrate(productionmode, production, 1.0)
       if analysis.isdecayonly and productionmode == "ggH": total += sum(totalrate(_, production, 1.0) for _ in ("VBF", "ZH", "WH", "ttH"))
       for channel, category in itertools.product(channels, categories):
-<<<<<<< HEAD
-        if analysis.isdecayonly and category != "Untagged": continue
-        YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
-=======
         YieldValue(channel, category, analysis, productionmode).value = total * (
           sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
         ) / (
           sum(result[tosample, categorization, AlternateWeight("1"), ca, ch] for tosample in samples for ca in categories for ch in channels)
         )
->>>>>>> 1059d39567c8ea61cf5478b9d187d2b3f436feb1
 
       #same for all categories and channels
       #from yaml
