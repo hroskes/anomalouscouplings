@@ -738,6 +738,15 @@ class TreeWrapperBase(Iterator):
       if self.notdijet: return -999
       return self.D_4couplings_general(self.binning_4couplings_HadVHdecay, self.foldbins_4couplings_HadVHdecay)
 
+class FixWrongWH(object):
+  def __init__(self, tree):
+    self.tree = tree
+  def __getattr__(self, attr):
+    try:
+      return getattr(self.tree, attr)
+    except AttributeError:
+      return getattr(self.tree, attr.replace("ghw", "ghv"))
+
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
@@ -784,6 +793,8 @@ class TreeWrapper(TreeWrapperBase):
             self.xsec = self.tree.xsec * 1000 #pb to fb
 
         self.preliminaryloop()
+
+        if self.treesample.production == "180224": self.tree = FixWrongWH(self.tree)
 
     @property
     @cache_instancemethod

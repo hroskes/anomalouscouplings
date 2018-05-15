@@ -198,6 +198,10 @@ class BaseSingleCategorization(BaseCategorization):
                       getattr(self_tree, pAux_variable_name),
                       getattr(self_tree, pWH_function_name)(),
                       getattr(self_tree, pZH_function_name)(),
+                      getattr(self_tree, p_HadWH_mavjj_variable_name),
+                      getattr(self_tree, p_HadWH_mavjj_true_variable_name),
+                      getattr(self_tree, p_HadZH_mavjj_variable_name),
+                      getattr(self_tree, p_HadZH_mavjj_true_variable_name),
                       getattr(self_tree, phi_variable_name),
                     self_tree.ZZMass,
                     self_tree.PFMET,
@@ -228,7 +232,7 @@ class BaseSingleCategorization(BaseCategorization):
                     config.useVHMETTagged,
                     config.useQGTagging,
                 )
-                return result
+            return result
         function.__name__ = self_categorization.category_function_name
         return function
 
