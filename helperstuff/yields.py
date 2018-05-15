@@ -12,7 +12,7 @@ from combinehelpers import Luminosity
 import config
 from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, ProductionMode
 from samples import ReweightingSample, Sample
-from utilities import JsonDict, MultiplyCounter
+from utilities import cache, JsonDict, MultiplyCounter
 
 class YieldSystematic(MyEnum):
     enumname = "yieldsystematic"
@@ -20,26 +20,16 @@ class YieldSystematic(MyEnum):
                  EnumItem("bTagSF"),
                  EnumItem("JES"),
                  EnumItem("QCDscale_ggH"),
-                 EnumItem("QCDscale_ggH_cat"),
                  EnumItem("QCDscale_qqH"),
-                 EnumItem("QCDscale_qqH_cat"),
                  EnumItem("QCDscale_VH"),
-                 EnumItem("QCDscale_VH_cat"),
                  EnumItem("QCDscale_ttH"),
-                 EnumItem("QCDscale_ttH_cat"),
                  EnumItem("QCDscale_VV"),
-                 EnumItem("QCDscale_VV_cat"),
                  EnumItem("EWcorr_VV"),
-                 EnumItem("EWcorr_VV_cat"),
                  EnumItem("QCDscale_ggVV_bonly"),
                  EnumItem("pdf_Higgs_gg"),
-                 EnumItem("pdf_Higgs_gg_cat"),
                  EnumItem("pdf_Higgs_qq"),
-                 EnumItem("pdf_Higgs_qq_cat"),
                  EnumItem("pdf_Higgs_ttH"),
-                 EnumItem("pdf_Higgs_ttH_cat"),
                  EnumItem("pdf_qq"),
-                 EnumItem("pdf_qq_cat"),
                  EnumItem("BRhiggs_hzz4l"),
                  EnumItem("PythiaScale"),
                  EnumItem("PythiaTune"),
@@ -138,7 +128,7 @@ class YieldSystematicValue(MultiEnum, JsonDict):
           except ValueError:
             if value.count("/") == 1:
               try:
-                value = [float(_) for _ in value.split("/")]
+                value = tuple(float(_) for _ in value.split("/"))
               except ValueError:
                 raise ValueError("string value {!r} can't be parsed as a number or 2 numbers with / in between".format(origvalue))
 
@@ -162,9 +152,8 @@ class YieldSystematicValue(MultiEnum, JsonDict):
 
         super(YieldSystematicValue, self).setvalue(value)
 
-    @property
-    def value(self):
-        result = super(YieldSystematicValue, self).value
+    def getvalue(self):
+        result = super(YieldSystematicValue, self).getvalue()
         if isinstance(result, list) and len(result) == 2:
           result = tuple(result)
         return result
@@ -248,25 +237,36 @@ class _TotalRate(MultiEnum):
 
   @property
   def treerate(self):
-    assert self.productionmode == "VBF bkg"
     result = 0
     c = ROOT.TCanvas()
     t = ROOT.TChain("candTree")
     t.SetBranchStatus("*", 0)
     t.SetBranchStatus("MC_weight_*", 1)
     t.SetBranchStatus("ZZMass", 1)
+    t.SetBranchStatus("genxsec", 1)
+    t.SetBranchStatus("genBR", 1)
+    t.SetBranchStatus("KFactor_QCD_ggZZ_Nominal", 1)
     weightname = set()
-    for flavor in "2e2mu", "4e", "4mu":
-      t.Add(Sample(self.productionmode, flavor, self.production).withdiscriminantsfile())
-      weightname.add(Sample(self.productionmode, flavor, self.production).weightname())
+    if self.productionmode == "VBF bkg":
+      for flavor in "2e2mu", "4e", "4mu":
+        t.Add(Sample(self.productionmode, flavor, self.production).withdiscriminantsfile())
+        weightname.add(Sample(self.productionmode, flavor, self.production).weightname())
+    elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
+      if self.productionmode == "ggH":
+        t.Add(Sample(self.productionmode, "0+", self.production).withdiscriminantsfile())
+        weightname.add("genxsec * genBR * KFactor_QCD_ggZZ_Nominal")
+      else:
+        t.Add(Sample(self.productionmode, "0+", "POWHEG", self.production).withdiscriminantsfile())
+        weightname.add("genxsec * genBR")
     assert len(weightname) == 1, weightname
     weightname = weightname.pop()
     t.Draw("1", "{}*(ZZMass>{} && ZZMass<{})".format(weightname, config.m4lmin, config.m4lmax))
     return c.FindObject("htemp").Integral()
 
   @property
+  @cache
   def rate(self):
-    if self.productionmode == "VBF bkg": return self.treerate
+    if self.productionmode == "VBF bkg" or self.productionmode.issignal: return self.treerate
     else: return self.yamlrate
 
 def totalrate(*args):
@@ -283,11 +283,12 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     t.SetBranchStatus("MC_weight_*", 1)
     t.SetBranchStatus("Z*Flav", 1)
     t.SetBranchStatus("ZZMass", 1)
+    t.SetBranchStatus("KFactor_*", 1)
+    t.SetBranchStatus("genxsec", 1)
+    t.SetBranchStatus("genBR", 1)
     for _ in alternateweights:
-      if _ == "1":
+      if _ in ("1", "EWcorrUp", "EWcorrDn"):
         pass
-      elif _ in ("EWcorrUp", "EWcorrDn"):
-        t.SetBranchStatus("KFactor_EW_qqZZ*", 1)
       else:
         t.SetBranchStatus(_.weightname, 1)
 
@@ -297,9 +298,14 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
         if alternateweight.issystematic and categorization.issystematic: continue
         t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "{}*(ZZMass>{} && ZZMass<{})*{}".format(tosample.weightname(), config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
         h = c.FindObject("htemp")
+        if tosample.productionmode == "ggH":
+            t.GetEntry(0)
+            assert all(_.productionmode == "ggH" for _ in fromsamples)
+            h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname) / tosample.SMxsec)
         for i in range(h.GetNbinsY()):
             for channel in channels:
                 toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
+                print i, Category.fromid(i), channel, toadd
                 result[tosample, categorization, alternateweight, Category.fromid(i), channel] += toadd
                 result[tosample, categorization, alternateweight, Category.fromid(i)] += toadd
 #        for k, v in result.iteritems(): print k, v
@@ -323,6 +329,7 @@ def check():
       y.update(yaml.load(f))
   for key in y:
     if key == "CMS_zz4l_bkg_kdShape": continue
+    if key.endswith("_cat") and key.replace("_cat", "") in y: continue
     try:
       YieldSystematic(key)
     except:

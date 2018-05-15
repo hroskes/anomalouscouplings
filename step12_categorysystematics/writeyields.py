@@ -55,17 +55,11 @@ def writeyields():
 
         tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
-      for key in tmpresult:
-        if len(key) == 3: continue
-        elif 4 <= len(key) <= 5:
-#          try:
-            assert key[0] in usesamples
-            tmpresult[key] /= sum(tmpresult[tosample,key[1],key[2]] for tosample in usesamples)
-#          except ZeroDivisionError:
-#            pass
-        else: assert False
-
       result += tmpresult
+
+    import pprint
+    pprint.pprint(dict(result))
+    assert False
 
 
     #if productionmode.issignal():
@@ -82,11 +76,15 @@ def writeyields():
 
       total = totalrate(productionmode, production, 1.0)
       for channel, category in itertools.product(channels, categories):
-        YieldValue(channel, category, analysis, productionmode).value = total*sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
+        YieldValue(channel, category, analysis, productionmode).value = total * (
+          sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
+        ) / (
+          sum(result[tosample, categorization, AlternateWeight("1"), ca, ch] for tosample in samples for ca in categories for ch in channels)
+        )
 
       #same for all categories and channels
       #from yaml
-      for systname in "pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_qq", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV":
+      for systname in "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV":
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
@@ -110,7 +108,7 @@ def writeyields():
         for category, channel in itertools.product(categories, channels):
           syst = YieldSystematicValue(channel, category, analysis, productionmode, systname)
           if str(channel) in systname and productionmode == "ZX":
-            syst.value = 0.4
+            syst.value = 1.4
           else:
             syst.value = None
 
@@ -221,7 +219,7 @@ def writeyields():
         else:
           EWcorrup = EWcorrdn = 1
         for channel in channels:
-          YieldSystematicValue(channel, category, analysis, productionmode, "EWcorr_VV_cat").value = (EWcorrup, EWcorrdn)
+          YieldSystematicValue(channel, category, analysis, productionmode, "EWcorr_VV").value = (EWcorrup, EWcorrdn)
 
     YieldValue.writedict()
     YieldSystematicValue.writedict()
