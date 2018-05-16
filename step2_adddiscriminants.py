@@ -29,7 +29,7 @@ def adddiscriminants(*args):
         return
 
     if sample.copyfromothersample is not None:
-      if xrd.exists(sample.CJLSTfile()):
+      if sample.CJLSTfile() != sample.copyfromothersample.CJLSTfile() and xrd.exists(sample.CJLSTfile()):
         raise ValueError("{} exists, why not use it?".format(sample.CJLSTfile()))
       os.symlink(sample.copyfromothersample.withdiscriminantsfile(), sample.withdiscriminantsfile())
       return

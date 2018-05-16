@@ -20,6 +20,7 @@ if cmssw[0] == 8:
 
 def buildtemplates(*args):
     templatesfile = TemplatesFile(*args)
+    if templatesfile.production == "160416_Ulascan": return
     print templatesfile
     if templatesfile.copyfromothertemplatesfile is not None: return
     with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp", message=LSB_JOBID()) as f:

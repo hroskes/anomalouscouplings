@@ -1719,6 +1719,7 @@ class SampleBasis(MultiEnum):
 
 def allsamples():
     for production in productions:
+        if production == "180416_Ulascan": continue
         for productionmode in "ggH", "VBF", "ZH", "WH":
             for hypothesis in ProductionMode(productionmode).generatedhypotheses:
                 yield Sample(productionmode, hypothesis, production)

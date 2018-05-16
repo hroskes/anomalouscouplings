@@ -649,6 +649,7 @@ class Production(MyEnum):
                  EnumItem("180121"),
                  EnumItem("180224"),
                  EnumItem("180416"),
+                 EnumItem("180416_Ulascan"),
                  EnumItem("LHE_170509"),
                 )
     def __cmp__(self, other):
@@ -682,7 +683,7 @@ class Production(MyEnum):
                 assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180224"
-        if self == "180416":
+        if self in ("180416", "180416_Ulascan"):
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/180416"
             elif config.host == "MARCC":
@@ -706,7 +707,7 @@ class Production(MyEnum):
     @property
     def dataluminosity(self):
         if self in ("170203", "170222", "170825", "180121", "180224"): return 35.8671
-        if self == "180416": return 41.4
+        if self in ("180416", "180416_Ulascan"): return 41.4
         if self == "LHE_170509": return 300
         assert False
     def __int__(self):
@@ -715,7 +716,7 @@ class Production(MyEnum):
     def year(self):
         if self <= "180224":
             return 2016
-        if self == "180416":
+        if self in ("180416", "180416_Ulascan"):
             return 2017
         assert False
     @property
@@ -860,7 +861,7 @@ else:
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine)
+productions = Production.items(lambda x: x in config.productionsforcombine + ["180416", "180416_Ulascan"])
 categories = Category.items()
 
 _ = [""]

@@ -52,6 +52,7 @@ class TemplatesFile(MultiEnum):
             raise ValueError("ShapeSystematic {} does not apply to {}\n{}".format(self.shapesystematic, self.templategroup, args))
 
     def jsonfile(self, iteration=None):
+        assert self.production != "180416_Ulascan"
         folder = os.path.join(config.repositorydir, "step5_json")
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
@@ -253,7 +254,13 @@ class TemplatesFile(MultiEnum):
         if self.analysis == "fa3fa2fL1fL1Zg":
             name += "_10bins"
         elif self.production.year == 2017:
-            name += "_20bins"
+            if self.production == "180416_Ulascan":
+                if self.category == "Untagged":
+                    name += "_30bins"
+                else:
+                    name += "_20bins"
+            else:
+                name += "_10bins"
 
         return discriminant(name)
 
@@ -269,7 +276,13 @@ class TemplatesFile(MultiEnum):
         if self.production.year == 2016:
             binsappend = ""
         elif self.production.year == 2017:
-            binsappend = "_20bins"
+            if self.production == "180416_Ulascan":
+                if self.category == "Untagged":
+                    binsappend = "_30bins"
+                else:
+                    binsappend = "_20bins"
+            else:
+                binsappend = "_10bins"
 
         if self.category == "Untagged":
             if self.analysis == "fa3":
@@ -336,7 +349,13 @@ class TemplatesFile(MultiEnum):
         if self.production.year == 2016:
             binsappend = ""
         elif self.production.year == 2017:
-            binsappend = "_20bins"
+            if self.production == "180416_Ulascan":
+                if self.category == "Untagged":
+                    binsappend = "_30bins"
+                else:
+                    binsappend = "_20bins"
+            else:
+                binsappend = "_10bins"
 
         if self.category == "Untagged":
             if self.analysis == "fa3":
