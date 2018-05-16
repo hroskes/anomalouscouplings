@@ -14,13 +14,13 @@ from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
 from helperstuff.utilities import cd, KeepWhileOpenFile, LSB_JOBID
 
-cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
-if cmssw[0] == 8:
-    raise ValueError("TemplateBuilder does not seem to work in CMSSW_8_X; the templates end up filled with NaNs.  Try CMSSW_7_4_X or CMSSW_7_6_X, I have tested that it works there.")
+#cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
+#if cmssw[0] == 8:
+#    raise ValueError("TemplateBuilder does not seem to work in CMSSW_8_X; the templates end up filled with NaNs.  Try CMSSW_7_4_X or CMSSW_7_6_X, I have tested that it works there.")
 
 def buildtemplates(*args):
     templatesfile = TemplatesFile(*args)
-    if templatesfile.production == "160416_Ulascan": return
+    if templatesfile.production == "180416_Ulascan": return
     print templatesfile
     if templatesfile.copyfromothertemplatesfile is not None: return
     with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp", message=LSB_JOBID()) as f:

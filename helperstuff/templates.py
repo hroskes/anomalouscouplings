@@ -184,7 +184,7 @@ class TemplatesFile(MultiEnum):
             result = ["qqZZ", "ggZZ"]
             if config.usedata:
                 result.append("ZX")
-            result.append("VBF bkg")
+#            result.append("VBF bkg")
             return [Template(self, productionmode) for productionmode in result]
         elif self.templategroup == "DATA":
             return [Template(self, "data")]
@@ -867,7 +867,7 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "data":
             result = {Sample(self.production, self.productionmode)}
         result = {sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0}
-        assert result
+        assert result, self
         return result
 
     @property
