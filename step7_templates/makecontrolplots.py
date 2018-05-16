@@ -57,6 +57,7 @@ def makecontrolplots(*args, **kwargs):
 if __name__ == "__main__":
     def thetemplatesfiles():
         for templatesfile in templatesfiles:
+            if templatesfile.production != "180416": continue
             yield templatesfile
     length = len(list(thetemplatesfiles()))
 

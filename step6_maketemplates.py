@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+import argparse
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--submitjobs", nargs="*")
+    p.add_argument("--keepjson", action="store_true")
+    args = p.parse_args()
+    if args.keepjson and args.submitjobs is None:
+        p.error("--keepjson only makes sense if --submitjobs is set")
+
 from array import array
 import os
 import ROOT
@@ -85,16 +94,12 @@ def copydata(*args):
     f.Close()
     newf.Close()
 
-def submitjobs(*args):
+def submitjobs(removefiles, keepjson=False):
     remove = {}
-    keepjson = False
-    for arg in args:
-        if arg == "keepjson":
-            keepjson = True
-            continue
-        if not arg.endswith(".root"): arg += ".root"
-        arg = os.path.basename(arg)
-        filename = os.path.join(config.repositorydir, "step7_templates", arg)
+    for filename in removefiles:
+        if not filename.endswith(".root"): filename += ".root"
+        filename = os.path.basename(filename)
+        filename = os.path.join(config.repositorydir, "step7_templates", filename)
         if not os.path.exists(filename):
             raise ValueError("{} does not exist!".format(filename))
         remove[filename] = False
@@ -123,11 +128,8 @@ def submitjobs(*args):
             submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0", docd=True)
 
 if __name__ == "__main__":
-    if sys.argv[1:]:
-        if sys.argv[1].lower() == "submitjobs":
-            submitjobs(*sys.argv[2:])
-        else:
-            raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
+    if args.submitjobs is not None:
+        submitjobs(args.submitjobs, keepjson=args.keepjson)
     else:
         for templatesfile in templatesfiles:
             buildtemplates(templatesfile)
