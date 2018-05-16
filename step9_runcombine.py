@@ -21,7 +21,7 @@ from helperstuff.plotlimits import plotlimits, plotlimits2D, plottitle
 from helperstuff.submitjob import submitjob
 from helperstuff.utilities import requirecmsenv, tfiles
 
-requirecmsenv(os.path.join(config.repositorydir, "CMSSW_7_6_5"))
+requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_1_0"))
 
 combinecardstemplate = r"""
 eval $(scram ru -sh) &&

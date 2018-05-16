@@ -10,7 +10,7 @@ import ROOT
 
 from combinehelpers import Luminosity
 import config
-from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, ProductionMode
+from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode
 from samples import ReweightingSample, Sample
 from utilities import cache, JsonDict, MultiplyCounter
 

@@ -71,5 +71,5 @@ try:
   import uncertainties
 except ImportError:
   print "Installing uncertainties..."
-  with utilities.cd("CMSSW_7_6_5"):
+  with utilities.cd("CMSSW_8_1_0"):
     subprocess.check_call("eval $(scram ru -sh) && pip install --user uncertainties", shell=True)

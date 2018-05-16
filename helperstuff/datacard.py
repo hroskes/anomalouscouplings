@@ -195,7 +195,7 @@ class _Datacard(MultiEnum):
                     if not t.hypothesis.ispure(): continue
                     yield p.combinename+"_"+t.hypothesis.combinename
                 for t in templatesfile.inttemplates():
-                    for "sign" in positive, negative:
+                    for sign in "positive", "negative":
                         yield p.combinename+"_"+template.templatename+"_"+sign
             else:
                 assert False
@@ -248,7 +248,7 @@ class _Datacard(MultiEnum):
         if self.analysis.usehistogramsforcombine:
             if config.LHE:
                 if yieldsystematic == "QCDscale_VV":
-                    result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in self.histograms]
+                    result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in self.histograms])
                     assert "1.1" in result
                     return result
                 else: return None
@@ -282,7 +282,8 @@ class _Datacard(MultiEnum):
                          )
         return " ".join(
                         ["shape1"] +
-                        [
+                        ["1" if workspaceshapesystematic in p.workspaceshapesystematics(self.category)
+                             else "-"
                             for p in self.productionmodes]
                        )
 
@@ -532,7 +533,7 @@ class _Datacard(MultiEnum):
             for systematic, direction in [(None, None)] + itertools.product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
                 if systematic is not None is not direction: systematic = ShapeSystematic(str(systematic)+direction)
                 t = gettemplate(p, self.analysis, self.productionmode, self.category, hypothesis, self.channel, systematic).Clone(h)
-                if sign is not None
+                if sign is not None:
                     if sign == "positive": pass
                     elif sign == "negative": t.Scale(-1)
                     else: assert False
