@@ -1181,6 +1181,18 @@ class IntTemplate(TemplateBase, MultiEnum):
 
         dontcheck = []
 
+        if self.productionmode == "ttH":
+            if self.hffhypothesis != "Hff0+":
+                raise ValueError("{} is not used to make templates {}!\n{}".format(self.hffhypothesis, args))
+        else:
+            if self.hffhypothesis is not None:
+               raise ValueError("HffHypothesis {} provided for {}!\n{}".format(self.hffhypothesis, self.productionmode, args))
+            dontcheck.append(HffHypothesis)
+
+        super(IntTemplate, self).check(*args, dontcheck=dontcheck)
+
+        del dontcheck
+
         if self.interferencetype.mindimensions > self.analysis.dimensions:
             raise ValueError("Invalid interferencetype {} for {}D analysis\n{}".format(self.interferencetype, self.analysis.dimensions, args))
 
@@ -1192,16 +1204,6 @@ class IntTemplate(TemplateBase, MultiEnum):
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
         else:
             raise ValueError("Invalid productionmode {}!\n{}".format(self.productionmode, args))
-
-        if self.productionmode == "ttH":
-            if self.hffhypothesis != "Hff0+":
-                raise ValueError("{} is not used to make templates {}!\n{}".format(self.hffhypothesis, args))
-        else:
-            if self.hffhypothesis is not None:
-               raise ValueError("HffHypothesis {} provided for {}!\n{}".format(self.hffhypothesis, self.productionmode, args))
-            dontcheck.append(HffHypothesis)
-
-        super(IntTemplate, self).check(*args, dontcheck=dontcheck)
 
     def templatename(self, final=True):
         if self.analysis.dimensions == 4:
@@ -1220,6 +1222,10 @@ class IntTemplate(TemplateBase, MultiEnum):
                     result = "templatea1L1IntAdapSmooth"
                 elif self.analysis == "fL1Zg":
                     result = "templatea1L1ZgIntAdapSmooth"
+                else:
+                    assert False
+                if "170203" in self.templatesfile.templatesfile():
+                    result = "templateIntAdapSmooth"
             elif self.interferencetype == "g11gj1":
                 if self.analysis.isfL1fL1Zg:
                     result = "templatea1L1ZgIntAdapSmooth"

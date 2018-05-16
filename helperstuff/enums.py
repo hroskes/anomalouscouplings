@@ -225,6 +225,12 @@ class Hypothesis(MyEnum):
         if self == "L1": return "g1prime2"
         if self == "L1Zg": return "ghzgs1prime2"
         assert False, self
+    @property
+    def combinename(self):
+        for _ in "0PM", "0PH", "0M", "0L1", "0L1Zg":
+            if self == _:
+                return _
+        assert False, self
 
 class HffHypothesis(MyEnum):
     enumname = "hffhypothesis"
@@ -548,6 +554,7 @@ class Analysis(MyEnum):
     def couplingnames(self):
         if self.isfL1fL1Zg: return "g1prime2", "ghzgs1prime2"
         if self == "fa3fa2fL1fL1Zg": return "g4", "g2", "g1prime2", "ghzgs1prime2"
+        if self.dimensions == 1: return self.couplingname,
         assert False, self
     @property
     def couplingtitle(self):

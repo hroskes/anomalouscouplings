@@ -1,16 +1,19 @@
 from collections import Counter
 import inspect
-import itertools
+from itertools import chain, product
 from math import pi
 import os
 import time
 
 import ROOT
 
+from rootoverloads import histogramfloor
+
 import combineinclude
 from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1, zerotemplate
 import config
 from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
+from templates import TemplatesFile
 import utilities
 from utilities import cache, callclassinitfunctions, cd, generatortolist, mkdir_p, multienumcache, OneAtATime, Tee
 from yields import YieldSystematic, YieldSystematicValue
@@ -86,14 +89,14 @@ def MakeSystematicFromEnums(*theenums, **kwargs):
         @property
         @generatortolist
         def allnames(self):
-            cartesianproduct = itertools.product(*(enum.items() for enum in theenums))
+            cartesianproduct = product(*(enum.items() for enum in theenums))
             for enumvalues in cartesianproduct:
                 formatdict = {enum.enumname: enumvalue for enum, enumvalue in zip(theenums, enumvalues)}
                 yield self.name.format(**formatdict)
 
 
         def applyallfunctions(self, datacardcls):
-            cartesianproduct = itertools.product(*(enum.items() for enum in theenums))
+            cartesianproduct = product(*(enum.items() for enum in theenums))
             for enumvalues in cartesianproduct:
                 formatdict = {enum.enumname: enumvalue for enum, enumvalue in zip(theenums, enumvalues)}
                 name = self.name.format(**formatdict)
@@ -146,7 +149,7 @@ class _Datacard(MultiEnum):
         return 1
     @property
     def jmax(self):
-        return len(self.process(Counter()).split())
+        return len(self.getprocesses(Counter()).split())
     @property
     def kmax(self):
         return "*"
@@ -171,7 +174,7 @@ class _Datacard(MultiEnum):
         if counter[self] == 1:
             return bin
         elif counter[self] == 2:
-            return " ".join([str(bin)]*len(self.process(Counter())))
+            return " ".join([str(bin)]*len(self.getprocesses(Counter())))
         assert False
 
     @property
@@ -182,6 +185,7 @@ class _Datacard(MultiEnum):
 
     @property
     @cache
+    @generatortolist
     def histograms(self):
         if not self.analysis.usehistogramsforcombine:
             raise ValueError("Should not be calling this function for {}".format(self.analysis))
@@ -190,18 +194,26 @@ class _Datacard(MultiEnum):
                 yield p.combinename
             elif p.issignal:
                 templategroup = str(p).lower()
-                templatesfile = TemplatesFile(p, self.analysis, self.production, self.channel, self.category)
+                templatesfile = TemplatesFile(templategroup, self.analysis, self.production, self.channel, self.category)
                 for t in templatesfile.templates():
-                    if not t.hypothesis.ispure(): continue
+                    if not t.hypothesis.ispure: continue
                     yield p.combinename+"_"+t.hypothesis.combinename
                 for t in templatesfile.inttemplates():
                     for sign in "positive", "negative":
-                        yield p.combinename+"_"+template.templatename+"_"+sign
+                        templatenamepart = (
+                          t.templatename().replace("template", "").replace("AdapSmooth", "").replace("Mirror", "").replace("Int", "")
+                                          .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
+                        )
+                        if t.templatename().startswith("templateIntAdapSmooth"): templatenamepart = "g11"+self.analysis.couplingname+"1"
+
+                        yield (p.combinename+"_"+templatenamepart+"_"+sign)
             else:
                 assert False
 
     @property
-    def process(self, counter=Counter()):
+    def process(self): return self.getprocesses()
+
+    def getprocesses(self, counter=Counter()):
         counter[self] += 1
 
         if self.analysis.usehistogramsforcombine:
@@ -530,34 +542,41 @@ class _Datacard(MultiEnum):
                 p, hypothesis = h.split("_")
                 sign = None
 
-            for systematic, direction in [(None, None)] + itertools.product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
+            p = ProductionMode(p)
+
+            for systematic, direction in chain([(None, None)], product(p.workspaceshapesystematics(self.category), ("Up", "Down"))):
                 if systematic is not None is not direction: systematic = ShapeSystematic(str(systematic)+direction)
-                t = gettemplate(p, self.analysis, self.productionmode, self.category, hypothesis, self.channel, systematic).Clone(h)
+                t = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic).Clone(h)
                 if sign is not None:
                     if sign == "positive": pass
                     elif sign == "negative": t.Scale(-1)
                     else: assert False
-                    rootfunctions.Floor(t)
+                    t.Floor()
 
                 name = h
                 if systematic: name += "_"+str(systematic)
-                t.SetName(h+systematic)
+                t.SetName(name)
                 t.SetDirectory(f)
                 cache.append(t)
 
-            assert len(set(t.name for t in cache)) == len(cache)
-            f.Write()
-            f.Close()
+        allnames = set(t.GetName() for t in cache)
+        assert len(allnames) == len(cache)
+        assert allnames == set(self.histograms), (allnames, set(self.histograms), allnames ^ set(self.histograms))
+        f.Write()
+        f.Close()
 
     def makeCardsWorkspaces(self, outdir="."):
         mkdir_p(outdir)
         with cd(outdir), Tee(self.logfile, 'w'):
-            for channel, category in itertools.product(channels, categories):
-                if config.LHE and channel != "2e2mu": continue
-                if self.analysis.isdecayonly and category != "Untagged": continue
-                Datacard(channel, category, self.analysis, self.luminosity).makepdfs()
-            self.writeworkspace()
-            self.linkworkspace()
+            if self.analysis.usehistogramsforcombine:
+                Datacard(self.channel, self.category, self.analysis, self.luminosity).makehistograms()
+            else:    
+                for channel, category in product(channels, categories):
+                    if config.LHE and channel != "2e2mu": continue
+                    if self.analysis.isdecayonly and category != "Untagged": continue
+                    Datacard(channel, category, self.analysis, self.luminosity).makepdfs()
+                self.writeworkspace()
+                self.linkworkspace()
             self.writedatacard()
 
 class PdfBase(MultiEnum):
@@ -1009,7 +1028,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
         dcs = [
                Datacard(production, channel, category, *otherargs)
                        for production, channel, category
-                       in itertools.product(productions, channels, categories)
+                       in product(productions, channels, categories)
               ]
         if all(os.path.exists(thing) for dc in dcs for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)):
             return
