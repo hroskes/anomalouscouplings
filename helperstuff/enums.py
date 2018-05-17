@@ -754,7 +754,6 @@ class Category(MyEnum):
         (defined in Category.h)
         """
         import CJLSTscripts
-        self.checkidnumbers()
         return {getattr(CJLSTscripts, name) for name in self.item.names if "Mor" in name}
 
     @property
@@ -762,6 +761,7 @@ class Category(MyEnum):
         return str(self).replace("tagged", "Tagged")
 
     def __contains__(self, other):
+        self.checkidnumbers()
         return other in self.idnumbers
 
     @property
@@ -781,7 +781,7 @@ class Category(MyEnum):
     @cache
     def checkidnumbers(cls):
         for cat1, cat2 in combinations(cls.enumitems, 2):
-            assert not cat1.idnumbers & cat2.idnumbers
+            assert not cls(cat1).idnumbers & cls(cat2).idnumbers
 
 class AlternateGenerator(MyEnum):
     enumname = "alternategenerator"
