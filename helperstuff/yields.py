@@ -73,14 +73,7 @@ class YieldSystematic(MyEnum):
         lep = dct["{}_lep".format(productionmode)]
         had = dct["{}_had".format(productionmode)]
         if lep == had: return lep
-        assert "/" in lep and "/" in had
-        up = float(lep.split("/")[0])-1, float(had.split("/")[0])-1
-        dn = float(lep.split("/")[1])-1, float(had.split("/")[1])-1
-        rates = [totalrate(productionmode, _, 1) for _ in ("lep", "had")]
-        assert all(_>0 for _ in up) and all(_<0 for _ in dn)
-        up = 1 + sqrt((up[0]*rates[0])**2+(up[1]*rates[1])**2) / sum(rates)
-        dn = 1 - sqrt((dn[0]*rates[0])**2+(dn[1]*rates[1])**2) / sum(rates)
-        return up, dn
+        assert False, (lep, had)
       else:
         return dct.get(productionmode.yamlsystname, None)
 
@@ -189,22 +182,8 @@ class YieldSystematicValue(MultiEnum, JsonDict):
             raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
         return "{}/{}".format(self.value[0], self.value[1])
 
-class VDecay(MyEnum):
-  enumname = "vdecay"
-  enumitems = (
-               EnumItem("had"),
-               EnumItem("lep"),
-              )
-
 class _TotalRate(MultiEnum):
-  enums = [ProductionMode, Luminosity, VDecay]
-  def check(self, *args):
-    dontcheck = []
-    if self.vdecay is not None and self.productionmode not in ("WH", "ZH"):
-      raise ValueError("Can't have VDecay for {}\n{}".format(self.productionmode, args))
-    if self.vdecay is None:
-      dontcheck.append(VDecay)
-    return super(_TotalRate, self).check(*args, dontcheck=dontcheck)
+  enums = [ProductionMode, Luminosity]
 
   @property
   def yamlrate(self):
@@ -226,7 +205,7 @@ class _TotalRate(MultiEnum):
         else:
           raise IOError("No luminosity in {}".format(filename))
 
-      pnames = [p for p in self.productionmode.yamlratenames if self.vdecay is None or str(self.vdecay) in p]
+      pnames = [p for p in self.productionmode.yamlratenames]
       assert pnames
 
       for tag, p in itertools.product(tags, pnames):
@@ -238,13 +217,18 @@ class _TotalRate(MultiEnum):
     return result
 
   @property
+  @cache
   def treerate(self):
+    if self.productionmode == "WH":
+      return sum(type(self)(self.luminosity, _).treerate for _ in ("WplusH", "WminusH"))
+
     result = 0
     c = ROOT.TCanvas()
     t = ROOT.TChain("candTree")
     t.SetBranchStatus("*", 0)
     t.SetBranchStatus("MC_weight_*", 1)
     t.SetBranchStatus("ZZMass", 1)
+    t.SetBranchStatus("xsec", 1)
     t.SetBranchStatus("genxsec", 1)
     t.SetBranchStatus("genBR", 1)
     if self.productionmode in ("ggH", "ggZZ"): t.SetBranchStatus("KFactor_QCD_ggZZ_Nominal", 1)
@@ -253,22 +237,17 @@ class _TotalRate(MultiEnum):
       for flavor in "2e2mu", "4e", "4mu":
         t.Add(Sample(self.productionmode, flavor, self.production).withdiscriminantsfile())
         weightname.add(Sample(self.productionmode, flavor, self.production).weightname())
-    elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
+    elif self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
       if self.productionmode == "ggH":
         s = Sample(self.productionmode, "0+", "POWHEG", self.production)
         t.Add(Sample(s).withdiscriminantsfile())
         weightname.add("({}) * (genxsec * genBR * KFactor_QCD_ggZZ_Nominal / xsec)".format(s.weightname()))
-      elif self.productionmode == "WH":
-        for _ in "WplusH", "WminusH":
-          s = Sample(_, "0+", "POWHEG", self.production)
-          t.Add(s.withdiscriminantsfile())
-          weightname.add("({}) * (genxsec * genBR / xsec)".format(s.weightname()))
       else:
-        s = Sample(self.productionmode, "0+", "POWHEG", self.production)
+        s = Sample(self.productionmode, "0+", "POWHEG", self.production, "Hff0+" if self.productionmode == "ttH" else None)
         t.Add(s.withdiscriminantsfile())
         weightname.add("({}) * (genxsec * genBR / xsec)".format(s.weightname()))
     else:
-      assert Flase
+      assert False
     assert len(weightname) == 1, weightname
     weightname = weightname.pop()
     t.Draw("1", "{}*(ZZMass>{} && ZZMass<{})".format(weightname, config.m4lmin, config.m4lmax))
@@ -294,7 +273,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     t.SetBranchStatus("MC_weight_*", 1)
     t.SetBranchStatus("Z*Flav", 1)
     t.SetBranchStatus("ZZMass", 1)
-    if any(_.productionmode in ("ggH", "ggZZ") for _ in fromsamples): t.SetBranchStatus("KFactor_*", 1)
+    if any(_.productionmode in ("ggH", "ggZZ", "qqZZ") for _ in fromsamples): t.SetBranchStatus("KFactor_*", 1)
     t.SetBranchStatus("genxsec", 1)
     t.SetBranchStatus("genBR", 1)
     for _ in alternateweights:
