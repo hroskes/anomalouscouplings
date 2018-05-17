@@ -247,7 +247,7 @@ class _TotalRate(MultiEnum):
     t.SetBranchStatus("ZZMass", 1)
     t.SetBranchStatus("genxsec", 1)
     t.SetBranchStatus("genBR", 1)
-    t.SetBranchStatus("KFactor_QCD_ggZZ_Nominal", 1)
+    if self.productionmode in ("ggH", "ggZZ"): t.SetBranchStatus("KFactor_QCD_ggZZ_Nominal", 1)
     weightname = set()
     if self.productionmode == "VBF bkg":
       for flavor in "2e2mu", "4e", "4mu":
@@ -255,11 +255,20 @@ class _TotalRate(MultiEnum):
         weightname.add(Sample(self.productionmode, flavor, self.production).weightname())
     elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
       if self.productionmode == "ggH":
-        t.Add(Sample(self.productionmode, "0+", self.production).withdiscriminantsfile())
-        weightname.add("genxsec * genBR * KFactor_QCD_ggZZ_Nominal")
+        s = Sample(self.productionmode, "0+", "POWHEG", self.production)
+        t.Add(Sample(s).withdiscriminantsfile())
+        weightname.add("({}) * (genxsec * genBR * KFactor_QCD_ggZZ_Nominal / xsec)".format(s.weightname()))
+      elif self.productionmode == "WH":
+        for _ in "WplusH", "WminusH":
+          s = Sample(_, "0+", "POWHEG", self.production)
+          t.Add(s.withdiscriminantsfile())
+          weightname.add("({}) * (genxsec * genBR / xsec)".format(s.weightname()))
       else:
-        t.Add(Sample(self.productionmode, "0+", "POWHEG", self.production).withdiscriminantsfile())
-        weightname.add("genxsec * genBR")
+        s = Sample(self.productionmode, "0+", "POWHEG", self.production)
+        t.Add(s.withdiscriminantsfile())
+        weightname.add("({}) * (genxsec * genBR / xsec)".format(s.weightname()))
+    else:
+      assert Flase
     assert len(weightname) == 1, weightname
     weightname = weightname.pop()
     t.Draw("1", "{}*(ZZMass>{} && ZZMass<{})".format(weightname, config.m4lmin, config.m4lmax))
@@ -285,7 +294,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     t.SetBranchStatus("MC_weight_*", 1)
     t.SetBranchStatus("Z*Flav", 1)
     t.SetBranchStatus("ZZMass", 1)
-    t.SetBranchStatus("KFactor_*", 1)
+    if any(_.productionmode in ("ggH", "ggZZ") for _ in fromsamples): t.SetBranchStatus("KFactor_*", 1)
     t.SetBranchStatus("genxsec", 1)
     t.SetBranchStatus("genBR", 1)
     for _ in alternateweights:
@@ -307,7 +316,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
         for i in range(h.GetNbinsY()):
             for channel in channels:
                 toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
-                print i, Category.fromid(i), channel, toadd
+#                print i, Category.fromid(i), channel, toadd
                 result[tosample, categorization, alternateweight, Category.fromid(i), channel] += toadd
                 result[tosample, categorization, alternateweight, Category.fromid(i)] += toadd
 #        for k, v in result.iteritems(): print k, v

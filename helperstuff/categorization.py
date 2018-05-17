@@ -350,17 +350,26 @@ class MultiCategorization(BaseCategorization):
     def __hash__(self):
         return hash(self.singles)
     def __eq__(self, other):
-        return self.singles == other.singles
+        try:
+            return self.singles == other.singles
+        except AttributeError:
+            return self.singles == {other}
     def __ne__(self, other):
-        return self.singles != other.singles
+        return not self == other
     def __gt__(self, other):
-        return self.singles > other.singles
-    def __ge__(self, other):
-        return self.singles >= other.singles
+        try:
+            return self.singles > other.singles
+        except AttributeError:
+            return isinstance(other, NoCategorization) or other in self.singles
     def __lt__(self, other):
-        return self.singles < other.singles
+        try:
+            return self.singles > other.singles
+        except AttributeError:
+            return False
+    def __ge__(self, other):
+        return self == other or self > other
     def __le__(self, other):
-        return self.singles <= other.singles
+        return self == other or self < other
 
     def __str__(self):
         return self.name.replace("_", " ")
