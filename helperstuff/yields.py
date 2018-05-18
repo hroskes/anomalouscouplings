@@ -12,7 +12,7 @@ from combinehelpers import Luminosity
 import config
 from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode
 from samples import ReweightingSample, Sample
-from utilities import cache, JsonDict, MultiplyCounter
+from utilities import cache, JsonDict, MultiplyCounter, TFile
 
 class YieldSystematic(MyEnum):
     enumname = "yieldsystematic"
@@ -259,9 +259,9 @@ class _TotalRate(MultiEnum):
     rate = 0
     for ca, ch in itertools.product(channels, categories):
       t = Template(self.productionmode, str(self.production)+"_Ulascan", "0+" if self.productionmode.issignal else None, ca, ch, "fa3")
-      with open(t.templatesfile) as f:
+      with TFile(t.templatesfile.templatesfile()) as f:
         h = getattr(f, t.templatename())
-      rate += h.Integral()
+        rate += h.Integral()
     if self.productionmode != "ZX": rate *= float(self.luminosity)
     return rate
 

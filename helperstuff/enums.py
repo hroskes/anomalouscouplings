@@ -799,7 +799,12 @@ class AlternateGenerator(MyEnum):
                  EnumItem("POWHEG"),
                  EnumItem("MINLO"),
                  EnumItem("NNLOPS"),
-                 EnumItem("ext")
+                )
+
+class Extension(MyEnum):
+    enumname = "extension"
+    enumitems = (
+                 EnumItem("ext"),
                 )
 
 class PythiaSystematic(MyEnum):

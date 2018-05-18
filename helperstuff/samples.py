@@ -10,7 +10,7 @@ import ROOT
 
 import config
 import constants
-from enums import AlternateGenerator, analyses, Analysis, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
+from enums import AlternateGenerator, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
 from utilities import cache, mkdtemp, product, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
@@ -877,8 +877,10 @@ class ReweightingSample(MultiEnum, SampleBase):
     def reweightingsamples(self):
         if self.productionmode == "qqZZ":      #self == ReweightingSample("qqZZ") or ReweightingSamplePlus("qqZZ", "ext")
             return [ReweightingSample("qqZZ")]
-        if self.productionmode in ("ggZZ", "qqZZ", "ZX") or self.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.pythiasystematic is not None:
+        if self.productionmode in ("ggZZ", "qqZZ", "ZX"):
             return [self]
+        if self.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.pythiasystematic is not None:
+            return [ReweightingSamplePlus(self.reweightingsample, self.alternategenerator, self.pythiasystematic)] #but not self.extension
         if self.productionmode == "VBF bkg":
             return [self, ReweightingSample("qqZZ")]
         if self.productionmode == "ttH":  #ttH reweighting doesn't work unfortunately
@@ -1447,7 +1449,7 @@ class ReweightingSampleWithFlavor(ReweightingSample):
                 raise ValueError("Flavor provided for {} productionmode\n{}".format(self.productionmode, args))
 
 class ReweightingSamplePlus(ReweightingSample):
-    enums = [ReweightingSample, AlternateGenerator, PythiaSystematic]
+    enums = [ReweightingSample, AlternateGenerator, PythiaSystematic, Extension]
     enumname = "reweightingsampleplus"
 
     def check(self, *args):
@@ -1476,10 +1478,11 @@ class ReweightingSamplePlus(ReweightingSample):
             raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hffhypothesis, self.alternategenerator, args))
 
         if (
-            self.alternategenerator == "ext"
-            and (
-                 self.productionmode != "qqZZ"
-                )
+            self.extension == "ext"
+            and not (
+                     self.productionmode == "qqZZ"
+                     or self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH") and self.alternategenerator == "POWHEG"
+                    )
            ):
             raise ValueError("No extra {} sample produced\n{}".format(self.productionmode, args))
 
@@ -1496,7 +1499,7 @@ class ReweightingSamplePlus(ReweightingSample):
 
     def weightname(self):
         result = super(ReweightingSamplePlus, self).weightname()
-        if self.alternategenerator and self.alternategenerator != "ext":
+        if self.alternategenerator:
             result += "_" + str(self.alternategenerator)
         if self.pythiasystematic:
             result += "_" + str(self.pythiasystematic)
@@ -1546,6 +1549,7 @@ class Sample(ReweightingSamplePlus):
                     if self.hypothesis == "0+": result = "{}125".format(s)
                 if self.pythiasystematic is not None:
                     result += self.pythiasystematic.appendname
+                if self.extension == "ext": result += "ext"
                 return result
         if self.alternategenerator in ("MINLO", "NNLOPS"):
             if self.productionmode == "ggH":
@@ -1579,7 +1583,7 @@ class Sample(ReweightingSamplePlus):
         if self.productionmode == "VBF bkg":
             return "VBFTo{}JJ_Contin_phantom128".format(self.flavor)
         if self.productionmode == "qqZZ":
-            if self.alternategenerator == "ext":
+            if self.extension == "ext":
                 return "ZZTo4lext"
             else:
                 return "ZZTo4l"
@@ -1624,7 +1628,7 @@ class Sample(ReweightingSamplePlus):
     def effectiveentries(reweightfrom, reweightto):
         from utilities import tfiles
         if (reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data")
-                or reweightfrom.alternategenerator is not None and reweightfrom.alternategenerator != "ext"
+                or reweightfrom.alternategenerator is not None
                 or config.LHE):
             assert reweightfrom.reweightingsample == reweightto
             return 1
@@ -1779,7 +1783,9 @@ def allsamples():
         yield Sample("ggH", "0+", "MINLO", production)
         for productionmode in "ggH", "VBF", "ZH", "WplusH", "WminusH":
             yield Sample(productionmode, "0+", "POWHEG", production)
+            if production.year == 2017: yield Sample(productionmode, "0+", "POWHEG", "ext", production)
         yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
+        if production.year == 2017: yield Sample("ttH", "Hff0+", "0+", "POWHEG", "ext", production)
         for systematic in pythiasystematics:
             if systematic in ("ScaleUp", "ScaleDown") and production.year >= 2017: continue
             for productionmode in "ggH", "VBF", "ZH", "WplusH", "WminusH":

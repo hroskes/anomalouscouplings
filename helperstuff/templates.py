@@ -184,7 +184,8 @@ class TemplatesFile(MultiEnum):
             result = ["qqZZ", "ggZZ"]
             if config.usedata:
                 result.append("ZX")
-#            result.append("VBF bkg")
+            if "Ulascan" in str(self.production):
+                result.append("VBF bkg")
             return [Template(self, productionmode) for productionmode in result]
         elif self.templategroup == "DATA":
             return [Template(self, "data")]
