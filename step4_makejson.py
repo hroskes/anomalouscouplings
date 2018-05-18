@@ -26,6 +26,6 @@ def makejson(*args):
 
 if __name__ == "__main__":
     for templatesfile in templatesfiles:
-        if templatesfile.production == "180416_Ulascan": continue
+        if "Ulascan" in str(templatesfile.production): continue
         if args.keep and os.path.exists(templatesfile.jsonfile()): continue
         makejson(templatesfile)

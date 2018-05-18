@@ -251,12 +251,25 @@ class _TotalRate(MultiEnum):
     assert len(weightname) == 1, weightname
     weightname = weightname.pop()
     t.Draw("1", "{}*(ZZMass>{} && ZZMass<{})".format(weightname, config.m4lmin, config.m4lmax))
-    return c.FindObject("htemp").Integral()
+    return c.FindObject("htemp").Integral() * float(self.luminosity)
+
+  @property
+  def ratefromUlascan(self):
+    from templates import Template
+    rate = 0
+    for ca, ch in itertools.product(channels, categories):
+      t = Template(self.productionmode, str(self.production)+"_Ulascan", "0+" if self.productionmode.issignal else None, ca, ch, "fa3")
+      with open(t.templatesfile) as f:
+        h = getattr(f, t.templatename())
+      rate += h.Integral()
+    rate *= float(self.luminosity)
+    return rate
 
   @property
   @cache
   def rate(self):
-    if self.productionmode == "VBF bkg" or self.productionmode.issignal: return self.treerate
+    if self.productionmode != "ttH": return self.ratefromUlascan
+    elif self.productionmode == "VBF bkg": return self.treerate
     else: return self.yamlrate
 
 def totalrate(*args):

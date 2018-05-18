@@ -9,6 +9,8 @@ from helperstuff.utilities import KeepWhileOpenFile, TFile
 def gettemplatefromulascan(template):
   if template.production == "180416_Ulascan":
     maindir = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/2017Width/CMSSW_9_4_3/src/HiggsWidth_PostICHEP/Analysis/test/output/LHC_13TeV/Templates/180423/FinalTemplates/Stage1/"
+  if template.production == "180224_Ulascan":
+    maindir = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/2016Width/CMSSW_9_4_3/src/HiggsWidth_PostICHEP/Analysis/test/output/LHC_13TeV/Templates/180509/FinalTemplates/Stage1/"
 
   if template.analysis == "fa3":
     folder = "a3"
@@ -122,7 +124,8 @@ def gettemplatesfromulascan(tf):
 
 def getalltemplatesfromulascan():
   for tf in templatesfiles:
-    if tf.production != "180416_Ulascan": continue
+    if "Ulascan" not in str(tf.production): continue
+    if tf.analysis not in ("fa3", "fa2", "fL1"): continue
     if tf.templategroup == "tth": continue
     gettemplatesfromulascan(tf)
 

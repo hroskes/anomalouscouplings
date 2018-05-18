@@ -29,7 +29,7 @@ from helperstuff.utilities import cd, KeepWhileOpenFile, LSB_JOBID
 
 def buildtemplates(*args):
     templatesfile = TemplatesFile(*args)
-    if templatesfile.production == "180416_Ulascan": return
+    if "Ulascan" in str(templatesfile.production): return
     print templatesfile
     if templatesfile.copyfromothertemplatesfile is not None: return
     with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp", message=LSB_JOBID()) as f:

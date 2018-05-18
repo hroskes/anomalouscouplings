@@ -655,6 +655,7 @@ class Production(MyEnum):
                  EnumItem("170825"),
                  EnumItem("180121"),
                  EnumItem("180224"),
+                 EnumItem("180224_Ulascan"),
                  EnumItem("180416"),
                  EnumItem("180416_Ulascan"),
                  EnumItem("LHE_170509"),
@@ -685,7 +686,7 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/180121"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180121"
-        if self == "180224":
+        if self in ("180224", "180224_Ulascan"):
             if config.host == "lxplus":
                 assert False
             elif config.host == "MARCC":
@@ -714,16 +715,20 @@ class Production(MyEnum):
     @property
     def dataluminosity(self):
         if self in ("170203", "170222", "170825", "180121", "180224"): return 35.8671
-        if self in ("180416", "180416_Ulascan"): return 41.4
+        if self == "180416_Ulascan": return 41.37
+        if self == "180224_Ulascan": return 35.8671
+        if self == "180416": return 41.53
         if self == "LHE_170509": return 300
         assert False
     def __int__(self):
         return int(str(self))
     @property
     def year(self):
+        if "Ulascan" in str(self):
+            return int(type(self)(str(self).replace("_Ulascan", "")))
         if self <= "180224":
             return 2016
-        if self in ("180416", "180416_Ulascan"):
+        if self == "180416":
             return 2017
         assert False
     @property
@@ -868,7 +873,7 @@ else:
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine + ["180416", "180416_Ulascan"])
+productions = Production.items(lambda x: x in config.productionsforcombine + ["180224_Ulascan", "180416_Ulascan"])
 categories = Category.items()
 
 _ = [""]

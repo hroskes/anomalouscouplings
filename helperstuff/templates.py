@@ -52,7 +52,7 @@ class TemplatesFile(MultiEnum):
             raise ValueError("ShapeSystematic {} does not apply to {}\n{}".format(self.shapesystematic, self.templategroup, args))
 
     def jsonfile(self, iteration=None):
-        assert self.production != "180416_Ulascan"
+        assert "Ulascan" not in str(self.production)
         folder = os.path.join(config.repositorydir, "step5_json")
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
@@ -254,7 +254,7 @@ class TemplatesFile(MultiEnum):
         if self.analysis == "fa3fa2fL1fL1Zg":
             name += "_10bins"
         elif self.production.year == 2017:
-            if self.production == "180416_Ulascan":
+            if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
                     name += "_30bins"
                 else:
@@ -276,7 +276,7 @@ class TemplatesFile(MultiEnum):
         if self.production.year == 2016:
             binsappend = ""
         elif self.production.year == 2017:
-            if self.production == "180416_Ulascan":
+            if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
                     binsappend = "_30bins"
                 else:
@@ -349,7 +349,7 @@ class TemplatesFile(MultiEnum):
         if self.production.year == 2016:
             binsappend = ""
         elif self.production.year == 2017:
-            if self.production == "180416_Ulascan":
+            if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
                     binsappend = "_30bins"
                 else:
