@@ -45,6 +45,9 @@ class SampleBase(object):
     @abstractproperty
     def kappa_tilde(self):
         pass
+    @abstractproperty
+    def pdf(self):
+        pass
 
     def ValueError(self, functionname):
         return ValueError("invalid sample {} in function {}".format(self, functionname))
@@ -68,7 +71,7 @@ class SampleBase(object):
         if self.productionmode == "ggH":
             pass
         elif self.productionmode == "VBF":
-            result *= constants.JHUXSVBFa1.nominal_value
+            result *= constants.NNPDF30_lo_as_0130.JHUXSVBFa1.nominal_value
             if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
                 result *= self.g1**2
             elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
@@ -82,7 +85,7 @@ class SampleBase(object):
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "ZH":
-            result *= constants.JHUXSZHa1.nominal_value
+            result *= constants.NNPDF30_lo_as_0130.JHUXSZHa1.nominal_value
             if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
                 result *= self.g1**2
             elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
@@ -96,7 +99,7 @@ class SampleBase(object):
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "WH":
-            result *= constants.JHUXSWHa1.nominal_value
+            result *= constants.NNPDF30_lo_as_0130.JHUXSWHa1.nominal_value
             if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
                 result *= self.g1**2
             elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
@@ -110,7 +113,7 @@ class SampleBase(object):
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "HJJ":
-            result *= constants.JHUXSHJJa2.nominal_value
+            result *= constants.NNPDF30_lo_as_0130.JHUXSHJJa2.nominal_value
             if self.ghg4 == 0:
                 result *= self.ghg2**2
             elif self.ghg2 == 0:
@@ -118,7 +121,7 @@ class SampleBase(object):
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "ttH":
-            result *= constants.JHUXSttHkappa.nominal_value
+            result *= constants.NNPDF30_lo_as_0130.JHUXSttHkappa.nominal_value
             if self.kappa_tilde == 0:
                 result *= self.kappa**2
             elif self.kappa == 0:
@@ -135,10 +138,21 @@ class SampleBase(object):
 
     @property
     def JHUxsec(self):
+        try:
+            return self.JHUxsec_pdf(self.pdf)
+        except ValueError as e:
+            if "with no pdf" in str(e):
+                raise ValueError("{} has no pdf, so can't get JHUxsec".format(self))
+            raise
+
+    def JHUxsec_pdf(self, pdf):
         from constants import JHUXSHZZ2L2la1, JHUXSHZZ2L2la2, JHUXSHZZ2L2la3, JHUXSHZZ2L2lL1, JHUXSHZZ2L2lL1Zg,\
                               JHUXSHZZ2L2la1a2, JHUXSHZZ2L2la1a3, JHUXSHZZ2L2la1L1, JHUXSHZZ2L2la1L1Zg,        \
                               JHUXSHZZ2L2la2a3, JHUXSHZZ2L2la2L1, JHUXSHZZ2L2la2L1Zg, JHUXSHZZ2L2la3L1,        \
-                              JHUXSHZZ2L2la3L1Zg, JHUXSHZZ2L2lL1L1Zg,                                          \
+                              JHUXSHZZ2L2la3L1Zg, JHUXSHZZ2L2lL1L1Zg
+
+        if pdf is not None:
+            exec 'from helperstuff.constants.'+pdf+' import ' + """                                            \
                               JHUXSVBFa1, JHUXSVBFa2, JHUXSVBFa3, JHUXSVBFL1, JHUXSVBFL1Zg,                    \
                               JHUXSVBFa1a2, JHUXSVBFa1a3, JHUXSVBFa1L1, JHUXSVBFa1L1Zg,                        \
                               JHUXSVBFa2a3, JHUXSVBFa2L1, JHUXSVBFa2L1Zg, JHUXSVBFa3L1,                        \
@@ -153,6 +167,10 @@ class SampleBase(object):
                               JHUXSWHa3L1Zg, JHUXSWHL1L1Zg,                                                    \
                               JHUXSHJJa2, JHUXSHJJa3, JHUXSHJJa2a3,                                            \
                               JHUXSttHkappa, JHUXSttHkappatilde, JHUXSttHkappakappatilde
+            """
+        else:
+            if self.productionmode != "ggH":
+                raise ValueError("Can't get xsec for {} with no pdf".format(self.productionmode))
         if self.productionmode == "ggH":
             return (
                       JHUXSHZZ2L2la1*self.g1**2
@@ -362,26 +380,26 @@ class SampleBase(object):
     def xsec(self):
         if self.productionmode == "ggH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSggH2L2l
-            return constants.SMXSggH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+            return constants.SMXSggH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "VBF":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSVBF2L2l
-            return constants.SMXSVBF2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+            return constants.SMXSVBF2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "ZH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSZH2L2l
-            return constants.SMXSZH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+            return constants.SMXSZH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "WH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWH2L2l
-            return constants.SMXSWH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec
+            return constants.SMXSWH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "WplusH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWpH2L2l
         if self.productionmode == "WminusH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWmH2L2l
         if self.productionmode == "HJJ":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return 1
-            return constants.SMXSHJJ2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec
+            return constants.SMXSHJJ2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "ttH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSttH2L2l
-            return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec
+            return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
         raise self.ValueError("xsec")
 
     @property
@@ -407,6 +425,8 @@ class SampleBase(object):
                        self.kappa == other.kappa,
                        self.kappa_tilde == other.kappa_tilde,
                    ))
+               ) and (
+                   self.pdf is None or other.pdf is None or self.pdf == other.pdf
                )
     def __ne__(self, other):
         return not self == other
@@ -611,6 +631,7 @@ class SampleBase(object):
         for h in purehypotheses:
             if not getattr(self, h.couplingname) and h != hypothesis: continue
             kwargs = {_.couplingname: 0 for _ in purehypotheses}
+            kwargs["pdf"] = "NNPDF30_lo_as_0130"
             kwargs[h.couplingname] = 1
             term = 0
             for productionmode in productionmodes:
@@ -648,7 +669,7 @@ class SampleBase(object):
         return (1 if a1*eR>0 else -1) * eR**2 * constants.JHUXSHZZ2L2leR / (eL**2 * constants.JHUXSHZZ2L2leL + eR**2 * constants.JHUXSHZZ2L2leR + abs(a1)**2 * constants.JHUXSHZZ2L2la1)
 
 class ArbitraryCouplingsSample(SampleBase):
-    def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None):
+    def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, pdf=None):
         self.productionmode = ProductionMode(productionmode)
         self.__g1, self.__g2, self.__g4, self.__g1prime2, self.__ghzgs1prime2 = g1, g2, g4, g1prime2, ghzgs1prime2
         if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH"):
@@ -681,6 +702,13 @@ class ArbitraryCouplingsSample(SampleBase):
             if kappa is not None or kappa_tilde is not None:
                 raise ValueError("Can't set kappa or kappa_tilde for {}".format(self.productionmode))
 
+        self.__pdf = pdf
+        if pdf is not None:
+            try:
+                exec "from constants import "+pdf in globals(), locals()
+            except ImportError:
+                raise ValueError("Unknown pdf "+pdf)
+
     @property
     def g1(self):
         return self.__g1
@@ -710,11 +738,15 @@ class ArbitraryCouplingsSample(SampleBase):
     @property
     def kappa_tilde(self):
         return self.__kappa_tilde
+    @property
+    def pdf(self):
+        return self.__pdf
 
     def __repr__(self):
         kwargs = ()
         if self.productionmode == "HJJ": kwargs += ("ghg2", "ghg4")
         if self.productionmode == "ttH": kwargs += ("kappa", "kappa_tilde")
+        if self.pdf is not None: kwargs += ("pdf",)
         kwargs += ("g1", "g2", "g4", "g1prime2", "ghzgs1prime2")
         return "{}({}, {})".format(
                                    type(self).__name__,
@@ -725,7 +757,7 @@ class ArbitraryCouplingsSample(SampleBase):
                                             ),
                                   )
 
-def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmodeforfai=None):
+def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmodeforfai=None, pdf=None):
     from combinehelpers import mixturesign, sigmaioversigma1
     analysis = Analysis(analysis)
     productionmode = ProductionMode(productionmode)
@@ -762,6 +794,7 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
                                              #mixturesign: multiply by -1 for fL1
                                              mixturesign(analysis)*fai
                                             )
+    kwargs["pdf"] = pdf
     return ArbitraryCouplingsSample(productionmode, **kwargs)
 
 def samplewitha1eLeR(a1, eL, eR):
@@ -1393,6 +1426,14 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hffhypothesis == "fCP0.5":
                 return constants.kappa_tilde_ttH
 
+    @property
+    def pdf(self): return None
+
+class ReweightingSampleWithPdf(ReweightingSample):
+    enums = [ReweightingSample, Production]
+    @property
+    def pdf(self): return self.production.pdf
+
 class ReweightingSampleWithFlavor(ReweightingSample):
     enums = [ReweightingSample, Flavor]
     def check(self, *args):
@@ -1474,7 +1515,8 @@ class Sample(ReweightingSamplePlus):
         if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
             raise ValueError("Separate {} sample is produced with POWHEG.  Maybe you meant to specify POWHEG, or WH?\n{}".format(self.productionmode, args))
 
-        ReweightingSampleWithFlavor(self.reweightingsample, self.flavor)
+        self.reweightingsamplewithflavor = ReweightingSampleWithFlavor(self.reweightingsample, self.flavor)
+        self.reweightingsamplewithpdf = ReweightingSampleWithPdf(self.reweightingsample, self.production)
 
         if self.pythiasystematic is not None and self.alternategenerator == "NNLOPS":
             raise ValueError("No NNLOPS samples with systematics!\n{}".format(args))
@@ -1617,6 +1659,9 @@ class Sample(ReweightingSamplePlus):
             args = [self.reweightingsampleplus, self.flavor, "170222"]
             return Sample(*args)
         return None
+
+    @property
+    def pdf(self): return self.reweightingsamplewithpdf.pdf
 
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]

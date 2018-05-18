@@ -31,5 +31,5 @@
 	url = ssh://git@gitlab.cern.ch:7999/hroskes/NIS_summary.git
 	branch = master
 [submodule "helperstuff/.constants"]
-	path = helperstuff/.constants
+	path = helperstuff/constants
 	url = git@github.com:hroskes/anomalouscouplingsconstants

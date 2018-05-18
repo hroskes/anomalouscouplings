@@ -741,6 +741,11 @@ class Production(MyEnum):
     @property
     def LHE(self):
         return "LHE" in str(self)
+    @property
+    def pdf(self):
+      if self.year == 2016: return "NNPDF30_lo_as_0130"
+      if self.year == 2017: return "NNPDF31_lo_as_0130"
+      assert False, self
 
 class Category(MyEnum):
     """
