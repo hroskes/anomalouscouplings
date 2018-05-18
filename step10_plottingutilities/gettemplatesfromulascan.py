@@ -7,30 +7,34 @@ from helperstuff.utilities import KeepWhileOpenFile, TFile
 
 
 def gettemplatefromulascan(template):
+  folder = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/{year}Width/CMSSW_9_4_3/src/HiggsWidth_PostICHEP/Analysis/test/output/LHC_13TeV/Templates/{templatedate}/FinalTemplates/Stage1/{coupling}"
+
+  kwargs = {}
+  kwargses = [kwargs]
+
   if template.production == "180416_Ulascan":
-    maindir = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/2017Width/CMSSW_9_4_3/src/HiggsWidth_PostICHEP/Analysis/test/output/LHC_13TeV/Templates/180423/FinalTemplates/Stage1/"
+    kwargs["templatedate"] = 180423
   if template.production == "180224_Ulascan":
-    maindir = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/2016Width/CMSSW_9_4_3/src/HiggsWidth_PostICHEP/Analysis/test/output/LHC_13TeV/Templates/180509/FinalTemplates/Stage1/"
+    kwargs["templatedate"] = 180509
 
   if template.analysis == "fa3":
-    folder = "a3"
+    kwargs["coupling"] = "a3"
     gi = constants.g4HZZ
   elif template.analysis == "fa2":
-    folder = "a2"
+    kwargs["coupling"] = "a2"
     gi = constants.g2HZZ
   elif template.analysis == "fL1":
-    folder = "L1"
+    kwargs["coupling"] = "L1"
     gi = constants.g1prime2HZZ
 
   basename = "HtoZZ{channel}_{category}_FinalTemplates_{productionmode}_{systematic}.root"
   templatename = "T_{productionmode}{_hypothesis}"
 
-  kwargs = {}
-  kwargses = [kwargs]
   kwargs["channel"] = template.channel
   kwargs["category"] = str(template.category).replace("VBFt", "JJVBFT").replace("VHHadrt", "HadVHT")
   if template.shapesystematic == "":
     kwargs["systematic"] = "Nominal"
+  kwargs["year"] = template.production.year
 
   if template.productionmode == "ggH":
     kwargs["productionmode"] = "ggZZ"
@@ -88,7 +92,7 @@ def gettemplatefromulascan(template):
   h = None
 
   for kwargs in kwargses:
-    filename = os.path.join(maindir, folder, basename.format(**kwargs))
+    filename = os.path.join(folder, basename).format(**kwargs)
     with TFile(filename) as f:
       _ = getattr(f, templatename.format(**kwargs))
       _.Sumw2()
@@ -98,7 +102,20 @@ def gettemplatefromulascan(template):
       else:
         h.Add(_)
 
+  print h.Integral(),
+  if h.Integral(): h.Scale(h.Integral("width") / h.Integral())
   h.Scale(1 / gi ** scalingpower)
+  if template.productionmode == "ZX":
+    txtfilename = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/RunII_Combination/CMSSW_9_4_3/src/HZZ4l/CreateWidthDatacards/cards_180516_Onshell_{coupling}_13TeV_{year}/HCG/13TeV_{year}/hzz{channel}_{category}.txt".format(**kwargs)
+    with open(txtfilename) as f:
+      for line in f:
+        if line.startswith("rate "):
+          multipliers = line.split()[1:]
+          assert all(float(_)==1 for _ in multipliers[:-1]), line
+          print multipliers[-1],
+          h.Scale(float(multipliers[-1]))
+          break
+  print h.Integral()
   h.SetName(template.templatename())
 
   return h

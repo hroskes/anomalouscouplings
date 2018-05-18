@@ -262,7 +262,7 @@ class _TotalRate(MultiEnum):
       with open(t.templatesfile) as f:
         h = getattr(f, t.templatename())
       rate += h.Integral()
-    rate *= float(self.luminosity)
+    if self.productionmode != "ZX": rate *= float(self.luminosity)
     return rate
 
   @property

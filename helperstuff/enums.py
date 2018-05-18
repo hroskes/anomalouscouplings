@@ -725,7 +725,7 @@ class Production(MyEnum):
     @property
     def year(self):
         if "Ulascan" in str(self):
-            return int(type(self)(str(self).replace("_Ulascan", "")))
+            return type(self)(str(self).replace("_Ulascan", "")).year
         if self <= "180224":
             return 2016
         if self == "180416":
