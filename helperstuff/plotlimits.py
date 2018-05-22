@@ -19,7 +19,7 @@ from enums import Analysis, Category, channels, EnumItem, MyEnum, ProductionMode
 from samples import ReweightingSample, Sample, samplewithfai
 from extendedcounter import ExtendedCounter
 from samples import samplewithfeLfeR
-from utilities import cache
+from utilities import cache, cd
 from yields import YieldValue
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
@@ -114,6 +114,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     killpoints = None
     faifor = "decay"
     xaxislimits = None
+    adddirectories = []
+    scale = 1
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -152,6 +154,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             faifor = kwarg
         elif kw == "xaxislimits":
             xaxislimits = kwarg
+        elif kw == "adddirectories":
+            adddirectories = kwarg
+        elif kw == "scale":
+            scale = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -194,43 +200,65 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     l.SetBorderSize(0)
 
     for scan in scans:
-        NLL = ExtendedCounter()
-        for scanrange in scanranges:
-            if scanrange == (101, -1, 1):
-                scanrangeappend = ""
-            else:
-                scanrangeappend = "_{},{},{}".format(*scanrange)
-            f = ROOT.TFile(infilename.format(append=scan.name, scanrangeappend=scanrangeappend))
-            assert f
-            t = f.Get("limit")
-            assert t
+        finalNLL = ExtendedCounter()
+        for directory in ["."] + adddirectories:
+            usemoreappend = ""
+            if directory != ".":
+                scale = 1
+                if isinstance(directory, tuple): directory, usemoreappend, scale = directory
+            with cd(directory):
+                NLL = ExtendedCounter()
+                for scanrange in scanranges:
+                    if scanrange == (101, -1, 1):
+                        scanrangeappend = ""
+                    else:
+                        scanrangeappend = "_{},{},{}".format(*scanrange)
+                    f = ROOT.TFile(infilename.format(append=scan.name+usemoreappend, scanrangeappend=scanrangeappend))
+                    assert f
+                    t = f.Get("limit")
+                    assert t
 
 
-            t.GetEntry(0)
-            if getattr(t, POI) == -1: startfrom = 0
-            else: startfrom = 1
+                    t.GetEntry(0)
+                    if getattr(t, POI) == -1: startfrom = 0
+                    else: startfrom = 1
 
-            for entry in islice(t, startfrom, None):
-                fa3 = getattr(t, POI)
-                if POI == "CMS_zz4l_fai1":
-                    if faifor == "decay": pass
-                    elif faifor in ("VBF", "VH", "ZH", "WH"): fa3 = samplewithfai("ggH", analysis, fa3).fai(faifor, analysis)
-                    elif faifor in ("VBF+dec", "VH+dec", "ZH+dec", "WH+dec"): fa3 = samplewithfai("ggH", analysis, fa3).fai(faifor, analysis, withdecay=True)
-                    elif faifor == "VBFreco": assert len(productions) == 1; fa3 = fai_VBFreco(analysis, productions[0], fa3)
-                    else: assert False
-                    if xaxislimits is not None and not (xaxislimits[0] <= fa3 <= xaxislimits[1]): continue
-                if killpoints is not None and killpoints[0] < fa3 < killpoints[1]: continue
-                if nuisance is None:
-                    deltaNLL = t.deltaNLL+t.nll+t.nll0
-                    NLL[fa3] = 2*deltaNLL
-                else:
-                    NLL[fa3] = getattr(t, nuisance)
-            if 1 not in NLL and -1 in NLL and xaxislimits is None and POI == "CMS_zz4l_fai1":
-                NLL[1] = NLL[-1]
+                    for entry in islice(t, startfrom, None):
+                        fa3 = getattr(t, POI)
+                        if POI == "CMS_zz4l_fai1":
+                            if faifor == "decay": pass
+                            elif faifor in ("VBF", "VH", "ZH", "WH"): fa3 = samplewithfai("ggH", analysis, fa3).fai(faifor, analysis)
+                            elif faifor in ("VBF+dec", "VH+dec", "ZH+dec", "WH+dec"): fa3 = samplewithfai("ggH", analysis, fa3).fai(faifor, analysis, withdecay=True)
+                            elif faifor == "VBFreco": assert len(productions) == 1; fa3 = fai_VBFreco(analysis, productions[0], fa3)
+                            else: assert False
+                            if xaxislimits is not None and not (xaxislimits[0] <= fa3 <= xaxislimits[1]): continue
+                        if killpoints is not None and killpoints[0] < fa3 < killpoints[1]: continue
+                        if nuisance is None:
+                            deltaNLL = t.deltaNLL+t.nll+t.nll0
+                            NLL[fa3] = 2*deltaNLL
+                        else:
+                            NLL[fa3] = getattr(t, nuisance)
+                    if 1 not in NLL and -1 in NLL and xaxislimits is None and POI == "CMS_zz4l_fai1":
+                        NLL[1] = NLL[-1]
+
+                    NLL *= scale
+
+                    if set(finalNLL):
+                        for point in finalNLL.copy():
+                            if point not in NLL:
+                                left = max(_ for _ in NLL if _<point)
+                                right = min(_ for _ in NLL if _>point)
+                                NLL[point] = -(point * (NLL[right]-NLL[left]) + right * NLL[left] - left*NLL[right]) / (left - right)
+                                print NLL[left], NLL[right], NLL[point]
+                        for point in NLL.copy():
+                            if point not in finalNLL:
+                                del NLL[point]
+
+                finalNLL += NLL
 
         c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
-        if nuisance is None: NLL.zero()
-        g = NLL.TGraph()
+        if nuisance is None: finalNLL.zero()
+        g = finalNLL.TGraph()
         mg.Add(g)
 
         g.SetLineColor(scan.color)
@@ -314,7 +342,7 @@ class XPos(MyEnum):
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
-@cache
+#@cache
 def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, xsize=.1, ysize=.03, yshift=0, yshift68=None, yshift95=None, textsize=None, PRL=False, CLbelow=False, arbitraryparameter=None):
     """
     xpostext: "left", "right", or a float, determines where the text 68% CL and 95% CL goes
