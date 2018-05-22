@@ -27,7 +27,11 @@ def copyplots(folder):
         print
         print "Failed to copy plots.  To do it yourself, try:"
         print
+        print "("
+        print "set -e"
+        print "cd "+os.getcwd()
         print " ".join(pipes.quote(_) for _ in command)
+        print ")"
         print
   else:
     assert False, config.host

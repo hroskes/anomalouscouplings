@@ -633,7 +633,7 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def fais(self):
-        if self.dimesions == 1: return self,
+        if self.dimensions == 1: return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
         if self == "fa3fa2fL1fL1Zg": return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
         assert False, self

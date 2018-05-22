@@ -13,16 +13,18 @@ import os
 
 #========================
 #inputs
-productionmode = "ZH"
-disc           = "D_4couplings_HadVHdecay"
-reweightto     = None
+productionmode = "ggH"
+disc           = "D_int_decay_new"
+reweightto     = "0+"
 bins           = None
 min            = None
 max            = None
 
+production     = "180416"
+
 enrich         = False
 masscut        = True
-normalizeto1   = True
+normalizeto1   = False
 
 channel        = None
 
@@ -38,7 +40,7 @@ max2           = None
 
 skip           = []
 
-logscale       = True
+logscale       = False
 setminimum     = 1e-7
 #========================
 
@@ -104,7 +106,8 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
       analysis=analysis,
       color=color,
       hname=hname,
-      cut=cut
+      cut=cut,
+      production=production,
     )
     if not logscale: h.SetMinimum(0)
     if setminimum is not None: h.SetMinimum(setminimum)

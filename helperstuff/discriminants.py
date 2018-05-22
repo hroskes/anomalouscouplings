@@ -26,6 +26,9 @@ decaydiscriminants = [
     Discriminant("D_L1L1Zg_decay", "D_{#Lambda1}^{ZZ/Z#gamma,dec}", defaultnbins, 0, 1),
     Discriminant("D_L1L1Zgint_decay", "D_{#Lambda1int}^{ZZ/Z#gamma,dec}", defaultnbins, -.3, .25),
 
+    Discriminant("D_CP_decay_new", "D_{CP}^{dec}", defaultnbins, -1, 1),
+    Discriminant("D_int_decay_new", "D_{int}^{dec}", defaultnbins, -1, 1),
+
     Discriminant("D_eL_decay", "D_{#epsilonL}^{dec}", defaultnbins, .12, .5),
     Discriminant("D_eR_decay", "D_{#epsilonL}^{dec}", defaultnbins, .12, .5),
     Discriminant("D_eLeR_decay", "D_{#epsilonL/#epsilonR}^{dec}", defaultnbins, .42, .59),
