@@ -1,4 +1,16 @@
 #!/usr/bin/env python
+import argparse
+
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("analysis")
+    p.add_argument("foldername")
+    p.add_argument("--plotname")
+    p.add_argument("--printformat")
+    p.add_argument("--subdirectory")
+    args = p.parse_args()
+
 from collections import namedtuple, OrderedDict
 from helperstuff import config
 from helperstuff.enums import Analysis, EnumItem, MyEnum
@@ -86,7 +98,7 @@ def printlimits(analysis, foldername, **kwargs):
         elif kw == "printformat":
             printformat = PrintFormat(kwarg)
         elif kw == "subdirectory":
-            subdirector = kwarg
+            subdirectory = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -129,15 +141,9 @@ def printlimits(analysis, foldername, **kwargs):
         print
         print
 
-        return minimum, results
+    return minimum, allresults
 
 if __name__ == "__main__":
-    analysis = Analysis(sys.argv[1])
-    foldername = sys.argv[2]
-    kwargs = {}
-    for arg in sys.argv[3:]:
-        kw, kwarg = arg.split("=")
-        if kw in kwargs:
-            raise TypeError("Duplicate kwarg {}!".format(kw))
-        kwargs[kw] = kwarg
-    printlimits(analysis, foldername, **kwargs)
+    for k, v in args.__dict__.copy().iteritems():
+        if v is None: del args.__dict__[k]
+    printlimits(**args.__dict__)
