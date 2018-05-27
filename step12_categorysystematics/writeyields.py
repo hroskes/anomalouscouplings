@@ -24,7 +24,6 @@ def writeyields():
   if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
 
   for production in config.productionsforcombine:
-    if production.year == 2016: continue
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
       SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),
@@ -33,8 +32,9 @@ def writeyields():
       SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
       SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
-#      SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}),
     ]
+    if production.year == 2016:
+      tosamples_foryields.append(SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}))
     if config.usedata:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
 
