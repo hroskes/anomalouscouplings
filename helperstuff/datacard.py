@@ -142,6 +142,7 @@ class _Datacard(MultiEnum):
             result.remove("VBFbkg")
         if not config.usedata:
             result.remove("ZX")
+        result.remove("VBFbkg")
         return result
 
     @property
@@ -247,9 +248,9 @@ class _Datacard(MultiEnum):
 
     @property
     def rate(self):
-        if self.analysis.usehistogramsforcombine:
-            raise NotImplementedError
-        else:
+#        if self.analysis.usehistogramsforcombine:
+#            raise NotImplementedError
+#        else:
             return " ".join(str(getrate(p, self.channel, self.category, self.analysis, self.luminosity)) for p in self.productionmodes)
 
     section4 = Section("## mass window [{},{}]".format(config.m4lmin, config.m4lmax),

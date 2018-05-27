@@ -24,6 +24,7 @@ def writeyields():
   if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
 
   for production in config.productionsforcombine:
+    if production.year == 2016: continue
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
       SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),
@@ -32,7 +33,7 @@ def writeyields():
       SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
       SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
-      SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}),
+#      SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}),
     ]
     if config.usedata:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
@@ -44,7 +45,10 @@ def writeyields():
       print productionmode
       samplegroups = [samples]
       if productionmode.issignal:
-        samplegroups += [{ReweightingSamplePlus(s, systematic) for s in samples} for systematic in pythiasystematics]
+        samplegroups += [{ReweightingSamplePlus(s, systematic) for s in samples} for systematic in pythiasystematics
+                            if systematic.hassample(production.year)]
+        if production.year == 2017:
+          samplegroups += [{ReweightingSamplePlus(s, "ext")} for s in samples]
 
       for usesamples in samplegroups:
         tmpresult = MultiplyCounter()
@@ -52,8 +56,10 @@ def writeyields():
           if (productionmode in ("ggZZ", "VBF bkg", "ZX")
                or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None):
             usealternateweights = [AlternateWeight("1")]
+          elif productionmode.issignal and tosample.extension == "ext":
+            usealternateweights = [AlternateWeight("PythiaScaleUp"), AlternateWeight("PythiaScaleDn")]
           else:
-            usealternateweights = productionmode.alternateweights
+            usealternateweights = productionmode.alternateweights(production.year)
 
           tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
 
@@ -214,8 +220,12 @@ def writeyields():
 
           #pythia scale and tune
           if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
-            scaleup = sum(result[ReweightingSamplePlus(tosample, "ScaleUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
-            scaledn = sum(result[ReweightingSamplePlus(tosample, "ScaleDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+            if production.year == 2016:
+              scaleup = sum(result[ReweightingSamplePlus(tosample, "ScaleUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+              scaledn = sum(result[ReweightingSamplePlus(tosample, "ScaleDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+            elif production.year == 2017:
+              scaleup = sum(result[tosample, categorization, AlternateWeight("PythiaScaleUp"), category] for tosample in samples) / nominal
+              scaledn = sum(result[tosample, categorization, AlternateWeight("PythiaScaleUp"), category] for tosample in samples) / nominal
             tuneup = sum(result[ReweightingSamplePlus(tosample, "TuneUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
             tunedn = sum(result[ReweightingSamplePlus(tosample, "TuneDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
           else:

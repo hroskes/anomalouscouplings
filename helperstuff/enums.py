@@ -381,12 +381,15 @@ class ProductionMode(MyEnum):
         result += ["MINLO"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
-    @property
-    def alternateweights(self):
+    def alternateweights(self, year):
+      def yearcondition(systematic):
+        if systematic == "PythiaScaleUp" or systematic == "PythiaScaleDown" and year == 2016: return False
+        return True
+
       if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
-         return AlternateWeight.items(lambda x: x!="EWcorrUp" and x!="EWcorrDn")
+        return AlternateWeight.items(lambda x: x!="EWcorrUp" and x!="EWcorrDn" and yearcondition(x))
       if self == "qqZZ":
-         return AlternateWeight.items()
+        return AlternateWeight.items(yearcondition)
       assert False
 
 class WorkspaceShapeSystematic(MyEnum):
@@ -819,21 +822,28 @@ class PythiaSystematic(MyEnum):
     @property
     def appendname(self):
         return "_" + str(self).lower().replace("dn", "down")
+    def hassample(self, year):
+        if self in ("TuneUp", "TuneDn") and year in (2016, 2017): return True
+        if self in ("ScaleUp", "ScaleDn") and year == 2016: return True
+        if self in ("ScaleUp", "ScaleDn") and year == 2017: return False
+        assert False, (self, year)
 
 class AlternateWeight(MyEnum):
     enumname = "alternateweight"
     enumitems = (
                  EnumItem("1"),
                  EnumItem("muRUp"),
-                 EnumItem("muRDn"),
+                 EnumItem("muRDn", "muRDown"),
                  EnumItem("muFUp"),
-                 EnumItem("muFDn"),
+                 EnumItem("muFDn", "muFDown"),
                  EnumItem("PDFUp"),
-                 EnumItem("PDFDn"),
+                 EnumItem("PDFDn", "PDFDown"),
                  EnumItem("alphaSUp"),
-                 EnumItem("alphaSDn"),
+                 EnumItem("alphaSDn", "alphaSDown"),
                  EnumItem("EWcorrUp"),
-                 EnumItem("EWcorrDn"),
+                 EnumItem("EWcorrDn", "EWcorrDown"),
+                 EnumItem("PythiaScaleUp"),
+                 EnumItem("PythiaScaleDn", "PythiaScaleDown"),
                 )
     @property
     def issystematic(self): return self != "1"
@@ -850,10 +860,12 @@ class AlternateWeight(MyEnum):
       if self == "alphaSDn": return "LHEweight_AsMZ_Dn"
       if self == "EWcorrUp": return "(1 + KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
       if self == "EWcorrDn": return "(1 - KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
+      if self == "PythiaScaleUp": return "(PythiaWeight_isr_muR4 * PythiaWeight_fsr_muR4)"
+      if self == "PythiaScaleDn": return "(PythiaWeight_isr_muR0p25 * PythiaWeight_fsr_muR0p25)"
       assert False
     @property
     def kfactorname(self):
-      if self == "1": return "KFactor_QCD_ggZZ_Nominal"
+      if self in ("1", "PythiaScaleUp", "PythiaScaleDn"): return "KFactor_QCD_ggZZ_Nominal"
       if self == "muRUp": return "KFactor_QCD_ggZZ_QCDScaleUp"
       if self == "muRDn": return "KFactor_QCD_ggZZ_QCDScaleDn"
       if self == "muFUp": return "KFactor_QCD_ggZZ_PDFScaleUp"

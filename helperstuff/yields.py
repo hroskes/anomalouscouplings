@@ -11,7 +11,7 @@ import ROOT
 from combinehelpers import Luminosity
 import config
 from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode
-from samples import ReweightingSample, Sample
+from samples import ReweightingSample, ReweightingSamplePlus, Sample
 from utilities import cache, JsonDict, MultiplyCounter, TFile
 
 class YieldSystematic(MyEnum):
@@ -290,31 +290,41 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     t.SetBranchStatus("genxsec", 1)
     t.SetBranchStatus("genBR", 1)
     for _ in alternateweights:
-      if _ in ("1", "EWcorrUp", "EWcorrDn"):
+      if _ in ("1", "EWcorrUp", "EWcorrDn", "PythiaScaleUp", "PythiaScaleDown"):
         pass
       else:
         t.SetBranchStatus(_.weightname, 1)
+    if "PythiaScaleUp" in alternateweights or "PythiaScaleDown" in alternateweights:
+      t.SetBranchStatus("PythiaWeight_*sr_muR0p25", 1)
+      t.SetBranchStatus("PythiaWeight_*sr_muR4", 1)
 
     c = ROOT.TCanvas()
     for tosample, categorization, alternateweight in itertools.product(tosamples, categorizations, alternateweights):
-        if tosample.productionmode == "WH" and tosample.hypothesis == "L1Zg": continue
-        if alternateweight.issystematic and categorization.issystematic: continue
-        t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "{}*(ZZMass>{} && ZZMass<{})*{}".format(tosample.weightname(), config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
-        h = c.FindObject("htemp")
-        if tosample.productionmode == "ggH":
-            t.GetEntry(0)
-            assert all(_.productionmode == "ggH" for _ in fromsamples)
-            h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname) / tosample.SMxsec)
-        for i in range(h.GetNbinsY()):
-            for channel in channels:
-                toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
-#                print i, Category.fromid(i), channel, toadd
-                result[tosample, categorization, alternateweight, Category.fromid(i), channel] += toadd
-                result[tosample, categorization, alternateweight, Category.fromid(i)] += toadd
-#        for k, v in result.iteritems(): print k, v
-#        assert 0
+        try:
+            if tosample.productionmode == "WH" and tosample.hypothesis == "L1Zg": continue
+            if alternateweight.issystematic and categorization.issystematic: continue
+            t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "{}*(ZZMass>{} && ZZMass<{})*{}".format(tosample.weightname(), config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
+            h = c.FindObject("htemp")
+            if tosample.productionmode == "ggH":
+                t.GetEntry(0)
+                assert all(_.productionmode == "ggH" for _ in fromsamples)
+                h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname) / tosample.SMxsec)
+            for i in range(h.GetNbinsY()):
+                for channel in channels:
+                    toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
+#                    print i, Category.fromid(i), channel, toadd
+                    result[tosample, categorization, alternateweight, Category.fromid(i), channel] += toadd
+                    result[tosample, categorization, alternateweight, Category.fromid(i)] += toadd
+#            for k, v in result.iteritems(): print k, v
+#            assert 0
 
-        result[tosample,categorization,alternateweight] = h.Integral()
+            result[tosample,categorization,alternateweight] = h.Integral()
+        except:
+            if tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneUp") or tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneDn"):
+              result[tosample,categorization,alternateweight] = result[ReweightingSamplePlus("ZH", "0+", "POWHEG"), categorization,alternateweight]
+            else:
+              print tosample, categorization, alternateweight
+              raise
 
     return result
 

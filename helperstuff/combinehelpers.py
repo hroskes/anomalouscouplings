@@ -74,7 +74,7 @@ class __Rate(MultiEnum):
     @cache
     def getrate(self):
         from yields import YieldValue
-        return YieldValue(self.productionmode, self.channel, self.category, self.analysis).value * float(self.luminosity)
+        return YieldValue(self.production, self.productionmode, self.channel, self.category, self.analysis).value * float(self.luminosity)
 
     def __float__(self):
         return self.getrate()
