@@ -121,6 +121,7 @@ class _Datacard(MultiEnum):
         return "hzz4l_{}S_{}_{}.lumi{}.txt".format(self.channel, self.category, self.year, float(self.luminosity))
     @property
     def rootfile(self):
+        if self.analysis.usehistogramsforcombine: return self.rootfile_base
         return "hzz4l_{}S_{}_{}.lumi{}.input.root".format(self.channel, self.category, self.year, float(self.luminosity))
     @property
     def rootfile_base(self):
@@ -150,7 +151,7 @@ class _Datacard(MultiEnum):
         return 1
     @property
     def jmax(self):
-        return len(self.getprocesses(Counter()).split())
+        return len(self.getprocesses(Counter()))
     @property
     def kmax(self):
         return "*"
@@ -212,7 +213,7 @@ class _Datacard(MultiEnum):
                 assert False
 
     @property
-    def process(self): return self.getprocesses()
+    def process(self): return " ".join(self.getprocesses())
 
     def getprocesses(self, counter=Counter()):
         counter[self] += 1
@@ -232,7 +233,7 @@ class _Datacard(MultiEnum):
                     result[1].append(h)
                     result[2].append(-nsignal)
                     nsignal += 1
-            return " ".join(str(_) for _ in result[counter[self]])
+            return [str(_) for _ in result[counter[self]]]
         else:
             if counter[self] == 1:
                 return " ".join(_.combinename for _ in self.productionmodes)
@@ -248,9 +249,9 @@ class _Datacard(MultiEnum):
 
     @property
     def rate(self):
-#        if self.analysis.usehistogramsforcombine:
-#            raise NotImplementedError
-#        else:
+        if self.analysis.usehistogramsforcombine:
+            return " ".join(str(self.histogramintegrals[h] * float(self.luminosity)) for h in self.histograms)
+        else:
             return " ".join(str(getrate(p, self.channel, self.category, self.analysis, self.luminosity)) for p in self.productionmodes)
 
     section4 = Section("## mass window [{},{}]".format(config.m4lmin, config.m4lmax),
@@ -267,7 +268,7 @@ class _Datacard(MultiEnum):
                 else: return None
             return " ".join(
                             ["lnN"] +
-                            [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis,
+                            [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production,
                                                       h if "bkg_" in h else h.split("_")[0]
                                 )                    )
                                 for h in self.histograms]
@@ -523,6 +524,14 @@ class _Datacard(MultiEnum):
         if not os.path.exists(self.rootfile):
             os.symlink(self.rootfile_base, self.rootfile)
 
+    @property
+    @cache
+    def histogramintegrals(self):
+        """
+        Gets modified during makehistograms
+        """
+        return {}
+
     def makehistograms(self):
         if not self.analysis.usehistogramsforcombine:
             raise ValueError("Should not be calling this function for {}".format(self.analysis))
@@ -545,6 +554,13 @@ class _Datacard(MultiEnum):
 
             p = ProductionMode(p)
 
+            scaleby = (
+                        getrate(p, self.channel, self.category, self.analysis, self.production, 1)
+                      /
+                        gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, self.channel).Integral()
+                      )
+            print p, scaleby
+
             for systematic, direction in chain([(None, None)], product(p.workspaceshapesystematics(self.category), ("Up", "Down"))):
                 if systematic is not None is not direction: systematic = ShapeSystematic(str(systematic)+direction)
                 t = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic).Clone(h)
@@ -556,9 +572,11 @@ class _Datacard(MultiEnum):
 
                 name = h
                 if systematic: name += "_"+str(systematic)
+                t.Scale(scaleby)
                 t.SetName(name)
                 t.SetDirectory(f)
                 cache.append(t)
+                self.histogramintegrals[name] = t.Integral()
 
         allnames = set(t.GetName() for t in cache)
         assert len(allnames) == len(cache)
