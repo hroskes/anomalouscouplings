@@ -151,7 +151,7 @@ class _Datacard(MultiEnum):
         return 1
     @property
     def jmax(self):
-        return len(self.getprocesses(Counter()))
+        return len(self.getprocesses(Counter()))-1
     @property
     def kmax(self):
         return "*"
@@ -538,6 +538,7 @@ class _Datacard(MultiEnum):
 
         f = ROOT.TFile(self.rootfile_base, "RECREATE")
         cache = []
+        print self
         for h in self.histograms:
             if "bkg_" in h:
                 p = h
@@ -581,6 +582,11 @@ class _Datacard(MultiEnum):
         allnames = set(t.GetName() for t in cache)
         assert len(allnames) == len(cache)
         assert allnames == set(self.histograms), (allnames, set(self.histograms), allnames ^ set(self.histograms))
+
+        datatree = getdatatree(self.channel, self.production, self.category, self.analysis).CloneTree()
+        datatree.SetName("data_obs")
+        datatree.SetDirectory(f)
+
         f.Write()
         f.Close()
 

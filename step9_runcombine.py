@@ -24,19 +24,16 @@ from helperstuff.utilities import requirecmsenv, tfiles
 requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_1_0"))
 
 combinecardstemplate = r"""
-eval $(scram ru -sh) &&
 combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
 """
 
 createworkspacetemplate = r"""
-eval $(scram ru -sh) &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P .oO[physicsmodel]Oo. \
                            .oO[physicsoptions]Oo. -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
                            |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
 exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = r"""
-eval $(scram ru -sh) &&
 combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
         --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
         -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
@@ -424,7 +421,16 @@ def runcombine(analysis, foldername, **kwargs):
         tfiles.clear()
         with utilities.OneAtATime(replaceByMap(".oO[combinecardsfile]Oo..tmp", repmap), 5, task="running combineCards"):
             if not os.path.exists(replaceByMap(".oO[combinecardsfile]Oo.", repmap)):
-                subprocess.check_call(replaceByMap(combinecardstemplate, repmap), shell=True)
+                try:
+                    subprocess.check_call(replaceByMap(combinecardstemplate, repmap), shell=True)
+                except:
+                    try:
+                        raise
+                    finally:
+                        try:
+                            os.remove(replaceByMap(".oO[combinecardsfile]Oo.", repmap))
+                        except subprocess.CalledProcessError:
+                            pass
         with utilities.OneAtATime(replaceByMap(".oO[workspacefile]Oo..tmp", repmap), 5, task="running text2workspace"):
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
