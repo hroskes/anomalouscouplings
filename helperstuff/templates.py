@@ -574,8 +574,7 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
-                    if config.showblinddistributions:
-                        yield TemplatesFile(channel, "DATA", analysis, production, category)
+                    yield TemplatesFile(channel, "DATA", analysis, production, category)
                     if category != "Untagged" and config.applyMINLOsystematics:
                         yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
 
@@ -866,7 +865,10 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "VBF bkg":
             result = {Sample(self.production, self.productionmode, flavor) for flavor in flavors if not flavor.hastaus}
         if self.productionmode == "data":
-            result = {Sample(self.production, self.productionmode)}
+            if config.showblinddistributions:
+                result = {Sample(self.production, self.productionmode)}
+            else:
+                result = {Sample("ggZZ", self.production, "4tau")}
         result = {sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0}
         assert result, self
         return result
@@ -879,6 +881,8 @@ class Template(TemplateBase, MultiEnum):
             result = uncertainties.nominal_value(ReweightingSample(self.productionmode, self.hypothesis).xsec) / uncertainties.nominal_value(ReweightingSample(self.productionmode, "SM").xsec)
         elif self.productionmode == "ttH":
             result = uncertainties.nominal_value(ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis).xsec) / uncertainties.nominal_value(ReweightingSample(self.productionmode, "SM", "Hff0+").xsec)
+        elif self.productionmode == "data" and not config.showblinddistributions:
+            return None  #this is to avoid calling effectiveentries
         elif self.productionmode in ("VBF bkg", "ggZZ", "ZX", "data"):
             result = len(self.reweightfrom())
         elif self.productionmode == "qqZZ":
@@ -1082,6 +1086,8 @@ class Template(TemplateBase, MultiEnum):
             result.append("Z1Flav*Z2Flav == {}".format(self.ZZFlav))
         if not self.analysis.isdecayonly:
             result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")")
+        if self.productionmode == "data" and not config.showblinddistributions:
+            result.insert(0, "false")
         return " && ".join(result)
 
     @property
