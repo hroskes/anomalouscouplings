@@ -204,7 +204,7 @@ class _Datacard(MultiEnum):
                     for sign in "positive", "negative":
                         templatenamepart = (
                           t.templatename().replace("template", "").replace("AdapSmooth", "").replace("Mirror", "").replace("Int", "")
-                                          .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
+                                          .replace("a1", "a11").replace("a3", "a31").replace("a2", "a21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
                         )
                         if t.templatename().startswith("templateIntAdapSmooth"): templatenamepart = "g11"+self.analysis.couplingname+"1"
 
@@ -250,7 +250,7 @@ class _Datacard(MultiEnum):
     @property
     def rate(self):
         if self.analysis.usehistogramsforcombine:
-            return " ".join(str(self.histogramintegrals[h] * float(self.luminosity)) for h in self.histograms)
+            return " ".join(str(self.histogramintegrals[h]) for h in self.histograms)
         else:
             return " ".join(str(getrate(p, self.channel, self.category, self.analysis, self.luminosity)) for p in self.productionmodes)
 
@@ -344,10 +344,12 @@ class _Datacard(MultiEnum):
     @property
     def muV_scaled(self):
         if self.analysis.isdecayonly: return None
+        if self.analysis.usehistogramsforcombine: return None
         return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
     @property
     def muf_scaled(self):
         if self.analysis.isdecayonly: return None
+        if self.analysis.usehistogramsforcombine: return None
         return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
 
     section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, "muV_scaled", "muf_scaled")
@@ -539,8 +541,8 @@ class _Datacard(MultiEnum):
         f = ROOT.TFile(self.rootfile_base, "RECREATE")
         cache = []
         print self
-        for h in self.histograms:
-            if "bkg_" in h:
+        for h in chain(self.histograms, ["data"]):
+            if "bkg_" in h or h == "data":
                 p = h
                 hypothesis = None
                 sign = None
@@ -555,37 +557,59 @@ class _Datacard(MultiEnum):
 
             p = ProductionMode(p)
 
-            scaleby = (
-                        getrate(p, self.channel, self.category, self.analysis, self.production, 1)
-                      /
-                        gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, self.channel).Integral()
-                      )
+            if p == "data":
+                scaleby = 1 if config.unblindscans else 0
+            else:
+                scaleby = (
+                            getrate(p, self.channel, self.category, self.analysis, self.production, 1)
+                          /
+                            gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, self.channel).Integral()
+                          ) * float(self.luminosity)
             print p, scaleby
+            assert scaleby >= 0, scaleby
 
-            for systematic, direction in chain([(None, None)], product(p.workspaceshapesystematics(self.category), ("Up", "Down"))):
+            for systematic, direction in chain(product(p.workspaceshapesystematics(self.category), ("Up", "Down")), [(None, None)]):
                 if systematic is not None is not direction: systematic = ShapeSystematic(str(systematic)+direction)
-                t = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic).Clone(h)
-                if sign is not None:
-                    if sign == "positive": pass
-                    elif sign == "negative": t.Scale(-1)
-                    else: assert False
-                    t.Floor()
 
                 name = h
                 if systematic: name += "_"+str(systematic)
-                t.Scale(scaleby)
-                t.SetName(name)
+                if p == "data": name = "data_obs"
+
+                t3D = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic).Clone(name+"_3D")
+                if sign is not None:
+                    if sign == "positive": pass
+                    elif sign == "negative": t3D.Scale(-1)
+                    else: assert False
+                    t3D.Floor()
+
+                t3D.Scale(scaleby)
+
+                nbinsx = t3D.GetNbinsX()
+                nbinsy = t3D.GetNbinsY()
+                nbinsz = t3D.GetNbinsZ()
+                nbinsxyz = nbinsx*nbinsy*nbinsz
+
+                t = getattr(ROOT, type(t3D).__name__.replace("3", "1"))(name, name, nbinsxyz, 0, nbinsxyz)
+
+                xyz = 1
+                for x, y, z in product(xrange(1, nbinsx+1), xrange(1, nbinsy+1), xrange(1, nbinsz+1)):
+                    t.SetBinContent(xyz, t3D.GetBinContent(x, y, z))
+                    xyz += 1
+
+                t3D.SetDirectory(f)
+                cache.append(t3D)
                 t.SetDirectory(f)
                 cache.append(t)
+
+                assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
                 self.histogramintegrals[name] = t.Integral()
 
         allnames = set(t.GetName() for t in cache)
         assert len(allnames) == len(cache)
-        assert allnames == set(self.histograms), (allnames, set(self.histograms), allnames ^ set(self.histograms))
 
-        datatree = getdatatree(self.channel, self.production, self.category, self.analysis).CloneTree()
-        datatree.SetName("data_obs")
-        datatree.SetDirectory(f)
+        expectedhistnames = set(self.histograms) | {"data_obs"}
+        expectedhistnames = expectedhistnames | {_+"_3D" for _ in expectedhistnames}
+        assert allnames == expectedhistnames, (allnames, expectedhistnames, allnames ^ expectedhistnames)
 
         f.Write()
         f.Close()
