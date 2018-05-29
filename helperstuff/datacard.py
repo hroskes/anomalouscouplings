@@ -236,14 +236,14 @@ class _Datacard(MultiEnum):
             return [str(_) for _ in result[counter[self]]]
         else:
             if counter[self] == 1:
-                return " ".join(_.combinename for _ in self.productionmodes)
+                return [_.combinename for _ in self.productionmodes]
 
             if counter[self] == 2:
                 nsignal = sum(_.issignal for _ in self.productionmodes)
                 nbkg = sum(_.isbkg for _ in self.productionmodes)
                 assert nsignal+nbkg == len(self.productionmodes)
 
-                return " ".join(str(_) for _ in range(-nsignal+1, nbkg+1))
+                return [str(_) for _ in range(-nsignal+1, nbkg+1)]
 
         assert False
 
@@ -279,7 +279,7 @@ class _Datacard(MultiEnum):
             else: return None
         return " ".join(
                         ["lnN"] +
-                        [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, p))
+                        [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production, p))
                             for p in self.productionmodes]
                        )
 
@@ -429,20 +429,20 @@ class _Datacard(MultiEnum):
         return ROOT.RooFormulaVar(
             name, name,
             "{mixturesign} * (@0>0 ? 1 : -1) * sqrt(abs(@0)/{sigmaioversigma1})".format(
-                sigmaioversigma1=sigmaioversigma1(self.analysis.fais[index], "ggH"),
-                mixturesign=mixturesign(self.analysis.fais[index])
+                sigmaioversigma1=sigmaioversigma1(analysis.fais[index], "ggH"),
+                mixturesign=mixturesign(analysis.fais[index])
             ),
             ROOT.RooArgList(getattr(cls, "fa"+letter)())
         )
 
     @classmethod
-    def ai(cls, analysis): return aletter(cls, analysis, "i")
+    def ai(cls, analysis): return cls.aletter(analysis, "i")
     @classmethod
-    def aj(cls, analysis): return aletter(cls, analysis, "j")
+    def aj(cls, analysis): return cls.aletter(analysis, "j")
     @classmethod
-    def ak(cls, analysis): return aletter(cls, analysis, "k")
+    def ak(cls, analysis): return cls.aletter(analysis, "k")
     @classmethod
-    def al(cls, analysis): return aletter(cls, analysis, "l")
+    def al(cls, analysis): return cls.aletter(analysis, "l")
 
     def makepdfs(self):
         if self.analysis.usehistogramsforcombine:
@@ -462,10 +462,10 @@ class _Datacard(MultiEnum):
         if self.analysis.isdecayonly:
             a1 = ai = None
         else:
-            a1 = self.a1()
+            a1 = self.a1(self.analysis)
             ai = self.ai(self.analysis)
 
-        discs = discriminants(self.analysis, self.category)
+        discs = discriminants(self.analysis, self.category, self.production)
         D1Name, D2Name, D3Name = (d.name for d in discs)
         dBinsX, dBinsY, dBinsZ = (d.bins for d in discs)
         dLowX, dLowY, dLowZ = (d.min for d in discs)
@@ -490,7 +490,7 @@ class _Datacard(MultiEnum):
         ## --------------------------- DATASET --------------------------- ##
 
         data_obs_tree = getdatatree(self.channel, self.production, self.category, self.analysis)
-        datasetName = makename("data_obs_{}_{}".format(self.channel, self.category))
+        datasetName = makename("data_obs_{}_{}_{}".format(self.channel, self.category, self.production))
 
 
         self.data_obs = ROOT.RooDataSet(datasetName,datasetName,data_obs_tree,ROOT.RooArgSet(D1,D2,D3))

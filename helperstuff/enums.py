@@ -647,7 +647,7 @@ class Analysis(MyEnum):
     @property
     def usehistogramsforcombine(self):
         if self == "fa3fa2fL1fL1Zg": return True
-        return True
+        return False
 
 class Production(MyEnum):
     enumname = "production"

@@ -142,11 +142,10 @@ def getnobserved(*args):
 
 def discriminants(*args):
     theset = set()
-    for production in config.productionsforcombine:
-        templatesfile = TemplatesFile("ggh", "2e2mu", production, *args)
-        SM = templatesfile.analysis.purehypotheses[0]
-        result = tuple(d for d in Template("ggH", SM, "2e2mu", production, *args).discriminants)
-        theset.add(result)
+    templatesfile = TemplatesFile("ggh", "2e2mu", *args)
+    SM = templatesfile.analysis.purehypotheses[0]
+    result = tuple(d for d in Template("ggH", SM, "2e2mu", *args).discriminants)
+    theset.add(result)
     assert len(theset) == 1  #sanity check
     return result
 
