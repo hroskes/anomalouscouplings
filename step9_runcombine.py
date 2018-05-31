@@ -392,21 +392,26 @@ def runcombine(analysis, foldername, **kwargs):
               "physicsmodel": None,
               "physicsoptions": None,
              }
-    if analysis.dimensions == 2 and analysis.isdecayonly:
-        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
-        repmap["physicsoptions"] = "--PO allowPMF"
-        if scanfai == analysis: repmap["physicsoptions"] += " --PO fai2asPOI"
-        elif scanfai == analysis.fais[0]: pass
-        elif scanfai == analysis.fais[1]: repmap["physicsoptions"] += " --PO fai2asPOI --PO fai1fixed"
-        repmap["savemu"] = ""
-    elif analysis.dimensions == 2 and not analysis.isdecayonly:
-        assert False
-    elif analysis.dimensions != 2 and analysis.isdecayonly:
-        assert False
-    else:
-        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs"
-        repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF"
+    if analysis.usehistogramsforcombine:
+        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
+        repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF --PO .oO[analysis]Oo."
         repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
+    else:
+        if analysis.dimensions == 2 and analysis.isdecayonly:
+            repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
+            repmap["physicsoptions"] = "--PO allowPMF"
+            if scanfai == analysis: repmap["physicsoptions"] += " --PO fai2asPOI"
+            elif scanfai == analysis.fais[0]: pass
+            elif scanfai == analysis.fais[1]: repmap["physicsoptions"] += " --PO fai2asPOI --PO fai1fixed"
+            repmap["savemu"] = ""
+        elif analysis.dimensions == 2 and not analysis.isdecayonly:
+            assert False
+        elif analysis.dimensions != 2 and analysis.isdecayonly:
+            assert False
+        else:
+            repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs"
+            repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF"
+            repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
 
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)

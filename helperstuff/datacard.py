@@ -548,8 +548,10 @@ class _Datacard(MultiEnum):
                 sign = None
             elif "positive" in h or "negative" in h:
                 p, inttype, sign = h.split("_")
+                print inttype
                 for letter, name in zip("ijkl", self.analysis.couplingnames):
                     inttype = inttype.replace(name, "g"+letter)
+                print inttype
                 hypothesis = inttype
             else:
                 p, hypothesis = h.split("_")
