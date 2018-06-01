@@ -216,6 +216,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                     f = ROOT.TFile(infilename.format(append=scan.name+usemoreappend, scanrangeappend=scanrangeappend))
                     assert f
                     t = f.Get("limit")
+                    if not t: print os.getcwd(); f.ls()
                     assert t
 
 
@@ -241,20 +242,33 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                     if 1 not in NLL and -1 in NLL and xaxislimits is None and POI == "CMS_zz4l_fai1":
                         NLL[1] = NLL[-1]
 
-                    NLL *= scale
+                NLL *= scale
 
-                    if set(finalNLL):
-                        for point in finalNLL.copy():
-                            if point not in NLL:
+                if set(finalNLL):
+                    for point in finalNLL.copy():
+                        if point not in NLL:
+                            try:
                                 left = max(_ for _ in NLL if _<point)
+                            except ValueError:
+                                left = None
+                            try:
                                 right = min(_ for _ in NLL if _>point)
-                                NLL[point] = -(point * (NLL[right]-NLL[left]) + right * NLL[left] - left*NLL[right]) / (left - right)
-                                print NLL[left], NLL[right], NLL[point]
-                        for point in NLL.copy():
-                            if point not in finalNLL:
-                                del NLL[point]
+                            except ValueError:
+                                right = None
 
-                finalNLL += NLL
+                            if right is None:
+                                right = left
+                                left = max(_ for _ in NLL if _<right)
+                            if left is None:
+                                left = right
+                                right = min(_ for _ in NLL if _>left)
+
+                            NLL[point] = -(point * (NLL[right]-NLL[left]) + right * NLL[left] - left*NLL[right]) / (left - right)
+                    for point in NLL.copy():
+                        if point not in finalNLL:
+                            del NLL[point]
+
+            finalNLL += NLL
 
         c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
         if nuisance is None: finalNLL.zero()

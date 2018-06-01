@@ -80,6 +80,10 @@ def mergeplots(analysis, **kwargs):
     legendposition = (.2, .7, .6, .9)
     ymax = None
     xmin, xmax = -1, 1
+    subdir = ""
+    lumi = None
+    outdir = "fL1fL1Zg_comparison"
+    copy = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "logscale":
             logscale = bool(int(kwarg))
@@ -103,21 +107,24 @@ def mergeplots(analysis, **kwargs):
         elif kw == "xmax":
             xmax = float(kwarg)
             drawlineskwargs[kw] = kwarg
+        elif kw == "subdir":
+            subdir = kwarg
+        elif kw == "outdir":
+            outdir = kwarg
+        elif kw == "lumi":
+            lumi = kwarg
+        elif kw == "copy":
+            copy = bool(int(kwarg))
         else:
             drawlineskwargs[kw] = kwarg
 
     analysis = Analysis(analysis)
     repmap = {"analysis": str(analysis)}
-    subdir = ""
-    plotname = "limit_feR.root"
+    plotname = ".oO[analysis]Oo..root"
     folders = [
-               Folder("fL1fL1Zg_DL1_DL1Zgint_firsttest/", "D_{#Lambda1}, D_{#Lambda1Z#gammaint}", 2, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
-               Folder("fL1fL1Zg_DeR_DeLint_firsttest/", "D_{#epsilonR}, D_{#epsilonLint}", 4, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
-               Folder("fL1fL1Zg_m1_m2_firsttest/", "m_{1}, m_{2}", 1, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
-               Folder("fL1fL1Zg_m1_phi_firsttest/", "m_{1}, #phi", ROOT.kGreen+3, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
-               Folder("fL1fL1Zg_m2_phi_firsttest/", "m_{2}, #phi", 6, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=1, linewidth=4),
+               Folder(".oO[analysis]Oo._all/", "Expected", 2, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder(".oO[analysis]Oo._13TeV/", "Expected, 13 TeV", 1, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=2, linewidth=1),
               ]
-    outdir = "fL1fL1Zg_comparison"
 
     if logscale and config.minimainlegend:
         for folder in folders:
@@ -197,8 +204,8 @@ def mergeplots(analysis, **kwargs):
     l.Draw()
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
-    #style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 Te
-    #                                        .format(config.productionforcombine.dataluminosity+config.lumi2015)
+    if lumi is not None:
+        style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)".format(lumi), drawCMS=False)
     for k, v in drawlineskwargs.items():
         if k == "xpostext":
             try:
@@ -230,7 +237,7 @@ def mergeplots(analysis, **kwargs):
         f.write(subprocess.check_output(["git", "status"]))
         f.write("\n")
         f.write(subprocess.check_output(["git", "diff"]))
-    copyplots(os.path.relpath(saveasdir, config.plotsbasedir))
+    if copy: copyplots(os.path.relpath(saveasdir, config.plotsbasedir))
 
 if __name__ == "__main__":
     args = []
