@@ -15,7 +15,7 @@ class WeightsHelper(MultiEnum):
 
     def check(self, *args):
         if self.productionmode in ("WplusH", "WminusH"): self.productionmode = ProductionMode("WH")
-        if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ"):
+        if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "bbH", "tqH"):
             raise ValueError("Has to be a signal productionmode, not {}!\n{}".format(self.productionmode, args))
 
     def weightstring(self, prodordec):

@@ -256,6 +256,8 @@ class ProductionMode(MyEnum):
                  EnumItem("data"),
                  EnumItem("WplusH"),
                  EnumItem("WminusH"),
+                 EnumItem("bbH"),
+                 EnumItem("tqH"),
                 )
     @property
     def combinename(self):
@@ -288,7 +290,7 @@ class ProductionMode(MyEnum):
         return str(self)
     @property
     def isbkg(self):
-        if self in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH"):
+        if self in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH"):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
@@ -300,7 +302,7 @@ class ProductionMode(MyEnum):
     def validhypotheses(self):
         if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
-        if self in ("ttH", "HJJ"):
+        if self in ("ttH", "HJJ", "bbH"):
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses)
@@ -308,7 +310,7 @@ class ProductionMode(MyEnum):
             return Hypothesis.items(lambda x: x in proddechypotheses)
         if self == "WH":
             return Hypothesis.items(lambda x: x in proddechypotheses)
-        if self in ("WplusH", "WminusH"):
+        if self in ("WplusH", "WminusH", "tqH"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
     @property
@@ -318,7 +320,7 @@ class ProductionMode(MyEnum):
                 return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5"))
             if self in ("VBF", "ZH", "WH"):
                 return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5"))
-            if self in ("WplusH", "WminusH", "ttH", "HJJ"):
+            if self in ("WplusH", "WminusH", "ttH", "HJJ", "bbH", "tqH"):
                 return Hypothesis.items(lambda x: x == "0+")
         else:
             if self == "ggH":

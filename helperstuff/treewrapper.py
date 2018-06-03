@@ -1500,7 +1500,7 @@ class TreeWrapper(TreeWrapperBase):
                 self.exceptions.append(sample.weightname())
 
         self.genMEs = []
-        if not self.isbkg and not self.isalternate:
+        if not self.isbkg and not self.isalternate and self.treesample.productionmode not in ("bbH", "tqH"):
             for sample in self.treesample.reweightingsamples():
                 for factor in sample.MC_weight_terms:
                     for weightname, couplingsq in factor:
@@ -1559,6 +1559,7 @@ class TreeWrapper(TreeWrapperBase):
         if self.isZX: return
         if self.isdata: return
         if self.treesample.productionmode == "ggZZ": return
+        if self.treesample.productionmode in ("bbH", "tqH"): return
 
         if self.treesample.productionmode == "qqZZ":
             self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
@@ -2141,6 +2142,34 @@ class TreeWrapper(TreeWrapperBase):
         ReweightingSample("HJJ", "fCP0.5", "fa30.5fL1Zg0.5"),
 
         ReweightingSample("HJJ", "fCP0.5", "fL10.5fL1Zg0.5"),
+
+        ReweightingSample("bbH", "0+"),
+        ReweightingSample("bbH", "a2"),
+        ReweightingSample("bbH", "0-"),
+        ReweightingSample("bbH", "L1"),
+        ReweightingSample("bbH", "L1Zg"),
+
+        ReweightingSample("bbH", "fa20.5"),
+        ReweightingSample("bbH", "fa30.5"),
+        ReweightingSample("bbH", "fL10.5"),
+        ReweightingSample("bbH", "fL1Zg0.5"),
+
+        ReweightingSample("bbH", "fa2-0.5"),
+        ReweightingSample("bbH", "fa3-0.5"),
+        ReweightingSample("bbH", "fL1-0.5"),
+        ReweightingSample("bbH", "fL1Zg-0.5"),
+        ReweightingSample("bbH", "fa2dec-0.9"),
+
+        ReweightingSample("bbH", "fa30.5fa20.5"),
+        ReweightingSample("bbH", "fa20.5fL10.5"),
+        ReweightingSample("bbH", "fa20.5fL1Zg0.5"),
+
+        ReweightingSample("bbH", "fa30.5fL10.5"),
+        ReweightingSample("bbH", "fa30.5fL1Zg0.5"),
+
+        ReweightingSample("bbH", "fL10.5fL1Zg0.5"),
+
+        ReweightingSample("tqH", "Hff0+", "0+"),
 
         ReweightingSample("ggZZ"),
         ReweightingSample("qqZZ"),
