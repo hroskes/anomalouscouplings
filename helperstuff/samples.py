@@ -54,7 +54,7 @@ class SampleBase(object):
 
     @property
     def nominalJHUxsec(self):
-        result = constants.JHUXSHZZ2L2la1.nominal_value
+        result = constants.JHUXSHZZ2e2mua1.nominal_value
         if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
             result *= self.g1**2
         elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
@@ -146,10 +146,10 @@ class SampleBase(object):
             raise
 
     def JHUxsec_pdf(self, pdf):
-        from constants import JHUXSHZZ2L2la1, JHUXSHZZ2L2la2, JHUXSHZZ2L2la3, JHUXSHZZ2L2lL1, JHUXSHZZ2L2lL1Zg,\
-                              JHUXSHZZ2L2la1a2, JHUXSHZZ2L2la1a3, JHUXSHZZ2L2la1L1, JHUXSHZZ2L2la1L1Zg,        \
-                              JHUXSHZZ2L2la2a3, JHUXSHZZ2L2la2L1, JHUXSHZZ2L2la2L1Zg, JHUXSHZZ2L2la3L1,        \
-                              JHUXSHZZ2L2la3L1Zg, JHUXSHZZ2L2lL1L1Zg
+        from constants import JHUXSHZZ2e2mua1, JHUXSHZZ2e2mua2, JHUXSHZZ2e2mua3, JHUXSHZZ2e2muL1, JHUXSHZZ2e2muL1Zg,\
+                              JHUXSHZZ2e2mua1a2, JHUXSHZZ2e2mua1a3, JHUXSHZZ2e2mua1L1, JHUXSHZZ2e2mua1L1Zg,         \
+                              JHUXSHZZ2e2mua2a3, JHUXSHZZ2e2mua2L1, JHUXSHZZ2e2mua2L1Zg, JHUXSHZZ2e2mua3L1,         \
+                              JHUXSHZZ2e2mua3L1Zg, JHUXSHZZ2e2muL1L1Zg
 
         if pdf is not None:
             exec 'from helperstuff.constants.'+pdf+' import ' + """                                            \
@@ -174,25 +174,25 @@ class SampleBase(object):
 
         if self.productionmode == "ggH":
             return (
-                      JHUXSHZZ2L2la1*self.g1**2
-                    + JHUXSHZZ2L2la2*self.g2**2
-                    + JHUXSHZZ2L2la3*self.g4**2
-                    + JHUXSHZZ2L2lL1*self.g1prime2**2
-                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2e2mua1*self.g1**2
+                    + JHUXSHZZ2e2mua2*self.g2**2
+                    + JHUXSHZZ2e2mua3*self.g4**2
+                    + JHUXSHZZ2e2muL1*self.g1prime2**2
+                    + JHUXSHZZ2e2muL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
-                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
-                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua1a2 * self.g1*self.g2
+                    + JHUXSHZZ2e2mua1a3 * self.g1*self.g4
+                    + JHUXSHZZ2e2mua1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2e2mua1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
-                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua2a3 * self.g4*self.g2
+                    + JHUXSHZZ2e2mua2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2e2mua2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2e2mua3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
 
         if self.productionmode == "VBF":
@@ -217,25 +217,25 @@ class SampleBase(object):
 
                     + JHUXSVBFL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
-                      JHUXSHZZ2L2la1*self.g1**2
-                    + JHUXSHZZ2L2la2*self.g2**2
-                    + JHUXSHZZ2L2la3*self.g4**2
-                    + JHUXSHZZ2L2lL1*self.g1prime2**2
-                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2e2mua1*self.g1**2
+                    + JHUXSHZZ2e2mua2*self.g2**2
+                    + JHUXSHZZ2e2mua3*self.g4**2
+                    + JHUXSHZZ2e2muL1*self.g1prime2**2
+                    + JHUXSHZZ2e2muL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
-                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
-                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua1a2 * self.g1*self.g2
+                    + JHUXSHZZ2e2mua1a3 * self.g1*self.g4
+                    + JHUXSHZZ2e2mua1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2e2mua1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
-                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua2a3 * self.g4*self.g2
+                    + JHUXSHZZ2e2mua2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2e2mua2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2e2mua3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
 
         if self.productionmode == "ZH":
@@ -260,25 +260,25 @@ class SampleBase(object):
 
                     + JHUXSZHL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
-                      JHUXSHZZ2L2la1*self.g1**2
-                    + JHUXSHZZ2L2la2*self.g2**2
-                    + JHUXSHZZ2L2la3*self.g4**2
-                    + JHUXSHZZ2L2lL1*self.g1prime2**2
-                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2e2mua1*self.g1**2
+                    + JHUXSHZZ2e2mua2*self.g2**2
+                    + JHUXSHZZ2e2mua3*self.g4**2
+                    + JHUXSHZZ2e2muL1*self.g1prime2**2
+                    + JHUXSHZZ2e2muL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
-                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
-                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua1a2 * self.g1*self.g2
+                    + JHUXSHZZ2e2mua1a3 * self.g1*self.g4
+                    + JHUXSHZZ2e2mua1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2e2mua1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
-                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua2a3 * self.g4*self.g2
+                    + JHUXSHZZ2e2mua2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2e2mua2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2e2mua3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
 
         if self.productionmode == "WH":
@@ -303,25 +303,25 @@ class SampleBase(object):
 
                     + JHUXSWHL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    ) * (
-                      JHUXSHZZ2L2la1*self.g1**2
-                    + JHUXSHZZ2L2la2*self.g2**2
-                    + JHUXSHZZ2L2la3*self.g4**2
-                    + JHUXSHZZ2L2lL1*self.g1prime2**2
-                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2e2mua1*self.g1**2
+                    + JHUXSHZZ2e2mua2*self.g2**2
+                    + JHUXSHZZ2e2mua3*self.g4**2
+                    + JHUXSHZZ2e2muL1*self.g1prime2**2
+                    + JHUXSHZZ2e2muL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
-                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
-                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua1a2 * self.g1*self.g2
+                    + JHUXSHZZ2e2mua1a3 * self.g1*self.g4
+                    + JHUXSHZZ2e2mua1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2e2mua1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
-                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua2a3 * self.g4*self.g2
+                    + JHUXSHZZ2e2mua2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2e2mua2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2e2mua3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
         if self.productionmode == "HJJ":
             return (
@@ -329,25 +329,25 @@ class SampleBase(object):
                     + JHUXSHJJa3 * self.ghg4**2
                     + JHUXSHJJa2a3 * self.ghg2*self.ghg4
                    ) * (
-                      JHUXSHZZ2L2la1*self.g1**2
-                    + JHUXSHZZ2L2la2*self.g2**2
-                    + JHUXSHZZ2L2la3*self.g4**2
-                    + JHUXSHZZ2L2lL1*self.g1prime2**2
-                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2e2mua1*self.g1**2
+                    + JHUXSHZZ2e2mua2*self.g2**2
+                    + JHUXSHZZ2e2mua3*self.g4**2
+                    + JHUXSHZZ2e2muL1*self.g1prime2**2
+                    + JHUXSHZZ2e2muL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
-                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
-                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua1a2 * self.g1*self.g2
+                    + JHUXSHZZ2e2mua1a3 * self.g1*self.g4
+                    + JHUXSHZZ2e2mua1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2e2mua1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
-                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua2a3 * self.g4*self.g2
+                    + JHUXSHZZ2e2mua2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2e2mua2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2e2mua3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
         if self.productionmode == "ttH":
             return (
@@ -355,25 +355,25 @@ class SampleBase(object):
                     + JHUXSttHkappatilde * self.kappa_tilde**2
                     + JHUXSttHkappakappatilde * self.kappa*self.kappa_tilde
                    ) * (
-                      JHUXSHZZ2L2la1*self.g1**2
-                    + JHUXSHZZ2L2la2*self.g2**2
-                    + JHUXSHZZ2L2la3*self.g4**2
-                    + JHUXSHZZ2L2lL1*self.g1prime2**2
-                    + JHUXSHZZ2L2lL1Zg*self.ghzgs1prime2**2
+                      JHUXSHZZ2e2mua1*self.g1**2
+                    + JHUXSHZZ2e2mua2*self.g2**2
+                    + JHUXSHZZ2e2mua3*self.g4**2
+                    + JHUXSHZZ2e2muL1*self.g1prime2**2
+                    + JHUXSHZZ2e2muL1Zg*self.ghzgs1prime2**2
 
-                    + JHUXSHZZ2L2la1a2 * self.g1*self.g2
-                    + JHUXSHZZ2L2la1a3 * self.g1*self.g4
-                    + JHUXSHZZ2L2la1L1 * self.g1*self.g1prime2
-                    + JHUXSHZZ2L2la1L1Zg * self.g1*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua1a2 * self.g1*self.g2
+                    + JHUXSHZZ2e2mua1a3 * self.g1*self.g4
+                    + JHUXSHZZ2e2mua1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2e2mua1L1Zg * self.g1*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la2a3 * self.g4*self.g2
-                    + JHUXSHZZ2L2la2L1 * self.g2*self.g1prime2
-                    + JHUXSHZZ2L2la2L1Zg * self.g2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua2a3 * self.g4*self.g2
+                    + JHUXSHZZ2e2mua2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2e2mua2L1Zg * self.g2*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2la3L1 * self.g4*self.g1prime2
-                    + JHUXSHZZ2L2la3L1Zg * self.g4*self.ghzgs1prime2
+                    + JHUXSHZZ2e2mua3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2e2mua3L1Zg * self.g4*self.ghzgs1prime2
 
-                    + JHUXSHZZ2L2lL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                    + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
 
         if self.productionmode == "tqH":
@@ -385,33 +385,33 @@ class SampleBase(object):
     @property
     def xsec(self):
         if self.productionmode == "ggH":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSggH2L2l
-            return constants.SMXSggH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSggH2e2mu
+            return constants.SMXSggH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "VBF":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSVBF2L2l
-            return constants.SMXSVBF2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSVBF2e2mu
+            return constants.SMXSVBF2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "ZH":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSZH2L2l
-            return constants.SMXSZH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSZH2e2mu
+            return constants.SMXSZH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "WH":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWH2L2l
-            return constants.SMXSWH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWH2e2mu
+            return constants.SMXSWH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "WplusH":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWpH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWpH2e2mu
         if self.productionmode == "WminusH":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWmH2L2l
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWmH2e2mu
         if self.productionmode == "HJJ":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return 1
-            return constants.SMXSHJJ2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
+            return constants.SMXSHJJ2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "ttH":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM" and self.hffhypothesis == "Hff0+": return constants.SMXSttH2L2l
-            return constants.SMXSttH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM" and self.hffhypothesis == "Hff0+": return constants.SMXSttH2e2mu
+            return constants.SMXSttH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "bbH":
-            if hasattr(self, hypothesis) and self.hypothesis == "SM": return constants.SMXSbbH2L2l
-            return constants.SMXSbbH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
+            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSbbH2e2mu
+            return constants.SMXSbbH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "tqH":
-            if hasattr(self, hypothesis) and self.hypothesis == "SM": return constants.SMXStqH2L2l
-            return constants.SMXStqH2L2l * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
+            if hasattr(self, hypothesis) and self.hypothesis == "SM": return constants.SMXStqH2e2mu
+            return constants.SMXStqH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
         raise self.ValueError("xsec")
 
     @property
@@ -673,12 +673,12 @@ class SampleBase(object):
     @property
     def feL(self):
         a1, eL, eR = self.a1eLeR
-        return (1 if a1*eL>0 else -1) * eL**2 * constants.JHUXSHZZ2L2leL / (eL**2 * constants.JHUXSHZZ2L2leL + eR**2 * constants.JHUXSHZZ2L2leR + abs(a1)**2 * constants.JHUXSHZZ2L2la1)
+        return (1 if a1*eL>0 else -1) * eL**2 * constants.JHUXSHZZ2e2mueL / (eL**2 * constants.JHUXSHZZ2e2mueL + eR**2 * constants.JHUXSHZZ2e2mueR + abs(a1)**2 * constants.JHUXSHZZ2e2mua1)
 
     @property
     def feR(self):
         a1, eL, eR = self.a1eLeR
-        return (1 if a1*eR>0 else -1) * eR**2 * constants.JHUXSHZZ2L2leR / (eL**2 * constants.JHUXSHZZ2L2leL + eR**2 * constants.JHUXSHZZ2L2leR + abs(a1)**2 * constants.JHUXSHZZ2L2la1)
+        return (1 if a1*eR>0 else -1) * eR**2 * constants.JHUXSHZZ2e2mueR / (eL**2 * constants.JHUXSHZZ2e2mueL + eR**2 * constants.JHUXSHZZ2e2mueR + abs(a1)**2 * constants.JHUXSHZZ2e2mua1)
 
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, pdf=None):
@@ -823,15 +823,15 @@ def samplewitha1eLeR(a1, eL, eR):
 def samplewithfeLfeR(feL, feR):
     fa1 = 1-abs(feL)-abs(feR)
     a1 = sqrt(fa1)
-    eL = (1 if feL>0 else -1) * sqrt(abs(feL) * constants.JHUXSHZZ2L2la1 / constants.JHUXSHZZ2L2leL)
-    eR = (1 if feR>0 else -1) * sqrt(abs(feR) * constants.JHUXSHZZ2L2la1 / constants.JHUXSHZZ2L2leR)
+    eL = (1 if feL>0 else -1) * sqrt(abs(feL) * constants.JHUXSHZZ2e2mua1 / constants.JHUXSHZZ2e2mueL)
+    eR = (1 if feR>0 else -1) * sqrt(abs(feR) * constants.JHUXSHZZ2e2mua1 / constants.JHUXSHZZ2e2mueR)
     return samplewitha1eLeR(a1, eL, eR)
 
 def samplewithfL1fL1Zg(fL1, fL1Zg):
     fa1 = 1-abs(fL1)-abs(fL1Zg)
     a1 = sqrt(fa1)
-    L1 = -(1 if fL1>0 else -1) * sqrt(abs(fL1) * constants.JHUXSHZZ2L2la1 / constants.JHUXSHZZ2L2lL1)
-    L1Zg = -(1 if fL1Zg>0 else -1) * sqrt(abs(fL1Zg) * constants.JHUXSHZZ2L2la1 / constants.JHUXSHZZ2L2lL1Zg)
+    L1 = -(1 if fL1>0 else -1) * sqrt(abs(fL1) * constants.JHUXSHZZ2e2mua1 / constants.JHUXSHZZ2e2muL1)
+    L1Zg = -(1 if fL1Zg>0 else -1) * sqrt(abs(fL1Zg) * constants.JHUXSHZZ2e2mua1 / constants.JHUXSHZZ2e2muL1Zg)
     return ArbitraryCouplingsSample("ggH", g1=a1, g1prime2=L1, ghzgs1prime2=L1Zg, g2=0, g4=0)
 
 class ReweightingSample(MultiEnum, SampleBase):

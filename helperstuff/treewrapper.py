@@ -777,7 +777,7 @@ class TreeWrapper(TreeWrapperBase):
         else:
             self.failedtree = None
 
-        self.nevents = self.nevents2L2l = self.cutoffs = None
+        self.nevents = self.nevents2e2mu = self.cutoffs = None
         self.xsec = None
         self.effectiveentriestree = None
 
@@ -1413,7 +1413,7 @@ class TreeWrapper(TreeWrapperBase):
             "maxevent",
             "minevent",
             "nevents",
-            "nevents2L2l",
+            "nevents2e2mu",
             "next",
             "onlyweights",
             "passesblindcut",
@@ -1552,7 +1552,7 @@ class TreeWrapper(TreeWrapperBase):
     def preliminaryloop(self):
         """
         Do the initial loops through the tree to find, for each hypothesis,
-        the cutoff and then the sum of weights for 2L2l
+        the cutoff and then the sum of weights for 2e2mu
         """
         if self.isalternate: return
         if self.isdummy: return
@@ -1583,10 +1583,10 @@ class TreeWrapper(TreeWrapperBase):
         if self.treesample.productionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
 
         functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in reweightingsamples}
-        is2L2l = []
-        flavs2L2l = {11*11*13*13, 11*11*15*15, 13*13*15*15}
+        is2e2mu = []
+        flavs2e2mu = {11*11*13*13}
         if self.treesample.productionmode == "VBFbkg":
-            flavs2L2l |= {11**4, 13**4, 15**4}
+            flavs2e2mu |= {11**4, 13**4, 15**4, 11*11*15*15, 13*13*15*15}
 
         values = functionsandarrays.values()
         #will fail if multiple have the same str() which would make no sense
@@ -1594,7 +1594,7 @@ class TreeWrapper(TreeWrapperBase):
 
         length = self.tree.GetEntries() + self.failedtree.GetEntries()
         for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
-            is2L2l.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2L2l)
+            is2e2mu.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2e2mu)
 
             for function, weightarray in values:
                 weightarray.append(function(entry))
@@ -1603,7 +1603,7 @@ class TreeWrapper(TreeWrapperBase):
                 #break
 
         self.cutoffs = {}
-        self.nevents2L2l = {}
+        self.nevents2e2mu = {}
         self.effectiveentries = {}
         self.multiplyweight = {}
 
@@ -1628,15 +1628,15 @@ class TreeWrapper(TreeWrapperBase):
             weightarray = numpy.array(weightarray)
             cutoff = self.cutoffs[strsample] = numpy.percentile(weightarray, percentile)
             weightarray[weightarray>cutoff] = cutoff**2/weightarray[weightarray>cutoff]
-            self.nevents2L2l[strsample] = sum(
+            self.nevents2e2mu[strsample] = sum(
                                                 weight
-                                                     for weight, isthis2L2l in zip(weightarray, is2L2l)
-                                                     if isthis2L2l
+                                                     for weight, isthis2e2mu in zip(weightarray, is2e2mu)
+                                                     if isthis2e2mu
                                                )
             #https://root.cern.ch/doc/master/classTH1.html#a79f9811dc6c4b9e68e683342bfc96f5e
-            if self.nevents2L2l[strsample]:
+            if self.nevents2e2mu[strsample]:
                 self.effectiveentries[strsample] = sum(weightarray)**2 / sum(weightarray**2)
-                self.multiplyweight[strsample] = SMxsec / self.nevents2L2l[strsample] * self.effectiveentries[strsample]
+                self.multiplyweight[strsample] = SMxsec / self.nevents2e2mu[strsample] * self.effectiveentries[strsample]
             else:
                 self.effectiveentries[strsample] = self.multiplyweight[strsample] = 0
 
@@ -1651,8 +1651,8 @@ class TreeWrapper(TreeWrapperBase):
         print "Cutoffs:"
         for sample, cutoff in self.cutoffs.iteritems():
              print "    {:15} {}".format(sample, cutoff)
-        print "nevents 2L2l:"
-        for sample, nevents in self.nevents2L2l.iteritems():
+        print "nevents 2e2mu:"
+        for sample, nevents in self.nevents2e2mu.iteritems():
              print "    {:15} {}".format(sample, nevents)
         print "effective entries:"
         for sample, nevents in self.effectiveentries.iteritems():
