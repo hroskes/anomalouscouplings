@@ -693,7 +693,7 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/180121"
         if self in ("180224", "180224_Ulascan"):
             if config.host == "lxplus":
-                assert False
+                return "/eos/user/u/usarica/CJLST/4l/180224"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180224"
         if self in ("180416", "180416_Ulascan"):
