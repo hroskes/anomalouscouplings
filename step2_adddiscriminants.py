@@ -31,7 +31,6 @@ def adddiscriminants(*args):
     if sample.copyfromothersample is not None:
       if sample.CJLSTfile() != sample.copyfromothersample.CJLSTfile() and xrd.exists(sample.CJLSTfile()):
         raise ValueError("{} exists, why not use it?".format(sample.CJLSTfile()))
-      os.symlink(sample.copyfromothersample.withdiscriminantsfile(), sample.withdiscriminantsfile())
       return
 
     treewrapper = TreeWrapper(sample)
@@ -90,7 +89,7 @@ def adddiscriminants(*args):
 def submitjobs():
     njobs = 0
     for sample in allsamples():
-        if not os.path.exists(sample.withdiscriminantsfile()) and not os.path.exists(sample.withdiscriminantsfile()+".tmp"):
+        if not os.path.exists(sample.withdiscriminantsfile()) and not os.path.exists(sample.withdiscriminantsfile()+".tmp") and not sample.copyfromothersample:
             njobs += 1
     for i in range(njobs):
         submitjobkwargs = {"jobname": str(i), "jobtime": "1-0:0:0"}
@@ -108,9 +107,10 @@ if __name__ == '__main__':
     else:
         try:
             for sample in allsamples():
-                 if sample.productionmode == "ggZZ" and sample.flavor == "4tau":
+                 if sample.productionmode == "ggZZ" and sample.flavor == "4tau" and not sample.copyfromothersample:
                      adddiscriminants(sample)
             for sample in allsamples():
+                if sample.copyfromothersample: continue
                 adddiscriminants(sample)
         finally:
             if config.LHE and not any(os.path.exists(sample.withdiscriminantsfile()+".tmp") for sample in allsamples()):

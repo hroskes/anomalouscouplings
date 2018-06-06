@@ -73,6 +73,7 @@ class __Rate(MultiEnum):
 
     @cache
     def getrate(self):
+        if self.copyfromotherrate: return self.copyfromotherrate.getrate()
         from yields import YieldValue
         result = YieldValue(self.production, self.productionmode, self.channel, self.category, self.analysis).value
         if self.productionmode != "ZX": result *= float(self.luminosity)
@@ -80,6 +81,16 @@ class __Rate(MultiEnum):
 
     def __float__(self):
         return self.getrate()
+
+    @property
+    def copyfromotherrate(self):
+        if self.production.productionforrate != self.production:
+            args = [
+                self.production.productionforrate,
+                self.productionmode, self.channel, self.luminositytype, self.category, self.analysis
+            ]
+            return type(self)(*args)
+        return None
 
 def getrate(*args):
     return float(__Rate(*args))

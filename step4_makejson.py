@@ -10,12 +10,12 @@ import json
 import os
 
 from helperstuff.templates import TemplatesFile, templatesfiles
-from helperstuff.utilities import KeepWhileOpenFile
+from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID
 
 def makejson(*args):
     templatesfile = TemplatesFile(*args)
     if templatesfile.copyfromothertemplatesfile is not None: return
-    with KeepWhileOpenFile(templatesfile.jsonfile()+".tmp") as f:
+    with KeepWhileOpenFile(templatesfile.jsonfile()+".tmp", message=LSB_JOBID()) as f:
         if not f: return
         print templatesfile, datetime.datetime.now()
 

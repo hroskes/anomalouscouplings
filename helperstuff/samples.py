@@ -1646,6 +1646,7 @@ class Sample(ReweightingSamplePlus):
         raise self.ValueError("LHEfile")
 
     def withdiscriminantsfile(self):
+        if self.copyfromothersample: return self.copyfromothersample.withdiscriminantsfile()
         result = os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
         return result
         raise self.ValueError("withdiscriminantsfile")
@@ -1688,6 +1689,10 @@ class Sample(ReweightingSamplePlus):
             return Sample("170222", "ggH", "MINLO", "0+")
         if self.production == "170712" and self.productionmode in ("ggH", "HJJ", "VBF", "WH", "ZH", "ttH") and self.alternategenerator is None:
             args = [self.reweightingsampleplus, self.flavor, "170222"]
+            return Sample(*args)
+        if self.production in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants", "180416_Ulascan"):
+            production = str(self.production).split("_")[0]
+            args = [self.flavor, self.reweightingsampleplus, production]
             return Sample(*args)
         return None
 
@@ -1794,6 +1799,7 @@ class SampleBasis(MultiEnum):
         return self.matrix.I
 
 def allsamples():
+    __xcheck()
     for production in productions:
         if "Ulascan" in str(production): continue
         for productionmode in "ggH", "VBF", "ZH", "WH", "bbH":
@@ -1827,30 +1833,44 @@ def allsamples():
 
 if config.LHE:
     def allsamples():
+        __xcheck()
         for production in productions:
             for hypothesis in "0+", "L1Zg", "fL1Zg0.5", "fL10.5fL1Zg0.5":
                 yield Sample("ggH", hypothesis, production)
             yield Sample("qqZZ", production)
             yield Sample("data", production)
 
-def xcheck():
+def __xcheck():
+    global __xcheck
+    def __xcheck(): pass
+
+    class WriteOnceDict(dict):
+        def __init__(self, messagefmt="{key} has already been set"):
+            self.messagefmt = messagefmt
+        def __setitem__(self, key, value):
+            if key in self:
+                if value != self[key]: return
+                raise KeyError(self.messagefmt.format(key=key, newvalue=value, oldvalue=self[key]))
+            super(WriteOnceDict, self).__setitem__(key, value)
+
     if config.LHE:
-        CJLST = {_: _.LHEfile for _ in allsamples()}
+        def CJLSTfile(sample):
+             return sample.LHEfile
     else:
-        CJLST = {_: _.CJLSTfile() for _ in allsamples()}
-    withdiscs = {_: _.withdiscriminantsfile() for _ in allsamples()}
+        def CJLSTfile(sample):
+             return sample.CJLSTfile()
 
-    for (k1, v1), (k2, v2) in cartesianproduct(CJLST.iteritems(), CJLST.iteritems()):
-        if k1.productionmode == "ZX" and k2.productionmode == "data" or k2.productionmode == "ZX" and k1.productionmode == "data": continue
-        if k1 != k2 and v1 == v2:
-            raise ValueError("CJLST files for {} and {} are the same:\n{}".format(k1, k2, v1))
+    CJ2wd = WriteOnceDict("Multiple withdiscriminantsfiles:\n  {oldvalue}\n  {newvalue}\nfrom the same CJLST file:\n  {key}")
+    wd2CJ = WriteOnceDict("Multiple CJLST files:\n  {oldvalue}\n  {newvalue}\nthat give the same withdiscriminantsfile:\n  {key}")
 
-    for (k1, v1), (k2, v2) in cartesianproduct(withdiscs.iteritems(), withdiscs.iteritems()):
-        if k1 != k2 and v1 == v2:
-            raise ValueError("with discriminants files for {} and {} are the same:\n{}".format(k1, k2, v1))
-
-xcheck()
-del xcheck
+    for sample in allsamples():
+        if sample.productionmode == "data": continue
+        try:
+            CJ2wd[CJLSTfile(sample)] = sample.withdiscriminantsfile()
+            wd2CJ[sample.withdiscriminantsfile()] = CJLSTfile(sample)
+        except KeyError as e:
+            print e
+            raise
 
 if __name__ == "__main__":
     for s in (

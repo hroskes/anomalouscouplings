@@ -16,7 +16,7 @@ import ROOT
 import config
 import customsmoothing
 from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
-from samples import ReweightingSample, ReweightingSamplePlus, Sample, SampleBasis
+from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis
 from utilities import cache, is_almost_integer, JsonDict, jsonloads, tfiles
 
 class TemplatesFile(MultiEnum):
@@ -242,19 +242,19 @@ class TemplatesFile(MultiEnum):
         from discriminants import discriminant
 
         name = "D_bkg"
-        if self.production.year == 2016: pass
-        elif self.production.year == 2017:
+        if self.production.year == 2017 or self.production == "180224_newdiscriminants":
             if self.category == "Untagged": pass
             elif self.category == "VBFtagged": name += "_VBFdecay"
             elif self.category == "VHHadrtagged": name += "_HadVHdecay"
             else: assert False
+        elif self.production.year == 2016: pass
         else: assert False
 
         name += self.shapesystematic.appendname()
 
         if self.analysis == "fa3fa2fL1fL1Zg":
             name += "_10bins"
-        elif self.production.year == 2017:
+        elif self.production.year == 2017 or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
                     name += "_30bins"
@@ -274,9 +274,7 @@ class TemplatesFile(MultiEnum):
         else:
             JECappend = ""
 
-        if self.production.year == 2016:
-            binsappend = ""
-        elif self.production.year == 2017:
+        if self.production.year == 2017 or self.production in ("180224_10bins", "180224_newdiscriminants"):
             if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
                     binsappend = "_30bins"
@@ -284,6 +282,8 @@ class TemplatesFile(MultiEnum):
                     binsappend = "_20bins"
             else:
                 binsappend = "_10bins"
+        elif self.production.year == 2016:
+            binsappend = ""
 
         if self.category == "Untagged":
             if self.analysis == "fa3":
@@ -347,16 +347,19 @@ class TemplatesFile(MultiEnum):
     def mixdiscriminant(self):
         from discriminants import discriminant
 
-        if self.production.year == 2016:
-            binsappend = ""
-        elif self.production.year == 2017:
+        if self.production.year == 2017 or self.production == "180224_newdiscriminants":
             if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
-                    binsappend = "_30bins"
+                    binsappend = "_new_30bins"
                 else:
-                    binsappend = "_20bins"
+                    binsappend = "_new_20bins"
             else:
-                binsappend = "_10bins"
+                binsappend = "_new_10bins"
+            if self.analysis in ("fL1", "fL1Zg"): binsappend = binsappend.replace("_new", "")
+        elif self.production == "180224_10bins":
+            binsappend = "_10bins"
+        elif self.production.year == 2016:
+            binsappend = ""
 
         if self.category == "Untagged":
             if self.analysis == "fa3":
@@ -878,9 +881,9 @@ class Template(TemplateBase, MultiEnum):
         if self.shapesystematic == "MINLO_SM":
             result = len(self.reweightfrom())
         elif self.productionmode in ("VBF", "ggH", "ZH", "WH"):
-            result = uncertainties.nominal_value(ReweightingSample(self.productionmode, self.hypothesis).xsec) / uncertainties.nominal_value(ReweightingSample(self.productionmode, "SM").xsec)
+            result = uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, self.hypothesis, self.production).xsec) / uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, "SM", self.production).xsec)
         elif self.productionmode == "ttH":
-            result = uncertainties.nominal_value(ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis).xsec) / uncertainties.nominal_value(ReweightingSample(self.productionmode, "SM", "Hff0+").xsec)
+            result = uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, self.hypothesis, self.hffhypothesis, self.production).xsec) / uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, "SM", "Hff0+", self.production).xsec)
         elif self.productionmode == "data" and not config.showblinddistributions:
             return None  #this is to avoid calling effectiveentries
         elif self.productionmode in ("VBF bkg", "ggZZ", "ZX", "data"):
@@ -1087,7 +1090,7 @@ class Template(TemplateBase, MultiEnum):
         if not self.analysis.isdecayonly:
             result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")")
         if self.productionmode == "data" and not config.showblinddistributions:
-            result.insert(0, "false")
+            result.insert(0, "0")
         return " && ".join(result)
 
     @property

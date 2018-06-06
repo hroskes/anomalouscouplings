@@ -661,6 +661,8 @@ class Production(MyEnum):
                  EnumItem("180121"),
                  EnumItem("180224"),
                  EnumItem("180224_Ulascan"),
+                 EnumItem("180224_10bins"),
+                 EnumItem("180224_newdiscriminants"),
                  EnumItem("180416"),
                  EnumItem("180416_Ulascan"),
                  EnumItem("LHE_170509"),
@@ -668,6 +670,7 @@ class Production(MyEnum):
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
+        if "_" in str(self) and "LHE" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
         if self == "170203":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170203"
@@ -691,7 +694,7 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/180121"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180121"
-        if self in ("180224", "180224_Ulascan"):
+        if self in ("180224", "180224_Ulascan", "180224_10bins", "180224_newdiscriminants"):
             if config.host == "lxplus":
                 return "/eos/user/u/usarica/CJLST/4l/180224"
             elif config.host == "MARCC":
@@ -729,8 +732,7 @@ class Production(MyEnum):
         return int(str(self))
     @property
     def year(self):
-        if "Ulascan" in str(self):
-            return type(self)(str(self).replace("_Ulascan", "")).year
+        if "_" in str(self) and "LHE" not in str(self): return type(self)(str(self).split("_")[0]).year
         if self <= "180224":
             return 2016
         if self == "180416":
@@ -742,6 +744,14 @@ class Production(MyEnum):
         if self == "170825": return type(self)("170203")
         if self == "180121": return type(self)("170203")
         if self == "180224": return type(self)("170203")
+
+        if self == "180224_10bins": return type(self)("180416")
+        if self == "180224_newdiscriminants": return type(self)("180416")
+        return self
+    @property
+    def productionforrate(self):
+        if self.production in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants", "180416_Ulascan"):
+            return type(self)(str(self).split("_")[0])
         return self
     @property
     def LHE(self):
@@ -897,7 +907,7 @@ else:
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine + ["180224_Ulascan", "180416_Ulascan"])
+productions = Production.items(lambda x: x in config.productionsforcombine + ["180224_Ulascan", "180416_Ulascan", "180224_10bins", "180224_newdiscriminants"])
 categories = Category.items()
 
 _ = [""]
