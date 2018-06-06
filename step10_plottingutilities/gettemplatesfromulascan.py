@@ -13,9 +13,15 @@ def gettemplatefromulascan(template):
   kwargses = [kwargs]
 
   if template.production == "180416_Ulascan":
-    kwargs["templatedate"] = 180423
+    if template.analysis in ("fa2", "fL1"):
+      kwargs["templatedate"] = 180520
+    else:
+      kwargs["templatedate"] = 180509
   if template.production == "180224_Ulascan":
-    kwargs["templatedate"] = 180509
+    if template.analysis in ("fa2", "fL1"):
+      kwargs["templatedate"] = 180520
+    else:
+      kwargs["templatedate"] = 180509
 
   if template.analysis == "fa3":
     kwargs["coupling"] = "a3"

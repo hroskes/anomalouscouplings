@@ -258,7 +258,7 @@ class _TotalRate(MultiEnum):
     from templates import Template
     rate = 0
     for ca, ch in itertools.product(channels, categories):
-      t = Template(self.productionmode, str(self.production)+"_Ulascan", "0+" if self.productionmode.issignal else None, ca, ch, "fa3")
+      t = Template(self.productionmode, str(self.production)+"_Ulascan", "0+" if self.productionmode.issignal else None, ca, ch, "fa2")
       with TFile(t.templatesfile.templatesfile()) as f:
         h = getattr(f, t.templatename())
         rate += h.Integral()
