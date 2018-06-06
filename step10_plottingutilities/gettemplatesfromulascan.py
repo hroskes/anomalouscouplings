@@ -12,13 +12,17 @@ def gettemplatefromulascan(template):
   kwargs = {}
   kwargses = [kwargs]
 
-  if template.production == "180416_Ulascan":
-    if template.analysis in ("fa2", "fL1"):
+  kwargs["year"] = template.production.year
+  if template.productionmode == "ggH":
+    kwargs["year"] = 2016
+
+  if kwargs["year"] == 2017:
+    if template.analysis in ("fa2", "fL1") and template.productionmode not in ("ggH", "ggZZ", "qqZZ", "ZX"):
       kwargs["templatedate"] = 180520
     else:
       kwargs["templatedate"] = 180509
-  if template.production == "180224_Ulascan":
-    if template.analysis in ("fa2", "fL1"):
+  elif kwargs["year"] == 2016:
+    if template.analysis in ("fa2", "fL1") and template.productionmode not in ("ggH", "ggZZ", "qqZZ", "ZX"):
       kwargs["templatedate"] = 180520
     else:
       kwargs["templatedate"] = 180509
@@ -40,7 +44,6 @@ def gettemplatefromulascan(template):
   kwargs["category"] = str(template.category).replace("VBFt", "JJVBFT").replace("VHHadrt", "HadVHT")
   if template.shapesystematic == "":
     kwargs["systematic"] = "Nominal"
-  kwargs["year"] = template.production.year
 
   if template.productionmode == "ggH":
     kwargs["productionmode"] = "ggZZ"
@@ -150,6 +153,7 @@ def getalltemplatesfromulascan():
     if "Ulascan" not in str(tf.production): continue
     if tf.analysis not in ("fa3", "fa2", "fL1"): continue
     if tf.templategroup == "tth": continue
+    if tf.templategroup == "DATA": continue
     gettemplatesfromulascan(tf)
 
 if __name__ == "__main__":
