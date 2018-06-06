@@ -722,9 +722,9 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222", "170825", "180121", "180224"): return 35.8671
+        if self in ("170203", "170222", "170825", "180121", "180224"): return 35.921875594646
         if self == "180416_Ulascan": return 41.37
-        if self == "180416": return 41.53
+        if self == "180416": return 41.529343499127
         if self == "LHE_170509": return 300
 
         if self in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants"):
