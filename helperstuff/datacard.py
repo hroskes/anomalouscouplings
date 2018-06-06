@@ -118,11 +118,11 @@ class _Datacard(MultiEnum):
         return self.production.year
     @property
     def txtfile(self):
-        return "hzz4l_{}S_{}_{}.lumi{}.txt".format(self.channel, self.category, self.year, float(self.luminosity))
+        return "hzz4l_{}S_{}_{}.lumi{:.2f}.txt".format(self.channel, self.category, self.year, float(self.luminosity))
     @property
     def rootfile(self):
         if self.analysis.usehistogramsforcombine: return self.rootfile_base
-        return "hzz4l_{}S_{}_{}.lumi{}.input.root".format(self.channel, self.category, self.year, float(self.luminosity))
+        return "hzz4l_{}S_{}_{}.lumi{:.2f}.input.root".format(self.channel, self.category, self.year, float(self.luminosity))
     @property
     def rootfile_base(self):
         return "hzz4l_{}S_{}_{}.input.root".format(self.channel, self.category, self.year)
