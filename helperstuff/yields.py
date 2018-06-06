@@ -87,7 +87,7 @@ class YieldValue(MultiEnum, JsonDict):
     @property
     def keys(self):
         return (
-                str(self.production),
+                str(self.production.productionforrate),
                 str(self.analysis),
                 str(self.category),
                 str(self.channel),
@@ -107,7 +107,7 @@ class YieldSystematicValue(MultiEnum, JsonDict):
     @property
     def keys(self):
         return (
-                str(self.production),
+                str(self.production.productionforrate),
                 str(self.yieldsystematic),
                 str(self.analysis),
                 str(self.category),

@@ -23,7 +23,7 @@ SampleCount = namedtuple("SampleCount", "productionmode samples")
 def writeyields():
   if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
 
-  for production in config.productionsforcombine:
+  for production in {_.productionforrate for _ in config.productionsforcombine}:
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
       SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),

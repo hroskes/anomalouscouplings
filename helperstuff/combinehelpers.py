@@ -84,12 +84,6 @@ class __Rate(MultiEnum):
 
     @property
     def copyfromotherrate(self):
-        if self.production.productionforrate != self.production:
-            args = [
-                self.production.productionforrate,
-                self.productionmode, self.channel, self.luminositytype, self.category, self.analysis
-            ]
-            return type(self)(*args)
         return None
 
 def getrate(*args):

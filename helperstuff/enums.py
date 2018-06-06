@@ -724,9 +724,12 @@ class Production(MyEnum):
     def dataluminosity(self):
         if self in ("170203", "170222", "170825", "180121", "180224"): return 35.8671
         if self == "180416_Ulascan": return 41.37
-        if self == "180224_Ulascan": return 35.8671
         if self == "180416": return 41.53
         if self == "LHE_170509": return 300
+
+        if self in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants"):
+            return type(self)(str(self).split("_")[0]).dataluminosity
+
         assert False
     def __int__(self):
         return int(str(self))
@@ -750,7 +753,7 @@ class Production(MyEnum):
         return self
     @property
     def productionforrate(self):
-        if self.production in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants", "180416_Ulascan"):
+        if self in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants", "180416_Ulascan"):
             return type(self)(str(self).split("_")[0])
         return self
     @property
