@@ -120,7 +120,7 @@ def writeyields():
               syst.value = None
 
         #Z+X, for now
-        for systname in "CMS_zz2e2mu_zjets", "CMS_zz4e_zjets", "CMS_zz4mu_zjets":
+        for systname in "CMS_hzz4l_zz2e2mu_zjets", "CMS_hzz4l_zz4e_zjets", "CMS_hzz4l_zz4mu_zjets":
           for category, channel in itertools.product(categories, channels):
             if analysis.isdecayonly and category != "Untagged": continue
             syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)

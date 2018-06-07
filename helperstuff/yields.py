@@ -37,9 +37,9 @@ class YieldSystematic(MyEnum):
                  EnumItem("lumi_13TeV_2017"),
                  EnumItem("CMS_eff_e"),
                  EnumItem("CMS_eff_m"),
-                 EnumItem("CMS_zz4e_zjets"),
-                 EnumItem("CMS_zz4mu_zjets"),
-                 EnumItem("CMS_zz2e2mu_zjets"),
+                 EnumItem("CMS_hzz4l_zz4e_zjets"),
+                 EnumItem("CMS_hzz4l_zz4mu_zjets"),
+                 EnumItem("CMS_hzz4l_zz2e2mu_zjets"),
                 )
 
     def yamlfilename(self, channel=None):
