@@ -94,11 +94,15 @@ def writeyields():
 
         #same for all categories and channels
         #from yaml
-        for systname in "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "lumi_13TeV":
+        for systname in "BRhiggs_hzz4l", "QCDscale_ggVV_bonly":
           for category, channel in itertools.product(categories, channels):
             if analysis.isdecayonly and category != "Untagged": continue
             syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
             syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
+
+        for systname in "lumi_13TeV_2016", "lumi_13TeV_2017":
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
+          syst.value = syst.yieldsystematic.hardcodedvalue(production)
 
         #same for all categories
         #from yaml

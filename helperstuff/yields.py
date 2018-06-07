@@ -33,7 +33,8 @@ class YieldSystematic(MyEnum):
                  EnumItem("BRhiggs_hzz4l"),
                  EnumItem("PythiaScale"),
                  EnumItem("PythiaTune"),
-                 EnumItem("lumi_13TeV"),
+                 EnumItem("lumi_13TeV_2016"),
+                 EnumItem("lumi_13TeV_2017"),
                  EnumItem("CMS_eff_e"),
                  EnumItem("CMS_eff_m"),
                  EnumItem("CMS_zz4e_zjets"),
@@ -44,8 +45,6 @@ class YieldSystematic(MyEnum):
     def yamlfilename(self, channel=None):
       if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_qq", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV"):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
-      if self in ("lumi_13TeV",):
-        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_expt_13TeV.yaml")
       if self in ("CMS_eff_e", "CMS_eff_m"):
         if channel is None:
           raise ValueError("Need to give channel for {}".format(self))
@@ -76,6 +75,11 @@ class YieldSystematic(MyEnum):
         assert False, (lep, had)
       else:
         return dct.get(productionmode.yamlsystname, None)
+
+    def hardcodedvalue(self, production):
+      if self == "lumi_13TeV_2016" and production.year == 2016: return 1.026
+      if self == "lumi_13TeV_2017" and production.year == 2017: return 1.023
+      return None
 
 class YieldValue(MultiEnum, JsonDict):
     __metaclass__ = MultiEnumABCMeta
