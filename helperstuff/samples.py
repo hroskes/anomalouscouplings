@@ -1849,7 +1849,7 @@ def __xcheck():
             self.messagefmt = messagefmt
         def __setitem__(self, key, value):
             if key in self:
-                if value != self[key]: return
+                if value == self[key]: return
                 raise KeyError(self.messagefmt.format(key=key, newvalue=value, oldvalue=self[key]))
             super(WriteOnceDict, self).__setitem__(key, value)
 

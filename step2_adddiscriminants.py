@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+
+import argparse
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--submitjobs", action="store_true")
+    p.add_argument("--filter", type=eval, default=lambda sample: True)
+    args = p.parse_args()
+    if args.filter and args.submitjobs:
+        p.error("Can't have a filter for submitjobs")
+
 from array import array
 from collections import OrderedDict
 from helperstuff import config
@@ -99,18 +109,15 @@ def submitjobs():
         submitjob("unbuffer "+os.path.join(config.repositorydir, "step2_adddiscriminants.py"), **submitjobkwargs)
 
 if __name__ == '__main__':
-    if sys.argv[1:]:
-        if sys.argv[1].lower() == "submitjobs":
-            submitjobs(*sys.argv[2:])
-        else:
-            raise ValueError("Can only run '{0}' with no arguments or '{0} submitjobs'".format(sys.argv[0]))
+    if args.submitjobs:
+        submitjobs()
     else:
         try:
             for sample in allsamples():
                  if sample.productionmode == "ggZZ" and sample.flavor == "4tau" and not sample.copyfromothersample:
                      adddiscriminants(sample)
             for sample in allsamples():
-                if sample.copyfromothersample: continue
+                if sample.copyfromothersample or args.filter(sample): continue
                 adddiscriminants(sample)
         finally:
             if config.LHE and not any(os.path.exists(sample.withdiscriminantsfile()+".tmp") for sample in allsamples()):
