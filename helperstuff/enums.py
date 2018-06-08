@@ -941,7 +941,7 @@ else:
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine + ["180224_Ulascan", "180416_Ulascan", "180224_10bins", "180224_newdiscriminants"])
+productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
 
 _ = [""]
