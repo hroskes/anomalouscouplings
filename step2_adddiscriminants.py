@@ -117,7 +117,8 @@ if __name__ == '__main__':
                  if sample.productionmode == "ggZZ" and sample.flavor == "4tau" and not sample.copyfromothersample:
                      adddiscriminants(sample)
             for sample in allsamples():
-                if sample.copyfromothersample or args.filter(sample): continue
+                if sample.copyfromothersample: continue
+                if not args.filter(sample): continue
                 adddiscriminants(sample)
         finally:
             if config.LHE and not any(os.path.exists(sample.withdiscriminantsfile()+".tmp") for sample in allsamples()):
