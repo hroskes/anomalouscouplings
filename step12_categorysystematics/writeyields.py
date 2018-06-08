@@ -148,79 +148,33 @@ def writeyields():
             YieldSystematicValue(channel, category, analysis, productionmode, "JES", production).value = (JECUp, JECDn)
             YieldSystematicValue(channel, category, analysis, productionmode, "bTagSF", production).value = (btSFUp, btSFDn)
 
-          allQCDsystematicnames = {ProductionMode(_).QCDsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")}
-          allpdfsystematicnames = {ProductionMode(_).pdfsystematicname for _ in ("ggH", "VBF", "ZH", "WH", "ttH", "qqZZ")}
+          #QCD muR weight variations
 
-          #QCD weight variations
-          for systname in allQCDsystematicnames | allpdfsystematicnames:
-            if productionmode == "ggZZ":
-              for channel in channels:
-                YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = YieldSystematicValue(channel, category, analysis, "ggH", systname, production).value
-            elif productionmode == "VBF bkg":
-              for channel in channels:
-                if analysis.isdecayonly:
+          for p in "ggH", "VBF", "ZH", "WH", "ttH", "qqZZ":
+            p = ProductionMode(p)
+            for systname, weight in (
+                                     (p.QCDfacsystematicname, "muF"),
+                                     (p.QCDrensystematicname, "muR"),
+                                     (p.pdfvariationsystematicname, "PDF"),
+                                     (p.pdfasmzsystematicname, "alphaS"), 
+                                    ):
+              if productionmode == "ggZZ":
+                for channel in channels:
+                  YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = YieldSystematicValue(channel, category, analysis, "ggH", systname, production).value
+              elif productionmode == "VBF bkg" and analysis.isdecayonly:
+                for channel in channels:
                   YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = 1
-                else:
+              elif productionmode == "VBF bkg":
+                for channel in channels:
                   YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = YieldSystematicValue(channel, category, analysis, "VBF", systname, production).value
-            elif systname == productionmode.QCDsystematicname or systname == productionmode.pdfsystematicname:
-              if systname == productionmode.QCDsystematicname: first, second = "muR", "muF"
-              if systname == productionmode.pdfsystematicname: first, second = "PDF", "alphaS"
-
-              firstup, secondup, firstdn, seconddn = (AlternateWeight(_) for _ in (first+"Up", second+"Up", first+"Dn", second+"Dn"))
-
-              up, dn = {}, {}
-              upUntagged, dnUntagged = {}, {}
-
-              up[1] = sum(result[tosample, categorization, firstup, category] for tosample in samples) / nominal
-              up[2] = sum(result[tosample, categorization, secondup, category] for tosample in samples) / nominal
-              dn[1] = sum(result[tosample, categorization, firstdn, category] for tosample in samples) / nominal
-              dn[2] = sum(result[tosample, categorization, seconddn, category] for tosample in samples) / nominal
-
-              #figure out which to combine with which
-              upUntagged[1] = sum(result[tosample, categorization, firstup, Category("Untagged")] for tosample in samples) / nominaluntagged
-              upUntagged[2] = sum(result[tosample, categorization, secondup, Category("Untagged")] for tosample in samples) / nominaluntagged
-              dnUntagged[1] = sum(result[tosample, categorization, firstdn, Category("Untagged")] for tosample in samples) / nominaluntagged
-              dnUntagged[2] = sum(result[tosample, categorization, seconddn, Category("Untagged")] for tosample in samples) / nominaluntagged
-
-              if upUntagged[1] >= dnUntagged[1]:
-                pass
-              elif dnUntagged[1] > upUntagged[1]:
-                up[1], dn[1] = dn[1], up[1]
-                upUntagged[1], dnUntagged[1] = dnUntagged[1], upUntagged[1]
+              elif systname in (p.QCDfacsystematicname, p.QCDrensystematicname, p.pdfvariationsystematicname, p.pdfasmzsystematicname):
+                up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal)
+                dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal)
+                for channel in channels:
+                  YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = (up, dn)
               else:
-                assert False, (upUntagged[1], dnUntagged[1])
-
-              if upUntagged[2] >= dnUntagged[2]:
-                pass
-              elif dnUntagged[2] > upUntagged[2]:
-                up[2], dn[2] = dn[2], up[2]
-                upUntagged[2], dnUntagged[2] = dnUntagged[2], upUntagged[2]
-              else:
-                assert False, (upUntagged[2], dnUntagged[2])
-
-              if upUntagged[2] > 1 and dnUntagged[2] > 1 or upUntagged[2] < 1 and dnUntagged[2] < 1:
-                logging.warning("{} up and down go in the same direction {} {}".format(second, upUntagged, dnUntagged))
-              if upUntagged[1] > 1 and dnUntagged[1] > 1 or upUntagged[1] < 1 and dnUntagged[1] < 1:
-                logging.warning("{} up and down go in the same direction {} {}".format(first, upUntagged, dnUntagged))
-
-              if   up[1] >= 1 and up[2] >= 1 and dn[1] <= 1 and dn[2] <= 1: signup, signdn = +1, -1
-              elif up[1] <= 1 and up[2] <= 1 and dn[1] >= 1 and dn[2] >= 1: signup, signdn = -1, +1
-              else:
-                logging.warning("{} and {} go in different directions in {} {}: {} {}".format(first, second, productionmode, category, up, dn))
-                if   sum(up.values()) > sum(dn.values()): signup, signdn = +1, -1
-                elif sum(up.values()) < sum(dn.values()): signup, signdn = -1, +1
-                else: assert False
-
-              assert signup != signdn
-
-              QCDUp = 1 + signup*sqrt((up[1]-1)**2 + (up[2]-1)**2)
-              QCDDn = 1 + signdn*sqrt((dn[1]-1)**2 + (dn[2]-1)**2)
-
-              for channel in channels:
-                YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = (QCDUp, QCDDn)
-            else:
-              for channel in channels:
-                YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = None
+                for channel in channels:
+                  YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = None
 
           #pythia scale and tune
           if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):

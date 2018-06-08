@@ -345,20 +345,37 @@ class ProductionMode(MyEnum):
                 yield Sample(self, h, hff, production)
 
     @property
-    def QCDsystematicname(self):
-      if self == "ggH": return "QCDscale_ggH"
-      if self == "qqH": return "QCDscale_qqH"
-      if self in ("ZH", "WH"): return "QCDscale_VH"
-      if self == "ttH": return "QCDscale_ttH"
-      if self == "qqZZ": return "QCDscale_VV"
+    def QCDfacsystematicname(self):
+      if self == "ggH": return "QCDscale_fac_ggH"
+      if self == "qqH": return "QCDscale_fac_qqH"
+      if self in ("ZH", "WH"): return "QCDscale_fac_VH"
+      if self == "ttH": return "QCDscale_fac_ttH"
+      if self == "qqZZ": return "QCDscale_fac_VV"
       return None
 
     @property
-    def pdfsystematicname(self):
-      if self == "ggH": return "pdf_Higgs_gg"
-      if self in ("qqH", "ZH", "WH"): return "pdf_Higgs_qq"
-      if self == "ttH": return "pdf_Higgs_ttH"
-      if self == "qqZZ": return "pdf_qq"
+    def QCDrensystematicname(self):
+      if self == "ggH": return "QCDscale_ren_ggH"
+      if self == "qqH": return "QCDscale_ren_qqH"
+      if self in ("ZH", "WH"): return "QCDscale_ren_VH"
+      if self == "ttH": return "QCDscale_ren_ttH"
+      if self == "qqZZ": return "QCDscale_ren_VV"
+      return None
+
+    @property
+    def pdfvariationsystematicname(self):
+      if self == "ggH": return "pdf_variation_Higgs_gg"
+      if self in ("qqH", "ZH", "WH"): return "pdf_variation_Higgs_qqbar"
+      if self == "ttH": return "pdf_variation_Higgs_ttH"
+      if self == "qqZZ": return "pdf_variation_qq"
+      return None
+
+    @property
+    def pdfasmzsystematicname(self):
+      if self == "ggH": return "pdf_asmz_Higgs_gg"
+      if self in ("qqH", "ZH", "WH"): return "pdf_asmz_Higgs_qqbar"
+      if self == "ttH": return "pdf_asmz_Higgs_ttH"
+      if self == "qqZZ": return "pdf_asmz_qq"
       return None
 
     def workspaceshapesystematics(self, category):
