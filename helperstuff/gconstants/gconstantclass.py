@@ -28,7 +28,7 @@ class Process(MyEnum):
 
 
 class GConstant(MultiEnum):
-  commit = "1881116c720858f445114a4c7201289276193be8"
+  commit = "3abe12fb451e3335efa3e4922acdc88028045bc5"
 
   enumname = "gconstant"
   enums = Process, Hypothesis

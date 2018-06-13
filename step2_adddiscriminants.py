@@ -4,7 +4,7 @@ import argparse
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--submitjobs", action="store_true")
-    p.add_argument("--filter", type=eval, default=lambda sample: True)
+    p.add_argument("--filter", type=eval, default=None)
     args = p.parse_args()
     if args.filter and args.submitjobs:
         p.error("Can't have a filter for submitjobs")
@@ -118,7 +118,7 @@ if __name__ == '__main__':
                      adddiscriminants(sample)
             for sample in allsamples():
                 if sample.copyfromothersample: continue
-                if not args.filter(sample): continue
+                if args.filter and not args.filter(sample): continue
                 adddiscriminants(sample)
         finally:
             if config.LHE and not any(os.path.exists(sample.withdiscriminantsfile()+".tmp") for sample in allsamples()):
