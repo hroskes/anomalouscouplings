@@ -367,48 +367,47 @@ class SingleCategorizationgm4l(BaseSingleCategorization):
     def pWH_function_name(self): return "category_p_HadWH_SIG_{}_JHUGen_{}_gm4l".format(self.hypothesisname, self.JEC)
 
     @staticmethod
-    def get_p_function(terms, multiplier, name):
-        terms_getattr = [(k, v) for k, v in terms.iteritems() if isinstance(v, basestring)]
-        terms_number = [term for term in terms.iteritems() if term not in terms_getattr]
+    def get_p_function(probability, gconstant, name):
+        usegconstant = not (gconstant == 1)
         @setname(name)
         def function(self_tree):
-            return (
-                sum(getattr(self_tree, k)*getattr(self_tree, v) for k, v in terms_getattr)
-              + sum(getattr(self_tree, k)*v                     for k, v in terms_number)
-            ) * multiplier
+            result = getattr(self_tree, probability)
+            if usegconstant:
+              result *= getattr(self_tree, gconstant)**2
+            return result
         return function
 
     def get_pHJJ_function(self):
-        terms = {"p_JJQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC): 1}
-        return self.get_p_function(terms, 1, self.pHJJ_function_name)
+        probability, gconstant = "p_JJQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC), 1
+        return self.get_p_function(probability, gconstant, self.pHJJ_function_name)
 
 
     def get_pVBF_function(self):
-        if self.hypothesis == "0+": terms = {"p_JJVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC): 1}
-        if self.hypothesis == "a2": terms = {"p_JJVBF_SIG_ghv2_1_JHUGen_{}".format(self.JEC): "g2VBF_m4l"}
-        if self.hypothesis == "a3": terms = {"p_JJVBF_SIG_ghv4_1_JHUGen_{}".format(self.JEC): "g4VBF_m4l"}
-        if self.hypothesis == "L1": terms = {"p_JJVBF_SIG_ghv1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2VBF_m4l"}
-        if self.hypothesis == "L1Zg": terms = {"p_JJVBF_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): "ghzgs1prime2VBF_m4l"}
-        return self.get_p_function(terms, 1, self.pVBF_function_name)
+        if self.hypothesis == "0+": probability, gconstant = "p_JJVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC), 1
+        if self.hypothesis == "a2": probability, gconstant = "p_JJVBF_SIG_ghv2_1_JHUGen_{}".format(self.JEC), "g2VBF_m4l"
+        if self.hypothesis == "a3": probability, gconstant = "p_JJVBF_SIG_ghv4_1_JHUGen_{}".format(self.JEC), "g4VBF_m4l"
+        if self.hypothesis == "L1": probability, gconstant = "p_JJVBF_SIG_ghv1prime2_1_JHUGen_{}".format(self.JEC), "g1prime2VBF_m4l"
+        if self.hypothesis == "L1Zg": probability, gconstant = "p_JJVBF_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC), "ghzgs1prime2VBF_m4l"
+        return self.get_p_function(probability, gconstant, self.pVBF_function_name)
 
     def get_pZH_function(self):
-        if self.hypothesis == "0+": terms = {"p_HadZH_SIG_ghz1_1_JHUGen_{}".format(self.JEC): 1}
-        if self.hypothesis == "a2": terms = {"p_HadZH_SIG_ghz2_1_JHUGen_{}".format(self.JEC): "g2ZH_m4l"}
-        if self.hypothesis == "a3": terms = {"p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC): "g4ZH_m4l"}
-        if self.hypothesis == "L1": terms = {"p_HadZH_SIG_ghz1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2ZH_m4l"}
-        if self.hypothesis == "L1Zg": terms = {"p_HadZH_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): "ghzgs1prime2ZH_m4l"}
-        return self.get_p_function(terms, 1, self.pZH_function_name)
+        if self.hypothesis == "0+": probability, gconstant = "p_HadZH_SIG_ghz1_1_JHUGen_{}".format(self.JEC), 1
+        if self.hypothesis == "a2": probability, gconstant = "p_HadZH_SIG_ghz2_1_JHUGen_{}".format(self.JEC), "g2ZH_m4l"
+        if self.hypothesis == "a3": probability, gconstant = "p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC), "g4ZH_m4l"
+        if self.hypothesis == "L1": probability, gconstant = "p_HadZH_SIG_ghz1prime2_1_JHUGen_{}".format(self.JEC), "g1prime2ZH_m4l"
+        if self.hypothesis == "L1Zg": probability, gconstant = "p_HadZH_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC), "ghzgs1prime2ZH_m4l"
+        return self.get_p_function(probability, gconstant, self.pZH_function_name)
 
     def get_pWH_function(self):
         if self.hypothesis == "L1Zg":
             @setname(self.pWH_function_name)
             def result(self_tree): return 0
             return result
-        if self.hypothesis == "0+": terms = {"p_HadWH_SIG_ghw1_1_JHUGen_{}".format(self.JEC): 1}
-        if self.hypothesis == "a2": terms = {"p_HadWH_SIG_ghw2_1_JHUGen_{}".format(self.JEC): "g2WH_m4l"}
-        if self.hypothesis == "a3": terms = {"p_HadWH_SIG_ghw4_1_JHUGen_{}".format(self.JEC): "g4WH_m4l"}
-        if self.hypothesis == "L1": terms = {"p_HadWH_SIG_ghw1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2WH_m4l"}
-        return self.get_p_function(terms, 1, self.pWH_function_name)
+        if self.hypothesis == "0+": probability, gconstant = "p_HadWH_SIG_ghw1_1_JHUGen_{}".format(self.JEC), 1
+        if self.hypothesis == "a2": probability, gconstant = "p_HadWH_SIG_ghw2_1_JHUGen_{}".format(self.JEC), "g2WH_m4l"
+        if self.hypothesis == "a3": probability, gconstant = "p_HadWH_SIG_ghw4_1_JHUGen_{}".format(self.JEC), "g4WH_m4l"
+        if self.hypothesis == "L1": probability, gconstant = "p_HadWH_SIG_ghw1prime2_1_JHUGen_{}".format(self.JEC), "g1prime2WH_m4l"
+        return self.get_p_function(probability, gconstant, self.pWH_function_name)
 
     def nicename(self, h):
         result = str(h).replace("+", "P").replace("-", "M")
