@@ -181,11 +181,11 @@ def mixturepermutations_4d(enumitemsalreadythere):
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
     enumitems = (
-                 EnumItem("0+", "SM", "scalar", "0PM"),
-                 EnumItem("a2", "0h+", "0PH"),
-                 EnumItem("0-", "a3", "PS", "pseudoscalar", "0M"),
+                 EnumItem("0+", "SM", "scalar", "0PM", "a1", "g1"),
+                 EnumItem("a2", "0h+", "0PH", "g2"),
+                 EnumItem("0-", "a3", "PS", "pseudoscalar", "0M", "g4"),
                  EnumItem("L1", "Lambda1", "0L1"),
-                 EnumItem("L1Zg", "0L1Zg"),
+                 EnumItem("L1Zg", "0L1Zg", "L1Zgs"),
                  EnumItem("fa20.5", "fa2dec0.5", "fa2+0.5", "fa2dec+0.5"),
                  EnumItem("fa30.5", "fa3dec0.5", "fa3+0.5", "fa3dec+0.5"),
                  EnumItem("fL10.5", "fL1dec0.5", "fL1+0.5", "fL1dec+0.5"),

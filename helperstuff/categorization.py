@@ -23,8 +23,8 @@ class NoCategorization(BaseCategorization):
     @property
     def category_function_name(self): return "category_nocategorization"
     def get_category_function(self_categorization):
+        @setname(self_categorization.category_function_name)
         def function(self_tree): return UntaggedMor17
-        function.__name__ = self_categorization.category_function_name
         return function
     @property
     def issystematic(self): return False
@@ -37,28 +37,6 @@ class BaseSingleCategorization(BaseCategorization):
             raise ValueError("Can't have systematics on both btag and JEC at the same time! {}, {}".format(self.btag, self.JEC))
     @property
     def issystematic(self): return self.btag != "Nominal" or self.JEC != "Nominal"
-    @abstractproperty
-    def g1(self): pass
-    @abstractproperty
-    def g2(self): pass
-    @abstractproperty
-    def g4(self): pass
-    @abstractproperty
-    def g1prime2(self): pass
-    @abstractproperty
-    def ghzgs1prime2(self): pass
-    @abstractproperty
-    def ghg2(self): pass
-    @abstractproperty
-    def ghg4(self): pass
-    @abstractproperty
-    def pHJJ_function_name(self): pass
-    @abstractproperty
-    def pVBF_function_name(self): pass
-    @abstractproperty
-    def pZH_function_name(self): pass
-    @abstractproperty
-    def pWH_function_name(self): pass
 
     @property
     def pHJ_variable_name(self): return "p_JQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC)
@@ -84,84 +62,14 @@ class BaseSingleCategorization(BaseCategorization):
     @property
     def QGL_variable_name(self): return "jetQGLikelihood" + self.JEC.njetsappendname
 
-    @staticmethod
-    def get_p_function(terms, multiplier, name):
-        def function(self_tree):
-            return sum(getattr(self_tree, k)*v for k, v in terms) * multiplier
-        function.__name__ = name
-        return function
-
-    def get_pHJJ_function(self):
-        terms = {
-                 "p_JJQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC): self.ghg2**2,
-                 "p_JJQCD_SIG_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg4**2,
-                 "p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg2*self.ghg4,
-                }
-        terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=1, ghg4=0, pdf="NNPDF30_lo_as_0130").JHUxsec / ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=self.ghg2, ghg4=self.ghg4, pdf="NNPDF30_lo_as_0130").JHUxsec
-        return self.get_p_function(terms, multiplier.nominal_value, self.pHJJ_function_name)
-
-    def get_pVBF_function(self):
-        terms = {
-                 "p_JJVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC): self.g1**2,
-                 "p_JJVBF_SIG_ghv2_1_JHUGen_{}".format(self.JEC): self.g2**2,
-                 "p_JJVBF_SIG_ghv4_1_JHUGen_{}".format(self.JEC): self.g4**2,
-                 "p_JJVBF_SIG_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
-                 "p_JJVBF_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
-                 "p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
-                 "p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
-                 "p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
-                 "p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
-                }
-        terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = (
-                      (ArbitraryCouplingsSample("VBF", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("VBF", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
-                     /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
-                     )
-        return self.get_p_function(terms, multiplier.nominal_value, self.pVBF_function_name)
-
-    def get_pZH_function(self):
-        terms = {
-                 "p_HadZH_SIG_ghz1_1_JHUGen_{}".format(self.JEC): self.g1**2,
-                 "p_HadZH_SIG_ghz2_1_JHUGen_{}".format(self.JEC): self.g2**2,
-                 "p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC): self.g4**2,
-                 "p_HadZH_SIG_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
-                 "p_HadZH_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
-                 "p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
-                 "p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
-                 "p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
-                 "p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
-                }
-        terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = (
-                      (ArbitraryCouplingsSample("ZH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ZH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
-                     /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
-                     )
-        return self.get_p_function(terms, multiplier.nominal_value, self.pZH_function_name)
-
-    def get_pWH_function(self):
-        if self.ghzgs1prime2 != 0:
-            def result(self_tree): return 0
-            result.__name__ = self.pWH_function_name
-            return result
-        terms = {
-                 "p_HadWH_SIG_ghw1_1_JHUGen_{}".format(self.JEC): self.g1**2,
-                 "p_HadWH_SIG_ghw2_1_JHUGen_{}".format(self.JEC): self.g2**2,
-                 "p_HadWH_SIG_ghw4_1_JHUGen_{}".format(self.JEC): self.g4**2,
-                 "p_HadWH_SIG_ghw1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
-                 "p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
-                 "p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
-                 "p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
-                }
-        terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = (
-                      (ArbitraryCouplingsSample("WH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("WH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
-                     /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
-                     )
-        return self.get_p_function(terms, multiplier.nominal_value, self.pWH_function_name)
+    @abstractmethod
+    def get_pHJJ_function(self): pass
+    @abstractmethod
+    def get_pVBF_function(self): pass
+    @abstractmethod
+    def get_pZH_function(self): pass
+    @abstractmethod
+    def get_pWH_function(self): pass
 
     def get_category_function(self_categorization):
         pHJJ_function_name = self_categorization.pHJJ_function_name
@@ -183,6 +91,7 @@ class BaseSingleCategorization(BaseCategorization):
         p_HadZH_mavjj_variable_name = self_categorization.p_HadZH_mavjj_variable_name
         p_HadZH_mavjj_true_variable_name = self_categorization.p_HadZH_mavjj_true_variable_name
 
+        @setname(self_categorization.category_function_name)
         def function(self_tree):
             if self_tree.year == 2016:
                 result = self_categorization.lastvalue = categoryMor17(
@@ -233,10 +142,113 @@ class BaseSingleCategorization(BaseCategorization):
                     config.useQGTagging,
                 )
             return result
-        function.__name__ = self_categorization.category_function_name
         return function
 
-class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
+class BaseSingleCategorizationCouplings(BaseSingleCategorization):
+    @abstractproperty
+    def g1(self): pass
+    @abstractproperty
+    def g2(self): pass
+    @abstractproperty
+    def g4(self): pass
+    @abstractproperty
+    def g1prime2(self): pass
+    @abstractproperty
+    def ghzgs1prime2(self): pass
+    @abstractproperty
+    def ghg2(self): pass
+    @abstractproperty
+    def ghg4(self): pass
+    @abstractproperty
+    def pHJJ_function_name(self): pass
+    @abstractproperty
+    def pVBF_function_name(self): pass
+    @abstractproperty
+    def pZH_function_name(self): pass
+    @abstractproperty
+    def pWH_function_name(self): pass
+
+    @staticmethod
+    def get_p_function(terms, multiplier, name):
+        @setname(name)
+        def function(self_tree):
+            return sum(getattr(self_tree, k)*v for k, v in terms) * multiplier
+        return function
+
+    def get_pHJJ_function(self):
+        terms = {
+                 "p_JJQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC): self.ghg2**2,
+                 "p_JJQCD_SIG_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg4**2,
+                 "p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg2*self.ghg4,
+                }
+        terms = tuple((k, v) for k, v in terms.iteritems() if v)
+        multiplier = ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=1, ghg4=0, pdf="NNPDF30_lo_as_0130").JHUxsec / ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=self.ghg2, ghg4=self.ghg4, pdf="NNPDF30_lo_as_0130").JHUxsec
+        return self.get_p_function(terms, multiplier.nominal_value, self.pHJJ_function_name)
+
+
+    def get_pVBF_function(self):
+        terms = {
+                 "p_JJVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC): self.g1**2,
+                 "p_JJVBF_SIG_ghv2_1_JHUGen_{}".format(self.JEC): self.g2**2,
+                 "p_JJVBF_SIG_ghv4_1_JHUGen_{}".format(self.JEC): self.g4**2,
+                 "p_JJVBF_SIG_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
+                 "p_JJVBF_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
+                 "p_JJVBF_SIG_ghv1_1_ghv2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
+                 "p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
+                 "p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
+                 "p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
+                }
+        terms = tuple((k, v) for k, v in terms.iteritems() if v)
+        multiplier = (
+                      (ArbitraryCouplingsSample("VBF", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("VBF", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                     /
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                     )
+        return self.get_p_function(terms, multiplier.nominal_value, self.pVBF_function_name)
+
+    def get_pZH_function(self):
+        terms = {
+                 "p_HadZH_SIG_ghz1_1_JHUGen_{}".format(self.JEC): self.g1**2,
+                 "p_HadZH_SIG_ghz2_1_JHUGen_{}".format(self.JEC): self.g2**2,
+                 "p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC): self.g4**2,
+                 "p_HadZH_SIG_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
+                 "p_HadZH_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.ghzgs1prime2**2,
+                 "p_HadZH_SIG_ghz1_1_ghz2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
+                 "p_HadZH_SIG_ghz1_1_ghz4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
+                 "p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
+                 "p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.ghzgs1prime2,
+                }
+        terms = tuple((k, v) for k, v in terms.iteritems() if v)
+        multiplier = (
+                      (ArbitraryCouplingsSample("ZH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ZH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                     /
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                     )
+        return self.get_p_function(terms, multiplier.nominal_value, self.pZH_function_name)
+
+    def get_pWH_function(self):
+        if self.ghzgs1prime2 != 0:
+            @setname(self.pWH_function_name)
+            def result(self_tree): return 0
+            return result
+        terms = {
+                 "p_HadWH_SIG_ghw1_1_JHUGen_{}".format(self.JEC): self.g1**2,
+                 "p_HadWH_SIG_ghw2_1_JHUGen_{}".format(self.JEC): self.g2**2,
+                 "p_HadWH_SIG_ghw4_1_JHUGen_{}".format(self.JEC): self.g4**2,
+                 "p_HadWH_SIG_ghw1prime2_1_JHUGen_{}".format(self.JEC): self.g1prime2**2,
+                 "p_HadWH_SIG_ghw1_1_ghw2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g2,
+                 "p_HadWH_SIG_ghw1_1_ghw4_1_JHUGen_{}".format(self.JEC): self.g1 * self.g4,
+                 "p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_{}".format(self.JEC): self.g1 * self.g1prime2,
+                }
+        terms = tuple((k, v) for k, v in terms.iteritems() if v)
+        multiplier = (
+                      (ArbitraryCouplingsSample("WH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("WH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                     /
+                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                     )
+        return self.get_p_function(terms, multiplier.nominal_value, self.pWH_function_name)
+
+class ArbitraryCouplingsSingleCategorization(BaseSingleCategorizationCouplings):
     def __init__(self, g1, g2, g4, g1prime2, ghg2=1, ghg4=0, JEC="Nominal", btag="Nominal"):
         self.__g1 = g1
         self.__g2 = g2
@@ -276,7 +288,7 @@ class ArbitraryCouplingsSingleCategorization(BaseSingleCategorization):
     @property
     def category_function_name(self): return "category_{}".format("_".join("{}_{}".format(name, getattr(self, name)) for name in ("ghg2", "ghg4", "g1", "g2", "g4", "g1prime2"))) + self.btag.appendname + self.JEC.appendname
 
-class SingleCategorizationFromSample(BaseSingleCategorization):
+class SingleCategorizationFromSample(BaseSingleCategorizationCouplings):
     def __init__(self, sample, JEC="Nominal", btag="Nominal"):
         self.sample = sample
         super(SingleCategorizationFromSample, self).__init__(JEC=JEC, btag=btag)
@@ -338,6 +350,65 @@ class SingleCategorizationFromSample(BaseSingleCategorization):
     def __repr__(self):
         return "{}({!r}, {!r}, {!r})".format(type(self).__name__, self.sample, self.JEC, self.btag)
 
+class SingleCategorizationgm4l(BaseSingleCategorization):
+    def __init__(self, hypothesis, JEC="Nominal", btag="Nominal"):
+        self.hypothesis = hypothesis
+        if not self.hypothesis.ispure: raise ValueError("Invalid hypothesis {}".format(hypothesis))
+        super(SingleCategorizationFromSample, self).__init__(JEC=JEC, btag=btag)
+
+    @property
+    def pHJJ_function_name(self): return "category_p_JJQCD_SIG_{}_JHUGen_{}_gm4l".format(self.hffhypothesisname, self.JEC)
+    @property
+    def pVBF_function_name(self): return "category_p_JJVBF_SIG_{}_JHUGen_{}_gm4l".format(self.hypothesisname, self.JEC)
+    @property
+    def pZH_function_name(self): return "category_p_HadZH_SIG_{}_JHUGen_{}_gm4l".format(self.hypothesisname, self.JEC)
+    @property
+    def pWH_function_name(self): return "category_p_HadWH_SIG_{}_JHUGen_{}_gm4l".format(self.hypothesisname, self.JEC)
+
+    @staticmethod
+    def get_p_function(terms, multiplier, name):
+        terms_getattr = [(k, v) for k, v in terms if isinstance(v, basestring)]
+        terms_number = [term for term in terms if term not in terms_getattr]
+        @setname(name)
+        def function(self_tree):
+            return (
+                sum(getattr(self_tree, k)*getattr(self_tree, v) for k, v in terms_getattr)
+              + sum(getattr(self_tree, k)*v                     for k, v in terms_number)
+            ) * multiplier
+        return function
+
+    def get_pHJJ_function(self):
+        terms = {"p_JJQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC): 1}
+        return self.get_p_function(terms, multiplier.nominal_value, self.pHJJ_function_name)
+
+
+    def get_pVBF_function(self):
+        if self.hypothesis == "0+": terms = {"p_JJVBF_SIG_ghv1_1_JHUGen_{}".format(self.JEC): 1}
+        if self.hypothesis == "a2": terms = {"p_JJVBF_SIG_ghv2_1_JHUGen_{}".format(self.JEC): "g2VBF_m4l"}
+        if self.hypothesis == "a3": terms = {"p_JJVBF_SIG_ghv4_1_JHUGen_{}".format(self.JEC): "g4VBF_m4l"}
+        if self.hypothesis == "L1": terms = {"p_JJVBF_SIG_ghv1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2VBF_m4l"}
+        if self.hypothesis == "L1Zg": terms = {"p_JJVBF_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): "ghzgs1prime2VBF_m4l"}
+        return self.get_p_function(terms, 1, self.pVBF_function_name)
+
+    def get_pZH_function(self):
+        if self.hypothesis == "0+": terms = {"p_HadZH_SIG_ghz1_1_JHUGen_{}".format(self.JEC): 1}
+        if self.hypothesis == "a2": terms = {"p_HadZH_SIG_ghz2_1_JHUGen_{}".format(self.JEC): "g2ZH_m4l"}
+        if self.hypothesis == "a3": terms = {"p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC): "g4ZH_m4l"}
+        if self.hypothesis == "L1": terms = {"p_HadZH_SIG_ghz1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2ZH_m4l"}
+        if self.hypothesis == "L1Zg": terms = {"p_HadZH_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): "ghzgs1prime2ZH_m4l"}
+        return self.get_p_function(terms, multiplier.nominal_value, self.pZH_function_name)
+
+    def get_pWH_function(self):
+        if self.hypothesis == "L1Zg":
+            @setname(self.pWH_function_name)
+            def result(self_tree): return 0
+            return result
+        if self.hypothesis == "0+": terms = {"p_HadZH_SIG_ghw1_1_JHUGen_{}".format(self.JEC): 1}
+        if self.hypothesis == "a2": terms = {"p_HadZH_SIG_ghw2_1_JHUGen_{}".format(self.JEC): "g2WH_m4l"}
+        if self.hypothesis == "a3": terms = {"p_HadZH_SIG_ghw4_1_JHUGen_{}".format(self.JEC): "g4WH_m4l"}
+        if self.hypothesis == "L1": terms = {"p_HadZH_SIG_ghw1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2WH_m4l"}
+        return self.get_p_function(terms, multiplier.nominal_value, self.pWH_function_name)
+
 class MultiCategorization(BaseCategorization):
     def __init__(self, name, *singles):
         self.name = name
@@ -376,6 +447,7 @@ class MultiCategorization(BaseCategorization):
 
     def get_category_function(self_categorization):
         singles = self_categorization.singles
+        @setname(self_categorization.category_function_name)
         def function(self_tree):
             lastvalues = {single.lastvalue for single in singles}
             if any(_ == VBF2jTaggedMor17 for _ in lastvalues):
@@ -384,7 +456,6 @@ class MultiCategorization(BaseCategorization):
                 return VHHadrTaggedMor17
             assert len(lastvalues) == 1
             return lastvalues.pop()
-        function.__name__ = self_categorization.category_function_name
         return function
 
     @property

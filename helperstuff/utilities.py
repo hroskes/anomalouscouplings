@@ -640,3 +640,9 @@ def Closing(thing, write=False):
 def TFile(*args, **kwargs):
     write = kwargs.pop("write", False)
     return Closing(ROOT.TFile(*args, **kwargs), write=write)
+
+def setname(name):
+    def decorator(function):
+        function.__name__ = name
+        return function
+    return decorator
