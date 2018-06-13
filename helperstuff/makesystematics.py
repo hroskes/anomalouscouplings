@@ -78,9 +78,15 @@ class MakeJECSystematics(MakeSystematics):
 
         result = re.findall("(self[.][\w]*)[^\w{]", code)
         for variable in result:
-            if re.match("self[.](M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay"
-                        "|ZZ(?:Eta|Pt|Mass)|D_4couplings_general(?:_raw|)|foldbins_4couplings_(?:VBF|HadVH)decay"
-                        "|p_m4l_(?:SIG|BKG)|cconstantforDbkg(?:kin)?|flavor)$", variable): continue
+            if re.match(
+              "self[.]("
+                "M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay"
+                "|ZZ(?:Eta|Pt|Mass)|D_4couplings_general(?:_raw|)|foldbins_4couplings_(?:VBF|HadVH)decay"
+                "|p_m4l_(?:SIG|BKG)|cconstantforDbkg(?:kin)?|flavor"
+                "|g(?:2|4|1prime2|hzgs1prime2)(?:HZZ|VBF|VH|ZH|WH)_m4l"
+              ")$",
+              variable
+            ): continue
             raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
 
         return code

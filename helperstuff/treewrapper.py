@@ -178,7 +178,8 @@ class TreeWrapperBase(Iterator):
         return (self.M2g1prime2_HadWH*self.g1prime2WH_m4l**2 / (self.M2g1prime2_HadWH*self.g1prime2WH_m4l**2 + self.M2g2_HJJ*self.cconstantforDHadWH))
     def D_HadWH_L1Zg(self):
         if self.notdijet: return -999
-        return (self.M2ghzgs1prime2_HadWH*self.ghzgs1prime2WH_m4l**2 / (self.M2ghzgs1prime2_HadWH*self.ghzgs1prime2WH_m4l**2 + self.M2g2_HJJ*self.cconstantforDHadWH))
+        #return (self.M2ghzgs1prime2_HadWH*self.ghzgs1prime2WH_m4l**2 / (self.M2ghzgs1prime2_HadWH*self.ghzgs1prime2WH_m4l**2 + self.M2g2_HJJ*self.cconstantforDHadWH))
+        return 0
 
     def D_HadZH_0plus(self):
         if self.notdijet: return -999
@@ -1151,7 +1152,7 @@ class TreeWrapper(TreeWrapperBase):
         self.g2WH_m4l            = gconstant("WH",       "g2", self.ZZMass)
         self.g4WH_m4l            = gconstant("WH",       "g4", self.ZZMass)
         self.g1prime2WH_m4l      = gconstant("WH",       "L1", self.ZZMass)
-        self.ghzgs1prime2WH_m4l  = gconstant("WH",       "L1Zg", self.ZZMass)
+        #self.ghzgs1prime2WH_m4l  = gconstant("WH",       "L1Zg", self.ZZMass)
 
         #Gen MEs
         for weightname in self.genMEs:
@@ -1301,7 +1302,7 @@ class TreeWrapper(TreeWrapperBase):
         ]  #note can't do this with two separate +=, since they both refer to the original append
         categorizations += append
     categorizations.append(categorization.NoCategorization())
-    assert len({_.name for _ in categorizations}) == len(categorizations)
+    assert len({_.category_function_name for _ in categorizations}) == len(categorizations)
     del append, btag, JEC, other
 
 #############

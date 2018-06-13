@@ -3,6 +3,7 @@ from CJLSTscripts import categoryMor17, categoryMor18, UntaggedMor17, VBF2jTagge
 import config
 from enums import BTagSystematic, Category, categories, HffHypothesis, Hypothesis, JECSystematic
 from samples import ArbitraryCouplingsSample
+from utilities import setname
 import re
 
 class BaseCategorization(object):
@@ -15,8 +16,8 @@ class BaseCategorization(object):
     @abstractproperty
     def issystematic(self): pass
 
-    def __hash__(self): return hash(self.category_function_name)
-    def __eq__(self, other): return self.category_function_name == other.category_function_name
+    def __hash__(self): return hash((type(self), self.category_function_name))
+    def __eq__(self, other): return type(self) == type(other) and self.category_function_name == other.category_function_name
     def __ne__(self, other): return not self == other
 
 class NoCategorization(BaseCategorization):
@@ -352,12 +353,12 @@ class SingleCategorizationFromSample(BaseSingleCategorizationCouplings):
 
 class SingleCategorizationgm4l(BaseSingleCategorization):
     def __init__(self, hypothesis, JEC="Nominal", btag="Nominal"):
-        self.hypothesis = hypothesis
+        self.hypothesis = Hypothesis(hypothesis)
         if not self.hypothesis.ispure: raise ValueError("Invalid hypothesis {}".format(hypothesis))
-        super(SingleCategorizationFromSample, self).__init__(JEC=JEC, btag=btag)
+        super(SingleCategorizationgm4l, self).__init__(JEC=JEC, btag=btag)
 
     @property
-    def pHJJ_function_name(self): return "category_p_JJQCD_SIG_{}_JHUGen_{}_gm4l".format(self.hffhypothesisname, self.JEC)
+    def pHJJ_function_name(self): return "category_p_JJQCD_SIG_Hff0P_JHUGen_{}_gm4l".format(self.JEC)
     @property
     def pVBF_function_name(self): return "category_p_JJVBF_SIG_{}_JHUGen_{}_gm4l".format(self.hypothesisname, self.JEC)
     @property
@@ -367,8 +368,8 @@ class SingleCategorizationgm4l(BaseSingleCategorization):
 
     @staticmethod
     def get_p_function(terms, multiplier, name):
-        terms_getattr = [(k, v) for k, v in terms if isinstance(v, basestring)]
-        terms_number = [term for term in terms if term not in terms_getattr]
+        terms_getattr = [(k, v) for k, v in terms.iteritems() if isinstance(v, basestring)]
+        terms_number = [term for term in terms.iteritems() if term not in terms_getattr]
         @setname(name)
         def function(self_tree):
             return (
@@ -379,7 +380,7 @@ class SingleCategorizationgm4l(BaseSingleCategorization):
 
     def get_pHJJ_function(self):
         terms = {"p_JJQCD_SIG_ghg2_1_JHUGen_{}".format(self.JEC): 1}
-        return self.get_p_function(terms, multiplier.nominal_value, self.pHJJ_function_name)
+        return self.get_p_function(terms, 1, self.pHJJ_function_name)
 
 
     def get_pVBF_function(self):
@@ -396,18 +397,32 @@ class SingleCategorizationgm4l(BaseSingleCategorization):
         if self.hypothesis == "a3": terms = {"p_HadZH_SIG_ghz4_1_JHUGen_{}".format(self.JEC): "g4ZH_m4l"}
         if self.hypothesis == "L1": terms = {"p_HadZH_SIG_ghz1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2ZH_m4l"}
         if self.hypothesis == "L1Zg": terms = {"p_HadZH_SIG_ghza1prime2_1_JHUGen_{}".format(self.JEC): "ghzgs1prime2ZH_m4l"}
-        return self.get_p_function(terms, multiplier.nominal_value, self.pZH_function_name)
+        return self.get_p_function(terms, 1, self.pZH_function_name)
 
     def get_pWH_function(self):
         if self.hypothesis == "L1Zg":
             @setname(self.pWH_function_name)
             def result(self_tree): return 0
             return result
-        if self.hypothesis == "0+": terms = {"p_HadZH_SIG_ghw1_1_JHUGen_{}".format(self.JEC): 1}
-        if self.hypothesis == "a2": terms = {"p_HadZH_SIG_ghw2_1_JHUGen_{}".format(self.JEC): "g2WH_m4l"}
-        if self.hypothesis == "a3": terms = {"p_HadZH_SIG_ghw4_1_JHUGen_{}".format(self.JEC): "g4WH_m4l"}
-        if self.hypothesis == "L1": terms = {"p_HadZH_SIG_ghw1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2WH_m4l"}
-        return self.get_p_function(terms, multiplier.nominal_value, self.pWH_function_name)
+        if self.hypothesis == "0+": terms = {"p_HadWH_SIG_ghw1_1_JHUGen_{}".format(self.JEC): 1}
+        if self.hypothesis == "a2": terms = {"p_HadWH_SIG_ghw2_1_JHUGen_{}".format(self.JEC): "g2WH_m4l"}
+        if self.hypothesis == "a3": terms = {"p_HadWH_SIG_ghw4_1_JHUGen_{}".format(self.JEC): "g4WH_m4l"}
+        if self.hypothesis == "L1": terms = {"p_HadWH_SIG_ghw1prime2_1_JHUGen_{}".format(self.JEC): "g1prime2WH_m4l"}
+        return self.get_p_function(terms, 1, self.pWH_function_name)
+
+    def nicename(self, h):
+        result = str(h).replace("+", "P").replace("-", "M")
+        assert re.match("[\w]+", result)
+        return result
+
+    @property
+    def hypothesisname(self):
+        return self.nicename(self.hypothesis)
+
+    @property
+    def category_function_name(self):
+        result = "category_" + self.hypothesisname + self.btag.appendname + self.JEC.appendname
+        return result
 
 class MultiCategorization(BaseCategorization):
     def __init__(self, name, *singles):
