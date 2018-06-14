@@ -148,7 +148,7 @@ def writeyields():
             YieldSystematicValue(channel, category, analysis, productionmode, "JES", production).value = (JECUp, JECDn)
             YieldSystematicValue(channel, category, analysis, productionmode, "bTagSF", production).value = (btSFUp, btSFDn)
 
-          #QCD muR weight variations
+          #QCD and PDF weight variations
 
           for p in "ggH", "VBF", "ZH", "WH", "ttH", "qqZZ":
             p = ProductionMode(p)
@@ -156,7 +156,7 @@ def writeyields():
                                      (p.QCDfacsystematicname, "muF"),
                                      (p.QCDrensystematicname, "muR"),
                                      (p.pdfvariationsystematicname, "PDF"),
-                                     (p.pdfasmzsystematicname, "alphaS"), 
+                                     (p.pdfasmzsystematicname, "alphaS"),
                                     ):
               if productionmode == "ggZZ":
                 for channel in channels:
@@ -167,9 +167,9 @@ def writeyields():
               elif productionmode == "VBF bkg":
                 for channel in channels:
                   YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = YieldSystematicValue(channel, category, analysis, "VBF", systname, production).value
-              elif systname in (p.QCDfacsystematicname, p.QCDrensystematicname, p.pdfvariationsystematicname, p.pdfasmzsystematicname):
-                up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal)
-                dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal)
+              elif systname in (productionmode.QCDfacsystematicname, productionmode.QCDrensystematicname, productionmode.pdfvariationsystematicname, productionmode.pdfasmzsystematicname):
+                up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal
+                dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal
                 for channel in channels:
                   YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = (up, dn)
               else:

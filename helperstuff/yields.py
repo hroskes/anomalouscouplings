@@ -329,33 +329,11 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
 
             result[tosample,categorization,alternateweight] = h.Integral()
         except:
-            if tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneUp") or tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneDn"):
+            
+            if tosample.productionmode == "ZH" and (tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneUp") or tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneDn")):
               result[tosample,categorization,alternateweight] = result[ReweightingSamplePlus("ZH", "0+", "POWHEG"), categorization,alternateweight]
             else:
               print tosample, categorization, alternateweight
               raise
 
     return result
-
-def check():
-  filenames = set()
-  for syst in YieldSystematic.items():
-    for channel in channels:
-      try:
-        filenames.add(syst.yamlfilename(channel))
-      except ValueError:
-        pass
-  y = {}
-  for filename in filenames:
-    with open(filename) as f:
-      y.update(yaml.load(f))
-  for key in y:
-    if key == "CMS_zz4l_bkg_kdShape": continue
-    if key.endswith("_cat") and key.replace("_cat", "") in y: continue
-    try:
-      YieldSystematic(key)
-    except:
-      raise ValueError("Don't have systematic for {}".format(key))
-
-check()
-del check
