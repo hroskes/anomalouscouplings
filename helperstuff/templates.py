@@ -93,11 +93,13 @@ class TemplatesFile(MultiEnum):
         if self.templategroup == "ggh" and self.shapesystematic == "MINLO_SM":
             return [ReweightingSamplePlus("ggH", "0+", "MINLO")]
 
-        elif self.templategroup in ("ggh", "tth"):
+        elif self.templategroup in ("ggh", "tth", "bbh"):
             if self.templategroup == "ggh":
                 args = "ggH",
             elif self.templategroup == "tth":
                 args = "ttH", "Hff0+"
+            elif self.templategroup == "bbh":
+                args = "bbH",
             else:
                 assert False, self.templategroup
 
@@ -177,7 +179,7 @@ class TemplatesFile(MultiEnum):
         return reweightingsamples
 
     def templates(self):
-        if self.templategroup in ["ggh", "vbf", "zh", "wh", "tth"]:
+        if self.templategroup in ["ggh", "vbf", "zh", "wh", "tth", "bbh"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
             if config.LHE: return [Template(self, "qqZZ")]
@@ -481,7 +483,7 @@ class TemplatesFile(MultiEnum):
                 else:
                     assert False
 
-            if self.templategroup in ("ggh", "tth"):
+            if self.templategroup in ("ggh", "tth", "bbh"):
                 if self.analysis.dimensions == 4:
                     assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 15))
                     assert                               all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 15))
@@ -597,6 +599,8 @@ class TemplateBase(object):
                 enumsdict[TemplateGroup] = "zh"
             elif enumsdict[ProductionMode] == "ttH":
                 enumsdict[TemplateGroup] = "tth"
+            elif enumsdict[ProductionMode] == "bbH":
+                enumsdict[TemplateGroup] = "bbh"
             elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "VBF bkg", "ZX"):
                 enumsdict[TemplateGroup] = "bkg"
             elif enumsdict[ProductionMode] == "data":
@@ -683,7 +687,7 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
 
-        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
+        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.reweightingsampleplus not in self.templatesfile.signalsamples():
@@ -715,7 +719,7 @@ class Template(TemplateBase, MultiEnum):
                raise ValueError("HffHypothesis {} provided for {}!\n{}".format(self.hffhypothesis, self.productionmode, args))
 
     def templatename(self, final=True):
-        if self.productionmode in ("ggH", "ttH"):
+        if self.productionmode in ("ggH", "ttH", "bbH"):
             match1 = re.match("^f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5$", str(self.hypothesis))
             match2 = re.match("^f(a2|a3|L1|L1Zg)(?:dec)?0.5f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5$", str(self.hypothesis))
             if self.hypothesis == "0+":
@@ -812,7 +816,7 @@ class Template(TemplateBase, MultiEnum):
         return name
 
     def title(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH"):
             return "{} {}".format(self.productionmode, self.hypothesis)
         if self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
             return str(self.productionmode).replace("ZZ", "#rightarrowZZ")
@@ -840,7 +844,7 @@ class Template(TemplateBase, MultiEnum):
         assert False, "{} does not exist in TreeWrapper".format(result)
 
     def reweightfrom(self):
-        if self.productionmode == "ggH":
+        if self.productionmode in ("ggH", "bbH"):
             if config.LHE:
                 result = {Sample(self.production, self.productionmode, self.hypothesis)}
             elif self.shapesystematic == "MINLO_SM":
@@ -880,7 +884,7 @@ class Template(TemplateBase, MultiEnum):
     def scalefactor(self):
         if self.shapesystematic == "MINLO_SM":
             result = len(self.reweightfrom())
-        elif self.productionmode in ("VBF", "ggH", "ZH", "WH"):
+        elif self.productionmode in ("VBF", "ggH", "ZH", "WH", "bbH"):
             result = uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, self.hypothesis, self.production).xsec) / uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, "SM", self.production).xsec)
         elif self.productionmode == "ttH":
             result = uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, self.hypothesis, self.hffhypothesis, self.production).xsec) / uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, "SM", "Hff0+", self.production).xsec)
@@ -1206,7 +1210,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         if self.interferencetype.mindimensions > self.analysis.dimensions:
             raise ValueError("Invalid interferencetype {} for {}D analysis\n{}".format(self.interferencetype, self.analysis.dimensions, args))
 
-        if self.productionmode in ("ggH", "ttH"):
+        if self.productionmode in ("ggH", "ttH", "bbH"):
             if self.interferencetype.totalpower != 2:
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
         elif self.productionmode in ("VBF", "ZH", "WH"):
@@ -1222,7 +1226,7 @@ class IntTemplate(TemplateBase, MultiEnum):
             result = result.replace("gj", self.analysis.couplingnames[1])
             result = result.replace("gk", self.analysis.couplingnames[2])
             result = result.replace("gl", self.analysis.couplingnames[3])
-        elif self.productionmode in ("ggH", "ttH"):
+        elif self.productionmode in ("ggH", "ttH", "bbH"):
             if self.interferencetype == "g11gi1":
                 if self.analysis in ("fa3", "fa3_STXS"):
                     result = "templatea1a3IntAdapSmooth"
@@ -1259,7 +1263,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         if self.analysis not in ("fa3", "fa3_STXS", "fa3fa2fL1fL1Zg"): return None
 
         #cross talk - production discriminants for the wrong category don't make sense
-        if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH"):
+        if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH", "bbH"):
             if (self.interferencetype == "g11gi1"
                 or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] == 1):
                 #ggH has no production information, and only using SM ttH, so mirror antisymmetric
@@ -1407,7 +1411,7 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     def gettemplate(self, *args, **kwargs):
         result = super(IntTemplate, self).gettemplate(*args, **kwargs)
-        if self.analysis == "fa3" and self.productionmode in ("ggH", "ttH") and self.interferencetype == "g11gi1" and self.category in ("VBFtagged", "VHHadrtagged"):
+        if self.analysis == "fa3" and self.productionmode in ("ggH", "ttH", "bbH") and self.interferencetype == "g11gi1" and self.category in ("VBFtagged", "VHHadrtagged"):
             assert self.domirror
             result.Scale(0)
         return result
@@ -1478,7 +1482,7 @@ class SubtractDataTree(DataTree, MultiEnum):
 if __name__ == "__main__":
     numpy.set_printoptions(edgeitems=35)
     tf = TemplatesFile("vbf", "2e2mu", "Untagged", "fa3fa2fL1fL1Zg")
-    productionmode = str(tf.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH")
+    productionmode = str(tf.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH").replace("BBH", "bbH")
     basis = SampleBasis([template.hypothesis for template in tf.templates()], productionmode, tf.analysis)
     print basis.matrix
     print numpy.linalg.det(basis.matrix)

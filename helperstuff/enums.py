@@ -501,6 +501,7 @@ class TemplateGroup(MyEnum):
                  EnumItem("zh"),
                  EnumItem("wh"),
                  EnumItem("tth"),
+                 EnumItem("bbh"),
                  EnumItem("background", "bkg"),
                  EnumItem("DATA"),
                 )
