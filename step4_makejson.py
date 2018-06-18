@@ -3,12 +3,15 @@ import argparse
 
 p = argparse.ArgumentParser()
 p.add_argument("--keep", help="keep the json files that already exist", action="store_true")
+p.add_argument("--submitjobs", help="submit jobs", action="store_true")
 args = p.parse_args()
 
 import datetime
 import json
 import os
 
+from helperstuff import config
+from helperstuff.submitjob import submitjob
 from helperstuff.templates import TemplatesFile, templatesfiles
 from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID
 
@@ -24,8 +27,17 @@ def makejson(*args):
         with open(filename, "w") as f:
             f.write(jsonstring)
 
-if __name__ == "__main__":
+def submitjobs():
+    i = 0
     for templatesfile in templatesfiles:
-        if "Ulascan" in str(templatesfile.production): continue
-        if args.keep and os.path.exists(templatesfile.jsonfile()): continue
-        makejson(templatesfile)
+        if os.path.exists(templatesfile.jsonfile()) or os.path.exists(templatesfile.jsonfile()+".tmp"): continue
+        submitjob("unbuffer "+os.path.join(config.repositorydir, "step4_makejson.py")+" --keep", jobname="json"+str(i), jobtime="30:0:0", docd=True)
+        i += 1
+
+if __name__ == "__main__":
+    if args.submitjobs:
+        submitjobs()
+    else:
+        for templatesfile in templatesfiles:
+            if args.keep and os.path.exists(templatesfile.jsonfile()): continue
+            makejson(templatesfile)

@@ -4,10 +4,7 @@ import argparse
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--submitjobs", nargs="*")
-    p.add_argument("--keepjson", action="store_true")
     args = p.parse_args()
-    if args.keepjson and args.submitjobs is None:
-        p.error("--keepjson only makes sense if --submitjobs is set")
 
 from array import array
 import os
@@ -95,7 +92,7 @@ def copydata(*args):
     f.Close()
     newf.Close()
 
-def submitjobs(removefiles, keepjson=False):
+def submitjobs(removefiles):
     remove = {}
     for filename in removefiles:
         if not filename.endswith(".root"): filename += ".root"
@@ -120,8 +117,6 @@ def submitjobs(removefiles, keepjson=False):
         if not found:
             raise IOError("{} is not a templatesfile!".format(filename))
     with cd(config.repositorydir):
-        if not keepjson:
-            subprocess.check_call(["./step4_makejson.py"])
         for filename in remove:
             if os.path.exists(filename):
                 os.remove(filename)
@@ -130,7 +125,7 @@ def submitjobs(removefiles, keepjson=False):
 
 if __name__ == "__main__":
     if args.submitjobs is not None:
-        submitjobs(args.submitjobs, keepjson=args.keepjson)
+        submitjobs(args.submitjobs)
     else:
         for templatesfile in templatesfiles:
             buildtemplates(templatesfile)
