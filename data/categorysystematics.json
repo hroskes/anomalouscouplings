@@ -13647,8 +13647,100 @@
         },
         "lumi_13TeV_2016": {
             "fL1": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
                     "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
                         "VBF": 1.026,
                         "VBFbkg": 1.026,
                         "WH": 1.026,
@@ -13662,8 +13754,100 @@
                 }
             },
             "fL1Zg": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
                     "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
                         "VBF": 1.026,
                         "VBFbkg": 1.026,
                         "WH": 1.026,
@@ -13677,8 +13861,100 @@
                 }
             },
             "fa2": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
                     "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
                         "VBF": 1.026,
                         "VBFbkg": 1.026,
                         "WH": 1.026,
@@ -13692,8 +13968,100 @@
                 }
             },
             "fa3": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
                     "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4e": {
+                        "VBF": 1.026,
+                        "VBFbkg": 1.026,
+                        "WH": 1.026,
+                        "ZH": 1.026,
+                        "ZX": 1.026,
+                        "ggH": 1.026,
+                        "ggZZ": 1.026,
+                        "qqZZ": 1.026,
+                        "ttH": 1.026
+                    },
+                    "4mu": {
                         "VBF": 1.026,
                         "VBFbkg": 1.026,
                         "WH": 1.026,
@@ -13709,8 +14077,100 @@
         },
         "lumi_13TeV_2017": {
             "fL1": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
                     "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
                         "VBF": null,
                         "VBFbkg": null,
                         "WH": null,
@@ -13724,8 +14184,100 @@
                 }
             },
             "fL1Zg": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
                     "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
                         "VBF": null,
                         "VBFbkg": null,
                         "WH": null,
@@ -13739,8 +14291,100 @@
                 }
             },
             "fa2": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
                     "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
                         "VBF": null,
                         "VBFbkg": null,
                         "WH": null,
@@ -13754,8 +14398,100 @@
                 }
             },
             "fa3": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
                     "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "VBFbkg": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
                         "VBF": null,
                         "VBFbkg": null,
                         "WH": null,
@@ -30507,8 +31243,92 @@
         },
         "lumi_13TeV_2016": {
             "fL1": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
                     "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
@@ -30521,8 +31341,92 @@
                 }
             },
             "fL1Zg": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
                     "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
@@ -30535,8 +31439,92 @@
                 }
             },
             "fa2": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
                     "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
@@ -30549,8 +31537,92 @@
                 }
             },
             "fa3": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
                     "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4e": {
+                        "VBF": null,
+                        "WH": null,
+                        "ZH": null,
+                        "ZX": null,
+                        "ggH": null,
+                        "ggZZ": null,
+                        "qqZZ": null,
+                        "ttH": null
+                    },
+                    "4mu": {
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
@@ -30565,8 +31637,92 @@
         },
         "lumi_13TeV_2017": {
             "fL1": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
                     "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
                         "VBF": 1.023,
                         "WH": 1.023,
                         "ZH": 1.023,
@@ -30579,8 +31735,92 @@
                 }
             },
             "fL1Zg": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
                     "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
                         "VBF": 1.023,
                         "WH": 1.023,
                         "ZH": 1.023,
@@ -30593,8 +31833,92 @@
                 }
             },
             "fa2": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
                     "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
                         "VBF": 1.023,
                         "WH": 1.023,
                         "ZH": 1.023,
@@ -30607,8 +31931,92 @@
                 }
             },
             "fa3": {
-                "VBFtagged": {
+                "Untagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
                     "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    }
+                },
+                "VBFtagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    }
+                },
+                "VHHadrtagged": {
+                    "2e2mu": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4e": {
+                        "VBF": 1.023,
+                        "WH": 1.023,
+                        "ZH": 1.023,
+                        "ZX": 1.023,
+                        "ggH": 1.023,
+                        "ggZZ": 1.023,
+                        "qqZZ": 1.023,
+                        "ttH": 1.023
+                    },
+                    "4mu": {
                         "VBF": 1.023,
                         "WH": 1.023,
                         "ZH": 1.023,

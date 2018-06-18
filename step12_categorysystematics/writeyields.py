@@ -99,10 +99,10 @@ def writeyields():
             if analysis.isdecayonly and category != "Untagged": continue
             syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
             syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
-
         for systname in "lumi_13TeV_2016", "lumi_13TeV_2017":
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-          syst.value = syst.yieldsystematic.hardcodedvalue(production)
+          for category, channel in itertools.product(categories, channels):
+            syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
+            syst.value = syst.yieldsystematic.hardcodedvalue(production)
 
         #same for all categories
         #from yaml
