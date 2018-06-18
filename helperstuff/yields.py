@@ -31,10 +31,14 @@ class YieldSystematic(MyEnum):
                  EnumItem("QCDscale_ren_VV"),
                  EnumItem("EWcorr_VV"),
                  EnumItem("QCDscale_ggVV_bonly"),
-                 EnumItem("pdf_Higgs_gg"),
-                 EnumItem("pdf_Higgs_qq"),
-                 EnumItem("pdf_Higgs_ttH"),
-                 EnumItem("pdf_qq"),
+                 EnumItem("pdf_variation_Higgs_gg"),
+                 EnumItem("pdf_variation_Higgs_qqbar"),
+                 EnumItem("pdf_variation_Higgs_ttH"),
+                 EnumItem("pdf_variation_qq"),
+                 EnumItem("pdf_asmz_Higgs_gg"),
+                 EnumItem("pdf_asmz_Higgs_qqbar"),
+                 EnumItem("pdf_asmz_Higgs_ttH"),
+                 EnumItem("pdf_asmz_qq"),
                  EnumItem("BRhiggs_hzz4l"),
                  EnumItem("PythiaScale"),
                  EnumItem("PythiaTune"),
@@ -48,7 +52,7 @@ class YieldSystematic(MyEnum):
                 )
 
     def yamlfilename(self, channel=None):
-      if self in ("pdf_Higgs_gg", "pdf_Higgs_qq", "pdf_Higgs_ttH", "pdf_qq", "BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "QCDscale_ggH", "QCDscale_qqH", "QCDscale_VH", "QCDscale_ttH", "QCDscale_VV", "EWcorr_VV"):
+      if self in ("BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "EWcorr_VV"):
         return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
       if self in ("CMS_eff_e", "CMS_eff_m"):
         if channel is None:
@@ -266,8 +270,12 @@ class _TotalRate(MultiEnum):
   def ratefromUlascan(self):
     from templates import Template
     rate = 0
+    if self.production.year == 2016:
+      productionforrate = Production("180224_Ulascan")
+    elif self.production.year == 2017:
+      productionforrate = Production("180416_Ulascan")
     for ca, ch in itertools.product(channels, categories):
-      t = Template(self.productionmode, str(self.production)+"_Ulascan", "0+" if self.productionmode.issignal else None, ca, ch, "fa2")
+      t = Template(self.productionmode, productionforrate, "0+" if self.productionmode.issignal else None, ca, ch, "fa2")
       with TFile(t.templatesfile.templatesfile()) as f:
         h = getattr(f, t.templatename())
         rate += h.Integral()

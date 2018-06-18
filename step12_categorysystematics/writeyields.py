@@ -13,7 +13,7 @@ from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import AlternateWeight, analyses, categories, Category, Channel, channels, flavors, ProductionMode, pythiasystematics
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
 from helperstuff.treewrapper import TreeWrapper
-from helperstuff.utilities import MultiplyCounter
+from helperstuff.utilities import deprecate, MultiplyCounter
 from helperstuff.yields import count, totalrate, YieldSystematicValue, YieldValue
 
 from categorysystematics import findsystematic
@@ -31,7 +31,7 @@ def writeyields():
       SampleCount(ProductionMode("ttH"), {ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")}),
       SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
-      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
+      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors if deprecate(flavor != "4mu", 2018, 6, 19)}),
     ]
     if production.year == 2016:
       tosamples_foryields.append(SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}))

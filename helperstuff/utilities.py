@@ -1,6 +1,7 @@
 import abc
 import collections
 import contextlib
+import datetime
 import errno
 from functools import wraps
 import inspect
@@ -646,3 +647,9 @@ def setname(name):
         function.__name__ = name
         return function
     return decorator
+
+def deprecate(thing, *datetimeargs, **datetimekwargs):
+    when = datetime.datetime(*datetimeargs, **datetimekwargs)
+    if datetime.datetime.now() >= when:
+        raise RuntimeError("fix this!")
+    return thing
