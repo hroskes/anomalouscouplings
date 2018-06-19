@@ -341,18 +341,7 @@ class _Datacard(MultiEnum):
             if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
                 return "param 0 1 [-3,3]"
 
-    @property
-    def muV_scaled(self):
-        if self.analysis.isdecayonly: return None
-        if self.analysis.usehistogramsforcombine: return None
-        return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
-    @property
-    def muf_scaled(self):
-        if self.analysis.isdecayonly: return None
-        if self.analysis.usehistogramsforcombine: return None
-        return "extArg {}:w:RecycleConflictNodes".format(self.rootfile)
-
-    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, "muV_scaled", "muf_scaled")
+    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel)
 
     divider = "\n------------\n"
 
@@ -726,17 +715,17 @@ class _Pdf(PdfBase):
         return "{}_norm".format(self.productionmode.combinename)  #no makename!
 
     @classmethod
-    def murationame(cls, productionmodes):
+    def murationame(cls, productionmodes, year):
         if productionmodes == ("ggH", "ttH"):
-            return makename("mufratio")
+            return makename("mufratio_{}".format(year))
         if productionmodes == ("VBF", "ZH", "WH"):
-            return makename("muVratio")
+            return makename("muVratio_{}".format(year))
     @classmethod
-    def muscaledname(cls, productionmodes):
+    def muscaledname(cls, productionmodes, year):
         if productionmodes == ("ggH", "ttH"):
-            return makename("muf_scaled")
+            return makename("muf_scaled_{}".format(year))
         if productionmodes == ("VBF", "ZH", "WH"):
-            return makename("muV_scaled")
+            return makename("muV_scaled_{}".format(year))
 
     @classmethod
     @cache
@@ -966,13 +955,13 @@ class _Pdf(PdfBase):
         formula = "({}) / ({})".format(numerator, denominator)
         arglist = utilities.RooArgList(*[_.individualnorm for _ in pdfswithsamemu]
                                        +[_.norm_SM for _ in pdfswithsamemu])
-        return ROOT.RooFormulaVar(cls.murationame(productionmodes), "", formula, arglist)
+        return ROOT.RooFormulaVar(cls.murationame(productionmodes, luminosity.production.year), "", formula, arglist)
 
     @classmethod
     @cache
     def makemuscaled(cls, productionmodes, luminosity, analysis, mu):
         muratio = cls.makemuratio(productionmodes, luminosity, analysis)
-        return ROOT.RooFormulaVar(cls.muscaledname(productionmodes), "", "@0/@1", ROOT.RooArgList(mu, muratio))
+        return ROOT.RooFormulaVar(cls.muscaledname(productionmodes, luminosity.production.year), "", "@0/@1", ROOT.RooArgList(mu, muratio))
 
     @cache
     def makepdf_ZX(self):

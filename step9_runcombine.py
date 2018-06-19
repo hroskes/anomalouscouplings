@@ -395,7 +395,7 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF --PO .oO[analysis]Oo."
-        repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
+        repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV", fixmuV), ("muf", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
     else:
         if analysis.dimensions == 2 and analysis.isdecayonly:
             repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
@@ -411,7 +411,7 @@ def runcombine(analysis, foldername, **kwargs):
         else:
             repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs"
             repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF"
-            repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV,muV_scaled", fixmuV), ("muf,muf_scaled", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
+            repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV", fixmuV), ("muf", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
 
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(foldername))
     utilities.mkdir_p(folder)
