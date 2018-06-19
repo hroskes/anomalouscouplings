@@ -11,7 +11,7 @@ import ROOT
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
-from utilities import cache, mkdtemp, product, tlvfromptetaphim
+from utilities import cache, deprecate, mkdtemp, product, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 
@@ -172,7 +172,7 @@ class SampleBase(object):
             if self.productionmode not in ("ggH", "bbH"):
                 raise ValueError("Can't get xsec for {} with no pdf".format(self.productionmode))
 
-        if self.productionmode == "ggH":
+        if self.productionmode in ("ggH", "bbH"):
             return (
                       JHUXSHZZ2e2mua1*self.g1**2
                     + JHUXSHZZ2e2mua2*self.g2**2
@@ -552,7 +552,7 @@ class SampleBase(object):
                     LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
                     return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
 
-            elif (self_sample.productionmode in ("VBF bkg", "bbH", "tqH")
+            elif (self_sample.productionmode in ("VBF bkg", "tqH")
                        or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS")
                        or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
                 def MC_weight_function(self_tree):
@@ -684,7 +684,7 @@ class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, pdf=None):
         self.productionmode = ProductionMode(productionmode)
         self.__g1, self.__g2, self.__g4, self.__g1prime2, self.__ghzgs1prime2 = g1, g2, g4, g1prime2, ghzgs1prime2
-        if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH"):
+        if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH", "bbH"):
             raise ValueError("Bad productionmode {}".format(self.productionmode))
         if sum(bool(g) for g in (g2, g4, g1prime2 or ghzgs1prime2)) > 1:
             raise ValueError("Can only set at most one of g2, g4, or g1prime2 and/or ghzgs1prime2")
@@ -912,9 +912,10 @@ class ReweightingSample(MultiEnum, SampleBase):
                    ]
         if self.productionmode == "ggH" and config.LHE:
             return [self]
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
-            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
-        if self.productionmode in ("bbH", "tqH"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "bbH"):
+            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses
+                     if not deprecate(self.productionmode == "bbH" and hypothesis in ("fa30.5fa20.5", "fa20.5fL10.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5", "fL10.5fL1Zg0.5", "fa20.5fL1Zg0.5"), 2018, 6, 20)]
+        if self.productionmode == "tqH":
             return [self]
         if self.productionmode == "data":
             return []
@@ -1713,7 +1714,7 @@ class SampleBasis(MultiEnum):
 
     def check(self, *args):
         args = (self.hypotheses,)+args
-        if self.productionmode in ("ggH", "ttH"):
+        if self.productionmode in ("ggH", "ttH", "bbH"):
             if self.analysis.dimensions == 4:
                 dimension = 15
             elif self.analysis.dimensions == 2:

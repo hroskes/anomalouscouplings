@@ -22,10 +22,10 @@ class WeightsHelper(MultiEnum):
         if prodordec == "dec":
             if self.productionmode == "ggH":
                 return "GG"
-            if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ"):
+            if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ", "bbH"):
                 return "Dec"
         if prodordec == "prod":
-            if self.productionmode == "ggH":
+            if self.productionmode in ("ggH", "bbH"):
                 return None
             if self.productionmode == "ttH": #production reweighting for ttH doesn't work unfortunately
                 return None
@@ -101,5 +101,5 @@ class WeightsHelper(MultiEnum):
 if __name__ == "__main__":
     from samples import ArbitraryCouplingsSample, ReweightingSample
     print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, kappa=1, kappa_tilde=4, pdf="NNPDF30_lo_as_0130").MC_weight
+    print ArbitraryCouplingsSample("bbH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, pdf="NNPDF30_lo_as_0130").MC_weight
     print ArbitraryCouplingsSample("ggH", g1=0, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=23456, ghg2=1, ghg4=0, pdf="NNPDF30_lo_as_0130").MC_weight
-

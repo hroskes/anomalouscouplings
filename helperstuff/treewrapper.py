@@ -19,7 +19,7 @@ import enums
 from gconstants import gconstant
 from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import cache_instancemethod, callclassinitfunctions, getmembernames, product, tlvfromptetaphim
+from utilities import cache_instancemethod, callclassinitfunctions, deprecate, getmembernames, product, tlvfromptetaphim
 import xrd
 import ZX
 
@@ -1532,7 +1532,7 @@ class TreeWrapper(TreeWrapperBase):
                 self.exceptions.append(sample.weightname())
 
         self.genMEs = []
-        if not self.isbkg and not self.isalternate and self.treesample.productionmode not in ("bbH", "tqH"):
+        if not self.isbkg and not self.isalternate and self.treesample.productionmode not in ("tqH",):
             for sample in self.treesample.reweightingsamples():
                 for factor in sample.MC_weight_terms:
                     for weightname, couplingsq in factor:
@@ -1591,7 +1591,7 @@ class TreeWrapper(TreeWrapperBase):
         if self.isZX: return
         if self.isdata: return
         if self.treesample.productionmode == "ggZZ": return
-        if self.treesample.productionmode in ("bbH", "tqH"): return
+        if self.treesample.productionmode == "tqH": return
 
         if self.treesample.productionmode == "qqZZ":
             self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
@@ -2191,6 +2191,7 @@ class TreeWrapper(TreeWrapperBase):
         ReweightingSample("bbH", "fL1-0.5"),
         ReweightingSample("bbH", "fL1Zg-0.5"),
         ReweightingSample("bbH", "fa2dec-0.9"),
+     ] + [
 
         ReweightingSample("bbH", "fa30.5fa20.5"),
         ReweightingSample("bbH", "fa20.5fL10.5"),
@@ -2200,6 +2201,7 @@ class TreeWrapper(TreeWrapperBase):
         ReweightingSample("bbH", "fa30.5fL1Zg0.5"),
 
         ReweightingSample("bbH", "fL10.5fL1Zg0.5"),
+     ] * deprecate(0, 2018, 6, 20) + [
 
         ReweightingSample("tqH", "Hff0+", "0+"),
 

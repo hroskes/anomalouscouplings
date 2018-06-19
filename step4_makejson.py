@@ -2,7 +2,7 @@
 import argparse
 
 p = argparse.ArgumentParser()
-p.add_argument("--keep", help="keep the json files that already exist", action="store_true")
+p.add_argument("--overwrite", help="keep the json files that already exist", action="store_false", dest="keep")
 p.add_argument("--submitjobs", help="submit jobs", action="store_true")
 args = p.parse_args()
 
@@ -31,7 +31,7 @@ def submitjobs():
     i = 0
     for templatesfile in templatesfiles:
         if os.path.exists(templatesfile.jsonfile()) or os.path.exists(templatesfile.jsonfile()+".tmp"): continue
-        submitjob("unbuffer "+os.path.join(config.repositorydir, "step4_makejson.py")+" --keep", jobname="json"+str(i), jobtime="30:0:0", docd=True)
+        submitjob("unbuffer "+os.path.join(config.repositorydir, "step4_makejson.py"), jobname="json"+str(i), jobtime="10:0:0", docd=True)
         i += 1
 
 if __name__ == "__main__":

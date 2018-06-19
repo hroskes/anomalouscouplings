@@ -194,7 +194,7 @@ class TemplatesFile(MultiEnum):
         assert False
 
     def inttemplates(self):
-        if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM" or self.templategroup == "tth":
+        if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM" or self.templategroup in ("tth", "bbh"):
             h = str(self.templategroup).replace("h", "H")
             if self.analysis.dimensions == 4:
                 return [IntTemplate(self, h, "g{}1g{}1".format(i1, i2))
@@ -244,7 +244,7 @@ class TemplatesFile(MultiEnum):
         from discriminants import discriminant
 
         name = "D_bkg"
-        if self.production.year == 2017 or self.production == "180224_newdiscriminants":
+        if self.production >= "180416" or self.production == "180224_newdiscriminants":
             if self.category == "Untagged": pass
             elif self.category == "VBFtagged": name += "_VBFdecay"
             elif self.category == "VHHadrtagged": name += "_HadVHdecay"
@@ -256,7 +256,7 @@ class TemplatesFile(MultiEnum):
 
         if self.analysis == "fa3fa2fL1fL1Zg":
             name += "_10bins"
-        elif self.production.year == 2017 or self.production in ("180224_newdiscriminants", "180224_10bins"):
+        elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
                     name += "_30bins"
@@ -276,7 +276,7 @@ class TemplatesFile(MultiEnum):
         else:
             JECappend = ""
 
-        if self.production.year == 2017 or self.production in ("180224_10bins", "180224_newdiscriminants"):
+        if self.production >= "180416" or self.production in ("180224_10bins", "180224_newdiscriminants"):
             if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
                     binsappend = "_30bins"
@@ -349,7 +349,7 @@ class TemplatesFile(MultiEnum):
     def mixdiscriminant(self):
         from discriminants import discriminant
 
-        if self.production.year == 2017 or self.production == "180224_newdiscriminants":
+        if self.production >= "180416" or self.production == "180224_newdiscriminants":
             if "Ulascan" in str(self.production):
                 if self.category == "Untagged":
                     binsappend = "_new_30bins"
@@ -434,7 +434,7 @@ class TemplatesFile(MultiEnum):
     @property
     @cache
     def invertedmatrix(self):
-        productionmode = str(self.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH")
+        productionmode = str(self.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH").replace("BBH", "bbH")
         basis = SampleBasis([template.hypothesis for template in self.templates()], productionmode, self.analysis)
         invertedmatrix = basis.invertedmatrix
         try:
@@ -579,6 +579,7 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
+                        yield TemplatesFile(channel, shapesystematic, "bbh", analysis, production, category)
                     yield TemplatesFile(channel, "DATA", analysis, production, category)
                     if category != "Untagged" and config.applyMINLOsystematics:
                         yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
@@ -844,7 +845,7 @@ class Template(TemplateBase, MultiEnum):
         assert False, "{} does not exist in TreeWrapper".format(result)
 
     def reweightfrom(self):
-        if self.productionmode in ("ggH", "bbH"):
+        if self.productionmode == "ggH":
             if config.LHE:
                 result = {Sample(self.production, self.productionmode, self.hypothesis)}
             elif self.shapesystematic == "MINLO_SM":
@@ -859,7 +860,7 @@ class Template(TemplateBase, MultiEnum):
                     Sample(self.production, self.productionmode, hypothesis)
                         for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
                    }
-        if self.productionmode == "ttH":
+        if self.productionmode in ("ttH", "bbH"):
             result={
                     Sample(self.production, self.productionmode, "0+", self.hffhypothesis)
                    }
