@@ -61,15 +61,8 @@ if __name__ == "__main__":
             yield templatesfile
     length = len(list(thetemplatesfiles()))
 
-    if len(sys.argv) == 1:
-        iteration = None
-    elif len(sys.argv) == 2:
-        iteration = sys.argv[1]
-    else:
-        raise TypeError("Too many command line arguments ({})".format(len(sys.argv)))
-
     for i, templatesfile in enumerate(thetemplatesfiles(), start=1):
-        makecontrolplots(templatesfile, iteration=iteration)
+        makecontrolplots(templatesfile)
         print i, "/", length
 
     copyplots(os.path.join("templateprojections", "controlplots"))
