@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+if __name__ == "__main__":
+  import argparse
+  def __ProductionMode(*args, **kwargs):
+    from helperstuff.enums import ProductionMode
+    return ProductionMode(*args, **kwargs)
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--productionmode", action="append", type=__ProductionMode)
+  args = parser.parse_args()
+
 from collections import namedtuple
 import itertools
 import logging
@@ -20,7 +29,7 @@ from categorysystematics import findsystematic
 
 SampleCount = namedtuple("SampleCount", "productionmode samples")
 
-def writeyields():
+def writeyields(productionmodelist=None):
   if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
 
   for production in {_.productionforrate for _ in config.productionsforcombine}:
@@ -29,9 +38,10 @@ def writeyields():
       SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("WH"), {ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("ttH"), {ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")}),
+      SampleCount(ProductionMode("bbH"), {ReweightingSamplePlus("bbH", "0+")}),
       SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
-      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors if deprecate(flavor != "4mu", 2018, 6, 19)}),
+      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors if deprecate(flavor != "4mu", 2018, 6, 22)}),
     ]
     if production.year == 2016:
       tosamples_foryields.append(SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}))
@@ -42,9 +52,10 @@ def writeyields():
 
     result = MultiplyCounter()
     for productionmode, samples in tosamples_foryields:
+      if productionmodelist and productionmode not in productionmodelist: continue
       print productionmode
       samplegroups = [samples]
-      if productionmode.issignal:
+      if productionmode.issignal and productionmode != "bbH":
         samplegroups += [{ReweightingSamplePlus(s, systematic) for s in samples} for systematic in pythiasystematics
                             if systematic.hassample(production.year)]
         if production.year == 2017:
@@ -53,7 +64,7 @@ def writeyields():
       for usesamples in samplegroups:
         tmpresult = MultiplyCounter()
         for tosample in usesamples:
-          if (productionmode in ("ggZZ", "VBF bkg", "ZX")
+          if (productionmode in ("ggZZ", "VBF bkg", "ZX", "bbH")
                or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None):
             usealternateweights = [AlternateWeight("1")]
           elif productionmode.issignal and tosample.extension == "ext":
@@ -76,9 +87,10 @@ def writeyields():
 
 
     for productionmode, samples in tosamples_foryields:
+      if productionmodelist and productionmode not in productionmodelist: continue
       print productionmode
       for analysis in analyses:
-        if analysis.isdecayonly and productionmode in ("VBF", "ZH", "WH", "ttH"): continue
+        if analysis.isdecayonly and productionmode in ("VBF", "ZH", "WH", "ttH", "bbH"): continue
         categorization = {_ for _ in categorizations if _.category_function_name == "category_"+analysis.categoryname}
         assert len(categorization) == 1, categorization
         categorization = categorization.pop()
@@ -102,7 +114,10 @@ def writeyields():
         for systname in "lumi_13TeV_2016", "lumi_13TeV_2017":
           for category, channel in itertools.product(categories, channels):
             syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-            syst.value = syst.yieldsystematic.hardcodedvalue(production)
+            if productionmode == "ZX":
+              syst.value = None
+            else:
+              syst.value = syst.yieldsystematic.hardcodedvalue(production)
 
         #same for all categories
         #from yaml
@@ -215,4 +230,4 @@ if __name__ == "__main__":
   if config.LHE:
     writeyields_LHE()
   else:
-    writeyields()
+    writeyields(args.productionmode)

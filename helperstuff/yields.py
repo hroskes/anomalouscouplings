@@ -267,6 +267,18 @@ class _TotalRate(MultiEnum):
     return c.FindObject("htemp").Integral() * float(self.luminosity)
 
   @property
+  def templaterate(self):
+    from templates import Template
+    rate = 0
+    for ca, ch in itertools.product(channels, categories):
+      t = Template(self.productionmode, self.production, "0+" if self.productionmode.issignal else None, ca, ch, "fa3")
+      with TFile(t.templatesfile.templatesfile()) as f:
+        h = getattr(f, t.templatename())
+        rate += h.Integral()
+    if self.productionmode != "ZX": rate *= float(self.luminosity)
+    return rate
+
+  @property
   def ratefromUlascan(self):
     from templates import Template
     rate = 0
@@ -285,8 +297,9 @@ class _TotalRate(MultiEnum):
   @property
   @cache
   def rate(self):
-    if self.productionmode != "ttH": return self.ratefromUlascan
+    if self.productionmode not in ("ttH", "bbH"): return self.ratefromUlascan
     elif self.productionmode == "VBF bkg": return self.treerate
+    elif self.productionmode == "bbH": return self.templaterate
     else: return self.yamlrate
 
 def totalrate(*args):

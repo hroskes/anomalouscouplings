@@ -6,9 +6,11 @@ import pipes
 import subprocess
 import sys
 
-from utilities import cd
+from utilities import cd, LSB_JOBID
 
 def copyplots(folder):
+  if LSB_JOBID():
+    return
   if config.host == "lxplus":
     return
   elif config.host == "MARCC":

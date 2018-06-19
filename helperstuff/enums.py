@@ -261,7 +261,7 @@ class ProductionMode(MyEnum):
                 )
     @property
     def combinename(self):
-        for name in "ggH", "qqH", "ZH", "WH", "ttH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets":
+        for name in "ggH", "qqH", "ZH", "WH", "ttH", "bbH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets":
             if self == name:
                 return name
         assert False
