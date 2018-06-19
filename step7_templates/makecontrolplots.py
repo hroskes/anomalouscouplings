@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+import argparse
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser()
+    p.add_argument("--filter", type=eval, default=lambda tf: True)
+    args = p.parse_args()
+
 import glob
 import os
 import sys
@@ -57,7 +64,8 @@ def makecontrolplots(*args, **kwargs):
 if __name__ == "__main__":
     def thetemplatesfiles():
         for templatesfile in templatesfiles:
-            if templatesfile.production != "180416": continue
+            if not args.filter(templatesfile): continue
+            if templatesfile.templategroup == "DATA": continue
             yield templatesfile
     length = len(list(thetemplatesfiles()))
 
