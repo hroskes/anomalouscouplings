@@ -287,9 +287,9 @@ class TemplatesFile(MultiEnum):
                     binsappend = "_20bins"
             else:
                 if self.category == "Untagged":
-                    name += "_20bins"
+                    binsappend = "_20bins"
                 else:
-                    name += "_10bins"
+                    binsappend = "_10bins"
         elif self.production.year == 2016:
             binsappend = ""
 
@@ -363,9 +363,9 @@ class TemplatesFile(MultiEnum):
                     binsappend = "_new_20bins"
             else:
                 if self.category == "Untagged":
-                    name += "_new_20bins"
+                    binsappend = "_new_20bins"
                 else:
-                    name += "_new_10bins"
+                    binsappend = "_new_10bins"
             if self.analysis in ("fL1", "fL1Zg"): binsappend = binsappend.replace("_new", "")
         elif self.production == "180224_10bins":
             binsappend = "_10bins"
