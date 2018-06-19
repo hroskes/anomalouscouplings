@@ -458,12 +458,15 @@ class LSF_creating(object):
 
         self.jsonfile = None
         self.ignorefailure = False
+        self.skipifexists = False
         for kw, kwarg in kwargs.iteritems():
             if kw == "jsonfile":
                 self.jsonfile = kwarg
                 if not self.jsonfile.startswith("/"): raise ValueError("jsonfile={} should be an absolute path!".format(self.jsonfile))
             elif kw == "ignorefailure":
                 self.ignorefailure = kwarg
+            elif kw == "skipifexists":
+                self.skipifexists = kwarg
             else:
                 raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
 
@@ -499,6 +502,7 @@ class LSF_creating(object):
         notcreated = []
 
         for filename in self.files:
+            if os.path.exists(filename) and self.skipifexists: continue
             if os.path.exists(os.path.basename(filename)):
                 shutil.move(os.path.basename(filename), filename)
             else:

@@ -123,11 +123,12 @@ def runscan(repmap, submitjobs, directory=None):
     tmpfile = os.path.join(directory, filename+".tmp")
     logfile = replaceByMap("log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap)
     if not os.path.exists(filename):
-           #utilities.KeepWhileOpenFile(tmpfile, message=utilities.LSB_JOBID()), \
       with utilities.cd(cdto), \
-           utilities.LSF_creating(os.path.join(directory, filename)), \
-           utilities.LSF_creating(os.path.join(directory, logfile)):
-        subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
+           utilities.OneAtATime(tmpfile, message=utilities.LSB_JOBID()), \
+           utilities.LSF_creating(os.path.join(directory, filename), skipifexists=True), \
+           utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
+        if not os.path.exists(filename):
+          subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
 
 
 def runcombine(analysis, foldername, **kwargs):
