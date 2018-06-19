@@ -124,7 +124,7 @@ def runscan(repmap, submitjobs, directory=None):
     logfile = replaceByMap("log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap)
     if not os.path.exists(filename):
       with utilities.cd(cdto), \
-           utilities.OneAtATime(tmpfile, message=utilities.LSB_JOBID()), \
+           utilities.OneAtATime(tmpfile, 30, message=utilities.LSB_JOBID()), \
            utilities.LSF_creating(os.path.join(directory, filename), skipifexists=True), \
            utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
         if not os.path.exists(filename):
