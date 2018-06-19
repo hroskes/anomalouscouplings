@@ -263,7 +263,10 @@ class TemplatesFile(MultiEnum):
                 else:
                     name += "_20bins"
             else:
-                name += "_10bins"
+                if self.category == "Untagged":
+                    name += "_20bins"
+                else:
+                    name += "_10bins"
 
         return discriminant(name)
 
@@ -283,7 +286,10 @@ class TemplatesFile(MultiEnum):
                 else:
                     binsappend = "_20bins"
             else:
-                binsappend = "_10bins"
+                if self.category == "Untagged":
+                    name += "_20bins"
+                else:
+                    name += "_10bins"
         elif self.production.year == 2016:
             binsappend = ""
 
@@ -356,7 +362,10 @@ class TemplatesFile(MultiEnum):
                 else:
                     binsappend = "_new_20bins"
             else:
-                binsappend = "_new_10bins"
+                if self.category == "Untagged":
+                    name += "_new_20bins"
+                else:
+                    name += "_new_10bins"
             if self.analysis in ("fL1", "fL1Zg"): binsappend = binsappend.replace("_new", "")
         elif self.production == "180224_10bins":
             binsappend = "_10bins"
