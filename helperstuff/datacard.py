@@ -132,12 +132,13 @@ class _Datacard(MultiEnum):
 
     @property
     def productionmodes(self):
-        result = [ProductionMode(p) for p in ("ggH", "qqH", "WH", "ZH", "ttH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets")]
+        result = [ProductionMode(p) for p in ("ggH", "qqH", "WH", "ZH", "ttH", "bbH", "bkg_qqzz", "bkg_ggzz", "bkg_vbf", "bkg_zjets")]
         if self.analysis.isdecayonly:
             result.remove("VBF")
             result.remove("WH")
             result.remove("ZH")
             result.remove("ttH")
+            result.remove("bbH")
         if config.LHE:
             result.remove("ggZZ")
             result.remove("VBFbkg")
@@ -716,13 +717,13 @@ class _Pdf(PdfBase):
 
     @classmethod
     def murationame(cls, productionmodes, year):
-        if productionmodes == ("ggH", "ttH"):
+        if productionmodes == ("ggH", "ttH", "bbH"):
             return makename("mufratio_{}".format(year))
         if productionmodes == ("VBF", "ZH", "WH"):
             return makename("muVratio_{}".format(year))
     @classmethod
     def muscaledname(cls, productionmodes, year):
-        if productionmodes == ("ggH", "ttH"):
+        if productionmodes == ("ggH", "ttH", "bbH"):
             return makename("muf_scaled_{}".format(year))
         if productionmodes == ("VBF", "ZH", "WH"):
             return makename("muV_scaled_{}".format(year))
@@ -929,15 +930,15 @@ class _Pdf(PdfBase):
         The individualnorm, set by makepdf, models how the number of events changes
         as a function of fai.  Now we want to divide by the sum of the individualnorms
         so that constant muV corresponds to the same number of observed VBF+ZH+WH events
-        for any fai, and constant muf corresponds to the same number of observed ggH+ttH
+        for any fai, and constant muf corresponds to the same number of observed ggH+ttH+bbH
         events for any fai.
         """
 
         if self.productionmode in ("VBF", "ZH", "WH"):
             productionmodes = [ProductionMode(_) for _ in ("VBF", "ZH", "WH")]
             mu = self.muV()
-        if self.productionmode in ("ggH", "ttH"):
-            productionmodes = [ProductionMode(_) for _ in ("ggH", "ttH")]
+        if self.productionmode in ("ggH", "ttH", "bbH"):
+            productionmodes = [ProductionMode(_) for _ in ("ggH", "ttH", "bbH")]
             mu = self.muf()
         return self.makemuscaled(tuple(productionmodes), self.luminosity, self.analysis, mu)
 
@@ -993,7 +994,7 @@ class _Pdf(PdfBase):
         self.T_datahist = ROOT.RooDataHist(self.datahistname(), "", ROOT.RooArgList(self.D1,self.D2,self.D3), self.T)
 
     def makepdf(self):
-        if self.productionmode in ("ggH", "ttH"):
+        if self.productionmode in ("ggH", "ttH", "bbH"):
             if self.analysis.dimensions == 2:
                 self.makepdf_decayonly_2D()
             else:
@@ -1040,7 +1041,7 @@ class _Pdf(PdfBase):
 
     def getpdf(self):
         self.makepdf()
-        if self.productionmode in ("ggH", "ttH"):
+        if self.productionmode in ("ggH", "ttH", "bbH"):
             if self.analysis.dimensions == 2:
                 return self.getpdf_decayonly_2D()
             else:
