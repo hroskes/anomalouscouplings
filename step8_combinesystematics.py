@@ -26,7 +26,12 @@ def combinesystematics(channel, analysis, production, category):
         ScaleAndRes = {}
         for _ in "ggh", "vbf", "zh", "wh", "tth":
             for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
-                if _ == "ggh" and category == "Untagged": continue
+                if config.getm4lsystsfromggHUntagged:
+                    if _ == "ggh" and category == "Untagged": continue
+                elif config.getm4lsystsfromggH:
+                    if _ == "ggh": continue
+                else:
+                    continue
                 ScaleAndRes[_,syst] = TemplatesFile(channel, _, syst, analysis, production, category)
             assert all("Scale" in _.templatesfile() or "Res" in _.templatesfile() for _ in ScaleAndRes.values())
         thetemplatesfiles += ScaleAndRes.values()
@@ -58,16 +63,21 @@ def combinesystematics(channel, analysis, production, category):
 
     store = []
 
-    if dom4lshapes:
-        ggHuntaggedSM = {systematic:
-                           gettemplate(channel, "ggH", analysis, production, "Untagged", analysis.purehypotheses[0], systematic)
-                           .ProjectionZ().Clone("projection_{}".format(systematic))
-                         for systematic in ("", "ScaleUp", "ScaleDown", "ResUp", "ResDown")}
+    if dom4lshapes and config.getm4lsystsfromggH:
+        if config.getm4lsystsfromggHUntagged: usecategory = "Untagged"
+        elif config.getm4lsystsfromggH: usecategory = category
+        else: assert False
+
+        ggHSM = {systematic:
+                   gettemplate(channel, "ggH", analysis, production, usecategory, analysis.purehypotheses[0], systematic)
+                   .ProjectionZ().Clone("projection_{}".format(systematic))
+                 for systematic in ("", "ScaleUp", "ScaleDown", "ResUp", "ResDown")}
         ggHnominal = ggHuntaggedSM[""]
         for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
             ggHsyst = ggHuntaggedSM[syst]
             for _ in "ggh", "vbf", "zh", "wh", "tth":
-                if _ == "ggh" and category == "Untagged": continue
+                if _ == "ggh" and category == "Untagged" and config.getm4lsystsfromggHUntagged: continue
+                elif _ == "ggh" and not config.getm4lsystsfromggHUntagged: continue
                 tf = TemplatesFile(channel, _, analysis, production, category)
                 for t in tf.templates() + tf.inttemplates():
                     h = t.gettemplate().Clone()

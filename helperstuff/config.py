@@ -47,11 +47,15 @@ useVHMETTagged = True
 usefastpdf = True
 usefastpdfdouble = False
 
-applym4lshapesystematicsUntagged = False
-applym4lshapesystematicsVBFVHtagged = False
+applym4lshapesystematicsUntagged = True
+applym4lshapesystematicsVBFVHtagged = True
 applym4lshapesystematicsggH = False
 applym4lshapesystematicsggHUntagged = False
 applym4lshapesystematicsdiagonal = False #VBF in VBFtagged, VH in VHHadrtagged
+
+getm4lsystsfromggHUntagged = False
+getm4lsystsfromggH = True
+
 combinem4lshapesystematics = False
 
 applyZXshapesystematicsVBFVHtagged = False
@@ -62,6 +66,7 @@ applyJECshapesystematics = False
 applyMINLOsystematics = False
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata <= (not LHE)
+assert getm4lsystsfromggHUntagged <= getm4lsystsfromggH
 
 lumi2015 = 2.7
 

@@ -123,30 +123,20 @@ class TreeWrapperBase(Iterator):
 ##########################
 
     def D_bkg(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG / (self.M2g1_decay*self.p_m4l_SIG  + self.M2qqZZ*self.p_m4l_BKG*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
+        if self.p_m4l_SIG <= 0: return -999
+        return self.M2g1_decay*self.p_m4l_SIG / (self.M2g1_decay*self.p_m4l_SIG  + self.M2qqZZ*self.p_m4l_BKG*self.cconstantforDbkg)
     def D_bkg_ResUp(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG_ResUp / (self.M2g1_decay*self.p_m4l_SIG_ResUp  + self.M2qqZZ*self.p_m4l_BKG_ResUp*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
+        if self.p_m4l_SIG_ResUp <= 0: return -999
+        return self.M2g1_decay*self.p_m4l_SIG_ResUp / (self.M2g1_decay*self.p_m4l_SIG_ResUp  + self.M2qqZZ*self.p_m4l_BKG_ResUp*self.cconstantforDbkg)
     def D_bkg_ResDown(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG_ResDown / (self.M2g1_decay*self.p_m4l_SIG_ResDown  + self.M2qqZZ*self.p_m4l_BKG_ResDown*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
+        if self.p_m4l_SIG_ResDown <= 0: return -999
+        return self.M2g1_decay*self.p_m4l_SIG_ResDown / (self.M2g1_decay*self.p_m4l_SIG_ResDown  + self.M2qqZZ*self.p_m4l_BKG_ResDown*self.cconstantforDbkg)
     def D_bkg_ScaleUp(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG_ScaleUp / (self.M2g1_decay*self.p_m4l_SIG_ScaleUp  + self.M2qqZZ*self.p_m4l_BKG_ScaleUp*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
+        if self.p_m4l_SIG_ScaleUp <= 0: return -999
+        return self.M2g1_decay*self.p_m4l_SIG_ScaleUp / (self.M2g1_decay*self.p_m4l_SIG_ScaleUp  + self.M2qqZZ*self.p_m4l_BKG_ScaleUp*self.cconstantforDbkg)
     def D_bkg_ScaleDown(self):
-        try:
-            return self.M2g1_decay*self.p_m4l_SIG_ScaleDown / (self.M2g1_decay*self.p_m4l_SIG_ScaleDown  + self.M2qqZZ*self.p_m4l_BKG_ScaleDown*self.cconstantforDbkg)
-        except ZeroDivisionError:
-            return 0
+        if self.p_m4l_SIG_ScaleDown <= 0: return -999
+        return self.M2g1_decay*self.p_m4l_SIG_ScaleDown / (self.M2g1_decay*self.p_m4l_SIG_ScaleDown  + self.M2qqZZ*self.p_m4l_BKG_ScaleDown*self.cconstantforDbkg)
 
     def D_2jet_0plus(self):
         if self.notdijet: return -999
@@ -225,7 +215,7 @@ class TreeWrapperBase(Iterator):
 
     @MakeJECSystematics
     def D_bkg_VBFdecay(self):
-        if self.notdijet: return -999
+        if self.notdijet or self.p_m4l_SIG <= 0: return -999
 
         #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
         #1/result - 1 = bkg/signal
@@ -234,6 +224,62 @@ class TreeWrapperBase(Iterator):
 
         result = 1/result - 1
         result *= self.p_m4l_BKG / self.p_m4l_SIG * self.cconstantforDbkg / self.cconstantforDbkgkin
+        result = 1/(1+result)
+
+        return result
+
+    def D_bkg_VBFdecay_ScaleUp(self):
+        if self.notdijet or self.p_m4l_SIG_ScaleUp <= 0: return -999
+
+        #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
+        #1/result - 1 = bkg/signal
+
+        result = self.D_bkg_kin_VBFdecay()
+
+        result = 1/result - 1
+        result *= self.p_m4l_BKG_ScaleUp / self.p_m4l_SIG_ScaleUp * self.cconstantforDbkg / self.cconstantforDbkgkin
+        result = 1/(1+result)
+
+        return result
+
+    def D_bkg_VBFdecay_ScaleDown(self):
+        if self.notdijet or self.p_m4l_SIG_ScaleDown <= 0: return -999
+
+        #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
+        #1/result - 1 = bkg/signal
+
+        result = self.D_bkg_kin_VBFdecay()
+
+        result = 1/result - 1
+        result *= self.p_m4l_BKG_ScaleDown / self.p_m4l_SIG_ScaleDown * self.cconstantforDbkg / self.cconstantforDbkgkin
+        result = 1/(1+result)
+
+        return result
+
+    def D_bkg_VBFdecay_ResUp(self):
+        if self.notdijet or self.p_m4l_SIG_ResUp <= 0: return -999
+
+        #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
+        #1/result - 1 = bkg/signal
+
+        result = self.D_bkg_kin_VBFdecay()
+
+        result = 1/result - 1
+        result *= self.p_m4l_BKG_ResUp / self.p_m4l_SIG_ResUp * self.cconstantforDbkg / self.cconstantforDbkgkin
+        result = 1/(1+result)
+
+        return result
+
+    def D_bkg_VBFdecay_ResDown(self):
+        if self.notdijet or self.p_m4l_SIG_ResDown <= 0: return -999
+
+        #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
+        #1/result - 1 = bkg/signal
+
+        result = self.D_bkg_kin_VBFdecay()
+
+        result = 1/result - 1
+        result *= self.p_m4l_BKG_ResDown / self.p_m4l_SIG_ResDown * self.cconstantforDbkg / self.cconstantforDbkgkin
         result = 1/(1+result)
 
         return result
@@ -266,7 +312,7 @@ class TreeWrapperBase(Iterator):
 
     @MakeJECSystematics
     def D_bkg_HadVHdecay(self):
-        if self.notdijet: return -999
+        if self.notdijet or self.p_m4l_SIG <= 0: return -999
 
         #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
         #1/result - 1 = bkg/signal
@@ -275,6 +321,62 @@ class TreeWrapperBase(Iterator):
 
         result = 1/result - 1
         result *= self.p_m4l_BKG / self.p_m4l_SIG * self.cconstantforDbkg / self.cconstantforDbkgkin
+        result = 1/(1+result)
+
+        return result
+
+    def D_bkg_HadVHdecay_ScaleUp(self):
+        if self.notdijet or self.p_m4l_SIG_ScaleUp <= 0: return -999
+
+        #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
+        #1/result - 1 = bkg/signal
+
+        result = self.D_bkg_kin_HadVHdecay()
+
+        result = 1/result - 1
+        result *= self.p_m4l_BKG_ScaleUp / self.p_m4l_SIG_ScaleUp * self.cconstantforDbkg / self.cconstantforDbkgkin
+        result = 1/(1+result)
+
+        return result
+
+    def D_bkg_HadVHdecay_ScaleDown(self):
+        if self.notdijet or self.p_m4l_SIG_ScaleDown <= 0: return -999
+
+        #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
+        #1/result - 1 = bkg/signal
+
+        result = self.D_bkg_kin_HadVHdecay()
+
+        result = 1/result - 1
+        result *= self.p_m4l_BKG_ScaleDown / self.p_m4l_SIG_ScaleDown * self.cconstantforDbkg / self.cconstantforDbkgkin
+        result = 1/(1+result)
+
+        return result
+
+    def D_bkg_HadVHdecay_ResUp(self):
+        if self.notdijet or self.p_m4l_SIG_ResUp <= 0: return -999
+
+        #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
+        #1/result - 1 = bkg/signal
+
+        result = self.D_bkg_kin_HadVHdecay()
+
+        result = 1/result - 1
+        result *= self.p_m4l_BKG_ResUp / self.p_m4l_SIG_ResUp * self.cconstantforDbkg / self.cconstantforDbkgkin
+        result = 1/(1+result)
+
+        return result
+
+    def D_bkg_HadVHdecay_ResDown(self):
+        if self.notdijet or self.p_m4l_SIG_ResDown <= 0: return -999
+
+        #result = signal / (signal+bkg) = 1 / (1+bkg/signal)
+        #1/result - 1 = bkg/signal
+
+        result = self.D_bkg_kin_HadVHdecay()
+
+        result = 1/result - 1
+        result *= self.p_m4l_BKG_ResDown / self.p_m4l_SIG_ResDown * self.cconstantforDbkg / self.cconstantforDbkgkin
         result = 1/(1+result)
 
         return result
@@ -1352,6 +1454,14 @@ class TreeWrapper(TreeWrapperBase):
             "D_bkg_ResDown",
             "D_bkg_ScaleUp",
             "D_bkg_ScaleDown",
+            "D_bkg_VBFdecay_ResUp",
+            "D_bkg_VBFdecay_ResDown",
+            "D_bkg_VBFdecay_ScaleUp",
+            "D_bkg_VBFdecay_ScaleDown",
+            "D_bkg_HadVHdecay_ResUp",
+            "D_bkg_HadVHdecay_ResDown",
+            "D_bkg_HadVHdecay_ScaleUp",
+            "D_bkg_HadVHdecay_ScaleDown",
             "D_2jet_0plus",
             "D_2jet_0minus",
             "D_2jet_a2",

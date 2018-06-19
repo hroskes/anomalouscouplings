@@ -578,12 +578,13 @@ def templatesfiles():
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
                     for shapesystematic in treeshapesystematics:
-                        if category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+                        if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         if config.LHE and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
-                        if shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
-                        yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
+                        if shapesystematic not in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"):
+                            yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
                         if analysis.isdecayonly: continue
+                        if config.getm4lsystsfromggH: continue
                         yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)

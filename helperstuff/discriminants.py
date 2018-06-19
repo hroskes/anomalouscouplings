@@ -15,6 +15,7 @@ decaydiscriminants = [
     Discriminant("D_bkg_ResDown", "D_{bkg}^{ResDown}", defaultnbins, 0, 1),
     Discriminant("D_bkg_ScaleUp", "D_{bkg}^{ScaleUp}", defaultnbins, 0, 1),
     Discriminant("D_bkg_ScaleDown", "D_{bkg}^{ScaleDown}", defaultnbins, 0, 1),
+
     Discriminant("D_0minus_decay", "D_{0-}^{dec}", defaultnbins, 0, 1),
     Discriminant("D_CP_decay", "D_{CP}^{dec}", defaultnbins, -0.5, 0.5),
     Discriminant("D_0hplus_decay", "D_{0h+}^{dec}", defaultnbins, 0, 1),
@@ -58,6 +59,11 @@ decaydiscriminants = [
     Discriminant("D_int_decay_new", "D_{int}^{dec}", 10, -1, 1, identifier="D_int_decay_new_10bins"),
 
     Discriminant("D_bkg", "D_{bkg}", 20, 0, 1, identifier="D_bkg_20bins"),
+    Discriminant("D_bkg_ResUp", "D_{bkg}^{ResUp}", 20, 0, 1, identifier="D_bkg_ResUp_20bins"),
+    Discriminant("D_bkg_ResDown", "D_{bkg}^{ResDown}", 20, 0, 1, identifier="D_bkg_ResDown_20bins"),
+    Discriminant("D_bkg_ScaleUp", "D_{bkg}^{ScaleUp}", 20, 0, 1, identifier="D_bkg_ScaleUp_20bins"),
+    Discriminant("D_bkg_ScaleDown", "D_{bkg}^{ScaleDown}", 20, 0, 1, identifier="D_bkg_ScaleDown_20bins"),
+
     Discriminant("D_0minus_decay", "D_{0-}^{dec}", 20, 0, 1, identifier="D_0minus_decay_20bins"),
     Discriminant("D_0hplus_decay", "D_{0h+}^{dec}", 20, 0, 1, identifier="D_0hplus_decay_20bins"),
     Discriminant("D_L1_decay", "D_{#Lambda1}^{dec}", 20, 0, 1, identifier="D_L1_decay_20bins"),
@@ -95,7 +101,12 @@ VBFdiscriminants = [
 
     Discriminant("D_CP_VBF", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_VBF_2bins"),
 
-    Discriminant("D_bkg_VBFdecay", "D_{bkg}", 10, 0, 1, identifier="D_bkg_VBFdecay_10bins"),
+    Discriminant("D_bkg_VBFdecay", "D_{bkg}^{VBF+dec}", 10, 0, 1, identifier="D_bkg_VBFdecay_10bins"),
+    Discriminant("D_bkg_VBFdecay_ResUp", "D_{bkg}^{VBF+dec,ResUp}", 10, 0, 1, identifier="D_bkg_VBFdecay_ResUp_10bins"),
+    Discriminant("D_bkg_VBFdecay_ResDown", "D_{bkg}^{VBF+dec,ResDown}", 10, 0, 1, identifier="D_bkg_VBFdecay_ResDown_10bins"),
+    Discriminant("D_bkg_VBFdecay_ScaleUp", "D_{bkg}^{VBF+dec,ScaleUp}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleUp_10bins"),
+    Discriminant("D_bkg_VBFdecay_ScaleDown", "D_{bkg}^{VBF+dec,ScaleDown}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleDown_10bins"),
+
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 10, 0, 1, identifier="D_0minus_VBFdecay_10bins"),
     Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBF+dec}", 10, 0, 1, identifier="D_0hplus_VBFdecay_10bins"),
     Discriminant("D_L1_VBFdecay", "D_{#Lambda1}^{VBF+dec}", 10, 0, 1, identifier="D_L1_VBFdecay_10bins"),
@@ -105,7 +116,7 @@ VBFdiscriminants = [
     Discriminant("D_CP_VBF_new", "D_{CP}^{VBF}", 10, -1, 1, identifier="D_CP_VBF_new_10bins"),
     Discriminant("D_int_VBF_new", "D_{int}^{VBF}", 10, -1, 1, identifier="D_int_VBF_new_10bins"),
 
-    Discriminant("D_bkg_VBFdecay", "D_{bkg}", 20, 0, 1, identifier="D_bkg_VBFdecay_20bins"),
+    Discriminant("D_bkg_VBFdecay", "D_{bkg}^{VBF+dec}", 20, 0, 1, identifier="D_bkg_VBFdecay_20bins"),
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 20, 0, 1, identifier="D_0minus_VBFdecay_20bins"),
     Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBF+dec}", 20, 0, 1, identifier="D_0hplus_VBFdecay_20bins"),
     Discriminant("D_L1_VBFdecay", "D_{#Lambda1}^{VBF+dec}", 20, 0, 1, identifier="D_L1_VBFdecay_20bins"),
@@ -132,7 +143,12 @@ VHdiscriminants = [
 
     Discriminant("D_CP_HadVH", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_HadVH_2bins"),
 
-    Discriminant("D_bkg_HadVHdecay", "D_{bkg}", 10, 0, 1, identifier="D_bkg_HadVHdecay_10bins"),
+    Discriminant("D_bkg_HadVHdecay", "D_{bkg}^{VH+dec}", 10, 0, 1, identifier="D_bkg_HadVHdecay_10bins"),
+    Discriminant("D_bkg_HadVHdecay_ResUp", "D_{bkg}^{VH+dec,ResUp}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ResUp_10bins"),
+    Discriminant("D_bkg_HadVHdecay_ResDown", "D_{bkg}^{VH+dec,ResDown}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ResDown_10bins"),
+    Discriminant("D_bkg_HadVHdecay_ScaleUp", "D_{bkg}^{VH+dec,ScaleUp}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleUp_10bins"),
+    Discriminant("D_bkg_HadVHdecay_ScaleDown", "D_{bkg}^{VH+dec,ScaleDown}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleDown_10bins"),
+
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 10, 0, 1, identifier="D_0minus_HadVHdecay_10bins"),
     Discriminant("D_0hplus_HadVHdecay", "D_{0h+}^{VH+dec}", 10, 0, 1, identifier="D_0hplus_HadVHdecay_10bins"),
     Discriminant("D_L1_HadVHdecay", "D_{#Lambda1}^{VH+dec}", 10, 0, 1, identifier="D_L1_HadVHdecay_10bins"),
