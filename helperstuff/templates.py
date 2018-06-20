@@ -584,7 +584,7 @@ def templatesfiles():
                         if shapesystematic not in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"):
                             yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
                         if analysis.isdecayonly: continue
-                        if config.getm4lsystsfromggH: continue
+                        if config.getm4lsystsfromggH and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)

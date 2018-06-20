@@ -154,6 +154,8 @@ def gettemplatesfromulascan(tf):
 def getalltemplatesfromulascan():
   for tf in templatesfiles:
     if tf.shapesystematic != "": continue
+    if tf.templategroup in ("tth", "bbh"): continue
+    if tf.templategroup == "wh" and tf.analysis == "fL1Zg": continue
     if tf.templategroup == "bkg" and tf.production.year == 2017: continue
     if tf.templategroup == "DATA": continue
     tf = TemplatesFile(tf.channel, tf.category, tf.analysis, tf.templategroup, tf.shapesystematic, str(tf.production)+"_Ulascan")
