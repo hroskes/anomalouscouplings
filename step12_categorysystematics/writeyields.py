@@ -5,8 +5,12 @@ if __name__ == "__main__":
   def __ProductionMode(*args, **kwargs):
     from helperstuff.enums import ProductionMode
     return ProductionMode(*args, **kwargs)
+  def __Production(*args, **kwargs):
+    from helperstuff.enums import Production
+    return Production(*args, **kwargs)
   parser = argparse.ArgumentParser()
   parser.add_argument("--productionmode", action="append", type=__ProductionMode)
+  parser.add_argument("--production", action="append", type=__Production)
   args = parser.parse_args()
 
 from collections import namedtuple
@@ -29,10 +33,11 @@ from categorysystematics import findsystematic
 
 SampleCount = namedtuple("SampleCount", "productionmode samples")
 
-def writeyields(productionmodelist=None):
+def writeyields(productionmodelist=None, productionlist=None):
   if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
 
   for production in {_.productionforrate for _ in config.productionsforcombine}:
+    if productionlist and production not in productionlist: continue
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
       SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),
@@ -292,4 +297,4 @@ if __name__ == "__main__":
   if config.LHE:
     writeyields_LHE()
   else:
-    writeyields(args.productionmode)
+    writeyields(productionmodelist=args.productionmode, productionlist=args.production)
