@@ -1691,7 +1691,7 @@ class Sample(ReweightingSamplePlus):
         if self.production == "170712" and self.productionmode in ("ggH", "HJJ", "VBF", "WH", "ZH", "ttH") and self.alternategenerator is None:
             args = [self.reweightingsampleplus, self.flavor, "170222"]
             return Sample(*args)
-        if self.production in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants", "180416_Ulascan"):
+        if self.production in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
             production = str(self.production).split("_")[0]
             args = [self.flavor, self.reweightingsampleplus, production]
             return Sample(*args)

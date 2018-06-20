@@ -85,11 +85,6 @@ class YieldSystematic(MyEnum):
       else:
         return dct.get(productionmode.yamlsystname, None)
 
-    def hardcodedvalue(self, production):
-      if self == "lumi_13TeV_2016" and production.year == 2016: return 1.026
-      if self == "lumi_13TeV_2017" and production.year == 2017: return 1.023
-      return None
-
 class YieldValue(MultiEnum, JsonDict):
     __metaclass__ = MultiEnumABCMeta
     enumname = "yieldvalue"
@@ -283,9 +278,9 @@ class _TotalRate(MultiEnum):
     from templates import Template
     rate = 0
     if self.production.year == 2016:
-      productionforrate = Production("180224_Ulascan")
+      productionforrate = Production("180530_Ulascan")
     elif self.production.year == 2017:
-      productionforrate = Production("180416_Ulascan")
+      productionforrate = Production("180531_Ulascan")
     for ca, ch in itertools.product(channels, categories):
       t = Template(self.productionmode, productionforrate, "0+" if self.productionmode.issignal else None, ca, ch, "fa2")
       with TFile(t.templatesfile.templatesfile()) as f:

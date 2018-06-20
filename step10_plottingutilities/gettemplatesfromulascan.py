@@ -7,7 +7,7 @@ from helperstuff.utilities import KeepWhileOpenFile, TFile
 
 
 def gettemplatefromulascan(template):
-  folder = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/{year}Width/CMSSW_9_4_3/src/HiggsWidth_PostICHEP/Analysis/test/output/LHC_13TeV/Templates/{templatedate}/FinalTemplates/Stage1/{coupling}"
+  folder = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/RunII_Combination/CMSSW_9_4_3/src/HZZ4l/CreateWidthDatacards/templates2D/13TeV_{year}/{coupling}/"
 
   kwargs = {}
   kwargses = [kwargs]
@@ -36,6 +36,9 @@ def gettemplatefromulascan(template):
   elif template.analysis == "fL1":
     kwargs["coupling"] = "L1"
     gi = constants.g1prime2HZZ
+  elif template.analysis == "fL1Zg":
+    kwargs["coupling"] = "L1Zg"
+    gi = constants.ghzgs1prime2HZZ
 
   basename = "HtoZZ{channel}_{category}_FinalTemplates_{productionmode}_{systematic}.root"
   templatename = "T_{productionmode}{_hypothesis}"

@@ -53,6 +53,7 @@ def writeyields(productionmodelist=None):
     result = MultiplyCounter()
     for productionmode, samples in tosamples_foryields:
       if productionmodelist and productionmode not in productionmodelist: continue
+      if productionmode == "ZX": continue
       print productionmode
       samplegroups = [samples]
       if productionmode.issignal and productionmode != "bbH":
@@ -98,7 +99,35 @@ def writeyields(productionmodelist=None):
         total = totalrate(productionmode, production, 1.0)
         if analysis.isdecayonly and productionmode == "ggH": total += sum(totalrate(_, production, 1.0) for _ in ("VBF", "ZH", "WH", "ttH"))
         for channel, category in itertools.product(channels, categories):
-          YieldValue(channel, category, analysis, productionmode, production).value = total * (
+          yv = YieldValue(channel, category, analysis, productionmode, production)
+          if productionmode == "ZX":
+            if production.year == 2016:
+              yv.value = {
+                (Channel("2e2mu"), Category(    "Untagged")): 12.197,
+                (Channel("2e2mu"), Category(   "VBFtagged")): 0.842,
+                (Channel("2e2mu"), Category("VHHadrtagged")): 0.646,
+                (Channel("4e"   ), Category(    "Untagged")): 4.906,
+                (Channel("4e"   ), Category(   "VBFtagged")): 0.311,
+                (Channel("4e"   ), Category("VHHadrtagged")): 0.270,
+                (Channel(  "4mu"), Category(    "Untagged")): 7.130,
+                (Channel(  "4mu"), Category(   "VBFtagged")): 0.573,
+                (Channel(  "4mu"), Category("VHHadrtagged")): 0.505,
+              }[self.channel, self.category]
+            elif production.year == 2017:
+              yv.value = {
+                (Channel("2e2mu"), Category(    "Untagged")): 12.580,
+                (Channel("2e2mu"), Category(   "VBFtagged")): 0.681,
+                (Channel("2e2mu"), Category("VHHadrtagged")): 0.595,
+                (Channel("4e"   ), Category(    "Untagged")): 4.144,
+                (Channel("4e"   ), Category(   "VBFtagged")): 0.170,
+                (Channel("4e"   ), Category("VHHadrtagged")): 0.174,
+                (Channel(  "4mu"), Category(    "Untagged")): 9.537,
+                (Channel(  "4mu"), Category(   "VBFtagged")): 0.487,
+                (Channel(  "4mu"), Category("VHHadrtagged")): 0.547,
+              }[self.channel, self.category]
+            continue
+            
+          yv.value = total * (
             sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
           ) / (
             sum(result[tosample, categorization, AlternateWeight("1"), ca, ch] for tosample in samples for ca in categories for ch in channels)
@@ -106,43 +135,76 @@ def writeyields(productionmodelist=None):
 
         #same for all categories and channels
         #from yaml
-        for systname in "BRhiggs_hzz4l", "QCDscale_ggVV_bonly":
-          for category, channel in itertools.product(categories, channels):
-            if analysis.isdecayonly and category != "Untagged": continue
-            syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-            syst.value = syst.yieldsystematic.valuefromyaml(productionmode, channel=channel)
-        for systname in "lumi_13TeV_2016", "lumi_13TeV_2017":
-          for category, channel in itertools.product(categories, channels):
-            syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-            if productionmode == "ZX":
-              syst.value = None
-            else:
-              syst.value = syst.yieldsystematic.hardcodedvalue(production)
+        for category, channel in itertools.product(categories, channels):
+          if analysis.isdecayonly and category != "Untagged": continue
 
-        #same for all categories
-        #from yaml
-        for systname in "CMS_eff_e", "CMS_eff_m":
-          for category, channel in itertools.product(categories, channels):
-            if analysis.isdecayonly and category != "Untagged": continue
-            syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-            if channel == "4e" and systname == "CMS_eff_m" or channel == "4mu" and systname == "CMS_eff_e":
-              values = {}
-            else:
-              values = syst.yieldsystematic.getfromyaml(channel=channel)
-            if productionmode.yamlsystname in values:
-              syst.value = values[productionmode.yamlsystname]
-            else:
-              syst.value = None
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, "BRhiggs_hzz4l", production)
+          if productionmode.issignal:
+            syst.value = 1.02
+          else:
+            syst.value = None
 
-        #Z+X, for now
-        for systname in "CMS_hzz4l_zz2e2mu_zjets", "CMS_hzz4l_zz4e_zjets", "CMS_hzz4l_zz4mu_zjets":
-          for category, channel in itertools.product(categories, channels):
-            if analysis.isdecayonly and category != "Untagged": continue
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, "QCDscale_ggVV_bonly", production)
+          if productionmode == "ggZZ":
+            syst.value = 1.1
+          else:
+            syst.value = None
+
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_e", production)
+          if productionmode == "ZX" or channel == "4mu":
+            syst.value = None
+          elif channel == "2e2mu":
+            syst.value = 0.96, 1.039
+          elif channel == "4e":
+            syst.value = 0.914, 1.082
+
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_m", production)
+          if productionmode == "ZX" or channel == "4e":
+            syst.value = None
+          elif channel == "2e2mu":
+            syst.value = 1.025
+          elif channel == "4mu":
+            syst.value = 0.953, 1.046
+
+          for systname in "lumi_13TeV_2016", "lumi_13TeV_2017":
             syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-            if str(channel) in systname and productionmode == "ZX":
-              syst.value = 1.4
-            else:
+            if productionmode == "ZX" or str(production.year) not in systname:
               syst.value = None
+            elif production.year == 2016:
+              syst.value = 1.026
+            elif production.year == 2017:
+              syst.value = 1.023
+
+          for systname in "CMS_hzz4l_zz2e2mu_zjets", "CMS_hzz4l_zz4e_zjets", "CMS_hzz4l_zz4mu_zjets":
+            syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
+            if productionmode != "ZX" or str(channel) not in systname:
+              syst.value = None
+            elif production.year == 2016:
+              syst.value = {
+                (Channel("2e2mu"), Category(    "Untagged")): (0.746, 1.340),
+                (Channel("2e2mu"), Category(   "VBFtagged")): (0.746, 1.341),
+                (Channel("2e2mu"), Category("VHHadrtagged")): (0.746, 1.341),
+                (Channel("4e"   ), Category(    "Untagged")): (0.758, 1.320),
+                (Channel("4e"   ), Category(   "VBFtagged")): (0.758, 1.321),
+                (Channel("4e"   ), Category("VHHadrtagged")): (0.758, 1.321),
+                (Channel(  "4mu"), Category(    "Untagged")): (0.741, 1.350),
+                (Channel(  "4mu"), Category(   "VBFtagged")): (0.740, 1.351),
+                (Channel(  "4mu"), Category("VHHadrtagged")): (0.740, 1.352),
+              }[self.channel, self.category]
+            elif production.year == 2017:
+              syst.value = {
+                (Channel("2e2mu"), Category(    "Untagged")): (0.769, 1.300),
+                (Channel("2e2mu"), Category(   "VBFtagged")): (0.768, 1.301),
+                (Channel("2e2mu"), Category("VHHadrtagged")): (0.768, 1.301),
+                (Channel("4e"   ), Category(    "Untagged")): (0.769, 1.300),
+                (Channel("4e"   ), Category(   "VBFtagged")): (0.768, 1.301),
+                (Channel("4e"   ), Category("VHHadrtagged")): (0.769, 1.301),
+                (Channel(  "4mu"), Category(    "Untagged")): (0.769, 1.300),
+                (Channel(  "4mu"), Category(   "VBFtagged")): (0.768, 1.302),
+                (Channel(  "4mu"), Category("VHHadrtagged")): (0.768, 1.302),
+              }[self.channel, self.category]
+            else:
+              assert False
 
         #same for all channels
         for category in categories:

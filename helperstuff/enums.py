@@ -678,13 +678,13 @@ class Production(MyEnum):
                  EnumItem("170825"),
                  EnumItem("180121"),
                  EnumItem("180224"),
-                 EnumItem("180224_Ulascan"),
                  EnumItem("180224_10bins"),
                  EnumItem("180224_newdiscriminants"),
                  EnumItem("180416"),
-                 EnumItem("180416_Ulascan"),
                  EnumItem("180530", "180531_2016"),
+                 EnumItem("180530_Ulascan"),
                  EnumItem("180531", "180531_2017"),
+                 EnumItem("180531_Ulascan"),
                  EnumItem("LHE_170509"),
                 )
     def __cmp__(self, other):
@@ -714,22 +714,22 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/180121"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180121"
-        if self in ("180224", "180224_Ulascan", "180224_10bins", "180224_newdiscriminants"):
+        if self in ("180224", "180224_10bins", "180224_newdiscriminants"):
             if config.host == "lxplus":
                 return "/eos/user/u/usarica/CJLST/4l/180224"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180224"
-        if self in ("180416", "180416_Ulascan"):
+        if self == "180416":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/180416"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180416"
-        if self == "180531_2016":
+        if self in ("180531_2016", "180530_Ulascan"):
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/180531_2016"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180530"
-        if self == "180531":
+        if self == ("180531", "180531_Ulascan"):
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/180531"
             elif config.host == "MARCC":
@@ -756,7 +756,7 @@ class Production(MyEnum):
         if self in ("180416", "180531"): return 41.529343499127
         if self == "LHE_170509": return 300
 
-        if self in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants", "180416_Ulascan"):
+        if self in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
             return type(self)(str(self).split("_")[0]).dataluminosity
 
         assert False
@@ -785,7 +785,7 @@ class Production(MyEnum):
         return self
     @property
     def productionforrate(self):
-        if self in ("180224_Ulascan", "180224_10bins", "180224_newdiscriminants", "180416_Ulascan"):
+        if self in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
             return type(self)(str(self).split("_")[0])
         return self
     @property
