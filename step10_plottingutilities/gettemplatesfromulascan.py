@@ -2,7 +2,7 @@
 
 import os
 from helperstuff import constants
-from helperstuff.templates import IntTemplate, Template, templatesfiles
+from helperstuff.templates import IntTemplate, Template, TemplatesFile, templatesfiles
 from helperstuff.utilities import KeepWhileOpenFile, TFile
 
 
@@ -37,7 +37,7 @@ def gettemplatefromulascan(template):
     kwargs["coupling"] = "L1"
     gi = constants.g1prime2HZZ
   elif template.analysis == "fL1Zg":
-    kwargs["coupling"] = "L1Zg"
+    kwargs["coupling"] = "L1ZGs"
     gi = constants.ghzgs1prime2HZZ
 
   basename = "HtoZZ{channel}_{category}_FinalTemplates_{productionmode}_{systematic}.root"
@@ -117,16 +117,16 @@ def gettemplatefromulascan(template):
   print h.Integral(),
   if h.Integral(): h.Scale(h.Integral("width") / h.Integral())
   h.Scale(1 / gi ** scalingpower)
-  if template.productionmode == "ZX":
-    txtfilename = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/RunII_Combination/CMSSW_9_4_3/src/HZZ4l/CreateWidthDatacards/cards_180516_Onshell_{coupling}_13TeV_{year}/HCG/13TeV_{year}/hzz{channel}_{category}.txt".format(**kwargs)
-    with open(txtfilename) as f:
-      for line in f:
-        if line.startswith("rate "):
-          multipliers = line.split()[1:]
-          assert all(float(_)==1 for _ in multipliers[:-1]), line
-          print multipliers[-1],
-          h.Scale(float(multipliers[-1]))
-          break
+#  if template.productionmode == "ZX":
+#    txtfilename = "/work-zfs/lhc/usarica/hep/SpinWidthPaper_2015/RunII_Combination/CMSSW_9_4_3/src/HZZ4l/CreateWidthDatacards/cards_180516_Onshell_{coupling}_13TeV_{year}/HCG/13TeV_{year}/hzz{channel}_{category}.txt".format(**kwargs)
+#    with open(txtfilename) as f:
+#      for line in f:
+#        if line.startswith("rate "):
+#          multipliers = line.split()[1:]
+#          assert all(float(_)==1 for _ in multipliers[:-1]), line
+#          print multipliers[-1],
+#          h.Scale(float(multipliers[-1]))
+#          break
   print h.Integral()
   h.SetName(template.templatename())
 
@@ -153,10 +153,10 @@ def gettemplatesfromulascan(tf):
 
 def getalltemplatesfromulascan():
   for tf in templatesfiles:
-    if "Ulascan" not in str(tf.production): continue
-    if tf.analysis not in ("fa3", "fa2", "fL1"): continue
-    if tf.templategroup == "tth": continue
+    if tf.shapesystematic != "": continue
+    if tf.templategroup == "bkg" and tf.production.year == 2017: continue
     if tf.templategroup == "DATA": continue
+    tf = TemplatesFile(tf.channel, tf.category, tf.analysis, tf.templategroup, tf.shapesystematic, str(tf.production)+"_Ulascan")
     gettemplatesfromulascan(tf)
 
 if __name__ == "__main__":
