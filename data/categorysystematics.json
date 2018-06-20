@@ -2054,7 +2054,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.34
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2092,7 +2095,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.341
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2130,7 +2136,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.341
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2170,7 +2179,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.34
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2208,7 +2220,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.341
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2246,7 +2261,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.341
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2286,7 +2304,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.34
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2324,7 +2345,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.341
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2362,7 +2386,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.341
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2402,7 +2429,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.34
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2440,7 +2470,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.341
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2478,7 +2511,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.746,
+                            1.341
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2532,7 +2568,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.32
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2570,7 +2609,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.321
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2608,7 +2650,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.321
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2648,7 +2693,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.32
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2686,7 +2734,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.321
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2724,7 +2775,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.321
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2764,7 +2818,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.32
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2802,7 +2859,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.321
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2840,7 +2900,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.321
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2880,7 +2943,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.32
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2918,7 +2984,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.321
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -2956,7 +3025,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.758,
+                            1.321
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3010,7 +3082,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.741,
+                            1.35
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3048,7 +3123,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.74,
+                            1.351
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3086,7 +3164,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.74,
+                            1.352
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3126,7 +3207,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.741,
+                            1.35
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3164,7 +3248,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.74,
+                            1.351
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3202,7 +3289,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.74,
+                            1.352
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3242,7 +3332,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.741,
+                            1.35
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3280,7 +3373,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.74,
+                            1.351
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3318,7 +3414,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.74,
+                            1.352
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3358,7 +3457,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.741,
+                            1.35
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3396,7 +3498,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.74,
+                            1.351
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -3434,7 +3539,10 @@
                         "VBFbkg": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.74,
+                            1.352
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22637,7 +22745,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22672,7 +22783,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22707,7 +22821,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22744,7 +22861,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22779,7 +22899,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22814,7 +22937,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22851,7 +22977,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22886,7 +23015,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22921,7 +23053,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22958,7 +23093,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -22993,7 +23131,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23028,7 +23169,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23078,7 +23222,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23113,7 +23260,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23148,7 +23298,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23185,7 +23338,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23220,7 +23376,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23255,7 +23414,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23292,7 +23454,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23327,7 +23492,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23362,7 +23530,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23399,7 +23570,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23434,7 +23608,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23469,7 +23646,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.301
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23519,7 +23699,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23554,7 +23737,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.302
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23589,7 +23775,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.302
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23626,7 +23815,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23661,7 +23853,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.302
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23696,7 +23891,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.302
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23733,7 +23931,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23768,7 +23969,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.302
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23803,7 +24007,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.302
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23840,7 +24047,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.769,
+                            1.3
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23875,7 +24085,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.302
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
@@ -23910,7 +24123,10 @@
                         "VBF": null,
                         "WH": null,
                         "ZH": null,
-                        "ZX": 1.4,
+                        "ZX": [
+                            0.768,
+                            1.302
+                        ],
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,

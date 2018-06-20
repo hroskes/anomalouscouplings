@@ -117,7 +117,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                 (Channel(  "4mu"), Category(    "Untagged")): 7.130,
                 (Channel(  "4mu"), Category(   "VBFtagged")): 0.573,
                 (Channel(  "4mu"), Category("VHHadrtagged")): 0.505,
-              }[self.channel, self.category]
+              }[channel, category]
             elif production.year == 2017:
               yv.value = {
                 (Channel("2e2mu"), Category(    "Untagged")): 12.580,
@@ -129,7 +129,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                 (Channel(  "4mu"), Category(    "Untagged")): 9.537,
                 (Channel(  "4mu"), Category(   "VBFtagged")): 0.487,
                 (Channel(  "4mu"), Category("VHHadrtagged")): 0.547,
-              }[self.channel, self.category]
+              }[channel, category]
             continue
             
           yv.value = total * (
@@ -195,7 +195,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                 (Channel(  "4mu"), Category(    "Untagged")): (0.741, 1.350),
                 (Channel(  "4mu"), Category(   "VBFtagged")): (0.740, 1.351),
                 (Channel(  "4mu"), Category("VHHadrtagged")): (0.740, 1.352),
-              }[self.channel, self.category]
+              }[channel, category]
             elif production.year == 2017:
               syst.value = {
                 (Channel("2e2mu"), Category(    "Untagged")): (0.769, 1.300),
@@ -207,7 +207,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                 (Channel(  "4mu"), Category(    "Untagged")): (0.769, 1.300),
                 (Channel(  "4mu"), Category(   "VBFtagged")): (0.768, 1.302),
                 (Channel(  "4mu"), Category("VHHadrtagged")): (0.768, 1.302),
-              }[self.channel, self.category]
+              }[channel, category]
             else:
               assert False
 
