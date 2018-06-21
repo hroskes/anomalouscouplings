@@ -37,8 +37,8 @@ except NameError:
 
 LHE = False
 usedata = True
-showblinddistributions = False
-unblinddistributions = False
+showblinddistributions = True
+unblinddistributions = True
 unblindscans = False
 
 useQGTagging = False

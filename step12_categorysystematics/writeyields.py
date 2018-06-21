@@ -130,8 +130,10 @@ def writeyields(productionmodelist=None, productionlist=None):
                 (Channel(  "4mu"), Category(   "VBFtagged")): 0.487,
                 (Channel(  "4mu"), Category("VHHadrtagged")): 0.547,
               }[channel, category]
+            else:
+              assert False
             continue
-            
+
           yv.value = total * (
             sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
           ) / (

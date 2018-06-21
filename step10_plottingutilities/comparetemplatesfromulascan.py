@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 
 import argparse
+
+if __name__ == "__main__":
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--yields", action="store_true")
+  args = parser.parse_args()
+
 import os
 
 import ROOT
 
 from helperstuff import config, style
 from helperstuff.copyplots import copyplots
-from helperstuff.enums import Analysis, categories, channels, ProductionMode
+from helperstuff.enums import analyses, Analysis, categories, channels, ProductionMode, productions
 from helperstuff.samples import Sample
 from helperstuff.plotfromtree import plotfromtree
 from helperstuff.templates import Template
@@ -51,21 +57,41 @@ def compare(template, axis):
   for ext in "png eps root pdf".split():
     c.SaveAs(saveas+"."+ext)
 
-if __name__ == "__main__":
-  try:
+def compareyields(analysis, productionmode, production):
+  from helperstuff.combinehelpers import getrate
+  productionmode = ProductionMode(productionmode)
+  hypothesis = "0+" if productionmode.issignal else None
+  for category in categories:
     for channel in channels:
-      for analysis in Analysis.items(lambda x: x in ("fa3", "fa2", "fL1", "fL1Zg")):
-        for category in categories:
-          for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ")):
-            if productionmode == "WH" and analysis == "fL1Zg": continue
-            if productionmode.issignal: hypotheses = analysis.purehypotheses
-            elif productionmode == "qqZZ": hypotheses = "ext",
-            else: hypotheses = None,
-            for hypothesis in hypotheses:
-              for production in "180530", "180531":
-                for axis in 0, 1, 2:
-                  compare(Template(analysis, productionmode, hypothesis, category, channel, production), axis)
+      r = Template(analysis, productionmode, category, channel, str(production)+"_Ulascan", hypothesis).gettemplate().Integral()
+      r2 = getrate(analysis, productionmode, category, channel, production, 1)
+      print "{:10} {:5} {:8.4f} {:8.4f} {:.2%}".format(category, channel, r, r2, r/r2-1)
+
+if __name__ == "__main__":
+  if args.yields:
+    for analysis in analyses:
+      for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ")):
+        for production in productions:
+          if analysis != "fa3": continue
+          print "================="
+          print "{:5} {:>4} {:6}".format(analysis, productionmode, production)
+          print "================="
+          compareyields(analysis, productionmode, production)
+  else:
+    try:
+      for channel in channels:
+        for analysis in Analysis.items(lambda x: x in ("fa3", "fa2", "fL1", "fL1Zg")):
+          for category in categories:
+            for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ")):
+              if productionmode == "WH" and analysis == "fL1Zg": continue
+              if productionmode.issignal: hypotheses = analysis.purehypotheses
+              elif productionmode == "qqZZ": hypotheses = "ext",
+              else: hypotheses = None,
+              for hypothesis in hypotheses:
+                for production in "180530", "180531":
+                  for axis in 0, 1, 2:
+                    compare(Template(analysis, productionmode, hypothesis, category, channel, production), axis)
 
 
-  finally:
-    copyplots("templateprojections/comparetoUlascan")
+    finally:
+      copyplots("templateprojections/comparetoUlascan")

@@ -914,7 +914,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             return [self]
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "bbH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses
-                     if not deprecate(self.productionmode == "bbH" and hypothesis in ("fa30.5fa20.5", "fa20.5fL10.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5", "fL10.5fL1Zg0.5", "fa20.5fL1Zg0.5"), 2018, 6, 20)]
+                     if not deprecate(self.productionmode == "bbH" and hypothesis in ("fa30.5fa20.5", "fa20.5fL10.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5", "fL10.5fL1Zg0.5", "fa20.5fL1Zg0.5"), 2018, 6, 22)]
         if self.productionmode == "tqH":
             return [self]
         if self.productionmode == "data":

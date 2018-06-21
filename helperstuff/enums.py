@@ -729,7 +729,7 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/180531_2016"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180530"
-        if self == ("180531", "180531_Ulascan"):
+        if self in ("180531", "180531_Ulascan"):
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/180531"
             elif config.host == "MARCC":
