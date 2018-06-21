@@ -47,9 +47,8 @@ def writeyields(productionmodelist=None, productionlist=None):
       SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
       SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors if deprecate(flavor != "4mu", 2018, 6, 22)}),
+      SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
     ]
-    if production.year == 2016:
-      tosamples_foryields.append(SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")}))
     if config.usedata:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
 
@@ -108,27 +107,27 @@ def writeyields(productionmodelist=None, productionlist=None):
           if productionmode == "ZX":
             if production.year == 2016:
               yv.value = {
-                (Channel("2e2mu"), Category(    "Untagged")): 12.197,
-                (Channel("2e2mu"), Category(   "VBFtagged")): 0.842,
-                (Channel("2e2mu"), Category("VHHadrtagged")): 0.646,
-                (Channel("4e"   ), Category(    "Untagged")): 4.906,
-                (Channel("4e"   ), Category(   "VBFtagged")): 0.311,
-                (Channel("4e"   ), Category("VHHadrtagged")): 0.270,
-                (Channel(  "4mu"), Category(    "Untagged")): 7.130,
-                (Channel(  "4mu"), Category(   "VBFtagged")): 0.573,
-                (Channel(  "4mu"), Category("VHHadrtagged")): 0.505,
+                (Channel("2e2mu"), Category(    "Untagged")): 11.679,
+                (Channel("2e2mu"), Category(   "VBFtagged")): 0.810,
+                (Channel("2e2mu"), Category("VHHadrtagged")): 0.619,
+                (Channel("4e"   ), Category(    "Untagged")): 4.393,
+                (Channel("4e"   ), Category(   "VBFtagged")): 0.282,
+                (Channel("4e"   ), Category("VHHadrtagged")): 0.241,
+                (Channel(  "4mu"), Category(    "Untagged")): 7.215,
+                (Channel(  "4mu"), Category(   "VBFtagged")): 0.578,
+                (Channel(  "4mu"), Category("VHHadrtagged")): 0.511,
               }[channel, category]
             elif production.year == 2017:
               yv.value = {
-                (Channel("2e2mu"), Category(    "Untagged")): 12.580,
-                (Channel("2e2mu"), Category(   "VBFtagged")): 0.681,
+                (Channel("2e2mu"), Category(    "Untagged")): 12.503,
+                (Channel("2e2mu"), Category(   "VBFtagged")): 0.674,
                 (Channel("2e2mu"), Category("VHHadrtagged")): 0.595,
-                (Channel("4e"   ), Category(    "Untagged")): 4.144,
-                (Channel("4e"   ), Category(   "VBFtagged")): 0.170,
-                (Channel("4e"   ), Category("VHHadrtagged")): 0.174,
-                (Channel(  "4mu"), Category(    "Untagged")): 9.537,
-                (Channel(  "4mu"), Category(   "VBFtagged")): 0.487,
-                (Channel(  "4mu"), Category("VHHadrtagged")): 0.547,
+                (Channel("4e"   ), Category(    "Untagged")): 3.984,
+                (Channel("4e"   ), Category(   "VBFtagged")): 0.160,
+                (Channel("4e"   ), Category("VHHadrtagged")): 0.169,
+                (Channel(  "4mu"), Category(    "Untagged")): 9.713,
+                (Channel(  "4mu"), Category(   "VBFtagged")): 0.494,
+                (Channel(  "4mu"), Category("VHHadrtagged")): 0.557,
               }[channel, category]
             else:
               assert False

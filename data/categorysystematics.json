@@ -5,11 +5,11 @@
                 "Untagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -17,11 +17,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -29,11 +29,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -43,11 +43,11 @@
                 "VBFtagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -55,11 +55,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -67,11 +67,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -81,11 +81,11 @@
                 "VHHadrtagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -93,11 +93,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -105,11 +105,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -121,11 +121,11 @@
                 "Untagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -133,11 +133,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -145,11 +145,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -159,11 +159,11 @@
                 "VBFtagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -171,11 +171,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -183,11 +183,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -197,11 +197,11 @@
                 "VHHadrtagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -209,11 +209,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -221,11 +221,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -237,11 +237,11 @@
                 "Untagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -249,11 +249,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -261,11 +261,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -275,11 +275,11 @@
                 "VBFtagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -287,11 +287,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -299,11 +299,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -313,11 +313,11 @@
                 "VHHadrtagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -325,11 +325,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -337,11 +337,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -353,11 +353,11 @@
                 "Untagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -365,11 +365,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -377,11 +377,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -391,11 +391,11 @@
                 "VBFtagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -403,11 +403,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -415,11 +415,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -429,11 +429,11 @@
                 "VHHadrtagged": {
                     "2e2mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -441,11 +441,11 @@
                     },
                     "4e": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -453,11 +453,11 @@
                     },
                     "4mu": {
                         "VBF": 1.02,
-                        "VBFbkg": 1.02,
+                        "VBFbkg": null,
                         "WH": 1.02,
                         "ZH": 1.02,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.02,
                         "ggH": 1.02,
                         "ggZZ": null,
                         "qqZZ": null,
@@ -478,13 +478,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -511,13 +517,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -558,13 +570,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -591,13 +609,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -638,13 +662,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -671,13 +701,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -720,13 +756,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -753,13 +795,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -800,13 +848,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -833,13 +887,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -880,13 +940,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -913,13 +979,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -962,13 +1034,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -995,13 +1073,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -1042,13 +1126,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -1075,13 +1165,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -1122,13 +1218,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -1155,13 +1257,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -1204,13 +1312,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -1237,13 +1351,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -1284,13 +1404,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -1317,13 +1443,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -1364,13 +1496,19 @@
                             0.96,
                             1.039
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.96,
+                            1.039
+                        ],
                         "ZH": [
                             0.96,
                             1.039
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.96,
+                            1.039
+                        ],
                         "ggH": [
                             0.96,
                             1.039
@@ -1397,13 +1535,19 @@
                             0.914,
                             1.082
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.914,
+                            1.082
+                        ],
                         "ZH": [
                             0.914,
                             1.082
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.914,
+                            1.082
+                        ],
                         "ggH": [
                             0.914,
                             1.082
@@ -1442,10 +1586,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1472,13 +1616,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1501,10 +1651,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1531,13 +1681,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1560,10 +1716,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1590,13 +1746,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1621,10 +1783,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1651,13 +1813,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1680,10 +1848,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1710,13 +1878,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1739,10 +1913,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1769,13 +1943,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1800,10 +1980,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1830,13 +2010,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1859,10 +2045,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1889,13 +2075,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1918,10 +2110,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -1948,13 +2140,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -1979,10 +2177,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -2009,13 +2207,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -2038,10 +2242,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -2068,13 +2272,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
@@ -2097,10 +2307,10 @@
                     "2e2mu": {
                         "VBF": 1.025,
                         "VBFbkg": 1.025,
-                        "WH": null,
+                        "WH": 1.025,
                         "ZH": 1.025,
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": 1.025,
                         "ggH": 1.025,
                         "ggZZ": 1.025,
                         "qqZZ": 1.025,
@@ -2127,13 +2337,19 @@
                             0.953,
                             1.046
                         ],
-                        "WH": null,
+                        "WH": [
+                            0.953,
+                            1.046
+                        ],
                         "ZH": [
                             0.953,
                             1.046
                         ],
                         "ZX": null,
-                        "bbH": null,
+                        "bbH": [
+                            0.953,
+                            1.046
+                        ],
                         "ggH": [
                             0.953,
                             1.046
