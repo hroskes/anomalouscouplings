@@ -36,7 +36,7 @@ SampleCount = namedtuple("SampleCount", "productionmode samples")
 def writeyields(productionmodelist=None, productionlist=None):
   if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
 
-  for production in {_.productionforrate for _ in config.productionsforcombine}:
+  for production in sorted({_.productionforrate for _ in config.productionsforcombine}):
     if productionlist and production not in productionlist: continue
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
@@ -57,7 +57,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     result = MultiplyCounter()
     for productionmode, samples in tosamples_foryields:
       if productionmodelist and productionmode not in productionmodelist: continue
-      if productionmode == "ZX": continue
+      if productionmode == "ZX" or productionmode == "VBF bkg" and production == "180531": continue
       print productionmode
       samplegroups = [samples]
       if productionmode.issignal and productionmode != "bbH":
@@ -131,6 +131,9 @@ def writeyields(productionmodelist=None, productionlist=None):
               }[channel, category]
             else:
               assert False
+            continue
+          if productionmode == "VBF bkg":
+            yv.value = gettemplate(productionmode, category, channel, production, analysis).Integral()
             continue
 
           yv.value = total * (
@@ -221,6 +224,17 @@ def writeyields(productionmodelist=None, productionlist=None):
           nominalyield = sum(result[tosample, categorization, AlternateWeight("1")] for tosample in samples)
           if productionmode == "ZX" or analysis.isdecayonly:
             JECUp = JECDn = btSFUp = btSFDn = 1
+          elif productionmode == "VBF bkg" and production == "180531":
+            _ = YieldSystematicValue(channel, category, analysis, productionmode, "JES", "180530").value
+            if _ is None:
+              JECUp = JECDn = 1
+            else:
+              JECUp, JECDn = _
+            _ = YieldSystematicValue(channel, category, analysis, productionmode, "bTagSF", "180530").value
+            if _ is None:
+              btSFUp = btSFDn = 1
+            else:
+              btSFUp, btSFDn = _
           else:
             JECUp = sum(result[tosample, findsystematic(categorizations, categorization, "JECUp", "Nominal"), AlternateWeight("1"), category] for tosample in samples) / nominal
             JECDn = sum(result[tosample, findsystematic(categorizations, categorization, "JECDn", "Nominal"), AlternateWeight("1"), category] for tosample in samples) / nominal

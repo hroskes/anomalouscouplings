@@ -141,10 +141,12 @@ class YieldSystematicValue(MultiEnum, JsonDict):
           if not all(isinstance(_, Number) for _ in value):
             raise ValueError("value '{!r}' doesn't contain only numbers!".format(origvalue))
 
-          if all(_ >= 1 for _ in list(value)):
-            value = max(value)
-          elif all(_ <= 1 for _ in list(value)):
-            value = min(value)
+          if all(_ == 1 for _ in list(value)):
+            value = 1
+#          if all(_ >= 1 for _ in list(value)):
+#            value = max(value)
+#          elif all(_ <= 1 for _ in list(value)):
+#            value = min(value)
 
         elif isinstance(value, Number) or value is None:
           pass
