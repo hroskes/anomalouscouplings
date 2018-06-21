@@ -64,7 +64,7 @@ def compareyields(analysis, productionmode, production):
 if __name__ == "__main__":
   if args.yields:
     for analysis in analyses:
-      for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ")):
+      for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ", "ZX", "VBF bkg")):
         for production in productions:
           if analysis != "fa3": continue
           print "================="
@@ -76,7 +76,7 @@ if __name__ == "__main__":
       for channel in channels:
         for analysis in Analysis.items(lambda x: x in ("fa3", "fa2", "fL1", "fL1Zg")):
           for category in categories:
-            for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ")):
+            for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ", "ZX", "VBF bkg")):
               if productionmode == "WH" and analysis == "fL1Zg": continue
               if productionmode.issignal: hypotheses = analysis.purehypotheses
               elif productionmode == "qqZZ": hypotheses = "ext",

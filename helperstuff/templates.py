@@ -183,11 +183,9 @@ class TemplatesFile(MultiEnum):
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
             if config.LHE: return [Template(self, "qqZZ")]
-            result = ["qqZZ", "ggZZ"]
+            result = ["qqZZ", "ggZZ", "VBF bkg"]
             if config.usedata:
                 result.append("ZX")
-            if "Ulascan" in str(self.production):
-                result.append("VBF bkg")
             return [Template(self, productionmode) for productionmode in result]
         elif self.templategroup == "DATA":
             return [Template(self, "data")]
@@ -620,9 +618,11 @@ class TemplateBase(object):
     def gettemplate(self, *args, **kwargs):
         with TFile(self.templatefile(**kwargs)) as f:
             try:
-                t = getattr(f, self.templatename)
+                t = getattr(f, self.templatename())
             except AttributeError:
                 raise IOError("No template {} in {}".format(self.templatename(), self.templatefile(**kwargs)))
+            t.SetDirectory(0)
+            return t
 
     @property
     def discriminants(self):
@@ -1105,7 +1105,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def copyfromothertemplate(self):
-        if self.productionmode == "ggZZ" and self.production in ("180530", "180531"):
+        if self.productionmode in ("ggZZ", "VBF bkg") and self.production in ("180530", "180531"):
             return type(self)(self.productionmode, self.channel, self.shapesystematic, self.templategroup, self.analysis, str(self.production)+"_Ulascan", self.category)
         return None
 

@@ -144,7 +144,6 @@ class _Datacard(MultiEnum):
             result.remove("VBFbkg")
         if not config.usedata:
             result.remove("ZX")
-        result.remove("VBFbkg")
         return result
 
     @property
