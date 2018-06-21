@@ -17,7 +17,7 @@ import config
 import customsmoothing
 from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis
-from utilities import cache, is_almost_integer, JsonDict, jsonloads, tfiles
+from utilities import cache, is_almost_integer, JsonDict, jsonloads, TFile, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
@@ -634,12 +634,13 @@ class TemplateBase(object):
     def templatename(self):
         pass
 
+    @cache
     def gettemplate(self, *args, **kwargs):
-        f = tfiles[self.templatefile(**kwargs)]
-        try:
-            return getattr(f, self.templatename())
-        except AttributeError:
-            raise IOError("No template {} in {}".format(self.templatename(), self.templatefile(**kwargs)))
+        with TFile(self.templatefile(**kwargs)) as f:
+            try:
+                t = getattr(f, self.templatename)
+            except AttributeError:
+                raise IOError("No template {} in {}".format(self.templatename(), self.templatefile(**kwargs)))
 
     @property
     def discriminants(self):
@@ -1056,6 +1057,7 @@ class Template(TemplateBase, MultiEnum):
       return result
 
     def getjson(self):
+        if self.copyfromothertemplate: return []
         jsn = [
                {
                 "name": self.templatename(final=False),
@@ -1118,6 +1120,16 @@ class Template(TemplateBase, MultiEnum):
     @property
     def sample(self):
         return ReweightingSample(self.hypothesis, self.productionmode)
+
+    @property
+    def copyfromothertemplate(self):
+        if self.productionmode == "ggZZ" and self.production in ("180530", "180531"):
+            return type(self)(self.productionmode, self.channel, self.shapesystematic, self.templategroup, self.analysis, str(self.production)+"_Ulascan", self.category)
+        return None
+
+    def gettemplate(self):
+        if self.copyfromothertemplate: return self.copyfromothertemplate.gettemplate()
+        return super(Template, self).gettemplate()
 
 class SmoothingParameters(MultiEnum, JsonDict):
       __metaclass__ = MultiEnumABCMeta
@@ -1420,6 +1432,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         finally:
             del self.customsmoothing_newf
 
+    @cache
     def gettemplate(self, *args, **kwargs):
         result = super(IntTemplate, self).gettemplate(*args, **kwargs)
         if self.analysis == "fa3" and self.productionmode in ("ggH", "ttH", "bbH") and self.interferencetype == "g11gi1" and self.category in ("VBFtagged", "VHHadrtagged"):
