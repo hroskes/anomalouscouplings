@@ -257,16 +257,10 @@ class TemplatesFile(MultiEnum):
         if self.analysis == "fa3fa2fL1fL1Zg":
             name += "_10bins"
         elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
-            if "Ulascan" in str(self.production):
-                if self.category == "Untagged":
-                    name += "_30bins"
-                else:
-                    name += "_20bins"
+            if self.category == "Untagged":
+                name += "_20bins"
             else:
-                if self.category == "Untagged":
-                    name += "_20bins"
-                else:
-                    name += "_10bins"
+                name += "_10bins"
 
         return discriminant(name)
 
@@ -280,16 +274,10 @@ class TemplatesFile(MultiEnum):
             JECappend = ""
 
         if self.production >= "180416" or self.production in ("180224_10bins", "180224_newdiscriminants"):
-            if "Ulascan" in str(self.production):
-                if self.category == "Untagged":
-                    binsappend = "_30bins"
-                else:
-                    binsappend = "_20bins"
+            if self.category == "Untagged":
+                binsappend = "_20bins"
             else:
-                if self.category == "Untagged":
-                    binsappend = "_20bins"
-                else:
-                    binsappend = "_10bins"
+                binsappend = "_10bins"
         elif self.production.year == 2016:
             binsappend = ""
 
@@ -356,16 +344,10 @@ class TemplatesFile(MultiEnum):
         from discriminants import discriminant
 
         if self.production >= "180416" or self.production == "180224_newdiscriminants":
-            if "Ulascan" in str(self.production):
-                if self.category == "Untagged":
-                    binsappend = "_new_30bins"
-                else:
-                    binsappend = "_new_20bins"
+            if self.category == "Untagged":
+                binsappend = "_new_20bins"
             else:
-                if self.category == "Untagged":
-                    binsappend = "_new_20bins"
-                else:
-                    binsappend = "_new_10bins"
+                binsappend = "_new_10bins"
             if self.analysis in ("fL1", "fL1Zg"): binsappend = binsappend.replace("_new", "")
         elif self.production == "180224_10bins":
             binsappend = "_10bins"

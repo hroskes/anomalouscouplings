@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import itertools
 import os
 from helperstuff import constants
 from helperstuff.templates import IntTemplate, Template, TemplatesFile, templatesfiles
@@ -128,9 +129,29 @@ def gettemplatefromulascan(template):
 #          h.Scale(float(multipliers[-1]))
 #          break
   print h.Integral()
-  h.SetName(template.templatename())
 
-  return h
+  hh = type(h)(template.templatename(), h.GetTitle(),
+               h.GetNbinsY(), h.GetYaxis().GetXmin(), h.GetYaxis().GetXmax(),
+               h.GetNbinsZ(), h.GetZaxis().GetXmin(), h.GetZaxis().GetXmax(),
+               h.GetNbinsX(), h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax(),
+              )
+  hh.Sumw2()
+  for x, y, z in itertools.product(range(h.GetNbinsX()+2), range(h.GetNbinsY()+2), range(h.GetNbinsZ()+2)):
+    hh.SetBinContent(y, z, x, h.GetBinContent(x, y, z))
+    hh.SetBinError  (y, z, x, h.GetBinError  (x, y, z))
+
+  hh.SetName(template.templatename())
+
+  if template.category in ("VBFtagged", "VHHadrtagged"):
+    hh.Rebin3D(2, 2, 2)
+
+  for axis, disc in itertools.izip((hh.GetXaxis(), hh.GetYaxis(), hh.GetZaxis()), template.discriminants):
+    if axis.GetXmin() != disc.min or axis.GetXmax() != disc.max or axis.GetNbins() != disc.bins:
+      raise ValueError("{d.name} has range ({d.bins}, {d.min}, {d.max}), but histogram for {template} has range ({bins}, {min}, {max})\n{filename}"
+        .format(d=disc, bins=axis.GetNbins(), min=axis.GetXmin(), max=axis.GetXmax(), template=template, filename=filename)
+      )
+
+  return hh
 
 def gettemplatesfromulascan(tf):
   filename = tf.templatesfile()

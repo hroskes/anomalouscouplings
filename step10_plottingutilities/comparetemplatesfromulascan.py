@@ -23,7 +23,7 @@ c = ROOT.TCanvas()
 
 def compare(template, axis):
   t = Template(str(template.production)+"_Ulascan", template.productionmode, template.hypothesis, template.category, template.channel, template.analysis, template.shapesystematic).gettemplate()
-  h = (t.ProjectionY, t.ProjectionZ, t.ProjectionX)[axis]()
+  h = (t.ProjectionX, t.ProjectionY, t.ProjectionZ)[axis]()
   h.Scale(1/h.Integral())
   h.SetLineColor(2)
 
@@ -31,12 +31,6 @@ def compare(template, axis):
   h2 = (t2.ProjectionX, t2.ProjectionY, t2.ProjectionZ)[axis]()
   h2.Scale(1/h2.Integral())
   h2.SetLineColor(4)
-
-  nbinstomerge = 1.0 * h.GetNbinsX() / h2.GetNbinsX()
-  assert nbinstomerge == int(nbinstomerge)
-  if nbinstomerge != 1:
-    nbinstomerge = int(nbinstomerge)
-    h.Rebin(nbinstomerge)
 
   hstack = ROOT.THStack()
   hstack.Add(h)
