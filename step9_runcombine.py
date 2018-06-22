@@ -88,7 +88,7 @@ def runscan(repmap, submitjobs, directory=None):
           del f
 
       if (os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
-       or os.path.exists(replaceByMap("jobs/.oO[filename]Oo..tmp", repmap_i)):
+       or os.path.exists(replaceByMap("jobs/.oO[filename]Oo..tmp", repmap_i))):
         continue
       job = "{} runscan {} directory={}".format(
                                                 os.path.join(config.repositorydir, "./step9_runcombine.py"),
