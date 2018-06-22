@@ -7,7 +7,7 @@ for productionmode in "ggH", "qqH", "ZH", "WH", "ttH", "qqZZ", "ggZZ", "VBFbkg",
   for category in categories:
     if category == "Untagged": continue
     maxseen = 0
-    for syst in YieldSystematic.items(lambda _: "cat" in str(_) or _ in ("JES", "bTagSF")):
+    for syst in YieldSystematic.items(lambda _: "cat" in str(_) or _ in ("CMS_scale_j_13TeV_2016", "CMS_btag_comb_13TeV_2016")):
       for analysis in analyses:
         for channel in channels:
           value = YieldSystematicValue(analysis, category, productionmode, syst, channel).value

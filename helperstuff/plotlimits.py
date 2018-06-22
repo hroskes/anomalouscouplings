@@ -32,7 +32,7 @@ def plottitle(nuisance):
     if nuisance == "CMS_zz4l_fai2": return "faj"
     if nuisance == "RV": return "muV"
     if nuisance == "RF": return "muf"
-    if nuisance == "JES": return nuisance
+    if nuisance == "CMS_scale_j_13TeV_2016": return nuisance
     assert False, nuisance
 def xaxistitle(POI, analysis, faifor=None):
     POI = actualvariable(POI)
@@ -41,7 +41,7 @@ def xaxistitle(POI, analysis, faifor=None):
     if POI == "CMS_zz4l_fai2": return "{} cos({})".format(analysis.fais[1].title(superscript=faifor), analysis.fais[1].phi_lower)
     if POI == "RV": return "#mu_{V}"
     if POI == "RF": return "#mu_{f}"
-    if nuisance == "JES": return nuisance
+    if nuisance == "CMS_scale_j_13TeV_2016": return nuisance
     assert False
 def xaxisrange(POI):
     POI = actualvariable(POI)

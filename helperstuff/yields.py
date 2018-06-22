@@ -17,8 +17,8 @@ from utilities import cache, JsonDict, MultiplyCounter, TFile
 class YieldSystematic(MyEnum):
     enumname = "yieldsystematic"
     enumitems = (
-                 EnumItem("bTagSF"),
-                 EnumItem("JES"),
+                 EnumItem("CMS_btag_comb_13TeV_2016"),
+                 EnumItem("CMS_scale_j_13TeV_2016"),
                  EnumItem("QCDscale_fac_ggH"),
                  EnumItem("QCDscale_fac_qqH"),
                  EnumItem("QCDscale_fac_VH"),

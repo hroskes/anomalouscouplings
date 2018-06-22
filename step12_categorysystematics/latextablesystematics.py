@@ -35,8 +35,8 @@ class Column(MyEnum):
     EnumItem("EWcorr_VV"),
     EnumItem("PythiaScale"),
     EnumItem("PythiaTune"),
-    EnumItem("JES"),
-    EnumItem("bTagSF"),
+    EnumItem("CMS_scale_j_13TeV_2016"),
+    EnumItem("CMS_btag_comb_13TeV_2016"),
   )
 
   @property
