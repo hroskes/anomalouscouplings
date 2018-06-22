@@ -186,6 +186,8 @@ class TemplatesFile(MultiEnum):
             result = ["qqZZ", "ggZZ", "VBF bkg"]
             if config.usedata:
                 result.append("ZX")
+            if self.shapesystematic in ("ZXUp", "ZXDown"):
+                result = [_ for _ in result if _ == "ZX"]
             return [Template(self, productionmode) for productionmode in result]
         elif self.templategroup == "DATA":
             return [Template(self, "data")]
@@ -560,9 +562,10 @@ def templatesfiles():
                     for shapesystematic in treeshapesystematics:
                         if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         if config.LHE and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
-                        yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
                         if shapesystematic not in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"):
                             yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
+                        if shapesystematic in ("ZXUp", "ZXDown"): continue
+                        yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
                         if analysis.isdecayonly: continue
                         if config.getm4lsystsfromggH and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                         yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
@@ -1105,7 +1108,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def copyfromothertemplate(self):
-        if self.productionmode in ("ggZZ", "VBF bkg") and self.production in ("180530", "180531"):
+        if self.productionmode in ("ggZZ", "VBF bkg", "ZX") and self.production in ("180530", "180531"):
             return type(self)(self.productionmode, self.channel, self.shapesystematic, self.templategroup, self.analysis, str(self.production)+"_Ulascan", self.category)
         return None
 

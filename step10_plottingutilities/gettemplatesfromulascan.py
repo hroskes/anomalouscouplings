@@ -48,6 +48,10 @@ def gettemplatefromulascan(template):
   kwargs["category"] = str(template.category).replace("VBFt", "JJVBFT").replace("VHHadrt", "HadVHT")
   if template.shapesystematic == "":
     kwargs["systematic"] = "Nominal"
+  elif template.shapesystematic == "ZXUp":
+    kwargs["systematic"] = "CMS_fake_{}Up".format(template.channel)
+  elif template.shapesystematic == "ZXDown":
+    kwargs["systematic"] = "CMS_fake_{}Down".format(template.channel)
 
   if template.productionmode == "ggH":
     kwargs["productionmode"] = "ggZZ"
@@ -174,7 +178,7 @@ def gettemplatesfromulascan(tf):
 
 def getalltemplatesfromulascan():
   for tf in templatesfiles:
-    if tf.shapesystematic != "": continue
+    if tf.shapesystematic not in ("", "ZXUp", "ZXDown"): continue
     if tf.templategroup in ("tth", "bbh"): continue
     if tf.templategroup == "wh" and tf.analysis == "fL1Zg": continue
     if tf.templategroup == "DATA": continue

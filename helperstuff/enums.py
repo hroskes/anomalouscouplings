@@ -350,6 +350,7 @@ class ProductionMode(MyEnum):
       if self == "qqH": return "QCDscale_fac_qqH"
       if self in ("ZH", "WH"): return "QCDscale_fac_VH"
       if self == "ttH": return "QCDscale_fac_ttH"
+      if self == "bbH": return "QCDscale_fac_bbH"
       if self == "qqZZ": return "QCDscale_fac_VV"
       return None
 
@@ -359,6 +360,7 @@ class ProductionMode(MyEnum):
       if self == "qqH": return "QCDscale_ren_qqH"
       if self in ("ZH", "WH"): return "QCDscale_ren_VH"
       if self == "ttH": return "QCDscale_ren_ttH"
+      if self == "bbH": return "QCDscale_ren_bbH"
       if self == "qqZZ": return "QCDscale_ren_VV"
       return None
 
@@ -962,7 +964,7 @@ if config.applyJECshapesystematics:
 if config.applyMINLOsystematics:
     _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
-treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown"))
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown") or x in ("ZXUp", "ZXDown") and config.usenewZXsystematics)
 del _
 
 class MetaclassForMultiEnums(type):
