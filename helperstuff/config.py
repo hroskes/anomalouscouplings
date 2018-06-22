@@ -61,6 +61,7 @@ combinem4lshapesystematics = False
 applyZXshapesystematicsVBFVHtagged = False
 applyZXshapesystematicsUntagged = False
 mergeZXVBFVHsystematics = False
+usenewZXsystematics = False
 
 applyJECshapesystematics = False
 applyMINLOsystematics = False

@@ -33,8 +33,8 @@ class Column(MyEnum):
     EnumItem("QCD"),
     EnumItem("PDF"),
     EnumItem("EWcorr_VV"),
-    EnumItem("PythiaScale"),
-    EnumItem("PythiaTune"),
+    EnumItem("CMS_scale_pythia"),
+    EnumItem("CMS_tune_pythia"),
     EnumItem("CMS_scale_j_13TeV_2016"),
     EnumItem("CMS_btag_comb_13TeV_2016"),
   )

@@ -288,7 +288,7 @@ class _Datacard(MultiEnum):
       if workspaceshapesystematic.isperchannel and channel == self.channel:
         if self.analysis.usehistogramsforcombine:
           return " ".join(
-                          ["lnN"] +
+                          ["shape1"] +
                           ["1" if workspaceshapesystematic in
                                   ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
                                else "-"
@@ -320,6 +320,7 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(Channel)
     def CMS_zz4l_smd_zjets_bkg_channel(self, channel):
+        if config.usenewZXsystematics: return None
         category = "Untagged"
         if channel == self.channel and category == self.category:
             if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
@@ -327,6 +328,7 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(Category)
     def CMS_zz4l_smd_zjets_bkg_category(self, category):
+        if config.usenewZXsystematics: return None
         if category == "Untagged": return None
         if not config.mergeZXVBFVHsystematics: return None
         if category == self.category:
@@ -335,13 +337,20 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(Category, Channel)
     def CMS_zz4l_smd_zjets_bkg_category_channel(self, category, channel):
+        if config.usenewZXsystematics: return None
         if category == "Untagged": return None
         if config.mergeZXVBFVHsystematics: return None
         if category == self.category and channel == self.channel:
             if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
                 return "param 0 1 [-3,3]"
 
-    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel)
+    @MakeSystematicFromEnums(Channel)
+    def CMS_fake_channel(self, channel):
+        if not config.usenewZXsystematics: return None
+        if channel == self.channel:
+            return "param 0 1 [-3,3]"
+
+    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel)
 
     divider = "\n------------\n"
 
@@ -627,7 +636,7 @@ class PdfBase(MultiEnum):
         if self.workspaceshapesystematic is None:
           self.shapesystematic = ShapeSystematic("")
         else:
-          self.shapesystematic = ShapeSystematic(str(self.workspaceshapesystematic) + str(self.systematicdirection))
+          self.shapesystematic = ShapeSystematic(self.workspaceshapesystematic.nickname + str(self.systematicdirection))
 
     def check(self, *args):
         dontcheck = []
@@ -731,7 +740,7 @@ class _Pdf(PdfBase):
     @cache
     def alphaMorphBkg_perchannel(cls, channel):
         channel = Channel(channel)
-        name = makename("CMS_zz4l_smd_zjets_bkg_{}".format(channel))
+        name = makename(("CMS_fake_{}" if config.usenewZXsystematics else "CMS_zz4l_smd_zjets_bkg_{}").format(channel))
         result = ROOT.RooRealVar(name,name,0,-20,20)
         result.setConstant(False)
         return result
@@ -739,6 +748,7 @@ class _Pdf(PdfBase):
     @classmethod
     @cache
     def alphaMorphBkg_percategory(cls, category):
+        assert not config.usenewZXsystematics
         category = Category(category)
         name = makename("CMS_zz4l_smd_zjets_bkg_{}".format(category))
         result = ROOT.RooRealVar(name,name,0,-20,20)
@@ -748,6 +758,7 @@ class _Pdf(PdfBase):
     @classmethod
     @cache
     def alphaMorphBkg_percategorychannel(cls, category, channel):
+        assert not config.usenewZXsystematics
         category = Category(category)
         channel = Channel(channel)
         name = makename("CMS_zz4l_smd_zjets_bkg_{}_{}".format(category, channel))
@@ -760,7 +771,7 @@ class _Pdf(PdfBase):
         class _(MultiEnum): enums = (Channel, Category)
         _ = _(channel, category)
         channel, category = _.channel, _.category
-        if category == "Untagged":
+        if category == "Untagged" or config.usenewZXsystematics:
             return cls.alphaMorphBkg_perchannel(channel)
         else:
             if config.mergeZXVBFVHsystematics:

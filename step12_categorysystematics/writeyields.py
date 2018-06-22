@@ -300,8 +300,8 @@ def writeyields(productionmodelist=None, productionlist=None):
           else:
             scaleup = scaledn = tuneup = tunedn = 1
           for channel in channels:
-            YieldSystematicValue(channel, category, analysis, productionmode, "PythiaScale", production).value = (scaleup, scaledn)
-            YieldSystematicValue(channel, category, analysis, productionmode, "PythiaTune", production).value = (tuneup, tunedn)
+            YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_pythia", production).value = (scaleup, scaledn)
+            YieldSystematicValue(channel, category, analysis, productionmode, "CMS_tune_pythia", production).value = (tuneup, tunedn)
 
           if productionmode == "qqZZ":
             EWcorrup = sum(result[tosample, categorization, AlternateWeight("EWcorrUp"), category] for tosample in samples) / nominal

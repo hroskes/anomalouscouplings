@@ -412,15 +412,22 @@ class ProductionMode(MyEnum):
 class WorkspaceShapeSystematic(MyEnum):
     enumname = "workspaceshapesystematic"
     enumitems = (
-                 EnumItem("Res"),
-                 EnumItem("Scale"),
-                 EnumItem("ScaleRes"),
-                 EnumItem("MINLO"),
+                 EnumItem("CMS_res_", "Res"),
+                 EnumItem("CMS_scale_", "Scale"),
+                 EnumItem("CMS_scaleres_", "ScaleRes"),
+                 EnumItem("QCDscale_ggH2in", "MINLO"),
                 )
     @property
     def isperchannel(self):
         if self in ("Res", "Scale", "ScaleRes"): return True
         return False
+
+    @property
+    def nickname(self):
+      for _ in "Res", "Scale", "ScaleRes", "MINLO":
+        if self == _:
+          return _
+      return str(self)
 
 class SystematicDirection(MyEnum):
     enumname = "systematicdirection"
