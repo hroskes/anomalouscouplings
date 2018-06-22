@@ -461,7 +461,7 @@ class ShapeSystematic(MyEnum):
         if self == "":
             return True
         if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"):
-            return templategroup in ("ggh", "vbf", "zh", "wh", "tth")
+            return templategroup in ("ggh", "vbf", "zh", "wh", "tth", "bbh")
         if self in ("ZXUp", "ZXDown"):
             return templategroup == "bkg"
         if self in ("MINLO_SM", "MINLOUp", "MINLODn"):
