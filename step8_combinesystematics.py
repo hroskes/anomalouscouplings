@@ -32,7 +32,7 @@ def combinesystematics(channel, analysis, production, category):
 
     if dom4lshapes:
         ScaleAndRes = {}
-        for _ in "ggh", "vbf", "zh", "wh", "tth":
+        for _ in "ggh", "vbf", "zh", "wh", "tth", "bbh":
             for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
                 if config.getm4lsystsfromggHUntagged:
                     if _ == "ggh" and category == "Untagged": continue
@@ -45,7 +45,7 @@ def combinesystematics(channel, analysis, production, category):
         thetemplatesfiles += ScaleAndRes.values()
         if config.combinem4lshapesystematics:
             ScaleResUp, ScaleResDown = {}, {}
-            for _ in "ggh", "vbf", "zh", "wh", "tth":
+            for _ in "ggh", "vbf", "zh", "wh", "tth", "bbh":
                 ScaleResUp[_] = TemplatesFile(channel, _, "ScaleResUp", analysis, production, category)
                 ScaleResDown[_] = TemplatesFile(channel, _, "ScaleResDown", analysis, production, category)
             assert all("ScaleRes" in _.templatesfile() for _ in ScaleResUp.values()+ScaleResDown.values())
@@ -83,7 +83,7 @@ def combinesystematics(channel, analysis, production, category):
         ggHnominal = ggHSM[""]
         for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
             ggHsyst = ggHSM[syst]
-            for _ in "ggh", "vbf", "zh", "wh", "tth":
+            for _ in "ggh", "vbf", "zh", "wh", "tth", "bbh":
                 if _ == "ggh" and category == "Untagged" and config.getm4lsystsfromggHUntagged: continue
                 elif _ == "ggh" and not config.getm4lsystsfromggHUntagged: continue
                 tf = TemplatesFile(channel, _, analysis, production, category)
@@ -103,7 +103,7 @@ def combinesystematics(channel, analysis, production, category):
         for templatesfile in ScaleAndRes.values(): outfiles[templatesfile].Write()
 
     if dom4lshapes and config.combinem4lshapesystematics:
-        for _ in "ggh", "vbf", "zh", "wh", "tth":
+        for _ in "ggh", "vbf", "zh", "wh", "tth", "bbh":
             tf = TemplatesFile(channel, _, analysis, production, category)
             for t in tf.templates() + tf.inttemplates():
                 if isinstance(t, Template): hypothesis = t.hypothesis

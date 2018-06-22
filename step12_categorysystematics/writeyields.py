@@ -255,23 +255,31 @@ def writeyields(productionmodelist=None, productionlist=None):
                                      (p.pdfvariationsystematicname, "PDF"),
                                      (p.pdfasmzsystematicname, "alphaS"),
                                     ):
+              syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
               if productionmode == "ggZZ":
                 for channel in channels:
-                  YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = YieldSystematicValue(channel, category, analysis, "ggH", systname, production).value
+                  syst.value = YieldSystematicValue(channel, category, analysis, "ggH", systname, production).value
               elif productionmode == "VBF bkg" and analysis.isdecayonly:
                 for channel in channels:
-                  YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = 1
+                  syst.value = 1
+              elif productionmode == "bbH":
+                syst.value = {
+                  "QCDscale_ren_bbH": (1.128, 0.837),
+                  "QCDscale_fac_bbH": (1.078, 0.96),
+                  "pdf_asmz_Higgs_gg": (0.945, 1.075),
+                  "pdf_variation_Higgs_gg": (1.113, 0.922),
+                }[systname]
               elif productionmode == "VBF bkg":
                 for channel in channels:
-                  YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = YieldSystematicValue(channel, category, analysis, "VBF", systname, production).value
+                  syst.value = YieldSystematicValue(channel, category, analysis, "VBF", systname, production).value
               elif systname in (productionmode.QCDfacsystematicname, productionmode.QCDrensystematicname, productionmode.pdfvariationsystematicname, productionmode.pdfasmzsystematicname):
                 up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal
                 dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal
                 for channel in channels:
-                  YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = (up, dn)
+                  syst.value = (up, dn)
               else:
                 for channel in channels:
-                  YieldSystematicValue(channel, category, analysis, productionmode, systname, production).value = None
+                  syst.value = None
 
           #pythia scale and tune
           if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):

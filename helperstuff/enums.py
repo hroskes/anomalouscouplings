@@ -364,23 +364,21 @@ class ProductionMode(MyEnum):
 
     @property
     def pdfvariationsystematicname(self):
-      if self == "ggH": return "pdf_variation_Higgs_gg"
+      if self in ("ggH", "ttH", "bbH"): return "pdf_variation_Higgs_gg"
       if self in ("qqH", "ZH", "WH"): return "pdf_variation_Higgs_qqbar"
-      if self == "ttH": return "pdf_variation_Higgs_ttH"
       if self == "qqZZ": return "pdf_variation_qq"
       return None
 
     @property
     def pdfasmzsystematicname(self):
-      if self == "ggH": return "pdf_asmz_Higgs_gg"
+      if self in ("ggH", "ttH", "bbH"): return "pdf_asmz_Higgs_gg"
       if self in ("qqH", "ZH", "WH"): return "pdf_asmz_Higgs_qqbar"
-      if self == "ttH": return "pdf_asmz_Higgs_ttH"
       if self == "qqZZ": return "pdf_asmz_qq"
       return None
 
     def workspaceshapesystematics(self, category):
       result = []
-      if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
+      if self in ("ggH", "qqH", "ZH", "WH", "ttH", "bbH"):
         if (
             config.applym4lshapesystematicsUntagged and category == "Untagged"
             or config.applym4lshapesystematicsVBFVHtagged and category != "Untagged"
