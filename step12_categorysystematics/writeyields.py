@@ -153,12 +153,6 @@ def writeyields(productionmodelist=None, productionlist=None):
           else:
             syst.value = None
 
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, "QCDscale_ggVV_bonly", production)
-          if productionmode == "ggZZ":
-            syst.value = 1.1
-          else:
-            syst.value = None
-
           syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_e", production)
           if productionmode == "ZX" or channel == "4mu":
             syst.value = None

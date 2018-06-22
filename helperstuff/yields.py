@@ -32,7 +32,6 @@ class YieldSystematic(MyEnum):
                  EnumItem("QCDscale_ren_bbH"),
                  EnumItem("QCDscale_ren_VV"),
                  EnumItem("EWcorr_VV"),
-                 EnumItem("QCDscale_ggVV_bonly"),
                  EnumItem("pdf_variation_Higgs_gg"),
                  EnumItem("pdf_variation_Higgs_qqbar"),
                  EnumItem("pdf_variation_qq"),
