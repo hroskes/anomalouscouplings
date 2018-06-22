@@ -3,7 +3,15 @@
 combine ScaleUp, ResUp --> ScaleResUp
 ZX systematics templates from qqZZ
 """
-import sys
+import argparse
+if __name__ == "__main__":
+    def __Analysis(*args, **kwargs):
+        from helperstuff.enums import Analysis
+        return Analysis(*args, **kwargs)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("analysis", type=__Analysis)
+    args = parser.parse_args()
+
 from itertools import product
 
 import ROOT
@@ -72,9 +80,9 @@ def combinesystematics(channel, analysis, production, category):
                    gettemplate(channel, "ggH", analysis, production, usecategory, analysis.purehypotheses[0], systematic)
                    .ProjectionZ().Clone("projection_{}".format(systematic))
                  for systematic in ("", "ScaleUp", "ScaleDown", "ResUp", "ResDown")}
-        ggHnominal = ggHuntaggedSM[""]
+        ggHnominal = ggHSM[""]
         for syst in "ScaleUp", "ScaleDown", "ResUp", "ResDown":
-            ggHsyst = ggHuntaggedSM[syst]
+            ggHsyst = ggHSM[syst]
             for _ in "ggh", "vbf", "zh", "wh", "tth":
                 if _ == "ggh" and category == "Untagged" and config.getm4lsystsfromggHUntagged: continue
                 elif _ == "ggh" and not config.getm4lsystsfromggHUntagged: continue
@@ -184,7 +192,7 @@ def combinesystematics(channel, analysis, production, category):
 if __name__ == "__main__":
     for production in productions:
         for analysis in analyses:
-            if analysis != sys.argv[1]: continue
+            if analysis != args.analysis: continue
             for channel in channels:
                 for category in categories:
                     print production, analysis, channel, category
