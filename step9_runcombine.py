@@ -87,15 +87,24 @@ def runscan(repmap, submitjobs, directory=None):
         else:
           del f
 
-      if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i)):
+      if (os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
+       or os.path.exists(replaceByMap("jobs/.oO[filename]Oo..tmp", repmap_i)):
         continue
       job = "{} runscan {} directory={}".format(
                                                 os.path.join(config.repositorydir, "./step9_runcombine.py"),
                                                 pipes.quote(json.dumps(repmap_i)),
                                                 pipes.quote(os.getcwd()),
                                                )
-      jobname = replaceByMap(".oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i).lstrip("_")
-      jobid = submitjob(job, jobname=jobname, jobtime="1-0:0:0", morerepmap=repmap_i)
+      submitjobkwargs = {
+        "jobname": replaceByMap(".oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i).lstrip("_"),
+        "jobtime": "1-0:0:0",
+        "outputfile": replaceByMap("jobs/joblog.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i),
+        "morerepmap": repmap_i
+      }
+      if config.host == "MARCC":
+        submitjobkwargs["queue"] = "lrgmem"
+        submitjobkwargs["memory"] = "10G"
+      jobid = submitjob(job, **submitjobkwargs)
       jobids.add(jobid)
 
     haddjobid = submitjob(" ".join([os.path.join(config.repositorydir, "helperstuff", "hadd.py"), finalfilename] + list(individualfilenames)), jobname="hadd", jobtime="1:0:0", waitids=jobids, docd=True)
@@ -108,11 +117,11 @@ def runscan(repmap, submitjobs, directory=None):
     if cwd != directory:
 #      if utilities.LSB_JOBID() is None:
 #        raise ValueError("Should call runscan from directory except in a batch job")
-      shutil.copytree(directory, os.path.basename(directory.rstrip("/")), symlinks=True)
+      shutil.copy(os.path.join(directory, replaceByMap(".oO[workspacefile]Oo.", repmap)), ".")
       if utilities.LSB_JOBID() is None:
          cdto = os.path.basename(directory.rstrip("/"))
       else:
-         cdto = "."
+         directory = os.path.join(directory, "jobs")
     else:
       cdto = "."
 
@@ -125,8 +134,8 @@ def runscan(repmap, submitjobs, directory=None):
     if not os.path.exists(filename):
       with utilities.cd(cdto), \
            utilities.OneAtATime(tmpfile, 30, message=utilities.LSB_JOBID()), \
-           utilities.LSF_creating(os.path.join(directory, filename), skipifexists=True), \
-           utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
+           utilities.LSF_creating(os.path.join(directory, "jobs", filename), skipifexists=True), \
+           utilities.LSF_creating(os.path.join(directory, "jobs", logfile), skipifexists=True):
         if not os.path.exists(filename):
           subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
 
