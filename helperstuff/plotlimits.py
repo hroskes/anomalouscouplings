@@ -30,8 +30,8 @@ def plottitle(nuisance):
     nuisance = actualvariable(nuisance)
     if nuisance == "CMS_zz4l_fai1": return "fai"
     if nuisance == "CMS_zz4l_fai2": return "faj"
-    if nuisance == "muV_scaled": return "muV"
-    if nuisance == "muf_scaled": return "muf"
+    if nuisance == "RV": return "muV"
+    if nuisance == "RF": return "muf"
     if nuisance == "JES": return nuisance
     assert False, nuisance
 def xaxistitle(POI, analysis, faifor=None):
@@ -39,8 +39,8 @@ def xaxistitle(POI, analysis, faifor=None):
     if faifor == "decay": faifor = None
     if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(superscript=faifor), analysis.phi_lower)
     if POI == "CMS_zz4l_fai2": return "{} cos({})".format(analysis.fais[1].title(superscript=faifor), analysis.fais[1].phi_lower)
-    if POI == "muV_scaled": return "#mu_{V}"
-    if POI == "muf_scaled": return "#mu_{f}"
+    if POI == "RV": return "#mu_{V}"
+    if POI == "RF": return "#mu_{f}"
     if nuisance == "JES": return nuisance
     assert False
 def xaxisrange(POI):
@@ -52,8 +52,8 @@ def yaxistitle(nuisance, analysis):
     if nuisance is None: return "#minus2 #Deltaln L"
     return xaxistitle(POI=nuisance, analysis=analysis)
 def actualvariable(variable):
-    if variable in ("r_VVH", "muV", "RV"): return "muV_scaled"
-    if variable in ("r_ffH", "muf", "RF"): return "muf_scaled"
+    #if variable in ("r_VVH", "muV", "RV"): return "muV_scaled"
+    #if variable in ("r_ffH", "muf", "RF"): return "muf_scaled"
     return variable
 
 
