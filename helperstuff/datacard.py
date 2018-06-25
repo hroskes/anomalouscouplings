@@ -352,7 +352,7 @@ class _Datacard(MultiEnum):
 
     @property
     def kbkg_gg(self):
-        return "param 0 1 [-3,3]"
+        return "param 1 0.1 [0,2]"
 
     section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel, "kbkg_gg")
 
