@@ -14,13 +14,13 @@ import os
 #========================
 #inputs
 productionmode = "ggH"
-disc           = "D_int_decay_new"
-reweightto     = "0+"
+disc           = "D_bkg_VBFdecay_10bins"
+reweightto     = None
 bins           = None
 min            = None
 max            = None
 
-production     = "180416"
+production     = "180530"
 
 enrich         = False
 masscut        = True
@@ -28,8 +28,8 @@ normalizeto1   = False
 
 channel        = None
 
-category       = None
-analysis       = None
+category       = "VBFtagged"
+analysis       = "fa3"
 
 cut            = None
 

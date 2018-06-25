@@ -348,12 +348,13 @@ class _Datacard(MultiEnum):
     def CMS_fake_channel(self, channel):
         if not config.usenewZXsystematics: return None
         if channel == self.channel:
-            return "param 0 1 [-3,3]"
+          return "param 0 1 [-3,3]"
 
+    @property
     def kbkg_gg(self):
         return "param 0 1 [-3,3]"
 
-    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel, kbkg_gg)
+    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel, "kbkg_gg")
 
     divider = "\n------------\n"
 
@@ -516,10 +517,10 @@ class _Datacard(MultiEnum):
 
         for pdf in self.pdfs:
             getattr(w, 'import')(pdf.pdf, ROOT.RooFit.RecycleConflictNodes())
-            if (pdf.productionmode.issignal or pdf.productionmode == "ggZZ") and pdf.shapesystematic == "":
+            if (pdf.productionmode.issignal or pdf.productionmode in ("ggZZ", "ZX")) and pdf.shapesystematic == "":
                 getattr(w, 'import')(pdf.norm, ROOT.RooFit.RecycleConflictNodes())
-                if not self.analysis.isdecayonly:
-                    getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
+            if pdf.productionmode.issignal and not self.analysis.isdecayonly:
+                getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
 
         w.writeToFile(self.rootfile_base)
 
@@ -663,7 +664,7 @@ class _Pdf(PdfBase):
         return self.getpdf()
     @property
     def norm(self):
-        if self.shapesystematic != "" or self.productionmode.isbkg and self.productionmode != "ggZZ":
+        if self.shapesystematic != "" or self.productionmode.isbkg and self.productionmode not in ("ggZZ", "ZX"):
             raise ValueError("Can't get norm for systematic or bkg pdf!\n{!r}".format(self))
         self.makepdf()
         return self.__norm
@@ -977,6 +978,20 @@ class _Pdf(PdfBase):
         muratio = cls.makemuratio(productionmodes, luminosity, analysis)
         return ROOT.RooFormulaVar(cls.muscaledname(productionmodes, luminosity.production.year), "", "@0/@1", ROOT.RooArgList(mu, muratio))
 
+    @classmethod
+    @cache
+    def one(cls):
+        return ROOT.RooConstVar(makename("one"), "one", 1)
+
+    @classmethod
+    @cache
+    def ZXnormstuff(cls, channel, category, year, nominal, up, dn):
+        return (
+            cls.one(),
+            ROOT.RooConstVar(makename("zxup_{}_{}_{}".format(channel, category, year)), "", up / nominal),
+            ROOT.RooConstVar(makename("zxdn_{}_{}_{}".format(channel, category, year)), "", dn / nominal),
+        )
+
     @cache
     def makepdf_ZX(self):
         if hasattr(self, "T"): return
@@ -999,13 +1014,26 @@ class _Pdf(PdfBase):
         self.funcList_zjets.add(self.ZXpdfs[ShapeSystematic("ZXDn")])
         self.morphVarListBkg.add(self.alphaMorphBkg(self.category, self.channel))
 
+        self.__norm = ROOT.AsymQuad(self.normname, self.normname, 
+          ROOT.RooArgList(*self.ZXnormstuff(self.channel, self.category, self.production.year, self.T[ShapeSystematic("")].Integral(), self.T[ShapeSystematic("ZXUp")].Integral(), self.T[ShapeSystematic("ZXDn")].Integral())),
+          ROOT.RooArgList(self.alphaMorphBkg(self.category, self.channel)),
+          1, 2
+        )
+
+    @classmethod
+    @cache
+    def kbkg_gg(cls):
+        k = ROOT.RooRealVar(makename("kbkg_gg"), "kbkg_gg", 1, 0, 2)
+        k.setBins(200)
+        return k
+
     @cache
     def makepdf_bkg(self):
         if hasattr(self, "T"): return
         self.T = gettemplate(self.productionmode, self.analysis, self.production, self.category, self.channel, self.shapesystematic)
         self.T.SetName(self.templatename())
         self.T_datahist = ROOT.RooDataHist(self.datahistname(), "", ROOT.RooArgList(self.D1,self.D2,self.D3), self.T)
-        self.__norm = ROOT.RooFormulaVar("abs(@0)", ROOT.RooArgList("kbkg_gg"))
+        self.__norm = ROOT.RooFormulaVar(self.normname, self.normname, "abs(@0)", ROOT.RooArgList(self.kbkg_gg()))
 
     def makepdf(self):
         if self.productionmode in ("ggH", "ttH", "bbH"):

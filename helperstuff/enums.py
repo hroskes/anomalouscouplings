@@ -368,14 +368,14 @@ class ProductionMode(MyEnum):
     def pdfvariationsystematicname(self):
       if self in ("ggH", "ttH", "bbH"): return "pdf_variation_Higgs_gg"
       if self in ("qqH", "ZH", "WH"): return "pdf_variation_Higgs_qqbar"
-      if self == "qqZZ": return "pdf_variation_qq"
+      if self == "qqZZ": return "pdf_variation_qqbar"
       return None
 
     @property
     def pdfasmzsystematicname(self):
       if self in ("ggH", "ttH", "bbH"): return "pdf_asmz_Higgs_gg"
       if self in ("qqH", "ZH", "WH"): return "pdf_asmz_Higgs_qqbar"
-      if self == "qqZZ": return "pdf_asmz_qq"
+      if self == "qqZZ": return "pdf_asmz_qqbar"
       return None
 
     def workspaceshapesystematics(self, category):
