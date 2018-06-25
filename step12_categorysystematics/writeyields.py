@@ -105,32 +105,7 @@ def writeyields(productionmodelist=None, productionlist=None):
         for channel, category in itertools.product(channels, categories):
           yv = YieldValue(channel, category, analysis, productionmode, production)
           if productionmode == "ZX":
-            if production.year == 2016:
-              yv.value = {
-                (Channel("2e2mu"), Category(    "Untagged")): 11.679,
-                (Channel("2e2mu"), Category(   "VBFtagged")): 0.810,
-                (Channel("2e2mu"), Category("VHHadrtagged")): 0.619,
-                (Channel("4e"   ), Category(    "Untagged")): 4.393,
-                (Channel("4e"   ), Category(   "VBFtagged")): 0.282,
-                (Channel("4e"   ), Category("VHHadrtagged")): 0.241,
-                (Channel(  "4mu"), Category(    "Untagged")): 7.215,
-                (Channel(  "4mu"), Category(   "VBFtagged")): 0.578,
-                (Channel(  "4mu"), Category("VHHadrtagged")): 0.511,
-              }[channel, category]
-            elif production.year == 2017:
-              yv.value = {
-                (Channel("2e2mu"), Category(    "Untagged")): 12.503,
-                (Channel("2e2mu"), Category(   "VBFtagged")): 0.674,
-                (Channel("2e2mu"), Category("VHHadrtagged")): 0.595,
-                (Channel("4e"   ), Category(    "Untagged")): 3.984,
-                (Channel("4e"   ), Category(   "VBFtagged")): 0.160,
-                (Channel("4e"   ), Category("VHHadrtagged")): 0.169,
-                (Channel(  "4mu"), Category(    "Untagged")): 9.713,
-                (Channel(  "4mu"), Category(   "VBFtagged")): 0.494,
-                (Channel(  "4mu"), Category("VHHadrtagged")): 0.557,
-              }[channel, category]
-            else:
-              assert False
+            yv.value = gettemplate(productionmode, category, channel, production, analysis).Integral()
             continue
           if productionmode == "VBF bkg":
             yv.value = gettemplate(productionmode, category, channel, production, analysis).Integral()
