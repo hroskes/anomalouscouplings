@@ -18,7 +18,7 @@ from helperstuff import config
 from helperstuff.enums import Analysis, Production
 from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
-from helperstuff.utilities import cache, cd, mkdtemp, tfiles
+from helperstuff.utilities import cache, cd, mkdtemp, PlotCopier, tfiles
 
 from mergeplots import Folder
 
@@ -112,7 +112,7 @@ def PRL_loglinear(**kwargs):
             assert False
         legendposition = x1legend, .3, x1legend+.45, .8
 
-        c = ROOT.TCanvas("c{}".format(random.randint(1, 1000000)), "", 8, 30, 1600, 1600)
+        c = plotcopier.TCanvas("c{}".format(random.randint(1, 1000000)), "", 8, 30, 1600, 1600)
 
         leftmargin = .1
         rightmargin = .045 #apply to the individual pads or 1 of the x axis gets cut off
@@ -131,10 +131,11 @@ def PRL_loglinear(**kwargs):
         repmap = {"analysis": str(analysis)}
         subdir = ""
         folders = [
-                   Folder(".oO[analysis]Oo._allsysts", "Observed", 2, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-                   Folder(".oO[analysis]Oo._allsysts", "Expected", 2, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
-                   Folder(".oO[analysis]Oo._allsysts", "Observed, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
-                   Folder(".oO[analysis]Oo._allsysts", "Expected, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=1),
+#                   Folder(".oO[analysis]Oo._fixggHsystematics", "Observed", 2, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+#                   Folder(".oO[analysis]Oo._fixggHsystematics", "Expected", 2, analysis, subdir, plotname="limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
+#                   Folder(".oO[analysis]Oo._fixggHsystematics", "Observed, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
+#                   Folder(".oO[analysis]Oo._fixggHsystematics", "Expected, 13 TeV", 1, analysis, subdir, plotname="limit_lumi35.8671_13_100,-1.0,1.0_100,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=1),
+                   Folder(".oO[analysis]Oo._fixggHsystematics", "Expected, 2016+2017", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=1),
                   ]
 
         mg = ROOT.TMultiGraph("limit", "")
@@ -184,8 +185,10 @@ def PRL_loglinear(**kwargs):
         l.Draw()
         c.cd()
         style.applycanvasstyle(c)
-        style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
-                                                .format(config.productionforcombine.dataluminosity+config.lumi2015),
+        style.CMS("", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)"
+#        style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
+                                                .format(sum(_.dataluminosity for _ in config.productionsforcombine)),
+#                                                .format(config.productionforcombine.dataluminosity+config.lumi2015),
                       x1=0.007, x2=1.01, #???
                       drawCMS=False, extratextsize=.039)
         if forWIN:
@@ -210,7 +213,7 @@ def PRL_loglinear(**kwargs):
         else:
             for ext in "png eps root pdf".split():
                 c.SaveAs(os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", ext), repmap)))
-            with open(os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
+            with plotcopier.open(os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
                 f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
                 f.write("\n\n\n\n\n\ngit info:\n\n")
                 f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
@@ -276,4 +279,5 @@ if __name__ == "__main__":
     if args and args[0] == "animations":
         args = args[1:]
         function = animations
-    function(*args, **kwargs)
+    with PlotCopier() as plotcopier:
+        function(*args, **kwargs)

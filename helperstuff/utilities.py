@@ -668,3 +668,61 @@ def deprecate(thing, *datetimeargs, **datetimekwargs):
 
 def sgn(number):
   return math.copysign(1, number)
+
+class TCanvas(ROOT.TCanvas):
+    def __init__(self, *args, **kwargs):
+        self.__plotcopier = kwargs.pop("plotcopier", None)
+        return super(TCanvas, self).__init__(*args, **kwargs)
+    def SaveAs(self, filename="", *otherargs, **kwargs):
+        absfilename = os.path.abspath(filename)
+        if self.__plotcopier:
+            self.__plotcopier.copy(filename)
+        return super(TCanvas, self).SaveAs(filename, *otherargs, **kwargs)
+
+class PlotCopier(object):
+    import config
+
+    copyfromconfig = config.getconfiguration("login-node", "jroskes1@jhu.edu")
+    copyfromfolder = os.path.join(os.path.abspath(copyfromconfig["plotsbasedir"]), "")
+    copyfromhost = copyfromconfig["host"]
+
+    copytoconfig = config.getconfiguration("lxplus", "hroskes")
+    copytofolder = os.path.join(copytoconfig["plotsbasedir"], "")
+    copytoconnect = copytoconfig["connect"]
+
+    def __init__(self):
+        self.__tocopy = set()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *error):
+        import config
+        if LSB_JOBID() or config.host != self.copyfromhost or not self.__tocopy: return
+        command = ["rsync", "-azvP", self.copyfromfolder, self.copytoconnect + ":" + self.copytofolder] + [
+          "--include="+_ for _ in self.__tocopy
+        ] + ["--exclude=*"]
+        print command
+        try:
+            subprocess.check_call(command)
+        except:
+            print
+            print "Failed to copy plots.  To do it yourself, try:"
+            print
+            print " ".join(pipes.quote(_) for _ in command)
+            print
+            raise
+
+    def TCanvas(self, *args, **kwargs):
+        return TCanvas(plotcopier=self, *args, **kwargs)
+
+    def copy(self, filename):
+        absfilename = os.path.abspath(filename)
+        if not self.copyfromfolder in absfilename: return
+        relativefilename = "/"+absfilename.replace(self.copyfromfolder, "")
+        for i in range(relativefilename.count("/")):
+            self.__tocopy.add(relativefilename.rsplit("/", i)[0])
+
+    def open(self, filename, *args, **kwargs):
+        self.copy(filename)
+        return open(filename, *args, **kwargs)

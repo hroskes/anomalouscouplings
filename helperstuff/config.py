@@ -10,6 +10,7 @@ def getconfiguration(hostname, username):
       repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings/",
       plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/",
       svndir = "/afs/cern.ch/work/h/hroskes/AN/",
+      connect = "hroskes@lxplus.cern.ch",
     )
 
   elif ("login-node" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
@@ -20,6 +21,7 @@ def getconfiguration(hostname, username):
       plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/",
       lxplususername = "hroskes",
       email = "heshyr@gmail.com",
+      connect = "jroskes1@jhu.edu@gateway2.marcc.jhu.edu",
     )
 
 for key, value in getconfiguration(socket.gethostname(), getpass.getuser()).iteritems():
