@@ -356,7 +356,7 @@ class XPos(MyEnum):
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
-#@cache
+@cache
 def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, xsize=.1, ysize=.03, yshift=0, yshift68=None, yshift95=None, textsize=None, PRL=False, CLbelow=False, arbitraryparameter=None):
     """
     xpostext: "left", "right", or a float, determines where the text 68% CL and 95% CL goes
