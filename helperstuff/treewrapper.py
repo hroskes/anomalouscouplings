@@ -19,7 +19,7 @@ import enums
 from gconstants import gconstant
 from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import cache_instancemethod, callclassinitfunctions, deprecate, getmembernames, product, tlvfromptetaphim
+from utilities import cache_instancemethod, callclassinitfunctions, deprecate, getmembernames, MultiplyCounter, product, tlvfromptetaphim
 import xrd
 import ZX
 
@@ -884,6 +884,7 @@ class TreeWrapper(TreeWrapperBase):
         self.nevents = self.nevents2e2mu = self.cutoffs = None
         self.xsec = None
         self.effectiveentriestree = None
+        self.alternateweightxsecstree = None
 
         super(TreeWrapper, self).__init__(treesample, minevent, maxevent)
 
@@ -1526,6 +1527,7 @@ class TreeWrapper(TreeWrapperBase):
             "D_bkg_kin_HadVHdecay_JECDn",
 
             "allsamples",
+            "alternateweightxsecstree",
             "categorizations",
             "cconstantforDbkg",
             "cconstantforD2jet",
@@ -1696,7 +1698,11 @@ class TreeWrapper(TreeWrapperBase):
         Do the initial loops through the tree to find, for each hypothesis,
         the cutoff and then the sum of weights for 2e2mu
         """
-        if self.isalternate: return
+        doalternateweightxsecstree = []
+        if self.treesample == ReweightingSamplePlus("ggH", "0+", "POWHEG"):
+            doalternateweightxsecstree = enums.AlternateWeight.items(lambda x: "LHEweight" in x.weightname or x == "1")
+
+        if self.isalternate and not doalternateweightxsecstree: return
         if self.isdummy: return
         if self.isZX: return
         if self.isdata: return
@@ -1713,10 +1719,16 @@ class TreeWrapper(TreeWrapperBase):
         print "Doing initial loop through tree"
         if self.failedtree is None: raise ValueError("No failedtree provided for {} which has reweighting!".format(self.treesample))
 
+        if doalternateweightxsecstree:
+            alternateweightxsecs = MultiplyCounter()
+
         for tree in self.tree, self.failedtree:
             tree.SetBranchStatus("*", 0)
             for weightname in self.genMEs:
                 tree.SetBranchStatus(weightname, 1)
+            for alternateweight in doalternateweightxsecstree:
+                if alternateweight == "1": continue
+                tree.SetBranchStatus(alternateweight.weightname, 1)
             tree.SetBranchStatus("GenZ*Flav", 1)
             tree.SetBranchStatus("LHEDaughter*", 1)
             tree.SetBranchStatus("LHEAssociated*", 1)
@@ -1733,6 +1745,7 @@ class TreeWrapper(TreeWrapperBase):
         values = functionsandarrays.values()
         #will fail if multiple have the same str() which would make no sense
         assert len(functionsandarrays) == len(reweightingsamples)
+        if doalternateweightxsecstree: assert len(functionsandarrays) == 1
 
         length = self.tree.GetEntries() + self.failedtree.GetEntries()
         for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
@@ -1743,6 +1756,12 @@ class TreeWrapper(TreeWrapperBase):
             if i % self.printevery == 0 or i == length:
                 print i, "/", length, "   (preliminary run)"
                 #break
+
+            for alternateweight in doalternateweightxsecstree:
+                #see if doalternateweightxsecstree: assert len(functionsandarrays) == 1 above!
+                alternateweightxsecs[alternateweight] += function(entry) * (
+                  1 if alternateweight.weightname == "1" else getattr(entry, alternateweight.weightname)
+                )
 
         self.cutoffs = {}
         self.nevents2e2mu = {}
@@ -1787,6 +1806,20 @@ class TreeWrapper(TreeWrapperBase):
             self.effectiveentriestree.Branch(sample.weightname(), branch, sample.weightname()+"/D")
 
         self.effectiveentriestree.Fill()  #will be written when newf.Write() is called in step2.py
+
+        if doalternateweightxsecstree:
+            alternateweightxsecs /= alternateweightxsecs[enums.AlternateWeight("1")]
+            self.alternateweightxsecstree = ROOT.TTree("alternateweightxsecstree", "")
+            for alternateweight in doalternateweightxsecstree:
+                if alternateweight == "1":
+                    assert alternateweightxsecs[alternateweight] == 1
+                    continue
+                branch = array('d', [alternateweightxsecs[alternateweight]])
+                self.branches.append(branch) #so it stays alive until we do Fill()
+                branchname = str(alternateweight)
+                self.alternateweightxsecstree.Branch(alternateweight.weightname, branch, alternateweight.weightname+"/D")
+
+            self.alternateweightxsecstree.Fill()  #will be written when newf.Write() is called in step2.py
 
         self.tree.SetBranchStatus("*", 1)
 
@@ -2311,7 +2344,7 @@ class TreeWrapper(TreeWrapperBase):
         ReweightingSample("bbH", "fa30.5fL1Zg0.5"),
 
         ReweightingSample("bbH", "fL10.5fL1Zg0.5"),
-     ] * deprecate(0, 2018, 6, 29) + [
+     ] * deprecate(0, 2018, 7, 15) + [
 
         ReweightingSample("tqH", "Hff0+", "0+"),
 

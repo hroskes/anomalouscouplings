@@ -55,6 +55,8 @@ def adddiscriminants(*args):
             newt = treewrapper.tree.CloneTree(0)
             if treewrapper.effectiveentriestree is not None:
                 treewrapper.effectiveentriestree.SetDirectory(newf)
+            if treewrapper.alternateweightxsecstree is not None:
+                treewrapper.alternateweightxsecstree.SetDirectory(newf)
         else:
             newt = ROOT.TTree("candTree", "candTree")
 

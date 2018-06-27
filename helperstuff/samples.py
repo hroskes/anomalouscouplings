@@ -11,7 +11,7 @@ import ROOT
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
-from utilities import cache, deprecate, mkdtemp, product, tlvfromptetaphim
+from utilities import cache, deprecate, mkdtemp, product, TFile, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 
@@ -556,6 +556,7 @@ class SampleBase(object):
                        or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS")
                        or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
                 def MC_weight_function(self_tree):
+                    if reweightingonly: return 1
                     return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
 
             elif self_sample.issignal:
@@ -914,7 +915,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             return [self]
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "bbH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses
-                     if not deprecate(self.productionmode == "bbH" and hypothesis in ("fa30.5fa20.5", "fa20.5fL10.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5", "fL10.5fL1Zg0.5", "fa20.5fL1Zg0.5"), 2018, 6, 22)]
+                     if not deprecate(self.productionmode == "bbH" and hypothesis in ("fa30.5fa20.5", "fa20.5fL10.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5", "fL10.5fL1Zg0.5", "fa20.5fL1Zg0.5"), 2018, 7, 15)]
         if self.productionmode == "tqH":
             return [self]
         if self.productionmode == "data":
@@ -1699,6 +1700,15 @@ class Sample(ReweightingSamplePlus):
 
     @property
     def pdf(self): return self.reweightingsamplewithpdf.pdf
+
+    @cache
+    def alternateweightxsec(self, alternateweight):
+        if alternateweight in ("1", "PythiaScaleUp", "PythiaScaleDown"):
+            return 1
+        with TFile(self.withdiscriminantsfile()) as f:
+             t = f.alternateweightxsecstree
+             t.GetEntry(0)
+             return getattr(t, alternateweight.weightname)
 
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]

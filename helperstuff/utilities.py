@@ -632,19 +632,26 @@ def recursivesubclasses(cls):
         result += recursivesubclasses(subcls)
     return result
 
-@contextlib.contextmanager
-def Closing(thing, write=False):
-    try:
-        yield thing
-    finally:
+class Closing(object):
+    def __init__(self, thing, write=False):
+        self.thing = thing
+        self.write = write
+    def __enter__(self):
+        return self.thing
+    def __exit__(self, *exc_info):
         try:
-            if write: thing.Write()
+            if self.write: self.thing.Write()
         finally:
-            thing.Close()
+            self.thing.Close()
 
-def TFile(*args, **kwargs):
-    write = kwargs.pop("write", False)
-    return Closing(ROOT.TFile(*args, **kwargs), write=write)
+class TFile(Closing):
+    def __init__(self, *args, **kwargs):
+        write = kwargs.pop("write", False)
+        return super(TFile, self).__init__(ROOT.TFile(*args, **kwargs), write=write)
+    def __exit__(self, *exc_info):
+        if any(exc_info):
+            self.thing.ls()
+        return super(TFile, self).__exit__(self, *exc_info)
 
 def setname(name):
     def decorator(function):

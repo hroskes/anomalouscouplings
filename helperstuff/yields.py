@@ -327,6 +327,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
       t.SetBranchStatus("PythiaWeight_*sr_muR4", 1)
 
     c = ROOT.TCanvas()
+
     for tosample, categorization, alternateweight in itertools.product(tosamples, categorizations, alternateweights):
         try:
             if tosample.productionmode == "WH" and tosample.hypothesis == "L1Zg": continue
@@ -336,7 +337,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
             if tosample.productionmode == "ggH":
                 t.GetEntry(0)
                 assert all(_.productionmode == "ggH" for _ in fromsamples)
-                h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname) / tosample.SMxsec)
+                assert len(fromsamples) == 1
+                h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname) / next(iter(fromsamples)).alternateweightxsec(alternateweight))
             for i in range(h.GetNbinsY()):
                 for channel in channels:
                     toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
