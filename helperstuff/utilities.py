@@ -7,6 +7,7 @@ from functools import wraps
 import inspect
 from itertools import tee, izip
 import logging
+import math
 import operator
 import json
 import os
@@ -664,3 +665,6 @@ def deprecate(thing, *datetimeargs, **datetimekwargs):
     if datetime.datetime.now() >= when:
         raise RuntimeError("fix this!")
     return thing
+
+def sgn(number):
+  return math.copysign(1, number)

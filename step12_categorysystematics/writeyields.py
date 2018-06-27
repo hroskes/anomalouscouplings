@@ -16,7 +16,7 @@ if __name__ == "__main__":
 from collections import namedtuple
 import itertools
 import logging
-from math import sqrt
+from math import exp, log, sqrt
 import os
 import yaml
 
@@ -26,7 +26,7 @@ from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import AlternateWeight, analyses, categories, Category, Channel, channels, flavors, ProductionMode, pythiasystematics
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
 from helperstuff.treewrapper import TreeWrapper
-from helperstuff.utilities import deprecate, MultiplyCounter
+from helperstuff.utilities import deprecate, MultiplyCounter, sgn
 from helperstuff.yields import count, totalrate, YieldSystematicValue, YieldValue
 
 from categorysystematics import findsystematic
@@ -239,7 +239,27 @@ def writeyields(productionmodelist=None, productionlist=None):
               elif productionmode == "VBF bkg":
                 for channel in channels:
                   syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-                  syst.value = YieldSystematicValue(channel, category, analysis, "VBF", systname, production).value
+                  addsysts = [(YieldValue(channel, category, analysis, _, production).value,
+                              YieldSystematicValue(channel, category, analysis, _, systname, production).value) for _ in "VBF", "ZH", "WH"]
+                  addfirsts = [(_1, _2[0] if _2 is not None else 1) for _1, _2 in addsysts]
+                  addseconds = [(_1, _2[1] if _2 is not None else 1) for _1, _2 in addsysts]
+                  if addfirsts and addseconds:
+                    first = sum(_1*_2 for _1, _2 in addfirsts) / sum(_1 for _1, _2 in addfirsts)
+                    second = sum(_1*_2 for _1, _2 in addseconds) / sum(_1 for _1, _2 in addseconds)
+                    #maxfirst = max(abs(log(_)) for _ in addfirsts)
+                    #maxsecond = max(abs(log(_)) for _ in addseconds)
+                    #addfirsts = [_ for _ in addfirsts if abs(log(_)) >= maxfirst/5]
+                    #addseconds = [_ for _ in addseconds if abs(log(_)) >= maxsecond/5]
+                    #assert len({sgn(log(_)) for _ in addfirsts}) <= 1, addfirsts
+                    #assert len({sgn(log(_)) for _ in addseconds}) <= 1, addseconds
+                    #first = exp(sqrt(sum(log(_)**2 for _ in addfirsts)))
+                    #if addfirsts[0] < 1: first = 1/first
+                    #second = exp(sqrt(sum(log(_)**2 for _ in addseconds)))
+                    #if addseconds[0] < 1: second = 1/second
+                    #print addfirsts, first
+                  else:
+                    first = second = 1
+                  syst.value = first, second
               elif systname in (productionmode.QCDfacsystematicname, productionmode.QCDrensystematicname, productionmode.pdfvariationsystematicname, productionmode.pdfasmzsystematicname):
                 if productionmode == "bbH":
                   dn, up = {
