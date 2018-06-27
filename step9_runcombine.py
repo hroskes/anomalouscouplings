@@ -59,7 +59,7 @@ def runscan(repmap, submitjobs, directory=None):
     finalfilename = replaceByMap(".oO[filename]Oo.", repmap_final)
     if os.path.exists(finalfilename): return
 
-    for i in range(npoints+1):
+    for i in range(npoints):
       repmap_i = repmap.copy()
       repmap_i.update({
         "selectpoints": "--firstPoint .oO[pointindex]Oo. --lastPoint .oO[pointindex]Oo.",
@@ -122,6 +122,7 @@ def runscan(repmap, submitjobs, directory=None):
          cdto = os.path.basename(directory.rstrip("/"))
       else:
          directory = os.path.join(directory, "jobs")
+         cdto = "."
     else:
       cdto = "."
 
@@ -134,8 +135,8 @@ def runscan(repmap, submitjobs, directory=None):
     if not os.path.exists(filename):
       with utilities.cd(cdto), \
            utilities.OneAtATime(tmpfile, 30, message=utilities.LSB_JOBID()), \
-           utilities.LSF_creating(os.path.join(directory, "jobs", filename), skipifexists=True), \
-           utilities.LSF_creating(os.path.join(directory, "jobs", logfile), skipifexists=True):
+           utilities.LSF_creating(os.path.join(directory, filename), skipifexists=True), \
+           utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
         if not os.path.exists(filename):
           subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
 
@@ -557,7 +558,7 @@ def runcombine(analysis, foldername, **kwargs):
         for arg in sys.argv[1:]:
             if "=" in arg and "subdirectory=" not in arg: continue
             f.write(pipes.quote(arg)+" ")
-        f.write("plotname="+plotname+" ")
+        f.write("--plotname="+plotname+" ")
         f.write("\n\n\n\n\n\ngit info:\n\n")
         f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
         f.write("\n")

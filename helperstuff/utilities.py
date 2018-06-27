@@ -237,20 +237,20 @@ class Tee(object):
         self.stdout.write(data)
 
 class OneAtATime(KeepWhileOpenFile):
-    def __init__(self, name, delay, message=None, task="doing this"):
-        super(OneAtATime, self).__init__(name)
+    def __init__(self, name, delay, message=None, printmessage=None, task="doing this"):
+        super(OneAtATime, self).__init__(name, message=message)
         self.delay = delay
-        if message is None:
-            message = "Another process is already {task}!  Waiting {delay} seconds."
-        message = message.format(delay=delay, task=task)
-        self.__message = message
+        if printmessage is None:
+            printmessage = "Another process is already {task}!  Waiting {delay} seconds."
+        printmessage = printmessage.format(delay=delay, task=task)
+        self.__printmessage = printmessage
 
     def __enter__(self):
         while True:
             result = super(OneAtATime, self).__enter__()
             if result:
                 return result
-            print self.__message
+            print self.__printmessage
             time.sleep(self.delay)
 
 def jsonloads(jsonstring):
