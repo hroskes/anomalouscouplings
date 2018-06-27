@@ -983,11 +983,6 @@ class Projections(MultiEnum):
 
             templates[0:0] = [top, bottom] #will remove some later, depending on the discriminant
 
-            if category in ("VBFtagged", "VHHadrtagged"):
-                rebin = 4
-            elif category == "Untagged":
-                rebin = 2
-
         if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
             if Dbkg_allcategories:
                 data = self.DbkgSum("",
