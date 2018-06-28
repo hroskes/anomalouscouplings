@@ -4,16 +4,16 @@ assert __name__ == "__main__"
 
 from helperstuff import config
 from helperstuff import style
-from helperstuff.copyplots import copyplots
 from helperstuff.enums import *
 from helperstuff.plotfromtree import plotfromtree
 from helperstuff.samples import *
+from helperstuff.utilities import PlotCopier
 import ROOT
 import os
 
 #========================
 #inputs
-productionmode = "ggH"
+productionmode = "VBF"
 disc           = "D_bkg_VBFdecay_10bins"
 reweightto     = None
 bins           = None
@@ -50,37 +50,38 @@ cache = []
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
 
-c = ROOT.TCanvas()
-if logscale: c.SetLogy()
-hs = {}
-
 productionmode = ProductionMode(productionmode)
 
 def hypothesestouse():
-    if productionmode == "VBF":
-        for hypothesis in hypotheses:
-            if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa3prod0.5", "fa2prod0.5", "fL1Zgprod0.5", "fL1prod0.5"): yield hypothesis
-    elif productionmode == "ZH":
-        for hypothesis in hypotheses:
-            if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa3prod0.5", "fa2prod0.5", "fL1Zgprod0.5", "fL1prod0.5"): yield hypothesis
-    else:
-        for hypothesis in hypotheses:
-            if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa30.5", "fa2-0.5", "fL1Zg0.5", "fL10.5"): yield hypothesis
+  if productionmode == "VBF":
+    for hypothesis in hypotheses:
+      if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa3prod0.5", "fa2prod0.5", "fL1Zgprod0.5", "fL1prod0.5"): yield hypothesis
+  elif productionmode == "ZH":
+    for hypothesis in hypotheses:
+      if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa3prod0.5", "fa2prod0.5", "fL1Zgprod0.5", "fL1prod0.5"): yield hypothesis
+  else:
+    for hypothesis in hypotheses:
+      if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa30.5", "fa2-0.5", "fL1Zg0.5", "fL10.5"): yield hypothesis
 
 def hffhypothesistouse():
-    if productionmode == "ttH":
-        return "Hff0+"
-    else:
-        return None
+  if productionmode == "ttH":
+    return "Hff0+"
+  else:
+    return None
 
-for hypothesis in hypotheses:
+with PlotCopier() as pc:
+  c = pc.TCanvas()
+  if logscale: c.SetLogy()
+  hs = {}
+
+  for hypothesis in hypotheses:
     if hypothesis not in list(hypothesestouse()):
-        try:
-            os.remove(os.path.join(config.plotsbasedir, "TEST", "reweighting", "{}.png".format(hypothesis)))
-        except OSError:
-            pass
+      try:
+        pc.remove(os.path.join(config.plotsbasedir, "TEST", "reweighting", "{}.png".format(hypothesis)))
+      except OSError:
+        pass
 
-for color, hypothesis in enumerate(hypothesestouse(), start=1):
+  for color, hypothesis in enumerate(hypothesestouse(), start=1):
     if color == 5: color = ROOT.kYellow+3
 
     hname = "h{}".format(hypothesis)
@@ -123,13 +124,11 @@ for color, hypothesis in enumerate(hypothesestouse(), start=1):
     for ext in "png eps root pdf".split():
       c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "reweighting", "{}.{}".format(hypothesis, ext)))
 
-if reweightto is None:
+  if reweightto is None:
     option = "hist nostack"
-else:
+  else:
     option = "hist"
-hstack.Draw(option)
-hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
-for ext in "png eps root pdf".split():
-  c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "reweighting", "test.{}".format(ext)))
-
-copyplots("TEST")
+  hstack.Draw(option)
+  hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
+  for ext in "png eps root pdf".split():
+    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "reweighting", "test.{}".format(ext)))

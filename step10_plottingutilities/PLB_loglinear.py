@@ -34,7 +34,7 @@ def applystyle(mg, mglog, folders, ydivide):
         mglog.GetXaxis().CenterTitle()
         mglog.GetYaxis().CenterTitle()
         mglog.SetMinimum(ydivide)
-        mglog.SetMaximum(150)
+        mglog.SetMaximum(170)
         style.applyaxesstyle(mglog)
         mglog.GetXaxis().SetLabelOffset(9999999)
         mglog.GetXaxis().SetTitleOffset(9999999)

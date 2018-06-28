@@ -765,8 +765,7 @@ class PlotCopier(object):
         if LSB_JOBID() or config.host != self.copyfromhost or not self.__tocopy: return
         command = ["rsync", "-azvP", self.copyfromfolder, self.copytoconnect + ":" + self.copytofolder] + [
           "--include="+_ for _ in self.__tocopy
-        ] + ["--exclude=*"]
-        print command
+        ] + ["--exclude=*", "--delete"]
         try:
             subprocess.check_call(command)
         except:
@@ -790,3 +789,7 @@ class PlotCopier(object):
     def open(self, filename, *args, **kwargs):
         self.copy(filename)
         return open(filename, *args, **kwargs)
+
+    def remove(self, filename, *args, **kwargs):
+        os.remove(filename, *args, **kwargs)
+        self.copy(filename)
