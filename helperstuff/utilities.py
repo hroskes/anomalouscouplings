@@ -160,32 +160,11 @@ def cd(newdir):
     finally:
         os.chdir(prevdir)
 
-def LSB_JOBID():
-    import config
-    if config.host == "lxplus":
-        return os.environ.get("LSB_JOBID", None)
-    if config.host == "MARCC":
-        return os.environ.get("SLURM_JOBID", None)
-    assert False, config.host
-
-def jobexists(jobid):
-    import config
-    if config.host == "lxplus":
-        return "is not found" not in subprocess.check_output(["bjobs", str(jobid)])
-    if config.host == "MARCC":
-        try:
-            return str(jobid) in subprocess.check_output(["squeue", "--job", str(jobid)], stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as e:
-            if "slurm_load_jobs error: Invalid job id specified" in e.output:
-                return False
-            print e.output
-            raise
-    assert False, config.host
-
 class KeepWhileOpenFile(object):
-    def __init__(self, name, message=LSB_JOBID):
+    def __init__(self, name, message=None):
         logging.debug("creating KeepWhileOpenFile {}".format(name))
         self.filename = name
+        if message is None: message = LSB_JOBID
         self.__message = message
         self.pwd = os.getcwd()
         self.fd = self.f = None
@@ -253,7 +232,9 @@ class KeepWhileOpenFile(object):
                 logging.warning("{} doesn't exist!??".format(self.filename))
             self.f = os.fdopen(self.fd, 'w')
 
-            if self.__message == LSB_JOBID: self.__message = self.__message()
+            logging.debug("{}".format(self.__message))
+            if self.__message == LSB_JOBID:
+                self.__message = self.__message()
             try:
                 if self.__message is not None:
                     logging.debug("writing message")
@@ -510,6 +491,28 @@ class JsonDict(object):
             thedict[keys[0]] = {}
 
         return cls.setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
+def LSB_JOBID():
+    import config
+    if config.host == "lxplus":
+        return os.environ.get("LSB_JOBID", None)
+    if config.host == "MARCC":
+        return os.environ.get("SLURM_JOBID", None)
+    assert False, config.host
+
+def jobexists(jobid):
+    import config
+    if config.host == "lxplus":
+        return "is not found" not in subprocess.check_output(["bjobs", str(jobid)])
+    if config.host == "MARCC":
+        try:
+            return str(jobid) in subprocess.check_output(["squeue", "--job", str(jobid)], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            if "slurm_load_jobs error: Invalid job id specified" in e.output:
+                return False
+            print e.output
+            raise
+    assert False, config.host
 
 class LSF_creating(object):
     def __init__(self, *files, **kwargs):
