@@ -519,8 +519,6 @@ class _Datacard(MultiEnum):
             getattr(w, 'import')(pdf.pdf, ROOT.RooFit.RecycleConflictNodes())
             if (pdf.productionmode.issignal or pdf.productionmode in ("ggZZ", "ZX")) and pdf.shapesystematic == "":
                 getattr(w, 'import')(pdf.norm, ROOT.RooFit.RecycleConflictNodes())
-            if pdf.productionmode.issignal and not self.analysis.isdecayonly:
-                getattr(w, 'import')(pdf.muscaled, ROOT.RooFit.RecycleConflictNodes())
 
         w.writeToFile(self.rootfile_base)
 
