@@ -32,7 +32,7 @@ def adddiscriminants(*args):
 
   newfilename = sample.withdiscriminantsfile()
   print newfilename
-  with cdtemp_slurm(), KeepWhileOpenFile(newfilename+".tmp", message=LSB_JOBID()) as kwof, LSF_creating(newfilename, ignorefailure=True) as LSF:
+  with cdtemp_slurm(), KeepWhileOpenFile(newfilename+".tmp") as kwof, LSF_creating(newfilename, ignorefailure=True) as LSF:
     if not kwof:
         return
     if os.path.exists(newfilename):
@@ -101,7 +101,7 @@ def adddiscriminants(*args):
 def submitjobs():
     njobs = 0
     for sample in allsamples():
-        if not os.path.exists(sample.withdiscriminantsfile()) and not os.path.exists(sample.withdiscriminantsfile()+".tmp") and not sample.copyfromothersample:
+        if not os.path.exists(sample.withdiscriminantsfile()) and KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid and not sample.copyfromothersample:
             njobs += 1
     for i in range(njobs):
         submitjobkwargs = {"jobname": str(i), "jobtime": "1-0:0:0"}
@@ -123,5 +123,5 @@ if __name__ == '__main__':
                 if args.filter and not args.filter(sample): continue
                 adddiscriminants(sample)
         finally:
-            if config.LHE and not any(os.path.exists(sample.withdiscriminantsfile()+".tmp") for sample in allsamples()):
+            if config.LHE and not any(KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid for sample in allsamples()):
                 deletemelastuff()

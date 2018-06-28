@@ -88,7 +88,7 @@ def runscan(repmap, submitjobs, directory=None):
           del f
 
       if (os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
-       or os.path.exists(replaceByMap("jobs/.oO[filename]Oo..tmp", repmap_i))):
+       or not KeepWhileOpenFile(replaceByMap("jobs/.oO[filename]Oo..tmp", repmap_i)).wouldbevalid):
         continue
       job = "{} runscan {} directory={}".format(
                                                 os.path.join(config.repositorydir, "./step9_runcombine.py"),
@@ -134,7 +134,7 @@ def runscan(repmap, submitjobs, directory=None):
     logfile = replaceByMap("log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap)
     if not os.path.exists(filename):
       with utilities.cd(cdto), \
-           utilities.OneAtATime(tmpfile, 30, message=utilities.LSB_JOBID()), \
+           utilities.OneAtATime(tmpfile, 30), \
            utilities.LSF_creating(os.path.join(directory, filename), skipifexists=True), \
            utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
         if not os.path.exists(filename):

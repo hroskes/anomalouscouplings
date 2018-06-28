@@ -29,7 +29,7 @@ def buildtemplates(*args):
     if "Ulascan" in str(templatesfile.production): return
     print templatesfile
     if templatesfile.copyfromothertemplatesfile is not None: return
-    with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp", message=LSB_JOBID()) as f:
+    with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
         if f:
             if not os.path.exists(templatesfile.templatesfile()):
                 if not os.path.exists(templatesfile.templatesfile(firststep=True)):
@@ -108,7 +108,7 @@ def submitjobs(removefiles):
             remove[templatesfile.templatesfile()] = True
             remove[templatesfile.templatesfile(firststep=True)] = True
             njobs += 1
-        elif os.path.exists(templatesfile.templatesfile()) or os.path.exists(templatesfile.templatesfile() + ".tmp"):
+        elif os.path.exists(templatesfile.templatesfile()) or not KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp").wouldbevalid:
             pass
         else:
             njobs += 1

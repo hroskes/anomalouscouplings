@@ -18,7 +18,7 @@ from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID
 def makejson(*args):
     templatesfile = TemplatesFile(*args)
     if templatesfile.copyfromothertemplatesfile is not None: return
-    with KeepWhileOpenFile(templatesfile.jsonfile()+".tmp", message=LSB_JOBID()) as f:
+    with KeepWhileOpenFile(templatesfile.jsonfile()+".tmp") as f:
         if not f: return
         print templatesfile, datetime.datetime.now()
 
@@ -30,7 +30,7 @@ def makejson(*args):
 def submitjobs(filesperjob):
     i = 0
     for templatesfile in templatesfiles:
-        if os.path.exists(templatesfile.jsonfile()) or os.path.exists(templatesfile.jsonfile()+".tmp"): continue
+        if os.path.exists(templatesfile.jsonfile()) or not KeepWhileOpenFile(templatesfile.jsonfile()+".tmp").wouldbevalid: continue
         if not i%filesperjob: submitjob("unbuffer "+os.path.join(config.repositorydir, "step4_makejson.py"), jobname="json"+str(i/filesperjob), jobtime="10:0:0", docd=True)
         i += 1
 

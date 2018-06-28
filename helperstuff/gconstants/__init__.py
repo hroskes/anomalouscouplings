@@ -19,7 +19,7 @@ def __init():
     thingstodownload.append([gconstant.url, gconstant.filename])
   thingstodownload.sort()
 
-  with cd(os.path.dirname(__file__)), OneAtATime("download_info.txt.tmp", 5, task="downloading gconstants", message=LSB_JOBID()):
+  with cd(os.path.dirname(__file__)), OneAtATime("download_info.txt.tmp", 5, task="downloading gconstants"):
     try:
       with open("download_info.txt") as f:
         if [GConstant.commit, thingstodownload] != json.load(f):

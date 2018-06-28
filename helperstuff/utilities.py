@@ -160,8 +160,30 @@ def cd(newdir):
     finally:
         os.chdir(prevdir)
 
+def LSB_JOBID():
+    import config
+    if config.host == "lxplus":
+        return os.environ.get("LSB_JOBID", None)
+    if config.host == "MARCC":
+        return os.environ.get("SLURM_JOBID", None)
+    assert False, config.host
+
+def jobexists(jobid):
+    import config
+    if config.host == "lxplus":
+        return "is not found" not in subprocess.check_output(["bjobs", str(jobid)])
+    if config.host == "MARCC":
+        try:
+            return str(jobid) in subprocess.check_output(["squeue", "--job", str(jobid)], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            if "slurm_load_jobs error: Invalid job id specified" in e.output:
+                return False
+            print e.output
+            raise
+    assert False, config.host
+
 class KeepWhileOpenFile(object):
-    def __init__(self, name, message=None):
+    def __init__(self, name, message=LSB_JOBID):
         logging.debug("creating KeepWhileOpenFile {}".format(name))
         self.filename = name
         self.__message = message
@@ -169,39 +191,86 @@ class KeepWhileOpenFile(object):
         self.fd = self.f = None
         self.bool = False
 
+    @property
+    def wouldbevalid(self):
+        if self: return True
+        with self:
+            return bool(self)
+
+    def __open(self):
+        self.fd = os.open(self.filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+
     def __enter__(self):
         logging.debug("entering KeepWhileOpenFile {}".format(self.filename))
         with cd(self.pwd):
             logging.debug("does it exist? {}".format(os.path.exists(self.filename)))
             try:
                 logging.debug("trying to open")
-                self.fd = os.open(self.filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                self.__open()
             except OSError:
                 logging.debug("failed: it already exists")
-                return None
-            else:
-                logging.debug("succeeded: it didn't exist")
-                logging.debug("does it now? {}".format(os.path.exists(self.filename)))
-                if not os.path.exists(self.filename):
-                    logging.warning("{} doesn't exist!??".format(self.filename))
-                self.f = os.fdopen(self.fd, 'w')
-                try:
-                    if self.__message is not None:
-                        logging.debug("writing message")
-                        self.f.write(self.__message+"\n")
-                        logging.debug("wrote message")
-                except IOError:
-                    logging.debug("failed to write message")
-                    pass
-                try:
-                    logging.debug("trying to close")
-                    self.f.close()
-                    logging.debug("closed")
-                except IOError:
-                    logging.debug("failed to close")
-                    pass
-                self.bool = True
-                return True
+                if self.__message == LSB_JOBID:
+                    logging.debug("message is a jobid: check if the job died")
+                    try:
+                        with open(self.filename) as f:
+                            oldjobid = int(f.read())
+                        logging.debug("job is {}".format(oldjobid))
+                    except IOError:
+                        logging.debug("tried to read the jobid, but the file doesn't exist anymore")
+                        try:
+                            self.__open()
+                            logging.debug("opened successfully this time")
+                        except OSError:
+                            logging.debug("and now it exists again, giving up")
+                            return None
+                    except ValueError:
+                        logging.debug("the file contents are not an int --> probably being run interactively")
+                        return None
+                    else:
+                        if jobexists(oldjobid):
+                            logging.debug("and that job is still running")
+                            return None
+                        else:
+                            logging.debug("and that job is no longer running, trying to remove")
+                            try:
+                                os.remove(self.filename)
+                                logging.debug("removed successfully")
+                            except OSError:   #another job removed it already
+                                logging.debug("too late, it's already gone")
+                            try:
+                                logging.debug("trying to open again")
+                                self.__open()
+                                logging.debug("opened successfully")
+                            except OSError:
+                                logging.debug("and now it exists again, giving up")
+                                return None
+                else:
+                    return None
+
+            logging.debug("succeeded: it didn't exist")
+            logging.debug("does it now? {}".format(os.path.exists(self.filename)))
+            if not os.path.exists(self.filename):
+                logging.warning("{} doesn't exist!??".format(self.filename))
+            self.f = os.fdopen(self.fd, 'w')
+
+            if self.__message == LSB_JOBID: self.__message = self.__message()
+            try:
+                if self.__message is not None:
+                    logging.debug("writing message")
+                    self.f.write(self.__message+"\n")
+                    logging.debug("wrote message")
+            except IOError:
+                logging.debug("failed to write message")
+                pass
+            try:
+                logging.debug("trying to close")
+                self.f.close()
+                logging.debug("closed")
+            except IOError:
+                logging.debug("failed to close")
+                pass
+            self.bool = True
+            return True
 
     def __exit__(self, *args):
         logging.debug("exiting")
@@ -441,14 +510,6 @@ class JsonDict(object):
             thedict[keys[0]] = {}
 
         return cls.setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
-
-def LSB_JOBID():
-    import config
-    if config.host == "lxplus":
-        return os.environ.get("LSB_JOBID", None)
-    if config.host == "MARCC":
-        return os.environ.get("SLURM_JOBID", None)
-    assert False, config.host
 
 class LSF_creating(object):
     def __init__(self, *files, **kwargs):
