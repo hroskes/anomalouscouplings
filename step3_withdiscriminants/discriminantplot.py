@@ -14,8 +14,8 @@ import os
 #========================
 #inputs
 productionmode = "VBF"
-disc           = "D_bkg_VBFdecay_10bins"
-reweightto     = None
+disc           = "D_CP_VBF_10bins"
+reweightto     = samplewithfai(productionmode, fai=0.0048, analysis="fa3", productionmodeforfai="ggH")
 bins           = None
 min            = None
 max            = None
@@ -53,6 +53,10 @@ ROOT.gErrorIgnoreLevel = ROOT.kError
 productionmode = ProductionMode(productionmode)
 
 def hypothesestouse():
+  if reweightto is not None:
+    for hypothesis in productionmode.generatedhypotheses:
+      yield hypothesis
+    return
   if productionmode == "VBF":
     for hypothesis in hypotheses:
       if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa3prod0.5", "fa2prod0.5", "fL1Zgprod0.5", "fL1prod0.5"): yield hypothesis
@@ -86,11 +90,12 @@ with PlotCopier() as pc:
 
     hname = "h{}".format(hypothesis)
     rwtfrom = hypothesis
-    if hypothesis in ("fa2-0.5", "L1Zg", "fL1Zg0.5", "fL1Zgprod0.5"): rwtfrom = "0+" if productionmode == "ggH" else "a2"
+    if hypothesis in ("fa2-0.5", "L1Zg", "fL1Zg0.5", "fL1Zgprod0.5"):
+      rwtfrom = "0+" if productionmode == "ggH" else "a2"
 
     h = hs[hypothesis] = plotfromtree(
       reweightfrom=ReweightingSample(productionmode, rwtfrom, hffhypothesistouse()),
-      reweightto=ReweightingSample(productionmode, hypothesis, hffhypothesistouse()),
+      reweightto=reweightto,
       disc=disc,
       bins=bins,
       min=min,
