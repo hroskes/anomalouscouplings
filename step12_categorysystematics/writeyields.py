@@ -270,6 +270,8 @@ def writeyields(productionmodelist=None, productionlist=None):
                   }[systname]
                 elif productionmode == "ttH" and systname == "pdf_asmz_Higgs_gg":
                   dn, up = 0.98, 1.02
+                elif "pdf_variation" in systname and production == "180531":
+                  dn, up = YieldSystematicValue(channel, category, analysis, productionmode, systname, "180530").value
                 else:
                   up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal
                   dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal

@@ -13705,472 +13705,6 @@
                 }
             }
         },
-        "QCDscale_ggVV_bonly": {
-            "fL1": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            },
-            "fL1Zg": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            },
-            "fa2": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            },
-            "fa3": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            }
-        },
         "QCDscale_ren_VH": {
             "fL1": {
                 "Untagged": {
@@ -22708,580 +22242,6 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            }
-        },
-        "pdf_variation_qq": {
-            "fL1": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700129238804629,
-                            1.0295265614851667
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700129238804629,
-                            1.0295265614851667
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700129238804629,
-                            1.0295265614851667
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9711310095620826,
-                            1.0284204167194133
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9711310095620826,
-                            1.0284204167194133
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9711310095620826,
-                            1.0284204167194133
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9710114002094992,
-                            1.0285518326984189
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9710114002094992,
-                            1.0285518326984189
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9710114002094992,
-                            1.0285518326984189
-                        ],
-                        "ttH": null
-                    }
-                }
-            },
-            "fL1Zg": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700154103581339,
-                            1.0295240514991386
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700154103581339,
-                            1.0295240514991386
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700154103581339,
-                            1.0295240514991386
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9710456370900576,
-                            1.0285056103894223
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9710456370900576,
-                            1.0285056103894223
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9710456370900576,
-                            1.0285056103894223
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9709701944893312,
-                            1.0285980623953384
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9709701944893312,
-                            1.0285980623953384
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9709701944893312,
-                            1.0285980623953384
-                        ],
-                        "ttH": null
-                    }
-                }
-            },
-            "fa2": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700056329648005,
-                            1.0295311665374782
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700056329648005,
-                            1.0295311665374782
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700056329648005,
-                            1.0295311665374782
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9712278637351258,
-                            1.0283098682847356
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9712278637351258,
-                            1.0283098682847356
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9712278637351258,
-                            1.0283098682847356
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9709677630094745,
-                            1.028713902450001
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9709677630094745,
-                            1.028713902450001
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9709677630094745,
-                            1.028713902450001
-                        ],
-                        "ttH": null
-                    }
-                }
-            },
-            "fa3": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700080319044024,
-                            1.0295302511574433
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700080319044024,
-                            1.0295302511574433
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9700080319044024,
-                            1.0295302511574433
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9713723847401706,
-                            1.028099062581157
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9713723847401706,
-                            1.028099062581157
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.9713723847401706,
-                            1.028099062581157
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.970697692351487,
-                            1.028970170123467
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.970697692351487,
-                            1.028970170123467
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.970697692351487,
-                            1.028970170123467
-                        ],
                         "ttH": null
                     }
                 }
@@ -37433,472 +36393,6 @@
                 }
             }
         },
-        "QCDscale_ggVV_bonly": {
-            "fL1": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            },
-            "fL1Zg": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            },
-            "fa2": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            },
-            "fa3": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": 1.1,
-                        "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            }
-        },
         "QCDscale_ren_VH": {
             "fL1": {
                 "Untagged": {
@@ -45091,17 +43585,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9776643141748905,
-                            1.0254265305492862
+                            0.9832437945471171,
+                            1.0136368696143818
                         ],
                         "ggZZ": [
-                            0.9776643141748905,
-                            1.0254265305492862
+                            0.9832437945471171,
+                            1.0136368696143818
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3231357869000495,
-                            0.6768637465263543
+                            1.030608475400435,
+                            0.9713742944181823
                         ]
                     },
                     "4e": {
@@ -45115,17 +43609,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9776643141748905,
-                            1.0254265305492862
+                            0.9832437945471171,
+                            1.0136368696143818
                         ],
                         "ggZZ": [
-                            0.9776643141748905,
-                            1.0254265305492862
+                            0.9832437945471171,
+                            1.0136368696143818
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3231357869000495,
-                            0.6768637465263543
+                            1.030608475400435,
+                            0.9713742944181823
                         ]
                     },
                     "4mu": {
@@ -45139,17 +43633,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9776643141748905,
-                            1.0254265305492862
+                            0.9832437945471171,
+                            1.0136368696143818
                         ],
                         "ggZZ": [
-                            0.9776643141748905,
-                            1.0254265305492862
+                            0.9832437945471171,
+                            1.0136368696143818
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3231357869000495,
-                            0.6768637465263543
+                            1.030608475400435,
+                            0.9713742944181823
                         ]
                     }
                 },
@@ -45165,17 +43659,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9961478201573434,
-                            0.993270732829824
+                            0.9860993018236949,
+                            1.0106230713676057
                         ],
                         "ggZZ": [
-                            0.9961478201573434,
-                            0.993270732829824
+                            0.9860993018236949,
+                            1.0106230713676057
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.377562558598324,
-                            0.6224370807118278
+                            1.0424991777268369,
+                            0.9634241997096096
                         ]
                     },
                     "4e": {
@@ -45189,17 +43683,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9961478201573434,
-                            0.993270732829824
+                            0.9860993018236949,
+                            1.0106230713676057
                         ],
                         "ggZZ": [
-                            0.9961478201573434,
-                            0.993270732829824
+                            0.9860993018236949,
+                            1.0106230713676057
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.377562558598324,
-                            0.6224370807118278
+                            1.0424991777268369,
+                            0.9634241997096096
                         ]
                     },
                     "4mu": {
@@ -45213,17 +43707,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9961478201573434,
-                            0.993270732829824
+                            0.9860993018236949,
+                            1.0106230713676057
                         ],
                         "ggZZ": [
-                            0.9961478201573434,
-                            0.993270732829824
+                            0.9860993018236949,
+                            1.0106230713676057
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.377562558598324,
-                            0.6224370807118278
+                            1.0424991777268369,
+                            0.9634241997096096
                         ]
                     }
                 },
@@ -45239,17 +43733,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9814448736149911,
-                            1.018840244390606
+                            0.9843326017479531,
+                            1.0126862276207895
                         ],
                         "ggZZ": [
-                            0.9814448736149911,
-                            1.018840244390606
+                            0.9843326017479531,
+                            1.0126862276207895
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3267867525799772,
-                            0.6732130792022338
+                            1.032853855509484,
+                            0.9693257899808535
                         ]
                     },
                     "4e": {
@@ -45263,17 +43757,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9814448736149911,
-                            1.018840244390606
+                            0.9843326017479531,
+                            1.0126862276207895
                         ],
                         "ggZZ": [
-                            0.9814448736149911,
-                            1.018840244390606
+                            0.9843326017479531,
+                            1.0126862276207895
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3267867525799772,
-                            0.6732130792022338
+                            1.032853855509484,
+                            0.9693257899808535
                         ]
                     },
                     "4mu": {
@@ -45287,17 +43781,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9814448736149911,
-                            1.018840244390606
+                            0.9843326017479531,
+                            1.0126862276207895
                         ],
                         "ggZZ": [
-                            0.9814448736149911,
-                            1.018840244390606
+                            0.9843326017479531,
+                            1.0126862276207895
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3267867525799772,
-                            0.6732130792022338
+                            1.032853855509484,
+                            0.9693257899808535
                         ]
                     }
                 }
@@ -45315,17 +43809,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9776977164420091,
-                            1.025368806734998
+                            0.9832606828065887,
+                            1.013620735196372
                         ],
                         "ggZZ": [
-                            0.9776977164420091,
-                            1.025368806734998
+                            0.9832606828065887,
+                            1.013620735196372
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3232008881311332,
-                            0.6767986751183703
+                            1.030657494090269,
+                            0.9713075620899009
                         ]
                     },
                     "4e": {
@@ -45339,17 +43833,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9776977164420091,
-                            1.025368806734998
+                            0.9832606828065887,
+                            1.013620735196372
                         ],
                         "ggZZ": [
-                            0.9776977164420091,
-                            1.025368806734998
+                            0.9832606828065887,
+                            1.013620735196372
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3232008881311332,
-                            0.6767986751183703
+                            1.030657494090269,
+                            0.9713075620899009
                         ]
                     },
                     "4mu": {
@@ -45363,17 +43857,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9776977164420091,
-                            1.025368806734998
+                            0.9832606828065887,
+                            1.013620735196372
                         ],
                         "ggZZ": [
-                            0.9776977164420091,
-                            1.025368806734998
+                            0.9832606828065887,
+                            1.013620735196372
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3232008881311332,
-                            0.6767986751183703
+                            1.030657494090269,
+                            0.9713075620899009
                         ]
                     }
                 },
@@ -45389,17 +43883,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9963464855160747,
-                            0.9929241205431611
+                            0.9859845393894217,
+                            1.0107168919642975
                         ],
                         "ggZZ": [
-                            0.9963464855160747,
-                            0.9929241205431611
+                            0.9859845393894217,
+                            1.0107168919642975
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3875873042218148,
-                            0.6124133131362275
+                            1.0445805028540538,
+                            0.9622267993462573
                         ]
                     },
                     "4e": {
@@ -45413,17 +43907,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9963464855160747,
-                            0.9929241205431611
+                            0.9859845393894217,
+                            1.0107168919642975
                         ],
                         "ggZZ": [
-                            0.9963464855160747,
-                            0.9929241205431611
+                            0.9859845393894217,
+                            1.0107168919642975
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3875873042218148,
-                            0.6124133131362275
+                            1.0445805028540538,
+                            0.9622267993462573
                         ]
                     },
                     "4mu": {
@@ -45437,17 +43931,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9963464855160747,
-                            0.9929241205431611
+                            0.9859845393894217,
+                            1.0107168919642975
                         ],
                         "ggZZ": [
-                            0.9963464855160747,
-                            0.9929241205431611
+                            0.9859845393894217,
+                            1.0107168919642975
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3875873042218148,
-                            0.6124133131362275
+                            1.0445805028540538,
+                            0.9622267993462573
                         ]
                     }
                 },
@@ -45463,17 +43957,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9814114239615431,
-                            1.0188984809358068
+                            0.9842210065759528,
+                            1.012812760562827
                         ],
                         "ggZZ": [
-                            0.9814114239615431,
-                            1.0188984809358068
+                            0.9842210065759528,
+                            1.012812760562827
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3261659425220058,
-                            0.6738339274858588
+                            1.0325633826390757,
+                            0.9697606897075128
                         ]
                     },
                     "4e": {
@@ -45487,17 +43981,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9814114239615431,
-                            1.0188984809358068
+                            0.9842210065759528,
+                            1.012812760562827
                         ],
                         "ggZZ": [
-                            0.9814114239615431,
-                            1.0188984809358068
+                            0.9842210065759528,
+                            1.012812760562827
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3261659425220058,
-                            0.6738339274858588
+                            1.0325633826390757,
+                            0.9697606897075128
                         ]
                     },
                     "4mu": {
@@ -45511,17 +44005,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9814114239615431,
-                            1.0188984809358068
+                            0.9842210065759528,
+                            1.012812760562827
                         ],
                         "ggZZ": [
-                            0.9814114239615431,
-                            1.0188984809358068
+                            0.9842210065759528,
+                            1.012812760562827
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3261659425220058,
-                            0.6738339274858588
+                            1.0325633826390757,
+                            0.9697606897075128
                         ]
                     }
                 }
@@ -45539,17 +44033,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9775372843496835,
-                            1.0256482908471871
+                            0.983170686801132,
+                            1.0136918858074644
                         ],
                         "ggZZ": [
-                            0.9775372843496835,
-                            1.0256482908471871
+                            0.983170686801132,
+                            1.0136918858074644
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3231342940795388,
-                            0.6768650657292857
+                            1.0308731213857227,
+                            0.9711467285806304
                         ]
                     },
                     "4e": {
@@ -45563,17 +44057,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9775372843496835,
-                            1.0256482908471871
+                            0.983170686801132,
+                            1.0136918858074644
                         ],
                         "ggZZ": [
-                            0.9775372843496835,
-                            1.0256482908471871
+                            0.983170686801132,
+                            1.0136918858074644
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3231342940795388,
-                            0.6768650657292857
+                            1.0308731213857227,
+                            0.9711467285806304
                         ]
                     },
                     "4mu": {
@@ -45587,17 +44081,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9775372843496835,
-                            1.0256482908471871
+                            0.983170686801132,
+                            1.0136918858074644
                         ],
                         "ggZZ": [
-                            0.9775372843496835,
-                            1.0256482908471871
+                            0.983170686801132,
+                            1.0136918858074644
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3231342940795388,
-                            0.6768650657292857
+                            1.0308731213857227,
+                            0.9711467285806304
                         ]
                     }
                 },
@@ -45613,17 +44107,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.996378250396574,
-                            0.9928725492841963
+                            0.9867786460206053,
+                            1.0101924569879757
                         ],
                         "ggZZ": [
-                            0.996378250396574,
-                            0.9928725492841963
+                            0.9867786460206053,
+                            1.0101924569879757
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3711667379935788,
-                            0.6288330673900169
+                            1.0375569582086799,
+                            0.9665186995210844
                         ]
                     },
                     "4e": {
@@ -45637,17 +44131,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.996378250396574,
-                            0.9928725492841963
+                            0.9867786460206053,
+                            1.0101924569879757
                         ],
                         "ggZZ": [
-                            0.996378250396574,
-                            0.9928725492841963
+                            0.9867786460206053,
+                            1.0101924569879757
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3711667379935788,
-                            0.6288330673900169
+                            1.0375569582086799,
+                            0.9665186995210844
                         ]
                     },
                     "4mu": {
@@ -45661,17 +44155,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.996378250396574,
-                            0.9928725492841963
+                            0.9867786460206053,
+                            1.0101924569879757
                         ],
                         "ggZZ": [
-                            0.996378250396574,
-                            0.9928725492841963
+                            0.9867786460206053,
+                            1.0101924569879757
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3711667379935788,
-                            0.6288330673900169
+                            1.0375569582086799,
+                            0.9665186995210844
                         ]
                     }
                 },
@@ -45687,17 +44181,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9792934991987936,
-                            1.0225833930070156
+                            0.984138553404409,
+                            1.0128924435608206
                         ],
                         "ggZZ": [
-                            0.9792934991987936,
-                            1.0225833930070156
+                            0.984138553404409,
+                            1.0128924435608206
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.304044276377133,
-                            0.6959562016767569
+                            1.0301249318661072,
+                            0.972096625357428
                         ]
                     },
                     "4e": {
@@ -45711,17 +44205,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9792934991987936,
-                            1.0225833930070156
+                            0.984138553404409,
+                            1.0128924435608206
                         ],
                         "ggZZ": [
-                            0.9792934991987936,
-                            1.0225833930070156
+                            0.984138553404409,
+                            1.0128924435608206
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.304044276377133,
-                            0.6959562016767569
+                            1.0301249318661072,
+                            0.972096625357428
                         ]
                     },
                     "4mu": {
@@ -45735,17 +44229,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9792934991987936,
-                            1.0225833930070156
+                            0.984138553404409,
+                            1.0128924435608206
                         ],
                         "ggZZ": [
-                            0.9792934991987936,
-                            1.0225833930070156
+                            0.984138553404409,
+                            1.0128924435608206
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.304044276377133,
-                            0.6959562016767569
+                            1.0301249318661072,
+                            0.972096625357428
                         ]
                     }
                 }
@@ -45763,17 +44257,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9774078056155397,
-                            1.025872735883631
+                            0.9831558000614229,
+                            1.0137084179819051
                         ],
                         "ggZZ": [
-                            0.9774078056155397,
-                            1.025872735883631
+                            0.9831558000614229,
+                            1.0137084179819051
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3224119214074914,
-                            0.6775875115761397
+                            1.030673065419467,
+                            0.9713180760468063
                         ]
                     },
                     "4e": {
@@ -45787,17 +44281,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9774078056155397,
-                            1.025872735883631
+                            0.9831558000614229,
+                            1.0137084179819051
                         ],
                         "ggZZ": [
-                            0.9774078056155397,
-                            1.025872735883631
+                            0.9831558000614229,
+                            1.0137084179819051
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3224119214074914,
-                            0.6775875115761397
+                            1.030673065419467,
+                            0.9713180760468063
                         ]
                     },
                     "4mu": {
@@ -45811,17 +44305,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9774078056155397,
-                            1.025872735883631
+                            0.9831558000614229,
+                            1.0137084179819051
                         ],
                         "ggZZ": [
-                            0.9774078056155397,
-                            1.025872735883631
+                            0.9831558000614229,
+                            1.0137084179819051
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3224119214074914,
-                            0.6775875115761397
+                            1.030673065419467,
+                            0.9713180760468063
                         ]
                     }
                 },
@@ -45837,17 +44331,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9965233157094855,
-                            0.9926202094589283
+                            0.9869290327220872,
+                            1.010023042899171
                         ],
                         "ggZZ": [
-                            0.9965233157094855,
-                            0.9926202094589283
+                            0.9869290327220872,
+                            1.010023042899171
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3734421818958502,
-                            0.6265574418796264
+                            1.039157756711308,
+                            0.965210083751341
                         ]
                     },
                     "4e": {
@@ -45861,17 +44355,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9965233157094855,
-                            0.9926202094589283
+                            0.9869290327220872,
+                            1.010023042899171
                         ],
                         "ggZZ": [
-                            0.9965233157094855,
-                            0.9926202094589283
+                            0.9869290327220872,
+                            1.010023042899171
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3734421818958502,
-                            0.6265574418796264
+                            1.039157756711308,
+                            0.965210083751341
                         ]
                     },
                     "4mu": {
@@ -45885,17 +44379,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9965233157094855,
-                            0.9926202094589283
+                            0.9869290327220872,
+                            1.010023042899171
                         ],
                         "ggZZ": [
-                            0.9965233157094855,
-                            0.9926202094589283
+                            0.9869290327220872,
+                            1.010023042899171
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3734421818958502,
-                            0.6265574418796264
+                            1.039157756711308,
+                            0.965210083751341
                         ]
                     }
                 },
@@ -45911,17 +44405,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9825452666194957,
-                            1.016927567799533
+                            0.9840671605074905,
+                            1.0129515930608386
                         ],
                         "ggZZ": [
-                            0.9825452666194957,
-                            1.016927567799533
+                            0.9840671605074905,
+                            1.0129515930608386
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3118048164223106,
-                            0.6881947582575347
+                            1.0309106100282954,
+                            0.97161102300388
                         ]
                     },
                     "4e": {
@@ -45935,17 +44429,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9825452666194957,
-                            1.016927567799533
+                            0.9840671605074905,
+                            1.0129515930608386
                         ],
                         "ggZZ": [
-                            0.9825452666194957,
-                            1.016927567799533
+                            0.9840671605074905,
+                            1.0129515930608386
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3118048164223106,
-                            0.6881947582575347
+                            1.0309106100282954,
+                            0.97161102300388
                         ]
                     },
                     "4mu": {
@@ -45959,17 +44453,17 @@
                             0.922
                         ],
                         "ggH": [
-                            0.9825452666194957,
-                            1.016927567799533
+                            0.9840671605074905,
+                            1.0129515930608386
                         ],
                         "ggZZ": [
-                            0.9825452666194957,
-                            1.016927567799533
+                            0.9840671605074905,
+                            1.0129515930608386
                         ],
                         "qqZZ": null,
                         "ttH": [
-                            1.3118048164223106,
-                            0.6881947582575347
+                            1.0309106100282954,
+                            0.97161102300388
                         ]
                     }
                 }
@@ -45980,20 +44474,20 @@
                 "Untagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.5091653097417015,
-                            0.4908359291976499
+                            1.0538483927965874,
+                            0.9539709030790305
                         ],
                         "VBFbkg": [
-                            1.473860138451908,
-                            0.5261406221139677
+                            1.0477883927654754,
+                            0.9569146349106386
                         ],
                         "WH": [
-                            1.409428860623275,
-                            0.5905704413382282
+                            1.0375869353982108,
+                            0.9621159545142906
                         ],
                         "ZH": [
-                            1.4286548437213136,
-                            0.5713460878254643
+                            1.038881179586596,
+                            0.9609125445513206
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46004,20 +44498,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.5091653097417015,
-                            0.4908359291976499
+                            1.0538483927965874,
+                            0.9539709030790305
                         ],
                         "VBFbkg": [
-                            1.473654259321438,
-                            0.526346482429242
+                            1.04777653332112,
+                            0.9569271230337818
                         ],
                         "WH": [
-                            1.409428860623275,
-                            0.5905704413382282
+                            1.0375869353982108,
+                            0.9621159545142906
                         ],
                         "ZH": [
-                            1.4286548437213136,
-                            0.5713460878254643
+                            1.038881179586596,
+                            0.9609125445513206
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46028,20 +44522,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.5091653097417015,
-                            0.4908359291976499
+                            1.0538483927965874,
+                            0.9539709030790305
                         ],
                         "VBFbkg": [
-                            1.4749635648497288,
-                            0.5250372012709057
+                            1.0479915581889234,
+                            0.9568198887779508
                         ],
                         "WH": [
-                            1.409428860623275,
-                            0.5905704413382282
+                            1.0375869353982108,
+                            0.9621159545142906
                         ],
                         "ZH": [
-                            1.4286548437213136,
-                            0.5713460878254643
+                            1.038881179586596,
+                            0.9609125445513206
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46054,20 +44548,20 @@
                 "VBFtagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.477421304314743,
-                            0.5225809449445511
+                            1.0423355995918537,
+                            0.9557842019352555
                         ],
                         "VBFbkg": [
-                            1.4669635106277397,
-                            0.5330385902559854
+                            1.0415824874351254,
+                            0.9566728342040288
                         ],
                         "WH": [
-                            1.3320101572434127,
-                            0.6679901600548567
+                            1.0320963627314579,
+                            0.9680583933875665
                         ],
                         "ZH": [
-                            1.3414442756544929,
-                            0.6585558551003328
+                            1.0322077971828416,
+                            0.9674567461202236
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46078,20 +44572,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.477421304314743,
-                            0.5225809449445511
+                            1.0423355995918537,
+                            0.9557842019352555
                         ],
                         "VBFbkg": [
-                            1.4662806689129133,
-                            0.5337214221396297
+                            1.0415330594810566,
+                            0.9567309467182002
                         ],
                         "WH": [
-                            1.3320101572434127,
-                            0.6679901600548567
+                            1.0320963627314579,
+                            0.9680583933875665
                         ],
                         "ZH": [
-                            1.3414442756544929,
-                            0.6585558551003328
+                            1.0322077971828416,
+                            0.9674567461202236
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46102,20 +44596,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.477421304314743,
-                            0.5225809449445511
+                            1.0423355995918537,
+                            0.9557842019352555
                         ],
                         "VBFbkg": [
-                            1.4672344578770646,
-                            0.5327676469211241
+                            1.0416021240870394,
+                            0.9566497670928524
                         ],
                         "WH": [
-                            1.3320101572434127,
-                            0.6679901600548567
+                            1.0320963627314579,
+                            0.9680583933875665
                         ],
                         "ZH": [
-                            1.3414442756544929,
-                            0.6585558551003328
+                            1.0322077971828416,
+                            0.9674567461202236
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46128,20 +44622,20 @@
                 "VHHadrtagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.4916775770905246,
-                            0.5083217424935591
+                            1.0444561035738207,
+                            0.9552355511042118
                         ],
                         "VBFbkg": [
-                            1.4199237063200807,
-                            0.5800755736321064
+                            1.0385156246319964,
+                            0.961012418997024
                         ],
                         "WH": [
-                            1.4074574888979836,
-                            0.5925420243805025
+                            1.0364800136278023,
+                            0.9629892308177569
                         ],
                         "ZH": [
-                            1.4056666868240917,
-                            0.5943322634808684
+                            1.0386795660243195,
+                            0.9608566563891591
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46152,20 +44646,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.4916775770905246,
-                            0.5083217424935591
+                            1.0444561035738207,
+                            0.9552355511042118
                         ],
                         "VBFbkg": [
-                            1.4189425362039592,
-                            0.581056747708131
+                            1.0384155864950764,
+                            0.9611096506550798
                         ],
                         "WH": [
-                            1.4074574888979836,
-                            0.5925420243805025
+                            1.0364800136278023,
+                            0.9629892308177569
                         ],
                         "ZH": [
-                            1.4056666868240917,
-                            0.5943322634808684
+                            1.0386795660243195,
+                            0.9608566563891591
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46176,20 +44670,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.4916775770905246,
-                            0.5083217424935591
+                            1.0444561035738207,
+                            0.9552355511042118
                         ],
                         "VBFbkg": [
-                            1.4196857249833106,
-                            0.5803135612555622
+                            1.0384691090982694,
+                            0.961057580338735
                         ],
                         "WH": [
-                            1.4074574888979836,
-                            0.5925420243805025
+                            1.0364800136278023,
+                            0.9629892308177569
                         ],
                         "ZH": [
-                            1.4056666868240917,
-                            0.5943322634808684
+                            1.0386795660243195,
+                            0.9608566563891591
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46204,20 +44698,20 @@
                 "Untagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.5088197391210685,
-                            0.49118151138744215
+                            1.053697414610331,
+                            0.954028042448947
                         ],
                         "VBFbkg": [
-                            1.4731674956380918,
-                            0.5268331926953271
+                            1.0476460596667552,
+                            0.9569973401161479
                         ],
                         "WH": [
-                            1.4082193549884385,
-                            0.5917798087928186
+                            1.0374749474348381,
+                            0.9622322127320065
                         ],
                         "ZH": [
-                            1.4277409838967998,
-                            0.5722596599046622
+                            1.0387910228782116,
+                            0.9610147102404294
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46228,20 +44722,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.5088197391210685,
-                            0.49118151138744215
+                            1.053697414610331,
+                            0.954028042448947
                         ],
                         "VBFbkg": [
-                            1.4728897969724029,
-                            0.5271108734904973
+                            1.04762191447545,
+                            0.9570157681756898
                         ],
                         "WH": [
-                            1.4082193549884385,
-                            0.5917798087928186
+                            1.0374749474348381,
+                            0.9622322127320065
                         ],
                         "ZH": [
-                            1.4277409838967998,
-                            0.5722596599046622
+                            1.0387910228782116,
+                            0.9610147102404294
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46252,20 +44746,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.5088197391210685,
-                            0.49118151138744215
+                            1.053697414610331,
+                            0.954028042448947
                         ],
                         "VBFbkg": [
-                            1.47426432574623,
-                            0.5257363718789868
+                            1.0478458651360716,
+                            0.9569032024902483
                         ],
                         "WH": [
-                            1.4082193549884385,
-                            0.5917798087928186
+                            1.0374749474348381,
+                            0.9622322127320065
                         ],
                         "ZH": [
-                            1.4277409838967998,
-                            0.5722596599046622
+                            1.0387910228782116,
+                            0.9610147102404294
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46278,20 +44772,20 @@
                 "VBFtagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.4780187311434076,
-                            0.5219827329724659
+                            1.0423443887503925,
+                            0.955767376028839
                         ],
                         "VBFbkg": [
-                            1.4687199639318156,
-                            0.5312814101256761
+                            1.041675191805286,
+                            0.9565587692827375
                         ],
                         "WH": [
-                            1.338020626169006,
-                            0.6619796753405779
+                            1.032569387731147,
+                            0.9676039042765362
                         ],
                         "ZH": [
-                            1.3443738496437532,
-                            0.6556260488691495
+                            1.0323052462219147,
+                            0.9672514793749157
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46302,20 +44796,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.4780187311434076,
-                            0.5219827329724659
+                            1.0423443887503925,
+                            0.955767376028839
                         ],
                         "VBFbkg": [
-                            1.46818921171605,
-                            0.5318121573020007
+                            1.0416371522475285,
+                            0.9566038992966438
                         ],
                         "WH": [
-                            1.338020626169006,
-                            0.6619796753405779
+                            1.032569387731147,
+                            0.9676039042765362
                         ],
                         "ZH": [
-                            1.3443738496437532,
-                            0.6556260488691495
+                            1.0323052462219147,
+                            0.9672514793749157
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46326,20 +44820,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.4780187311434076,
-                            0.5219827329724659
+                            1.0423443887503925,
+                            0.955767376028839
                         ],
                         "VBFbkg": [
-                            1.4690453717227103,
-                            0.5309560056149919
+                            1.0416988099351605,
+                            0.9565310225532587
                         ],
                         "WH": [
-                            1.338020626169006,
-                            0.6619796753405779
+                            1.032569387731147,
+                            0.9676039042765362
                         ],
                         "ZH": [
-                            1.3443738496437532,
-                            0.6556260488691495
+                            1.0323052462219147,
+                            0.9672514793749157
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46352,20 +44846,20 @@
                 "VHHadrtagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.4848919471871245,
-                            0.5151082171572892
+                            1.0449901487612563,
+                            0.9547383011033796
                         ],
                         "VBFbkg": [
-                            1.4184039896782603,
-                            0.5815955033270835
+                            1.038566455659328,
+                            0.9609577493704885
                         ],
                         "WH": [
-                            1.407748384989231,
-                            0.5922513150202726
+                            1.0365178835993654,
+                            0.9629444572109347
                         ],
                         "ZH": [
-                            1.4057969106175592,
-                            0.5942020346729803
+                            1.038710318976597,
+                            0.9608140886321827
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46376,20 +44870,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.4848919471871245,
-                            0.5151082171572892
+                            1.0449901487612563,
+                            0.9547383011033796
                         ],
                         "VBFbkg": [
-                            1.4175706862511617,
-                            0.5824288034805931
+                            1.0384692949550411,
+                            0.9610518742483647
                         ],
                         "WH": [
-                            1.407748384989231,
-                            0.5922513150202726
+                            1.0365178835993654,
+                            0.9629444572109347
                         ],
                         "ZH": [
-                            1.4057969106175592,
-                            0.5942020346729803
+                            1.038710318976597,
+                            0.9608140886321827
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46400,20 +44894,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.4848919471871245,
-                            0.5151082171572892
+                            1.0449901487612563,
+                            0.9547383011033796
                         ],
                         "VBFbkg": [
-                            1.41808770370227,
-                            0.5819117944044591
+                            1.0385090274936049,
+                            0.961013437829677
                         ],
                         "WH": [
-                            1.407748384989231,
-                            0.5922513150202726
+                            1.0365178835993654,
+                            0.9629444572109347
                         ],
                         "ZH": [
-                            1.4057969106175592,
-                            0.5942020346729803
+                            1.038710318976597,
+                            0.9608140886321827
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46428,20 +44922,20 @@
                 "Untagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.5098057685631892,
-                            0.4901963078613918
+                            1.054194954904461,
+                            0.9538977055554815
                         ],
                         "VBFbkg": [
-                            1.4764554801654814,
-                            0.5235457380202813
+                            1.048260516376721,
+                            0.9566498037803227
                         ],
                         "WH": [
-                            1.413768387334639,
-                            0.5862314320663959
+                            1.0380504175530771,
+                            0.961635177579231
                         ],
                         "ZH": [
-                            1.4332846577786489,
-                            0.5667151609460811
+                            1.039307563963013,
+                            0.9604647631306905
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46452,20 +44946,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.5098057685631892,
-                            0.4901963078613918
+                            1.054194954904461,
+                            0.9538977055554815
                         ],
                         "VBFbkg": [
-                            1.4761949567619899,
-                            0.5238062607996694
+                            1.0482409453430683,
+                            0.9566659817276439
                         ],
                         "WH": [
-                            1.413768387334639,
-                            0.5862314320663959
+                            1.0380504175530771,
+                            0.961635177579231
                         ],
                         "ZH": [
-                            1.4332846577786489,
-                            0.5667151609460811
+                            1.039307563963013,
+                            0.9604647631306905
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46476,20 +44970,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.5098057685631892,
-                            0.4901963078613918
+                            1.054194954904461,
+                            0.9538977055554815
                         ],
                         "VBFbkg": [
-                            1.4775716792537081,
-                            0.5224295712153837
+                            1.0484748153178773,
+                            0.956554579547364
                         ],
                         "WH": [
-                            1.413768387334639,
-                            0.5862314320663959
+                            1.0380504175530771,
+                            0.961635177579231
                         ],
                         "ZH": [
-                            1.4332846577786489,
-                            0.5667151609460811
+                            1.039307563963013,
+                            0.9604647631306905
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46502,20 +44996,20 @@
                 "VBFtagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.4767990954028896,
-                            0.5232038492491629
+                            1.0422856444814528,
+                            0.9558737003959471
                         ],
                         "VBFbkg": [
-                            1.4616217673814689,
-                            0.5383809550175964
+                            1.0412060958803122,
+                            0.9571697602784403
                         ],
                         "WH": [
-                            1.3381078405297286,
-                            0.66189292313076
+                            1.0321009855827,
+                            0.9680690469713013
                         ],
                         "ZH": [
-                            1.3439904686152702,
-                            0.6560107430205363
+                            1.033290395496096,
+                            0.9667180722532649
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46526,20 +45020,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.4767990954028896,
-                            0.5232038492491629
+                            1.0422856444814528,
+                            0.9558737003959471
                         ],
                         "VBFbkg": [
-                            1.4608881487251222,
-                            0.5391145634955709
+                            1.0411551172413966,
+                            0.9572310831616778
                         ],
                         "WH": [
-                            1.3381078405297286,
-                            0.66189292313076
+                            1.0321009855827,
+                            0.9680690469713013
                         ],
                         "ZH": [
-                            1.3439904686152702,
-                            0.6560107430205363
+                            1.033290395496096,
+                            0.9667180722532649
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46550,20 +45044,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.4767990954028896,
-                            0.5232038492491629
+                            1.0422856444814528,
+                            0.9558737003959471
                         ],
                         "VBFbkg": [
-                            1.4620102686668381,
-                            0.5379924594683235
+                            1.0412338297056527,
+                            0.9571364742290447
                         ],
                         "WH": [
-                            1.3381078405297286,
-                            0.66189292313076
+                            1.0321009855827,
+                            0.9680690469713013
                         ],
                         "ZH": [
-                            1.3439904686152702,
-                            0.6560107430205363
+                            1.033290395496096,
+                            0.9667180722532649
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46576,20 +45070,20 @@
                 "VHHadrtagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.5012317855172603,
-                            0.49876801232472856
+                            1.0459072290276294,
+                            0.9539943369221634
                         ],
                         "VBFbkg": [
-                            1.4214982890520522,
-                            0.5785013110535439
+                            1.0385856402870104,
+                            0.9609439493746866
                         ],
                         "WH": [
-                            1.403179311945456,
-                            0.596820408684306
+                            1.0360749592425376,
+                            0.963362875888601
                         ],
                         "ZH": [
-                            1.4046893280763726,
-                            0.5953100127490947
+                            1.0381284833682496,
+                            0.9613309382673544
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46600,20 +45094,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.5012317855172603,
-                            0.49876801232472856
+                            1.0459072290276294,
+                            0.9539943369221634
                         ],
                         "VBFbkg": [
-                            1.4201482579291138,
-                            0.5798513433793374
+                            1.0384389523881172,
+                            0.9610841665050782
                         ],
                         "WH": [
-                            1.403179311945456,
-                            0.596820408684306
+                            1.0360749592425376,
+                            0.963362875888601
                         ],
                         "ZH": [
-                            1.4046893280763726,
-                            0.5953100127490947
+                            1.0381284833682496,
+                            0.9613309382673544
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46624,20 +45118,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.5012317855172603,
-                            0.49876801232472856
+                            1.0459072290276294,
+                            0.9539943369221634
                         ],
                         "VBFbkg": [
-                            1.4211485695372255,
-                            0.5788510344260109
+                            1.0385299378373103,
+                            0.9609978411557314
                         ],
                         "WH": [
-                            1.403179311945456,
-                            0.596820408684306
+                            1.0360749592425376,
+                            0.963362875888601
                         ],
                         "ZH": [
-                            1.4046893280763726,
-                            0.5953100127490947
+                            1.0381284833682496,
+                            0.9613309382673544
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46652,20 +45146,20 @@
                 "Untagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.5087540317252368,
-                            0.49124783010871276
+                            1.0540990556486798,
+                            0.9539834232988078
                         ],
                         "VBFbkg": [
-                            1.4750810620065007,
-                            0.5249201069481951
+                            1.0480938539028308,
+                            0.9567901938980048
                         ],
                         "WH": [
-                            1.4123909432720994,
-                            0.587608837184262
+                            1.0378483249681827,
+                            0.9618365891525085
                         ],
                         "ZH": [
-                            1.4320547289910337,
-                            0.5679456872763323
+                            1.0391625055111409,
+                            0.9606176557636653
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46676,20 +45170,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.5087540317252368,
-                            0.49124783010871276
+                            1.0540990556486798,
+                            0.9539834232988078
                         ],
                         "VBFbkg": [
-                            1.474773497975835,
-                            0.5252276620444304
+                            1.0480637162470239,
+                            0.9568110954271809
                         ],
                         "WH": [
-                            1.4123909432720994,
-                            0.587608837184262
+                            1.0378483249681827,
+                            0.9618365891525085
                         ],
                         "ZH": [
-                            1.4320547289910337,
-                            0.5679456872763323
+                            1.0391625055111409,
+                            0.9606176557636653
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46700,20 +45194,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.5087540317252368,
-                            0.49124783010871276
+                            1.0540990556486798,
+                            0.9539834232988078
                         ],
                         "VBFbkg": [
-                            1.47615651466267,
-                            0.5238446749131663
+                            1.0482999521725809,
+                            0.9566978102658347
                         ],
                         "WH": [
-                            1.4123909432720994,
-                            0.587608837184262
+                            1.0378483249681827,
+                            0.9618365891525085
                         ],
                         "ZH": [
-                            1.4320547289910337,
-                            0.5679456872763323
+                            1.0391625055111409,
+                            0.9606176557636653
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46726,20 +45220,20 @@
                 "VBFtagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.477446226274884,
-                            0.5225571064408099
+                            1.0423626628267402,
+                            0.9557945097643669
                         ],
                         "VBFbkg": [
-                            1.4624216564094463,
-                            0.5375813490665794
+                            1.0413020364547607,
+                            0.957075916309445
                         ],
                         "WH": [
-                            1.3466629496670728,
-                            0.6533375034045501
+                            1.0328287021107456,
+                            0.9673307173712831
                         ],
                         "ZH": [
-                            1.3460604360230795,
-                            0.6539400774906958
+                            1.0334985669782935,
+                            0.9664797093969025
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46750,20 +45244,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.477446226274884,
-                            0.5225571064408099
+                            1.0423626628267402,
+                            0.9557945097643669
                         ],
                         "VBFbkg": [
-                            1.4621353032661535,
-                            0.5378676960113815
+                            1.0412821935330647,
+                            0.9570998679868016
                         ],
                         "WH": [
-                            1.3466629496670728,
-                            0.6533375034045501
+                            1.0328287021107456,
+                            0.9673307173712831
                         ],
                         "ZH": [
-                            1.3460604360230795,
-                            0.6539400774906958
+                            1.0334985669782935,
+                            0.9664797093969025
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46774,20 +45268,20 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.477446226274884,
-                            0.5225571064408099
+                            1.0423626628267402,
+                            0.9557945097643669
                         ],
                         "VBFbkg": [
-                            1.463122199165666,
-                            0.5368808214870251
+                            1.0413507017742516,
+                            0.9570171669352673
                         ],
                         "WH": [
-                            1.3466629496670728,
-                            0.6533375034045501
+                            1.0328287021107456,
+                            0.9673307173712831
                         ],
                         "ZH": [
-                            1.3460604360230795,
-                            0.6539400774906958
+                            1.0334985669782935,
+                            0.9664797093969025
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46800,20 +45294,20 @@
                 "VHHadrtagged": {
                     "2e2mu": {
                         "VBF": [
-                            1.5164010143541047,
-                            0.48359854869971863
+                            1.0457074053419528,
+                            0.95403511618265
                         ],
                         "VBFbkg": [
-                            1.426039630773558,
-                            0.5739605386591892
+                            1.0387714573097842,
+                            0.9607175250851218
                         ],
                         "WH": [
-                            1.4038111944010494,
-                            0.5961889973069654
+                            1.0362408685694917,
+                            0.9631885031937988
                         ],
                         "ZH": [
-                            1.4070379613744157,
-                            0.5929625042137929
+                            1.0384085643652439,
+                            0.9610234360707994
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46824,20 +45318,20 @@
                     },
                     "4e": {
                         "VBF": [
-                            1.5164010143541047,
-                            0.48359854869971863
+                            1.0457074053419528,
+                            0.95403511618265
                         ],
                         "VBFbkg": [
-                            1.4242288967638432,
-                            0.5757712805558681
+                            1.0386047660268605,
+                            0.9608792284526189
                         ],
                         "WH": [
-                            1.4038111944010494,
-                            0.5961889973069654
+                            1.0362408685694917,
+                            0.9631885031937988
                         ],
                         "ZH": [
-                            1.4070379613744157,
-                            0.5929625042137929
+                            1.0384085643652439,
+                            0.9610234360707994
                         ],
                         "ZX": null,
                         "bbH": null,
@@ -46848,600 +45342,26 @@
                     },
                     "4mu": {
                         "VBF": [
-                            1.5164010143541047,
-                            0.48359854869971863
+                            1.0457074053419528,
+                            0.95403511618265
                         ],
                         "VBFbkg": [
-                            1.425341344844632,
-                            0.5746588255791082
+                            1.0386938532807688,
+                            0.9607932501691864
                         ],
                         "WH": [
-                            1.4038111944010494,
-                            0.5961889973069654
+                            1.0362408685694917,
+                            0.9631885031937988
                         ],
                         "ZH": [
-                            1.4070379613744157,
-                            0.5929625042137929
+                            1.0384085643652439,
+                            0.9610234360707994
                         ],
                         "ZX": null,
                         "bbH": null,
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": null,
-                        "ttH": null
-                    }
-                }
-            }
-        },
-        "pdf_variation_qq": {
-            "fL1": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6461273285833319,
-                            1.3538743660634491
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6461273285833319,
-                            1.3538743660634491
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6461273285833319,
-                            1.3538743660634491
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6686376973266285,
-                            1.3313632869891716
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6686376973266285,
-                            1.3313632869891716
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6686376973266285,
-                            1.3313632869891716
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6544239540289614,
-                            1.345576110344788
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6544239540289614,
-                            1.345576110344788
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6544239540289614,
-                            1.345576110344788
-                        ],
-                        "ttH": null
-                    }
-                }
-            },
-            "fL1Zg": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6461187284074678,
-                            1.3538824494381785
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6461187284074678,
-                            1.3538824494381785
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6461187284074678,
-                            1.3538824494381785
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6717891277841617,
-                            1.3282118530687899
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6717891277841617,
-                            1.3282118530687899
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6717891277841617,
-                            1.3282118530687899
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6535516307825784,
-                            1.3464484283326665
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6535516307825784,
-                            1.3464484283326665
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6535516307825784,
-                            1.3464484283326665
-                        ],
-                        "ttH": null
-                    }
-                }
-            },
-            "fa2": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6460286634386282,
-                            1.3539729570762973
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6460286634386282,
-                            1.3539729570762973
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6460286634386282,
-                            1.3539729570762973
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6744622664542425,
-                            1.3255389163647893
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6744622664542425,
-                            1.3255389163647893
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6744622664542425,
-                            1.3255389163647893
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6531460836405137,
-                            1.3468537786499173
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6531460836405137,
-                            1.3468537786499173
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6531460836405137,
-                            1.3468537786499173
-                        ],
-                        "ttH": null
-                    }
-                }
-            },
-            "fa3": {
-                "Untagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6460487574379915,
-                            1.3539525937332506
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6460487574379915,
-                            1.3539525937332506
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6460487574379915,
-                            1.3539525937332506
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VBFtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6724598064428001,
-                            1.3275413461140642
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6724598064428001,
-                            1.3275413461140642
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6724598064428001,
-                            1.3275413461140642
-                        ],
-                        "ttH": null
-                    }
-                },
-                "VHHadrtagged": {
-                    "2e2mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6530798508287506,
-                            1.346919924241692
-                        ],
-                        "ttH": null
-                    },
-                    "4e": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6530798508287506,
-                            1.346919924241692
-                        ],
-                        "ttH": null
-                    },
-                    "4mu": {
-                        "VBF": null,
-                        "VBFbkg": null,
-                        "WH": null,
-                        "ZH": null,
-                        "ZX": null,
-                        "bbH": null,
-                        "ggH": null,
-                        "ggZZ": null,
-                        "qqZZ": [
-                            0.6530798508287506,
-                            1.346919924241692
-                        ],
                         "ttH": null
                     }
                 }
@@ -47460,8 +45380,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3538743660634491,
-                            0.6461273285833319
+                            1.0295265614851667,
+                            0.9700129238804629
                         ],
                         "ttH": null
                     },
@@ -47475,8 +45395,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3538743660634491,
-                            0.6461273285833319
+                            1.0295265614851667,
+                            0.9700129238804629
                         ],
                         "ttH": null
                     },
@@ -47490,8 +45410,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3538743660634491,
-                            0.6461273285833319
+                            1.0295265614851667,
+                            0.9700129238804629
                         ],
                         "ttH": null
                     }
@@ -47507,8 +45427,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3313632869891716,
-                            0.6686376973266285
+                            1.0284204167194133,
+                            0.9711310095620826
                         ],
                         "ttH": null
                     },
@@ -47522,8 +45442,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3313632869891716,
-                            0.6686376973266285
+                            1.0284204167194133,
+                            0.9711310095620826
                         ],
                         "ttH": null
                     },
@@ -47537,8 +45457,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3313632869891716,
-                            0.6686376973266285
+                            1.0284204167194133,
+                            0.9711310095620826
                         ],
                         "ttH": null
                     }
@@ -47554,8 +45474,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.345576110344788,
-                            0.6544239540289614
+                            1.0285518326984189,
+                            0.9710114002094992
                         ],
                         "ttH": null
                     },
@@ -47569,8 +45489,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.345576110344788,
-                            0.6544239540289614
+                            1.0285518326984189,
+                            0.9710114002094992
                         ],
                         "ttH": null
                     },
@@ -47584,8 +45504,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.345576110344788,
-                            0.6544239540289614
+                            1.0285518326984189,
+                            0.9710114002094992
                         ],
                         "ttH": null
                     }
@@ -47603,8 +45523,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3538824494381785,
-                            0.6461187284074678
+                            1.0295240514991386,
+                            0.9700154103581339
                         ],
                         "ttH": null
                     },
@@ -47618,8 +45538,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3538824494381785,
-                            0.6461187284074678
+                            1.0295240514991386,
+                            0.9700154103581339
                         ],
                         "ttH": null
                     },
@@ -47633,8 +45553,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3538824494381785,
-                            0.6461187284074678
+                            1.0295240514991386,
+                            0.9700154103581339
                         ],
                         "ttH": null
                     }
@@ -47650,8 +45570,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3282118530687899,
-                            0.6717891277841617
+                            1.0285056103894223,
+                            0.9710456370900576
                         ],
                         "ttH": null
                     },
@@ -47665,8 +45585,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3282118530687899,
-                            0.6717891277841617
+                            1.0285056103894223,
+                            0.9710456370900576
                         ],
                         "ttH": null
                     },
@@ -47680,8 +45600,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3282118530687899,
-                            0.6717891277841617
+                            1.0285056103894223,
+                            0.9710456370900576
                         ],
                         "ttH": null
                     }
@@ -47697,8 +45617,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3464484283326665,
-                            0.6535516307825784
+                            1.0285980623953384,
+                            0.9709701944893312
                         ],
                         "ttH": null
                     },
@@ -47712,8 +45632,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3464484283326665,
-                            0.6535516307825784
+                            1.0285980623953384,
+                            0.9709701944893312
                         ],
                         "ttH": null
                     },
@@ -47727,8 +45647,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3464484283326665,
-                            0.6535516307825784
+                            1.0285980623953384,
+                            0.9709701944893312
                         ],
                         "ttH": null
                     }
@@ -47746,8 +45666,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3539729570762973,
-                            0.6460286634386282
+                            1.0295311665374782,
+                            0.9700056329648005
                         ],
                         "ttH": null
                     },
@@ -47761,8 +45681,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3539729570762973,
-                            0.6460286634386282
+                            1.0295311665374782,
+                            0.9700056329648005
                         ],
                         "ttH": null
                     },
@@ -47776,8 +45696,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3539729570762973,
-                            0.6460286634386282
+                            1.0295311665374782,
+                            0.9700056329648005
                         ],
                         "ttH": null
                     }
@@ -47793,8 +45713,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3255389163647893,
-                            0.6744622664542425
+                            1.0283098682847356,
+                            0.9712278637351258
                         ],
                         "ttH": null
                     },
@@ -47808,8 +45728,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3255389163647893,
-                            0.6744622664542425
+                            1.0283098682847356,
+                            0.9712278637351258
                         ],
                         "ttH": null
                     },
@@ -47823,8 +45743,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3255389163647893,
-                            0.6744622664542425
+                            1.0283098682847356,
+                            0.9712278637351258
                         ],
                         "ttH": null
                     }
@@ -47840,8 +45760,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3468537786499173,
-                            0.6531460836405137
+                            1.028713902450001,
+                            0.9709677630094745
                         ],
                         "ttH": null
                     },
@@ -47855,8 +45775,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3468537786499173,
-                            0.6531460836405137
+                            1.028713902450001,
+                            0.9709677630094745
                         ],
                         "ttH": null
                     },
@@ -47870,8 +45790,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3468537786499173,
-                            0.6531460836405137
+                            1.028713902450001,
+                            0.9709677630094745
                         ],
                         "ttH": null
                     }
@@ -47889,8 +45809,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3539525937332506,
-                            0.6460487574379915
+                            1.0295302511574433,
+                            0.9700080319044024
                         ],
                         "ttH": null
                     },
@@ -47904,8 +45824,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3539525937332506,
-                            0.6460487574379915
+                            1.0295302511574433,
+                            0.9700080319044024
                         ],
                         "ttH": null
                     },
@@ -47919,8 +45839,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3539525937332506,
-                            0.6460487574379915
+                            1.0295302511574433,
+                            0.9700080319044024
                         ],
                         "ttH": null
                     }
@@ -47936,8 +45856,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3275413461140642,
-                            0.6724598064428001
+                            1.028099062581157,
+                            0.9713723847401706
                         ],
                         "ttH": null
                     },
@@ -47951,8 +45871,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3275413461140642,
-                            0.6724598064428001
+                            1.028099062581157,
+                            0.9713723847401706
                         ],
                         "ttH": null
                     },
@@ -47966,8 +45886,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.3275413461140642,
-                            0.6724598064428001
+                            1.028099062581157,
+                            0.9713723847401706
                         ],
                         "ttH": null
                     }
@@ -47983,8 +45903,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.346919924241692,
-                            0.6530798508287506
+                            1.028970170123467,
+                            0.970697692351487
                         ],
                         "ttH": null
                     },
@@ -47998,8 +45918,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.346919924241692,
-                            0.6530798508287506
+                            1.028970170123467,
+                            0.970697692351487
                         ],
                         "ttH": null
                     },
@@ -48013,8 +45933,8 @@
                         "ggH": null,
                         "ggZZ": null,
                         "qqZZ": [
-                            1.346919924241692,
-                            0.6530798508287506
+                            1.028970170123467,
+                            0.970697692351487
                         ],
                         "ttH": null
                     }
