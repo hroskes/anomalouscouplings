@@ -176,6 +176,7 @@ def runcombine(analysis, foldername, **kwargs):
     scanfai = analysis
     faifor = "decay"
     xaxislimits = None
+    plotlimitskwargs = {}
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -295,6 +296,8 @@ def runcombine(analysis, foldername, **kwargs):
                     raise ValueError
             except ValueError:
                 raise ValueError("xaxislimits has to be 2 floats separated by commas")
+        elif kw in ("killpoints",):
+            plotlimitskwargs[kw] = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -544,12 +547,12 @@ def runcombine(analysis, foldername, **kwargs):
 
         if faifor != "decay":
             plotname += "_"+faifor
-        plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits)
+        plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
         for nuisance in plotnuisances:
             if plottitle(nuisance) == plottitle(POI): continue
             if nuisance == "CMS_zz4l_fai1" and fixfai: continue
             nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-            plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits)
+            plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
 
     with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))

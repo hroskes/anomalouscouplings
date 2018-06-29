@@ -148,6 +148,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         elif kw == "xtitle":
             xtitle = kwarg
         elif kw == "killpoints":
+            if isinstance(kwarg, basestring): kwarg = [float(_) for _ in kwarg.split(",")]
             assert len(kwarg) == 2
             killpoints = kwarg
         elif kw == "faifor":
