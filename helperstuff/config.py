@@ -41,7 +41,7 @@ LHE = False
 usedata = True
 showblinddistributions = True
 unblinddistributions = True
-unblindscans = False
+unblindscans = True
 
 useQGTagging = False
 useVHMETTagged = True
