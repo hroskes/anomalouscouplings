@@ -131,7 +131,7 @@ class SampleBase(object):
         else:
             raise self.ValueError("nominalJHUxsec")
 
-        if result == 0 != self.JHUxsec:
+        if not (self.productionmode == "WH" and self.g1 == self.g2 == self.g4 == self.g1prime2 == 0) and result == 0 != self.JHUxsec:
             raise ValueError("Something is wrong")
 
         return result

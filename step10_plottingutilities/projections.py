@@ -514,9 +514,9 @@ class Projections(MultiEnum):
 
     SMhypothesis = self.analysis.purehypotheses[0]
     gi_ggHBSM = getattr(ReweightingSample("ggH", BSMhypothesis), BSMhypothesis.couplingname)
-    gi_VBFBSM = copysign((ReweightingSample("VBF", SMhypothesis).xsec / ReweightingSample("VBF", BSMhypothesis).xsec)**.25, gi_ggHBSM)
-    gi_VHBSM = copysign(((ReweightingSample("WH", SMhypothesis).xsec + ReweightingSample("ZH", SMhypothesis).xsec) / (ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
-    gi_VVHBSM = copysign(((ReweightingSample("VBF", SMhypothesis).xsec + ReweightingSample("WH", SMhypothesis).xsec + ReweightingSample("ZH", SMhypothesis).xsec) / (ReweightingSample("VBF", BSMhypothesis).xsec + ReweightingSample("WH", BSMhypothesis).xsec + ReweightingSample("ZH", BSMhypothesis).xsec))**.25, gi_ggHBSM)
+    gi_VBFBSM = copysign((ReweightingSample("VBF", SMhypothesis).nominalJHUxsec / ReweightingSample("VBF", BSMhypothesis).nominalJHUxsec)**.25, gi_ggHBSM)
+    gi_VHBSM = copysign(((ReweightingSample("WH", SMhypothesis).nominalJHUxsec + ReweightingSample("ZH", SMhypothesis).nominalJHUxsec) / (ReweightingSample("WH", BSMhypothesis).nominalJHUxsec + ReweightingSample("ZH", BSMhypothesis).nominalJHUxsec))**.25, gi_ggHBSM)
+    gi_VVHBSM = copysign(((ReweightingSample("VBF", SMhypothesis).nominalJHUxsec + ReweightingSample("WH", SMhypothesis).nominalJHUxsec + ReweightingSample("ZH", SMhypothesis).nominalJHUxsec) / (ReweightingSample("VBF", BSMhypothesis).nominalJHUxsec + ReweightingSample("WH", BSMhypothesis).nominalJHUxsec + ReweightingSample("ZH", BSMhypothesis).nominalJHUxsec))**.25, gi_ggHBSM)
     if category == "UntaggedMor17":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
@@ -748,10 +748,10 @@ class Projections(MultiEnum):
 #    mix_p = self.TemplateSum("{}=#plus0.5".format(fainame),        (ggHmix_p, ggHfactor), (VBFmix_p, VBFfactor), (VHmix_p, VHfactor), (ttHmix_p, ttHfactor), linecolor=ROOT.kGreen+3)
 #    mix_m = self.TemplateSum("{}=#minus0.5".format(fainame),       (ggHmix_m, ggHfactor), (VBFmix_m, VBFfactor), (VHmix_m, VHfactor), (ttHmix_m, ttHfactor), linecolor=4)
 
-    qqZZ      = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "qqZZ",    self.shapesystematic, self.production, linecolor=6, with2015=with2015)
-    ggZZ      = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ggZZ",    self.shapesystematic, self.production, linecolor=ROOT.kOrange+6, with2015=with2015)
-    VBFbkg    = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "VBF bkg", self.shapesystematic, self.production, linecolor=ROOT.kViolet+7, with2015=with2015)
-    ZX        = self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ZX",      self.shapesystematic, self.production, linecolor=2, with2015=with2015)
+#    qqZZ      = {production: self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "qqZZ",    self.shapesystematic, production, linecolor=6, with2015=with2015) for production in config.productionsforcombine}
+#    ggZZ      = {production: self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ggZZ",    self.shapesystematic, production, linecolor=ROOT.kOrange+6, with2015=with2015) for production in config.productionsforcombine}
+#    VBFbkg    = {production: self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "VBF bkg", self.shapesystematic, production, linecolor=ROOT.kViolet+7, with2015=with2015) for production in config.productionsforcombine}
+#    ZX        = {production: self.TemplateFromFile(category, self.enrichstatus, self.normalization, self.analysis, channel, "ZX",      self.shapesystematic, production, linecolor=2, with2015=with2015) for production in config.productionsforcombine}
 
     templates = []
     if not animation and not nicestyle:
@@ -931,10 +931,8 @@ class Projections(MultiEnum):
                                      linecolor=topcolor, linewidth=2, linestyle=2)
             templates[0:0] = [SM, SMbottom, BSM, BSMbottom, mix_p, mix_pbottom, mix_m, mix_mbottom] #will remove some later, depending on the discriminant
 
-            if category in ("VBFtagged", "VHHadrtagged"):
-                rebin = 4
-            elif category == "Untagged":
-                rebin = 2
+            rebin = 1
+
         else: #animation
             ffHintegral  = self.DbkgSum("ffHintegral", *sum(
                                                             ([(allggHg12gi0[ca,ch], g1_custom**2), (allggHg10gi2[ca,ch], (gi_custom/gi_ggHBSM)**2), (allggHg11gi1[ca,ch],  g1_custom*gi_custom/gi_ggHBSM),
@@ -983,6 +981,8 @@ class Projections(MultiEnum):
 
             templates[0:0] = [top, bottom] #will remove some later, depending on the discriminant
 
+            rebin = 1
+
         if self.enrichstatus == "impoverish" and config.showblinddistributions or config.unblinddistributions:
             if Dbkg_allcategories:
                 data = self.DbkgSum("",
@@ -997,9 +997,9 @@ class Projections(MultiEnum):
                 data = self.TemplateSum("",
                                         *((self.TemplateFromFile(
                                                                  category, self.enrichstatus, self.normalization,
-                                                                 self.analysis, ch, "data", self.production,
+                                                                 self.analysis, ch, "data", production,
                                                                  linecolor=1, with2015=with2015,
-                                                                ), 1) for ch in channels)
+                                                                ), 1) for ch in channels for production in config.productionsforcombine)
                                        )
                 data = [style.asymmerrorsfromhistogram(data.Projection(i, rebin=rebin), showemptyerrors=False) for i in range(3)]
             for g in data:
@@ -1025,7 +1025,7 @@ class Projections(MultiEnum):
         usetemplates = templates
         if nicestyle and not animation:
             usetemplates = templates[:]
-            tf = TemplatesFile("2e2mu", "ggh", category, self.production, self.analysis)
+            tf = TemplatesFile("2e2mu", "ggh", category, config.productionsforcombine[0], self.analysis)
             if discriminant == tf.mixdiscriminant and self.analysis == "fa3" or discriminant in (tf.mixdiscriminant, tf.purediscriminant) and self.analysis == "fL1":
                 usetemplates.remove(BSM)
                 usetemplates.remove(mix_m)
@@ -1129,8 +1129,9 @@ class Projections(MultiEnum):
             else:
                 CMStext = "Internal"
 
-            lumi = float(Luminosity("fordata", self.production))
+            lumi = sum(float(Luminosity("fordata", production)) for production in config.productionsforcombine)
             if with2015:
+                assert False
                 lumi += config.lumi2015
 
             style.CMS(CMStext, lumi)
@@ -1166,7 +1167,7 @@ class Projections(MultiEnum):
       assert self.normalization == "rescalemixtures"
       return os.path.join(config.plotsbasedir, "templateprojections", forWIN, "projections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
   def saveasdir_niceplots(self, category, with2015=False, forWIN=False):
-      assert self.normalization == "rescalemixtures" and len(config.productionsforcombine) == 1
+      assert self.normalization == "rescalemixtures"# and len(config.productionsforcombine) == 1
       forWIN = "forWIN" if forWIN else ""
       result = os.path.join(config.plotsbasedir, "templateprojections", forWIN, "niceplots", self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
       if with2015: result += "_with2015"
@@ -1176,7 +1177,7 @@ class Projections(MultiEnum):
       return os.path.join(config.plotsbasedir, "templateprojections", forWIN, "niceplots", self.enrichstatus.dirname(), str(self.analysis))
 
   def discriminants(self, category):
-      return TemplatesFile("2e2mu", self.shapesystematic, "ggh", self.analysis, self.production, category).discriminants
+      return TemplatesFile("2e2mu", self.shapesystematic, "ggh", self.analysis, config.productionsforcombine[0], category).discriminants
 
   class AnimationStep(object):
     def __init__(self, productionmodeforfai, analysis, fai, delay, muV=1, muf=1, deltaNLL=None):
@@ -1414,7 +1415,8 @@ def main():
   def projections():
 #    yield Projections("170203", "2e2mu", "fa3", "rescalemixtures", "fullrange", "VHHadrtagged")
 #    return
-    for production in config.productionsforcombine:
+#    for production in config.productionsforcombine:
+      production = None
       for analysis in analyses:
         if analysis not in useanalyses: continue
         for normalization in normalizations:
@@ -1428,14 +1430,15 @@ def main():
     process = int(sys.argv[1])
     if process == 1 or process == 4:
       p.projections(ch, ca, nicestyle=True)
-      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
-      p.projections(ch, ca, nicestyle=True, forWIN=True)
-      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, forWIN=True)
+#      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
+#      p.projections(ch, ca, nicestyle=True, forWIN=True)
+#      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, forWIN=True)
     if process == 2 or process == 5:
-      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True)
-      p.projections(ch, ca, nicestyle=True, with2015=True)
-      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True, forWIN=True)
-      p.projections(ch, ca, nicestyle=True, with2015=True, forWIN=True)
+      pass
+#      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True)
+#      p.projections(ch, ca, nicestyle=True, with2015=True)
+#      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, with2015=True, forWIN=True)
+#      p.projections(ch, ca, nicestyle=True, with2015=True, forWIN=True)
     if process == 3:
       p.projections(ch, ca)
       p.projections(ch, ca, subdir="ggH", productionmode="ggH")
