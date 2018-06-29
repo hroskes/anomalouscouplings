@@ -34,12 +34,23 @@ unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P .oO[physicsmodel]O
 exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = r"""
-combine -M MultiDimFit .oO[workspacefile]Oo. --algo=.oO[algo]Oo. --robustFit=.oO[robustfit]Oo. --points .oO[npoints]Oo. \
-        --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. \
+combine -M .oO[method]Oo. .oO[workspacefile]Oo. --robustFit=.oO[robustfit]Oo. .oO[morecombineoptions]Oo. \
+        --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. \
         -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
-        --alignEdges=1 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
+        --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
         .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
+        -S .oO[usesystematics]Oo. |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
+"""
+
+morecombineoptions = {
+    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[npoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1",
+    "FitDiagnostics": "",
+}
+
+diffnuisancescommand = r"""
+                  $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit/test/diffNuisances.py \
+                  -a fitDiagnostics_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..root \
+                  --poi .oO[POI]Oo. |& tee fitDiagnostics.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..txt
 """
 
 def check_call_test(*args, **kwargs):
@@ -176,6 +187,7 @@ def runcombine(analysis, foldername, **kwargs):
     scanfai = analysis
     faifor = "decay"
     xaxislimits = None
+    method = "MultiDimFit"
     plotlimitskwargs = {}
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
@@ -298,6 +310,8 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("xaxislimits has to be 2 floats separated by commas")
         elif kw in ("killpoints",):
             plotlimitskwargs[kw] = kwarg
+        elif kw == "method":
+            method = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -317,6 +331,9 @@ def runcombine(analysis, foldername, **kwargs):
             raise RuntimeError("submitjobs should be run from a screen session!")
         if "minimum" in expectvalues:
             raise ValueError("Can't run scan for minimum using submitjobs")
+
+    if "minimum" in expectvalues and method != "MultiDimFit":
+        raise ValueError("Can't run scan for minimum using "+methdo)
 
     if len(productions) > 1 and lumitype != "fordata":
         raise TypeError("If there's >1 production, have to use lumitype == 'fordata'")
@@ -385,7 +402,7 @@ def runcombine(analysis, foldername, **kwargs):
               "cardstocombine": " ".join(["hzz4l_{}S_{}_{}.lumi{:.2f}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)] + alsocombine),
               "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
               "workspacefile": "workspace.oO[workspacefileappend]Oo..root",
-              "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..MultiDimFit.mH125.root",
+              "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[method]Oo..mH125.root",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": "{:.2f}".format(totallumi),
               "observedappend": "obs",
@@ -397,6 +414,7 @@ def runcombine(analysis, foldername, **kwargs):
               "workspacefileappend": workspacefileappend,
               "combinecardsappend": combinecardsappend,
               "algo": algo,
+              "method": method,
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
               "POI": POI,
@@ -405,6 +423,7 @@ def runcombine(analysis, foldername, **kwargs):
               "sqrts": ",".join("{:d}".format(_) for _ in sqrts),
               "physicsmodel": None,
               "physicsoptions": None,
+              "morecombineoptions": morecombineoptions[method],
              }
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
@@ -473,17 +492,22 @@ def runcombine(analysis, foldername, **kwargs):
               })
               jobids.add(runscan(repmap_obs, submitjobs=submitjobs))
               finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_obs))
-              if not submitjobs:
+              if not submitjobs and method == "MultiDimFit":
                   f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
                   t = f.limit
                   for entry in t:
                       if t.deltaNLL+t.nll+t.nll0 < minimum[1]:
                           minimum = (getattr(t, POI), t.deltaNLL+t.nll+t.nll0)
+
+              if method == "FitDiagnostics":
+                command = replaceByMap(diffnuisancescommand, repmap_obs)
+                subprocess.check_call(command, shell=True)
+
           minimum = minimum[0]
           del f
 
-        for scanrange in scanranges:
-          for expectfai in expectvalues:
+        for expectfai in expectvalues:
+          for scanrange in scanranges:
               repmap_exp = repmap.copy()
               if expectfai == "minimum":
                   expectfai = minimum
@@ -499,6 +523,10 @@ def runcombine(analysis, foldername, **kwargs):
               })
               jobids.add(runscan(repmap_exp, submitjobs=submitjobs))
               finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_exp))
+
+          if method == "FitDiagnostics":
+            command = replaceByMap(diffnuisancescommand, repmap_exp)
+            subprocess.check_call(command, shell=True)
 
         if None in jobids: jobids.remove(None)
         if jobids:
@@ -547,29 +575,31 @@ def runcombine(analysis, foldername, **kwargs):
 
         if faifor != "decay":
             plotname += "_"+faifor
-        plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
-        for nuisance in plotnuisances:
-            if plottitle(nuisance) == plottitle(POI): continue
-            if nuisance == "CMS_zz4l_fai1" and fixfai: continue
-            nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-            plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
 
-    with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
-        f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
-        f.write("\n\n\n")
-        f.write("python limits.py ")
-        for arg in sys.argv[1:]:
-            if "=" in arg and "subdirectory=" not in arg: continue
-            f.write(pipes.quote(arg)+" ")
-        f.write("--plotname="+plotname+" ")
-        f.write("\n\n\n\n\n\ngit info:\n\n")
-        f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
-        f.write("\n")
-        f.write(subprocess.check_output(["git", "status"]))
-        f.write("\n")
-        f.write(subprocess.check_output(["git", "diff"]))
+        if method == "MultiDimFit":
+            plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
+            for nuisance in plotnuisances:
+                if plottitle(nuisance) == plottitle(POI): continue
+                if nuisance == "CMS_zz4l_fai1" and fixfai: continue
+                nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
+                plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
 
-    copyplots(os.path.join("limits", subdirectory, foldername))
+            with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
+                f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
+                f.write("\n\n\n")
+                f.write("python limits.py ")
+                for arg in sys.argv[1:]:
+                    if "=" in arg and "subdirectory=" not in arg: continue
+                    f.write(pipes.quote(arg)+" ")
+                f.write("--plotname="+plotname+" ")
+                f.write("\n\n\n\n\n\ngit info:\n\n")
+                f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
+                f.write("\n")
+                f.write(subprocess.check_output(["git", "status"]))
+                f.write("\n")
+                f.write(subprocess.check_output(["git", "diff"]))
+
+            copyplots(os.path.join("limits", subdirectory, foldername))
 
 ntry = 0
 maxntries = 3
