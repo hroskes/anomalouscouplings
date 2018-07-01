@@ -180,14 +180,16 @@ def plotfromtree(**kwargs):
   return h
 
 class Line(namedtuple("Line", "sample title color reweightfrom")):
-    """useful namedtuple, no special interaction with anything else here"""
-    def __new__(cls, sample, title, color, reweightfrom=None, bkpreweightfrom=None):
-        if reweightfrom is None: reweightfrom = sample
-        if not isinstance(reweightfrom, Sample):
-            assert len(config.productionsforcombine) == 1
-            try:
-              reweightfrom = Sample(reweightfrom, config.productionsforcombine[0])
-            except ValueError:
-              if bkpreweightfrom is None: raise
-              reweightfrom = Sample(bkpreweightfrom, config.productionsforcombine[0])
-        return super(Line, cls).__new__(cls, sample, title, color, reweightfrom)
+  """useful namedtuple, no special interaction with anything else here"""
+  def __new__(cls, sample, title, color, reweightfrom=None, bkpreweightfrom=None, production=None):
+    if reweightfrom is None: reweightfrom = sample
+    if not isinstance(reweightfrom, Sample):
+      if production is None:
+        assert len(config.productionsforcombine) == 1
+        production = config.productionsforcombine[0]
+      try:
+        reweightfrom = Sample(reweightfrom, production)
+      except ValueError:
+        if bkpreweightfrom is None: raise
+        reweightfrom = Sample(bkpreweightfrom, production)
+    return super(Line, cls).__new__(cls, sample, title, color, reweightfrom)

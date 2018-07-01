@@ -7,13 +7,15 @@ import ROOT
 from helperstuff import config, stylefunctions
 from helperstuff.CJLSTscripts import getDZHhWP, getDWHhWP, getDVBF2jetsWP
 from helperstuff.discriminants import discriminant
-from helperstuff.enums import analyses, Analysis
+from helperstuff.enums import analyses, Analysis, Production
 from helperstuff.plotfromtree import Line, plotfromtree
 from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample
 from helperstuff.templates import TemplatesFile
+from helperstuff.utilities import PlotCopier
 
-def makeplot(productionmode, analysis, category, disc):
+def makeplot(productionmode, analysis, category, production, disc):
   analysis = Analysis(analysis)
+  production = Production(production)
   if analysis == "fL1Zg" and "L1Zg" in disc and "HadWH" in disc: return
 
   fainame = analysis.title(superscript=productionmode if productionmode != "ggH" else "dec")
@@ -21,7 +23,7 @@ def makeplot(productionmode, analysis, category, disc):
 
   SM, BSM = (ReweightingSample(productionmode, _, hff) for _ in analysis.purehypotheses)
 
-  sample, _, _, reweightfrom = Line(SM, "{} SM".format(productionmode), 1, bkpreweightfrom=ReweightingSample(productionmode, "0+", hff))
+  sample, _, _, reweightfrom = Line(SM, "{} SM".format(productionmode), 1, bkpreweightfrom=ReweightingSample(productionmode, "0+", hff), production=production)
 
   hs = {}
   hstack = ROOT.THStack(disc, "")
@@ -30,7 +32,7 @@ def makeplot(productionmode, analysis, category, disc):
   l.SetBorderSize(0)
   l.SetFillStyle(0)
   stylefunctions.applylegendstyle(l)
-  c = ROOT.TCanvas("c", "", 8, 30, 800, 800)
+  c = pc.TCanvas("c", "", 8, 30, 800, 800)
   stylefunctions.applycanvasstyle(c)
 
   xaxislabel = discriminant(disc).title
@@ -46,7 +48,8 @@ def makeplot(productionmode, analysis, category, disc):
       normalizeto1=True,
       color=color,
       category=category,
-      analysis=analysis
+      analysis=analysis,
+      production=production,
     )
     h.SetLineWidth(2)
     hstack.Add(h)
@@ -59,7 +62,7 @@ def makeplot(productionmode, analysis, category, disc):
 
   hstack.GetXaxis().SetTitle(h.GetXaxis().GetTitle())
 
-  saveasdir = os.path.join(config.plotsbasedir, "xchecks", "JECsystematics", str(analysis), str(productionmode))
+  saveasdir = os.path.join(config.plotsbasedir, "xchecks", "JECsystematics", str(production.year), str(analysis), str(productionmode))
   try:
     os.makedirs(saveasdir)
   except OSError:
@@ -68,8 +71,10 @@ def makeplot(productionmode, analysis, category, disc):
     c.SaveAs(os.path.join(saveasdir, "{}.{}".format(disc, ext)))
 
 if __name__ == "__main__":
-  for analysis in analyses:
-    for category in "VBFtagged", "VHHadrtagged":
-      for disc in TemplatesFile("ggh", "2e2mu", analysis, category).discriminants[0:2]:
-        for p in "ggH", "VBF", "ZH", "WH", "ttH":
-          makeplot(p, analysis, category, disc.name)
+  with PlotCopier() as pc:
+    for analysis in analyses:
+      for category in "VBFtagged", "VHHadrtagged":
+        for disc in TemplatesFile("ggh", "2e2mu", analysis, category, "180530").discriminants:
+          for p in "ggH", "VBF", "ZH", "WH", "ttH":
+            for production in config.productionsforcombine:
+              makeplot(p, analysis, category, production, disc.identifier)
