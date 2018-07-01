@@ -127,14 +127,11 @@ def combinesystematics(channel, analysis, production, category):
                 store += [hup, hdn]
 
     if config.applyMINLOsystematics and category != "Untagged":
+        useproduction = production
+        if production == "180531": useproduction = "180530"
         tf = TemplatesFile(channel, "ggh", analysis, production, category)
-        SM = analysis.purehypotheses[0]
-        POWHEG3DSM = gettemplate("ggH", SM, tf)
-        POWHEG2DSM = POWHEG3DSM.Project3D("yxe")
-        MINLO2DSM = POWHEG2DSM.Clone("MINLO2DSM")
-        MINLO2DSM.Reset("M")
-        for c in channels:
-            MINLO2DSM.Add(gettemplate("ggH", "0+", "MINLO_SM", "MINLO", c, analysis, production, category))
+        POWHEG3DSM = gettemplate("ggH", "0+", channel, analysis, useproduction, category)
+        MINLO3DSM = gettemplate("ggH", "0+", "MINLO_SM", "MINLO", channel, analysis, useproduction, category)
 
         for t in tf.templates():
             POWHEG3D = t.gettemplate()
@@ -143,13 +140,21 @@ def combinesystematics(channel, analysis, production, category):
             MINLO3DDn = POWHEG3D.Clone(Template("ggH", t.hypothesis, "MINLODn", channel, analysis, production, category).templatename())
             MINLO3DDn.SetDirectory(outfiles[MINLODn])
             for x, y, z in product(xrange(1, MINLO3D.GetNbinsX()+1), xrange(1, MINLO3D.GetNbinsY()+1), xrange(1, MINLO3D.GetNbinsZ()+1)):
+                try:
+                    upbincontent = POWHEG3D.GetBinContent(x, y, z) * MINLO3DSM.GetBinContent(x, y, z) / POWHEG3DSM.GetBinContent(x, y, z)
+                except ZeroDivisionError:
+                    if MINLO3DSM.GetBinContent(x, y, z) == POWHEG3D.GetBinContent(x, y, z) == 0:
+                        upbincontent = 0
+                    else:
+                         raise
+                downbincontent = POWHEG3D.GetBinContent(x, y, z) **2 / upbincontent
                 MINLO3D.SetBinContent(
                                       x, y, z,
-                                      POWHEG3D.GetBinContent(x, y, z) * MINLO2DSM.GetBinContent(x, y) / POWHEG2DSM.GetBinContent(x, y)
+                                      upbincontent
                                      )
                 MINLO3DDn.SetBinContent(
                                         x, y, z,
-                                        POWHEG3D.GetBinContent(x, y, z) **2 / MINLO3D.GetBinContent(x, y, z)
+                                        downbincontent
                                        )
             MINLO3D.Scale(POWHEG3D.Integral()/MINLO3D.Integral())
             MINLO3DDn.Scale(POWHEG3D.Integral()/MINLO3DDn.Integral())

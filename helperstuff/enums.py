@@ -426,7 +426,7 @@ class WorkspaceShapeSystematic(MyEnum):
 
     @property
     def nickname(self):
-      for _ in "Res", "Scale", "ScaleRes", "MINLO":
+      for _ in "Res", "Scale", "ScaleRes", "QCDscale_ggH2in":
         if self == _:
           return _
       return str(self)

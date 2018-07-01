@@ -419,7 +419,6 @@ class TemplatesFile(MultiEnum):
 
     @property
     def discriminants(self):
-        if self.shapesystematic == "MINLO_SM": return (self.purediscriminant, self.mixdiscriminant)
         return (self.purediscriminant, self.mixdiscriminant, self.bkgdiscriminant)
 
     @property
@@ -574,7 +573,7 @@ def templatesfiles():
                         yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
                         yield TemplatesFile(channel, shapesystematic, "bbh", analysis, production, category)
                     yield TemplatesFile(channel, "DATA", analysis, production, category)
-                    if category != "Untagged" and config.applyMINLOsystematics:
+                    if category != "Untagged" and config.applyMINLOsystematics and production == "180530":
                         yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
 
 
