@@ -7,6 +7,7 @@ import shutil
 import subprocess
 
 def tar_cvzf(tarballname, tmpdir, plotcopier=None):
+  utilities.mkdir_p(os.path.dirname(tarballname))
   subprocess.check_call(["tar", "-cvzf", tarballname, "-C", tmpdir] + os.listdir(tmpdir))
   if plotcopier: plotcopier.copy(tarballname)
 
@@ -69,7 +70,7 @@ def discriminantdistributions(plotcopier=None):
 #      for filename in theglob:
 #        shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, "all", os.path.basename(filename.replace("_with2015", "")))))
 
-    tar_cvzf("discriminantdistributions.tar.gz", tmpdir, plotcopier)
+    tar_cvzf("Figures/stacked/discriminantdistributions.tar.gz", tmpdir, plotcopier)
 
 def animations(plotcopier=None):
   if glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", "*", "*", "animation")):
@@ -97,10 +98,18 @@ def animations(plotcopier=None):
 
     tar_cvzf("discriminantdistributions_animations.tar.gz", tmpdir, plotcopier)
 
+def loglinear(plotcopier):
+  tmpdir = utilities.mkdtemp()
+  for a in analyses:
+    plot = os.path.join(config.plotsbasedir, "limits", str(a)+"_limit_lumi80.15.pdf")
+    shutil.copy(plot, os.path.join(tmpdir, str(a)+".pdf"))
+  tar_cvzf("Figures/results/onshell/limits.tar.gz", tmpdir, plotcopier)
+    
+
 if __name__ == "__main__":
-  functions = {_.__name__: _ for _ in (templateprojections, POWHEGvsJHUGen, categorydiscriminants, discriminantdistributions, animations)}
+  functions = {_.__name__: _ for _ in (templateprojections, POWHEGvsJHUGen, categorydiscriminants, discriminantdistributions, animations, loglinear)}
   parser = argparse.ArgumentParser()
-  parser.add_argument("tarball", choices=functions.values(), type=lambda _: functions[_], action="append")
+  parser.add_argument("tarball", choices=functions.values(), type=lambda _: functions[_], nargs="+")
   args = parser.parse_args()
 
 from helperstuff import config, utilities
@@ -108,6 +117,6 @@ from helperstuff.enums import analyses, categories
 from helperstuff.utilities import PlotCopier
 
 if __name__ == "__main__":
-  with PlotCopier(copyfromfolder=".", copytofolder="/afs/cern.ch/work/h/hroskes/AN/papers/HIG-18-002/trunk/Figures/stacked") as pc:
+  with PlotCopier(copyfromfolder=".", copytofolder="/afs/cern.ch/work/h/hroskes/AN/papers/HIG-18-002/trunk/") as pc:
     for tarball in args.tarball:
       tarball(pc)

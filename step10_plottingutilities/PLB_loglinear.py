@@ -34,7 +34,7 @@ def applystyle(mg, mglog, folders, ydivide):
         mglog.GetXaxis().CenterTitle()
         mglog.GetYaxis().CenterTitle()
         mglog.SetMinimum(ydivide)
-        mglog.SetMaximum(170)
+        mglog.SetMaximum(250)
         style.applyaxesstyle(mglog)
         mglog.GetXaxis().SetLabelOffset(9999999)
         mglog.GetXaxis().SetTitleOffset(9999999)
@@ -134,6 +134,7 @@ def PRL_loglinear(**kwargs):
 #                   Folder(".oO[analysis]Oo._fixggHsystematics", "Observed", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
                    Folder(".oO[analysis]Oo._fixggHsystematics", "Expected", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=2),
 #                   Folder(".oO[analysis]Oo._fixggHsystematics", "Observed, 13 TeV", 1, analysis, subdir, plotname="limit_lumi77.45_13_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
+                   Folder(".oO[analysis]Oo._forpresentationJune29", "Observed, 2016+2017", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
                    Folder(".oO[analysis]Oo._fixggHsystematics", "Expected, 13 TeV", 1, analysis, subdir, plotname="limit_lumi77.45_13_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=1),
                   ]
 
