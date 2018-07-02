@@ -7,7 +7,7 @@ import ROOT
 from helperstuff import config, stylefunctions
 from helperstuff.CJLSTscripts import getDZHhWP, getDWHhWP, getDVBF2jetsWP
 from helperstuff.discriminants import discriminant
-from helperstuff.enums import analyses, Analysis, Production
+from helperstuff.enums import analyses, Analysis, Production, ProductionMode
 from helperstuff.plotfromtree import Line, plotfromtree
 from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample
 from helperstuff.templates import TemplatesFile
@@ -16,14 +16,22 @@ from helperstuff.utilities import PlotCopier
 def makeplot(productionmode, analysis, category, production, disc):
   analysis = Analysis(analysis)
   production = Production(production)
+  productionmode = ProductionMode(productionmode)
   if analysis == "fL1Zg" and "L1Zg" in disc and "HadWH" in disc: return
 
   fainame = analysis.title(superscript=productionmode if productionmode != "ggH" else "dec")
   hff = "Hff0+" if productionmode == "ttH" else None
 
-  SM, BSM = (ReweightingSample(productionmode, _, hff) for _ in analysis.purehypotheses)
+  if productionmode.issignal:
+    hypothesis = "0+"
+    SM, BSM = (ReweightingSample(productionmode, _, hff) for _ in analysis.purehypotheses)
+    if hypothesis: title = str(productionmode) + " SM"
+  else:
+    title = str(productionmode)
+    hypothesis = None
+    SM = ReweightingSample(productionmode)
 
-  sample, _, _, reweightfrom = Line(SM, "{} SM".format(productionmode), 1, bkpreweightfrom=ReweightingSample(productionmode, "0+", hff), production=production)
+  sample, _, _, reweightfrom = Line(SM, title, 1, bkpreweightfrom=ReweightingSample(productionmode, hypothesis, hff), production=production)
 
   hs = {}
   hstack = ROOT.THStack(disc, "")
@@ -75,6 +83,7 @@ if __name__ == "__main__":
     for analysis in analyses:
       for category in "VBFtagged", "VHHadrtagged":
         for disc in TemplatesFile("ggh", "2e2mu", analysis, category, "180530").discriminants:
-          for p in "ggH", "VBF", "ZH", "WH", "ttH":
+          for p in "ggH", "VBF", "ZH", "WH", "ttH", "qqZZ":
+            if p != "qqZZ": continue
             for production in config.productionsforcombine:
               makeplot(p, analysis, category, production, disc.identifier)

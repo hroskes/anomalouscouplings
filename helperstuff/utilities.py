@@ -774,7 +774,7 @@ class PlotCopier(object):
             print
             print " ".join(pipes.quote(_) for _ in command)
             print
-            raise
+            if all(_ is None for _ in error): raise
 
     def TCanvas(self, *args, **kwargs):
         return TCanvas(plotcopier=self, *args, **kwargs)

@@ -262,6 +262,9 @@ class TemplatesFile(MultiEnum):
             else:
                 name += "_10bins"
 
+        if self.shapesystematic in ("JECUp", "JECDn") and ("VBF" in name or "HadVH" in name):
+            name += "_{}".format(self.shapesystematic)
+
         return discriminant(name)
 
     @property
@@ -399,7 +402,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
             if self.analysis == "fa3fa2fL1fL1Zg":
-                return discriminant("D_CP_VBF_2bins")
+                return discriminant("D_CP_VBF_2bins"+JECappend)
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -413,7 +416,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
             if self.analysis == "fa3fa2fL1fL1Zg":
-                return discriminant("D_CP_HadVH_2bins")
+                return discriminant("D_CP_HadVH_2bins"+JECappend)
 
         assert False
 
@@ -547,6 +550,20 @@ class TemplatesFile(MultiEnum):
           return TemplatesFile(*kwargs.values())
         return None
 
+    @property
+    def treeshapesystematics(self):
+        if self.shapesystematic != "": raise ValueError("I'm already a shape systematic\n{!r}".format(self))
+        for _ in treeshapesystematics:
+            if not _.appliesto(self.templategroup): continue
+            if _ in ("ResUp", "ResDown", "ScaleUp", "ScaleDown") and self.templategroup != "ggh" and config.getm4lsystsfromggH: continue
+            if config.getm4lsystsfromggHUntagged and self.category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+
+            if _ in ("JECUp", "JECDn"):
+                if self.templategroup not in ("ggh", "zh", "wh"): continue
+                if self.category == "Untagged": continue
+
+            yield _
+
 def listfromiterator(function):
     return list(function())
 
@@ -558,23 +575,16 @@ def templatesfiles():
             for analysis in analyses:
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
-                    for shapesystematic in treeshapesystematics:
-                        if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
-                        if config.LHE and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
-                        if shapesystematic not in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"):
-                            yield TemplatesFile(channel, shapesystematic, "bkg", analysis, production, category)
-                        if shapesystematic in ("ZXUp", "ZXDown"): continue
-                        yield TemplatesFile(channel, shapesystematic, "ggh", analysis, production, category)
-                        if analysis.isdecayonly: continue
-                        if config.getm4lsystsfromggH and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
-                        yield TemplatesFile(channel, shapesystematic, "vbf", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "zh", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "wh", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "tth", analysis, production, category)
-                        yield TemplatesFile(channel, shapesystematic, "bbh", analysis, production, category)
-                    yield TemplatesFile(channel, "DATA", analysis, production, category)
-                    if category != "Untagged" and config.applyMINLOsystematics and production == "180530":
-                        yield TemplatesFile(channel, "ggh", analysis, production, category, "MINLO_SM")
+                    for templategroup in TemplateGroup.items():
+                        nominal = TemplatesFile(channel, templategroup, analysis, production, category)
+                        for shapesystematic in nominal.treeshapesystematics:
+                            if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+                            if config.LHE and shapesystematic != "": continue
+                            if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
+                            if production == "180531" and shapesystematic == "MINLO_SM": continue
+                            if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
+
+                            yield TemplatesFile(channel, shapesystematic, templategroup, analysis, production, category)
 
 
 class TemplateBase(object):

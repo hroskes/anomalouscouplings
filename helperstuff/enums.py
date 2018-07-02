@@ -462,6 +462,8 @@ class ShapeSystematic(MyEnum):
     def appliesto(self, templategroup):
         if self == "":
             return True
+        if self in ("JECUp", "JECDn"):
+            return templategroup in ("ggh", "zh", "wh")
         if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"):
             return templategroup in ("ggh", "vbf", "zh", "wh", "tth", "bbh")
         if self in ("ZXUp", "ZXDown"):
@@ -964,7 +966,7 @@ if config.applyJECshapesystematics:
 if config.applyMINLOsystematics:
     _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
-treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown") or x in ("ZXUp", "ZXDown") and config.usenewZXsystematics)
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown", "MINLO_SM") + ("ZXUp", "ZXDown")*config.usenewZXsystematics)
 del _
 
 class MetaclassForMultiEnums(type):
