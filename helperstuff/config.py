@@ -65,7 +65,7 @@ applyZXshapesystematicsUntagged = True
 mergeZXVBFVHsystematics = False
 usenewZXsystematics = True
 
-applyJECshapesystematics = False
+applyJECshapesystematics = True
 applyMINLOsystematics = True
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata <= (not LHE)

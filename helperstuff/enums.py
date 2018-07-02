@@ -449,7 +449,7 @@ class ShapeSystematic(MyEnum):
                  EnumItem("ScaleResUp", "ResScaleUp"),
                  EnumItem("ScaleResDown", "ResScaleDown"),
                  EnumItem("JECUp"),
-                 EnumItem("JECDown", "JECDn"),
+                 EnumItem("JECDn", "JECDown"),
                  EnumItem("ZXUp"),
                  EnumItem("ZXDown", "ZXDn"),
                  EnumItem("MINLO_SM"),
