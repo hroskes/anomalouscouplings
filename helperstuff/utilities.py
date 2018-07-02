@@ -747,15 +747,24 @@ class PlotCopier(object):
     import config
 
     copyfromconfig = config.getconfiguration("login-node", "jroskes1@jhu.edu")
-    copyfromfolder = os.path.join(os.path.abspath(copyfromconfig["plotsbasedir"]), "")
     copyfromhost = copyfromconfig["host"]
 
     copytoconfig = config.getconfiguration("lxplus", "hroskes")
-    copytofolder = os.path.join(copytoconfig["plotsbasedir"], "")
     copytoconnect = copytoconfig["connect"]
 
-    def __init__(self):
+    def __init__(
+      self,
+      copyfromfolder=copyfromconfig["plotsbasedir"],
+      copytofolder=copytoconfig["plotsbasedir"],
+    ):
         self.__tocopy = set()
+        self.__copyfromfolder = os.path.join(os.path.abspath(copyfromfolder), "")
+        self.__copytofolder = os.path.join(os.path.abspath(copytofolder), "")
+
+    @property
+    def copyfromfolder(self): return self.__copyfromfolder
+    @property
+    def copytofolder(self): return self.__copytofolder
 
     def __enter__(self):
         return self
