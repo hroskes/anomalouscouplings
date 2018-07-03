@@ -56,7 +56,7 @@ def makeplot(productionmode, analysis, category, production, disc):
       normalizeto1=True,
       color=color,
       category=category,
-      analysis=analysis,
+      categorization=analysis.categoryname+JECappend,
       production=production,
     )
     h.SetLineWidth(2)
@@ -84,6 +84,5 @@ if __name__ == "__main__":
       for category in "VBFtagged", "VHHadrtagged":
         for disc in TemplatesFile("ggh", "2e2mu", analysis, category, "180530").discriminants:
           for p in "ggH", "VBF", "ZH", "WH", "ttH", "qqZZ":
-            if p != "qqZZ": continue
             for production in config.productionsforcombine:
               makeplot(p, analysis, category, production, disc.identifier)

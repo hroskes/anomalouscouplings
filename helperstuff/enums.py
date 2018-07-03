@@ -456,9 +456,20 @@ class ShapeSystematic(MyEnum):
                  EnumItem("MINLOUp"),
                  EnumItem("MINLODn", "MINLODown"),
                 )
-    def appendname(self):
-        if self in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): return "_" + str(self)
+    @property
+    def Dbkgappendname(self):
+        for _ in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"):
+            if self == _:
+                return "_" + _
         return ""
+    @property
+    def categoryappendname(self):
+        for _ in ("JECUp", "JECDn"):
+            if self == _:
+                return "_" + _
+        if self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "MINLO_SM", "ZXUp", "ZXDn"):
+            return ""
+        assert False, self
     def appliesto(self, templategroup):
         if self == "":
             return True

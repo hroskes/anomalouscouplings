@@ -48,7 +48,7 @@ class TemplatesFile(MultiEnum):
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
-        if not self.shapesystematic.appliesto(self.templategroup):
+        if self.shapesystematic not in self.treeshapesystematics:
             raise ValueError("ShapeSystematic {} does not apply to {}\n{}".format(self.shapesystematic, self.templategroup, args))
 
     def jsonfile(self, iteration=None):
@@ -252,7 +252,7 @@ class TemplatesFile(MultiEnum):
         elif self.production.year == 2016: pass
         else: assert False
 
-        name += self.shapesystematic.appendname()
+        name += self.shapesystematic.Dbkgappendname
 
         if self.analysis == "fa3fa2fL1fL1Zg":
             name += "_10bins"
@@ -552,7 +552,6 @@ class TemplatesFile(MultiEnum):
 
     @property
     def treeshapesystematics(self):
-        if self.shapesystematic != "": raise ValueError("I'm already a shape systematic\n{!r}".format(self))
         for _ in treeshapesystematics:
             if not _.appliesto(self.templategroup): continue
             if _ in ("ResUp", "ResDown", "ScaleUp", "ScaleDown") and self.templategroup != "ggh" and config.getm4lsystsfromggH: continue
@@ -560,6 +559,7 @@ class TemplatesFile(MultiEnum):
 
             if _ in ("JECUp", "JECDn"):
                 if self.templategroup not in ("ggh", "zh", "wh"): continue
+                if self.templategroup in ("zh", "wh") and self.category == "VBFtagged": continue
                 if self.category == "Untagged": continue
 
             yield _
@@ -843,6 +843,7 @@ class Template(TemplateBase, MultiEnum):
     def categoryname(self):
         result = "category_"
         result += self.analysis.categoryname
+        result += self.shapesystematic.categoryappendname
 
         from treewrapper import TreeWrapper
         for categorization in TreeWrapper.categorizations:
