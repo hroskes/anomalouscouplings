@@ -4,7 +4,10 @@ import argparse
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--submitjobs", nargs="*")
+    p.add_argument("--jsontoo", action="store_true")
     args = p.parse_args()
+    if args.jsontoo and args.submitjobs is None:
+        raise ValueError("--jsontoo doesn't make sense without --submitjobs")
 
 from array import array
 import os
@@ -92,7 +95,7 @@ def copydata(*args):
     f.Close()
     newf.Close()
 
-def submitjobs(removefiles):
+def submitjobs(removefiles, jsontoo=False):
     remove = {}
     for filename in removefiles:
         if not filename.endswith(".root"): filename += ".root"
@@ -101,6 +104,10 @@ def submitjobs(removefiles):
         if not os.path.exists(filename):
             raise ValueError("{} does not exist!".format(filename))
         remove[filename] = False
+        if jsontoo:
+            jsonfilename = os.path.join(config.repositorydir, "step5_json", filename.replace(".root", ".json"))
+            if os.path.exists(jsonfilename):
+                remove[jsonfilename] = False
 
     njobs = 0
     for templatesfile in templatesfiles:
@@ -108,24 +115,40 @@ def submitjobs(removefiles):
             remove[templatesfile.templatesfile()] = True
             remove[templatesfile.templatesfile(firststep=True)] = True
             njobs += 1
+            if jsontoo:
+                if templatesfile.jsonfile() in remove:
+                    remove[templatesfile.jsonfile()] = True
+            else:
+                if not os.path.exists(templatesfile.jsonfile()):
+                    raise ValueError(templatesfile.jsonfile()+" doesn't exist!  Try --jsontoo.")
         elif os.path.exists(templatesfile.templatesfile()) or not KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp").wouldbevalid:
             pass
         else:
+            if not jsontoo:
+                if not os.path.exists(templatesfile.jsonfile()):
+                    raise ValueError(templatesfile.jsonfile()+" doesn't exist!  Try --jsontoo.")
             njobs += 1
     if not njobs: return
     for filename, found in remove.iteritems():
         if not found:
             raise IOError("{} is not a templatesfile!".format(filename))
+
     with cd(config.repositorydir):
         for filename in remove:
             if os.path.exists(filename):
                 os.remove(filename)
+        if jsontoo:
+            sys.dont_write_bytecode = True
+            import step4_makejson
+            waitids = list(step4_makejson.submitjobs(5))
+        else:
+            waitids = []
         for i in range(njobs):
-            submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0", docd=True)
+            submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0", docd=True, waitids=waitids)
 
 if __name__ == "__main__":
     if args.submitjobs is not None:
-        submitjobs(args.submitjobs)
+        submitjobs(args.submitjobs, args.jsontoo)
     else:
         for templatesfile in templatesfiles:
             buildtemplates(templatesfile)
