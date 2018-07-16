@@ -19,16 +19,12 @@ def gettemplatefromulascan(template):
   if template.productionmode == "ggH":
     kwargs["year"] = 2016
 
-  if kwargs["year"] == 2017:
-    if template.analysis in ("fa2", "fL1") and template.productionmode not in ("ggH", "ggZZ", "qqZZ", "ZX"):
-      kwargs["templatedate"] = 180520
-    else:
-      kwargs["templatedate"] = 180509
-  elif kwargs["year"] == 2016:
-    if template.analysis in ("fa2", "fL1") and template.productionmode not in ("ggH", "ggZZ", "qqZZ", "ZX"):
-      kwargs["templatedate"] = 180520
-    else:
-      kwargs["templatedate"] = 180509
+  if template.analysis == "fL1":
+    kwargs["templatedate"] = 180625
+  elif template.productionmode == "bbH" and template.analysis == "fa3":
+    kwargs["templatedate"] = 180621
+  else:
+    kwargs["templatedate"] = 180615
 
   if template.analysis == "fa3":
     kwargs["coupling"] = "a3"
@@ -145,12 +141,17 @@ def gettemplatefromulascan(template):
 
   hh.SetName(template.templatename())
 
-  if not math.isnan(h.Integral()) and not h.Integral() == hh.Integral() == 0: assert abs(hh.Integral() / h.Integral() - 1) < 1e8, (hh.Integral(), h.Integral())
-
   if template.category in ("VBFtagged", "VHHadrtagged"):
     hh.Rebin3D(2, 2, 2)
 
-  if not math.isnan(h.Integral()) and not h.Integral() == hh.Integral() == 0: assert abs(hh.Integral() / h.Integral() - 1) < 1e8, (hh.Integral(), h.Integral())
+  try:
+    assert abs(hh.Integral() / h.Integral() - 1) < 1e8
+  except Exception as e:
+    if isinstance(e, ZeroDivisionError) and abs(hh.Integral()) < 1e-13 / gi**scalingpower: pass
+    elif math.isnan(h.Integral()) and math.isnan(hh.Integral()): pass
+    else:
+      print h.Integral(), hh.Integral()
+      raise
 
   for axis, disc in itertools.izip((hh.GetXaxis(), hh.GetYaxis(), hh.GetZaxis()), template.discriminants):
     if axis.GetXmin() != disc.min or axis.GetXmax() != disc.max or axis.GetNbins() != disc.bins:
