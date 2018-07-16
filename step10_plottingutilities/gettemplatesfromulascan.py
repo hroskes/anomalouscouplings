@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import itertools
+import math
 import os
+
 from helperstuff import constants
 from helperstuff.templates import IntTemplate, Template, TemplatesFile, templatesfiles
 from helperstuff.utilities import KeepWhileOpenFile, TFile
@@ -112,14 +114,12 @@ def gettemplatefromulascan(template):
     filename = os.path.join(folder, basename).format(**kwargs)
     with TFile(filename) as f:
       _ = getattr(f, templatename.format(**kwargs))
-      _.Sumw2()
       if h is None:
         h = _
         h.SetDirectory(0)
       else:
         h.Add(_)
 
-  print h.Integral(),
   if h.Integral(): h.Scale(h.Integral("width") / h.Integral())
   h.Scale(1 / gi ** scalingpower)
 #  if template.productionmode == "ZX":
@@ -132,7 +132,6 @@ def gettemplatefromulascan(template):
 #          print multipliers[-1],
 #          h.Scale(float(multipliers[-1]))
 #          break
-  print h.Integral()
 
   hh = type(h)(template.templatename(), h.GetTitle(),
                h.GetNbinsY(), h.GetYaxis().GetXmin(), h.GetYaxis().GetXmax(),
@@ -146,8 +145,12 @@ def gettemplatefromulascan(template):
 
   hh.SetName(template.templatename())
 
+  if not math.isnan(h.Integral()) and not h.Integral() == hh.Integral() == 0: assert abs(hh.Integral() / h.Integral() - 1) < 1e8, (hh.Integral(), h.Integral())
+
   if template.category in ("VBFtagged", "VHHadrtagged"):
     hh.Rebin3D(2, 2, 2)
+
+  if not math.isnan(h.Integral()) and not h.Integral() == hh.Integral() == 0: assert abs(hh.Integral() / h.Integral() - 1) < 1e8, (hh.Integral(), h.Integral())
 
   for axis, disc in itertools.izip((hh.GetXaxis(), hh.GetYaxis(), hh.GetZaxis()), template.discriminants):
     if axis.GetXmin() != disc.min or axis.GetXmax() != disc.max or axis.GetNbins() != disc.bins:

@@ -46,7 +46,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       SampleCount(ProductionMode("bbH"), {ReweightingSamplePlus("bbH", "0+")}),
       SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
-      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors if deprecate(flavor != "4mu", 2018, 7, 15)}),
+      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors if deprecate(flavor != "4mu", 2018, 7, 20)}),
       SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
     ]
     if config.usedata:
@@ -284,7 +284,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                   syst.value = None
 
           #pythia scale and tune
-          if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH") and productionmode != deprecate("ZH", 2018, 7, 15):
+          if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH") and productionmode != deprecate("ZH", 2018, 7, 20):
             if production.year == 2016:
               scaleup = sum(result[ReweightingSamplePlus(tosample, "ScaleUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
               scaledn = sum(result[ReweightingSamplePlus(tosample, "ScaleDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
