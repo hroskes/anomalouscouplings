@@ -9,6 +9,7 @@ if __name__ == "__main__":
     p.add_argument("--plotname")
     p.add_argument("--printformat")
     p.add_argument("--subdirectory")
+    p.add_argument("--poi", default="CMS_zz4l_fai1")
     args = p.parse_args()
 
 from collections import namedtuple, OrderedDict
@@ -26,12 +27,16 @@ class PrintFormat(MyEnum):
                  EnumItem("powerpoint", "ppt"),
                 )
 
-    @property
-    def printformat(self):
+    def printformat(self, poi):
+        nominaldigits = {
+          "CMS_zz4l_fai1": "2g",
+          "RV": "2f",
+          "RF": "2f",
+        }[poi]
         if self == "latex":
-            return "${min:.2g}^{{{pluscl:+.2g}}}_{{{minuscl:+.2g}}}$ ${95%}$"
+            return "${min:."+nominaldigits+"}^{{{pluscl:+.2g}}}_{{{minuscl:+.2g}}}$ ${95%}$"
         if self == "ppt":
-            return "{min:.2g}^({pluscl:+.2g})_({minuscl:+.2g}) {95%}"
+            return "{min:."+nominaldigits+"}^({pluscl:+.2g})_({minuscl:+.2g}) {95%}"
         assert False
 
 def findwhereyequals(y, p1, p2):
@@ -39,10 +44,16 @@ def findwhereyequals(y, p1, p2):
     b =  p1.y - m*p1.x
     return (y-b)/m
 
-def getlimits(filename, domirror=False):
+def getlimits(filename, poi, domirror=False):
     f = ROOT.TFile(filename)
     c = f.c1
     legend = c.GetListOfPrimitives()[2]
+
+    poimin, poimax = {
+        "CMS_zz4l_fai1": (-1, 1),
+        "RV": (0, float("inf")),
+        "RF": (0, float("inf")),
+    }[poi]
 
     thresholds = [1, 3.84]
     NLL = {}
@@ -60,7 +71,7 @@ def getlimits(filename, domirror=False):
                 return y.pop()
             points = [Point(x, (y+findy(-x))/2 if any(xx==-x for xx, yy in points) else y) for x, y in points]
         isabove = {threshold: points[0].y > threshold for threshold in thresholds}
-        results = {threshold: [[-1]] if not isabove[threshold] else [] for threshold in thresholds}
+        results = {threshold: [[poimin]] if not isabove[threshold] else [] for threshold in thresholds}
         for point in points:
             for threshold in thresholds:
                 if isabove[threshold] and point.y < threshold:
@@ -78,7 +89,7 @@ def getlimits(filename, domirror=False):
 
         for threshold in thresholds:
             if not isabove[threshold]:
-                results[threshold][-1].append(1)
+                results[threshold][-1].append(poimax)
 
         finalresult[label] = minimum.x, results[1.0], results[3.84]
 
@@ -90,6 +101,7 @@ def printlimits(analysis, foldername, **kwargs):
     plotname = "limit"
     printformat = PrintFormat("latex")
     subdirectory = ""
+    poi = "CMS_zz4l_fai1"
     for kw, kwarg in kwargs.iteritems():
         if kw == "plotname":
             plotname = kwarg
@@ -99,11 +111,13 @@ def printlimits(analysis, foldername, **kwargs):
             printformat = PrintFormat(kwarg)
         elif kw == "subdirectory":
             subdirectory = kwarg
+        elif kw == "poi":
+            poi = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
     filename = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername, plotname+".root")
-    allresults = getlimits(filename, domirror=(analysis=="fa3"))
+    allresults = getlimits(filename, poi=poi, domirror=(analysis=="fa3"))
 
     for label, (minimum, c68, c95) in allresults.iteritems():
         repmap = {}
@@ -136,7 +150,7 @@ def printlimits(analysis, foldername, **kwargs):
 
         repmap["95%"] = " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in c95)
 
-        print printformat.printformat.format(**repmap)
+        print printformat.printformat(poi=poi).format(**repmap)
 
         print
         print

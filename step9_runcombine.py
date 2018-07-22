@@ -592,6 +592,7 @@ def runcombine(analysis, foldername, **kwargs):
                     if "=" in arg and "subdirectory=" not in arg: continue
                     f.write(pipes.quote(arg)+" ")
                 f.write("--plotname="+plotname+" ")
+                f.write("--poi="+POI+" ")
                 f.write("\n\n\n\n\n\ngit info:\n\n")
                 f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
                 f.write("\n")
