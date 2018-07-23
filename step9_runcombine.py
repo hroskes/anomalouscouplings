@@ -36,7 +36,8 @@ exit ${PIPESTATUS[0]}
 runcombinetemplate = r"""
 combine -M .oO[method]Oo. .oO[workspacefile]Oo. --robustFit=.oO[robustfit]Oo. .oO[morecombineoptions]Oo. \
         --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. \
-        -n $1_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
+        -n _.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
+        .oO[saveorloadworkspace]Oo.
         --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
         .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
         -S .oO[usesystematics]Oo. |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
@@ -70,11 +71,49 @@ def runscan(repmap, submitjobs, directory=None):
     finalfilename = replaceByMap(".oO[filename]Oo.", repmap_final)
     if os.path.exists(finalfilename): return
 
+    repmap_initial = repmap.copy()
+    repmap_initial.update({
+      "scanrangeappend": "_firststep",
+      "selectpoints": "--firstPoint 1 --lastPoint 0",
+      "saveorloadworkspace": "--saveWorkspace",
+    })
+    if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial)):
+      try:
+        f = ROOT.TFile(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial))
+        f.w
+      except:
+        try:
+          del f
+          os.remove(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial))
+        except:
+          pass
+      else:
+        del f
+
+    initialjobids = []
+    if not os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial)):
+      job = "{} runscan {} directory={}".format(
+                                                os.path.join(config.repositorydir, "./step9_runcombine.py"),
+                                                pipes.quote(json.dumps(repmap_initial)),
+                                                pipes.quote(os.getcwd()),
+                                               )
+      submitjobkwargs = {
+        "jobname": replaceByMap(".oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_initial).lstrip("_"),
+        "jobtime": "1-0:0:0",
+        "outputfile": replaceByMap("jobs/joblog.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_initial),
+        "morerepmap": repmap_initial
+      }
+
+      jobid = submitjob(job, **submitjobkwargs)
+      initialjobids.append(jobid)
+
     for i in range(npoints):
       repmap_i = repmap.copy()
       repmap_i.update({
         "selectpoints": "--firstPoint .oO[pointindex]Oo. --lastPoint .oO[pointindex]Oo.",
         "pointindex": str(i),
+        "saveorloadworkspace": "--snapshotName MultiDimFit",
+        "workspacefile": replaceByMap(".oO[filename]Oo.", repmap_initial),
       })
       replaceByMap(runcombinetemplate, repmap_i) #sanity check that replaceByMap works
       individualfilenames.add(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
@@ -85,11 +124,14 @@ def runscan(repmap, submitjobs, directory=None):
         shutil.move(replaceByMap(".oO[filename]Oo.", repmap_i), "jobs/")
       ############################
 
+      if not utilities.KeepWhileOpenFile(replaceByMap("jobs/.oO[filename]Oo..tmp", repmap_i)).wouldbevalid:
+        continue
+
       if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i)):
         try:
           f = ROOT.TFile(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
           f.limit
-        except Exception as e:
+        except:
           try:
             del f
             os.remove(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
@@ -98,8 +140,7 @@ def runscan(repmap, submitjobs, directory=None):
         else:
           del f
 
-      if (os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
-       or not utilities.KeepWhileOpenFile(replaceByMap("jobs/.oO[filename]Oo..tmp", repmap_i)).wouldbevalid):
+      if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i)):
         continue
       job = "{} runscan {} directory={}".format(
                                                 os.path.join(config.repositorydir, "./step9_runcombine.py"),

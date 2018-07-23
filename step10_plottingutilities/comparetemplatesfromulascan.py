@@ -77,6 +77,7 @@ if __name__ == "__main__":
         for analysis in Analysis.items(lambda x: x in ("fa3", "fa2", "fL1", "fL1Zg")):
           for category in categories:
             for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ", "ZX", "VBF bkg")):
+              if productionmode != "VBF": continue
               if productionmode == "WH" and analysis == "fL1Zg": continue
               if productionmode.issignal: hypotheses = analysis.purehypotheses
               elif productionmode == "qqZZ": hypotheses = "ext",

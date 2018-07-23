@@ -48,8 +48,8 @@ class TemplatesFile(MultiEnum):
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
-        if self.shapesystematic not in self.treeshapesystematics:
-            raise ValueError("ShapeSystematic {} does not apply to {}\n{}".format(self.shapesystematic, self.templategroup, args))
+        if self.shapesystematic not in self.allshapesystematics:
+            raise ValueError("ShapeSystematic {} does not apply to {!r}\n{}".format(self.shapesystematic, self.nominal, args))
 
     def jsonfile(self, iteration=None):
         assert "Ulascan" not in str(self.production)
@@ -551,11 +551,21 @@ class TemplatesFile(MultiEnum):
         return None
 
     @property
+    def nominal(self):
+        return type(self)(*(getattr(self, enum.enumname) for enum in self.enums if enum != ShapeSystematic))
+
+    @property
     def treeshapesystematics(self):
-        for _ in treeshapesystematics:
-            if not _.appliesto(self.templategroup): continue
+        for _ in self.allshapesystematics:
+            if _ not in treeshapesystematics: continue
             if _ in ("ResUp", "ResDown", "ScaleUp", "ScaleDown") and self.templategroup != "ggh" and config.getm4lsystsfromggH: continue
             if config.getm4lsystsfromggHUntagged and self.category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
+            yield _
+
+    @property
+    def allshapesystematics(self):
+        for _ in treeshapesystematics:
+            if not _.appliesto(self.templategroup): continue
 
             if _ in ("JECUp", "JECDn"):
                 if self.templategroup not in ("ggh", "zh", "wh"): continue
@@ -563,6 +573,7 @@ class TemplatesFile(MultiEnum):
                 if self.category == "Untagged": continue
 
             yield _
+            
 
 def listfromiterator(function):
     return list(function())

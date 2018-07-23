@@ -19,13 +19,6 @@ def gettemplatefromulascan(template):
   if template.productionmode == "ggH":
     kwargs["year"] = 2016
 
-  if template.analysis == "fL1":
-    kwargs["templatedate"] = 180625
-  elif template.productionmode == "bbH" and template.analysis == "fa3":
-    kwargs["templatedate"] = 180621
-  else:
-    kwargs["templatedate"] = 180615
-
   if template.analysis == "fa3":
     kwargs["coupling"] = "a3"
     gi = constants.g4HZZ
