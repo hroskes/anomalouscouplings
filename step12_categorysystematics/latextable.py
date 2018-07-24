@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+if __name__ == "__main__":
+  import argparse
+  p = argparse.ArgumentParser()
+  p.add_argument("--PRL", action="store_true")
+  p.add_argument("analysis", choices="fa3 fa2 fL1 fL1Zg".split())
+  args = p.parse_args()
+
 from abc import ABCMeta, abstractmethod, abstractproperty
 from itertools import product
 import random
@@ -407,12 +414,4 @@ def maketable(analysis, dochannels=True, PRL=False):
   print r"\end{tabular}"
 
 if __name__ == "__main__":
-  dochannels = False
-  PRL = False
-  for arg in sys.argv[2:]:
-    if arg == "PRL":
-      PRL = True
-      dochannels = False
-    else:
-      raise ValueError("Unknown command line argument {}".format(arg))
-  maketable(sys.argv[1], dochannels=dochannels, PRL=PRL)
+  maketable(args.analysis, dochannels=not args.PRL, PRL=args.PRL)

@@ -5,9 +5,11 @@ import argparse
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("--yields", action="store_true")
+  parser.add_argument("--analysis")
   args = parser.parse_args()
 
 import os
+import random
 
 import ROOT
 
@@ -21,14 +23,17 @@ from helperstuff.utilities import mkdir_p
 
 c = ROOT.TCanvas()
 
+def strrandom():
+  return str(random.randint(1, 10000000000))
+
 def compare(template, axis):
   t = Template(str(template.production)+"_Ulascan", template.productionmode, template.hypothesis, template.category, template.channel, template.analysis, template.shapesystematic).gettemplate()
-  h = (t.ProjectionX, t.ProjectionY, t.ProjectionZ)[axis]()
+  h = (t.ProjectionX, t.ProjectionY, t.ProjectionZ)[axis](strrandom())
   h.Scale(1/h.Integral())
   h.SetLineColor(2)
 
   t2 = template.gettemplate()
-  h2 = (t2.ProjectionX, t2.ProjectionY, t2.ProjectionZ)[axis]()
+  h2 = (t2.ProjectionX, t2.ProjectionY, t2.ProjectionZ)[axis](strrandom())
   h2.Scale(1/h2.Integral())
   h2.SetLineColor(4)
 
@@ -75,9 +80,9 @@ if __name__ == "__main__":
     try:
       for channel in channels:
         for analysis in Analysis.items(lambda x: x in ("fa3", "fa2", "fL1", "fL1Zg")):
+          if args.analysis and analysis != args.analysis: continue
           for category in categories:
             for productionmode in ProductionMode.items(lambda x: x in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ", "ZX", "VBF bkg")):
-              if productionmode != "VBF": continue
               if productionmode == "WH" and analysis == "fL1Zg": continue
               if productionmode.issignal: hypotheses = analysis.purehypotheses
               elif productionmode == "qqZZ": hypotheses = "ext",
