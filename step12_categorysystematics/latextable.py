@@ -16,6 +16,7 @@ import random
 import sys
 
 import ROOT
+import uncertainties
 
 from helperstuff import config
 
@@ -36,10 +37,15 @@ class TableType(MyEnum):
 categories = list(Category(_) for _ in ("VBFtagged", "VHHadrtagged", "Untagged"))
 channels = list(Channel(_) for _ in ("4e", "4mu", "2e2mu"))
 
-def categoryname(category):
-  if category == "VBFtagged": return "VBF-jets"
-  if category == "VHHadrtagged": return "$\V\!\PH$-jets"
-  if category == "Untagged": return "untagged"
+def categoryname(category, tabletype):
+  if tabletype in ("HIG17011PAS", "HIG17011"):
+    if category == "VBFtagged": return "VBF-jets"
+    if category == "VHHadrtagged": return "$\V\!\PH$-jets"
+    if category == "Untagged": return "untagged"
+  if tabletype == "HIG18002":
+    if category == "VBFtagged": return "VBF-tagged"
+    if category == "VHHadrtagged": return "$\V\PH$-tagged"
+    if category == "Untagged": return "Untagged"
 
 def gettree(productionmodeandproduction):
   productionmode, production = productionmodeandproduction
@@ -86,14 +92,19 @@ class RowBase(RowBaseBase):
       result += " & "
     result = "{}".format(self.title)
     for category in list(categories)+[2015]:
+      if tabletype == "HIG18002" and isinstance(category, int) and category == 2015: continue
       result += " & "
       total = 0
       for channel in channels:
         channel = Channel(channel)
-        total += self.categorydistribution[channel, category]
+        amount = self.categorydistribution[channel, category]
+        if tabletype == "HIG18002" and category == "Untagged": amount += self.categorydistribution[channel, 2015]
+        total += amount
         if tabletype == "HIG17011PAS":
-          result += self.fmt.format(self.categorydistribution[channel, category])+"/"
+          result += self.fmt.format(amount)+"/"
       result += self.fmt.format(total)
+      if tabletype == "HIG18002":
+        result += " & xx"
     return result
 
 class Row(RowBase, MultiEnum):
@@ -140,7 +151,7 @@ class Row(RowBase, MultiEnum):
                   (ReweightingSample(self.productionmode, "SM"           ).xsec 
                       / sum(ReweightingSample(_, "SM"           ).xsec for _ in ("VBF", "ZH", "WH")))
                 )
-    if self.productionmode in ("VBF", "ZH", "WH", "ggH", "ttH"):
+    if self.productionmode in ("VBF", "ZH", "WH", "ggH", "ttH", "bbH"):
       result /= sum(
                     Sample.effectiveentries(
                                             reweightfrom=reweightfrom,
@@ -150,6 +161,7 @@ class Row(RowBase, MultiEnum):
                    )
     if self.productionmode != "data":
       result *= float(Luminosity(production, "fordata"))
+    result = uncertainties.nominal_value(result)
     return result
 
   @property
@@ -205,13 +217,11 @@ class SlashRow(RowBaseBase):
     return "{:.1f}"
 
   def getlatex(self, tabletype):
-    assert tabletype == "HIG17011"
+    assert tabletype != "HIG17011PAS"
 
-    result = ""
-    if tabletype == "HIG17011PAS":
-      result += " & "
     result = "{}".format(self.title)
     for category in categories+[2015]:
+      if tabletype == "HIG18002" and isinstance(category, int) and category == 2015: continue
       result += " & "
       parts = []
       for row in self.rows:
@@ -219,9 +229,12 @@ class SlashRow(RowBaseBase):
         for channel in channels:
           channel = Channel(channel)
           total += row.categorydistribution[channel, category]
+          if tabletype == "HIG18002" and category == "Untagged": total += row.categorydistribution[channel, 2015]
         parts.append(self.fmt.format(total))
       assert len(parts) == 2
       result += "{} ({})".format(*parts)
+      if tabletype == "HIG18002":
+        result += " & xx (xx)"
     return result
 
   def getcategorydistribution(self):
@@ -276,7 +289,7 @@ class Section(object):
     if not config.unblinddistributions:
       self.rows = tuple(row for row in self.rows if row.productionmode != "data")
   def getlatex(self, tabletype):
-    if tabletype == "HIG17011":
+    if tabletype == "HIG17011" or tabletype == "HIG18002":
       result = (r"\\"+"\n").join(_.getlatex(tabletype=tabletype) for _ in self.rows)
     elif tabletype == "HIG17011PAS":
       result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
@@ -372,7 +385,56 @@ def maketable(analysis, tabletype):
     )
     scaleslashrows((sections[0].findrow("VBF signal"), sections[0].findrow(r"$\Z\!\PH$ signal"), sections[0].findrow(r"$\PW\!\PH$ signal")))
     scaleslashrows([sections[0].findrow(r"$\Pg\Pg\to\PH$ signal"), sections[0].findrow(r"$\ttbar\PH$ signal")])
-  else:
+  elif tabletype == "HIG18002":
+    sections = [
+      Section("SM",
+        SlashRow(
+          Row(analysis, "VBF", analysis.purehypotheses[0], title="VBF signal"),
+          Row(analysis, "VBF", analysis.purehypotheses[1], title="VBF signal"),
+          title="VBF signal",
+        ),
+        SlashRow(
+          Row(analysis, "ZH", analysis.purehypotheses[0], title=r"$\Z\PH$"),
+          Row(analysis, "ZH", analysis.purehypotheses[1], title=r"$\Z\PH$"),
+          title=r"$\Z\PH$ signal",
+        ),
+        SlashRow(
+          Row(analysis, "WH", analysis.purehypotheses[0], title=r"$\PW\PH$"),
+          Row(analysis, "WH", analysis.purehypotheses[1], title=r"$\PW\PH$"),
+          title=r"$\PW\PH$ signal",
+        ),
+        SlashRow(
+          Row(analysis, "ggH", analysis.purehypotheses[0], title=r"$\Pg\Pg\to\PH$"),
+          Row(analysis, "ggH", analysis.purehypotheses[1], title=r"$\Pg\Pg\to\PH$"),
+          title=r"$\Pg\Pg\to\PH$ signal"
+        ),
+        SlashRow(
+          Row(analysis, "ttH", analysis.purehypotheses[0], "Hff0+", title=r"$\ttH$"),
+          Row(analysis, "ttH", analysis.purehypotheses[1], "Hff0+", title=r"$\ttH$"),
+          title=r"$\ttH$ signal"
+        ),
+        SlashRow(
+          Row(analysis, "bbH", analysis.purehypotheses[0], title=r"$\bbH$"),
+          Row(analysis, "bbH", analysis.purehypotheses[1], title=r"$\bbH$"),
+          title=r"$\bbH$ signal"
+        ),
+      ),
+      Section("bkg",
+        Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$ bkg"),
+        Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$ bkg"),
+        Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$ bkg"),
+        Row(analysis, "ZX", title=r"$\Z\!+\!\X$ bkg"),
+      ),
+    ]
+    sections.append(
+      Section("Total",
+        TotalRow(*(sections[0].rows+sections[1].rows), title="Total expected"),
+        Row(analysis, "data", title="Total observed"),
+      )
+    )
+    scaleslashrows((sections[0].findrow("VBF signal"), sections[0].findrow(r"$\Z\PH$ signal"), sections[0].findrow(r"$\PW\PH$ signal")))
+    scaleslashrows([sections[0].findrow(r"$\Pg\Pg\to\PH$ signal"), sections[0].findrow(r"$\ttH$ signal"), sections[0].findrow(r"$\bbH$ signal")])
+  elif tabletype == "HIG17011PRL":
     sections = [
       Section("SM",
         Row(analysis, "VBF", analysis.purehypotheses[0]),
@@ -409,16 +471,22 @@ def maketable(analysis, tabletype):
   if tabletype == "HIG17011":
     print r"\begin{{tabular}}{{{}}}".format("l" + "".join("c"*(len(categories)+1)) + "")
     print r"\hline\hline"
+    print " & " + " & ".join(list(categoryname(_, tabletype) for _ in categories)+["~~2015~~"]) + r"\\\hline"
+    joiner = r"\\"+"\n"
   elif tabletype == "HIG17011PAS":
     print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")
     print r"\hline"
-  if tabletype == "HIG17011":
-    print " & " + " & ".join(list(categoryname(_) for _ in categories)+["~~2015~~"]) + r"\\\hline"
-    joiner = r"\\"+"\n"
-  elif tabletype == "HIG17011PAS":
-    print " & & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline\hline"
+    print " & & " + " & ".join(categoryname(_, tabletype) for _ in categories) + r"\\\hline\hline"
     joiner = r"\\\hline"+"\n"
+  elif tabletype == "HIG18002":
+    print r"\begin{{tabular}}{{{}}}".format("l" + "".join("c"*(2*len(categories))) + "")
+    print r"\hline"
+    print " & " + " & ".join(list(r"\multicolumn{2}{c}{"+categoryname(_, tabletype)+"}" for _ in categories)) + r" \\"
+    print " & " + " & ".join(list(r"\onshell & \offshell" for _ in categories)) + r"  \\\hline"
+    joiner = r"\\\hline"+"\n"
+
   print joiner.join(section.getlatex(tabletype=tabletype) for section in sections)
+
   if tabletype == "HIG17011":
     print r"\\\hline\hline"
   else:

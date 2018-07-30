@@ -215,7 +215,7 @@ class __Rate2015(MultiEnum):
             if self.channel == "4mu": return 6
             if self.channel == "4e": return 1
             assert 0
-        if self.productionmode == "VBF bkg":
+        if self.productionmode in ("VBF bkg", "bbH"):
             production = {_ for _ in config.productionsforcombine if _.year == 2016}
             assert len(production) == 1, production; production = production.pop()
             rate2016 = sum(getrate(self.productionmode, self.channel, "fordata", production, "fa3", c) for c in categories)
