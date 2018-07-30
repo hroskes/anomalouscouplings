@@ -3,7 +3,10 @@
 if __name__ == "__main__":
   import argparse
   p = argparse.ArgumentParser()
-  p.add_argument("--PRL", action="store_true")
+  g = p.add_mutually_exclusive_group(required=True)
+  g.add_argument("--HIG17011", action="store_true")
+  g.add_argument("--HIG17011PAS", action="store_true")
+  g.add_argument("--HIG18002", action="store_true")
   p.add_argument("analysis", choices="fa3 fa2 fL1 fL1Zg".split())
   args = p.parse_args()
 
@@ -17,13 +20,18 @@ import ROOT
 from helperstuff import config
 
 from helperstuff.combinehelpers import getdatatree, getrate, getrate2015, Luminosity
-from helperstuff.enums import analyses, Analysis, Category, Channel, flavors, HffHypothesis, Hypothesis, JECSystematic, MultiEnum, MultiEnumABCMeta, ProductionMode
-from helperstuff.samples import ReweightingSample, Sample
+from helperstuff.enums import analyses, Analysis, Category, Channel, EnumItem, flavors, HffHypothesis, Hypothesis, JECSystematic, MultiEnum, MultiEnumABCMeta, MyEnum, ProductionMode
+from helperstuff.samples import ReweightingSample, ReweightingSampleWithPdf, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import KeyDefaultDict, MultiplyCounter, tfiles
 
-assert len(config.productionsforcombine) == 1
-production = config.productionsforcombine[0]
+class TableType(MyEnum):
+  enumname = "tabletype"
+  enumitems = (
+    EnumItem("HIG17011PAS"),
+    EnumItem("HIG17011"),
+    EnumItem("HIG18002"),
+  )
 
 categories = list(Category(_) for _ in ("VBFtagged", "VHHadrtagged", "Untagged"))
 channels = list(Channel(_) for _ in ("4e", "4mu", "2e2mu"))
@@ -33,7 +41,8 @@ def categoryname(category):
   if category == "VHHadrtagged": return "$\V\!\PH$-jets"
   if category == "Untagged": return "untagged"
 
-def gettree(productionmode):
+def gettree(productionmodeandproduction):
+  productionmode, production = productionmodeandproduction
   t = ROOT.TChain("candTree")
   for sample in productionmode.allsamples(production):
     t.Add(sample.withdiscriminantsfile())
@@ -66,14 +75,14 @@ class RowBaseBase(object):
   @abstractproperty
   def fmt(self): pass
   @abstractmethod
-  def getlatex(self, dochannels=True, PRL=False): pass
+  def getlatex(self, tabletype): pass
   @abstractmethod
   def getcategorydistribution(self): pass
 
 class RowBase(RowBaseBase):
-  def getlatex(self, dochannels=True, PRL=False):
+  def getlatex(self, tabletype):
     result = ""
-    if not PRL:
+    if tabletype == "HIG17011PAS":
       result += " & "
     result = "{}".format(self.title)
     for category in list(categories)+[2015]:
@@ -82,7 +91,7 @@ class RowBase(RowBaseBase):
       for channel in channels:
         channel = Channel(channel)
         total += self.categorydistribution[channel, category]
-        if dochannels:
+        if tabletype == "HIG17011PAS":
           result += self.fmt.format(self.categorydistribution[channel, category])+"/"
       result += self.fmt.format(total)
     return result
@@ -117,18 +126,16 @@ class Row(RowBase, MultiEnum):
     else:
       return "{:.1f}"
 
-  @property
-  def tree(self): return trees[self.productionmode]
+  def tree(self, production): return trees[self.productionmode, production]
   @property
   def reweightingsample(self): return ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis)
 
-  @property
-  def scalefactor(self):
+  def scalefactor(self, production):
     result = 1
     if self.productionmode in ("VBF", "ZH", "WH"):
       result *= (
-                  (ReweightingSample(self.productionmode, self.hypothesis).xsec 
-                      / sum(ReweightingSample(_, self.hypothesis).xsec for _ in ("VBF", "ZH", "WH")))
+                  (ReweightingSampleWithPdf(self.productionmode, self.hypothesis, production).xsec 
+                      / sum(ReweightingSampleWithPdf(_, self.hypothesis, production).xsec for _ in ("VBF", "ZH", "WH")))
                  /
                   (ReweightingSample(self.productionmode, "SM"           ).xsec 
                       / sum(ReweightingSample(_, "SM"           ).xsec for _ in ("VBF", "ZH", "WH")))
@@ -142,7 +149,7 @@ class Row(RowBase, MultiEnum):
                      for reweightfrom in self.productionmode.allsamples(production)
                    )
     if self.productionmode != "data":
-      result *= float(Luminosity(config.productionforcombine, "fordata"))
+      result *= float(Luminosity(production, "fordata"))
     return result
 
   @property
@@ -197,12 +204,11 @@ class SlashRow(RowBaseBase):
   def fmt(self):
     return "{:.1f}"
 
-  def getlatex(self, dochannels=True, PRL=False):
-    assert PRL
-    assert not dochannels
+  def getlatex(self, tabletype):
+    assert tabletype == "HIG17011"
 
     result = ""
-    if not PRL:
+    if tabletype == "HIG17011PAS":
       result += " & "
     result = "{}".format(self.title)
     for category in categories+[2015]:
@@ -223,7 +229,7 @@ class SlashRow(RowBaseBase):
 
 class RowChannel(Row, MultiEnum):
   enums = (Row, Channel)
-  def getcategorydistribution(self):
+  def getcategorydistributionproduction(self, production):
     if self.productionmode == "data":
       result = MultiplyCounter({
                                 (self.channel, category): getdatatree(self.analysis, category, self.channel, production).GetEntries()
@@ -232,7 +238,7 @@ class RowChannel(Row, MultiEnum):
     elif self.productionmode.isbkg or self.hypothesis == "SM":
       result = MultiplyCounter({(self.channel, category): getrate(self.channel, category, production, "fordata", self.analysis, self.productionmode) for category in categories})
     else:
-      t = self.tree
+      t = self.tree(production)
       weightparts = [
                      "ZZMass>{}".format(config.m4lmin),
                      "ZZMass<{}".format(config.m4lmax),
@@ -248,7 +254,11 @@ class RowChannel(Row, MultiEnum):
       result = MultiplyCounter()
       for i in range(h.GetNbinsX()):
         result[self.channel, Category.fromid(i)] += h.GetBinContent(i+1)
-      result *= self.scalefactor
+      result *= self.scalefactor(production)
+    return result
+
+  def getcategorydistribution(self):
+    result = sum((self.getcategorydistributionproduction(production) for production in config.productionsforcombine), MultiplyCounter())
     result[self.channel, 2015] = getrate2015(self.channel, self.productionmode)
     return result
 
@@ -265,12 +275,12 @@ class Section(object):
     self.rows = rows
     if not config.unblinddistributions:
       self.rows = tuple(row for row in self.rows if row.productionmode != "data")
-  def getlatex(self, dochannels=True, PRL=False):
-    if PRL:
-      result = (r"\\"+"\n").join(_.getlatex(dochannels=dochannels, PRL=True) for _ in self.rows)
-    else:
+  def getlatex(self, tabletype):
+    if tabletype == "HIG17011":
+      result = (r"\\"+"\n").join(_.getlatex(tabletype=tabletype) for _ in self.rows)
+    elif tabletype == "HIG17011PAS":
       result = r"\multirow{{{}}}{{*}}{{{}}}".format(len(self.rows), self.title)
-      result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex(dochannels=dochannels) for _ in self.rows)
+      result += (r"\\\cline{{2-{}}}".format(len(categories)+2)+"\n").join(_.getlatex(tabletype=tabletype) for _ in self.rows)
     return result
   def findrow(self, productionmode):
     def equalproductionmodes(a, row):
@@ -316,9 +326,9 @@ def scaleslashrows(rows):
 def total(rows):
   return sum(row.categorydistribution[channel, category] for row in rows for channel in channels for category in categories)
 
-def maketable(analysis, dochannels=True, PRL=False):
+def maketable(analysis, tabletype):
   analysis = Analysis(analysis)
-  if PRL:
+  if tabletype == "HIG17011":
     sections = [
       Section("SM",
         SlashRow(
@@ -392,26 +402,33 @@ def maketable(analysis, dochannels=True, PRL=False):
       )
     )
 
-  if not PRL:
+  if tabletype == "HIG17011PAS":
     scalerows([sections[1].findrow(p) for p in ("VBF", "ZH", "WH")], [sections[0].findrow(p) for p in ("VBF", "ZH", "WH")])
     scalerows([sections[1].findrow(p) for p in ("ggH", "ttH")], [sections[0].findrow(p) for p in ("ggH", "ttH")])
 
-  if PRL:
+  if tabletype == "HIG17011":
     print r"\begin{{tabular}}{{{}}}".format("l" + "".join("c"*(len(categories)+1)) + "")
     print r"\hline\hline"
-  else:
+  elif tabletype == "HIG17011PAS":
     print r"\begin{{tabular}}{{{}}}".format("|" + "|".join("c"*(len(categories)+2)) + "|")
     print r"\hline"
-  if PRL:
+  if tabletype == "HIG17011":
     print " & " + " & ".join(list(categoryname(_) for _ in categories)+["~~2015~~"]) + r"\\\hline"
-  else:
+    joiner = r"\\"+"\n"
+  elif tabletype == "HIG17011PAS":
     print " & & " + " & ".join(categoryname(_) for _ in categories) + r"\\\hline\hline"
-  print (r"\\"+"\n" if PRL else r"\\\hline"+"\n").join(section.getlatex(dochannels=dochannels, PRL=PRL) for section in sections)
-  if PRL:
+    joiner = r"\\\hline"+"\n"
+  print joiner.join(section.getlatex(tabletype=tabletype) for section in sections)
+  if tabletype == "HIG17011":
     print r"\\\hline\hline"
   else:
     print r"\\\hline"
   print r"\end{tabular}"
 
 if __name__ == "__main__":
-  maketable(args.analysis, dochannels=not args.PRL, PRL=args.PRL)
+  tabletype = None
+  for _ in TableType.enumitems:
+    if any(getattr(args, name) for name in _.names):
+      assert tabletype is None
+      tabletype = TableType(_)
+  maketable(args.analysis, tabletype)

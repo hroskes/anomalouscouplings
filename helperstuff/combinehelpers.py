@@ -216,8 +216,10 @@ class __Rate2015(MultiEnum):
             if self.channel == "4e": return 1
             assert 0
         if self.productionmode == "VBF bkg":
-            rate2016 = sum(getrate(self.productionmode, self.channel, "fordata", config.productionforcombine, "fa3", c) for c in categories)
-            return rate2016 * config.lumi2015 / float(Luminosity("fordata", config.productionforcombine))
+            production = {_ for _ in config.productionsforcombine if _.year == 2016}
+            assert len(production) == 1, production; production = production.pop()
+            rate2016 = sum(getrate(self.productionmode, self.channel, "fordata", production, "fa3", c) for c in categories)
+            return rate2016 * config.lumi2015 / float(Luminosity("fordata", production))
         filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2016", "LegoCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(self.channel))
         with open(filename) as f:
             y = yaml.load(f)
