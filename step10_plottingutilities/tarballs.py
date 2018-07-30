@@ -109,7 +109,7 @@ def loglinear(plotcopier):
 if __name__ == "__main__":
   functions = {_.__name__: _ for _ in (templateprojections, POWHEGvsJHUGen, categorydiscriminants, discriminantdistributions, animations, loglinear)}
   parser = argparse.ArgumentParser()
-  parser.add_argument("tarball", choices=functions.values(), type=lambda _: functions[_], nargs="+")
+  parser.add_argument("tarball", choices=functions.keys(), nargs="+")
   args = parser.parse_args()
 
 from helperstuff import config, utilities
@@ -119,4 +119,4 @@ from helperstuff.utilities import PlotCopier
 if __name__ == "__main__":
   with PlotCopier(copyfromfolder=".", copytofolder="/afs/cern.ch/work/h/hroskes/AN/papers/HIG-18-002/trunk/") as pc:
     for tarball in args.tarball:
-      tarball(pc)
+      functions[tarball](pc)

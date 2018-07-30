@@ -98,7 +98,7 @@ class RowBase(RowBaseBase):
       for channel in channels:
         channel = Channel(channel)
         amount = self.categorydistribution[channel, category]
-        if tabletype == "HIG18002" and category == "Untagged": amount += self.categorydistribution[channel, 2015]
+#        if tabletype == "HIG18002" and category == "Untagged": amount += self.categorydistribution[channel, 2015]
         total += amount
         if tabletype == "HIG17011PAS":
           result += self.fmt.format(amount)+"/"
@@ -229,7 +229,7 @@ class SlashRow(RowBaseBase):
         for channel in channels:
           channel = Channel(channel)
           total += row.categorydistribution[channel, category]
-          if tabletype == "HIG18002" and category == "Untagged": total += row.categorydistribution[channel, 2015]
+#          if tabletype == "HIG18002" and category == "Untagged": total += row.categorydistribution[channel, 2015]
         parts.append(self.fmt.format(total))
       assert len(parts) == 2
       result += "{} ({})".format(*parts)

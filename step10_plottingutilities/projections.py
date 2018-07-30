@@ -816,8 +816,6 @@ class Projections(MultiEnum):
         templates += [ZZ, ZX]
 
         legendargs = [(0.20,0.57,0.58,0.90), (0.20,0.57,0.58,0.90), (0.23,0.57,0.61,0.90)]
-        if category == "VHHadrtagged":
-            legendargs[2] = legendargs[0]
         if Dbkg_allcategories:
             usecategories = categories
             templateclass = self.DbkgSum
@@ -1071,13 +1069,13 @@ class Projections(MultiEnum):
                     hstack.SetMaximum(ymax * 1.7)
                 else:
                     hstack.SetMaximum(ymax)
-            elif discriminant.name in ("D_0minus_decay", "D_CP_decay", "D_0minus_HadVHdecay", "D_0hplus_decay") and self.enrichstatus == "enrich":
+            elif discriminant.name in ("D_0minus_decay", "D_CP_decay_new", "D_0minus_HadVHdecay", "D_0hplus_decay") and self.enrichstatus == "enrich":
                 hstack.SetMaximum(ymax * 1.4)
             elif discriminant.name in ("D_L1_decay", "D_L1Zg_decay") and self.enrichstatus == "enrich" and not animation:
                 hstack.SetMaximum(ymax * 1.4)
-            elif discriminant.name in ("D_CP_VBF", "D_0hplus_VBFdecay", "D_int_VBF", "D_int_HadVH") and self.enrichstatus == "enrich":
+            elif discriminant.name in ("D_CP_VBF_new", "D_0hplus_VBFdecay", "D_int_VBF_new", "D_int_HadVH_new") and self.enrichstatus == "enrich":
                 hstack.SetMaximum(ymax * 1.7)
-            elif discriminant.name in ("D_CP_HadVH", "D_0hplus_HadVHdecay") and self.enrichstatus == "enrich":
+            elif discriminant.name in ("D_CP_HadVH_new", "D_0hplus_HadVHdecay") and self.enrichstatus == "enrich":
                 if animation:
                     hstack.SetMaximum(ymax * 1.7)
                 else:
@@ -1091,40 +1089,40 @@ class Projections(MultiEnum):
         hstack.Draw("nostack")
         hstack.GetXaxis().SetTitle(discriminant.title)
         hstack.GetYaxis().SetTitle(
-                                   "Events / {:.2f}".format(
-                                                            (hstack.GetXaxis().GetXmax() - hstack.GetXaxis().GetXmin()) / hstack.GetXaxis().GetNbins()
-                                                           )
+#                                   "Events / {:.2f}".format(
+#                                                            (hstack.GetXaxis().GetXmax() - hstack.GetXaxis().GetXmin()) / hstack.GetXaxis().GetNbins()
+#                                                           )
+                                   "Events / bin"
                                   )
-        if nicestyle and discriminant.name == "D_CP_decay": hstack.GetXaxis().SetRangeUser(-.4, .4)
         style.applyaxesstyle(hstack)
         if nicestyle:
             subfigletter = None
             #aux - add subfig letters here?
             if forWIN:
                 CMStext = "Preliminary"
-            elif discriminant.name == "D_bkg" and with2015 and Dbkg_allcategories and self.enrichstatus == "fullrange" and self.analysis == "fa3" and not animation:
+            elif discriminant.name == "D_bkg_VBFdecay" and not with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange" and self.analysis == "fa3" and not animation:
                 CMStext = ""
-            elif discriminant.name == "D_0minus_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
+            elif discriminant.name == "D_bkg_HadVHdecay" and not with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange" and self.analysis == "fa3" and not animation:
                 CMStext = ""
-            elif discriminant.name == "D_0hplus_decay" and with2015 and self.enrichstatus == "enrich" and not animation and self.analysis == "fa2":
+            elif discriminant.name == "D_bkg" and not with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange" and self.analysis == "fa3" and not animation:
                 CMStext = ""
-            elif discriminant.name == "D_L1_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
+            elif discriminant.name == "D_0minus_decay" and not with2015 and self.enrichstatus == "enrich" and not animation:
                 CMStext = ""
-            elif discriminant.name == "D_L1Zg_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
+            elif discriminant.name == "D_0hplus_decay" and not with2015 and self.enrichstatus == "enrich" and not animation and self.analysis == "fa2":
+                CMStext = ""
+            elif discriminant.name == "D_L1_decay" and not with2015 and self.enrichstatus == "enrich" and not animation:
+                CMStext = ""
+            elif discriminant.name == "D_L1Zg_decay" and not with2015 and self.enrichstatus == "enrich" and not animation:
                 CMStext = ""
             elif discriminant.name == "D_0minus_VBFdecay" and self.enrichstatus == "enrich" and not animation:
                 CMStext = ""
             elif discriminant.name == "D_0minus_HadVHdecay" and self.enrichstatus == "enrich" and not animation:
                 CMStext = ""
-            elif discriminant.name == "D_CP_decay" and with2015 and self.enrichstatus == "enrich" and not animation:
+            elif discriminant.name == "D_CP_decay_new" and not with2015 and self.enrichstatus == "enrich" and not animation:
                 CMStext = ""
-            elif discriminant.name == "D_bkg" and with2015 and self.enrichstatus == "fullrange":
+            elif discriminant.name in ("D_bkg", "D_bkg_VBFdecay", "D_bkg_HadVHdecay") and not with2015 and not Dbkg_allcategories and self.enrichstatus == "fullrange":
                 CMStext = "Supplementary"
-            elif discriminant.name == "D_bkg" and category != "Untagged" and not Dbkg_allcategories and self.enrichstatus == "fullrange":
-                CMStext = "Supplementary"
-            elif discriminant.name != "D_bkg" and with2015 and self.enrichstatus == "enrich":
-                CMStext = "Supplementary"
-            elif discriminant.name != "D_bkg" and category != "Untagged" and self.enrichstatus == "enrich":
+            elif discriminant.name not in ("D_bkg", "D_bkg_VBFdecay", "D_bkg_HadVHdecay") and not with2015 and self.enrichstatus == "enrich":
                 CMStext = "Supplementary"
             else:
                 CMStext = "Internal"
@@ -1145,7 +1143,7 @@ class Projections(MultiEnum):
             if subfigletter is not None:
                 style.subfig(subfigletter)
                 cuttextkwargs.update(y1=.78, y2=.86)
-            style.cuttext(self.enrichstatus.cuttext(), **cuttextkwargs)
+            #style.cuttext(self.enrichstatus.cuttext(), **cuttextkwargs)
 
         legend.Draw()
         for thing, option in otherthingstodraw:
