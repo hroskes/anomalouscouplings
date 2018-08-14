@@ -33,3 +33,6 @@
 [submodule "helperstuff/.constants"]
 	path = helperstuff/constants
 	url = git@github.com:hroskes/anomalouscouplingsconstants
+[submodule "CMSSW_8_1_0/src/CombineHarvester"]
+	path = CMSSW_8_1_0/src/CombineHarvester
+	url = git@github.com:cms-analysis/CombineHarvester
