@@ -2344,7 +2344,7 @@ class TreeWrapper(TreeWrapperBase):
         ReweightingSample("bbH", "fa30.5fL1Zg0.5"),
 
         ReweightingSample("bbH", "fL10.5fL1Zg0.5"),
-     ] * deprecate(0, 2018, 8, 1) + [
+     ] * deprecate(0, 2018, 9, 1) + [
 
         ReweightingSample("tqH", "Hff0+", "0+"),
 
