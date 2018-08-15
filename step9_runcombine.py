@@ -19,7 +19,7 @@ from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits, plotlimits2D, plottitle
 from helperstuff.submitjob import submitjob
-from helperstuff.utilities import requirecmsenv, tfiles
+from helperstuff.utilities import deprecate, requirecmsenv, tfiles
 
 requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_1_0"))
 
@@ -34,18 +34,21 @@ unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P .oO[physicsmodel]O
 exit ${PIPESTATUS[0]}
 """
 runcombinetemplate = r"""
-combine -M .oO[method]Oo. .oO[workspacefile]Oo. --robustFit=.oO[robustfit]Oo. .oO[morecombineoptions]Oo. \
-        --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. \
-        -n _.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
-        .oO[saveorloadworkspace]Oo.
-        --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
-        .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-        -S .oO[usesystematics]Oo. |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
+.oO[combine]Oo. -M .oO[method]Oo. -d .oO[workspacefile]Oo. --robustFit=.oO[robustfit]Oo. \
+                .oO[morecombineoptions]Oo. \
+                --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. \
+                -n _.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
+                .oO[saveorloadworkspace]Oo. \
+                --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
+                .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
+                -S .oO[usesystematics]Oo. \
+|& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
 """
 
 morecombineoptions = {
     "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[npoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1",
     "FitDiagnostics": "",
+    "Impacts": ".oO[impactsstep.oO[impactsstep]Oo.]Oo."
 }
 
 diffnuisancescommand = r"""
@@ -60,7 +63,9 @@ def check_call_test(*args, **kwargs):
 #subprocess.check_call = subprocess.check_output = check_call_test
 
 def runscan(repmap, submitjobs, directory=None):
-  if submitjobs:
+  originalrepmap = repmap
+
+  if submitjobs and repmap["method"] == "MultiDimFit":
     utilities.mkdir_p("jobs")
     npoints = int(repmap["npoints"])
     jobids = set()
@@ -181,9 +186,24 @@ def runscan(repmap, submitjobs, directory=None):
     repmap = repmap.copy()
     if "selectpoints" not in repmap:
       repmap["selectpoints"] = ""
+
+    if repmap["method"] == "Impacts":
+      tmp = repmap.copy()
+      tmp["impactsstep"] = "1"
+      while int(tmp["impactsstep"]) < 3 and os.path.exists(replaceByMap(".oO[filename]Oo.", tmp)):
+        tmp["impactsstep"] = str(int(tmp["impactsstep"]) + 1)
+      if "impactsstep" in repmap and repmap["impactsstep"] != tmp["impactsstep"]:
+        raise RuntimeError("Trying to run impacts step {}, but {} does not exist".format(repmap["impactsstep"], replaceByMap(".oO[filename]Oo.", tmp)))
+      repmap["impactsstep"] = tmp["impactsstep"]
+      del tmp
+
     filename = replaceByMap(".oO[filename]Oo.", repmap)
+
+    if filename != "TEST": assert False, (replaceByMap(".oO[filename]Oo.", repmap), os.path.exists(replaceByMap(".oO[filename]Oo.", repmap)))
+
     tmpfile = os.path.join(directory, filename+".tmp")
-    logfile = replaceByMap("log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap)
+    logfile = replaceByMap(".oO[logfile]Oo.", repmap)
+
     if not os.path.exists(filename):
       with utilities.cd(cdto), \
            utilities.OneAtATime(tmpfile, 30), \
@@ -191,6 +211,9 @@ def runscan(repmap, submitjobs, directory=None):
            utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
         if not os.path.exists(filename):
           subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
+
+    if method == "Impacts" and impactsstep != "3":
+      runscan(repmap=originalrepmap, submitjobs=submitjobs, directory=directory)
 
 
 def runcombine(analysis, foldername, **kwargs):
@@ -230,6 +253,7 @@ def runcombine(analysis, foldername, **kwargs):
     xaxislimits = None
     method = "MultiDimFit"
     plotlimitskwargs = {}
+    ntoys = -1
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -353,6 +377,8 @@ def runcombine(analysis, foldername, **kwargs):
             plotlimitskwargs[kw] = kwarg
         elif kw == "method":
             method = kwarg
+        elif kw == "ntoys":
+            ntoys = int(kwarg)
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -372,9 +398,11 @@ def runcombine(analysis, foldername, **kwargs):
             raise RuntimeError("submitjobs should be run from a screen session!")
         if "minimum" in expectvalues:
             raise ValueError("Can't run scan for minimum using submitjobs")
+        if method != "MultiDimFit":
+            raise ValueError("Can't do submitjobs for the "+method+" method")
 
     if "minimum" in expectvalues and method != "MultiDimFit":
-        raise ValueError("Can't run scan for minimum using "+methdo)
+        raise ValueError("Can't run scan for minimum using "+method)
 
     if len(productions) > 1 and lumitype != "fordata":
         raise TypeError("If there's >1 production, have to use lumitype == 'fordata'")
@@ -444,6 +472,7 @@ def runcombine(analysis, foldername, **kwargs):
               "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
               "workspacefile": "workspace.oO[workspacefileappend]Oo..root",
               "filename": "higgsCombine_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[method]Oo..mH125.root",
+              "logfile": "log_.oO[method]Oo._.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..oO[expectfaiappend]Oo..txt",
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": "{:.2f}".format(totallumi),
               "observedappend": "obs",
@@ -465,7 +494,24 @@ def runcombine(analysis, foldername, **kwargs):
               "physicsmodel": None,
               "physicsoptions": None,
               "morecombineoptions": morecombineoptions[method],
+              "ntoys": str(ntoys),
+              "saveorloadworkspace": "",
+              "combine": "combineTool.py",
+              "impactsstep1": "--doInitialFit",
+              "impactsstep2": "--doFits",
+              "impactsstep3": "-o .oO[filename]Oo."
              }
+
+    if method == "Impacts":
+        repmap.update({
+          "filename": ".oO[impactsfilename.oO[impactsstep]Oo.]Oo.",
+          "logfile": repmap["logfile"].replace(".oO[method]Oo.", ".oO[method]Oo..oO[impactsstep]Oo."),
+          "impactsfilename1": "higgsCombine_initialFit__.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..MultiDimFit.mH125.oO[seedforimpacts]Oo..root",
+          "impactsfilename2": "TEST",
+          "impactsfilename3": "impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..json",
+        })
+        
+
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF --PO .oO[analysis]Oo."
@@ -530,7 +576,9 @@ def runcombine(analysis, foldername, **kwargs):
                 "expectfaiappend": "",
                 "exporobs": "obs",
                 "-t -1": "",
+                "seedforimpacts": "",
               })
+
               jobids.add(runscan(repmap_obs, submitjobs=submitjobs))
               finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_obs))
               if not submitjobs and method == "MultiDimFit":
@@ -560,7 +608,8 @@ def runcombine(analysis, foldername, **kwargs):
                 "append": ".oO[expectedappend]Oo.",
                 "expectfaiappend": "_.oO[expectfai]Oo.",
                 "exporobs": "exp",
-                "-t -1": "-t -1",
+                "-t -1": "-t .oO[ntoys]Oo.",
+                "seedforimpacts": ".123456"
               })
               jobids.add(runscan(repmap_exp, submitjobs=submitjobs))
               finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_exp))
