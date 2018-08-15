@@ -42,7 +42,7 @@ runcombinetemplate = r"""
                 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
                 .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
                 -S .oO[usesystematics]Oo. \
-|& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
+|& tee .oO[logfile]Oo.
 """
 
 plotimpactscommand = r"""
@@ -173,6 +173,15 @@ def runscan(repmap, submitjobs, directory=None):
     if repmap["method"] == "Impacts":
       tmp = repmap.copy()
       tmp["impactsstep"] = "1"
+
+      tmp["seedforimpacts"] = ".123456"
+      linkfrom = None
+      if utilities.existsandvalid(replaceByMap(".oO[filename]Oo.", tmp)):
+        linkfrom = replaceByMap(".oO[filename]Oo.", tmp)
+      tmp["seedforimpacts"] = ""
+      if linkfrom and not utilities.existsandvalid(replaceByMap(".oO[filename]Oo.", tmp)):
+        os.symlink(linkfrom, replaceByMap(".oO[filename]Oo.", tmp))
+
       if os.path.exists(replaceByMap(".oO[filename]Oo.", tmp)):
         tmp["impactsstep"] = "2"
         nuisances = {"RV": None, "RF": None}
@@ -192,7 +201,15 @@ def runscan(repmap, submitjobs, directory=None):
         exist = {}
         for nuisance in nuisances.keys():
           tmp["nuisanceforimpacts"] = nuisance
-           
+
+          tmp["seedforimpacts"] = ".123456"
+          linkfrom = None
+          if utilities.existsandvalid(replaceByMap(".oO[filename]Oo.", tmp)):
+            linkfrom = replaceByMap(".oO[filename]Oo.", tmp)
+          tmp["seedforimpacts"] = ""
+          if linkfrom and not utilities.existsandvalid(replaceByMap(".oO[filename]Oo.", tmp)):
+            os.symlink(linkfrom, replaceByMap(".oO[filename]Oo.", tmp))
+
           nuisances[nuisance] = utilities.existsandvalid(replaceByMap(".oO[filename]Oo.", tmp), "limit")
 
         if all(nuisances.itervalues()):
@@ -634,7 +651,7 @@ def runcombine(analysis, foldername, **kwargs):
                 "expectfaiappend": "_.oO[expectfai]Oo.",
                 "exporobs": "exp",
                 "-t -1": "-t .oO[ntoys]Oo.",
-                "seedforimpacts": ".123456"
+                "seedforimpacts": ""
               })
               jobids.add(runscan(repmap_exp, submitjobs=submitjobs))
               repmap_exp["impactsstep"] = "3"
