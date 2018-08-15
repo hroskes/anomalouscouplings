@@ -45,6 +45,11 @@ runcombinetemplate = r"""
 |& tee log.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.
 """
 
+plotimpactscommand = r"""
+plotImpacts.py -i .oO[impactsfilename3]Oo. -o .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. &&
+gm convert .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..pdf .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..png
+"""
+
 morecombineoptions = {
     "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[npoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1",
     "FitDiagnostics": "",
@@ -82,18 +87,7 @@ def runscan(repmap, submitjobs, directory=None):
       "selectpoints": "--firstPoint 1 --lastPoint 0",
       "saveorloadworkspace": "--saveWorkspace",
     })
-    if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial)):
-      try:
-        f = ROOT.TFile(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial))
-        f.w
-      except:
-        try:
-          del f
-          os.remove(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial))
-        except:
-          pass
-      else:
-        del f
+    utilities.existsandvalid(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial), "w")
 
     initialjobids = []
     if not os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial)):
@@ -132,18 +126,7 @@ def runscan(repmap, submitjobs, directory=None):
       if not utilities.KeepWhileOpenFile(replaceByMap("jobs/.oO[filename]Oo..tmp", repmap_i)).wouldbevalid:
         continue
 
-      if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i)):
-        try:
-          f = ROOT.TFile(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
-          f.limit
-        except:
-          try:
-            del f
-            os.remove(replaceByMap("jobs/.oO[filename]Oo.", repmap_i))
-          except:
-            pass
-        else:
-          del f
+      utilities.existsandvalid(replaceByMap("jobs/.oO[filename]Oo.", repmap_i), "limit")
 
       if os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_i)):
         continue
@@ -190,16 +173,44 @@ def runscan(repmap, submitjobs, directory=None):
     if repmap["method"] == "Impacts":
       tmp = repmap.copy()
       tmp["impactsstep"] = "1"
-      while int(tmp["impactsstep"]) < 3 and os.path.exists(replaceByMap(".oO[filename]Oo.", tmp)):
-        tmp["impactsstep"] = str(int(tmp["impactsstep"]) + 1)
+      if os.path.exists(replaceByMap(".oO[filename]Oo.", tmp)):
+        tmp["impactsstep"] = "2"
+        nuisances = {"RV": None, "RF": None}
+        with open(replaceByMap(".oO[combinecardsfile]Oo.", repmap)) as f:
+          for line in f:
+            try:
+              if not line.strip(): continue
+              if line[0] in "-#": continue
+              split = line.split()
+              if split[0] in "Combination imax jmax kmax shapes bin observation process rate": continue
+              if split[1] in "lnN param shape1": nuisances[split[0]] = None; continue
+            except:
+              print "\n\n\nError when reading line\n\n"+line+"\n\n"
+              raise
+            raise ValueError("Don't know what to do with line:\n\n"+line)
+
+        exist = {}
+        for nuisance in nuisances.keys():
+          tmp["nuisanceforimpacts"] = nuisance
+           
+          nuisances[nuisance] = utilities.existsandvalid(replaceByMap(".oO[filename]Oo.", tmp), "limit")
+
+        if all(nuisances.itervalues()):
+          tmp["impactsstep"] = "3"
+        elif any(nuisances.itervalues()):
+          raise ValueError("Files exist for some but not all nuisances.\n\nExist:\n{}\n\nDon't exist:\n{}".format(
+            "\n".join("  "+os.path.basename(k) for k, v in nuisances.iteritems() if v),
+            "\n".join("  "+os.path.basename(k) for k, v in nuisances.iteritems() if not v),
+          ))
+        else:  #none exist, keep step 2
+          repmap["nuisanceforimpacts"] = sorted(nuisances.iterkeys())[0]
+
       if "impactsstep" in repmap and repmap["impactsstep"] != tmp["impactsstep"]:
         raise RuntimeError("Trying to run impacts step {}, but {} does not exist".format(repmap["impactsstep"], replaceByMap(".oO[filename]Oo.", tmp)))
       repmap["impactsstep"] = tmp["impactsstep"]
       del tmp
 
     filename = replaceByMap(".oO[filename]Oo.", repmap)
-
-    if filename != "TEST": assert False, (replaceByMap(".oO[filename]Oo.", repmap), os.path.exists(replaceByMap(".oO[filename]Oo.", repmap)))
 
     tmpfile = os.path.join(directory, filename+".tmp")
     logfile = replaceByMap(".oO[logfile]Oo.", repmap)
@@ -212,7 +223,9 @@ def runscan(repmap, submitjobs, directory=None):
         if not os.path.exists(filename):
           subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
 
-    if method == "Impacts" and impactsstep != "3":
+    if repmap["method"] == "Impacts" and repmap["impactsstep"] != "3":
+      newrepmap = originalrepmap.copy()
+      newrepmap["impactsstep"] = str(int(repmap["impactsstep"]) + 1)
       runscan(repmap=originalrepmap, submitjobs=submitjobs, directory=directory)
 
 
@@ -461,6 +474,11 @@ def runcombine(analysis, foldername, **kwargs):
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
     totallumi = sum(float(Luminosity(p, lumitype)) for p in productions)
+    saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
+    try:
+        os.makedirs(saveasdir)
+    except OSError:
+        pass
 
     physicsmodelparameterranges = {
                                    "CMS_zz4l_fai1": "-1,1",
@@ -499,7 +517,8 @@ def runcombine(analysis, foldername, **kwargs):
               "combine": "combineTool.py",
               "impactsstep1": "--doInitialFit",
               "impactsstep2": "--doFits",
-              "impactsstep3": "-o .oO[filename]Oo."
+              "impactsstep3": "-o .oO[filename]Oo.",
+              "saveasdir": saveasdir,
              }
 
     if method == "Impacts":
@@ -507,7 +526,7 @@ def runcombine(analysis, foldername, **kwargs):
           "filename": ".oO[impactsfilename.oO[impactsstep]Oo.]Oo.",
           "logfile": repmap["logfile"].replace(".oO[method]Oo.", ".oO[method]Oo..oO[impactsstep]Oo."),
           "impactsfilename1": "higgsCombine_initialFit__.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..MultiDimFit.mH125.oO[seedforimpacts]Oo..root",
-          "impactsfilename2": "TEST",
+          "impactsfilename2": "higgsCombine_paramFit__.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo._.oO[nuisanceforimpacts]Oo..MultiDimFit.mH125.oO[seedforimpacts]Oo..root",
           "impactsfilename3": "impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..json",
         })
         
@@ -580,6 +599,7 @@ def runcombine(analysis, foldername, **kwargs):
               })
 
               jobids.add(runscan(repmap_obs, submitjobs=submitjobs))
+              repmap_obs["impactsstep"] = "3"
               finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_obs))
               if not submitjobs and method == "MultiDimFit":
                   f = ROOT.TFile(replaceByMap(".oO[filename]Oo.", repmap_obs))
@@ -591,6 +611,11 @@ def runcombine(analysis, foldername, **kwargs):
               if method == "FitDiagnostics":
                 command = replaceByMap(diffnuisancescommand, repmap_obs)
                 subprocess.check_call(command, shell=True)
+
+              if method == "Impacts":
+                command = replaceByMap(plotimpactscommand, repmap_obs)
+                subprocess.check_call(command, shell=True)
+                utilities.writeplotinfo(replaceByMap(".oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..txt", repmap_obs))
 
           minimum = minimum[0]
           del f
@@ -612,39 +637,30 @@ def runcombine(analysis, foldername, **kwargs):
                 "seedforimpacts": ".123456"
               })
               jobids.add(runscan(repmap_exp, submitjobs=submitjobs))
+              repmap_exp["impactsstep"] = "3"
               finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_exp))
 
           if method == "FitDiagnostics":
             command = replaceByMap(diffnuisancescommand, repmap_exp)
             subprocess.check_call(command, shell=True)
 
+          if method == "Impacts":
+            command = replaceByMap(plotimpactscommand, repmap_exp)
+            subprocess.check_call(command, shell=True)
+            utilities.writeplotinfo(replaceByMap(".oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..txt", repmap_exp))
+
         if None in jobids: jobids.remove(None)
         if jobids:
             submitjob("echo done", waitids=jobids, interactive=True, jobtime="0:0:10", jobname="wait")
 
         if ntry < maxntries:
-            e = None
+            anydontexist = False
             for filename in finalfiles:
-                try:
-                    f = ROOT.TFile(filename)
-                    f.limit
-                except Exception as e:
-                    try:
-                        del f
-                        os.remove(filename)
-                    except:
-                        pass
-                else:
-                    del f
-            if e is not None:
+                if not utilities.existsandvalid(filename, "limit"): anydontexist = True
+            if anydontexist:
                 runcombine(*inputargs, **inputkwargs)
                 return
 
-        saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
-        try:
-            os.makedirs(saveasdir)
-        except OSError:
-            pass
         plotscans = []
         if config.unblindscans and runobs:
             plotscans.append("obs")
@@ -674,22 +690,9 @@ def runcombine(analysis, foldername, **kwargs):
                 nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
                 plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
 
-            with open(os.path.join(saveasdir, plotname+".txt"), "w") as f:
-                f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
-                f.write("\n\n\n")
-                f.write("python limits.py ")
-                for arg in sys.argv[1:]:
-                    if "=" in arg and "subdirectory=" not in arg: continue
-                    f.write(pipes.quote(arg)+" ")
-                f.write("--plotname="+plotname+" ")
-                f.write("--poi="+POI+" ")
-                f.write("\n\n\n\n\n\ngit info:\n\n")
-                f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
-                f.write("\n")
-                f.write(subprocess.check_output(["git", "status"]))
-                f.write("\n")
-                f.write(subprocess.check_output(["git", "diff"]))
+            utilities.writeplotinfo(os.path.join(saveasdir, plotname+".txt"), "python limits.py --plotname="+plotname+" --poi="+POI+" --subdirectory="+subdirectory)
 
+        if method in ("MultiDimFit", "Impacts"):
             copyplots(os.path.join("limits", subdirectory, foldername))
 
 ntry = 0

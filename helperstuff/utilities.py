@@ -802,3 +802,42 @@ class PlotCopier(object):
     def remove(self, filename, *args, **kwargs):
         os.remove(filename, *args, **kwargs)
         self.copy(filename)
+
+def existsandvalid(filename, *shouldcontain):
+  with OneAtATime(filename+".tmp", delay=1):
+    if not os.path.exists(filename): return False
+
+    if filename.endswith(".root"):
+      try:
+        with TFile(filename) as f:
+          for _ in shouldcontain:
+            getattr(f, _)
+      except AttributeError:
+        os.remove(filename)
+
+    elif filename.endswith(".json"):
+      with open(filename) as f:
+        try:
+          json.load(f)
+        except ValueError:
+          os.remove(filename)
+
+    else:
+      raise ValueError("Don't know what to do with:\n"+filename)
+
+    return os.path.exists(filename)
+
+def writeplotinfo(txtfilename, *morestuff):
+  assert txtfilename.endswith(".txt")
+  with open(txtfilename, "w") as f:
+    f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
+    f.write("\n\n\n")
+    for thing in morestuff:
+      f.write(thing)
+    f.write("\n\n\n\n\n\ngit info:\n\n")
+    f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
+    f.write("\n")
+    f.write(subprocess.check_output(["git", "status"]))
+    f.write("\n")
+    f.write(subprocess.check_output(["git", "diff"]))
+
