@@ -1699,7 +1699,7 @@ class TreeWrapper(TreeWrapperBase):
         the cutoff and then the sum of weights for 2e2mu
         """
         doalternateweightxsecstree = []
-        if self.treesample == ReweightingSamplePlus("ggH", "0+", "POWHEG"):
+        if self.treesample.reweightingsampleplus == ReweightingSamplePlus("ggH", "0+", "POWHEG"):
             doalternateweightxsecstree = enums.AlternateWeight.items(lambda x: "LHEweight" in x.weightname or x == "1")
 
         if self.isalternate and not doalternateweightxsecstree: return

@@ -281,9 +281,9 @@ class _TotalRate(MultiEnum):
     from templates import Template
     rate = 0
     if self.production.year == 2016:
-      productionforrate = Production("180530_Ulascan")
+      productionforrate = Production("180721_Ulascan")
     elif self.production.year == 2017:
-      productionforrate = Production("180531_Ulascan")
+      productionforrate = Production("180722_Ulascan")
     for ca, ch in itertools.product(channels, categories):
       t = Template(self.productionmode, productionforrate, "0+" if self.productionmode.issignal else None, ca, ch, "fa2")
       with TFile(t.templatesfile.templatesfile()) as f:

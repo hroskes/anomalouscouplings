@@ -90,7 +90,7 @@ if LHE:
     smearptmuon = 2.169/6
     smearptjet = 18./6
 else:
-    productionsforcombine = ["180530", "180531"]
+    productionsforcombine = ["180721_2016", "180721_2017"]
 
 if len(productionsforcombine) == 1:
     productionforcombine = productionsforcombine[0]

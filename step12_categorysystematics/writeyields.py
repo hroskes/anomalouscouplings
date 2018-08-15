@@ -57,7 +57,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     result = MultiplyCounter()
     for productionmode, samples in tosamples_foryields:
       if productionmodelist and productionmode not in productionmodelist: continue
-      if productionmode == "ZX" or productionmode == "VBF bkg" and production == "180531": continue
+      if productionmode == "ZX" or productionmode == "VBF bkg" and production == "180722": continue
       print productionmode
       samplegroups = [samples]
       if productionmode.issignal and productionmode != "bbH":
@@ -192,13 +192,13 @@ def writeyields(productionmodelist=None, productionlist=None):
           nominalyield = sum(result[tosample, categorization, AlternateWeight("1")] for tosample in samples)
           if productionmode == "ZX" or analysis.isdecayonly:
             JECUp = JECDn = btSFUp = btSFDn = 1
-          elif productionmode == "VBF bkg" and production == "180531":
-            _ = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_2017", "180530").value
+          elif productionmode == "VBF bkg" and production == "180722":
+            _ = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_2017", "180721").value
             if _ is None:
               JECUp = JECDn = 1
             else:
               JECUp, JECDn = _
-            _ = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_2017", "180530").value
+            _ = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_2017", "180721").value
             if _ is None:
               btSFUp = btSFDn = 1
             else:
@@ -270,8 +270,8 @@ def writeyields(productionmodelist=None, productionlist=None):
                   }[systname]
                 elif productionmode == "ttH" and systname == "pdf_asmz_Higgs_gg":
                   dn, up = 0.98, 1.02
-                elif "pdf_variation" in systname and production == "180531":
-                  dn, up = YieldSystematicValue(channel, category, analysis, productionmode, systname, "180530").value
+                elif "pdf_variation" in systname and production == "180722":
+                  dn, up = YieldSystematicValue(channel, category, analysis, productionmode, systname, "180721").value
                 else:
                   up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal
                   dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal

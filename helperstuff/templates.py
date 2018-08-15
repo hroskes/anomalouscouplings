@@ -592,7 +592,7 @@ def templatesfiles():
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                             if config.LHE and shapesystematic != "": continue
                             if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
-                            if production == "180531" and shapesystematic == "MINLO_SM": continue
+                            if production in ("180531_2017", "180721_2017") and shapesystematic == "MINLO_SM": continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
                             yield TemplatesFile(channel, shapesystematic, templategroup, analysis, production, category)
@@ -1129,7 +1129,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def copyfromothertemplate(self):
-        if self.productionmode in ("ggZZ", "VBF bkg", "ZX") and self.production in ("180530", "180531"):
+        if self.productionmode in ("ggZZ", "VBF bkg", "ZX") and self.production in ("180721", "180722"):
             return type(self)(self.productionmode, self.channel, self.shapesystematic, self.templategroup, self.analysis, str(self.production)+"_Ulascan", self.category)
         return None
 

@@ -88,7 +88,7 @@ if __name__ == "__main__":
               elif productionmode == "qqZZ": hypotheses = "ext",
               else: hypotheses = None,
               for hypothesis in hypotheses:
-                for production in "180530", "180531":
+                for production in "180721", "180722":
                   for axis in 0, 1, 2:
                     compare(Template(analysis, productionmode, hypothesis, category, channel, production), axis)
 

@@ -705,6 +705,10 @@ class Production(MyEnum):
                  EnumItem("180530_Ulascan"),
                  EnumItem("180531", "180531_2017"),
                  EnumItem("180531_Ulascan"),
+                 EnumItem("180721", "180721_2016"),
+                 EnumItem("180721_Ulascan"),
+                 EnumItem("180722", "180721_2017"),
+                 EnumItem("180722_Ulascan"),
                  EnumItem("LHE_170509"),
                 )
     def __cmp__(self, other):
@@ -754,6 +758,16 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/180531"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180531"
+        if self in ("180721_2016", "180721_Ulascan"):
+            if config.host == "lxplus":
+                return "root://lxcms03//data3/Higgs/180721_2016"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/180721"
+        if self in ("180721_2017", "180722_Ulascan"):
+            if config.host == "lxplus":
+                return "root://lxcms03//data3/Higgs/180721_2017"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/180722"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -772,8 +786,8 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222", "170825", "180121", "180224", "180531_2016"): return 35.921875594646
-        if self in ("180416", "180531"): return 41.529343499127
+        if self in ("170203", "170222", "170825", "180121", "180224", "180531_2016", "180721_2016"): return 35.921875594646
+        if self in ("180416", "180531", "180721_2017"): return 41.529343499127
         if self == "LHE_170509": return 300
 
         if self in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
@@ -785,9 +799,9 @@ class Production(MyEnum):
     @property
     def year(self):
         if "_" in str(self) and "LHE" not in str(self): return type(self)(str(self).split("_")[0]).year
-        if self <= "180224" or self == "180531_2016":
+        if self <= "180224" or self == "180531_2016" or self == "180721_2016":
             return 2016
-        if self == "180416" or self == "180531":
+        if self == "180416" or self == "180531" or self == "180721_2017":
             return 2017
         assert False
     @property
@@ -802,6 +816,9 @@ class Production(MyEnum):
 
         if self == "180531": return type(self)("180416")
         if self == "180531_2016": return type(self)("180416")  #10 bins
+
+        if self == "180721_2016": return type(self)("180416")
+        if self == "180721_2017": return type(self)("180416")
         return self
     @property
     def productionforrate(self):
