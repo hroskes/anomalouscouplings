@@ -1608,6 +1608,8 @@ class Sample(ReweightingSamplePlus):
         if self.productionmode == "bbH": return "bbH125"
         if self.productionmode == "tqH": return "tqH125"
         if self.productionmode == "ggZZ":
+            if self.production in ("180721", "180722") and self.flavor == "4mu":
+                return "ggTo4mu_ContinDefaultShower_MCFM701"
             return "ggTo{}_Contin_MCFM701".format(self.flavor)
         if self.productionmode == "VBF bkg":
             return "VBFTo{}JJ_Contin_phantom128".format(self.flavor)

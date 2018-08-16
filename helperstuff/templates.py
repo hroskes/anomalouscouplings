@@ -548,6 +548,25 @@ class TemplatesFile(MultiEnum):
           kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
           kwargs["production"] = "170222"
           return TemplatesFile(*kwargs.values())
+
+        if self.production == "180721":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "180530"
+          return TemplatesFile(*kwargs.values())
+        if self.production == "180722":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "180531"
+          return TemplatesFile(*kwargs.values())
+
+        if self.production == "180530_Ulascan":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "180721_Ulascan"
+          return TemplatesFile(*kwargs.values())
+        if self.production == "180531_Ulascan":
+          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+          kwargs["production"] = "180722_Ulascan"
+          return TemplatesFile(*kwargs.values())
+
         return None
 
     @property

@@ -357,4 +357,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
               print tosample, categorization, alternateweight
               raise
 
+    for k, v in result.iteritems():
+      print " ".join(str(_) for _ in k), v
+
     return result

@@ -46,7 +46,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       SampleCount(ProductionMode("bbH"), {ReweightingSamplePlus("bbH", "0+")}),
       SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
-      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors if deprecate(flavor != "4mu", 2018, 7, 20)}),
+      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
       SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
     ]
     if config.usedata:
@@ -270,8 +270,6 @@ def writeyields(productionmodelist=None, productionlist=None):
                   }[systname]
                 elif productionmode == "ttH" and systname == "pdf_asmz_Higgs_gg":
                   dn, up = 0.98, 1.02
-                elif "pdf_variation" in systname and production == "180722":
-                  dn, up = YieldSystematicValue(channel, category, analysis, productionmode, systname, "180721").value
                 else:
                   up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal
                   dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal
@@ -284,7 +282,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                   syst.value = None
 
           #pythia scale and tune
-          if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH") and productionmode != deprecate("ZH", 2018, 7, 20):
+          if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH") and productionmode != deprecate("ZH", 2018, 8, 17):
             if production.year == 2016:
               scaleup = sum(result[ReweightingSamplePlus(tosample, "ScaleUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
               scaledn = sum(result[ReweightingSamplePlus(tosample, "ScaleDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
