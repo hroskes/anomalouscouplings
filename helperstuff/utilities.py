@@ -270,6 +270,14 @@ class KeepWhileOpenFile(object):
     def __nonzero__(self):
         return self.bool
 
+@contextlib.contextmanager
+def KeepWhileOpenFiles(*filenames):
+  if not filenames:
+    yield []
+    return
+  with KeepWhileOpenFile(filenames[0]) as kwof, KeepWhileOpenFiles(*filenames[1:]) as kwofs:
+    yield [kwof] + kwofs
+
 class Tee(object):
     """http://stackoverflow.com/a/616686/5228524"""
     def __init__(self, *openargs, **openkwargs):
@@ -840,4 +848,3 @@ def writeplotinfo(txtfilename, *morestuff):
     f.write(subprocess.check_output(["git", "status"]))
     f.write("\n")
     f.write(subprocess.check_output(["git", "diff"]))
-

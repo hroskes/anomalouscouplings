@@ -15,7 +15,7 @@ import ROOT
 
 import config
 import customsmoothing
-from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, TemplateGroup, treeshapesystematics
+from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis
 from utilities import cache, is_almost_integer, JsonDict, jsonloads, TFile, tfiles
 
@@ -570,6 +570,11 @@ class TemplatesFile(MultiEnum):
         return None
 
     @property
+    def actualtemplatesfile(self):
+        if self.copyfromothertemplatesfile: return self.copyfromothertemplatesfile.actualtemplatesfile
+        return self
+
+    @property
     def nominal(self):
         return type(self)(*(getattr(self, enum.enumname) for enum in self.enums if enum != ShapeSystematic))
 
@@ -583,7 +588,7 @@ class TemplatesFile(MultiEnum):
 
     @property
     def allshapesystematics(self):
-        for _ in treeshapesystematics:
+        for _ in shapesystematics:
             if not _.appliesto(self.templategroup): continue
 
             if _ in ("JECUp", "JECDn"):
