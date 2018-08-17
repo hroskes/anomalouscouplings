@@ -52,7 +52,15 @@ def adddiscriminants(*args):
     try:
         newf = ROOT.TFile.Open(LSF.basename(newfilename), "recreate")
         if not config.LHE:
+            if sample.production == "180721_2016":
+                treewrapper.tree.SetBranchStatus("LHEweight_PDFVariation_*", 0)
             newt = treewrapper.tree.CloneTree(0)
+            if sample.production == "180721_2016":
+                treewrapper.tree.SetBranchStatus("LHEweight_PDFVariation_*", 1)
+                pdfup = array('d', [0])
+                pdfdn = array('d', [0])
+                newt.Branch("LHEweight_PDFVariation_Up", pdfup, "LHEweight_PDFVariation_Up/D")
+                newt.Branch("LHEweight_PDFVariation_Dn", pdfdn, "LHEweight_PDFVariation_Dn/D")
             if treewrapper.effectiveentriestree is not None:
                 treewrapper.effectiveentriestree.SetDirectory(newf)
             if treewrapper.alternateweightxsecstree is not None:
@@ -79,6 +87,9 @@ def adddiscriminants(*args):
                     except:
                         print "Error while calculating", discriminant
                         raise
+                if sample.production == "180721_2016":
+                    pdfup[0] = treewrapper.tree.LHEweight_PDFVariation_Up
+                    pdfdn[0] = treewrapper.tree.LHEweight_PDFVariation_Dn
                 newt.Fill()
         except:
             treewrapper.Show()
