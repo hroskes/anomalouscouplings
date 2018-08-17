@@ -350,7 +350,6 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
 
             result[tosample,categorization,alternateweight] = h.Integral()
         except:
-            
             if tosample.productionmode == "ZH" and (tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneUp") or tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneDn")):
               result[tosample,categorization,alternateweight] = result[ReweightingSamplePlus("ZH", "0+", "POWHEG"), categorization,alternateweight]
             else:
@@ -358,6 +357,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
               raise
 
     for k, v in result.iteritems():
-      print " ".join(str(_) for _ in k), v
+      t.GetEntry(0)
+      if "PDF" in str(k[2]): print " ".join(str(_) for _ in k), v, k[2].weightname, getattr(t, k[2].weightname)
+      if k[2] == "1" and not k[1].issystematic: print " ".join(str(_) for _ in k), v, k[2].weightname, 1.
 
     return result
