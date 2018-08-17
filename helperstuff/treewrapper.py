@@ -1759,9 +1759,11 @@ class TreeWrapper(TreeWrapperBase):
 
             for alternateweight in doalternateweightxsecstree:
                 #see if doalternateweightxsecstree: assert len(functionsandarrays) == 1 above!
-                alternateweightxsecs[alternateweight] += function(entry) * (
+                toadd = function(entry) * (
                   1 if alternateweight.weightname == "1" else getattr(entry, alternateweight.weightname)
                 )
+                if numpy.isfinite(toadd):
+                    alternateweightxsecs[alternateweight] += toadd
 
         self.cutoffs = {}
         self.nevents2e2mu = {}
