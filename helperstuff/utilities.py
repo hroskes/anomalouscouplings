@@ -812,7 +812,8 @@ class PlotCopier(object):
         self.copy(filename)
 
 def existsandvalid(filename, *shouldcontain):
-  with OneAtATime(filename+".tmp", delay=1):
+  with KeepWhileOpenFile(filename+".tmp") as kwof:
+    if not kwof: return True  #it may be valid when the job is done
     if not os.path.exists(filename): return False
 
     if filename.endswith(".root"):

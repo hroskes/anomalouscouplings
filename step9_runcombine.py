@@ -83,7 +83,7 @@ def runscan(repmap, submitjobs, directory=None):
 
     repmap_initial = repmap.copy()
     repmap_initial.update({
-      "scanrangeappend": "_firststep",
+      "pointindex": "_firststep",
       "selectpoints": "--firstPoint 1 --lastPoint 0",
       "saveorloadworkspace": "--saveWorkspace",
     })
@@ -139,7 +139,8 @@ def runscan(repmap, submitjobs, directory=None):
         "jobname": replaceByMap(".oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i).lstrip("_"),
         "jobtime": "1-0:0:0",
         "outputfile": replaceByMap("jobs/joblog.oO[expectfaiappend]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo...oO[exporobs]Oo.", repmap_i),
-        "morerepmap": repmap_i
+        "morerepmap": repmap_i,
+        "waitids": initialjobids,
       }
       if config.host == "MARCC":
         submitjobkwargs["queue"] = "lrgmem"
@@ -157,7 +158,14 @@ def runscan(repmap, submitjobs, directory=None):
     if cwd != directory:
 #      if utilities.LSB_JOBID() is None:
 #        raise ValueError("Should call runscan from directory except in a batch job")
-      shutil.copy(os.path.join(directory, replaceByMap(".oO[workspacefile]Oo.", repmap)), ".")
+      shutil.copy(
+        os.path.join(
+          directory,
+          "jobs" if "higgsCombine" in replaceByMap(".oO[workspacefile]Oo.", repmap) else "",
+          replaceByMap(".oO[workspacefile]Oo.", repmap)
+        ),
+        "."
+      )
       if utilities.LSB_JOBID() is None:
          cdto = os.path.basename(directory.rstrip("/"))
       else:
