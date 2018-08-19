@@ -63,12 +63,12 @@ def PRL_loglinear(**kwargs):
                              "xsize": .2,
                              "ysize": .045,
                              "textsize": .09,
-                             "yshift68": .08,
-                             "yshift95": -.1,
+                             "yshift68": .03,
+                             "yshift95": .03,
                             }
     markerposition = None
     onlyanalysis = None
-    ydivide = 4.5
+    ydivide = 11
     saveas = None
     forWIN = False
     for kw, kwarg in kwargs.iteritems():
