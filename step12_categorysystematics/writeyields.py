@@ -49,7 +49,6 @@ def writeyields(productionmodelist=None, productionlist=None):
       SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
       SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
     ]
-    deprecate(tosamples_foryields[6].samples.remove(ReweightingSamplePlus("qqZZ", "ext")), 2018, 8, 19)
 
     if config.usedata:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
