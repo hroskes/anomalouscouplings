@@ -113,6 +113,11 @@ class TreeWrapperBase(Iterator):
         if error:
             raise SyntaxError(error)
 
+    @classmethod
+    def initweightfunctions(cls):
+        for sample in cls.allsamples:
+            setattr(cls, sample.weightname(), sample.get_MC_weight_function(LHE=False))
+
 ##########################
 #background discriminants#
 ##########################
@@ -1421,11 +1426,6 @@ class TreeWrapper(TreeWrapperBase):
         return getattr(self, sample.weightname())
 
     @classmethod
-    def initweightfunctions(cls):
-        if self.treesample.production.LHE: return
-        for sample in cls.allsamples:
-            setattr(cls, sample.weightname(), sample.get_MC_weight_function())
-    @classmethod
     def initcategoryfunctions(cls):
         for _ in cls.categorizations:
             setattr(cls, _.category_function_name, _.get_category_function())
@@ -1535,6 +1535,7 @@ class TreeWrapper(TreeWrapperBase):
             "checkfunctions",
             "counters",
             "cutoffs",
+            "definitelyexists",
             "effectiveentriestree",
             "exceptions",
             "f",
@@ -1735,7 +1736,7 @@ class TreeWrapper(TreeWrapperBase):
         reweightingsamples = self.treesample.reweightingsamples()
         if self.treesample.productionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
 
-        functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True), []) for sample in reweightingsamples}
+        functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True, LHE=False), []) for sample in reweightingsamples}
         is2e2mu = []
         flavs2e2mu = {11*11*13*13}
         if self.treesample.productionmode == "VBFbkg":

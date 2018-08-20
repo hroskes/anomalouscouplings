@@ -67,7 +67,7 @@ usenewZXsystematics = True
 applyJECshapesystematics = True
 applyMINLOsystematics = True
 
-assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata <= (not LHE)
+assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 assert getm4lsystsfromggHUntagged <= getm4lsystsfromggH
 
 lumi2015 = 2.7
@@ -83,13 +83,11 @@ defaultnbins = 40
 arrowsatminima = False
 minimainlegend = True
 
-if LHE:
-    productionsforcombine = ["LHE_170509"]
-    smearptelectron = 2.399/6
-    smearptmuon = 2.169/6
-    smearptjet = 18./6
-else:
-    productionsforcombine = ["180721_2016", "180721_2017"]
+LHEsmearptelectron = 2.399/6
+LHEsmearptmuon = 2.169/6
+LHEsmearptjet = 18./6
+
+productionsforcombine = ["180721_2016", "180721_2017"]
 
 if len(productionsforcombine) == 1:
     productionforcombine = productionsforcombine[0]

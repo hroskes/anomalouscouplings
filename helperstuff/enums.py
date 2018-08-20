@@ -313,7 +313,6 @@ class ProductionMode(MyEnum):
         if self in ("WplusH", "WminusH", "tqH"):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
-    @property
     def generatedhypotheses(self, production):
         if not production.LHE:
             if self == "ggH":

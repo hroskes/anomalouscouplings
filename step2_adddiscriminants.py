@@ -16,7 +16,7 @@ from helperstuff import xrd
 from helperstuff.enums import hffhypotheses, ProductionMode, productions, pythiasystematics
 from helperstuff.samples import allsamples, Sample
 from helperstuff.submitjob import submitjob
-from helperstuff.treewrapper import TreeWrapperFactory
+from helperstuff.treewrapper import TreeWrapper, TreeWrapperFactory
 from helperstuff.utilities import cdtemp_slurm, deletemelastuff, KeepWhileOpenFile, LSB_JOBID, LSF_creating
 import os
 import ROOT

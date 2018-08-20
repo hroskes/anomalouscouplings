@@ -66,13 +66,13 @@ class LHEEvent(object):
     id, p = particle
     if abs(id) == 11:
       newid = id
-      smearpt = config.smearptelectron
+      smearpt = config.LHEsmearptelectron
     elif abs(id) == 13:
       newid = id
-      smearpt = config.smearptmuon
+      smearpt = config.LHEsmearptmuon
     elif 1 <= abs(id) <= 5 or abs(id) == 21:
       newid = 0
-      smearpt = config.smearptjet
+      smearpt = config.LHEsmearptjet
     elif abs(id) == 15:
       newid = id
       smearpt = 0  #taus are dropped anyway in passparticlecuts
@@ -378,7 +378,7 @@ class LHEWrapper(TreeWrapperMELA):
     if self.isdummy: return
     i = 0
     sumofweights = 0
-    weightfunction = self.treesample.get_MC_weight_function(reweightingonly=True)
+    weightfunction = self.treesample.get_MC_weight_function(reweightingonly=True, LHE=True)
     with open(self.treesample.LHEfile) as f:
       event = ""
       for line in f:
@@ -429,11 +429,6 @@ class LHEWrapper(TreeWrapperMELA):
 
   def __del__(self):
     self.mela.resetInputEvent()
-
-  @classmethod
-  def initweightfunctions(cls):
-    for sample in cls.allsamples:
-      setattr(cls, sample.weightname(), sample.get_MC_weight_function())
 
   def initlists(self):
     self.toaddtotree = [

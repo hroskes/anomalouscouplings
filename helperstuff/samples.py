@@ -512,13 +512,13 @@ class SampleBase(object):
                          )
         return result
 
-    def get_MC_weight_function(self_sample, functionname=None, reweightingonly=False):
+    def get_MC_weight_function(self_sample, functionname=None, reweightingonly=False, LHE=False):
         if functionname is None:
             functionname = self_sample.weightname()
 
         strsample = str(self_sample)
 
-        if not self_sample.production.LHE:
+        if not LHE:
 
             if self_sample.productionmode == "ggZZ":
                 def MC_weight_function(self_tree):
@@ -600,7 +600,7 @@ class SampleBase(object):
             else:
                 raise ValueError("No MC weight function defined for {}".format(self_sample))
 
-        else: #self_sample.production.LHE
+        else: #LHE
             photoncut_decay = False
             if self_sample.productionmode == "ggH":
                 def MC_weight_function(self_tree):
