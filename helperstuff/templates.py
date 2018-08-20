@@ -42,7 +42,7 @@ class TemplatesFile(MultiEnum):
                 raise ValueError("decay only analysis is only done for untagged!\n{}".format(args))
             if self.templategroup in ("vbf", "zh", "wh", "tth"):
                 raise ValueError("decay only analysis is only done with decay information!\n{}".format(args))
-        if config.LHE:
+        if self.production.LHE:
             if self.channel != "2e2mu":
                 raise ValueError("LHE analysis is only done for 2e2mu for now!\n{}".format(args))
 
@@ -182,7 +182,7 @@ class TemplatesFile(MultiEnum):
         if self.templategroup in ["ggh", "vbf", "zh", "wh", "tth", "bbh"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
-            if config.LHE: return [Template(self, "qqZZ")]
+            if self.production.LHE: return [Template(self, "qqZZ")]
             result = ["qqZZ", "ggZZ", "VBF bkg"]
             if config.usedata:
                 result.append("ZX")
@@ -605,8 +605,8 @@ def listfromiterator(function):
 @listfromiterator
 def templatesfiles():
     for channel in channels:
-        if channel != "2e2mu" and config.LHE: continue
         for production in productions:
+            if channel != "2e2mu" and production.LHE: continue
             for analysis in analyses:
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
@@ -614,7 +614,7 @@ def templatesfiles():
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
-                            if config.LHE and shapesystematic != "": continue
+                            if production.LHE and shapesystematic != "": continue
                             if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
                             if production in ("180531_2017", "180721_2017") and shapesystematic == "MINLO_SM": continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
@@ -887,7 +887,7 @@ class Template(TemplateBase, MultiEnum):
 
     def reweightfrom(self):
         if self.productionmode == "ggH":
-            if config.LHE:
+            if self.production.LHE:
                 result = {Sample(self.production, self.productionmode, self.hypothesis)}
             elif self.shapesystematic == "MINLO_SM":
                 result = {Sample(self.production, self.productionmode, self.hypothesis, "MINLO")}
@@ -1132,7 +1132,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def selection(self):
         result = ["ZZMass>{}".format(config.m4lmin), "ZZMass<{}".format(config.m4lmax)]
-        if not config.LHE:
+        if not self.production.LHE:
             result.append("Z1Flav*Z2Flav == {}".format(self.ZZFlav))
         if not self.analysis.isdecayonly:
             result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")")
@@ -1142,7 +1142,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def ZZFlav(self):
-        assert not config.LHE
+        assert not self.production.LHE
         result = self.channel.ZZFlav
         if self.productionmode == "ZX": result *= -1
         return result
@@ -1478,7 +1478,7 @@ class DataTree(MultiEnum):
         if self.analysis.isdecayonly:
             if self.category != "Untagged":
                 raise ValueError("decayonly analysis is only done for untagged!\n{}".format(args))
-        if config.LHE:
+        if self.production.LHE:
             if self.channel != "2e2mu":
                 raise ValueError("LHE analysis is only done for 2e2mu for now!\n{}".format(args))
 
@@ -1494,7 +1494,7 @@ class DataTree(MultiEnum):
 @listfromiterator
 def datatrees():
     for channel in channels:
-        if channel != "2e2mu" and config.LHE: continue
+        if channel != "2e2mu" and self.production.LHE: continue
         for production in productions:
             for category in categories:
                 for analysis in analyses:

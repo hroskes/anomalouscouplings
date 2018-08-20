@@ -34,9 +34,7 @@ from categorysystematics import findsystematic
 SampleCount = namedtuple("SampleCount", "productionmode samples")
 
 def writeyields(productionmodelist=None, productionlist=None):
-  if config.LHE: raise ValueError("For LHE you want writeyields_LHE()")
-
-  for production in sorted({_.productionforrate for _ in config.productionsforcombine}):
+  for production in sorted({_.productionforrate for _ in config.productionsforcombine if not _.LHE}):
     if productionlist and production not in productionlist: continue
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
@@ -85,7 +83,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       #if productionmode.issignal():
       #  result += count(
       #                  {ReweightingSample(productionmode, "0+")},
-      #                  {Sample(productionmode, h, production) for h in productionmode.generatedhypotheses},
+      #                  {Sample(productionmode, h, production) for h in productionmode.generatedhypotheses(production)},
       #                  TreeWrapper.categorizations,
       #                 )
 
@@ -310,15 +308,13 @@ def writeyields(productionmodelist=None, productionlist=None):
       YieldSystematicValue.writedict()
 
 def writeyields_LHE():
-  if not config.LHE: raise ValueError("For non-LHE you want writeyields()")
-  for analysis in analyses:
-    if not analysis.isfL1fL1Zg: continue
-    YieldValue("ggH", "2e2mu", "Untagged", analysis, production).value = 1.5258744890164022
-    YieldValue("qqZZ", "2e2mu", "Untagged", analysis, production).value = 1.6250924214670268
+  for production in sorted({_.productionforrate for _ in config.productionsforcombine if _.LHE}):
+    for analysis in analyses:
+      if not analysis.isfL1fL1Zg: continue
+      YieldValue("ggH", "2e2mu", "Untagged", analysis, production).value = 1.5258744890164022
+      YieldValue("qqZZ", "2e2mu", "Untagged", analysis, production).value = 1.6250924214670268
   YieldValue.writedict()
 
 if __name__ == "__main__":
-  if config.LHE:
-    writeyields_LHE()
-  else:
-    writeyields(productionmodelist=args.productionmode, productionlist=args.production)
+  writeyields_LHE()
+  writeyields(productionmodelist=args.productionmode, productionlist=args.production)

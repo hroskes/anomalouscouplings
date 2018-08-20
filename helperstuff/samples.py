@@ -518,7 +518,7 @@ class SampleBase(object):
 
         strsample = str(self_sample)
 
-        if not config.LHE:
+        if not self_sample.production.LHE:
 
             if self_sample.productionmode == "ggZZ":
                 def MC_weight_function(self_tree):
@@ -600,7 +600,7 @@ class SampleBase(object):
             else:
                 raise ValueError("No MC weight function defined for {}".format(self_sample))
 
-        else: #config.LHE
+        else: #self_sample.production.LHE
             photoncut_decay = False
             if self_sample.productionmode == "ggH":
                 def MC_weight_function(self_tree):
@@ -911,7 +911,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                             for hypothesis in self.productionmode.validhypotheses
                             for hffhypothesis in hffhypotheses
                    ]
-        if self.productionmode == "ggH" and config.LHE:
+        if self.productionmode == "ggH" and self.production.LHE:
             return [self]
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "bbH"):
             return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses
@@ -1539,7 +1539,7 @@ class Sample(ReweightingSamplePlus):
         if self.production is None:
             raise ValueError("No option provided for production\n{}".format(args))
 
-        if self.hypothesis is not None and self.hypothesis not in self.productionmode.generatedhypotheses:
+        if self.hypothesis is not None and self.hypothesis not in self.productionmode.generatedhypotheses(self.production):
             raise ValueError("No {} sample produced with hypothesis {}!\n{}".format(self.productionmode, self.hypothesis, args))
 
         if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
@@ -1623,12 +1623,12 @@ class Sample(ReweightingSamplePlus):
         raise self.ValueError("CJLSTdirname")
 
     def CJLSTfile(self):
-        if config.LHE: raise ValueError("Can't get the CJLST file when in LHE mode!")
+        if self.production.LHE: raise ValueError("Can't get the CJLST file when in LHE mode!")
         return os.path.join(self.CJLSTmaindir(), self.CJLSTdirname(), "ZZ4lAnalysis.root")
 
     @property
     def LHEfile(self):
-        if not config.LHE: raise ValueError("Can't get the lhe file when not in LHE mode!")
+        if not self.production.LHE: raise ValueError("Can't get the lhe file when not in LHE mode!")
         if self.production == "LHE_170509":
             if self.productionmode == "ggH":
                 folder = "/work-zfs/lhc/heshy/LHEanomalouscouplings/processlhe/fL1fL1Zg"
@@ -1661,7 +1661,7 @@ class Sample(ReweightingSamplePlus):
         from utilities import tfiles
         if (reweightto.productionmode in ("ggZZ", "VBF bkg", "ZX", "data")
                 or reweightfrom.alternategenerator is not None
-                or config.LHE):
+                or reweightfrom.production.LHE):
             assert reweightfrom.reweightingsample == reweightto
             return 1
         f = tfiles[reweightfrom.withdiscriminantsfile()]
@@ -1689,7 +1689,7 @@ class Sample(ReweightingSamplePlus):
 
     @property
     def copyfromothersample(self):
-        if not config.LHE and self == Sample("170203", "ggH", "MINLO", "0+"):
+        if not self.production.LHE and self == Sample("170203", "ggH", "MINLO", "0+"):
             return Sample("170222", "ggH", "MINLO", "0+")
         if self.production == "170712" and self.productionmode in ("ggH", "HJJ", "VBF", "WH", "ZH", "ttH") and self.alternategenerator is None:
             args = [self.reweightingsampleplus, self.flavor, "170222"]
@@ -1815,8 +1815,16 @@ def allsamples():
     __xcheck()
     for production in productions:
         if "Ulascan" in str(production): continue
+
+        if production.LHE:
+            for hypothesis in "0+", "L1Zg", "fL1Zg0.5", "fL10.5fL1Zg0.5":
+                yield Sample("ggH", hypothesis, production)
+            yield Sample("qqZZ", production)
+            yield Sample("data", production)  #(not real data, just an empty dummy file)
+            continue
+
         for productionmode in "ggH", "VBF", "ZH", "WH", "bbH":
-            for hypothesis in ProductionMode(productionmode).generatedhypotheses:
+            for hypothesis in ProductionMode(productionmode).generatedhypotheses(production):
                 yield Sample(productionmode, hypothesis, production)
         for hypothesis in hffhypotheses:
             yield Sample("HJJ", hypothesis, "0+", production)
@@ -1844,15 +1852,6 @@ def allsamples():
         yield Sample("ZX", production)
         yield Sample("data", production)
 
-if config.LHE:
-    def allsamples():
-        __xcheck()
-        for production in productions:
-            for hypothesis in "0+", "L1Zg", "fL1Zg0.5", "fL10.5fL1Zg0.5":
-                yield Sample("ggH", hypothesis, production)
-            yield Sample("qqZZ", production)
-            yield Sample("data", production)
-
 def __xcheck():
     global __xcheck
     def __xcheck(): pass
@@ -1866,11 +1865,10 @@ def __xcheck():
                 raise KeyError(self.messagefmt.format(key=key, newvalue=value, oldvalue=self[key]))
             super(WriteOnceDict, self).__setitem__(key, value)
 
-    if config.LHE:
-        def CJLSTfile(sample):
+    def CJLSTfile(sample):
+        if sample.production.LHE:
              return sample.LHEfile
-    else:
-        def CJLSTfile(sample):
+        else:
              return sample.CJLSTfile()
 
     CJ2wd = WriteOnceDict("Multiple withdiscriminantsfiles:\n  {oldvalue}\n  {newvalue}\nfrom the same CJLST file:\n  {key}")

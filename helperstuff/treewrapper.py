@@ -29,11 +29,6 @@ sys.setrecursionlimit(100000)
 #to pass to the category code when there are no jets
 dummyfloatstar = array('f', [0])
 
-if not config.LHE:
-    definitelyexists = Sample("VBF", "0+", config.productionsforcombine[0], "POWHEG")
-    if not xrd.exists(definitelyexists.CJLSTfile()):
-        raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
-
 class TreeWrapperBase(Iterator):
     def __init__(self, treesample, minevent=0, maxevent=None):
         self.treesample = treesample
@@ -854,6 +849,10 @@ class FixWrongWH(object):
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
+    definitelyexists = Sample("VBF", "0+", config.productionsforcombine[0], "POWHEG")
+    if not xrd.exists(definitelyexists.CJLSTfile()):
+        raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
+
     def __init__(self, treesample, minevent=0, maxevent=None):
         """
         treesample - which sample the TTree was created from
@@ -863,9 +862,9 @@ class TreeWrapper(TreeWrapperBase):
 
         if xrd.exists(self.filename): self.f = ROOT.TFile.Open(filename)
         if self.isdummy:
-            print "{} does not exist or is bad, using {}".format(filename, definitelyexists.CJLSTfile())
+            print "{} does not exist or is bad, using {}".format(filename, self.definitelyexists.CJLSTfile())
             #give it a tree so that it can get the format, but not fill any entries
-            filename = definitelyexists.CJLSTfile()
+            filename = self.definitelyexists.CJLSTfile()
         self.f = ROOT.TFile.Open(filename)
 
         self.counters = self.f.Get("{}/Counters".format(treesample.TDirectoryname()))
@@ -1423,7 +1422,7 @@ class TreeWrapper(TreeWrapperBase):
 
     @classmethod
     def initweightfunctions(cls):
-        if config.LHE: return
+        if self.treesample.production.LHE: return
         for sample in cls.allsamples:
             setattr(cls, sample.weightname(), sample.get_MC_weight_function())
     @classmethod
@@ -2372,3 +2371,11 @@ class TreeWrapper(TreeWrapperBase):
         ReweightingSamplePlus("WminusH", "0+", "POWHEG", _),
         ReweightingSamplePlus("ttH", "Hff0+", "0+", "POWHEG", _),
     ] for _ in enums.pythiasystematics), [])
+
+def TreeWrapperFactory(treesample, minevent=0, maxevent=None):
+    if treesample.production.LHE:
+        from lhewrapper import LHEWrapper
+        cls = LHEWrapper
+    else:
+        cls = TreeWrapper
+    return cls(treesample, minevent=minevent, maxevent=maxevent)

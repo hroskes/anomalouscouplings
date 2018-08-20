@@ -314,8 +314,8 @@ class ProductionMode(MyEnum):
             return Hypothesis.items(lambda x: x == "0+")
         assert False
     @property
-    def generatedhypotheses(self):
-        if not config.LHE:
+    def generatedhypotheses(self, production):
+        if not production.LHE:
             if self == "ggH":
                 return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5"))
             if self in ("VBF", "ZH", "WH"):
@@ -341,7 +341,7 @@ class ProductionMode(MyEnum):
         else:
             hff = None
             if self in ("HJJ", "ttH"): hff = "Hff0+"
-            for h in self.generatedhypotheses:
+            for h in self.generatedhypotheses(production):
                 yield Sample(self, h, hff, production)
 
     @property
@@ -973,10 +973,7 @@ proddechypotheses = Hypothesis.items(lambda x: True)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
-if config.LHE:
-    analyses = Analysis.items(lambda x: x.doLHE)
-else:
-    analyses = Analysis.items(lambda x: x.doCMS)
+analyses = Analysis.items(lambda x: x.doCMS)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)

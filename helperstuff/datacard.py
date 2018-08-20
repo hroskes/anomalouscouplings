@@ -139,7 +139,7 @@ class _Datacard(MultiEnum):
             result.remove("ZH")
             result.remove("ttH")
             result.remove("bbH")
-        if config.LHE:
+        if self.production.LHE:
             result.remove("ggZZ")
             result.remove("VBFbkg")
         if not config.usedata:
@@ -260,7 +260,7 @@ class _Datacard(MultiEnum):
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
         if self.analysis.usehistogramsforcombine:
-            if config.LHE:
+            if self.production.LHE:
                 if yieldsystematic == "QCDscale_VV":
                     result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in self.histograms])
                     assert "1.1" in result
@@ -274,7 +274,7 @@ class _Datacard(MultiEnum):
                                 for h in self.histograms]
                            )
 
-        if config.LHE:
+        if self.production.LHE:
             if yieldsystematic == "QCDscale_VV": return " ".join(["lnN"] + ["1.1" if p=="qqZZ" else "-" for p in self.productionmodes])
             else: return None
         return " ".join(
@@ -623,7 +623,7 @@ class _Datacard(MultiEnum):
                 Datacard(self.channel, self.category, self.analysis, self.luminosity).makehistograms()
             else:    
                 for channel, category in product(channels, categories):
-                    if config.LHE and channel != "2e2mu": continue
+                    if self.production.LHE and channel != "2e2mu": continue
                     if self.analysis.isdecayonly and category != "Untagged": continue
                     Datacard(channel, category, self.analysis, self.luminosity).makepdfs()
                 self.writeworkspace()
@@ -1114,7 +1114,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
         if all(os.path.exists(thing) for dc in dcs for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)):
             return
         for dc in dcs:
-            if config.LHE and dc.channel != "2e2mu": continue
+            if self.production.LHE and dc.channel != "2e2mu": continue
             if dc.analysis.isdecayonly and dc.category != "Untagged": continue
             dc.makeCardsWorkspaces(**kwargs)
             for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:

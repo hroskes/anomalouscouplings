@@ -449,6 +449,11 @@ def runcombine(analysis, foldername, **kwargs):
     if len(set(years)) != len(years):
         raise ValueError("Some of your productions are from the same year!")
 
+    LHE = {p.LHE for p in productions}
+    if len(LHE) != 1:
+        raise ValueError("Some of your productions are for LHE and some are not!")
+    LHE = LHE.pop()
+
     combinecardsappend = "_lumi.oO[totallumi]Oo."
     workspacefileappend = ".oO[combinecardsappend]Oo."
     moreappend = ".oO[workspacefileappend]Oo."
@@ -490,7 +495,7 @@ def runcombine(analysis, foldername, **kwargs):
 
     if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
         raise ValueError("For decay only analysis have to specify categories=Untagged")
-    if set(usechannels) != {Channel("2e2mu")} and config.LHE:
+    if set(usechannels) != {Channel("2e2mu")} and LHE:
         raise ValueError("For LHE analysis have to specify channels=2e2mu")
 
     if sqrts is None:

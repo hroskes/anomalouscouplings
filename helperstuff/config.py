@@ -37,7 +37,6 @@ try:
 except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
-LHE = False
 usedata = True
 showblinddistributions = True
 unblinddistributions = True

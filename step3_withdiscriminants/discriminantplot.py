@@ -54,7 +54,7 @@ productionmode = ProductionMode(productionmode)
 
 def hypothesestouse():
   if reweightto is not None:
-    for hypothesis in productionmode.generatedhypotheses:
+    for hypothesis in productionmode.generatedhypotheses(production):
       yield hypothesis
     return
   if productionmode == "VBF":
