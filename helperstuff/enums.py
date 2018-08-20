@@ -666,13 +666,14 @@ class Analysis(MyEnum):
     @property
     def doLHE(self):
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
-        if self.isfL1fL1Zg: return True
+        if self.isfL1fL1Zg: return False
         if self == "fa3fa2fL1fL1Zg": return True
         assert False, self
+    @property
     def doCMS(self):
-        if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg", "fL1fL1Zg"): return True
-        if self.isfL1fL1Zg: return False  #but not the main fL1fL1Zg
-        if self == "fa3fa2fL1fL1Zg": return False
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
+        if self.isfL1fL1Zg: return False
+        if self in ("fa3_STXS", "fa3fa2fL1fL1Zg"): return False
         assert False, self
     @property
     def fais(self):
@@ -975,7 +976,7 @@ productionmodes = ProductionMode.items()
 if config.LHE:
     analyses = Analysis.items(lambda x: x.doLHE)
 else:
-    analyses = Analysis.items(lambda x: x.doCMS and x in ("fa3", "fa2", "fL1", "fL1Zg"))
+    analyses = Analysis.items(lambda x: x.doCMS)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
