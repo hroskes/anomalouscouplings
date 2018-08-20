@@ -122,6 +122,7 @@ def submitjobs():
         if config.host == "MARCC":
             submitjobkwargs["queue"] = "lrgmem"
             submitjobkwargs["memory"] = "12000M"
+            submitjobkwargs["docd"] = True  #since cdtemp_slurm happens in thisfile
         submitjob("unbuffer "+os.path.join(config.repositorydir, "step2_adddiscriminants.py"), **submitjobkwargs)
 
 if __name__ == '__main__':
