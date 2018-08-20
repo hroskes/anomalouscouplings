@@ -80,7 +80,7 @@ def adddiscriminants(*args):
             newt.Branch(discriminant, discriminants[discriminant], discriminant + "/F")
 
         try:
-            for entry in treewrapper:
+            for i, entry in enumerate(treewrapper, start=1):
                 for discriminant in discriminants:
                     try:
                         discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
@@ -91,6 +91,9 @@ def adddiscriminants(*args):
                     pdfup[0] = treewrapper.tree.LHEweight_PDFVariation_Up
                     pdfdn[0] = treewrapper.tree.LHEweight_PDFVariation_Dn
                 newt.Fill()
+                if i % 50000 == 0 and LSB_JOBID():
+                    with open(LSF.basename(newfilename)): pass #access it, hopefully preventing tmp from being deleted
+                    with open("touch.txt", "w") as f:     pass #touch another file, same idea
         except:
             treewrapper.Show()
             raise
