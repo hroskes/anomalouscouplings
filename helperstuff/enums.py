@@ -771,7 +771,7 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/180722"
         if self == "GEN_Meng":
             if config.host == "lxplus":
-                return "/eos/cms/store/user/xiaomeng/ZZTo4l/"
+                return "/eos/cms/store/user/xiaomeng/"
             elif config.host == "MARCC":
                 assert False
         assert False
@@ -804,10 +804,10 @@ class Production(MyEnum):
         return int(str(self))
     @property
     def year(self):
-        if "_" in str(self) and "LHE" not in str(self): return type(self)(str(self).split("_")[0]).year
+        if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).year
         if self <= "180224" or self == "180531_2016" or self == "180721_2016":
             return 2016
-        if self == "180416" or self == "180531" or self == "180721_2017":
+        if self == "180416" or self == "180531" or self == "180721_2017" or self == "GEN_Meng":
             return 2017
         assert False
     @property

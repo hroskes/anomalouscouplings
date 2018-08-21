@@ -87,7 +87,8 @@ LHEsmearptelectron = 2.399/6
 LHEsmearptmuon = 2.169/6
 LHEsmearptjet = 18./6
 
-productionsforcombine = ["180721_2016", "180721_2017"]
+#productionsforcombine = ["180721_2016", "180721_2017"]
+productionsforcombine = ["GEN_Meng"]
 
 if len(productionsforcombine) == 1:
     productionforcombine = productionsforcombine[0]

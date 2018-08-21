@@ -54,6 +54,8 @@ class TreeWrapperBase(Iterator):
         self.minevent = minevent
         self.maxevent = maxevent
 
+        self.GEN = self.treesample.production.GEN
+
         self.initlists()
         if treesample.onlyweights(): self.onlyweights()
         self.checkfunctions()
@@ -854,7 +856,7 @@ class FixWrongWH(object):
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
-    definitelyexists = Sample("VBF", "0+", config.productionsforcombine[0], "POWHEG")
+    definitelyexists = Sample("qqZZ", config.productionsforcombine[0])
     if not xrd.exists(definitelyexists.CJLSTfile()):
         raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
 
@@ -983,7 +985,6 @@ class TreeWrapper(TreeWrapperBase):
         self.M2g1ghzgs1prime2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghza1prime2_1E4_JHUGen / 1e4
         self.M2g1prime2ghzgs1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_ghza1prime2_1E4_JHUGen / 1e4**2
 
-        #JECNominal
         self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal               = self.M2g1_VBF                     = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal
         self.p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal               = self.M2g4_VBF                     = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECNominal
         self.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal        = self.M2g1g4_VBF                   = t.p_JJVBF_SIG_ghv1_1_ghv4_1_JHUGen_JECNominal
@@ -1049,6 +1050,110 @@ class TreeWrapper(TreeWrapperBase):
         self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal                                                    = t.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal
         self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal                                                    = t.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal
         self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal                                                 = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal
+
+        #for Dbkgs
+        self.p_JJVBF_S_SIG_ghv1_1_MCFM_JECNominal = t.p_JJVBF_S_SIG_ghv1_1_MCFM_JECNominal
+        self.p_HadZH_S_SIG_ghz1_1_MCFM_JECNominal = t.p_HadZH_S_SIG_ghz1_1_MCFM_JECNominal
+        self.p_HadWH_S_SIG_ghw1_1_MCFM_JECNominal = t.p_HadWH_S_SIG_ghw1_1_MCFM_JECNominal
+        self.p_JJVBF_BKG_MCFM_JECNominal = t.p_JJVBF_BKG_MCFM_JECNominal
+        self.p_HadZH_BKG_MCFM_JECNominal = t.p_HadZH_BKG_MCFM_JECNominal
+        self.p_HadWH_BKG_MCFM_JECNominal = t.p_HadWH_BKG_MCFM_JECNominal
+        self.p_JJQCD_BKG_MCFM_JECNominal = t.p_JJQCD_BKG_MCFM_JECNominal
+        self.p_HadZH_mavjj_JECNominal = t.p_HadZH_mavjj_JECNominal
+        self.p_HadZH_mavjj_true_JECNominal = t.p_HadZH_mavjj_true_JECNominal
+        self.p_HadWH_mavjj_JECNominal = t.p_HadWH_mavjj_JECNominal
+        self.p_HadWH_mavjj_true_JECNominal = t.p_HadWH_mavjj_true_JECNominal
+        self.pConst_JJVBF_S_SIG_ghv1_1_MCFM_JECNominal = t.pConst_JJVBF_S_SIG_ghv1_1_MCFM_JECNominal
+        self.pConst_HadZH_S_SIG_ghz1_1_MCFM_JECNominal = t.pConst_HadZH_S_SIG_ghz1_1_MCFM_JECNominal
+        self.pConst_HadWH_S_SIG_ghw1_1_MCFM_JECNominal = t.pConst_HadWH_S_SIG_ghw1_1_MCFM_JECNominal
+        self.pConst_JJVBF_BKG_MCFM_JECNominal = t.pConst_JJVBF_BKG_MCFM_JECNominal
+        self.pConst_HadZH_BKG_MCFM_JECNominal = t.pConst_HadZH_BKG_MCFM_JECNominal
+        self.pConst_HadWH_BKG_MCFM_JECNominal = t.pConst_HadWH_BKG_MCFM_JECNominal
+        self.pConst_JJQCD_BKG_MCFM_JECNominal = t.pConst_JJQCD_BKG_MCFM_JECNominal
+
+        self.g2HZZ_m4l           = gconstant("HZZ2e2mu", "g2", self.ZZMass)
+        self.g4HZZ_m4l           = gconstant("HZZ2e2mu", "g4", self.ZZMass)
+        self.g1prime2HZZ_m4l     = gconstant("HZZ2e2mu", "L1", self.ZZMass)
+        self.ghzgs1prime2HZZ_m4l = gconstant("HZZ2e2mu", "L1Zg", self.ZZMass)
+
+        self.g2VBF_m4l           = gconstant("VBF",      "g2", self.ZZMass)
+        self.g4VBF_m4l           = gconstant("VBF",      "g4", self.ZZMass)
+        self.g1prime2VBF_m4l     = gconstant("VBF",      "L1", self.ZZMass)
+        self.ghzgs1prime2VBF_m4l = gconstant("VBF",      "L1Zg", self.ZZMass)
+
+        self.g2VH_m4l            = gconstant("VH",       "g2", self.ZZMass)
+        self.g4VH_m4l            = gconstant("VH",       "g4", self.ZZMass)
+        self.g1prime2VH_m4l      = gconstant("VH",       "L1", self.ZZMass)
+        self.ghzgs1prime2VH_m4l  = gconstant("VH",       "L1Zg", self.ZZMass)
+
+        self.g2ZH_m4l            = gconstant("ZH",       "g2", self.ZZMass)
+        self.g4ZH_m4l            = gconstant("ZH",       "g4", self.ZZMass)
+        self.g1prime2ZH_m4l      = gconstant("ZH",       "L1", self.ZZMass)
+        self.ghzgs1prime2ZH_m4l  = gconstant("ZH",       "L1Zg", self.ZZMass)
+
+        self.g2WH_m4l            = gconstant("WH",       "g2", self.ZZMass)
+        self.g4WH_m4l            = gconstant("WH",       "g4", self.ZZMass)
+        self.g1prime2WH_m4l      = gconstant("WH",       "L1", self.ZZMass)
+        #self.ghzgs1prime2WH_m4l  = gconstant("WH",       "L1Zg", self.ZZMass)
+
+        #Gen MEs
+        for weightname in self.genMEs:
+            setattr(self, weightname, getattr(t, weightname))
+
+        #Gen MEs
+        for kfactor in self.kfactors:
+            setattr(self, kfactor, getattr(t, kfactor))
+
+        #category variables
+        self.nExtraLep = t.nExtraLep
+        self.nExtraZ = t.nExtraZ
+        self.PFMET = t.PFMET
+
+        nCleanedJets = t.nCleanedJets
+
+        self.nCleanedJetsPt30 = t.nCleanedJetsPt30
+        if not self.GEN:
+            self.nCleanedJetsPt30BTagged_bTagSF = t.nCleanedJetsPt30BTagged_bTagSF
+            self.nCleanedJetsPt30BTagged_bTagSFUp = t.nCleanedJetsPt30BTagged_bTagSFUp
+            self.nCleanedJetsPt30BTagged_bTagSFDn = t.nCleanedJetsPt30BTagged_bTagSFDn
+            self.jetQGLikelihood = t.JetQGLikelihood.data()
+        else:
+            assert not hasattr(t, "nCleanedJetsPt30BTagged_bTagSF")
+            self.nCleanedJetsPt30BTagged_bTagSF = 0
+            self.jetQGLikelihood = dummyfloatstar
+        self.jetPhi = t.JetPhi.data()
+        jets = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(t.JetPt, t.JetEta, t.JetPhi, t.JetMass)[:2]]
+
+        if nCleanedJets == 0:
+            self.jetQGLikelihood = self.jetPhi = dummyfloatstar
+            self.Jet1Pt = None
+        else:
+            self.Jet1Pt = t.JetPt[0]
+
+        self.DiJetMass = t.DiJetMass
+        self.DiJetDEta = t.DiJetDEta
+        self.HjjPt = (Hvector + jets[0] + jets[1]).Pt() if nCleanedJets >= 2 else -99
+
+        #LHE info, needed for photon cut
+        try:
+            self.LHEDaughterId = t.LHEDaughterId
+            self.LHEDaughterPt = t.LHEDaughterPt
+            self.LHEDaughterEta = t.LHEDaughterEta
+            self.LHEDaughterPhi = t.LHEDaughterPhi
+            self.LHEDaughterMass = t.LHEDaughterMass
+            self.LHEAssociatedParticlePt = t.LHEAssociatedParticlePt
+            self.LHEAssociatedParticleEta = t.LHEAssociatedParticleEta
+            self.LHEAssociatedParticlePhi = t.LHEAssociatedParticlePhi
+            self.LHEAssociatedParticleMass = t.LHEAssociatedParticleMass
+        except AttributeError:
+            pass
+
+        if self.isdata and not self.unblind and not self.passesblindcut():
+            return next(self)
+
+        self.notdijet = self.M2g1_VBF <= 0
+
+        if self.GEN: return self
 
         #JECUp
         self.p_JJVBF_SIG_ghv1_1_JHUGen_JECUp                    = self.M2g1_VBF_JECUp               = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECUp
@@ -1117,6 +1222,56 @@ class TreeWrapper(TreeWrapperBase):
         self.p_JVBF_SIG_ghv1_1_JHUGen_JECUp                                                         = t.p_JVBF_SIG_ghv1_1_JHUGen_JECUp
         self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECUp                                                      = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECUp
 
+        self.p_JJVBF_S_SIG_ghv1_1_MCFM_JECUp = t.p_JJVBF_S_SIG_ghv1_1_MCFM_JECUp
+        self.p_HadZH_S_SIG_ghz1_1_MCFM_JECUp = t.p_HadZH_S_SIG_ghz1_1_MCFM_JECUp
+        self.p_HadWH_S_SIG_ghw1_1_MCFM_JECUp = t.p_HadWH_S_SIG_ghw1_1_MCFM_JECUp
+        self.p_JJVBF_BKG_MCFM_JECUp = t.p_JJVBF_BKG_MCFM_JECUp
+        self.p_HadZH_BKG_MCFM_JECUp = t.p_HadZH_BKG_MCFM_JECUp
+        self.p_HadWH_BKG_MCFM_JECUp = t.p_HadWH_BKG_MCFM_JECUp
+        self.p_JJQCD_BKG_MCFM_JECUp = t.p_JJQCD_BKG_MCFM_JECUp
+        self.p_HadZH_mavjj_JECUp = t.p_HadZH_mavjj_JECUp
+        self.p_HadZH_mavjj_true_JECUp = t.p_HadZH_mavjj_true_JECUp
+        self.p_HadWH_mavjj_JECUp = t.p_HadWH_mavjj_JECUp
+        self.p_HadWH_mavjj_true_JECUp = t.p_HadWH_mavjj_true_JECUp
+        self.pConst_JJVBF_S_SIG_ghv1_1_MCFM_JECUp = t.pConst_JJVBF_S_SIG_ghv1_1_MCFM_JECUp
+        self.pConst_HadZH_S_SIG_ghz1_1_MCFM_JECUp = t.pConst_HadZH_S_SIG_ghz1_1_MCFM_JECUp
+        self.pConst_HadWH_S_SIG_ghw1_1_MCFM_JECUp = t.pConst_HadWH_S_SIG_ghw1_1_MCFM_JECUp
+        self.pConst_JJVBF_BKG_MCFM_JECUp = t.pConst_JJVBF_BKG_MCFM_JECUp
+        self.pConst_HadZH_BKG_MCFM_JECUp = t.pConst_HadZH_BKG_MCFM_JECUp
+        self.pConst_HadWH_BKG_MCFM_JECUp = t.pConst_HadWH_BKG_MCFM_JECUp
+        self.pConst_JJQCD_BKG_MCFM_JECUp = t.pConst_JJQCD_BKG_MCFM_JECUp
+
+        self.nCleanedJetsPt30_jecUp = t.nCleanedJetsPt30_jecUp
+        ptUp = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma))), reverse=True)
+        jecUpIndices = [i for pt, i in ptUp if pt>30]
+
+        self.Jet1Pt_jecUp = ptUp[0][0] if ptUp else None
+        if self.nCleanedJetsPt30_jecUp < 2:
+            self.DiJetMass_jecUp = self.DiJetDEta_jecUp = self.HjjPt_jecUp = -99
+        else:
+            jets_jecUp = [tlvfromptetaphim(pt, t.JetEta[i], t.JetPhi[i], t.JetMass[i]) for pt, i in ptUp[:2]]
+            self.DiJetMass_jecUp = (jets_jecUp[0]+jets_jecUp[1]).M()
+            self.DiJetDEta_jecUp = jets_jecUp[0].Eta() - jets_jecUp[1].Eta()
+            self.HjjPt_jecUp = (Hvector + jets_jecUp[0] + jets_jecUp[1]).Pt() if nCleanedJets >= 2 else -99
+
+        if self.nCleanedJetsPt30 == self.nCleanedJetsPt30_jecUp:
+            self.nCleanedJetsPt30BTagged_bTagSF_jecUp = self.nCleanedJetsPt30BTagged_bTagSF
+            self.jetQGLikelihood_jecUp = self.jetQGLikelihood
+            self.jetPhi_jecUp = self.jetPhi
+            #note that this automatically takes care of the dummyfloatstar case, since if there are no jets
+            # nCleanedJetsPt30 will be the same as nCleanedJetsPt30_jecUp
+        else:
+            self.nCleanedJetsPt30BTagged_bTagSF_jecUp = int(sum(t.JetIsBtaggedWithSF[i] for i in jecUpIndices))
+            if jecUpIndices == range(self.nCleanedJetsPt30_jecUp):
+                #should happen almost always
+                self.jetQGLikelihood_jecUp = self.jetQGLikelihood
+                self.jetPhi_jecUp = self.jetPhi
+            else:
+                self.jetQGLikelihood_jecUp = array("f", [t.JetQGLikelihood[i] for i in jecUpIndices])
+                self.jetPhi_jecUp = array("f", [t.JetPhi[i] for i in jecUpIndices])
+
+        self.notdijet_JECUp = self.M2g1_VBF_JECUp <= 0
+
         #JECDn
         self.p_JJVBF_SIG_ghv1_1_JHUGen_JECDn                    = self.M2g1_VBF_JECDn               = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECDn
         self.p_JJVBF_SIG_ghv4_1_JHUGen_JECDn                    = self.M2g4_VBF_JECDn               = t.p_JJVBF_SIG_ghv4_1_JHUGen_JECDn
@@ -1184,45 +1339,6 @@ class TreeWrapper(TreeWrapperBase):
         self.p_JVBF_SIG_ghv1_1_JHUGen_JECDn                                                         = t.p_JVBF_SIG_ghv1_1_JHUGen_JECDn
         self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECDn                                                      = t.pAux_JVBF_SIG_ghv1_1_JHUGen_JECDn
 
-        #for Dbkgs
-        self.p_JJVBF_S_SIG_ghv1_1_MCFM_JECNominal = t.p_JJVBF_S_SIG_ghv1_1_MCFM_JECNominal
-        self.p_HadZH_S_SIG_ghz1_1_MCFM_JECNominal = t.p_HadZH_S_SIG_ghz1_1_MCFM_JECNominal
-        self.p_HadWH_S_SIG_ghw1_1_MCFM_JECNominal = t.p_HadWH_S_SIG_ghw1_1_MCFM_JECNominal
-        self.p_JJVBF_BKG_MCFM_JECNominal = t.p_JJVBF_BKG_MCFM_JECNominal
-        self.p_HadZH_BKG_MCFM_JECNominal = t.p_HadZH_BKG_MCFM_JECNominal
-        self.p_HadWH_BKG_MCFM_JECNominal = t.p_HadWH_BKG_MCFM_JECNominal
-        self.p_JJQCD_BKG_MCFM_JECNominal = t.p_JJQCD_BKG_MCFM_JECNominal
-        self.p_HadZH_mavjj_JECNominal = t.p_HadZH_mavjj_JECNominal
-        self.p_HadZH_mavjj_true_JECNominal = t.p_HadZH_mavjj_true_JECNominal
-        self.p_HadWH_mavjj_JECNominal = t.p_HadWH_mavjj_JECNominal
-        self.p_HadWH_mavjj_true_JECNominal = t.p_HadWH_mavjj_true_JECNominal
-        self.pConst_JJVBF_S_SIG_ghv1_1_MCFM_JECNominal = t.pConst_JJVBF_S_SIG_ghv1_1_MCFM_JECNominal
-        self.pConst_HadZH_S_SIG_ghz1_1_MCFM_JECNominal = t.pConst_HadZH_S_SIG_ghz1_1_MCFM_JECNominal
-        self.pConst_HadWH_S_SIG_ghw1_1_MCFM_JECNominal = t.pConst_HadWH_S_SIG_ghw1_1_MCFM_JECNominal
-        self.pConst_JJVBF_BKG_MCFM_JECNominal = t.pConst_JJVBF_BKG_MCFM_JECNominal
-        self.pConst_HadZH_BKG_MCFM_JECNominal = t.pConst_HadZH_BKG_MCFM_JECNominal
-        self.pConst_HadWH_BKG_MCFM_JECNominal = t.pConst_HadWH_BKG_MCFM_JECNominal
-        self.pConst_JJQCD_BKG_MCFM_JECNominal = t.pConst_JJQCD_BKG_MCFM_JECNominal
-
-        self.p_JJVBF_S_SIG_ghv1_1_MCFM_JECUp = t.p_JJVBF_S_SIG_ghv1_1_MCFM_JECUp
-        self.p_HadZH_S_SIG_ghz1_1_MCFM_JECUp = t.p_HadZH_S_SIG_ghz1_1_MCFM_JECUp
-        self.p_HadWH_S_SIG_ghw1_1_MCFM_JECUp = t.p_HadWH_S_SIG_ghw1_1_MCFM_JECUp
-        self.p_JJVBF_BKG_MCFM_JECUp = t.p_JJVBF_BKG_MCFM_JECUp
-        self.p_HadZH_BKG_MCFM_JECUp = t.p_HadZH_BKG_MCFM_JECUp
-        self.p_HadWH_BKG_MCFM_JECUp = t.p_HadWH_BKG_MCFM_JECUp
-        self.p_JJQCD_BKG_MCFM_JECUp = t.p_JJQCD_BKG_MCFM_JECUp
-        self.p_HadZH_mavjj_JECUp = t.p_HadZH_mavjj_JECUp
-        self.p_HadZH_mavjj_true_JECUp = t.p_HadZH_mavjj_true_JECUp
-        self.p_HadWH_mavjj_JECUp = t.p_HadWH_mavjj_JECUp
-        self.p_HadWH_mavjj_true_JECUp = t.p_HadWH_mavjj_true_JECUp
-        self.pConst_JJVBF_S_SIG_ghv1_1_MCFM_JECUp = t.pConst_JJVBF_S_SIG_ghv1_1_MCFM_JECUp
-        self.pConst_HadZH_S_SIG_ghz1_1_MCFM_JECUp = t.pConst_HadZH_S_SIG_ghz1_1_MCFM_JECUp
-        self.pConst_HadWH_S_SIG_ghw1_1_MCFM_JECUp = t.pConst_HadWH_S_SIG_ghw1_1_MCFM_JECUp
-        self.pConst_JJVBF_BKG_MCFM_JECUp = t.pConst_JJVBF_BKG_MCFM_JECUp
-        self.pConst_HadZH_BKG_MCFM_JECUp = t.pConst_HadZH_BKG_MCFM_JECUp
-        self.pConst_HadWH_BKG_MCFM_JECUp = t.pConst_HadWH_BKG_MCFM_JECUp
-        self.pConst_JJQCD_BKG_MCFM_JECUp = t.pConst_JJQCD_BKG_MCFM_JECUp
-
         self.p_JJVBF_S_SIG_ghv1_1_MCFM_JECDn = t.p_JJVBF_S_SIG_ghv1_1_MCFM_JECDn
         self.p_HadZH_S_SIG_ghz1_1_MCFM_JECDn = t.p_HadZH_S_SIG_ghz1_1_MCFM_JECDn
         self.p_HadWH_S_SIG_ghw1_1_MCFM_JECDn = t.p_HadWH_S_SIG_ghw1_1_MCFM_JECDn
@@ -1241,93 +1357,6 @@ class TreeWrapper(TreeWrapperBase):
         self.pConst_HadZH_BKG_MCFM_JECDn = t.pConst_HadZH_BKG_MCFM_JECDn
         self.pConst_HadWH_BKG_MCFM_JECDn = t.pConst_HadWH_BKG_MCFM_JECDn
         self.pConst_JJQCD_BKG_MCFM_JECDn = t.pConst_JJQCD_BKG_MCFM_JECDn
-
-        self.g2HZZ_m4l           = gconstant("HZZ2e2mu", "g2", self.ZZMass)
-        self.g4HZZ_m4l           = gconstant("HZZ2e2mu", "g4", self.ZZMass)
-        self.g1prime2HZZ_m4l     = gconstant("HZZ2e2mu", "L1", self.ZZMass)
-        self.ghzgs1prime2HZZ_m4l = gconstant("HZZ2e2mu", "L1Zg", self.ZZMass)
-
-        self.g2VBF_m4l           = gconstant("VBF",      "g2", self.ZZMass)
-        self.g4VBF_m4l           = gconstant("VBF",      "g4", self.ZZMass)
-        self.g1prime2VBF_m4l     = gconstant("VBF",      "L1", self.ZZMass)
-        self.ghzgs1prime2VBF_m4l = gconstant("VBF",      "L1Zg", self.ZZMass)
-
-        self.g2VH_m4l            = gconstant("VH",       "g2", self.ZZMass)
-        self.g4VH_m4l            = gconstant("VH",       "g4", self.ZZMass)
-        self.g1prime2VH_m4l      = gconstant("VH",       "L1", self.ZZMass)
-        self.ghzgs1prime2VH_m4l  = gconstant("VH",       "L1Zg", self.ZZMass)
-
-        self.g2ZH_m4l            = gconstant("ZH",       "g2", self.ZZMass)
-        self.g4ZH_m4l            = gconstant("ZH",       "g4", self.ZZMass)
-        self.g1prime2ZH_m4l      = gconstant("ZH",       "L1", self.ZZMass)
-        self.ghzgs1prime2ZH_m4l  = gconstant("ZH",       "L1Zg", self.ZZMass)
-
-        self.g2WH_m4l            = gconstant("WH",       "g2", self.ZZMass)
-        self.g4WH_m4l            = gconstant("WH",       "g4", self.ZZMass)
-        self.g1prime2WH_m4l      = gconstant("WH",       "L1", self.ZZMass)
-        #self.ghzgs1prime2WH_m4l  = gconstant("WH",       "L1Zg", self.ZZMass)
-
-        #Gen MEs
-        for weightname in self.genMEs:
-            setattr(self, weightname, getattr(t, weightname))
-
-        #Gen MEs
-        for kfactor in self.kfactors:
-            setattr(self, kfactor, getattr(t, kfactor))
-
-        #category variables
-        self.nExtraLep = t.nExtraLep
-        self.nExtraZ = t.nExtraZ
-        self.PFMET = t.PFMET
-
-        nCleanedJets = t.nCleanedJets
-
-        self.nCleanedJetsPt30 = t.nCleanedJetsPt30
-        self.nCleanedJetsPt30BTagged_bTagSF = t.nCleanedJetsPt30BTagged_bTagSF
-        self.nCleanedJetsPt30BTagged_bTagSFUp = t.nCleanedJetsPt30BTagged_bTagSFUp
-        self.nCleanedJetsPt30BTagged_bTagSFDn = t.nCleanedJetsPt30BTagged_bTagSFDn
-        self.jetQGLikelihood = t.JetQGLikelihood.data()
-        self.jetPhi = t.JetPhi.data()
-        jets = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(t.JetPt, t.JetEta, t.JetPhi, t.JetMass)[:2]]
-
-        if nCleanedJets == 0:
-            self.jetQGLikelihood = self.jetPhi = dummyfloatstar
-            self.Jet1Pt = None
-        else:
-            self.Jet1Pt = t.JetPt[0]
-
-        self.DiJetMass = t.DiJetMass
-        self.DiJetDEta = t.DiJetDEta
-        self.HjjPt = (Hvector + jets[0] + jets[1]).Pt() if nCleanedJets >= 2 else -99
-
-        self.nCleanedJetsPt30_jecUp = t.nCleanedJetsPt30_jecUp
-        ptUp = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma))), reverse=True)
-        jecUpIndices = [i for pt, i in ptUp if pt>30]
-
-        self.Jet1Pt_jecUp = ptUp[0][0] if ptUp else None
-        if self.nCleanedJetsPt30_jecUp < 2:
-            self.DiJetMass_jecUp = self.DiJetDEta_jecUp = self.HjjPt_jecUp = -99
-        else:
-            jets_jecUp = [tlvfromptetaphim(pt, t.JetEta[i], t.JetPhi[i], t.JetMass[i]) for pt, i in ptUp[:2]]
-            self.DiJetMass_jecUp = (jets_jecUp[0]+jets_jecUp[1]).M()
-            self.DiJetDEta_jecUp = jets_jecUp[0].Eta() - jets_jecUp[1].Eta()
-            self.HjjPt_jecUp = (Hvector + jets_jecUp[0] + jets_jecUp[1]).Pt() if nCleanedJets >= 2 else -99
-
-        if self.nCleanedJetsPt30 == self.nCleanedJetsPt30_jecUp:
-            self.nCleanedJetsPt30BTagged_bTagSF_jecUp = self.nCleanedJetsPt30BTagged_bTagSF
-            self.jetQGLikelihood_jecUp = self.jetQGLikelihood
-            self.jetPhi_jecUp = self.jetPhi
-            #note that this automatically takes care of the dummyfloatstar case, since if there are no jets
-            # nCleanedJetsPt30 will be the same as nCleanedJetsPt30_jecUp
-        else:
-            self.nCleanedJetsPt30BTagged_bTagSF_jecUp = int(sum(t.JetIsBtaggedWithSF[i] for i in jecUpIndices))
-            if jecUpIndices == range(self.nCleanedJetsPt30_jecUp):
-                #should happen almost always
-                self.jetQGLikelihood_jecUp = self.jetQGLikelihood
-                self.jetPhi_jecUp = self.jetPhi
-            else:
-                self.jetQGLikelihood_jecUp = array("f", [t.JetQGLikelihood[i] for i in jecUpIndices])
-                self.jetPhi_jecUp = array("f", [t.JetPhi[i] for i in jecUpIndices])
 
         self.nCleanedJetsPt30_jecDn = t.nCleanedJetsPt30_jecDn
         ptDn = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma))), reverse=True)
@@ -1358,26 +1387,8 @@ class TreeWrapper(TreeWrapperBase):
                 self.jetQGLikelihood_jecDn = array("f", [t.JetQGLikelihood[i] for i in jecDnIndices])
                 self.jetPhi_jecDn = array("f", [t.JetPhi[i] for i in jecDnIndices])
 
-        #LHE info, needed for photon cut
-        try:
-            self.LHEDaughterId = t.LHEDaughterId
-            self.LHEDaughterPt = t.LHEDaughterPt
-            self.LHEDaughterEta = t.LHEDaughterEta
-            self.LHEDaughterPhi = t.LHEDaughterPhi
-            self.LHEDaughterMass = t.LHEDaughterMass
-            self.LHEAssociatedParticlePt = t.LHEAssociatedParticlePt
-            self.LHEAssociatedParticleEta = t.LHEAssociatedParticleEta
-            self.LHEAssociatedParticlePhi = t.LHEAssociatedParticlePhi
-            self.LHEAssociatedParticleMass = t.LHEAssociatedParticleMass
-        except AttributeError:
-            pass
-
-        if self.isdata and not self.unblind and not self.passesblindcut():
-            return next(self)
-
-        self.notdijet = self.M2g1_VBF <= 0
-        self.notdijet_JECUp = self.M2g1_VBF_JECUp <= 0
         self.notdijet_JECDn = self.M2g1_VBF_JECDn <= 0
+
         return self
 
     @cache_instancemethod
@@ -1541,6 +1552,7 @@ class TreeWrapper(TreeWrapperBase):
             "f",
             "failedtree",
             "filename",
+            "GEN",
             "genMEs",
             "getweightfunction",
             "hypothesis",
@@ -1615,7 +1627,10 @@ class TreeWrapper(TreeWrapperBase):
             self.toaddtotree_int += [_+JEC for _ in STXSdiscriminants]
 
         for _ in self.categorizations:
-            self.toaddtotree_int.append(_.category_function_name)
+            if self.GEN and _.issystematic:
+                self.exceptions.append(_.category_function_name)
+            else:
+                self.toaddtotree_int.append(_.category_function_name)
             if isinstance(_, categorization.BaseSingleCategorization):
                 for name in (
                     _.pHJJ_function_name,
@@ -1643,6 +1658,13 @@ class TreeWrapper(TreeWrapperBase):
             else:
                 self.exceptions.append(sample.weightname())
 
+        if self.GEN:
+            for lst in self.toaddtotree, self.toaddtotree_int, self.toaddtotree_float:
+                for _ in lst[:]:
+                    if "jecup" in _.lower() or "jecdn" in _.lower():
+                        lst.remove(_)
+                        self.exceptions.append(_)
+
         self.genMEs = []
         if not self.isbkg and not self.isalternate and self.treesample.productionmode not in ("tqH",):
             for sample in self.treesample.reweightingsamples():
@@ -1654,8 +1676,9 @@ class TreeWrapper(TreeWrapperBase):
             self.genMEs.append("p_Gen_JJQCD_BKG_MCFM")
 
         self.kfactors = []
-        if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
-        if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
+        if not self.GEN:
+            if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
+            if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
 
     def onlyweights(self):
         """Call this to only add the weights and ZZMass to the new tree"""
