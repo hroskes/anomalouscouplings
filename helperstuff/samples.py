@@ -1816,6 +1816,13 @@ def allsamples():
     for production in productions:
         if "Ulascan" in str(production): continue
 
+        if production == "GEN_Meng":
+           yield Sample("qqZZ", production)
+           continue
+
+        if production.GEN:
+            raise NotImplementedError
+
         if production.LHE:
             for hypothesis in "0+", "L1Zg", "fL1Zg0.5", "fL10.5fL1Zg0.5":
                 yield Sample("ggH", hypothesis, production)

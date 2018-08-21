@@ -710,11 +710,12 @@ class Production(MyEnum):
                  EnumItem("180722", "180721_2017"),
                  EnumItem("180722_Ulascan"),
                  EnumItem("LHE_170509"),
+                 EnumItem("GEN_Meng"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
-        if "_" in str(self) and "LHE" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
+        if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
         if self == "170203":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170203"
@@ -768,6 +769,11 @@ class Production(MyEnum):
                 return "root://lxcms03//data3/Higgs/180721_2017"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/180722"
+        if self == "GEN_Meng":
+            if config.host == "lxplus":
+                return "/eos/cms/store/user/xiaomeng/ZZTo4l/"
+            elif config.host == "MARCC":
+                assert False
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -828,6 +834,9 @@ class Production(MyEnum):
     @property
     def LHE(self):
         return "LHE" in str(self)
+    @property
+    def GEN(self):
+        return "GEN" in str(self)
     @property
     def pdf(self):
       if self.year == 2016: return "NNPDF30_lo_as_0130"
