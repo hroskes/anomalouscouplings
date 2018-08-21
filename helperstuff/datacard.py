@@ -1114,7 +1114,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
         if all(os.path.exists(thing) for dc in dcs for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)):
             return
         for dc in dcs:
-            if self.production.LHE and dc.channel != "2e2mu": continue
+            if dc.production.LHE and dc.channel != "2e2mu": continue
             if dc.analysis.isdecayonly and dc.category != "Untagged": continue
             dc.makeCardsWorkspaces(**kwargs)
             for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
