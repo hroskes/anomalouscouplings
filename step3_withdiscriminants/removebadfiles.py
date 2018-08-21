@@ -17,7 +17,7 @@ for filename in os.listdir("."):
   except AttributeError:
       delete.append(filename)
 
-  if filename in delete and KeepWhileOpenFile(filename+".tmp").wouldbevalid: delete.remove(filename)
+  if filename in delete and not KeepWhileOpenFile(filename+".tmp").wouldbevalid: delete.remove(filename)
 
 if delete:
     print "rm \t\t\t\\"
