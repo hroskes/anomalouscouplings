@@ -1494,8 +1494,8 @@ class DataTree(MultiEnum):
 @listfromiterator
 def datatrees():
     for channel in channels:
-        if channel != "2e2mu" and self.production.LHE: continue
         for production in productions:
+            if channel != "2e2mu" and production.LHE: continue
             for category in categories:
                 for analysis in analyses:
                     if category != "Untagged" and analysis.isdecayonly: continue
