@@ -1824,7 +1824,7 @@ def allsamples():
 
         if production == "GEN_Meng":
            yield Sample("qqZZ", production)
-           yield Sample("ggH", "MINLO", "0+", production)
+           #yield Sample("ggH", "MINLO", "0+", production)
            yield Sample("HJJ", "0+", "Hff0+", production)
            continue
 

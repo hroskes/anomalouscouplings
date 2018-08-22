@@ -19,7 +19,7 @@ import enums
 from gconstants import gconstant
 from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import cache_instancemethod, callclassinitfunctions, deprecate, getmembernames, MultiplyCounter, product, tlvfromptetaphim
+from utilities import cache_instancemethod, callclassinitfunctions, deprecate, getmembernames, MultiplyCounter, product, TFile, tlvfromptetaphim
 import xrd
 import ZX
 
@@ -867,25 +867,20 @@ class TreeWrapper(TreeWrapperBase):
         self.treesample = treesample
         self.filename = filename = treesample.CJLSTfile()
 
-        if xrd.exists(self.filename): self.f = ROOT.TFile.Open(filename)
+        if xrd.exists(self.filename): self.f = TFile(filename, contextmanager=False)
         if self.isdummy:
             print "{} does not exist or is bad, using {}".format(filename, self.definitelyexists.CJLSTfile())
             #give it a tree so that it can get the format, but not fill any entries
             filename = self.definitelyexists.CJLSTfile()
-        self.f = ROOT.TFile.Open(filename)
+        self.f = TFile(filename, contextmanager=False)
 
         self.counters = self.f.Get("{}/Counters".format(treesample.TDirectoryname()))
         if not self.counters:
             raise ValueError("No Counters in file "+filename)
 
-        self.tree = ROOT.TChain("{}/candTree".format(treesample.TDirectoryname()))
-        self.tree.Add(filename)
-
-        if self.f.Get("{}/candTree_failed".format(treesample.TDirectoryname())):
-            self.failedtree = ROOT.TChain("{}/candTree_failed".format(treesample.TDirectoryname()))
-            self.failedtree.Add(filename)
-        else:
-            self.failedtree = None
+        self.tree = self.f.Get("{}/candTree".format(treesample.TDirectoryname()))
+        self.failedtree = self.f.Get("{}/candTree_failed".format(treesample.TDirectoryname()))
+        if not self.failedtree: self.failedtree = None
 
         self.nevents = self.nevents2e2mu = self.cutoffs = None
         self.xsec = None

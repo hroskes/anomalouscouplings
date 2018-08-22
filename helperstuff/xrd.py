@@ -1,7 +1,7 @@
 import os
 from pipes import quote
 import subprocess
-from utilities import KeyDefaultDict
+from utilities import cache, LSB_JOBID
 
 xrdlstemplate = """
 echo '
@@ -11,12 +11,12 @@ ls
 ' | xrd
 """
 
-def xrdls(hostfolder):
-    host, folder = hostfolder
+@cache
+def xrdls(host, folder):
     folder = os.path.join(folder, "")
     output = subprocess.check_output(xrdlstemplate.format(host=quote(host), folder=quote(folder)), shell=True)
     if "no such file or directory" in output:
-        raise OSError("root://{}/{} doesn't exist!".format(host, folder))
+        raise IOError("root://{}/{} doesn't exist!".format(host, folder))
     result = []
     for line in output.split("\n"):
         line = line.split(folder+"> ")[-1]
@@ -25,10 +25,11 @@ def xrdls(hostfolder):
         line = line.split(folder)[-1]
         result.append(line)
     return result
-xrdls = KeyDefaultDict(xrdls)
     
 
 def exists(filename):
+    if filename.startswith("/eos/cms/") and LSB_JOBID():
+        filename = "root://eoscms/"+filename
     if filename.startswith("root://"):
         filename = filename.rstrip("/")
         filename = filename.replace("root://", "")
@@ -36,8 +37,10 @@ def exists(filename):
         location = "/"+location
         dirname, basename = os.path.split(location)
         dirdirname, basedirname = os.path.split(dirname)
-        if basedirname not in xrdls[host, dirdirname]: return False
-        return basename in xrdls[host, dirname]
+        try:
+            return basename in xrdls(host, dirname)
+        except IOError:
+            return False
     else:
         return os.path.exists(filename)
 
