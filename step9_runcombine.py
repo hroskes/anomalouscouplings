@@ -502,9 +502,9 @@ def runcombine(analysis, foldername, **kwargs):
         sqrts = [13]
 
     analysis = Analysis(analysis)
-    foldername = "{}_{}".format(analysis, foldername)
+    fullfoldername = "{}_{}".format(analysis, foldername)
     totallumi = sum(float(Luminosity(p, lumitype)) for p in productions)
-    saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername)
+    saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, fullfoldername)
     try:
         os.makedirs(saveasdir)
     except OSError:
@@ -582,7 +582,7 @@ def runcombine(analysis, foldername, **kwargs):
             repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF"
             repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV", fixmuV), ("muf", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
 
-    folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(foldername))
+    folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
     utilities.mkdir_p(folder)
     with utilities.cd(folder):
         with open(".gitignore", "w") as f:
@@ -722,11 +722,14 @@ def runcombine(analysis, foldername, **kwargs):
 
             utilities.writeplotinfo(
               os.path.join(saveasdir, plotname+".txt"),
-              "python limits.py {} {} --plotname={} --poi={} --subdirectory={}".format(analysis, foldername, plotname, POI, subdirectory),
+              " ".join(pipes.quote(_) for _ in (
+                "python", "limits.py", str(analysis), foldername,
+                "--plotname="+plotname, "--poi="+POI, "--subdirectory="+subdirectory
+              )),
             )
 
         if method in ("MultiDimFit", "Impacts"):
-            copyplots(os.path.join("limits", subdirectory, foldername))
+            copyplots(os.path.join("limits", subdirectory, fullfoldername))
 
 ntry = 0
 maxntries = 3
