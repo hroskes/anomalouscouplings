@@ -720,7 +720,10 @@ def runcombine(analysis, foldername, **kwargs):
                 nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
                 plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
 
-            utilities.writeplotinfo(os.path.join(saveasdir, plotname+".txt"), "python limits.py --plotname="+plotname+" --poi="+POI+" --subdirectory="+subdirectory)
+            utilities.writeplotinfo(
+              os.path.join(saveasdir, plotname+".txt"),
+              "python limits.py {} {} --plotname={} --poi={} --subdirectory={}".format(analysis, foldername, plotname, POI, subdirectory),
+            )
 
         if method in ("MultiDimFit", "Impacts"):
             copyplots(os.path.join("limits", subdirectory, foldername))
