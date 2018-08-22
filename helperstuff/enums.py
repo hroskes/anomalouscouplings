@@ -771,7 +771,7 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/180722"
         if self == "GEN_Meng":
             if config.host == "lxplus":
-                return "/eos/cms/store/user/xiaomeng/"
+                return "/eos/cms/store/user/xiaomeng/writeupTrees/"
             elif config.host == "MARCC":
                 assert False
         assert False

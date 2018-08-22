@@ -705,26 +705,44 @@ def recursivesubclasses(cls):
         result += recursivesubclasses(subcls)
     return result
 
-class Closing(object):
-    def __init__(self, thing, write=False):
-        self.thing = thing
-        self.write = write
-    def __enter__(self):
-        return self.thing
-    def __exit__(self, *exc_info):
-        try:
-            if self.write: self.thing.Write()
-        finally:
-            self.thing.Close()
+class TFile(object):
+    def __init__(self, filename, *args, **kwargs):
+        import xrd
+        if filename.startswith("/eos/cms"):# and LSB_JOBID():
+            filename = "root://eoscms/"+filename
 
-class TFile(Closing):
-    def __init__(self, *args, **kwargs):
-        write = kwargs.pop("write", False)
-        return super(TFile, self).__init__(ROOT.TFile(*args, **kwargs), write=write)
+        self.__filename = filename
+        self.__write = kwargs.pop("write", False)
+        self.__contextmanager = kwargs.pop("contextmanager", True)
+        self.__entered = False
+
+        if not self.__write and not xrd.exists(self.__filename):
+            raise IOError(filename+" does not exist!")
+
+        self.__args = args
+        self.__kwargs = kwargs
+
+        if not self.__contextmanager: self.__enter__()
+
+    def __enter__(self):
+        if self.__entered: raise ValueError("Already entered {!r}".format(self))
+        self.__entered = True
+        self.__f = ROOT.TFile.Open(self.__filename, *self.__args, **self.__kwargs)
+        return self
     def __exit__(self, *exc_info):
         if any(exc_info):
-            self.thing.ls()
-        return super(TFile, self).__exit__(self, *exc_info)
+            self.__f.ls()
+        try:
+            if self.__write: self.__f.Write()
+        finally:
+            self.__f.Close()
+    def __repr__(self):
+        return "{.__name__}('{}', write={}, contextmanager={})".format(type(self), self.__filename, self.__write, self.__contextmanager)
+
+    def __getattr__(self, attr):
+        if not self.__entered:
+            raise AttributeError("Trying to get {} from {!r} before entering it".format(attr, self))
+        return getattr(self.__f, attr)
 
 def setname(name):
     def decorator(function):
