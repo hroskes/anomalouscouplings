@@ -553,7 +553,7 @@ class TemplatesFile(MultiEnum):
           kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
           kwargs["production"] = "180530"
           return TemplatesFile(*kwargs.values())
-        if self.production == "180722":
+        if self.production == "180722" and self.shapesystematic != "MINLO_SM":
           kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
           kwargs["production"] = "180531"
           return TemplatesFile(*kwargs.values())
@@ -616,7 +616,6 @@ def templatesfiles():
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                             if production.LHE and shapesystematic != "": continue
                             if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
-                            if production in ("180531_2017", "180721_2017") and shapesystematic == "MINLO_SM": continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
                             yield TemplatesFile(channel, shapesystematic, templategroup, analysis, production, category)
