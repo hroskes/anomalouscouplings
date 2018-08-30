@@ -553,7 +553,7 @@ class TemplatesFile(MultiEnum):
           kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
           kwargs["production"] = "180530"
           return TemplatesFile(*kwargs.values())
-        if self.production == "180722" and self.shapesystematic not in ("MINLO_SM", "MINLOUp", "MINLODn"):
+        if self.production == "180722" and self.templategroup != "ggh":
           kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
           kwargs["production"] = "180531"
           return TemplatesFile(*kwargs.values())

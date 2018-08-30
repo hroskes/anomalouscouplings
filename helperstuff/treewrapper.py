@@ -3,7 +3,7 @@ from abc import abstractmethod, abstractproperty
 from array import array
 from collections import Counter, Iterator
 import inspect
-from itertools import chain
+from itertools import chain, izip
 from math import sqrt
 import resource
 import sys
@@ -1237,7 +1237,7 @@ class TreeWrapper(TreeWrapperBase):
         self.pConst_JJQCD_BKG_MCFM_JECUp = t.pConst_JJQCD_BKG_MCFM_JECUp
 
         self.nCleanedJetsPt30_jecUp = t.nCleanedJetsPt30_jecUp
-        ptUp = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma))), reverse=True)
+        ptUp = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(izip(t.JetPt, t.JetSigma))), reverse=True)
         jecUpIndices = [i for pt, i in ptUp if pt>30]
 
         self.Jet1Pt_jecUp = ptUp[0][0] if ptUp else None
@@ -1354,7 +1354,7 @@ class TreeWrapper(TreeWrapperBase):
         self.pConst_JJQCD_BKG_MCFM_JECDn = t.pConst_JJQCD_BKG_MCFM_JECDn
 
         self.nCleanedJetsPt30_jecDn = t.nCleanedJetsPt30_jecDn
-        ptDn = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(zip(t.JetPt, t.JetSigma))), reverse=True)
+        ptDn = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(izip(t.JetPt, t.JetSigma))), reverse=True)
         jecDnIndices = [i for pt, i in ptDn if pt>30]
 
         self.Jet1Pt_jecDn = ptDn[0][0] if ptDn else None
@@ -1756,6 +1756,7 @@ class TreeWrapper(TreeWrapperBase):
 
         functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True, LHE=False), []) for sample in reweightingsamples}
         is2e2mu = []
+        genweights = []
         flavs2e2mu = {11*11*13*13}
         if self.treesample.productionmode == "VBFbkg":
             flavs2e2mu |= {11**4, 13**4, 15**4, 11*11*15*15, 13*13*15*15}
@@ -1768,6 +1769,7 @@ class TreeWrapper(TreeWrapperBase):
         length = self.tree.GetEntries() + self.failedtree.GetEntries()
         for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
             is2e2mu.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2e2mu)
+            genweights.append(entry.genHEPMCweight)
 
             for function, weightarray in values:
                 weightarray.append(function(entry))
@@ -1810,8 +1812,8 @@ class TreeWrapper(TreeWrapperBase):
             cutoff = self.cutoffs[strsample] = numpy.percentile(weightarray, percentile)
             weightarray[weightarray>cutoff] = cutoff**2/weightarray[weightarray>cutoff]
             self.nevents2e2mu[strsample] = sum(
-                                                weight
-                                                     for weight, isthis2e2mu in zip(weightarray, is2e2mu)
+                                                weight*genweight
+                                                     for weight, genweight, isthis2e2mu in izip(weightarray, genweights, is2e2mu)
                                                      if isthis2e2mu
                                                )
             #https://root.cern.ch/doc/master/classTH1.html#a79f9811dc6c4b9e68e683342bfc96f5e
