@@ -143,10 +143,9 @@ def combinesystematics(channel, analysis, production, category):
 
       if config.applyMINLOsystematics and category != "Untagged" and (outfiles[MINLOUp] or outfiles[MINLODn]):
           assert outfiles[MINLOUp] and outfiles[MINLODn]
-          useproduction = production
           tf = TemplatesFile(channel, "ggh", analysis, production, category)
-          POWHEG3DSM = gettemplate("ggH", "0+", channel, analysis, useproduction, category)
-          MINLO3DSM = gettemplate("ggH", "0+", "MINLO_SM", "MINLO", channel, analysis, useproduction, category)
+          POWHEG3DSM = gettemplate("ggH", "0+", channel, analysis, production, category)
+          MINLO3DSM = gettemplate("ggH", "0+", "MINLO_SM", "MINLO", channel, analysis, production, category)
 
           for t in tf.templates():
               POWHEG3D = t.gettemplate()
@@ -171,10 +170,10 @@ def combinesystematics(channel, analysis, production, category):
                                           x, y, z,
                                           downbincontent
                                          )
-              if useproduction.year == 2016:
+              if production.year == 2016:
                   MINLO3D.Scale(POWHEG3D.Integral()/MINLO3D.Integral())
                   MINLO3DDn.Scale(POWHEG3D.Integral()/MINLO3DDn.Integral())
-              elif useproduction.year == 2017:
+              elif production.year == 2017:
                   pass
               else:
                   assert False
