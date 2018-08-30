@@ -1,8 +1,29 @@
 #!/usr/bin/env python
 
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--scan", nargs=4, action="append", help="example: --scan file1.root,file2.root,file3.root Expected kGreen+3 kDashed")
+    parser.add_argument("outputfile")
+    parser.add_argument("--legendposition", nargs=4, type=float, default=[.2, .7, .6, .9], help="--legendposition xmin xmax ymin ymax")
+    parser.add_argument("--CLtextposition", default="left")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--luminosity", type=float)
+    group.add_argument("--lumitext")
+    parser.add_argument("--scanrange", nargs=2, type=float, default=[-1, 1], help="x axis limits")
+    parser.add_argument("--POI", default="CMS_zz4l_fai1")
+    parser.add_argument("--CMStext", default="Preliminary")
+    parser.add_argument("--noCMS", dest="drawCMS", action="store_false", help="don't write CMS in the corner")
+    parser.add_argument("--xtitle", required=True, help="x axis label")
+    parser.add_argument("--ytitle", default="#minus2 #Deltaln L", help="y axis label")
+    args = parser.parse_args()
+    kwargs = args.__dict__
+
 import array
 import math
 import os
+import pipes
+import subprocess
 import sys
 
 from collections import namedtuple
@@ -19,10 +40,11 @@ from utilities import cache
 
 Scan = namedtuple("Scan", "filenames title color style")
 
-def plotlimits(outputfile, *scans, **kwargs):
+def plotlimits(*scans, **kwargs):
     legendposition = (.2, .7, .6, .9)
     CLtextposition = "left"
     luminosity = None
+    lumitext = None
     scanrange = -1, 1
     POI = "CMS_zz4l_fai1"
     CMStext = "Preliminary"
@@ -36,10 +58,12 @@ def plotlimits(outputfile, *scans, **kwargs):
             CLtextposition = kwarg
         elif kw == "luminosity":
             luminosity = kwarg
+        elif kw == "lumitext":
+            lumitext = kwarg
         elif kw == "scanrange":
             scanrange = kwarg
         elif kw == "POI":
-            POI = actualvariable(kwarg)
+            POI = kwarg
         elif kw == "CMStext":
             CMStext = kwarg
         elif kw == "drawCMS":
@@ -48,6 +72,8 @@ def plotlimits(outputfile, *scans, **kwargs):
             xtitle = kwarg
         elif kw == "ytitle":
             ytitle = kwarg
+        elif kw == "outputfile":
+            outputfile = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -97,7 +123,7 @@ def plotlimits(outputfile, *scans, **kwargs):
 
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)
-    style.CMS(CMStext, luminosity, drawCMS=drawCMS)
+    style.CMS(CMStext, lumi=luminosity, lumitext=lumitext, drawCMS=drawCMS)
 
     drawlines(CLtextposition, xmin=xmin, xmax=xmax)
     for ext in "png eps root pdf".split():
@@ -144,8 +170,6 @@ class XPos(object):
         else:
             x1, y1 = GetNDC(self.value, ypos, logscale)
             x2 = x1 + xsize
-        else:
-            assert False
 
         y1 += yshift  #make some room between the text and the line
         y2 = y1 + ysize
@@ -222,25 +246,10 @@ def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, xsize=.1, ysize=
 
     return line68, line95, oneSig, twoSig
 
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--scan", nargs=4, action="append", help="example: --scan file1.root,file2.root,file3.root Expected kGreen+3 kDashed")
-    parser.add_argument("outputfile", required=True)
-    parser.add_argument("--legendposition", nargs=4, type=float, default=[.2, .7, .6, .9], help="--legendposition xmin xmax ymin ymax")
-    parser.add_argument("--CLtextposition", default="left")
-    parser.add_argument("--luminosity", required=True)
-    parser.add_argument("--scanrange", nargs=2, type=float, default=[-1, 1], help="x axis limits")
-    parser.add_argument("--POI", default="CMS_zz4l_fai1")
-    parser.add_argument("--CMStext", default="Preliminary")
-    parser.add_argument("--noCMS", dest="drawCMS", action="store_false", help="don't write CMS in the corner")
-    parser.add_argument("--xtitle", required=True, help="x axis label")
-    parser.add_argument("--ytitle", default="#minus2 #Deltaln L", help="y axis label")
-    args = parser.parse_args()
-    kwargs = args.__dict__
 
-    scans = [Scan(filenames.split(","), title, parsecolor(color), parsestyle(style))
-               for filenames, title, color, style in kwargs.pop("scan")]
+if __name__ == "__main__":
+    scans = list(Scan(filenames.split(","), title, parsecolor(color), int(parsestyle(style)))
+               for filenames, title, color, style in kwargs.pop("scan"))
 
     plotlimits(*scans, **kwargs)
 
@@ -250,10 +259,10 @@ if __name__ == "__main__":
         outputfile = outputfile.replace("."+ext, "")
     with open(outputfile+".txt", 'w') as f:
         f.write("cd {} &&\n".format(os.getcwd()))
-        f.write("python " + " ".join(sys.argv)+"\n")
+        f.write("python " + " ".join(pipes.quote(_) for _ in sys.argv)+"\n")
 
         try:
-            subprocess.check_call(["git", "status"])
+            subprocess.check_output(["git", "status"], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             pass
         else:
