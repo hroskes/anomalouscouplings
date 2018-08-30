@@ -13,7 +13,7 @@ def getconfiguration(hostname, username):
       connect = "hroskes@lxplus.cern.ch",
     )
 
-  elif ("login-node" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
+  elif ("login-node" in hostname or "bc-login" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
     return dict(
       host = "MARCC",
       repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/",
