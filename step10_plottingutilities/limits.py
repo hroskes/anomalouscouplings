@@ -12,12 +12,15 @@ if __name__ == "__main__":
     p.add_argument("--poi", default="CMS_zz4l_fai1")
     args = p.parse_args()
 
+import math
+import os
+import sys
 from collections import namedtuple, OrderedDict
+
+import ROOT
+
 from helperstuff import config
 from helperstuff.enums import Analysis, EnumItem, MyEnum
-import os
-import ROOT
-import sys
 
 Point = namedtuple("Point", "x y")
 
@@ -27,17 +30,51 @@ class PrintFormat(MyEnum):
                  EnumItem("powerpoint", "ppt"),
                 )
 
-    def printformat(self, poi):
-        nominaldigits = {
-          "CMS_zz4l_fai1": "2g",
-          "RV": "2f",
-          "RF": "2f",
-        }[poi]
+    def printformat(self, minimum, pluscl, minuscl, str95):
+        digits = max(
+          min(-math.ceil(math.log(pluscl, 10)), -math.ceil(math.log(-minuscl, 10)))+2,
+          -math.ceil(math.log(pluscl/2, 10))+1,
+          -math.ceil(math.log(-minuscl/2, 10))+1,
+        )
+        formatdict = {
+            "minimum": minimum,
+            "pluscl": pluscl,
+            "minuscl": minuscl,
+            "str95": str95,
+        }
+        percentdict = {
+            "digits": digits
+        }
+        if float(("{minimum:.%(digits)df}" % percentdict).format(**formatdict)) == 0:
+            percentdict["plus"] = ""
+            formatdict["minimum"] = 0  #to avoid -0.0000
+        else:
+            percentdict["plus"] = "+"
+
         if self == "latex":
-            return "${min:."+nominaldigits+"}^{{{pluscl:+.2g}}}_{{{minuscl:+.2g}}}$ ${95%}$"
+            fmt = "${minimum:%(plus)s.%(digits)df}^{{{pluscl:+.%(digits)df}}}_{{{minuscl:+.%(digits)df}}}$ ${str95}$" % percentdict
         if self == "ppt":
-            return "{min:."+nominaldigits+"}^({pluscl:+.2g})_({minuscl:+.2g}) {95%}"
-        assert False
+            fmt = "${minimum:%(plus)s.%(digits)df}^({pluscl:+.%(digits)df})_({minuscl:+.%(digits)df}) {str95}" % percentdict
+        try:
+            return fmt.format(**formatdict)
+        except:
+            print fmt
+            raise
+
+def str95(*ranges):
+  result = []
+  for lo, hi in ranges:
+    if lo < 0 < hi:
+      digits = max(
+        min(-math.ceil(math.log(hi, 10)), -math.ceil(math.log(-lo, 10)))+2,
+        -math.ceil(math.log(hi/2, 10))+1,
+        -math.ceil(math.log(-lo/2, 10))+1,
+      )
+    else:
+      digits = 2
+    result.append(("[{:.%(digits)df}, {:.%(digits)df}]" % {"digits": digits}).format(lo, hi))
+  
+  return " \cup ".join(result)
 
 def findwhereyequals(y, p1, p2):
     m = (p2.y-p1.y) / (p2.x - p1.x)
@@ -125,7 +162,7 @@ def printlimits(analysis, foldername, **kwargs):
         print label
         print
 
-        repmap["min"] = minimum
+        repmap["minimum"] = minimum
         if len(c68) == 1:
             repmap["pluscl"] = c68[0][1] - minimum
             repmap["minuscl"] = c68[0][0] - minimum
@@ -141,16 +178,16 @@ def printlimits(analysis, foldername, **kwargs):
                     assert False
             else:
                 print "Need something more complicated for 68% CL!"
-                print "ranges: ", " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in c68)
+                print "ranges: ", str95(*c68)
                 for range_ in c68:
                     if range_[0] < minimum < range_[1]:
                         break
                 repmap["pluscl"] = range_[1] - minimum
                 repmap["minuscl"] = range_[0] - minimum
 
-        repmap["95%"] = " \cup ".join("[{:.2g},{:.2g}]".format(range_[0],range_[1]) for range_ in c95)
+        repmap["str95"] = str95(*c95)
 
-        print printformat.printformat(poi=poi).format(**repmap)
+        print printformat.printformat(**repmap)
 
         print
         print
