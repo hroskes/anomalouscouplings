@@ -9,6 +9,7 @@ def getconfiguration(hostname, username):
       host = "lxplus",
       repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings/",
       plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/",
+      slcversion = 6,
       svndir = "/afs/cern.ch/work/h/hroskes/AN/",
       connect = "hroskes@lxplus.cern.ch",
     )
@@ -19,6 +20,7 @@ def getconfiguration(hostname, username):
       repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/",
       repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/",
       plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/",
+      slcversion = 7,
       lxplususername = "hroskes",
       email = "heshyr@gmail.com",
       connect = "jroskes1@jhu.edu@gateway2.marcc.jhu.edu",
