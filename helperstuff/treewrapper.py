@@ -3,7 +3,7 @@ from abc import abstractmethod, abstractproperty
 from array import array
 from collections import Counter, Iterator
 import inspect
-from itertools import chain, izip
+from itertools import chain, izip, izip_longest
 from math import sqrt
 import resource
 import sys
@@ -1705,6 +1705,7 @@ class TreeWrapper(TreeWrapperBase):
         self.tree.GetEntry(0)  #to initialize the vectors to something other than (vector<float>*)0 which gives a segfault in python
         self.tree.SetBranchStatus("*", 0)
         self.tree.SetBranchStatus("ZZMass", 1)
+        self.tree.SetBranchStatus("genHEPMCweight", 1)
         self.tree.SetBranchStatus("Z*Flav", 1)
         for variable in categoryingredients:
             self.tree.SetBranchStatus(variable, 1)
@@ -1747,6 +1748,7 @@ class TreeWrapper(TreeWrapperBase):
             for alternateweight in doalternateweightxsecstree:
                 if alternateweight == "1": continue
                 tree.SetBranchStatus(alternateweight.weightname, 1)
+            tree.SetBranchStatus("genHEPMCweight", 1)
             tree.SetBranchStatus("GenZ*Flav", 1)
             tree.SetBranchStatus("LHEDaughter*", 1)
             tree.SetBranchStatus("LHEAssociated*", 1)
@@ -1812,9 +1814,9 @@ class TreeWrapper(TreeWrapperBase):
             cutoff = self.cutoffs[strsample] = numpy.percentile(weightarray, percentile)
             weightarray[weightarray>cutoff] = cutoff**2/weightarray[weightarray>cutoff]
             self.nevents2e2mu[strsample] = sum(
-                                                weight*genweight
-                                                     for weight, genweight, isthis2e2mu in izip(weightarray, genweights, is2e2mu)
-                                                     if isthis2e2mu
+                                                weight*genweight*isthis2e2mu #multiply by isthis2e2mu, which is supposed to be True=1, to make sure it's not None due to izip_longest, which would indicate a bug
+                                                     for weight, genweight, isthis2e2mu in izip_longest(weightarray, genweights, is2e2mu)
+                                                     if isthis2e2mu!=False
                                                )
             #https://root.cern.ch/doc/master/classTH1.html#a79f9811dc6c4b9e68e683342bfc96f5e
             if self.nevents2e2mu[strsample]:
