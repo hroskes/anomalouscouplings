@@ -266,22 +266,35 @@ class _Datacard(MultiEnum):
                     assert "1.1" in result
                     return result
                 else: return None
-            return " ".join(
-                            ["lnN"] +
-                            [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production,
-                                                      h if "bkg_" in h else h.split("_")[0]
-                                )                    )
-                                for h in self.histograms]
-                           )
+            lst = ["lnN"]
+            for h in self.histograms:
+                ysv = str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production,
+                                               h if "bkg_" in h else h.split("_")[0]
+                                              )
+                         )
+                try:
+                    wss = WorkspaceShapeSystematic(str(yieldsystematic))
+                except ValueError:
+                    pass
+                if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
+                    raise ValueError("{} has both a yield and shape systematic in {} {}".format(wss, p, self.category))
+                lst.append(ysv)
+            return " ".join(lst)
 
         if self.production.LHE:
             if yieldsystematic == "QCDscale_VV": return " ".join(["lnN"] + ["1.1" if p=="qqZZ" else "-" for p in self.productionmodes])
             else: return None
-        return " ".join(
-                        ["lnN"] +
-                        [str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production, p))
-                            for p in self.productionmodes]
-                       )
+        lst = ["lnN"]
+        for p in self.productionmodes:
+            ysv = str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production, p))
+            try:
+                wss = WorkspaceShapeSystematic(str(yieldsystematic))
+            except ValueError:
+                pass
+            if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
+                raise ValueError("{} has both a yield and shape systematic in {} {}".format(wss, p, self.category))
+            lst.append(ysv)
+        return " ".join(lst)
 
     @MakeSystematicFromEnums(WorkspaceShapeSystematic, Channel)
     def workspaceshapesystematicchannel(self, workspaceshapesystematic, channel):

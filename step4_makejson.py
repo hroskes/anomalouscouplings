@@ -31,7 +31,12 @@ def makejson(*args):
 def submitjobs(filesperjob):
     i = 0
     for templatesfile in templatesfiles:
-        if os.path.exists(templatesfile.jsonfile()) or not KeepWhileOpenFile(templatesfile.jsonfile()+".tmp").wouldbevalid: continue
+        if os.path.exists(templatesfile.jsonfile()): continue
+        if templatesfile.copyfromothertemplatesfile is not None: continue
+        kwof = KeepWhileOpenFile(templatesfile.jsonfile()+".tmp")
+        if not kwof.wouldbevalid:
+            jobid = kwof.runningjobid
+            if jobid: yield jobid
         if not i%filesperjob: yield submitjob("unbuffer "+os.path.join(config.repositorydir, "step4_makejson.py"), jobname="json"+str(i/filesperjob), jobtime="10:0:0", docd=True)
         i += 1
 

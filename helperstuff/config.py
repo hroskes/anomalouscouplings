@@ -92,7 +92,8 @@ LHEsmearptjet = 18./6
 if host == "MARCC":
     productionsforcombine = ["180721_2016", "180721_2017"]
 elif host == "lxplus":
-    productionsforcombine = ["GEN_Meng"]
+#    productionsforcombine = ["GEN_Meng"]
+    productionsforcombine = ["180721_2016", "180721_2017"]
 
 if len(productionsforcombine) == 1:
     productionforcombine = productionsforcombine[0]
