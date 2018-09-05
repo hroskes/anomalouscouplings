@@ -728,7 +728,7 @@ class TFile(object):
         if self.__entered: raise ValueError("Already entered {!r}".format(self))
         self.__entered = True
         self.__f = ROOT.TFile.Open(self.__filename, *self.__args, **self.__kwargs)
-        return self
+        return self.__f
     def __exit__(self, *exc_info):
         if any(exc_info):
             self.__f.ls()
