@@ -304,8 +304,8 @@ def writeyields(productionmodelist=None, productionlist=None):
             if production.year == 2016:
               minloup = minlodn = 1
             elif production.year == 2017:
-              minloup = sum(result[ReweightingSamplePlus(tosample, "MINLO"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
-              minlodn = nominal**2 / minloup
+              minloup = sum(result[ReweightingSamplePlus(tosample.reweightingsample, "MINLO"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+              minlodn = 1 / minloup
           else:
             minloup = minlodn = 1
           for channel in channels:

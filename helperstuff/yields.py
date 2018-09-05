@@ -357,9 +357,4 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
               print tosample, categorization, alternateweight
               raise
 
-    for k, v in result.iteritems():
-      t.GetEntry(0)
-      if "PDF" in str(k[2]): print " ".join(str(_) for _ in k), v, k[2].weightname, getattr(t, k[2].weightname)
-      if k[2] == "1" and not k[1].issystematic: print " ".join(str(_) for _ in k), v, k[2].weightname, 1.
-
     return result
