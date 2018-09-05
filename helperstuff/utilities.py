@@ -176,6 +176,14 @@ class KeepWhileOpenFile(object):
         with self:
             return bool(self)
 
+    @property
+    def runningjobid(self):
+        try:
+            with open(self.filename) as f:
+                return int(f.read())
+        except (IOError, ValueError):
+            return None
+
     def __open(self):
         self.fd = os.open(self.filename, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
 

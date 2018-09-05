@@ -111,6 +111,7 @@ def submitjobs(removefiles, jsontoo=False):
 
     njobs = 0
     for templatesfile in templatesfiles:
+        if templatesfile.copyfromothertemplatesfile is not None: continue
         if templatesfile.templatesfile() in remove:
             remove[templatesfile.templatesfile()] = True
             remove[templatesfile.templatesfile(firststep=True)] = True
