@@ -64,12 +64,16 @@ def writeyields(productionmodelist=None, productionlist=None):
                             if systematic.hassample(production.year)]
         if production.year == 2017:
           samplegroups += [{ReweightingSamplePlus(s, "ext")} for s in samples]
+          if productionmode == "ggH":
+            samplegroups += [{ReweightingSamplePlus(s.reweightingsample, "MINLO")} for s in samples]
 
       for usesamples in samplegroups:
         tmpresult = MultiplyCounter()
         for tosample in usesamples:
           if (productionmode in ("ggZZ", "VBF bkg", "ZX", "bbH")
-               or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None):
+               or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None
+               or hasattr(tosample, "alternategenerator") and tosample.alternategenerator == "MINLO"
+             ):
             usealternateweights = [AlternateWeight("1")]
           elif productionmode.issignal and tosample.extension == "ext":
             usealternateweights = [AlternateWeight("PythiaScaleUp"), AlternateWeight("PythiaScaleDn")]
@@ -295,6 +299,17 @@ def writeyields(productionmodelist=None, productionlist=None):
           for channel in channels:
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_pythia", production).value = (scaledn, scaleup)
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_tune_pythia", production).value = (tunedn, tuneup)
+
+          if productionmode == "ggH" and category == "Untagged":
+            if production.year == 2016:
+              minloup = minlodn = 1
+            elif production.year == 2017:
+              minloup = sum(result[ReweightingSamplePlus(tosample, "MINLO"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
+              minlodn = nominal**2 / minloup
+          else:
+            minloup = minlodn = 1
+          for channel in channels:
+            YieldSystematicValue(channel, category, analysis, productionmode, "QCDscale_ggH2in", production).value = (minlodn, minloup)
 
           if productionmode == "qqZZ":
             EWcorrup = sum(result[tosample, categorization, AlternateWeight("EWcorrUp"), category] for tosample in samples) / nominal

@@ -50,6 +50,7 @@ class YieldSystematic(MyEnum):
                  EnumItem("CMS_hzz4l_zz4e_zjets"),
                  EnumItem("CMS_hzz4l_zz4mu_zjets"),
                  EnumItem("CMS_hzz4l_zz2e2mu_zjets"),
+                 EnumItem("QCDscale_ggH2in"),
                 )
 
     def yamlfilename(self, channel=None):
