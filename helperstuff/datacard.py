@@ -76,6 +76,7 @@ def MakeSystematicFromEnums(*theenums, **kwargs):
                 enums = theenums
 
                 def __get__(self_systematic, self_datacard, objtype):
+                    if self_datacard is None: return self_systematic #when you get it directly from the Datacard class
                     return function(
                                     self_datacard,
                                     **{enum.enumname: getattr(self_systematic, enum.enumname)
@@ -95,14 +96,25 @@ def MakeSystematicFromEnums(*theenums, **kwargs):
                 yield self.name.format(**formatdict)
 
 
-        def applyallfunctions(self, datacardcls):
+        def applyallfunctions(self_systematic, datacardcls):
             cartesianproduct = product(*(enum.items() for enum in theenums))
             for enumvalues in cartesianproduct:
                 formatdict = {enum.enumname: enumvalue for enum, enumvalue in zip(theenums, enumvalues)}
-                name = self.name.format(**formatdict)
-                setattr(datacardcls, name, self.systematicfromenumswithvalues(*enumvalues))
+                name = self_systematic.name.format(**formatdict)
+                newsystematic = self_systematic.systematicfromenumswithvalues(*enumvalues)
+                if hasattr(datacardcls, name):
+                    oldsystematic = getattr(datacardcls, name)
+                    def doublesystematic(self_datacard, counter=Counter()):
+                        counter[self_datacard] += 1
+                        if counter[self_datacard] == 1: return oldsystematic.__get__(self_datacard, type(self_datacard))
+                        if counter[self_datacard] == 2: return newsystematic.__get__(self_datacard, type(self_datacard))
+                    doublesystematic.__name__ = name  #does this do anything when I'm going to property it anyway? not sure
+                    doublesystematic = property(doublesystematic)
+                    setattr(datacardcls, name, doublesystematic)
+                else:
+                    setattr(datacardcls, name, newsystematic)
 
-            delattr(datacardcls, self.origname)
+            delattr(datacardcls, self_systematic.origname)
 
     return SystematicFromEnums
 
@@ -291,8 +303,9 @@ class _Datacard(MultiEnum):
                 wss = WorkspaceShapeSystematic(str(yieldsystematic))
             except ValueError:
                 pass
-            if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
-                raise ValueError("{} has both a yield and shape systematic in {} {}".format(wss, p, self.category))
+            else:
+                if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
+                    raise ValueError("{} has both a yield and shape systematic in {} {}".format(wss, p, self.category))
             lst.append(ysv)
         return " ".join(lst)
 
