@@ -397,6 +397,8 @@ class ProductionMode(MyEnum):
             result += ["Scale", "Res"]
       if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyMINLOsystematics:
         result += ["MINLO"]
+      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged"):
+        result += ["CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
     def alternateweights(self, year):
@@ -417,17 +419,28 @@ class WorkspaceShapeSystematic(MyEnum):
                  EnumItem("CMS_scale_", "Scale"),
                  EnumItem("CMS_scaleres_", "ScaleRes"),
                  EnumItem("QCDscale_ggH2in", "MINLO"),
+                 EnumItem("CMS_scale_j_13TeV_2016"),
+                 EnumItem("CMS_scale_j_13TeV_2017"),
                 )
     @property
     def isperchannel(self):
         if self in ("Res", "Scale", "ScaleRes"): return True
-        return False
+        if self in ("MINLO", "CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017"): return False
+        assert False, self
+
+    @property
+    def years(self):
+        if self == "CMS_scale_j_13TeV_2016": return 2016,
+        if self == "CMS_scale_j_13TeV_2017": return 2017,
+        if self in ("Res", "Scale", "ScaleRes", "MINLO"): return 2016, 2017
+        assert False, self
 
     @property
     def nickname(self):
       for _ in "Res", "Scale", "ScaleRes", "MINLO":
         if self == _:
           return _
+      if self in ("CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017"): return "JEC"
       return str(self)
 
 class SystematicDirection(MyEnum):

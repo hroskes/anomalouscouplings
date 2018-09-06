@@ -300,7 +300,7 @@ def writeyields(productionmodelist=None, productionlist=None):
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_pythia", production).value = (scaledn, scaleup)
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_tune_pythia", production).value = (tunedn, tuneup)
 
-          if productionmode == "ggH" and category == "Untagged":
+          if productionmode == "ggH":
             if production.year == 2016:
               minloup = minlodn = 1
             elif production.year == 2017:

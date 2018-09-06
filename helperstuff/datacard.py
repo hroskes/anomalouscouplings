@@ -104,7 +104,7 @@ def MakeSystematicFromEnums(*theenums, **kwargs):
                 newsystematic = self_systematic.systematicfromenumswithvalues(*enumvalues)
                 if hasattr(datacardcls, name):
                     oldsystematic = getattr(datacardcls, name)
-                    def doublesystematic(self_datacard, counter=Counter()):
+                    def doublesystematic(self_datacard, counter=Counter(), oldsystematic=oldsystematic, newsystematic=newsystematic):
                         counter[self_datacard] += 1
                         if counter[self_datacard] == 1: return oldsystematic.__get__(self_datacard, type(self_datacard))
                         if counter[self_datacard] == 2: return newsystematic.__get__(self_datacard, type(self_datacard))
@@ -280,16 +280,13 @@ class _Datacard(MultiEnum):
                 else: return None
             lst = ["lnN"]
             for h in self.histograms:
-                ysv = str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production,
-                                               h if "bkg_" in h else h.split("_")[0]
-                                              )
-                         )
+                p = ProductionMode(h if "bkg_" in h else h.split("_")[0])
+                ysv = str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production, p))
                 try:
                     wss = WorkspaceShapeSystematic(str(yieldsystematic))
                 except ValueError:
                     pass
-                if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
-                    raise ValueError("{} has both a yield and shape systematic in {} {}".format(wss, p, self.category))
+                if wss in p.workspaceshapesystematics(self.category): ysv = "-"
                 lst.append(ysv)
             return " ".join(lst)
 
@@ -311,6 +308,7 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(WorkspaceShapeSystematic, Channel)
     def workspaceshapesystematicchannel(self, workspaceshapesystematic, channel):
+      if self.year not in workspaceshapesystematic.years: return None
       if workspaceshapesystematic.isperchannel and channel == self.channel:
         if self.analysis.usehistogramsforcombine:
           return " ".join(
@@ -329,10 +327,11 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(WorkspaceShapeSystematic)
     def workspaceshapesystematic(self, workspaceshapesystematic):
+      if self.year not in workspaceshapesystematic.years: return None
       if workspaceshapesystematic.isperchannel: return None
       if self.analysis.usehistogramsforcombine:
         return " ".join(
-                        ["lnN"] +
+                        ["shape1"] +
                         ["1" if workspaceshapesystematic in
                                 ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
                              else "-"
