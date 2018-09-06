@@ -272,29 +272,20 @@ class _Datacard(MultiEnum):
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
         if self.analysis.usehistogramsforcombine:
-            if self.production.LHE:
-                if yieldsystematic == "QCDscale_VV":
-                    result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in self.histograms])
-                    assert "1.1" in result
-                    return result
-                else: return None
-            lst = ["lnN"]
-            for h in self.histograms:
-                p = ProductionMode(h if "bkg_" in h else h.split("_")[0])
-                ysv = str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production, p))
-                try:
-                    wss = WorkspaceShapeSystematic(str(yieldsystematic))
-                except ValueError:
-                    pass
-                if wss in p.workspaceshapesystematics(self.category): ysv = "-"
-                lst.append(ysv)
-            return " ".join(lst)
+            productionmodes = [h if "bkg_" in h else h.split("_")[0] for h in self.histograms]
+        else:
+            productionmodes = self.productionmodes
 
         if self.production.LHE:
-            if yieldsystematic == "QCDscale_VV": return " ".join(["lnN"] + ["1.1" if p=="qqZZ" else "-" for p in self.productionmodes])
+            if yieldsystematic == "QCDscale_VV":
+                result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for p in productionmodes])
+                assert "1.1" in result
+                return result
             else: return None
+
         lst = ["lnN"]
-        for p in self.productionmodes:
+
+        for p in productionmodes:
             ysv = str(YieldSystematicValue(yieldsystematic, self.channel, self.category, self.analysis, self.production, p))
             try:
                 wss = WorkspaceShapeSystematic(str(yieldsystematic))
@@ -302,8 +293,13 @@ class _Datacard(MultiEnum):
                 pass
             else:
                 if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
-                    raise ValueError("{} has both a yield and shape systematic in {} {}".format(wss, p, self.category))
+                    if (yieldsystematic in ("QCDscale_ggH2in", "CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017") and p == "ggH" and self.category in ("VBFtagged", "VHHadrtagged")):
+                        ysv = "1"
+                        lst[0] = "shape1?"
+                    else:
+                        raise ValueError("{} has both a yield and shape systematic in {} {}".format(wss, p, self.category))
             lst.append(ysv)
+
         return " ".join(lst)
 
     @MakeSystematicFromEnums(WorkspaceShapeSystematic, Channel)
@@ -329,6 +325,12 @@ class _Datacard(MultiEnum):
     def workspaceshapesystematic(self, workspaceshapesystematic):
       if self.year not in workspaceshapesystematic.years: return None
       if workspaceshapesystematic.isperchannel: return None
+      try:
+          YieldSystematic(str(workspaceshapesystematic))
+      except ValueError:
+          pass
+      else:
+          return None  #in that case shape1? is taken care of in yieldsystematic
       if self.analysis.usehistogramsforcombine:
         return " ".join(
                         ["shape1"] +
@@ -511,6 +513,7 @@ class _Datacard(MultiEnum):
             pdfkwargs = {"fai": fai, "a1": a1, "ai": ai, "D1": D1, "D2": D2, "D3": D3, "faj": faj, "phiai": phiai, "phiaj": phiaj}
             self.pdfs.append(Pdf(self, p, **pdfkwargs))
             for systematic in p.workspaceshapesystematics(self.category):
+                if self.production.year not in systematic.years: continue
                 self.pdfs.append(Pdf(self, p, systematic, "Up", **pdfkwargs))
                 self.pdfs.append(Pdf(self, p, systematic, "Down", **pdfkwargs))
 
