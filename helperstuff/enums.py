@@ -397,7 +397,7 @@ class ProductionMode(MyEnum):
             result += ["Scale", "Res"]
       if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyMINLOsystematics:
         result += ["MINLO"]
-      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged"):
+      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
         result += ["CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
