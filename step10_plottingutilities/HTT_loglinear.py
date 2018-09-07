@@ -25,12 +25,14 @@ from mergeplots import Folder
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
 def saveasdir(forWIN=False):
-    return os.path.join(config.plotsbasedir, "limits", "forWIN" if forWIN else "")
+    return os.path.join(config.plotsbasedir, "limits", "HTT")
 baseplotname = "limit_lumi80.15.root"
 
-def applystyle(mg, mglog, folders, ydivide):
+def applystyle(mgs, mglogs, folders, xdivides, ydivide):
+    assert len(mgs) == len(mglogs) == len(xdivides)+1
+    for mg, mglog, xmin, xmax in izip(mgs, mglogs, [-setmax]+list(xdivides), list(xdivides)+[setmax]):
         mglog.GetXaxis().SetTitle(folders[0].xtitle)
-        mglog.GetXaxis().SetRangeUser(-setmax, setmax)
+        mglog.GetXaxis().SetRangeUser(xmin, xmax)
         mglog.GetXaxis().CenterTitle()
         mglog.GetYaxis().CenterTitle()
         mglog.SetMinimum(ydivide)
@@ -42,7 +44,7 @@ def applystyle(mg, mglog, folders, ydivide):
         mglog.GetYaxis().SetTitleSize(.1)
 
         mg.GetXaxis().SetTitle(folders[0].xtitle)
-        mg.GetXaxis().SetRangeUser(-setmax, setmax)
+        mg.GetXaxis().SetRangeUser(xmin, xmax)
         mg.GetXaxis().CenterTitle()
         mg.GetYaxis().CenterTitle()
         mg.SetMinimum(0)
@@ -69,11 +71,15 @@ def PRL_loglinear(**kwargs):
     markerposition = None
     onlyanalysis = None
     ydivide = 11
+    xdivides = -.05, .05
     saveas = None
     forWIN = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "ydivide":
             ydivide = float(kwarg)
+        elif kw == "xdivides":
+            xdivides = sorted(float(_) for _ in kwarg)
+            assert len(xdivides) == 2, xdivides
         elif kw == "markerposition":
             markerposition = kwarg
         elif kw == "analysis":
@@ -114,18 +120,19 @@ def PRL_loglinear(**kwargs):
 
         c = plotcopier.TCanvas("c{}".format(random.randint(1, 1000000)), "", 8, 30, 1600, 1600)
 
-        leftmargin = .1
+        leftmargin = .2
         rightmargin = .045 #apply to the individual pads or 1 of the x axis gets cut off
         topmargin = .02
-        bottommargin = .125
+        bottommargin = .225
         assert abs((leftmargin + rightmargin) - (topmargin + bottommargin)) < 1e-5, (leftmargin + rightmargin, topmargin + bottommargin)
         c.SetLeftMargin(leftmargin)
         c.SetRightMargin(0)
-        c.Divide(1, 2, 0, 0)
-        linearpad = c.cd(2)
-        logpad = legendpad = c.cd(1)
-        linearpad.SetTicks()
-        logpad.SetTicks()
+        c.Divide(3, 2, 0, 0)
+        logpads = [c.cd(1), c.cd(2), c.cd(3)]
+        linearpads = [c.cd(4), c.cd(5), c.cd(6)]
+        legendpad = logpads[1]
+        for _ in linearpads + logpads:
+            _.SetTicks()
 
         analysis = Analysis(analysis)
         repmap = {"analysis": str(analysis)}
@@ -157,19 +164,23 @@ def PRL_loglinear(**kwargs):
         mglog = mg.Clone()
         if markerposition and marker.GetY()[0] <= 0:
             mg.Add(marker, "P")
-        logpad.cd()
-        logpad.SetLogy()
-        mglog.Draw("al")
-        logpad.SetRightMargin(rightmargin)
-        logpad.SetTopMargin(topmargin*2)
+        mgs = [mg, mg.Clone(), mg.Clone()]
+        mglogs = [mglog, mglog.Clone(), mglog.Clone()]
+        for logpad, mglog in izip(logpads, mglogs):
+            logpad.cd()
+            logpad.SetLogy()
+            mglog.Draw("al")
+            logpad.SetTopMargin(topmargin*2)
+        logpads[-1].SetRightMargin(rightmargin)
         style.subfig(letter, textsize=.11, x1=.87, x2=.91, y1=.87, y2=.91)
 
-        linearpad.cd()
-        mg.Draw("al")
-        linearpad.SetRightMargin(rightmargin)
-        linearpad.SetBottomMargin(bottommargin*2)
+        for linearpad, mg in izip(linearpads, mgs):
+            linearpad.cd()
+            mg.Draw("al")
+            linearpad.SetBottomMargin(bottommargin*2)
+        linearpads[-1].SetRightMargin(rightmargin)
 
-        applystyle(mg, mglog, folders, ydivide)
+        applystyle(mgs, mglogs, folders, xdivides, ydivide)
 
         drawlines(**drawlineskwargs)
 
