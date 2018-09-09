@@ -86,9 +86,8 @@ def setupdats(plotid):
     models = OrderedDict((k, v) for (k, v) in sorted(models.items(), key=thekey))
 
     for analysis in analyses:
-      filename = os.path.join(config.plotsbasedir, "limits", "{}_allsysts".format(analysis), "limit_lumi35.8671_7813_100,-1.0,1.0_100,-0.02,0.02.root")
-      if analysis == "fa3": filename = filename.replace("allsysts", "fixint")
-      allresults = getlimits(filename, analysis=="fa3")
+      filename = os.path.join(config.plotsbasedir, "limits", "{}_September7combination".format(analysis), "limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root")
+      allresults = getlimits(filename, poi="CMS_zz4l_fai1", domirror=analysis=="fa3")
 
       m = models[analysis.couplingtitle]
       expname = "Expected, {} = 0 or #pi".format(analysis.phi)
@@ -153,7 +152,5 @@ def makeplot(plotid):
       shutil.copy("Summary_{}.{}".format(plotid, ext), os.path.join(config.plotsbasedir, "limits", "summary"))
 
 if __name__ == "__main__":
-  setupdats("WIN17")
-  makeplot("WIN17")
-  setupdats("HIG17011")
-  makeplot("HIG17011")
+  setupdats("HIG18002onshell")
+  makeplot("HIG18002onshell")
