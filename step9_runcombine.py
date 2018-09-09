@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import getpass
 import glob
 from itertools import product
 import json
@@ -19,7 +20,7 @@ from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits, plotlimits2D, plottitle
 from helperstuff.submitjob import submitjob
-from helperstuff.utilities import deprecate, requirecmsenv, tfiles
+from helperstuff.utilities import cd, deprecate, LSB_JOBID, mkdir_p, requirecmsenv, tfiles
 
 requirecmsenv(os.path.join(config.repositorydir, "CMSSW_8_1_0"))
 
@@ -71,7 +72,7 @@ def runscan(repmap, submitjobs, directory=None):
   originalrepmap = repmap
 
   if submitjobs and repmap["method"] == "MultiDimFit":
-    utilities.mkdir_p("jobs")
+    mkdir_p("jobs")
     npoints = int(repmap["npoints"])
     jobids = set()
     individualfilenames = set()
@@ -241,7 +242,7 @@ def runscan(repmap, submitjobs, directory=None):
     logfile = replaceByMap(".oO[logfile]Oo.", repmap)
 
     if not os.path.exists(filename):
-      with utilities.cd(cdto), \
+      with cd(cdto), \
            utilities.OneAtATime(tmpfile, 30), \
            utilities.LSF_creating(os.path.join(directory, filename), skipifexists=True), \
            utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
@@ -374,6 +375,25 @@ def runcombine(analysis, foldername, **kwargs):
                 raise ValueError("You didn't give anything to alsocombine")
 
             alsocombine = []
+
+            tocopy = []
+            for _ in kwarg[1:]:
+                if _.startswith("/work-zfs") and config.host == "lxplus":
+                    tocopy.append(
+                        config.getconfiguration("login-node02", config.marccusername)["connect"]
+                        + ":" + _.replace(".txt", "*").replace(".input.root", "*").replace(".root", "*")
+                    )
+            if tocopy:
+                assert not LSB_JOBID()
+                tmpdir = "/tmp/"+getpass.getuser()+"/{}_{}/".format(analysis, foldername)
+                mkdir_p(tmpdir)
+                with cd(tmpdir):
+                    subprocess.check_call(["rsync", "-azvPR"] + tocopy + ["."])
+                for i, _ in enumerate(kwarg):
+                    if _.startswith("/work-zfs"):
+                        kwarg[i] = tmpdir + _
+
+
             for _ in kwarg[1:]:
                 theglob = glob.glob(_)
                 if not theglob:
@@ -583,8 +603,8 @@ def runcombine(analysis, foldername, **kwargs):
             repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV", fixmuV), ("muf", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
 
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
-    utilities.mkdir_p(folder)
-    with utilities.cd(folder):
+    mkdir_p(folder)
+    with cd(folder):
         with open(".gitignore", "w") as f:
             f.write("*")
         #must make it for all categories and channels even if not using them all because of mu definition!

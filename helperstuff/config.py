@@ -10,6 +10,7 @@ def getconfiguration(hostname, username):
       repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings/",
       plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/",
       slcversion = 6,
+      marccusername = "jroskes1@jhu.edu",
       svndir = "/afs/cern.ch/work/h/hroskes/AN/",
       connect = "hroskes@lxplus.cern.ch",
     )
