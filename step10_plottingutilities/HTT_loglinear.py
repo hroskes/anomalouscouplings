@@ -31,8 +31,7 @@ baseplotname = "limit_lumi80.15.root"
 def applystyle(mgs, mglogs, folders, xdivides, ydivide):
     assert len(mgs) == len(mglogs) == len(xdivides)+1
     for mg, mglog, xmin, xmax in izip(mgs, mglogs, [-setmax]+list(xdivides), list(xdivides)+[setmax]):
-        mglog.GetXaxis().SetTitle(folders[0].xtitle)
-        mglog.GetXaxis().SetRangeUser(xmin, xmax)
+        mglog.GetXaxis().SetLimits(xmin, xmax)
         mglog.GetXaxis().CenterTitle()
         mglog.GetYaxis().CenterTitle()
         mglog.SetMinimum(ydivide)
@@ -43,17 +42,24 @@ def applystyle(mgs, mglogs, folders, xdivides, ydivide):
         mglog.GetYaxis().SetLabelSize(.1)
         mglog.GetYaxis().SetTitleSize(.1)
 
-        mg.GetXaxis().SetTitle(folders[0].xtitle)
-        mg.GetXaxis().SetRangeUser(xmin, xmax)
+        mg.GetXaxis().SetLimits(xmin, xmax)
         mg.GetXaxis().CenterTitle()
         mg.GetYaxis().CenterTitle()
         mg.SetMinimum(0)
         mg.SetMaximum(ydivide)
         style.applyaxesstyle(mg)
         mg.GetXaxis().SetLabelSize(.1)
+        mg.GetXaxis().SetTitleOffset(0.7)
         mg.GetYaxis().SetLabelSize(.1)
-        mg.GetXaxis().SetTitleSize(.12)
+        mg.GetXaxis().SetTitleSize(.15)
         mg.GetYaxis().SetTitleSize(.1)
+
+    mgs[len(mgs)/2].GetXaxis().SetTitle(folders[0].xtitle)
+    for mg, mglog in izip(mgs[1:], mglogs[1:]):
+        mglog.GetYaxis().SetLabelOffset(9999999)
+        mglog.GetYaxis().SetTitleOffset(9999999)
+        mg.GetYaxis().SetLabelOffset(9999999)
+        mg.GetYaxis().SetTitleOffset(9999999)
 
 def getplotname(analysis):
     return "{}_{}".format(analysis, baseplotname)
@@ -71,7 +77,7 @@ def PRL_loglinear(**kwargs):
     markerposition = None
     onlyanalysis = None
     ydivide = 11
-    xdivides = -.05, .05
+    xdivides = -.03, .03
     saveas = None
     forWIN = False
     for kw, kwarg in kwargs.iteritems():
@@ -103,45 +109,58 @@ def PRL_loglinear(**kwargs):
     for i, (analysis, letter) in reversed(list(enumerate(zip(analyses, "abcd"), start=1))):
         if analysis != onlyanalysis is not None: continue
         if analysis == "fa3":
-            x1legend = .32
             CLtextposition=-.9
         elif analysis == "fa2":
-            x1legend = .5
             CLtextposition=-.9
         elif analysis == "fL1":
-            x1legend = .15
             CLtextposition=.65
         elif analysis == "fL1Zg":
-            x1legend = .15
             CLtextposition=-.9
         else:
             assert False
-        legendposition = x1legend, .3, x1legend+.45, .8
 
         c = plotcopier.TCanvas("c{}".format(random.randint(1, 1000000)), "", 8, 30, 1600, 1600)
 
-        leftmargin = .2
-        rightmargin = .045 #apply to the individual pads or 1 of the x axis gets cut off
-        topmargin = .02
-        bottommargin = .225
-        assert abs((leftmargin + rightmargin) - (topmargin + bottommargin)) < 1e-5, (leftmargin + rightmargin, topmargin + bottommargin)
-        c.SetLeftMargin(leftmargin)
+        leftmargin = .1
+        rightmargin = .02 #apply to the individual pads or 1 of the x axis gets cut off
+        topmargin = .07
+        bottommargin = .12
+        #assert abs((leftmargin + rightmargin) - (topmargin + bottommargin)) < 1e-5, (leftmargin + rightmargin, topmargin + bottommargin)
+        c.SetLeftMargin(0)
         c.SetRightMargin(0)
-        c.Divide(3, 2, 0, 0)
-        logpads = [c.cd(1), c.cd(2), c.cd(3)]
-        linearpads = [c.cd(4), c.cd(5), c.cd(6)]
+        c.SetTopMargin(0)
+        c.SetBottomMargin(0)
+        xboundaries = [0, leftmargin+(1-leftmargin-rightmargin)/3, leftmargin+(1-leftmargin-rightmargin)*2/3, 1]
+        yboundaries = [0, bottommargin+(1-bottommargin-topmargin)/2, 1]
+        legendposition = 0, .2, 1, .8*(1-topmargin)
+        logpads = [
+          ROOT.TPad(c.GetName()+"_1", "_1", xboundaries[0], yboundaries[1], xboundaries[1], yboundaries[2]),
+          ROOT.TPad(c.GetName()+"_2", "_2", xboundaries[1], yboundaries[1], xboundaries[2], yboundaries[2]),
+          ROOT.TPad(c.GetName()+"_3", "_3", xboundaries[2], yboundaries[1], xboundaries[3], yboundaries[2]),
+        ]
+        linearpads = [
+          ROOT.TPad(c.GetName()+"_4", "_4", xboundaries[0], yboundaries[0], xboundaries[1], yboundaries[1]),
+          ROOT.TPad(c.GetName()+"_5", "_5", xboundaries[1], yboundaries[0], xboundaries[2], yboundaries[1]),
+          ROOT.TPad(c.GetName()+"_6", "_6", xboundaries[2], yboundaries[0], xboundaries[3], yboundaries[1]),
+        ]
         legendpad = logpads[1]
         for _ in linearpads + logpads:
+            _.Draw()
             _.SetTicks()
+            _.SetLeftMargin(0)
+            _.SetRightMargin(0)
+            _.SetTopMargin(0)
+            _.SetBottomMargin(0)
+        logpads[-1].SetRightMargin(rightmargin*len(logpads))
 
         analysis = Analysis(analysis)
         repmap = {"analysis": str(analysis)}
         subdir = ""
         folders = [
-                   Folder(".oO[analysis]Oo._August17combination", "Observed", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-                   Folder(".oO[analysis]Oo._August17combination", "Expected", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=2),
-                   Folder(".oO[analysis]Oo._August17combination", "Observed, 2016+2017", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
-                   Folder(".oO[analysis]Oo._August17combination", "Expected, 2016+2017", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=1),
+                   Folder(".oO[analysis]Oo._September7combination", "Observed", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+                   Folder(".oO[analysis]Oo._September7combination", "Expected", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=2),
+                   Folder(".oO[analysis]Oo._September7combination", "#splitline{Observed,}{2016+2017}", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
+                   Folder(".oO[analysis]Oo._September7combination", "#splitline{Expected,}{2016+2017}", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=1),
                   ]
 
         mg = ROOT.TMultiGraph("limit", "")
@@ -171,18 +190,22 @@ def PRL_loglinear(**kwargs):
             logpad.SetLogy()
             mglog.Draw("al")
             logpad.SetTopMargin(topmargin*2)
-        logpads[-1].SetRightMargin(rightmargin)
-        style.subfig(letter, textsize=.11, x1=.87, x2=.91, y1=.87, y2=.91)
+        logpads[-1].SetRightMargin(rightmargin * 1 / (xboundaries[-1] - xboundaries[-2]))
+        logpads[0].SetLeftMargin(leftmargin * 1 / (xboundaries[1] - xboundaries[0]))
+        style.subfig(letter, textsize=.11, x1=.79, x2=.83, y1=.80, y2=.84)
 
-        for linearpad, mg in izip(linearpads, mgs):
+        for i, (linearpad, mg) in enumerate(izip(linearpads, mgs)):
             linearpad.cd()
             mg.Draw("al")
             linearpad.SetBottomMargin(bottommargin*2)
-        linearpads[-1].SetRightMargin(rightmargin)
+            paddrawlineskwargs = drawlineskwargs.copy()
+            paddrawlineskwargs["arbitraryparameter"] = paddrawlineskwargs["arbitraryparameter"] + (i,)
+            drawlines(**paddrawlineskwargs)
+
+        linearpads[-1].SetRightMargin(rightmargin * 1 / (xboundaries[-1] - xboundaries[-2]))
+        linearpads[0].SetLeftMargin(leftmargin * 1 / (xboundaries[1] - xboundaries[0]))
 
         applystyle(mgs, mglogs, folders, xdivides, ydivide)
-
-        drawlines(**drawlineskwargs)
 
         legendpad.cd()
         l = ROOT.TLegend(*legendposition)
@@ -190,8 +213,10 @@ def PRL_loglinear(**kwargs):
         l.SetFillStyle(0)
         for folder in folders:
             folder.addtolegend(l)
-        if all(folder.secondcolumn is not None for folder in folders):
-            l.SetNColumns(2)
+        if any(folder.secondcolumn is not None for folder in folders):
+            assert all(folder.secondcolumn is not None for folder in folders)
+            legend.SetNColumns(2)
+        l.SetTextSize(.1)
         l.Draw()
         c.cd()
         style.applycanvasstyle(c)
@@ -199,15 +224,7 @@ def PRL_loglinear(**kwargs):
                                                 .format(sum(_.dataluminosity for _ in config.productionsforcombine)+config.lumi2015),
                       x1=0.007, x2=1.01, #???
                       drawCMS=False, extratextsize=.039)
-        if forWIN:
-            if analysis == "fa2":
-                style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
-                style.CMS("Preliminary", x1=0.0, x2=1.025, y1=.8, y2=.86, CMStextsize=.06, extratextsize=.039, drawCMS=False)
-            else:
-                style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
-                style.CMS("Preliminary", x1=0.15, x2=1.025, y1=.85, y2=.93, CMStextsize=.06, extratextsize=.039, drawCMS=False)
-        else:
-            style.CMS("", x1=0.12, x2=1.025, y1=.86, y2=.94, CMStextsize=.06)
+        style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.06)
         yaxislabel(folders[0].ytitle).Draw()
 
         try:
@@ -234,6 +251,7 @@ def PRL_loglinear(**kwargs):
                                 os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", "pdf"), repmap)),
                                 os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
                                )
+        c.SaveAs("test.C")
 
 def animations(**kwargs):
     from projections import Projections
