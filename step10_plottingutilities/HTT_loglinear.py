@@ -28,9 +28,9 @@ def saveasdir(forWIN=False):
     return os.path.join(config.plotsbasedir, "limits", "HTT")
 baseplotname = "limit_lumi80.15.root"
 
-def applystyle(mgs, mglogs, folders, xdivides, ydivide):
+def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
     assert len(mgs) == len(mglogs) == len(xdivides)+1
-    for mg, mglog, xmin, xmax in izip(mgs, mglogs, [-setmax]+list(xdivides), list(xdivides)+[setmax]):
+    for mg, mglog, xmin, xmax, fractionxmin, fractionxmax in izip(mgs, mglogs, [-setmax]+list(xdivides), list(xdivides)+[setmax], xboundaries[:-1], xboundaries[1:]):
         mglog.GetXaxis().SetLimits(xmin, xmax)
         mglog.GetXaxis().CenterTitle()
         mglog.GetYaxis().CenterTitle()
@@ -48,11 +48,15 @@ def applystyle(mgs, mglogs, folders, xdivides, ydivide):
         mg.SetMinimum(0)
         mg.SetMaximum(ydivide)
         style.applyaxesstyle(mg)
-        mg.GetXaxis().SetLabelSize(.1)
+        mg.GetXaxis().SetLabelSize(.1 / (3*(fractionxmax - fractionxmin)))
         mg.GetXaxis().SetTitleOffset(0.7)
-        mg.GetYaxis().SetLabelSize(.1)
-        mg.GetXaxis().SetTitleSize(.15)
-        mg.GetYaxis().SetTitleSize(.1)
+        mg.GetYaxis().SetLabelSize(.1 / (3*(fractionxmax - fractionxmin)))
+        mg.GetXaxis().SetTitleSize(.15 / (3*(fractionxmax - fractionxmin)))
+        mg.GetYaxis().SetTitleSize(.1 / (3*(fractionxmax - fractionxmin)))
+        mg.GetXaxis().SetLabelOffset(-0.0165)
+
+    mgs[0].GetXaxis().SetLabelOffset(0.007)
+    mgs[-1].GetXaxis().SetLabelOffset(-0.012)
 
     mgs[len(mgs)/2].GetXaxis().SetTitle(folders[0].xtitle)
     for mg, mglog in izip(mgs[1:], mglogs[1:]):
@@ -70,7 +74,6 @@ def PRL_loglinear(**kwargs):
                              "logscale": False,  #the lines are in the linear part
                              "xsize": .2,
                              "ysize": .045,
-                             "textsize": .09,
                              "yshift68": .03,
                              "yshift95": .03,
                             }
@@ -109,13 +112,13 @@ def PRL_loglinear(**kwargs):
     for i, (analysis, letter) in reversed(list(enumerate(zip(analyses, "abcd"), start=1))):
         if analysis != onlyanalysis is not None: continue
         if analysis == "fa3":
-            CLtextposition=-.9
+            CLtextposition=-.8
         elif analysis == "fa2":
-            CLtextposition=-.9
+            CLtextposition=-.8
         elif analysis == "fL1":
             CLtextposition=.65
         elif analysis == "fL1Zg":
-            CLtextposition=-.9
+            CLtextposition=-.8
         else:
             assert False
 
@@ -171,6 +174,14 @@ def PRL_loglinear(**kwargs):
         drawlineskwargs["xpostext"] = CLtextposition
         drawlineskwargs["arbitraryparameter"] = analysis, markerposition
 
+        padindex = 0
+        for _ in xdivides:
+          if CLtextposition > _:
+            padindex += 1
+        drawlineskwargs["textsize"] = (
+          0.09 / (3*(xboundaries[padindex+1] - xboundaries[padindex]))
+        )
+
         if markerposition:
             markerposition = [array('d', [_]) for _ in markerposition]
             marker = ROOT.TGraph(1, *markerposition)
@@ -198,14 +209,17 @@ def PRL_loglinear(**kwargs):
             linearpad.cd()
             mg.Draw("al")
             linearpad.SetBottomMargin(bottommargin*2)
-            paddrawlineskwargs = drawlineskwargs.copy()
-            paddrawlineskwargs["arbitraryparameter"] = paddrawlineskwargs["arbitraryparameter"] + (i,)
-            drawlines(**paddrawlineskwargs)
 
         linearpads[-1].SetRightMargin(rightmargin * 1 / (xboundaries[-1] - xboundaries[-2]))
         linearpads[0].SetLeftMargin(leftmargin * 1 / (xboundaries[1] - xboundaries[0]))
 
-        applystyle(mgs, mglogs, folders, xdivides, ydivide)
+        applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide)
+
+        for i, (linearpad, mg) in enumerate(izip(linearpads, mgs)):
+            linearpad.cd()
+            paddrawlineskwargs = drawlineskwargs.copy()
+            paddrawlineskwargs["arbitraryparameter"] = paddrawlineskwargs["arbitraryparameter"] + (i,)
+            drawlines(**paddrawlineskwargs)
 
         legendpad.cd()
         l = ROOT.TLegend(*legendposition)
