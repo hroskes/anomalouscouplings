@@ -133,12 +133,26 @@ def getlimits(filename, poi, domirror=False):
     return finalresult
 
 def printlimits(analysis, foldername, **kwargs):
+    if str(analysis) == "table":
+      print r"\begin{tabular}{ccc}"
+      print r"\hline"
+      print r" Parameter                                   &  {Observed} & {Expected}    \\"
+      print r"\hline"
+      for analysis in Analysis.items(lambda x: x in ("fa3", "fa2", "fL1", "fL1Zg")):
+        print analysis.latexfai,
+        printlimits(analysis, foldername, fortable=True, **kwargs)
+        print r"\\"
+      print r"\hline"
+      print r"\end{tabular}"
+      return
+
     analysis = Analysis(analysis)
     foldername = "{}_{}".format(analysis, foldername)
     plotname = "limit"
     printformat = PrintFormat("latex")
     subdirectory = ""
     poi = "CMS_zz4l_fai1"
+    fortable = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "plotname":
             plotname = kwarg
@@ -150,17 +164,22 @@ def printlimits(analysis, foldername, **kwargs):
             subdirectory = kwarg
         elif kw == "poi":
             poi = kwarg
+        elif kw == "fortable":
+            fortable = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
     filename = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername, plotname+".root")
     allresults = getlimits(filename, poi=poi, domirror=(analysis=="fa3"))
+    if fortable:
+        assert len(allresults.keys()) == 2 and allresults.keys()[0].startswith("Observed") and allresults.keys()[1].startswith("Expected"), allresults.keys()
 
     for label, (minimum, c68, c95) in allresults.iteritems():
         repmap = {}
 
-        print label
-        print
+        if not fortable:
+            print label
+            print
 
         repmap["minimum"] = minimum
         if len(c68) == 1:
@@ -187,10 +206,12 @@ def printlimits(analysis, foldername, **kwargs):
 
         repmap["str95"] = str95(*c95)
 
-        print printformat.printformat(**repmap)
-
-        print
-        print
+        if fortable:
+            print "&", printformat.printformat(**repmap),
+        else:
+            print printformat.printformat(**repmap)
+            print
+            print
 
     return minimum, allresults
 

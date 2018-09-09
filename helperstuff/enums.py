@@ -618,6 +618,17 @@ class Analysis(MyEnum):
         if self == "fL1": return "#Lambda_{1}"
         if self == "fL1Zg": return "#Lambda_{1}^{Z#gamma}"
     @property
+    def latexfai(self):
+        if self == "fa3" or self == "fa3_STXS":
+            return r"\fcospAC{3}"
+        if self == "fa2":
+            return r"\fcospAC{2}"
+        if self == "fL1":
+            return r"\fcospLC{1}"
+        if self == "fL1Zg":
+            return r"\fcospLZGs"
+        assert False, self
+    @property
     def purehypotheses(self):
         if self == "fa3" or self == "fa3_STXS":
             return Hypothesis("0+"), Hypothesis("0-")

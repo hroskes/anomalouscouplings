@@ -103,8 +103,6 @@ class RowBase(RowBaseBase):
         if tabletype == "HIG17011PAS":
           result += self.fmt.format(amount)+"/"
       result += self.fmt.format(total)
-      if tabletype == "HIG18002":
-        result += " & xx"
     return result
 
 class Row(RowBase, MultiEnum):
@@ -233,8 +231,6 @@ class SlashRow(RowBaseBase):
         parts.append(self.fmt.format(total))
       assert len(parts) == 2
       result += "{} ({})".format(*parts)
-      if tabletype == "HIG18002":
-        result += " & xx (xx)"
     return result
 
   def getcategorydistribution(self):
@@ -420,10 +416,10 @@ def maketable(analysis, tabletype):
         ),
       ),
       Section("bkg",
-        Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$ bkg"),
-        Row(analysis, "ggZZ", title=r"$\Pg\Pg\to4\ell$ bkg"),
-        Row(analysis, "VBFbkg", title=r"VBF/$\V\V\V$ bkg"),
-        Row(analysis, "ZX", title=r"$\Z\!+\!\X$ bkg"),
+        Row(analysis, "VBFbkg", title=r"\VV bkg."),
+        Row(analysis, "ggZZ", title=r"\glufu bkg."),
+        Row(analysis, "qqZZ", title=r"$\qqbar\to4\ell$ bkg."),
+        Row(analysis, "ZX", title=r"$\Z\!+\!\X$ bkg."),
       ),
     ]
     sections.append(
@@ -479,11 +475,11 @@ def maketable(analysis, tabletype):
     print " & & " + " & ".join(categoryname(_, tabletype) for _ in categories) + r"\\\hline\hline"
     joiner = r"\\\hline"+"\n"
   elif tabletype == "HIG18002":
-    print r"\begin{{tabular}}{{{}}}".format("l" + "".join("c"*(2*len(categories))) + "")
+    print r"\begin{{tabular}}{{{}}}".format("l" + "".join("c"*len(categories)) + "")
     print r"\hline"
-    print " & " + " & ".join(list(r"\multicolumn{2}{c}{"+categoryname(_, tabletype)+"}" for _ in categories)) + r" \\"
-    print " & " + " & ".join(list(r"\onshell & \offshell" for _ in categories)) + r"  \\\hline"
-    joiner = r"\\\hline"+"\n"
+    print " & " + " & ".join(list(r"{"+categoryname(_, tabletype)+"}" for _ in categories)) + r" \\"
+    print r"\hline"
+    joiner = r"\\"+"\n"+r"\hline"+"\n"
 
   print joiner.join(section.getlatex(tabletype=tabletype) for section in sections)
 
