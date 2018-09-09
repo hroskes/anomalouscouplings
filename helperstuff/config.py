@@ -27,7 +27,8 @@ def getconfiguration(hostname, username):
       connect = "jroskes1@jhu.edu@gateway2.marcc.jhu.edu",
     )
 
-for key, value in getconfiguration(socket.gethostname(), getpass.getuser()).iteritems():
+configuration = getconfiguration(socket.gethostname(), getpass.getuser())
+for key, value in configuration.iteritems():
   assert key not in globals()
   globals()[key] = value
 

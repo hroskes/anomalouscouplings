@@ -114,9 +114,10 @@ if __name__ == "__main__":
 
 from helperstuff import config, utilities
 from helperstuff.enums import analyses, categories
-from helperstuff.utilities import PlotCopier
+from helperstuff.utilities import cd, DummyContextManager, PlotCopier
 
 if __name__ == "__main__":
-  with PlotCopier(copyfromfolder=".", copytofolder="/afs/cern.ch/work/h/hroskes/AN/papers/HIG-18-002/trunk/") as pc:
+  with cd("/afs/cern.ch/work/h/hroskes/AN/papers/HIG-18-002/trunk/") if config.host == "lxplus" else DummyContextManager(), \
+       PlotCopier(copyfromfolder=".", copytofolder="/afs/cern.ch/work/h/hroskes/AN/papers/HIG-18-002/trunk/") as pc:
     for tarball in args.tarball:
       functions[tarball](pc)

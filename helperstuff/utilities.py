@@ -780,25 +780,35 @@ class TCanvas(ROOT.TCanvas):
 class PlotCopier(object):
     import config
 
-    copyfromconfig = config.getconfiguration("login-node", "jroskes1@jhu.edu")
-    copyfromhost = copyfromconfig["host"]
-
-    copytoconfig = config.getconfiguration("lxplus", "hroskes")
-    copytoconnect = copytoconfig["connect"]
-
     def __init__(
       self,
-      copyfromfolder=copyfromconfig["plotsbasedir"],
-      copytofolder=copytoconfig["plotsbasedir"],
+      copyfromconfig=config.getconfiguration("login-node", "jroskes1@jhu.edu"),
+      copytoconfig=config.getconfiguration("lxplus", "hroskes"),
+      copyfromfolder=None,
+      copytofolder=None,
+      copyfromhost=None,
+      copytoconnect=None,
     ):
+
+        if copyfromfolder is None: copyfromfolder = copyfromconfig["plotsbasedir"]
+        if copytofolder is None: copytofolder = copytoconfig["plotsbasedir"]
+        if copyfromhost is None: copyfromhost = copyfromconfig["host"]
+        if copytoconnect is None: copytoconnect = copytoconfig["connect"]
+
         self.__tocopy = set()
         self.__copyfromfolder = os.path.join(os.path.abspath(copyfromfolder), "")
         self.__copytofolder = os.path.join(os.path.abspath(copytofolder), "")
+        self.__copyfromhost = copyfromhost
+        self.__copytoconnect = copytoconnect
 
     @property
     def copyfromfolder(self): return self.__copyfromfolder
     @property
     def copytofolder(self): return self.__copytofolder
+    @property
+    def copyfromhost(self): return self.__copyfromhost
+    @property
+    def copytoconnect(self): return self.__copytoconnect
 
     def __enter__(self):
         return self
