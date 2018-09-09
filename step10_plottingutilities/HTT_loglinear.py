@@ -25,7 +25,7 @@ from mergeplots import Folder
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
 def saveasdir(forWIN=False):
-    return os.path.join(config.plotsbasedir, "limits", "HTT")
+    return os.path.join(config.plotsbasedir, "limits")
 baseplotname = "limit_lumi80.15.root"
 
 def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
