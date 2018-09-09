@@ -131,10 +131,10 @@ def PRL_loglinear(**kwargs):
         repmap = {"analysis": str(analysis)}
         subdir = ""
         folders = [
-                   Folder(".oO[analysis]Oo._August17combination", "Observed", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-                   Folder(".oO[analysis]Oo._August17combination", "Expected", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=2),
-                   Folder(".oO[analysis]Oo._August17combination", "Observed, 2016+2017", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
-                   Folder(".oO[analysis]Oo._August17combination", "Expected, 2016+2017", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=1),
+                   Folder(".oO[analysis]Oo._September7combination", "Observed", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+                   Folder(".oO[analysis]Oo._September7combination", "Expected", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=2),
+                   Folder(".oO[analysis]Oo._September7combination", "Observed, 2016+2017", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
+                   Folder(".oO[analysis]Oo._September7combination", "Expected, 2016+2017", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=1),
                   ]
 
         mg = ROOT.TMultiGraph("limit", "")
