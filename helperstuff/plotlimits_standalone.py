@@ -5,7 +5,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--scan", nargs=4, action="append", help="example: --scan file1.root,file2.root,file3.root Expected kGreen+3 kDashed")
     parser.add_argument("outputfile")
-    parser.add_argument("--legendposition", nargs=4, type=float, default=[.2, .7, .6, .9], help="--legendposition xmin xmax ymin ymax")
+    parser.add_argument("--legendposition", nargs=4, type=float, default=[.2, .7, .6, .9], help="--legendposition xmin ymin xmax ymax")
     parser.add_argument("--CLtextposition", default="left")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--luminosity", type=float)
@@ -16,6 +16,9 @@ if __name__ == "__main__":
     parser.add_argument("--noCMS", dest="drawCMS", action="store_false", help="don't write CMS in the corner")
     parser.add_argument("--xtitle", required=True, help="x axis label")
     parser.add_argument("--ytitle", default="#minus2 #Deltaln L", help="y axis label")
+    parser.add_argument("--letter", help="goes in the corner of the plot, e.g. --letter=a gives (a)")
+    parser.add_argument("--letterposition", nargs=4, type=float, default=(.86, .86, .90, .92), help="--letterposition xmin ymin xmax ymax (default: .86, .86, .90, .92)")
+    parser.add_argument("--lettersize", type=float, default=0.06, help="size of --letter, default: 0.06")
     args = parser.parse_args()
     kwargs = args.__dict__
 
@@ -51,6 +54,8 @@ def plotlimits(*scans, **kwargs):
     drawCMS = True
     xtitle = None
     ytitle = None
+    letter = None
+    letterposition = (.86, .86, .90, .92)
     for kw, kwarg in kwargs.iteritems():
         if kw == "legendposition":
             legendposition = kwarg
@@ -74,6 +79,13 @@ def plotlimits(*scans, **kwargs):
             ytitle = kwarg
         elif kw == "outputfile":
             outputfile = kwarg
+        elif kw == "letter":
+            letter = kwarg
+            if letter: letter = letter.lstrip("(").rstrip(")")
+        elif kw == "letterposition":
+            letterposition = kwarg
+        elif kw == "lettersize":
+            lettersize = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -124,6 +136,8 @@ def plotlimits(*scans, **kwargs):
     style.applycanvasstyle(c1)
     style.applyaxesstyle(mg)
     style.CMS(CMStext, lumi=luminosity, lumitext=lumitext, drawCMS=drawCMS)
+
+    if letter is not None: style.subfig(letter, *letterposition, textsize=lettersize)
 
     drawlines(CLtextposition, xmin=xmin, xmax=xmax)
     for ext in "png eps root pdf".split():
