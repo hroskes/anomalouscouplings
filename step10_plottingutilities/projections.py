@@ -1160,18 +1160,18 @@ class Projections(MultiEnum):
   def saveasdir(self, *categoryandchannel, **kwargs):
       forWIN = kwargs.pop("forWIN", False)
       assert not kwargs
-      forWIN = "forWIN" if forWIN else ""
+      forWIN = "forPAS" if forWIN else ""
       categoryandchannel = self.CategoryAndChannel(*categoryandchannel)
       assert self.normalization == "rescalemixtures"
       return os.path.join(config.plotsbasedir, "templateprojections", forWIN, "projections", self.enrichstatus.dirname(), "{}_{}/{}/{}".format(self.analysis, self.production, categoryandchannel.category, categoryandchannel.channel))
   def saveasdir_niceplots(self, category, with2015=False, forWIN=False):
       assert self.normalization == "rescalemixtures"# and len(config.productionsforcombine) == 1
-      forWIN = "forWIN" if forWIN else ""
+      forWIN = "forPAS" if forWIN else ""
       result = os.path.join(config.plotsbasedir, "templateprojections", forWIN, "niceplots", self.enrichstatus.dirname(), "{}/{}".format(self.analysis, Category(category)))
       if with2015: result += "_with2015"
       return result
   def saveasdir_Dbkgsum(self, forWIN=False):
-      forWIN = "forWIN" if forWIN else ""
+      forWIN = "forPAS" if forWIN else ""
       return os.path.join(config.plotsbasedir, "templateprojections", forWIN, "niceplots", self.enrichstatus.dirname(), str(self.analysis))
 
   def discriminants(self, category):
@@ -1429,7 +1429,7 @@ def main():
     if process == 1 or process == 4:
       p.projections(ch, ca, nicestyle=True)
 #      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True)
-#      p.projections(ch, ca, nicestyle=True, forWIN=True)
+      p.projections(ch, ca, nicestyle=True, forWIN=True)
 #      p.projections(ch, ca, nicestyle=True, Dbkg_allcategories=True, forWIN=True)
     if process == 2 or process == 5:
       pass

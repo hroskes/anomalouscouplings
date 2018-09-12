@@ -25,7 +25,7 @@ from mergeplots import Folder
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
 def saveasdir(forWIN=False):
-    return os.path.join(config.plotsbasedir, "limits")
+    return os.path.join(config.plotsbasedir, "limits", "forPAS" if forWIN else "")
 baseplotname = "limit_lumi80.15.root"
 
 def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
@@ -128,6 +128,7 @@ def PRL_loglinear(**kwargs):
         rightmargin = .02 #apply to the individual pads or 1 of the x axis gets cut off
         topmargin = .07
         bottommargin = .12
+        biglegend = True
         #assert abs((leftmargin + rightmargin) - (topmargin + bottommargin)) < 1e-5, (leftmargin + rightmargin, topmargin + bottommargin)
         c.SetLeftMargin(0)
         c.SetRightMargin(0)
@@ -135,7 +136,15 @@ def PRL_loglinear(**kwargs):
         c.SetBottomMargin(0)
         xboundaries = [0, leftmargin+(1-leftmargin-rightmargin)/3, leftmargin+(1-leftmargin-rightmargin)*2/3, 1]
         yboundaries = [0, bottommargin+(1-bottommargin-topmargin)/2, 1]
-        legendposition = 0, .2, 1, .8*(1-topmargin)
+        if biglegend:
+            if analysis == "fa2":
+                legendposition = .4, .57, .8, .87
+            elif analysis == "fL1":
+                legendposition = .2, .57, .6, .87
+            else:
+                legendposition = .3, .57, .7, .87
+        else:
+            legendposition =  0, .2, 1, .8*(1-topmargin)
         logpads = [
           ROOT.TPad(c.GetName()+"_1", "_1", xboundaries[0], yboundaries[1], xboundaries[1], yboundaries[2]),
           ROOT.TPad(c.GetName()+"_2", "_2", xboundaries[1], yboundaries[1], xboundaries[2], yboundaries[2]),
@@ -159,11 +168,15 @@ def PRL_loglinear(**kwargs):
         analysis = Analysis(analysis)
         repmap = {"analysis": str(analysis)}
         subdir = ""
+        if biglegend:
+            def run2only(x): return x + ", 2016+2017"
+        else:
+            def run2only(x): return "#splitline{"+x+"}{2016+2017}"
         folders = [
                    Folder(".oO[analysis]Oo._September7combination", "Observed", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
                    Folder(".oO[analysis]Oo._September7combination", "Expected", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=2),
-                   Folder(".oO[analysis]Oo._September7combination", "#splitline{Observed,}{2016+2017}", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
-                   Folder(".oO[analysis]Oo._September7combination", "#splitline{Expected,}{2016+2017}", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=1),
+                   Folder(".oO[analysis]Oo._September7combination", run2only("Observed"), 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
+                   Folder(".oO[analysis]Oo._September7combination", run2only("Expected"), 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=1),
                   ]
 
         mg = ROOT.TMultiGraph("limit", "")
@@ -222,7 +235,7 @@ def PRL_loglinear(**kwargs):
             if i != CLpadindex: paddrawlineskwargs["yshift68"] = paddrawlineskwargs["yshift95"] = 100
             drawlines(**paddrawlineskwargs)
 
-        legendpad.cd()
+        (c if biglegend else legendpad).cd()
         l = ROOT.TLegend(*legendposition)
         l.SetBorderSize(0)
         l.SetFillStyle(0)
@@ -231,7 +244,7 @@ def PRL_loglinear(**kwargs):
         if any(folder.secondcolumn is not None for folder in folders):
             assert all(folder.secondcolumn is not None for folder in folders)
             legend.SetNColumns(2)
-        l.SetTextSize(.1)
+        l.SetTextSize(.04 if biglegend else .1)
         l.Draw()
         c.cd()
         style.applycanvasstyle(c)
@@ -239,7 +252,9 @@ def PRL_loglinear(**kwargs):
                                                 .format(sum(_.dataluminosity for _ in config.productionsforcombine)+config.lumi2015),
                       x1=0.007, x2=1.01, #???
                       drawCMS=False, extratextsize=.039)
-        style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.06)
+        style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
+        if forWIN:
+            style.CMS("Preliminary", x1=0.12, x2=1.025, y1=.85, y2=.93, drawCMS=False, CMStextsize=.06, extratextsize=.039)
         yaxislabel(folders[0].ytitle).Draw()
 
         try:
