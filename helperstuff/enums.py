@@ -900,6 +900,12 @@ class Category(MyEnum):
         if self == "VBFtagged": return [ProductionMode("VBF")]
         if self == "VHHadrtagged": return [ProductionMode("ZH"), ProductionMode("WH")]
 
+    @property
+    def nameonplot(self):
+        if self == "Untagged": return "Untagged"
+        if self == "VBFtagged": return "VBF-tagged"
+        if self == "VHHadrtagged": return "VH-tagged"
+
     @classmethod
     def fromid(cls, number):
         for category in cls.items():

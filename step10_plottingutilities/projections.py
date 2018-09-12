@@ -1143,7 +1143,7 @@ class Projections(MultiEnum):
             if subfigletter is not None:
                 style.subfig(subfigletter)
                 cuttextkwargs.update(y1=.78, y2=.86)
-            #style.cuttext(self.enrichstatus.cuttext(), **cuttextkwargs)
+            style.cuttext(category.nameonplot, **cuttextkwargs)
 
         legend.Draw()
         for thing, option in otherthingstodraw:

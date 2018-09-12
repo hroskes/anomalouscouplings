@@ -51,14 +51,15 @@ def categorydiscriminants(plotcopier=None):
 
     tar_cvzf("categorydiscriminants.tar.gz", tmpdir, plotcopier)
 
-def discriminantdistributions(plotcopier=None):
-  if os.path.exists(os.path.join(config.plotsbasedir, "templateprojections", "niceplots")):
+def discriminantdistributions(plotcopier=None, forPAS=False):
+  thepath = os.path.join(config.plotsbasedir, "templateprojections", "forPAS" if forPAS else "", "niceplots")
+  if os.path.exists(thepath):
     tmpdir = utilities.mkdtemp()
     for a in analyses:
       for c in categories:
         cfolder = str(c)
 #        if c == "Untagged": cfolder = "Untagged_with2015"
-        theglob = glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", str(a), cfolder, "*.pdf"))
+        theglob = glob.glob(os.path.join(thepath, "enrich", str(a), cfolder, "*.pdf"))
         assert theglob, (a, c)
         for filename in theglob:
           if "D_bkg" in filename:
@@ -70,7 +71,10 @@ def discriminantdistributions(plotcopier=None):
 #      for filename in theglob:
 #        shutil.copy(filename, os.path.join(tmpdir, "{}_{}_{}".format(a, "all", os.path.basename(filename.replace("_with2015", "")))))
 
-    tar_cvzf("Figures/stacked/discriminantdistributions.tar.gz", tmpdir, plotcopier)
+    tar_cvzf(os.path.join("notes" if forPAS else "papers", "HIG-18-002", "trunk", "Figures", "stacked", "discriminantdistributions.tar.gz"), tmpdir, plotcopier)
+
+def discriminantdistributionsPAS(plotcopier=None):
+  return discriminantdistributions(plotcopier=plotcopier, forPAS=True)
 
 def animations(plotcopier=None):
   if glob.glob(os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "enrich", "*", "*", "animation")):
@@ -103,11 +107,11 @@ def loglinear(plotcopier):
   for a in analyses:
     plot = os.path.join(config.plotsbasedir, "limits", str(a)+"_limit_lumi80.15.pdf")
     shutil.copy(plot, os.path.join(tmpdir, str(a)+".pdf"))
-  tar_cvzf("Figures/results/onshell/limits.tar.gz", tmpdir, plotcopier)
+  tar_cvzf("papers/HIG-18-002/trunk/Figures/results/onshell/limits.tar.gz", tmpdir, plotcopier)
     
 
 if __name__ == "__main__":
-  functions = {_.__name__: _ for _ in (templateprojections, POWHEGvsJHUGen, categorydiscriminants, discriminantdistributions, animations, loglinear)}
+  functions = {_.__name__: _ for _ in (templateprojections, POWHEGvsJHUGen, categorydiscriminants, discriminantdistributions, discriminantdistributionsPAS, animations, loglinear)}
   parser = argparse.ArgumentParser()
   parser.add_argument("tarball", choices=functions.keys(), nargs="+")
   args = parser.parse_args()
@@ -117,7 +121,7 @@ from helperstuff.enums import analyses, categories
 from helperstuff.utilities import cd, DummyContextManager, PlotCopier
 
 if __name__ == "__main__":
-  with cd("/afs/cern.ch/work/h/hroskes/AN/papers/HIG-18-002/trunk/") if config.host == "lxplus" else DummyContextManager(), \
-       PlotCopier(copyfromfolder=".", copytofolder="/afs/cern.ch/work/h/hroskes/AN/papers/HIG-18-002/trunk/") as pc:
+  with cd("/afs/cern.ch/work/h/hroskes/AN/") if config.host == "lxplus" else DummyContextManager(), \
+       PlotCopier(copyfromfolder=".", copytofolder="/afs/cern.ch/work/h/hroskes/AN/") as pc:
     for tarball in args.tarball:
       functions[tarball](pc)
