@@ -144,7 +144,7 @@ def PRL_loglinear(**kwargs):
             else:
                 legendposition = .3, .57, .7, .87
         else:
-            legendposition =  0, .2, 1, .8*(1-topmargin)
+            legendposition = 0, .2, 1, .8*(1-topmargin)
         logpads = [
           ROOT.TPad(c.GetName()+"_1", "_1", xboundaries[0], yboundaries[1], xboundaries[1], yboundaries[2]),
           ROOT.TPad(c.GetName()+"_2", "_2", xboundaries[1], yboundaries[1], xboundaries[2], yboundaries[2]),
