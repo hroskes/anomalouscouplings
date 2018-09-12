@@ -174,12 +174,12 @@ def PRL_loglinear(**kwargs):
         drawlineskwargs["xpostext"] = CLtextposition
         drawlineskwargs["arbitraryparameter"] = analysis, markerposition
 
-        padindex = 0
+        CLpadindex = 0
         for _ in xdivides:
           if CLtextposition > _:
-            padindex += 1
+            CLpadindex += 1
         drawlineskwargs["textsize"] = (
-          0.09 / (3*(xboundaries[padindex+1] - xboundaries[padindex]))
+          0.09 / (3*(xboundaries[CLpadindex+1] - xboundaries[CLpadindex]))
         )
 
         if markerposition:
@@ -219,6 +219,7 @@ def PRL_loglinear(**kwargs):
             linearpad.cd()
             paddrawlineskwargs = drawlineskwargs.copy()
             paddrawlineskwargs["arbitraryparameter"] = paddrawlineskwargs["arbitraryparameter"] + (i,)
+            if i != CLpadindex: paddrawlineskwargs["yshift68"] = paddrawlineskwargs["yshift95"] = 100
             drawlines(**paddrawlineskwargs)
 
         legendpad.cd()
@@ -265,7 +266,6 @@ def PRL_loglinear(**kwargs):
                                 os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", "pdf"), repmap)),
                                 os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
                                )
-        c.SaveAs("test.C")
 
 def animations(**kwargs):
     from projections import Projections

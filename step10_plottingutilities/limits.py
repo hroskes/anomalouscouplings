@@ -49,7 +49,7 @@ class PrintFormat(MyEnum):
             percentdict["plus"] = ""
             formatdict["minimum"] = 0  #to avoid -0.0000
         else:
-            percentdict["plus"] = "+"
+            percentdict["plus"] = ""
 
         if self == "latex":
             fmt = "${minimum:%(plus)s.%(digits)df}^{{{pluscl:+.%(digits)df}}}_{{{minuscl:+.%(digits)df}}}$ ${str95}$" % percentdict
