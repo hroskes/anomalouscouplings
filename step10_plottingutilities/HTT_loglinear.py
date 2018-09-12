@@ -49,7 +49,7 @@ def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
         mg.SetMaximum(ydivide)
         style.applyaxesstyle(mg)
         mg.GetXaxis().SetLabelSize(.1 / (3*(fractionxmax - fractionxmin)))
-        mg.GetXaxis().SetTitleOffset(0.7)
+        mg.GetXaxis().SetTitleOffset(.6)
         mg.GetYaxis().SetLabelSize(.1 / (3*(fractionxmax - fractionxmin)))
         mg.GetXaxis().SetTitleSize(.15 / (3*(fractionxmax - fractionxmin)))
         mg.GetYaxis().SetTitleSize(.1 / (3*(fractionxmax - fractionxmin)))
