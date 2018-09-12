@@ -112,7 +112,7 @@ def PRL_loglinear(**kwargs):
     for i, (analysis, letter) in reversed(list(enumerate(zip(analyses, "abcd"), start=1))):
         if analysis != onlyanalysis is not None: continue
         if analysis == "fa3":
-            CLtextposition=-.8
+            CLtextposition=.65
         elif analysis == "fa2":
             CLtextposition=-.8
         elif analysis == "fL1":
@@ -216,7 +216,8 @@ def PRL_loglinear(**kwargs):
             logpad.SetTopMargin(topmargin*2)
         logpads[-1].SetRightMargin(rightmargin * 1 / (xboundaries[-1] - xboundaries[-2]))
         logpads[0].SetLeftMargin(leftmargin * 1 / (xboundaries[1] - xboundaries[0]))
-        style.subfig(letter, textsize=.11, x1=.79, x2=.83, y1=.80, y2=.84)
+        c.cd()
+        style.subfig(letter, textsize=.04, x1=.91, x2=.94, y1=.88, y2=.92)
 
         for i, (linearpad, mg) in enumerate(izip(linearpads, mgs)):
             linearpad.cd()
