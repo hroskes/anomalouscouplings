@@ -150,9 +150,14 @@ def makeplot(plotid):
     for ext in "png eps root pdf C".split():
       if plotid == "HIG18002onshell": shutil.copy("Summary_HIG18002onshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary."+ext))
       if plotid == "HIG18002onshellPAS": shutil.copy("Summary_HIG18002onshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary."+ext))
+      if plotid == "HIG18002onshelloffshell": shutil.copy("Summary_HIG18002onshelloffshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary_offshell."+ext))
+      if plotid == "HIG18002onshelloffshellPAS": shutil.copy("Summary_HIG18002onshelloffshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary_offshell."+ext))
 
 if __name__ == "__main__":
-  setupdats("HIG18002onshell")
-  makeplot("HIG18002onshell")
-  setupdats("HIG18002onshellPAS")
-  makeplot("HIG18002onshellPAS")
+#  setupdats("HIG18002onshell")
+#  makeplot("HIG18002onshell")
+#  setupdats("HIG18002onshellPAS")
+#  makeplot("HIG18002onshellPAS")
+#  setupdats("HIG18002onshelloffshell")
+  makeplot("HIG18002onshelloffshell")
+  makeplot("HIG18002onshelloffshellPAS")
