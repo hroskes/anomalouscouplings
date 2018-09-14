@@ -146,7 +146,7 @@ def setupdats(plotid):
 def makeplot(plotid):
   with cd(os.path.join(config.repositorydir, "step10_plottingutilities", "NIS_summary")):
     subprocess.check_call(["make"])
-    subprocess.check_call(["./NIS_summary_3", plotid])
+    subprocess.check_call(["./NIS_summary_4", plotid])
     for ext in "png eps root pdf C".split():
       if plotid == "HIG18002onshell": shutil.copy("Summary_HIG18002onshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary."+ext))
       if plotid == "HIG18002onshellPAS": shutil.copy("Summary_HIG18002onshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary."+ext))
