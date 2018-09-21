@@ -33,8 +33,8 @@ class PrintFormat(MyEnum):
     def printformat(self, minimum, pluscl, minuscl, str95):
         digits = max(
           min(-math.ceil(math.log(pluscl, 10)), -math.ceil(math.log(-minuscl, 10)))+2,
-          -math.ceil(math.log(pluscl/2, 10))+1,
-          -math.ceil(math.log(-minuscl/2, 10))+1,
+          -math.ceil(math.log(pluscl/2., 10))+1,
+          -math.ceil(math.log(-minuscl/2., 10))+1,
         )
         formatdict = {
             "minimum": minimum,
@@ -67,8 +67,8 @@ def str95(*ranges):
     if lo < 0 < hi:
       digits = max(
         min(-math.ceil(math.log(hi, 10)), -math.ceil(math.log(-lo, 10)))+2,
-        -math.ceil(math.log(hi/2, 10))+1,
-        -math.ceil(math.log(-lo/2, 10))+1,
+        -math.ceil(math.log(hi/2., 10))+1,
+        -math.ceil(math.log(-lo/2., 10))+1,
       )
     else:
       digits = 2
