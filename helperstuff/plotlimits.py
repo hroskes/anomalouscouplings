@@ -111,7 +111,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     infilename = filenametemplate
     xtitle = None
     scanfai = analysis
-    killpoints = None
+    killpoints = []
     faifor = "decay"
     xaxislimits = None
     adddirectories = []
@@ -148,9 +148,13 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         elif kw == "xtitle":
             xtitle = kwarg
         elif kw == "killpoints":
-            if isinstance(kwarg, basestring): kwarg = [float(_) for _ in kwarg.split(",")]
-            assert len(kwarg) == 2
-            killpoints = kwarg
+            if isinstance(kwarg, basestring):
+                kwarg = kwarg.replace(":", ";")
+                kwarg = kwarg.split(";")
+            for _ in kwarg:
+                if isinstance(_, basestring): _ = [float(a) for a in _.split(",")]
+                assert len(_) == 2
+                killpoints.append(_)
         elif kw == "faifor":
             faifor = kwarg
         elif kw == "xaxislimits":
@@ -234,7 +238,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                             elif faifor == "VBFreco": assert len(productions) == 1; fa3 = fai_VBFreco(analysis, productions[0], fa3)
                             else: assert False
                             if xaxislimits is not None and not (xaxislimits[0] <= fa3 <= xaxislimits[1]): continue
-                        if killpoints is not None and killpoints[0] < fa3 < killpoints[1]: continue
+                        if killpoints is not None and any(_[0] < fa3 < _[1] for _ in killpoints): continue
                         if nuisance is None:
                             deltaNLL = t.deltaNLL+t.nll+t.nll0
                             NLL[fa3] = 2*deltaNLL
