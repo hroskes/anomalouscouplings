@@ -72,8 +72,10 @@ def setupdats(plotid):
          open("obs_model_95CL_up_2.dat") as files.obs95_up_2:
       for data in izip(*files):
         data = [data[0].strip()] + [float(_) if float(_) != 0 else int(float(_)) for _ in data[1:]]
-        assert data[0] not in models, data[0]
-        models[data[0]] = Model(*data)
+        if data[0] in models:
+            models[data[0]+"offshell"] = Model(*data)
+        else:
+            models[data[0]] = Model(*data)
 
     def thekey(kv):
       k, v = kv
@@ -82,17 +84,27 @@ def setupdats(plotid):
       k = k.replace("3", "1")
       k = k.replace("#", "")
       k = k.lower()
+      if "offshell" in k: k = "zzzz offshell" + k
       return k
     models = OrderedDict((k, v) for (k, v) in sorted(models.items(), key=thekey))
 
     for analysis in analyses:
-      filename = os.path.join(config.plotsbasedir, "limits", "{}_September7combination".format(analysis), "limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root")
+      if "HIG18002" in plotid:
+          filename = os.path.join(config.plotsbasedir, "limits", "{}_September7combination".format(analysis), "limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root")
+      elif "FTR18011" in plotid:
+          filename = os.path.join(config.plotsbasedir, "limits", "{}_September21projection3000".format(analysis), "limit_lumi3000.00_100,-1.0,1.0_100,-0.02,0.02.root")
       allresults = getlimits(filename, poi="CMS_zz4l_fai1", domirror=analysis=="fa3")
 
       m = models[analysis.couplingtitle]
       expname = "Expected, {} = 0 or #pi".format(analysis.phi)
       obsname = "Observed, {} = 0 or #pi".format(analysis.phi)
-      (expmin, exp68, exp95), (obsmin, obs68, obs95) = allresults[expname], allresults[obsname]
+      (expmin, exp68, exp95) = allresults[expname]
+      if "FTR18011" in plotid:
+          obsmin = 999
+          obs68 = [[0, 0]]
+          obs95 = [[-1, 1]]  #nothing is excluded by observation
+      else:
+          (obsmin, obs68, obs95) = allresults[obsname]
 
       assert abs(expmin) < .001, expmin
 
@@ -146,12 +158,16 @@ def setupdats(plotid):
 def makeplot(plotid):
   with cd(os.path.join(config.repositorydir, "step10_plottingutilities", "NIS_summary")):
     subprocess.check_call(["make"])
-    subprocess.check_call(["./NIS_summary_4", plotid])
+    if plotid == "FTR18011":
+        subprocess.check_call(["./NIS_summary_3", plotid])
+    else:
+        subprocess.check_call(["./NIS_summary_4", plotid])
     for ext in "png eps root pdf C".split():
       if plotid == "HIG18002onshell": shutil.copy("Summary_HIG18002onshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary."+ext))
       if plotid == "HIG18002onshellPAS": shutil.copy("Summary_HIG18002onshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary."+ext))
       if plotid == "HIG18002onshelloffshell": shutil.copy("Summary_HIG18002onshelloffshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary_offshell."+ext))
       if plotid == "HIG18002onshelloffshellPAS": shutil.copy("Summary_HIG18002onshelloffshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary_offshell."+ext))
+      if plotid == "FTR18011": shutil.copy("Summary_FTR18011."+ext, os.path.join(config.plotsbasedir, "limits", "summary_3000fb-1."+ext))
 
 if __name__ == "__main__":
 #  setupdats("HIG18002onshell")
@@ -161,3 +177,5 @@ if __name__ == "__main__":
 #  setupdats("HIG18002onshelloffshell")
   makeplot("HIG18002onshelloffshell")
   makeplot("HIG18002onshelloffshellPAS")
+  setupdats("FTR18011")
+  makeplot("FTR18011")

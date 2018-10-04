@@ -738,12 +738,12 @@ class TFile(object):
         self.__f = ROOT.TFile.Open(self.__filename, *self.__args, **self.__kwargs)
         return self.__f
     def __exit__(self, *exc_info):
-        if any(exc_info):
+        if self.__f and any(exc_info):
             self.__f.ls()
         try:
-            if self.__write: self.__f.Write()
+            if self.__f and self.__write: self.__f.Write()
         finally:
-            self.__f.Close()
+            if self.__f: self.__f.Close()
     def __repr__(self):
         return "{.__name__}('{}', write={}, contextmanager={})".format(type(self), self.__filename, self.__write, self.__contextmanager)
 
@@ -857,7 +857,7 @@ def existsandvalid(filename, *shouldcontain):
         with TFile(filename) as f:
           for _ in shouldcontain:
             getattr(f, _)
-      except AttributeError:
+      except (AttributeError, ReferenceError):
         os.remove(filename)
 
     elif filename.endswith(".json"):

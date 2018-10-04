@@ -84,14 +84,21 @@ def runscan(repmap, submitjobs, directory=None):
 
     repmap_initial = repmap.copy()
     repmap_initial.update({
+      "npoints": "101",
+      "scanrange": {
+        "CMS_zz4l_fai1": "-1,1",
+      }[repmap["POI"]],
+      "scanrangeappend": ".oO[pointindex]Oo.",
+      "expectfai": "0.0",
       "pointindex": "_firststep",
       "selectpoints": "--firstPoint 1 --lastPoint 0",
       "saveorloadworkspace": "--saveWorkspace",
     })
-    utilities.existsandvalid(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial), "w")
 
     initialjobids = []
-    if not os.path.exists(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial)):
+    print replaceByMap("jobs/.oO[filename]Oo.", repmap_initial)
+    if not utilities.existsandvalid(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial), "w"):
+      assert False
       job = "{} runscan {} directory={}".format(
                                                 os.path.join(config.repositorydir, "./step9_runcombine.py"),
                                                 pipes.quote(json.dumps(repmap_initial)),

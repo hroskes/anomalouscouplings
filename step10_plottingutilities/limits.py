@@ -69,7 +69,7 @@ def str95(*ranges):
         min(-math.ceil(math.log(hi, 10)), -math.ceil(math.log(-lo, 10)))+2,
         -math.ceil(math.log(hi/2., 10))+1,
         -math.ceil(math.log(-lo/2., 10))+1,
-      )
+      )+3
     else:
       digits = 2
     result.append(("[{:.%(digits)df}, {:.%(digits)df}]" % {"digits": digits}).format(lo, hi))
