@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import getpass
 import glob
-from itertools import product
+from itertools import izip, product
 import json
 import os
 import pipes
@@ -52,7 +52,7 @@ gm convert .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanran
 """
 
 morecombineoptions = {
-    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[npoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1",
+    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1",
     "FitDiagnostics": "",
     "Impacts": ".oO[impactsstep.oO[impactsstep]Oo.]Oo."
 }
@@ -117,8 +117,9 @@ def runscan(repmap, submitjobs, directory=None):
     for i in range(npoints):
       repmap_i = repmap.copy()
       repmap_i.update({
-        "selectpoints": "--firstPoint .oO[pointindex]Oo. --lastPoint .oO[pointindex]Oo.",
+        "selectpoints": "--firstPoint .oO[pointindexplusoffset]Oo. --lastPoint .oO[pointindexplusoffset]Oo.",
         "pointindex": str(i),
+        "pointindexplusoffset": str(i+int(replaceByMap(".oO[pointoffset]Oo.", repmap_i))),
         "saveorloadworkspace": "--snapshotName MultiDimFit",
         "workspacefile": replaceByMap(".oO[filename]Oo.", repmap_initial),
       })
@@ -458,6 +459,26 @@ def runcombine(analysis, foldername, **kwargs):
     if is2dscan:
       scanranges = list((points**2, min, max) for points, min, max in scanranges)
 
+    internalscanranges = []
+    for scanrange in scanranges:
+      internalscanrange = list(scanrange) + [0] #0 is the offset
+      internalscanranges.append(internalscanrange)
+      assert not is2dscan
+      if POI == "CMS_zz4l_fai1":
+        hastoinclude = 0
+      else:
+        assert False, poi
+      assert scanrange[2] > scanrange[1], (scanrange[2], scanrange[1])
+      while not internalscanrange[1] < hastoinclude:
+        internalscanrange[1] -= (internalscanrange[2] - internalscanrange[1])
+        internalscanrange[3] += scanrange[0]-1
+        internalscanrange[0] += scanrange[0]-1
+        assert submitjobs
+      while not internalscanrange[2] > hastoinclude:
+        internalscanrange[2] += (internalscanrange[2] - internalscanrange[1])
+        internalscanrange[0] += scanrange[0]-1
+        assert submitjobs
+
     if submitjobs:
         if not utilities.inscreen():
             raise RuntimeError("submitjobs should be run from a screen session!")
@@ -539,7 +560,7 @@ def runcombine(analysis, foldername, **kwargs):
 
     physicsmodelparameterranges = {
                                    "CMS_zz4l_fai1": "-1,1",
-                                   POI: ".oO[scanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
+                                   POI: ".oO[internalscanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
                                   }
 
     repmap = {
@@ -641,11 +662,14 @@ def runcombine(analysis, foldername, **kwargs):
 
         if config.unblindscans and runobs:
           minimum = (float("nan"), float("inf"))
-          for scanrange in scanranges:
+          for scanrange, internalscanrange in izip(scanranges, internalscanranges):
               repmap_obs = repmap.copy()
               repmap_obs.update({
                 "npoints": str(scanrange[0]),
-                "scanrange": "{},{}".format(*scanrange[1:]),
+                "internalnpoints": str(internalscanrange[0]),
+                "scanrange": "{},{}".format(*scanrange[1:3]),
+                "internalscanrange": "{},{}".format(*internalscanrange[1:3]),
+                "pointoffset": str(internalscanrange[3]),
                 "scanrangeappend": ("" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.")+".oO[pointindex]Oo.",
                 "expectfai": "0.0",  #starting point
                 "append": ".oO[observedappend]Oo.",
@@ -678,13 +702,16 @@ def runcombine(analysis, foldername, **kwargs):
           del f
 
         for expectfai in expectvalues:
-          for scanrange in scanranges:
+          for scanrange, internalscanrange in izip(scanranges, internalscanranges):
               repmap_exp = repmap.copy()
               if expectfai == "minimum":
                   expectfai = minimum
               repmap_exp.update({
                 "npoints": str(scanrange[0]),
+                "internalnpoints": str(internalscanrange[0]),
                 "scanrange": "{},{}".format(*scanrange[1:]),
+                "internalscanrange": "{},{}".format(*internalscanrange[1:3]),
+                "pointoffset": str(internalscanrange[3]),
                 "scanrangeappend": ("" if scanrange==defaultscanrange else "_.oO[npoints]Oo.,.oO[scanrange]Oo.")+".oO[pointindex]Oo.",
                 "expectfai": str(expectfai),
                 "append": ".oO[expectedappend]Oo.",
