@@ -10,6 +10,7 @@ if __name__ == "__main__":
     p.add_argument("--printformat")
     p.add_argument("--subdirectory")
     p.add_argument("--poi", default="CMS_zz4l_fai1")
+    p.add_argument("--airatio", action="store_true")
     args = p.parse_args()
 
 import math
@@ -31,11 +32,16 @@ class PrintFormat(MyEnum):
                 )
 
     def printformat(self, minimum, pluscl, minuscl, str95):
-        digits = max(
-          min(-math.ceil(math.log(pluscl, 10)), -math.ceil(math.log(-minuscl, 10)))+2,
-          -math.ceil(math.log(pluscl/2., 10))+1,
-          -math.ceil(math.log(-minuscl/2., 10))+1,
-        )
+        try:
+          digits = max(
+            min(-math.ceil(math.log(pluscl, 10)), -math.ceil(math.log(-minuscl, 10)))+2,
+            -math.ceil(math.log(pluscl/2., 10))+1,
+            -math.ceil(math.log(-minuscl/2., 10))+1,
+            0,
+          )
+        except ValueError as e:
+          print "digits value error", e
+          digits = 2
         formatdict = {
             "minimum": minimum,
             "pluscl": pluscl,
@@ -66,10 +72,11 @@ def str95(*ranges):
   for lo, hi in ranges:
     if lo < 0 < hi:
       digits = max(
-        min(-math.ceil(math.log(hi, 10)), -math.ceil(math.log(-lo, 10)))+2,
-        -math.ceil(math.log(hi/2., 10))+1,
-        -math.ceil(math.log(-lo/2., 10))+1,
-      )+3
+        min(-math.ceil(math.log(hi, 10)), -math.ceil(math.log(-lo, 10)))+1,
+        -math.ceil(math.log(hi, 10))+1,
+        -math.ceil(math.log(-lo, 10))+1,
+        0,
+      )+1
     else:
       digits = 2
     result.append(("[{:.%(digits)df}, {:.%(digits)df}]" % {"digits": digits}).format(lo, hi))
@@ -81,7 +88,7 @@ def findwhereyequals(y, p1, p2):
     b =  p1.y - m*p1.x
     return (y-b)/m
 
-def getlimits(filename, poi, domirror=False):
+def getlimits(filename, poi, domirror=False, airatio=False, analysis=None):
     f = ROOT.TFile(filename)
     c = f.c1
     legend = c.GetListOfPrimitives()[2]
@@ -97,13 +104,36 @@ def getlimits(filename, poi, domirror=False):
 
     finalresult = OrderedDict()
 
+    if airatio:
+        assert poi == "CMS_zz4l_fai1", poi
+        assert analysis
+        def transform(fa3):
+            from helperstuff.combinehelpers import sigmaioversigma1
+            if abs(fa3) == 1: return math.copysign(float("inf"), fa3)
+            return math.copysign(math.sqrt(abs(fa3) / (1-abs(fa3)) / sigmaioversigma1(analysis, "ggH")), fa3)
+        if analysis in ("fa3", "fa2"):
+            pass
+        elif analysis in ("fL1", "fL1Zg"):
+            fa3transform = transform
+            def transform(fL1):
+                result = fa3transform(fL1)
+                #result is g1prime2 / a1
+                L1JHU = 10000 #GeV
+                #set g1prime2 = L1JHU^2 / L1^2
+                #then result is L1JHU^2 / (a1 L1^2)
+                if result == 0: return float("inf")
+                return math.copysign(math.sqrt(abs(L1JHU**2 / result)), result)
+                #which is L1 sqrt(a1)
+    else:
+        def transform(fa3): return fa3
+
     for entry in legend.GetListOfPrimitives():
         minimum = Point(float("nan"), float("infinity"))
         g, label = entry.GetObject(), entry.GetLabel()
-        points = [Point(x, y) for x, y, n in zip(g.GetX(), g.GetY(), range(g.GetN()))]
+        points = [Point(transform(x), y) for x, y, n in zip(g.GetX(), g.GetY(), range(g.GetN()))]
         if domirror and "Expected" in label:
             def findy(x):
-                y = {yy for xx, yy in points if abs(xx - x) == 0}
+                y = {yy for xx, yy in points if x==xx or abs(xx - x) == 0}   #x==xx to cover float("inf")
                 assert len(y) == 1, (x, y)
                 return y.pop()
             points = [Point(x, (y+findy(-x))/2 if any(xx==-x for xx, yy in points) else y) for x, y in points]
@@ -153,6 +183,7 @@ def printlimits(analysis, foldername, **kwargs):
     subdirectory = ""
     poi = "CMS_zz4l_fai1"
     fortable = False
+    airatio = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "plotname":
             plotname = kwarg
@@ -166,13 +197,23 @@ def printlimits(analysis, foldername, **kwargs):
             poi = kwarg
         elif kw == "fortable":
             fortable = kwarg
+        elif kw == "airatio":
+            airatio = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
     filename = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername, plotname+".root")
-    allresults = getlimits(filename, poi=poi, domirror=(analysis=="fa3"))
+    allresults = getlimits(filename, poi=poi, domirror=(analysis=="fa3"), airatio=airatio, analysis=analysis)
     if fortable:
         assert len(allresults.keys()) == 2 and allresults.keys()[0].startswith("Observed") and allresults.keys()[1].startswith("Expected"), allresults.keys()
+
+    if not fortable and airatio:
+        if analysis in ("fa3", "fa2"):
+            print "Printing a_i / a_1"
+            print
+        elif analysis in ("fL1", "fL1Zg"):
+            print "Printing Lambda_1^VV sqrt(a_1)"
+            print
 
     for label, (minimum, c68, c95) in allresults.iteritems():
         repmap = {}
