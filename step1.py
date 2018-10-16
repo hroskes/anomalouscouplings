@@ -29,7 +29,7 @@ else:
     shutil.move("CMSSW_9_4_3/.gitignore", os.path.join(tmpdir, ".gitignore"))
     try:
         os.rmdir("CMSSW_9_4_3")
-        os.environ["SCRAM_ARCH"] = "slc{}_amd64_gcc530".format(helperstuff.config.slcversion)
+        os.environ["SCRAM_ARCH"] = "slc{}_amd64_gcc630".format(helperstuff.config.slcversion)
         subprocess.check_call(["scram", "p", "CMSSW", "CMSSW_9_4_3"])
     finally:
         if os.path.exists("CMSSW_9_4_3/src"):
