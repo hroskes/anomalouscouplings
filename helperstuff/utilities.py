@@ -885,3 +885,11 @@ def writeplotinfo(txtfilename, *morestuff):
     f.write(subprocess.check_output(["git", "status"]))
     f.write("\n")
     f.write(subprocess.check_output(["git", "diff"]))
+
+def debugfunction(function):
+  @wraps(function)
+  def newfunction(*args, **kwargs):
+    result = function(*args, **kwargs)
+    print "{.__name__}({}{}{})={}".format(function, ", ".join(str(_) for _ in args), ", " if args and kwargs else "", ", ".join("{}={}".format(k, v) for k, v in kwargs.iteritems()), result)
+    return result
+  return newfunction

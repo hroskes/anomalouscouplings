@@ -94,7 +94,7 @@ def getlimits(filename, poi, domirror=False, airatio=False, analysis=None):
     legend = c.GetListOfPrimitives()[2]
 
     poimin, poimax = {
-        "CMS_zz4l_fai1": (-1, 1),
+        "CMS_zz4l_fai1": (-float("inf"), float("inf")) if airatio else (-1, 1),
         "RV": (0, float("inf")),
         "RF": (0, float("inf")),
     }[poi]
@@ -137,6 +137,7 @@ def getlimits(filename, poi, domirror=False, airatio=False, analysis=None):
                 assert len(y) == 1, (x, y)
                 return y.pop()
             points = [Point(x, (y+findy(-x))/2 if any(xx==-x for xx, yy in points) else y) for x, y in points]
+        points.sort()
         isabove = {threshold: points[0].y > threshold for threshold in thresholds}
         results = {threshold: [[poimin]] if not isabove[threshold] else [] for threshold in thresholds}
         for point in points:

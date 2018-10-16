@@ -19,6 +19,7 @@ if __name__ == "__main__":
     parser.add_argument("--letter", help="goes in the corner of the plot, e.g. --letter=a gives (a)")
     parser.add_argument("--letterposition", nargs=4, type=float, default=(.86, .86, .90, .92), help="--letterposition xmin ymin xmax ymax (default: .86, .86, .90, .92)")
     parser.add_argument("--lettersize", type=float, default=0.06, help="size of --letter, default: 0.06")
+    parser.add_argument("--killpoints", type=float, nargs=2, action="append")
     args = parser.parse_args()
     kwargs = args.__dict__
 
@@ -56,6 +57,7 @@ def plotlimits(*scans, **kwargs):
     ytitle = None
     letter = None
     letterposition = (.86, .86, .90, .92)
+    killpoints = []
     for kw, kwarg in kwargs.iteritems():
         if kw == "legendposition":
             legendposition = kwarg
@@ -86,6 +88,8 @@ def plotlimits(*scans, **kwargs):
             letterposition = kwarg
         elif kw == "lettersize":
             lettersize = kwarg
+        elif kw == "killpoints" and kwarg:
+            killpoints = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -112,6 +116,7 @@ def plotlimits(*scans, **kwargs):
             for entry in islice(t, startfrom, None):
                 fa3 = getattr(t, POI)
                 deltaNLL = t.deltaNLL+t.nll+t.nll0
+                if any(_[0] < fa3 < _[1] for _ in killpoints): continue
                 NLL[fa3] = 2*deltaNLL
             if 1 not in NLL and -1 in NLL:
                 NLL[1] = NLL[-1]
