@@ -163,10 +163,11 @@ def makeplot(plotid):
     else:
         subprocess.check_call(["./NIS_summary_4", plotid])
     for ext in "png eps root pdf C".split():
-      if plotid == "HIG18002onshell": shutil.copy("Summary_HIG18002onshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary."+ext))
-      if plotid == "HIG18002onshellPAS": shutil.copy("Summary_HIG18002onshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary."+ext))
-      if plotid == "HIG18002onshelloffshell": shutil.copy("Summary_HIG18002onshelloffshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary_offshell."+ext))
-      if plotid == "HIG18002onshelloffshellPAS": shutil.copy("Summary_HIG18002onshelloffshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary_offshell."+ext))
+      if plotid == "HIG18002onshell": shutil.copy("Summary_HIG18002onshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary_onshell."+ext))
+      if plotid == "HIG18002onshellPAS": shutil.copy("Summary_HIG18002onshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary_onshell."+ext))
+      if plotid == "HIG18002onshelloffshell": shutil.copy("Summary_HIG18002onshelloffshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary."+ext))
+      if plotid == "HIG18002onshelloffshellPAS": shutil.copy("Summary_HIG18002onshelloffshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary."+ext))
+      if plotid == "HIG17034": shutil.copy("Summary_HIG17034."+ext, os.path.join(config.plotsbasedir, "limits", "HTT", "summary."+ext))
       if plotid == "FTR18011": shutil.copy("Summary_FTR18011."+ext, os.path.join(config.plotsbasedir, "limits", "summary_3000fb-1."+ext))
 
 if __name__ == "__main__":
@@ -177,5 +178,6 @@ if __name__ == "__main__":
 #  setupdats("HIG18002onshelloffshell")
   makeplot("HIG18002onshelloffshell")
   makeplot("HIG18002onshelloffshellPAS")
-  setupdats("FTR18011")
-  makeplot("FTR18011")
+  makeplot("HIG17034")
+#  setupdats("FTR18011")
+#  makeplot("FTR18011")
