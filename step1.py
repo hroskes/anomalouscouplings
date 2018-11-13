@@ -17,25 +17,25 @@ print """Yes, config is set up!
 print "Initiating git submodules..."
 subprocess.check_call(["git", "submodule", "update", "--init", "--recursive"])
 
-if set(os.listdir("CMSSW_8_1_0")) != set(["src", ".gitignore"]):
-    print """CMSSW_8_1_0 area already set up."""
+if set(os.listdir("CMSSW_9_4_3")) != set(["src", ".gitignore"]):
+    print """CMSSW_9_4_3 area already set up."""
     print
 else:
-    print """Now setting up CMSSW_8_1_0 area for combine..."""
-    #move files out of CMSSW_8_1_0
-    tmpdir = "tmpCMSSW_8_1_0"
+    print """Now setting up CMSSW_9_4_3 area for combine..."""
+    #move files out of CMSSW_9_4_3
+    tmpdir = "tmpCMSSW_9_4_3"
     utilities.mkdir_p(tmpdir)
-    shutil.move("CMSSW_8_1_0/src", os.path.join(tmpdir, "src"))
-    shutil.move("CMSSW_8_1_0/.gitignore", os.path.join(tmpdir, ".gitignore"))
+    shutil.move("CMSSW_9_4_3/src", os.path.join(tmpdir, "src"))
+    shutil.move("CMSSW_9_4_3/.gitignore", os.path.join(tmpdir, ".gitignore"))
     try:
-        os.rmdir("CMSSW_8_1_0")
-        os.environ["SCRAM_ARCH"] = "slc{}_amd64_gcc530".format(helperstuff.config.slcversion)
-        subprocess.check_call(["scram", "p", "CMSSW", "CMSSW_8_1_0"])
+        os.rmdir("CMSSW_9_4_3")
+        os.environ["SCRAM_ARCH"] = "slc{}_amd64_gcc630".format(helperstuff.config.slcversion)
+        subprocess.check_call(["scram", "p", "CMSSW", "CMSSW_9_4_3"])
     finally:
-        if os.path.exists("CMSSW_8_1_0/src"):
-            os.rmdir("CMSSW_8_1_0/src")
-        shutil.move(os.path.join(tmpdir, "src"), "CMSSW_8_1_0/src")
-        shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_8_1_0/.gitignore")
+        if os.path.exists("CMSSW_9_4_3/src"):
+            os.rmdir("CMSSW_9_4_3/src")
+        shutil.move(os.path.join(tmpdir, "src"), "CMSSW_9_4_3/src")
+        shutil.move(os.path.join(tmpdir, ".gitignore"), "CMSSW_9_4_3/.gitignore")
         os.rmdir(tmpdir)
 
     print """CMSSW area is set up"""
@@ -43,18 +43,18 @@ else:
 print
 print "Compiling MELA..."
 
-with utilities.cd("CMSSW_8_1_0/src/ZZMatrixElement"):
+with utilities.cd("CMSSW_9_4_3/src/ZZMatrixElement"):
     subprocess.check_call("eval $(scram ru -sh) && ./setup.sh -j 10", shell=True)
 
 print
 print """Compiling CMSSW..."""
 
-with utilities.cd("CMSSW_8_1_0/src"):
+with utilities.cd("CMSSW_9_4_3/src"):
     subprocess.check_call(["scram", "b", "-j", "10"])
 
 print "Compiling TemplateBuilder..."
 
-subprocess.check_call("cd CMSSW_8_1_0 && eval $(scram ru -sh) && cd ../TemplateBuilder && make", shell=True)
+subprocess.check_call("cd CMSSW_9_4_3 && eval $(scram ru -sh) && cd ../TemplateBuilder && make", shell=True)
 gitignore = """
 obj/*
 buildTemplate.exe
@@ -64,12 +64,12 @@ with open("TemplateBuilder/.gitignore", "w") as f:
     f.write(gitignore)
 
 print "Compiling NIS_summary..."
-subprocess.check_call("cd CMSSW_8_1_0 && eval $(scram ru -sh) && cd ../step10_plottingutilities/NIS_summary && make", shell=True)
+subprocess.check_call("cd CMSSW_9_4_3 && eval $(scram ru -sh) && cd ../step10_plottingutilities/NIS_summary && make", shell=True)
 
 print """Checking that python dependencies are installed..."""
 try:
   import uncertainties
 except ImportError:
   print "Installing uncertainties..."
-  with utilities.cd("CMSSW_8_1_0"):
+  with utilities.cd("CMSSW_9_4_3"):
     subprocess.check_call("eval $(scram ru -sh) && pip install --user uncertainties", shell=True)

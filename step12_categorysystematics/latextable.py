@@ -11,7 +11,7 @@ if __name__ == "__main__":
   args = p.parse_args()
 
 from abc import ABCMeta, abstractmethod, abstractproperty
-from itertools import product
+from itertools import chain, product
 import random
 import sys
 
@@ -424,7 +424,11 @@ def maketable(analysis, tabletype):
     ]
     sections.append(
       Section("Total",
-        TotalRow(*(sections[0].rows+sections[1].rows), title="Total expected"),
+        SlashRow(
+          TotalRow(*chain((_.rows[0] for _ in sections[0].rows), sections[1].rows), title="Total expected"),
+          TotalRow(*chain((_.rows[1] for _ in sections[0].rows), sections[1].rows), title="Total expected"),
+          title="Total expected",
+        ),
         Row(analysis, "data", title="Total observed"),
       )
     )
