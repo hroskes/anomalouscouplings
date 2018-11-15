@@ -1,11 +1,11 @@
 import abc
 import collections
 import contextlib
+import cPickle
 import datetime
 import errno
-from functools import wraps
 import inspect
-from itertools import tee, izip
+import itertools
 import logging
 import math
 import operator
@@ -17,6 +17,9 @@ import subprocess
 import sys
 import tempfile
 import time
+
+from functools import wraps
+from itertools import tee, izip
 
 import ROOT
 
@@ -107,6 +110,35 @@ def cache_instancemethod(function):
         if not hasattr(self, "__cache_instancemethod_{}".format(function.__name__)):
             setattr(self, "__cache_instancemethod_{}".format(function.__name__), function(self))
         return getattr(self, "__cache_instancemethod_{}".format(function.__name__))
+
+def cache_file(filename, *argkeys, **kwargkeys):
+    def inner_cache_file(function):
+        try:
+            with OneAtATime(filename+".tmp", 5), open(filename, "rb") as f:
+                cache = cPickle.load(f)
+        except IOError:
+            cache = {}
+        @wraps(function)
+        def newfunction(*args, **kwargs):
+            argsforcache = tuple(key(arg) for key, arg in itertools.izip_longest(argkeys, args, fillvalue=lambda x: x))
+            kwargsforcache = {kw: kwargkeys.get(kw, lambda x: x)(kwargs[kw]) for kw in kwargs}
+            keyforcache = argsforcache, tuple(sorted(kwargsforcache.iteritems()))
+            try:
+                return cache[keyforcache]
+            except TypeError:
+                print keyforcache
+                raise
+            except KeyError:
+                result = function(*args, **kwargs)
+                with OneAtATime(filename+".tmp", 5):
+                    with open(filename, "rb") as f:
+                        cache.update(cPickle.load(f))
+                    cache[keyforcache] = result
+                    with open(filename, "wb") as f:
+                        cPickle.dump(cache, f)
+                return newfunction(*args, **kwargs)
+        return newfunction
+    return inner_cache_file
 
 def multienumcache(function, haskwargs=False, multienumforkey=None):
     from enums import MultiEnum

@@ -3,7 +3,7 @@ import argparse
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--overwrite", help="keep the json files that already exist", action="store_false", dest="keep")
+    p.add_argument("--overwrite", help="redo the json files that already exist", action="store_false", dest="keep")
     p.add_argument("--submitjobs", help="submit jobs", metavar="FILES_PER_JOB", type=int)
     args = p.parse_args()
 

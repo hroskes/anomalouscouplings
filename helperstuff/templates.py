@@ -182,7 +182,7 @@ class TemplatesFile(MultiEnum):
         if self.templategroup in ["ggh", "vbf", "zh", "wh", "tth", "bbh"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
-            if self.production.LHE: return [Template(self, "qqZZ")]
+            if self.production.LHE or self.production.GEN: return [Template(self, "qqZZ")]
             result = ["qqZZ", "ggZZ", "VBF bkg"]
             if config.usedata:
                 result.append("ZX")

@@ -11,7 +11,7 @@ import ROOT
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
-from utilities import cache, deprecate, mkdtemp, product, TFile, tlvfromptetaphim
+from utilities import cache, cache_file, deprecate, mkdtemp, product, TFile, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 
@@ -1717,6 +1717,10 @@ class Sample(ReweightingSamplePlus):
              t.GetEntry(0)
              return getattr(t, alternateweight.weightname)
 
+@cache_file(os.path.join(config.repositorydir, "data", "invertedmatrices.pkl"), lambda x: bytes(x.data))
+def invertnumpymatrix(numpymatrix):
+    return numpymatrix.I
+
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]
     def __init__(self, hypotheses, *args):
@@ -1814,7 +1818,8 @@ class SampleBasis(MultiEnum):
     @property
     @cache
     def invertedmatrix(self):
-        return self.matrix.I
+        self.matrix.flags.writeable = False
+        return invertnumpymatrix(self.matrix)
 
 def allsamples():
     __xcheck()
