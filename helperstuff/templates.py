@@ -615,6 +615,7 @@ def templatesfiles():
                         for shapesystematic in nominal.treeshapesystematics:
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                             if (production.LHE or production.GEN) and shapesystematic != "": continue
+                            if (production.LHE or production.GEN) and templategroup == "DATA": continue
                             if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
