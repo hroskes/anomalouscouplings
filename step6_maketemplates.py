@@ -105,7 +105,7 @@ def submitjobs(removefiles, jsontoo=False):
             raise ValueError("{} does not exist!".format(filename))
         remove[filename] = False
         if jsontoo:
-            jsonfilename = os.path.join(config.repositorydir, "step5_json", filename.replace(".root", ".json"))
+            jsonfilename = os.path.relpath(filename, config.repositorydir).replace("step7_templates", "step5_json").replace(".root", ".json")
             if os.path.exists(jsonfilename):
                 remove[jsonfilename] = False
 

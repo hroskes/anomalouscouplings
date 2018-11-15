@@ -53,7 +53,7 @@ class TemplatesFile(MultiEnum):
 
     def jsonfile(self, iteration=None):
         assert "Ulascan" not in str(self.production)
-        folder = os.path.join(config.repositorydir, "step5_json")
+        folder = os.path.join(config.repositorydir, "step5_json", str(self.production))
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
 
@@ -614,7 +614,7 @@ def templatesfiles():
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
-                            if production.LHE and shapesystematic != "": continue
+                            if (production.LHE or production.GEN) and shapesystematic != "": continue
                             if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
