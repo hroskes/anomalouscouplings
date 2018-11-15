@@ -1656,7 +1656,7 @@ class Sample(ReweightingSamplePlus):
 
     def withdiscriminantsfile(self):
         if self.copyfromothersample: return self.copyfromothersample.withdiscriminantsfile()
-        result = os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
+        result = os.path.join(config.repositorydir, "step3_withdiscriminants", str(self.production), "{}.root".format(self).replace(" ", ""))
         return result
         raise self.ValueError("withdiscriminantsfile")
 

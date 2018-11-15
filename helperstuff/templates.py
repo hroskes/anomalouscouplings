@@ -506,7 +506,7 @@ class TemplatesFile(MultiEnum):
 
     def getjson(self):
         return {
-                "inputDirectory": "step3_withdiscriminants/",
+                "inputDirectory": os.path.join("step3_withdiscriminants", str(self.production)),
                 "outputFile": self.templatesfile(firststep=self.hascustomsmoothing),
                 "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
                }

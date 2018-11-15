@@ -687,7 +687,7 @@ class Analysis(MyEnum):
         if self == "fa3fa2fL1fL1Zg": return False
         assert False, self
     @property
-    def doLHE(self):
+    def doGEN(self):
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
         if self == "fa3fa2fL1fL1Zg": return True
@@ -1017,7 +1017,7 @@ proddechypotheses = Hypothesis.items(lambda x: True)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
-analyses = Analysis.items(lambda x: x.doCMS)
+analyses = Analysis.items(lambda x: x.doGEN)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
