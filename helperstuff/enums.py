@@ -299,6 +299,7 @@ class ProductionMode(MyEnum):
     def issignal(self):
         return not self.isbkg
     @property
+    @cache
     def validhypotheses(self):
         if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)

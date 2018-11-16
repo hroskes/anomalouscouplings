@@ -1,5 +1,5 @@
 [submodule "TemplateBuilder"]
-	path = TemplateBuilder
+	path = CMSSW_9_4_3/src/TemplateBuilder/TemplateBuilder
 	url = git@github.com:hroskes/TemplateBuilder
 	branch = master
 [submodule "CMSSW_7_6_5/src/HiggsAnalysis/CombinedLimit"]
