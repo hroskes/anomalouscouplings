@@ -68,7 +68,7 @@ class TemplatesFile(MultiEnum):
         if self.copyfromothertemplatesfile is not None:
             return self.copyfromothertemplatesfile.templatesfile()
 
-        folder = os.path.join(config.repositorydir, "step7_templates")
+        folder = os.path.join(config.repositorydir, "step7_templates", str(self.production))
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
             if not os.path.exists(folder):
@@ -1487,7 +1487,7 @@ class DataTree(MultiEnum):
         return Sample("data", self.production).withdiscriminantsfile()
     @property
     def treefile(self):
-        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
+        return os.path.join(config.repositorydir, "step7_templates", str(self.production), "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
     def passescut(self, t):
         return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblinddistributions and getattr(t, "category_"+self.analysis.categoryname) in self.category
 
