@@ -5,7 +5,7 @@ import os
 import re
 
 import config
-from utilities import cache, generatortolist_condition, tfiles
+from utilities import cache, deprecate, generatortolist_condition, tfiles
 
 class EnumItem(object):
     def __init__(self, name, *other):
@@ -825,7 +825,7 @@ class Production(MyEnum):
     def dataluminosity(self):
         if self in ("170203", "170222", "170825", "180121", "180224", "180531_2016", "180721_2016"): return 35.921875594646
         if self in ("180416", "180531", "180721_2017"): return 41.529343499127
-        if self == "LHE_170509": return 300
+        if self.LHE or self.GEN: return 300
 
         if self in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
             return type(self)(str(self).split("_")[0]).dataluminosity
