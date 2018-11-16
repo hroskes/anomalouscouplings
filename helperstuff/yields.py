@@ -12,7 +12,7 @@ from combinehelpers import Luminosity
 import config
 from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
-from utilities import cache, JsonDict, MultiplyCounter, TFile
+from utilities import cache, deprecate, JsonDict, MultiplyCounter, TFile
 
 class YieldSystematic(MyEnum):
     enumname = "yieldsystematic"
@@ -253,11 +253,19 @@ class _TotalRate(MultiEnum):
       if self.productionmode == "ggH":
         s = Sample(self.productionmode, "0+", "POWHEG", self.production)
         t.Add(Sample(s).withdiscriminantsfile())
-        weightname.add("({}) * (genxsec * genBR * KFactor_QCD_ggZZ_Nominal / xsec)".format(s.weightname()))
+        weightname.add("({}) * (genxsec * genBR * KFactor_QCD_ggZZ_Nominal / xsec)".format(s.weightname()).replace(deprecate("KFactor_QCD_ggZZ_Nominal", 2018, 11, 20), "1"))
       else:
         s = Sample(self.productionmode, "0+", "POWHEG", self.production, "Hff0+" if self.productionmode == "ttH" else None)
         t.Add(s.withdiscriminantsfile())
         weightname.add("({}) * (genxsec * genBR / xsec)".format(s.weightname()))
+    elif self.productionmode == "bbH":
+      s = Sample(self.productionmode, self.production, "0+")
+      t.Add(s.withdiscriminantsfile())
+      weightname.add(s.weightname())
+    elif self.productionmode == "qqZZ":
+      s = Sample(self.productionmode, self.production)
+      t.Add(s.withdiscriminantsfile())
+      weightname.add(s.weightname())
     else:
       assert False
     assert len(weightname) == 1, weightname
@@ -296,8 +304,8 @@ class _TotalRate(MultiEnum):
   @property
   @cache
   def rate(self):
-    if self.productionmode not in ("ttH", "bbH"): return self.ratefromUlascan
-    elif self.productionmode == "VBF bkg": return self.treerate
+    if self.production in ("180721", "180722") and self.productionmode not in ("ttH", "bbH"): return self.ratefromUlascan
+    elif self.production.GEN or self.productionmode == "VBF bkg": return self.treerate
     elif self.productionmode == "bbH": return self.templaterate
     else: return self.yamlrate
 
@@ -339,7 +347,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
                 t.GetEntry(0)
                 assert all(_.productionmode == "ggH" for _ in fromsamples)
                 assert len(fromsamples) == 1
-                h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname) / next(iter(fromsamples)).alternateweightxsec(alternateweight))
+                h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname, deprecate(1, 2018, 11, 20)) / next(iter(fromsamples)).alternateweightxsec(alternateweight))
             for i in range(h.GetNbinsY()):
                 for channel in channels:
                     toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))

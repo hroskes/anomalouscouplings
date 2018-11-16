@@ -49,7 +49,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
     ] * (not production.GEN)
 
-    if config.usedata:
+    if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
 
     categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, (MultiCategorization, NoCategorization)) and (not production.GEN or not _.issystematic)]
