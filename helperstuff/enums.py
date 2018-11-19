@@ -736,7 +736,7 @@ class Production(MyEnum):
                  EnumItem("180722_Ulascan"),
                  EnumItem("LHE_170509"),
                  EnumItem("GEN_Meng"),
-                 EnumItem("GEN_181114"),
+                 EnumItem("GEN_181119"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -800,11 +800,11 @@ class Production(MyEnum):
                 return "/eos/cms/store/user/xiaomeng/writeupTrees/"
             elif config.host == "MARCC":
                 assert False
-        if self == "GEN_181114":
+        if self == "GEN_181119":
             if config.host == "lxplus":
                 assert False
             elif config.host == "MARCC":
-                return "/work-zfs/lhc/GENtrees/181114_2017MC"
+                return "/work-zfs/lhc/GENtrees/181119_2017MC"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -838,7 +838,7 @@ class Production(MyEnum):
         if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).year
         if self <= "180224" or self == "180531_2016" or self == "180721_2016":
             return 2016
-        if self == "180416" or self == "180531" or self == "180721_2017" or self == "GEN_Meng" or self == "GEN_181114":
+        if self == "180416" or self == "180531" or self == "180721_2017" or self == "GEN_Meng" or self == "GEN_181119":
             return 2017
         assert False
     @property
