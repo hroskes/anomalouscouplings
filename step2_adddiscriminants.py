@@ -29,6 +29,8 @@ def adddiscriminants(*args):
 
   newfilename = sample.withdiscriminantsfile()
   print newfilename
+  mkdir_p(os.path.dirname(newfilename))
+
   with cdtemp_slurm(), KeepWhileOpenFile(newfilename+".tmp") as kwof, LSF_creating(newfilename, ignorefailure=True) as LSF:
     if not kwof:
         return
@@ -44,8 +46,6 @@ def adddiscriminants(*args):
 
     if os.path.exists(newfilename):
         return
-
-    mkdir_p(os.path.dirname(newfilename))
 
     failed = False
     try:

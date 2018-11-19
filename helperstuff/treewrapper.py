@@ -891,6 +891,12 @@ class TreeWrapper(TreeWrapperBase):
 
         if self.counters is not None:
             self.nevents = self.counters.GetBinContent(40)
+            #========================
+            assert self.treesample.production == "GEN_181119", "remove this section"
+            if self.nevents == 0:
+                self.nevents = self.counters.GetBinContent(41)
+            assert self.nevents != 0
+            #========================
 
         self.tree.GetEntry(0)
         if self.isdata or self.isZX:
