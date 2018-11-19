@@ -3,19 +3,23 @@ import os
 
 import ROOT
 
-from helperstuff.utilities import KeepWhileOpenFile
+from helperstuff.utilities import cd, KeepWhileOpenFile
 
 delete = []
 
-for filename in os.listdir("."):
-  if not filename.endswith(".root"): continue
-  if not KeepWhileOpenFile(filename+".tmp").wouldbevalid: continue
-  f = ROOT.TFile(filename)
-  try:
-    if f.candTree.GetEntries() == 0:
-      delete.append(filename)
-  except AttributeError:
-      delete.append(filename)
+with cd(os.path.dirname(__file__)):
+  for directory in os.listdir("."):
+    if not os.path.isdir(directory): continue
+    for filename in os.listdir(directory):
+      filename = os.path.join(directory, filename)
+      if not filename.endswith(".root"): continue
+      if not KeepWhileOpenFile(filename+".tmp").wouldbevalid: continue
+      f = ROOT.TFile(filename)
+      try:
+        if f.candTree.GetEntries() == 0:
+          delete.append(filename)
+      except AttributeError:
+          delete.append(filename)
 
   if filename in delete and not KeepWhileOpenFile(filename+".tmp").wouldbevalid: delete.remove(filename)
 

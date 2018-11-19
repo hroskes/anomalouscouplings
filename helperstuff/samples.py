@@ -11,7 +11,7 @@ import ROOT
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
-from utilities import cache, deprecate, mkdtemp, product, TFile, tlvfromptetaphim
+from utilities import cache, cache_file, deprecate, mkdtemp, product, TFile, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 
@@ -920,8 +920,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode == "ggH" and self.production.LHE:
             return [self]
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "bbH"):
-            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses
-                     if not deprecate(self.productionmode == "bbH" and hypothesis in ("fa30.5fa20.5", "fa20.5fL10.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5", "fL10.5fL1Zg0.5", "fa20.5fL1Zg0.5"), 2018, 10, 1)]
+            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
         if self.productionmode == "tqH":
             return [self]
         if self.productionmode == "data":
@@ -1657,7 +1656,7 @@ class Sample(ReweightingSamplePlus):
 
     def withdiscriminantsfile(self):
         if self.copyfromothersample: return self.copyfromothersample.withdiscriminantsfile()
-        result = os.path.join(config.repositorydir, "step3_withdiscriminants", "{}.root".format(self).replace(" ", ""))
+        result = os.path.join(config.repositorydir, "step3_withdiscriminants", str(self.production), "{}.root".format(self).replace(" ", ""))
         return result
         raise self.ValueError("withdiscriminantsfile")
 
@@ -1717,6 +1716,10 @@ class Sample(ReweightingSamplePlus):
              t = f.alternateweightxsecstree
              t.GetEntry(0)
              return getattr(t, alternateweight.weightname)
+
+@cache_file(os.path.join(config.repositorydir, "data", "invertedmatrices.pkl"), lambda x: bytes(x.data))
+def invertnumpymatrix(numpymatrix):
+    return numpymatrix.I
 
 class SampleBasis(MultiEnum):
     enums = [ProductionMode, Analysis]
@@ -1815,7 +1818,8 @@ class SampleBasis(MultiEnum):
     @property
     @cache
     def invertedmatrix(self):
-        return self.matrix.I
+        self.matrix.flags.writeable = False
+        return invertnumpymatrix(self.matrix)
 
 def allsamples():
     __xcheck()
@@ -1823,13 +1827,29 @@ def allsamples():
         if "Ulascan" in str(production): continue
 
         if production == "GEN_Meng":
-           yield Sample("qqZZ", production)
-           #yield Sample("ggH", "MINLO", "0+", production)
-           yield Sample("HJJ", "0+", "Hff0+", production)
-           continue
+            yield Sample("qqZZ", production)
+            #yield Sample("ggH", "MINLO", "0+", production)
+            yield Sample("HJJ", "0+", "Hff0+", production)
+            continue
 
         if production.GEN:
-            raise NotImplementedError
+            for productionmode in "ggH", "VBF", "ZH", "WH", "bbH":
+                for hypothesis in ProductionMode(productionmode).generatedhypotheses(production):
+                    yield Sample(productionmode, hypothesis, production)
+            for hypothesis in hffhypotheses:
+                yield Sample("HJJ", hypothesis, "0+", production)
+                yield Sample("ttH", hypothesis, "0+", production)
+            yield Sample("tqH", "0+", "Hff0+", production)
+            yield Sample("ggH", "0+", "MINLO", production)
+            for productionmode in "ggH", "VBF", "ZH", "WplusH", "WminusH":
+                yield Sample(productionmode, "0+", "POWHEG", production)
+                yield Sample(productionmode, "0+", "POWHEG", "ext", production)
+            yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
+            yield Sample("ttH", "Hff0+", "0+", "POWHEG", "ext", production)
+            yield Sample("qqZZ", production)
+            yield Sample("qqZZ", production, "ext")
+            yield Sample("data", production)  #(not real data, just an empty dummy file)
+            continue
 
         if production.LHE:
             for hypothesis in "0+", "L1Zg", "fL1Zg0.5", "fL10.5fL1Zg0.5":

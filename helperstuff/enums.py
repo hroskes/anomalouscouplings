@@ -5,7 +5,7 @@ import os
 import re
 
 import config
-from utilities import cache, generatortolist_condition, tfiles
+from utilities import cache, deprecate, generatortolist_condition, tfiles
 
 class EnumItem(object):
     def __init__(self, name, *other):
@@ -299,6 +299,7 @@ class ProductionMode(MyEnum):
     def issignal(self):
         return not self.isbkg
     @property
+    @cache
     def validhypotheses(self):
         if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
@@ -687,7 +688,7 @@ class Analysis(MyEnum):
         if self == "fa3fa2fL1fL1Zg": return False
         assert False, self
     @property
-    def doLHE(self):
+    def doGEN(self):
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
         if self == "fa3fa2fL1fL1Zg": return True
@@ -735,6 +736,7 @@ class Production(MyEnum):
                  EnumItem("180722_Ulascan"),
                  EnumItem("LHE_170509"),
                  EnumItem("GEN_Meng"),
+                 EnumItem("GEN_181114"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -798,6 +800,11 @@ class Production(MyEnum):
                 return "/eos/cms/store/user/xiaomeng/writeupTrees/"
             elif config.host == "MARCC":
                 assert False
+        if self == "GEN_181114":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/GENtrees/181114_2017MC"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -818,7 +825,7 @@ class Production(MyEnum):
     def dataluminosity(self):
         if self in ("170203", "170222", "170825", "180121", "180224", "180531_2016", "180721_2016"): return 35.921875594646
         if self in ("180416", "180531", "180721_2017"): return 41.529343499127
-        if self == "LHE_170509": return 300
+        if self.LHE or self.GEN: return 300
 
         if self in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
             return type(self)(str(self).split("_")[0]).dataluminosity
@@ -831,7 +838,7 @@ class Production(MyEnum):
         if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).year
         if self <= "180224" or self == "180531_2016" or self == "180721_2016":
             return 2016
-        if self == "180416" or self == "180531" or self == "180721_2017" or self == "GEN_Meng":
+        if self == "180416" or self == "180531" or self == "180721_2017" or self == "GEN_Meng" or self == "GEN_181114":
             return 2017
         assert False
     @property
@@ -1011,7 +1018,7 @@ proddechypotheses = Hypothesis.items(lambda x: True)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
-analyses = Analysis.items(lambda x: x.doCMS)
+analyses = Analysis.items(lambda x: x.doGEN)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)

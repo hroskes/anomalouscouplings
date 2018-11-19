@@ -17,7 +17,7 @@ from helperstuff.enums import hffhypotheses, ProductionMode, productions, pythia
 from helperstuff.samples import allsamples, Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.treewrapper import TreeWrapper, TreeWrapperFactory
-from helperstuff.utilities import cdtemp_slurm, deletemelastuff, KeepWhileOpenFile, LSB_JOBID, LSF_creating
+from helperstuff.utilities import cdtemp_slurm, deletemelastuff, KeepWhileOpenFile, LSB_JOBID, LSF_creating, mkdir_p
 import os
 import ROOT
 import sys
@@ -44,6 +44,8 @@ def adddiscriminants(*args):
 
     if os.path.exists(newfilename):
         return
+
+    mkdir_p(os.path.dirname(newfilename))
 
     failed = False
     try:

@@ -53,7 +53,7 @@ class TemplatesFile(MultiEnum):
 
     def jsonfile(self, iteration=None):
         assert "Ulascan" not in str(self.production)
-        folder = os.path.join(config.repositorydir, "step5_json")
+        folder = os.path.join(config.repositorydir, "step5_json", str(self.production))
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
 
@@ -68,7 +68,7 @@ class TemplatesFile(MultiEnum):
         if self.copyfromothertemplatesfile is not None:
             return self.copyfromothertemplatesfile.templatesfile()
 
-        folder = os.path.join(config.repositorydir, "step7_templates")
+        folder = os.path.join(config.repositorydir, "step7_templates", str(self.production))
         if iteration is not None:
             folder = os.path.join(folder, "bkp_iter{}".format(iteration))
             if not os.path.exists(folder):
@@ -182,7 +182,7 @@ class TemplatesFile(MultiEnum):
         if self.templategroup in ["ggh", "vbf", "zh", "wh", "tth", "bbh"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
-            if self.production.LHE: return [Template(self, "qqZZ")]
+            if self.production.LHE or self.production.GEN: return [Template(self, "qqZZ")]
             result = ["qqZZ", "ggZZ", "VBF bkg"]
             if config.usedata:
                 result.append("ZX")
@@ -506,7 +506,7 @@ class TemplatesFile(MultiEnum):
 
     def getjson(self):
         return {
-                "inputDirectory": "step3_withdiscriminants/",
+                "inputDirectory": os.path.join("step3_withdiscriminants", str(self.production)),
                 "outputFile": self.templatesfile(firststep=self.hascustomsmoothing),
                 "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
                }
@@ -614,7 +614,8 @@ def templatesfiles():
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
-                            if production.LHE and shapesystematic != "": continue
+                            if (production.LHE or production.GEN) and shapesystematic != "": continue
+                            if (production.LHE or production.GEN) and templategroup == "DATA": continue
                             if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
@@ -1486,7 +1487,7 @@ class DataTree(MultiEnum):
         return Sample("data", self.production).withdiscriminantsfile()
     @property
     def treefile(self):
-        return os.path.join(config.repositorydir, "step7_templates", "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
+        return os.path.join(config.repositorydir, "step7_templates", str(self.production), "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
     def passescut(self, t):
         return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblinddistributions and getattr(t, "category_"+self.analysis.categoryname) in self.category
 

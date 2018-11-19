@@ -3,7 +3,7 @@ import argparse
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--overwrite", help="keep the json files that already exist", action="store_false", dest="keep")
+    p.add_argument("--overwrite", help="redo the json files that already exist", action="store_false", dest="keep")
     p.add_argument("--submitjobs", help="submit jobs", metavar="FILES_PER_JOB", type=int)
     args = p.parse_args()
 
@@ -14,7 +14,7 @@ import os
 from helperstuff import config
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import TemplatesFile, templatesfiles
-from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID
+from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID, mkdir_p
 
 def makejson(*args):
     templatesfile = TemplatesFile(*args)
@@ -23,8 +23,9 @@ def makejson(*args):
         if not f: return
         print templatesfile, datetime.datetime.now()
 
-        jsonstring = json.dumps(templatesfile.getjson(), sort_keys=True, indent=4, separators=(',', ': '))
         filename = templatesfile.jsonfile()
+        mkdir_p(os.path.dirname(filename))
+        jsonstring = json.dumps(templatesfile.getjson(), sort_keys=True, indent=4, separators=(',', ': '))
         with open(filename, "w") as f:
             f.write(jsonstring)
 

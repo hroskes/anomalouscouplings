@@ -21,7 +21,7 @@ from helperstuff.discriminants import discriminants
 from helperstuff.samples import Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
-from helperstuff.utilities import cd, KeepWhileOpenFile, LSB_JOBID
+from helperstuff.utilities import cd, KeepWhileOpenFile, LSB_JOBID, mkdir_p
 
 #cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
 #if cmssw[0] == 8:
@@ -36,8 +36,9 @@ def buildtemplates(*args):
         if f:
             if not os.path.exists(templatesfile.templatesfile()):
                 if not os.path.exists(templatesfile.templatesfile(firststep=True)):
+                    mkdir_p(os.path.dirname(templatesfile.templatesfile(firststep=True)))
                     try:
-                        subprocess.call([os.path.join(config.repositorydir, "TemplateBuilder/buildTemplate.exe"), templatesfile.jsonfile()])
+                        subprocess.call(["buildTemplate.exe", templatesfile.jsonfile()])
                     except:
                         try:
                             os.remove(templatesfile.templatesfile(firststep=templatesfile.hascustomsmoothing))
@@ -80,6 +81,7 @@ def copydata(*args):
 
     newfilename = datatree.treefile
     if os.path.exists(newfilename): f.Close(); return
+    mkdir_p(os.path.dirname(newfilename))
 
     newf = ROOT.TFile(newfilename, "recreate")
     newt = t.CloneTree(0)
@@ -105,7 +107,7 @@ def submitjobs(removefiles, jsontoo=False):
             raise ValueError("{} does not exist!".format(filename))
         remove[filename] = False
         if jsontoo:
-            jsonfilename = os.path.join(config.repositorydir, "step5_json", filename.replace(".root", ".json"))
+            jsonfilename = os.path.relpath(filename, config.repositorydir).replace("step7_templates", "step5_json").replace(".root", ".json")
             if os.path.exists(jsonfilename):
                 remove[jsonfilename] = False
 

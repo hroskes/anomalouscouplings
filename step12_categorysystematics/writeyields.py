@@ -44,14 +44,15 @@ def writeyields(productionmodelist=None, productionlist=None):
       SampleCount(ProductionMode("bbH"), {ReweightingSamplePlus("bbH", "0+")}),
       SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
       SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
+    ] + [
       SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
       SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
-    ]
+    ] * (not production.GEN)
 
-    if config.usedata:
+    if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
 
-    categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, (MultiCategorization, NoCategorization))]
+    categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, (MultiCategorization, NoCategorization)) and (not production.GEN or not _.issystematic)]
 
     result = MultiplyCounter()
     for productionmode, samples in tosamples_foryields:
@@ -59,7 +60,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       if productionmode == "ZX" or productionmode == "VBF bkg" and production == "180722": continue
       print productionmode
       samplegroups = [samples]
-      if productionmode.issignal and productionmode != "bbH":
+      if productionmode.issignal and productionmode != "bbH" and not production.GEN:
         samplegroups += [{ReweightingSamplePlus(s, systematic) for s in samples} for systematic in pythiasystematics
                             if systematic.hassample(production.year)]
         if production.year == 2017:
@@ -73,6 +74,7 @@ def writeyields(productionmodelist=None, productionlist=None):
           if (productionmode in ("ggZZ", "VBF bkg", "ZX", "bbH")
                or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None
                or hasattr(tosample, "alternategenerator") and tosample.alternategenerator == "MINLO"
+               or production.GEN
              ):
             usealternateweights = [AlternateWeight("1")]
           elif productionmode.issignal and tosample.extension == "ext":
@@ -118,6 +120,8 @@ def writeyields(productionmodelist=None, productionlist=None):
           ) / (
             sum(result[tosample, categorization, AlternateWeight("1"), ca, ch] for tosample in samples for ca in categories for ch in channels)
           )
+
+        if production.GEN: continue
 
         #same for all categories and channels
         #from yaml
