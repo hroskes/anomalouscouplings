@@ -245,6 +245,7 @@ class _TotalRate(MultiEnum):
     t.SetBranchStatus("genBR", 1)
     if self.productionmode in ("ggH", "ggZZ"): t.SetBranchStatus("KFactor_QCD_ggZZ_Nominal", 1)
     weightname = set()
+    effectiveentriestree = ROOT.TChain("effectiveentries", "effectiveentries")
     if self.productionmode == "VBF bkg":
       for flavor in "2e2mu", "4e", "4mu":
         t.Add(Sample(self.productionmode, flavor, self.production).withdiscriminantsfile())
@@ -262,16 +263,25 @@ class _TotalRate(MultiEnum):
       s = Sample(self.productionmode, self.production, "0+")
       t.Add(s.withdiscriminantsfile())
       weightname.add(s.weightname())
+      effectiveentriestree.Add(s.withdiscriminantsfile())
     elif self.productionmode == "qqZZ":
       s = Sample(self.productionmode, self.production)
       t.Add(s.withdiscriminantsfile())
       weightname.add(s.weightname())
+      effectiveentriestree.Add(s.withdiscriminantsfile())
     else:
       assert False
     assert len(weightname) == 1, weightname
     weightname = weightname.pop()
     t.Draw("1", "{}*(ZZMass>{} && ZZMass<{})".format(weightname, config.m4lmin, config.m4lmax))
-    return c.FindObject("htemp").Integral() * float(self.luminosity)
+    result = c.FindObject("htemp").Integral() * float(self.luminosity)
+
+    if effectiveentriestree.GetEntries() != 0:
+      assert effectiveentriestree.GetEntries() == 1, effectiveentriestree.GetEntries()
+      effectiveentriestree.GetEntry(0)
+      result /= getattr(effectiveentriestree, weightname)
+
+    return result
 
   @property
   def templaterate(self):
