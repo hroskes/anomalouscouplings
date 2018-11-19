@@ -168,6 +168,7 @@ def makeplot(plotid):
       if plotid == "HIG18002onshelloffshell": shutil.copy("Summary_HIG18002onshelloffshell."+ext, os.path.join(config.plotsbasedir, "limits", "summary."+ext))
       if plotid == "HIG18002onshelloffshellPAS": shutil.copy("Summary_HIG18002onshelloffshellPAS."+ext, os.path.join(config.plotsbasedir, "limits", "forPAS", "summary."+ext))
       if plotid == "HIG17034": shutil.copy("Summary_HIG17034."+ext, os.path.join(config.plotsbasedir, "limits", "HTT", "summary."+ext))
+      if plotid == "HIG17034PAS": shutil.copy("Summary_HIG17034PAS."+ext, os.path.join(config.plotsbasedir, "limits", "HTT", "preliminary", "summary."+ext))
       if plotid == "FTR18011": shutil.copy("Summary_FTR18011."+ext, os.path.join(config.plotsbasedir, "limits", "summary_3000fb-1."+ext))
 
 if __name__ == "__main__":
@@ -179,5 +180,6 @@ if __name__ == "__main__":
   makeplot("HIG18002onshelloffshell")
   makeplot("HIG18002onshelloffshellPAS")
   makeplot("HIG17034")
+  makeplot("HIG17034PAS")
 #  setupdats("FTR18011")
 #  makeplot("FTR18011")
