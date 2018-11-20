@@ -19,11 +19,11 @@ with cd(os.path.dirname(__file__)):
         if f.candTree.GetEntries() == 0:
           delete.append(filename)
       except AttributeError:
-          delete.append(filename)
+        delete.append(filename)
 
   if filename in delete and not KeepWhileOpenFile(filename+".tmp").wouldbevalid: delete.remove(filename)
 
 if delete:
-    print "rm \t\t\t\\"
-    print "\t\t\t\\\n".join(delete)
-    print
+  print "rm \t\t\t\\"
+  print "\t\t\t\\\n".join(delete)
+  print

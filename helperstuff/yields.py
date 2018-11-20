@@ -254,7 +254,7 @@ class _TotalRate(MultiEnum):
       if self.productionmode == "ggH":
         s = Sample(self.productionmode, "0+", "POWHEG", self.production)
         t.Add(Sample(s).withdiscriminantsfile())
-        weightname.add("({}) * (genxsec * genBR * KFactor_QCD_ggZZ_Nominal / xsec)".format(s.weightname()).replace(deprecate("KFactor_QCD_ggZZ_Nominal", 2018, 11, 20), "1"))
+        weightname.add("({}) * (genxsec * genBR * KFactor_QCD_ggZZ_Nominal / xsec)".format(s.weightname()))
       else:
         s = Sample(self.productionmode, "0+", "POWHEG", self.production, "Hff0+" if self.productionmode == "ttH" else None)
         t.Add(s.withdiscriminantsfile())
@@ -357,7 +357,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
                 t.GetEntry(0)
                 assert all(_.productionmode == "ggH" for _ in fromsamples)
                 assert len(fromsamples) == 1
-                h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname, deprecate(1, 2018, 11, 20)) / next(iter(fromsamples)).alternateweightxsec(alternateweight))
+                h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname) / next(iter(fromsamples)).alternateweightxsec(alternateweight))
             for i in range(h.GetNbinsY()):
                 for channel in channels:
                     toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
