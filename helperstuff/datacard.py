@@ -151,7 +151,7 @@ class _Datacard(MultiEnum):
             result.remove("ZH")
             result.remove("ttH")
             result.remove("bbH")
-        if self.production.LHE:
+        if self.production.LHE or self.production.GEN:
             result.remove("ggZZ")
             result.remove("VBFbkg")
         if not config.usedata:
@@ -276,9 +276,9 @@ class _Datacard(MultiEnum):
         else:
             productionmodes = self.productionmodes
 
-        if self.production.LHE:
-            if yieldsystematic == "QCDscale_VV":
-                result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for p in productionmodes])
+        if self.production.LHE or self.production.GEN:
+            if yieldsystematic == "QCDscale_ren_VV":
+                result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in productionmodes])
                 assert "1.1" in result
                 return result
             else: return None
@@ -305,6 +305,7 @@ class _Datacard(MultiEnum):
     @MakeSystematicFromEnums(WorkspaceShapeSystematic, Channel)
     def workspaceshapesystematicchannel(self, workspaceshapesystematic, channel):
       if self.year not in workspaceshapesystematic.years: return None
+      if self.production.LHE or self.production.GEN: return None
       if workspaceshapesystematic.isperchannel and channel == self.channel:
         if self.analysis.usehistogramsforcombine:
           return " ".join(
@@ -348,6 +349,7 @@ class _Datacard(MultiEnum):
     @MakeSystematicFromEnums(Channel)
     def CMS_zz4l_smd_zjets_bkg_channel(self, channel):
         if config.usenewZXsystematics: return None
+        if self.production.LHE or self.production.GEN: return None
         category = "Untagged"
         if channel == self.channel and category == self.category:
             if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
@@ -358,6 +360,7 @@ class _Datacard(MultiEnum):
         if config.usenewZXsystematics: return None
         if category == "Untagged": return None
         if not config.mergeZXVBFVHsystematics: return None
+        if self.production.LHE or self.production.GEN: return None
         if category == self.category:
             if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
                 return "param 0 1 [-3,3]"
@@ -367,6 +370,7 @@ class _Datacard(MultiEnum):
         if config.usenewZXsystematics: return None
         if category == "Untagged": return None
         if config.mergeZXVBFVHsystematics: return None
+        if self.production.LHE or self.production.GEN: return None
         if category == self.category and channel == self.channel:
             if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
                 return "param 0 1 [-3,3]"
@@ -374,11 +378,13 @@ class _Datacard(MultiEnum):
     @MakeSystematicFromEnums(Channel)
     def CMS_fake_channel(self, channel):
         if not config.usenewZXsystematics: return None
+        if self.production.LHE or self.production.GEN: return None
         if channel == self.channel:
           return "param 0 1 [-3,3]"
 
     @property
     def kbkg_gg(self):
+        if self.production.LHE or self.production.GEN: return None
         return "param 1 0.1 [0,2]"
 
     section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel, "kbkg_gg")
@@ -599,7 +605,9 @@ class _Datacard(MultiEnum):
             assert scaleby >= 0, scaleby
 
             for systematic, direction in chain(product(p.workspaceshapesystematics(self.category), ("Up", "Down")), [(None, None)]):
-                if systematic is not None is not direction: systematic = ShapeSystematic(str(systematic)+direction)
+                if systematic is not None is not direction:
+                    if self.production.GEN: continue
+                    systematic = ShapeSystematic(str(systematic)+direction)
 
                 name = h
                 if systematic: name += "_"+str(systematic)

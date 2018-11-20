@@ -564,6 +564,7 @@ def runcombine(analysis, foldername, **kwargs):
                                   }
 
     repmap = {
+              "analysis": str(analysis),
               "cardstocombine": " ".join(["hzz4l_{}S_{}_{}.lumi{:.2f}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)] + alsocombine),
               "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
               "workspacefile": "workspace.oO[workspacefileappend]Oo..root",

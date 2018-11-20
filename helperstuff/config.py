@@ -41,10 +41,10 @@ try:
 except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
-usedata = True
-showblinddistributions = True
-unblinddistributions = True
-unblindscans = True
+usedata = False
+showblinddistributions = False
+unblinddistributions = False
+unblindscans = False
 
 useQGTagging = False
 useVHMETTagged = True

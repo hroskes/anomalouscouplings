@@ -615,7 +615,6 @@ def templatesfiles():
                         for shapesystematic in nominal.treeshapesystematics:
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                             if (production.LHE or production.GEN) and shapesystematic != "": continue
-                            if (production.LHE or production.GEN) and templategroup == "DATA": continue
                             if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
@@ -916,6 +915,8 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "data":
             if config.showblinddistributions:
                 result = {Sample(self.production, self.productionmode)}
+            elif self.production.GEN or self.production.LHE:
+                result = {Sample("WplusH", "POWHEG", "ext", self.production, "0+")}
             else:
                 result = {Sample("ggZZ", self.production, "4tau")}
         result = {sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0}

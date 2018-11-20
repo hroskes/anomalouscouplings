@@ -21,7 +21,8 @@ with cd(os.path.dirname(__file__)):
       except AttributeError:
         delete.append(filename)
 
-  if filename in delete and not KeepWhileOpenFile(filename+".tmp").wouldbevalid: delete.remove(filename)
+for filename in delete[:]:
+  if not KeepWhileOpenFile(filename+".tmp").wouldbevalid: delete.remove(filename)
 
 if delete:
   print "rm \t\t\t\\"
