@@ -41,11 +41,6 @@ try:
 except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
-usedata = False
-showblinddistributions = False
-unblinddistributions = False
-unblindscans = False
-
 useQGTagging = False
 useVHMETTagged = True
 
@@ -71,7 +66,6 @@ usenewZXsystematics = True
 applyJECshapesystematics = False
 applyMINLOsystematics = False
 
-assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 assert getm4lsystsfromggHUntagged <= getm4lsystsfromggH
 
 lumi2015 = 2.7
@@ -92,11 +86,20 @@ LHEsmearptmuon = 2.169/6
 LHEsmearptjet = 18./6
 
 if host == "MARCC":
-    productionsforcombine = ["GEN_181119"]
-#    productionsforcombine = ["180721_2016", "180721_2017"]
+  usedata = False
+  showblinddistributions = False
+  unblinddistributions = False
+  unblindscans = False
+  productionsforcombine = ["GEN_181119"]
+#  productionsforcombine = ["180721_2016", "180721_2017"]
 elif host == "lxplus":
-    productionsforcombine = ["180721_2016", "180721_2017"]
+  usedata = True
+  showblinddistributions = True
+  unblinddistributions = True
+  unblindscans = True
+  productionsforcombine = ["180721_2016", "180721_2017"]
+
+assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
 if len(productionsforcombine) == 1:
     productionforcombine = productionsforcombine[0]
-
