@@ -302,9 +302,9 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     if nuisance is None:
         drawlines(CLtextposition, xmin=xmin, xmax=xmax)
-    for ext in "png eps root pdf".split():
+    for ext in "png eps root pdf C".split():
         outputfilename = outputfilename.replace("."+ext, "")
-    for ext in "png eps root pdf".split():
+    for ext in "png eps root pdf C".split():
         c1.SaveAs("{}.{}".format(outputfilename, ext))
 
 #https://root.cern.ch/phpBB3/viewtopic.php?t=10159

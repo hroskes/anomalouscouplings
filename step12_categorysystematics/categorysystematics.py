@@ -8,7 +8,7 @@ import ROOT
 from helperstuff import config, utilities
 
 from helperstuff.enums import analyses, Analysis, BTagSystematic, categories, Category, JECSystematic, pythiasystematics
-from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, Sample
+from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import MultiplyCounter
 from helperstuff.yields import count
@@ -20,10 +20,8 @@ def findsystematic(categorizations, categorization, JEC, btag):
     assert len(result) == 1, result
     return result.pop()
 
-def maketable(analysis):
+def maketable(analysis, production):
     analysis = Analysis(analysis)
-    assert len(config.productionsforcombine) == 1
-    production = config.productionsforcombine[0]
     categorizations = [_ for _ in TreeWrapper.categorizations if analysis.categoryname in _.category_function_name]
 
     BSM = analysis.purehypotheses[1]
@@ -47,14 +45,17 @@ def maketable(analysis):
                      ReweightingSample("WH", BSM),
                      ReweightingSample("ttH", BSM, "Hff0+"),
                      ReweightingSample("qqZZ"),
-                     ReweightingSample("ggZZ", "2e2mu"),
-                     ReweightingSample("VBF bkg", "2e2mu"),
+                     ReweightingSampleWithFlavor("ggZZ", "2e2mu"),
+                     ReweightingSampleWithFlavor("VBF bkg", "2e2mu"),
                      ReweightingSample("ZX"),
                 ]
 
     othertosamples = [
                       ReweightingSamplePlus(_, systematic) for _ in tosamples for systematic in pythiasystematics
-                                                           if isinstance(_, ReweightingSamplePlus) or _.productionmode == "ggH" and _.hypothesis == "0+"
+                                                           if isinstance(_, ReweightingSamplePlus)
+                     ] + [
+                      ReweightingSamplePlus(_, systematic, "POWHEG") for _ in tosamples for systematic in pythiasystematics
+                                                           if _.productionmode == "ggH" and _.hypothesis == "0+" and not isinstance(_, ReweightingSamplePlus)
                      ]
 
     result = MultiplyCounter()
@@ -178,5 +179,6 @@ def maketable(analysis):
         f.write(table)
 
 if __name__ == "__main__":
-    for analysis in analyses:
-        maketable(analysis)
+  for analysis in analyses:
+    for production in config.productionsforcombine:
+      maketable(analysis, production)
