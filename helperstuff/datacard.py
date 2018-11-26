@@ -12,7 +12,8 @@ from rootoverloads import histogramfloor
 import combineinclude
 from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1, zerotemplate
 import config
-from enums import Analysis, categories, Category, Channel, channels, MultiEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
+from enums import Analysis, categories, Category, Channel, channels, Hypothesis, MultiEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
+from samples import ReweightingSample
 from templates import TemplatesFile
 import utilities
 from utilities import cache, callclassinitfunctions, cd, generatortolist, mkdir_p, multienumcache, OneAtATime, Tee
@@ -216,9 +217,10 @@ class _Datacard(MultiEnum):
                     for sign in "positive", "negative":
                         templatenamepart = (
                           t.templatename().replace("template", "").replace("AdapSmooth", "").replace("Mirror", "").replace("Int", "")
-                                          .replace("a1", "a11").replace("a3", "a31").replace("a2", "a21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
+                                          .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
                         )
                         if t.templatename().startswith("templateIntAdapSmooth"): templatenamepart = "g11"+self.analysis.couplingname+"1"
+                        print t, templatenamepart
 
                         yield (p.combinename+"_"+templatenamepart+"_"+sign)
             else:
@@ -520,6 +522,7 @@ class _Datacard(MultiEnum):
             self.pdfs.append(Pdf(self, p, **pdfkwargs))
             for systematic in p.workspaceshapesystematics(self.category):
                 if self.production.year not in systematic.years: continue
+                if self.production.LHE or self.production.GEN: continue
                 self.pdfs.append(Pdf(self, p, systematic, "Up", **pdfkwargs))
                 self.pdfs.append(Pdf(self, p, systematic, "Down", **pdfkwargs))
 
@@ -582,27 +585,14 @@ class _Datacard(MultiEnum):
                 sign = None
             elif "positive" in h or "negative" in h:
                 p, inttype, sign = h.split("_")
-                print inttype
                 for letter, name in zip("ijkl", self.analysis.couplingnames):
                     inttype = inttype.replace(name, "g"+letter)
-                print inttype
                 hypothesis = inttype
             else:
                 p, hypothesis = h.split("_")
                 sign = None
 
             p = ProductionMode(p)
-
-            if p == "data":
-                scaleby = 1 if config.unblindscans else 0
-            else:
-                scaleby = (
-                            getrate(p, self.channel, self.category, self.analysis, self.production, 1)
-                          /
-                            gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, self.channel).Integral()
-                          ) * float(self.luminosity)
-            print p, scaleby
-            assert scaleby >= 0, scaleby
 
             for systematic, direction in chain(product(p.workspaceshapesystematics(self.category), ("Up", "Down")), [(None, None)]):
                 if systematic is not None is not direction:
@@ -612,6 +602,19 @@ class _Datacard(MultiEnum):
                 name = h
                 if systematic: name += "_"+str(systematic)
                 if p == "data": name = "data_obs"
+
+                if p == "data":
+                    scaleby = 1 if config.unblindscans else 0
+                else:
+                    scaleby = (
+                                getrate(p, self.channel, self.category, self.analysis, self.production, 1)
+                              /
+                                gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, self.channel).Integral()
+                              ) * float(self.luminosity)
+                assert scaleby >= 0, scaleby
+
+                if hypothesis and "positive" not in h and "negative" not in h:
+                    scaleby /= getattr(ReweightingSample(p, hypothesis, "Hff0+" if p=="ttH" else None), Hypothesis(hypothesis).couplingname)**2
 
                 t3D = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic).Clone(name+"_3D")
                 if sign is not None:

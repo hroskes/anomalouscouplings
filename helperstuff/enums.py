@@ -689,6 +689,7 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def doGEN(self):
+        if self == "fa3": return True
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
         if self == "fa3fa2fL1fL1Zg": return True
@@ -711,6 +712,7 @@ class Analysis(MyEnum):
 
     @property
     def usehistogramsforcombine(self):
+        if self == "fa3": return True
         if self == "fa3fa2fL1fL1Zg": return True
         return False
 

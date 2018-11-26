@@ -8,7 +8,7 @@ def getconfiguration(hostname, username):
     return dict(
       host = "lxplus",
       repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings/",
-      plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/",
+      plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_multiparameter/",
       slcversion = 6,
       marccusername = "jroskes1@jhu.edu",
       svndir = "/afs/cern.ch/work/h/hroskes/AN/",
