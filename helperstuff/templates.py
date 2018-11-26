@@ -103,7 +103,7 @@ class TemplatesFile(MultiEnum):
             else:
                 assert False, self.templategroup
 
-            if self.analysis in ("fa3", "fa3_STXS"):
+            if self.analysis in ("fa3", "fa3_STXS", "fa3_multiparameter"):
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("0-", *args), ReweightingSample("fa30.5", *args)]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("a2", *args), ReweightingSample("fa2-0.5", *args)]
@@ -126,7 +126,7 @@ class TemplatesFile(MultiEnum):
 
         elif self.templategroup in ("vbf", "zh", "wh"):
             p = str(self.templategroup).upper()
-            if self.analysis in ("fa3", "fa3_STXS"):
+            if self.analysis in ("fa3", "fa3_STXS", "fa3_multiparameter"):
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "0-"), ReweightingSample(p, "fa3prod0.5"), ReweightingSample(p, "fa3dec0.5"), ReweightingSample(p, "fa3proddec-0.5")]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "a2"), ReweightingSample(p, "fa2prod0.5"), ReweightingSample(p, "fa2dec-0.5"), ReweightingSample(p, "fa2proddec-0.5")]
@@ -309,7 +309,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z2Mass")
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_ggH_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
                 return discriminant("D_4couplings_decay")
 
         if self.category == "VBFtagged":
@@ -323,7 +323,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
                 return discriminant("D_4couplings_VBFdecay"+JECappend)
 
         if self.category == "VHHadrtagged":
@@ -337,7 +337,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
                 return discriminant("D_4couplings_HadVHdecay"+JECappend)
 
         assert False
@@ -382,7 +382,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
                 return discriminant("D_CP_decay_2bins")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
@@ -401,7 +401,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
                 return discriminant("D_CP_VBF_2bins"+JECappend)
 
         if self.category == "VHHadrtagged":
@@ -415,7 +415,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
 
         assert False
@@ -954,7 +954,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def domirror(self):
-        if self.analysis not in ("fa3", "fa3_STXS", "fa3fa2fL1fL1Zg"): return False
+        if self.analysis not in ("fa3", "fa3_STXS", "fa3_multiparameter", "fa3fa2fL1fL1Zg"): return False
         if self.analysis == "fa3_STXS": return False #for now... could do it later
         if self.productionmode == "data": return False
 
@@ -1282,7 +1282,7 @@ class IntTemplate(TemplateBase, MultiEnum):
             result = result.replace("gl", self.analysis.couplingnames[3])
         elif self.productionmode in ("ggH", "ttH", "bbH"):
             if self.interferencetype == "g11gi1":
-                if self.analysis in ("fa3", "fa3_STXS"):
+                if self.analysis in ("fa3", "fa3_STXS", "fa3_multiparameter"):
                     result = "templatea1a3IntAdapSmooth"
                 elif self.analysis == "fa2":
                     result = "templatea1a2IntAdapSmooth"

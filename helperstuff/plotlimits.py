@@ -166,7 +166,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
-    if scanfai == analysis.fais[0]: pass
+    if scanfai == analysis.fais[0] or analysis.dimensions == 1: pass
     elif scanfai == analysis.fais[1]: POI = "CMS_zz4l_fai2"
     else: assert False
 

@@ -564,7 +564,6 @@ def runcombine(analysis, foldername, **kwargs):
                                   }
 
     repmap = {
-              "analysis": str(analysis),
               "cardstocombine": " ".join(["hzz4l_{}S_{}_{}.lumi{:.2f}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)] + alsocombine),
               "combinecardsfile": "hzz4l_4l.oO[combinecardsappend]Oo..txt",
               "workspacefile": "workspace.oO[workspacefileappend]Oo..root",
@@ -598,6 +597,7 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
+              "fais": " ".join("--PO {}".format(_) for _ in analysis.fais),
              }
 
     if method == "Impacts":
@@ -612,7 +612,7 @@ def runcombine(analysis, foldername, **kwargs):
 
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
-        repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF --PO .oO[analysis]Oo."
+        repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
         repmap["savemu"] = ""
     else:
         if analysis.dimensions == 2 and analysis.isdecayonly:
