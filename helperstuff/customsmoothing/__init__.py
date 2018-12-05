@@ -43,7 +43,8 @@ def customsmoothing(hsmooth, rawprojections, templatedirectory, controlplotsdire
         rawprojection = rawprojection.Clone(rawname)
         smoothprojection.SetName(projname)
 
-        rawprojection.Scale(smoothprojection.Integral() / rawprojection.Integral())
+        if rawprojection.Integral() and smoothprojection.Integral():
+            rawprojection.Scale(smoothprojection.Integral() / rawprojection.Integral())
 
         smoothprojection.SetLineColor(ROOT.kRed)
         smoothprojection.SetLineWidth(2)

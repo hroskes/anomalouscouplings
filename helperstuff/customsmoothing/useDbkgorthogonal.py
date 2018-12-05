@@ -15,6 +15,9 @@ def useDbkgorthogonal(hsmooth, rawprojections):
     keep the integral over z, but copy the shape from the overall z shape
     """
     totalintegral = hsmooth.Integral()
+    if not totalintegral:
+        assert hsmooth.GetMaximum() == hsmooth.GetMinimum() == 0
+        return True
     zprojection = rawprojections[2]
     for xbin, ybin in product(xrange(1, hsmooth.GetNbinsX()+1), xrange(1, hsmooth.GetNbinsY()+1)):
         for zbin in xrange(1, hsmooth.GetNbinsZ()+1):
@@ -29,5 +32,4 @@ def useDbkgorthogonal(hsmooth, rawprojections):
             hsmooth.SetBinContent(xbin, ybin, zbin, bincontent)
             hsmooth.SetBinError(xbin, ybin, zbin, bincontent)
 
-    print hsmooth.Integral() / totalintegral
     return True #do make new control plots
