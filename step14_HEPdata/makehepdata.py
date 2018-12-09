@@ -7,6 +7,7 @@ if __name__ == "__main__":
   g = p.add_mutually_exclusive_group()
   g.add_argument("--force", "-f", action="store_true")
   g.add_argument("--check", "-c", action="store_true")
+  g.add_argument("--tar", "-t", action="store_true")
   args = p.parse_args()
 
 import abc, contextlib, os, shutil, subprocess, tempfile, urllib2
@@ -14,9 +15,11 @@ import abc, contextlib, os, shutil, subprocess, tempfile, urllib2
 import yaml
 
 class HEPData(object):
-  def run(self, force=False, check=False):
-    if check:
+  def run(self, force=False, check=False, tar=False):
+    if check or tar:
       self.check(self.cadi)
+      if tar:
+        subprocess.check_call(["tar", "cvzf", self.cadi+".tgz", "-C", self.cadi] + os.listdir(self.cadi))
       return
     if os.path.exists(self.cadi):
       if not force:
@@ -144,17 +147,17 @@ class FaiLimitTable(Table):
     self.fai = fai
     super(FaiLimitTable, self).__init__(cadi)
   @property
-  def faifancy(self):
+  def fancyfai(self):
     return {"fa3": "f_{a3}", "fa2": "f_{a2}", "fL1": "f_{\Lambda1}", "fL1Zg": "f_{\Lambda1}^{Z\gamma}"}[self.fai]
   @property
-  def phiaifancy(self):
-    return self.faifancy.replace("f", "\phi", 1)
+  def fancyphiai(self):
+    return self.fancyfai.replace("f", "\phi", 1)
   @property
-  def aifancy(self):
+  def fancyai(self):
     return {"fa3": "a_{3}", "fa2": "a_{2}", "fL1": "\Lambda_{1}", "fL1Zg": "\Lambda_{1}^{Z\gamma}"}[self.fai]
   @property
   def xheader(self):
-    return {"name": "${}\cos({})$".format(self.faifancy, self.phiaifancy)}
+    return {"name": "${}\cos({})$".format(self.fancyfai, self.fancyphiai)}
   @property
   def observables(self):
     return ["SIG/SIG"]
@@ -178,12 +181,12 @@ class FaiLimitTable(Table):
         x["values"] = [{"value": _} for _ in xvalues]
       else:
         assert xvalues == entry.xvalues, (set(xvalues) ^ set(entry.xvalues))
-    ys.append(entry.ydict)
+      ys.append(entry.ydict)
     return result
 
   def legendentries(self, legend):
     for entry in legend.GetListOfPrimitives():
-      yield FaiLegendEntry(entry, self.lumidict, self.aifancy, self.removepoints)
+      yield FaiLegendEntry(entry, self.lumidict, self.fancyphiai, self.removepoints)
 
   @property
   def name(self):
@@ -208,7 +211,7 @@ class FaiLimitTable(Table):
 
   @property
   def description(self):
-    return "Observed and expected likelihood scans ${self.fancyfai}\cos{self.fancyphiai}$.  See Section 2 of the paper for more details."
+    return "Observed and expected likelihood scans ${self.fancyfai}\cos{self.fancyphiai}$.  See Section 2 of the paper for more details.".format(self=self)
 
   @property
   def figurepage(self):
@@ -216,17 +219,17 @@ class FaiLimitTable(Table):
     assert False
 
 class FaiLegendEntry(object):
-  def __init__(self, entry, lumidict, aifancy, removepoints):
+  def __init__(self, entry, lumidict, fancyphiai, removepoints):
     self.entry = entry
     self.lumidict = lumidict
-    self.aifancy = aifancy
+    self.fancyphiai = fancyphiai
     self.removepoints = removepoints
   @property
   def tgraph(self):
     return self.entry.GetObject()
   @property
   def header(self):
-    return {"name": "-2\Delta\ln L "+self.entry.GetLabel()}
+    return {"name": "$-2\Delta\ln L$ "+self.entry.GetLabel()}
   @property
   def xyvalues(self):
     return [(x, y) for i, x, y in zip(range(self.tgraph.GetN()), self.tgraph.GetX(), self.tgraph.GetY()) if x not in self.removepoints]
@@ -242,9 +245,9 @@ class FaiLegendEntry(object):
       "header": self.header,
       "qualifiers": [
         {"name": "LUMINOSITY_{:d}TeV".format(sqrts), "units": 'fb$^{-1}$', "value": lumi}
-          for sqrts, lumi in self.lumidict.iteritems() if not ("13 TeV" in self.header and sqrts != 13)
+          for sqrts, lumi in self.lumidict.iteritems() if not ("13 TeV" in self.header["name"] and sqrts != 13)
       ] + [
-        {"name": "HVV couplings", "value": "$%s$ real, other $f_{ai}=0$" % self.aifancy}
+        {"name": "HVV couplings", "value": "${self.fancyphiai}=0$ or $\pi$, other $f_{{ai}}=0$".format(self=self)}
       ],
       "values": [{"value": y} for y in self.yvalues]
     }
@@ -269,4 +272,4 @@ def cd(newdir):
         os.chdir(prevdir)
 
 if __name__ == "__main__":
-  globals()[args.cadi.replace("-", "")]().run(force=args.force, check=args.check)
+  globals()[args.cadi.replace("-", "")]().run(force=args.force, check=args.check, tar=args.tar)
