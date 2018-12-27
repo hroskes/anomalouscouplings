@@ -27,9 +27,9 @@ def redointerference(hsmooth, rawprojections, templatesandfactors, mirrorjsn, ne
             else: sign = 1
 
             tmp = hsmooth.Clone("tmp"+hsmooth.GetName())
-            for binx in range(tmp.GetNbinsX()):
-                for biny in range(tmp.GetNbinsY()):
-                    for binz in range(tmp.GetNbinsZ()):
+            for binx in range(1, tmp.GetNbinsX()+1):
+                for biny in range(1, tmp.GetNbinsY()+1):
+                    for binz in range(1, tmp.GetNbinsZ()+1):
                         hsmooth.SetBinContent(binx, biny, binz,
                                               tmp.GetBinContent(binx, biny, binz)
                                                 + sign*tmp.GetBinContent(binx, tmp.GetNbinsY()-biny+1, binz)

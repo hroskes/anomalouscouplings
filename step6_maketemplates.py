@@ -3,11 +3,14 @@
 import argparse
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--submitjobs", nargs="*")
+    p.add_argument("--submitjobs", action="store_true")
     p.add_argument("--jsontoo", action="store_true")
+    p.add_argument("--removefiles", nargs="*", default=())
     args = p.parse_args()
-    if args.jsontoo and args.submitjobs is None:
+    if args.jsontoo and not args.submitjobs:
         raise ValueError("--jsontoo doesn't make sense without --submitjobs")
+    if args.removefiles and not args.submitjobs:
+        raise ValueError("--removefiles doesn't make sense without --submitjobs")
 
 from array import array
 import os
@@ -150,8 +153,8 @@ def submitjobs(removefiles, jsontoo=False):
             submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0", docd=True, waitids=waitids)
 
 if __name__ == "__main__":
-    if args.submitjobs is not None:
-        submitjobs(args.submitjobs, args.jsontoo)
+    if args.submitjobs:
+        submitjobs(args.removefiles, args.jsontoo)
     else:
         for templatesfile in templatesfiles:
             buildtemplates(templatesfile)

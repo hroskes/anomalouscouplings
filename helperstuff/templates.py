@@ -243,6 +243,8 @@ class TemplatesFile(MultiEnum):
     def bkgdiscriminant(self):
         from discriminants import discriminant
 
+        if self.analysis == "fa3_multiparameter": return discriminant("phistarZ2")
+
         name = "D_bkg"
         if self.production >= "180416" or self.production == "180224_newdiscriminants":
             if self.category == "Untagged": pass
@@ -254,7 +256,7 @@ class TemplatesFile(MultiEnum):
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis == "fa3fa2fL1fL1Zg":
+        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
             name += "_10bins"
         elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if self.category == "Untagged":
@@ -1314,7 +1316,7 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     @property
     def mirrorjsn(self):
-        if self.analysis not in ("fa3", "fa3_STXS", "fa3fa2fL1fL1Zg"): return None
+        if self.analysis not in ("fa3", "fa3_STXS", "fa3_multiparameter", "fa3fa2fL1fL1Zg"): return None
 
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH", "bbH"):
