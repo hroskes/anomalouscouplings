@@ -1385,7 +1385,11 @@ class IntTemplate(TemplateBase, MultiEnum):
                 g1exp = giexp = 1
                 rowofinvertedmatrix = giexp #first row is labeled 0
                 hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
-                multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
+                if self.analysis.dimensions == 1:
+                    #using new PDF class that uses a1=ai=1 for interference
+                    multiplyby = 1
+                else:
+                    multiplyby = getattr(ReweightingSample(self.productionmode, self.analysis.purehypotheses[1], hffhypothesis), self.analysis.purehypotheses[1].couplingname)
             else:
                 assert False, analysis.dimensions
 

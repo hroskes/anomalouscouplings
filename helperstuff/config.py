@@ -44,9 +44,6 @@ except NameError:
 useQGTagging = False
 useVHMETTagged = True
 
-usefastpdf = True
-usefastpdfdouble = False
-
 applym4lshapesystematicsUntagged = True
 applym4lshapesystematicsVBFVHtagged = True
 applym4lshapesystematicsggH = False
