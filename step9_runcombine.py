@@ -301,6 +301,7 @@ def runcombine(analysis, foldername, **kwargs):
     method = "MultiDimFit"
     plotlimitskwargs = {}
     ntoys = -1
+    docopyplots = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -445,6 +446,8 @@ def runcombine(analysis, foldername, **kwargs):
             method = kwarg
         elif kw == "ntoys":
             ntoys = int(kwarg)
+        elif kw == "copyplots":
+            docopyplots = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -787,7 +790,7 @@ def runcombine(analysis, foldername, **kwargs):
               )),
             )
 
-        if method in ("MultiDimFit", "Impacts"):
+        if method in ("MultiDimFit", "Impacts") and docopyplots:
             copyplots(os.path.join("limits", subdirectory, fullfoldername))
 
 ntry = 0
