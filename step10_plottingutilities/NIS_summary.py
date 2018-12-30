@@ -158,7 +158,7 @@ def setupdats(plotid):
 def makeplot(plotid):
   with cd(os.path.join(config.repositorydir, "step10_plottingutilities", "NIS_summary")):
     subprocess.check_call(["make"])
-    if plotid == "FTR18011":
+    if plotid in ("FTR18011", "HIG17011", "WIN17"):
         subprocess.check_call(["./NIS_summary_3", plotid])
     else:
         subprocess.check_call(["./NIS_summary_4", plotid])
@@ -177,6 +177,8 @@ if __name__ == "__main__":
 #  setupdats("HIG18002onshellPAS")
 #  makeplot("HIG18002onshellPAS")
 #  setupdats("HIG18002onshelloffshell")
+  makeplot("WIN17")
+  makeplot("HIG17011")
   makeplot("HIG18002onshelloffshell")
   makeplot("HIG18002onshelloffshellPAS")
   makeplot("HIG17034")
