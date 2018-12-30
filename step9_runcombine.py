@@ -281,7 +281,7 @@ def runcombine(analysis, foldername, **kwargs):
     subdirectory = ""
     defaultscanrange = (101, -1.0, 1.0)
     scanranges = [defaultscanrange]
-    defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH")}
+    defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH")}
     usebkg = True
     fixmuV = fixmuf = fixfai = False
     plotnuisances = []
@@ -516,6 +516,10 @@ def runcombine(analysis, foldername, **kwargs):
         workspacefileappend += "_"+",".join(str(p) for p in usesignalproductionmodes)
         disableproductionmodes = set(defaultusesignalproductionmodes) - set(usesignalproductionmodes)
         turnoff.append("--PO turnoff={}".format(",".join(p.combinename for p in disableproductionmodes)))
+        if not any(_ in ("VBF", "ZH", "WH") for _ in usesignalproductionmodes):
+            turnoff.append("--PO noRV")
+        if not any(_ in ("ggH", "ttH", "bbH") for _ in usesignalproductionmodes):
+            turnoff.append("--PO noRF")
     if set(usechannels) != set(channels):
         combinecardsappend += "_" + ",".join(sorted(str(c) for c in usechannels))
     if set(usecategories) != set(categories):
