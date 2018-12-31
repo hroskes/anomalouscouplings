@@ -67,6 +67,7 @@ class MakeJECSystematics(MakeSystematics):
             r"(self[.]M2(?:(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))|qqZZJJ)\b",
             r"(self[.]notdijet)\b",
             r"(self[.](?:binning_4couplings|D_bkg_kin)_(?:HadVH|VBF|)decay)\b",
+            r"(self[.]category_0P)"
         ):
             code = re.sub(thing, r"\1_JEC{UpDn}", code)
         for thing in (

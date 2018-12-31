@@ -18,10 +18,16 @@
 // VBF_2j = 16;
 // VBF_REST = ?
 
+#include "TH1F.h"
+#include "TString.h"
+
+#include <memory>
+#include <stdexcept>
+
 float bins_hpt4[]={0,60,120,200};
-auto hpt_bin = make_unique<TH1F>("hpt_bin","",3, bins_hpt4);
 
 int stage1_reco(int Njets, float pTj1, float mjj, float deta_jj, float H_pt, string &reco_catName,int category, float D1jet){
+	static auto hpt_bin = make_unique<TH1F>("hpt_bin","",3, bins_hpt4);
 	if(category>2 ){
 		switch (category){
 			case 3: reco_catName = "VH_Lep"; break; 
@@ -75,10 +81,16 @@ lineuntag:
 			}
 			return binpt+4;
 		}
+		else {
+			throw invalid_argument(TString("Njets = ") += Njets);
+		}
 	}
+	throw runtime_error("?????");
 }
 
-int stage1_reco_stage1(int Njets, float pTj1, float mjj, float deta_jj, float H_pt, string &reco_catName,int category){
+int stage1_reco_stage1(int Njets, float pTj1, float mjj, float deta_jj, float H_pt, /*string &reco_catName,*/int category){
+	static auto hpt_bin = make_unique<TH1F>("hpt_bin","",3, bins_hpt4);
+	string reco_catName;
 	if(category>2 && category!=4){
 		switch (category){
 			case 3: reco_catName = "VH_Lep"; break; 
@@ -118,6 +130,9 @@ int stage1_reco_stage1(int Njets, float pTj1, float mjj, float deta_jj, float H_
 			}
 			return binpt+4;
 		}
+		else {
+			throw invalid_argument(TString("Njets = ") += Njets);
+		}
 	}
 }
 int convertCat (int htxs_stage1_red_cat){
@@ -142,6 +157,7 @@ int convertCat (int htxs_stage1_red_cat){
 		case -2: return -2; 
 
 	}
+	throw invalid_argument(TString("htxs_stage1_red_cat = ")+=htxs_stage1_red_cat);
 }
 
 TString convertsys(TString inputname){
@@ -159,4 +175,6 @@ TString convertsys(TString inputname){
 		return "bbH";
 	else if (inputname.Contains("ZZTo"))
 		return "qqZZ";
+	else
+		throw invalid_argument("inputname = "+inputname);
 }

@@ -16,12 +16,13 @@ import CJLSTscripts
 import config
 import constants
 import enums
+import STXS
+import xrd
+import ZX
 from gconstants import gconstant
 from makesystematics import MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
 from utilities import cache_instancemethod, callclassinitfunctions, deprecate, Fake_LSF_creating, getmembernames, MultiplyCounter, product, TFile, tlvfromptetaphim
-import xrd
-import ZX
 
 resource.setrlimit(resource.RLIMIT_STACK, (2**29,-1))
 sys.setrecursionlimit(100000)
@@ -714,45 +715,10 @@ class TreeWrapperBase(Iterator):
 #STXS#
 ######
 
-#https://arxiv.org/pdf/1610.07922.pdf
-#starting on page 462
-
-    def D_STXS_stage0(self):
-        if abs(self.ZZEta) < 2.5: return 0
-        return 1
-
     @MakeJECSystematics
-    def D_STXS_ggH_stage1(self):
-        if abs(self.ZZEta) < 2.5:
-            if self.nCleanedJetsPt30 == 0: return 0
-            if self.nCleanedJetsPt30 == 1:
-                if self.ZZPt < 60: return 1
-                if self.ZZPt < 120: return 2
-                if self.ZZPt < 200: return 3
-                return 4
-            if self.nCleanedJetsPt30 >= 2:
-                #note this is out of order, to stay consistent with the order in the picture on page 463
-                if self.DiJetMass > 400 and self.DiJetDEta > 2.8 and self.ZZPt < 200:  #"VBF cuts"
-                    if self.HjjPt < 25: return 9
-                    return 10
-                if self.ZZPt < 60: return 5
-                if self.ZZPt < 120: return 6
-                if self.ZZPt < 200: return 7
-                return 8
-            assert False
-        return 11
-
-    @MakeJECSystematics
-    def D_STXS_VBF_stage1(self):
-        if abs(self.ZZEta) < 2.5:
-            if self.nCleanedJetsPt30 == 0 or self.Jet1Pt < 200:
-                if self.nCleanedJetsPt30 >= 2 and self.DiJetMass > 400 and self.DiJetDEta > 2.8:
-                    if self.HjjPt < 25: return 0
-                    return 1
-                if self.nCleanedJetsPt30 >= 2 and 60 < self.DiJetMass < 120: return 2
-                return 3
-            return 4
-        return 5
+    def D_STXS_stage1(self):
+        category = self.category_0P()    #no need for anomalous couplings because we only look at VH lep and ttH
+        return STXS.stage1_reco_stage1(self.nCleanedJetsPt30, self.Jet1Pt, self.DiJetMass, abs(self.DiJetDEta), self.ZZPt, category)
 
 #########################
 #4 coupling discriminant#
@@ -877,9 +843,14 @@ class TreeWrapper(TreeWrapperBase):
         treesample - which sample the TTree was created from
         """
         self.treesample = treesample
-        self.filename = filename = LSF.basename(treesample.CJLSTfile())
 
-        if xrd.exists(self.filename): self.f = TFile(filename, contextmanager=False)
+        filename = treesample.CJLSTfile()
+        if xrd.exists(filename):
+            filename = LSF.basename(treesample.CJLSTfile())
+            self.f = TFile(filename, contextmanager=False)
+
+        self.filename = filename
+
         if self.isdummy:
             print "{} does not exist or is bad, using {}".format(filename, self.definitelyexists.CJLSTfile())
             #give it a tree so that it can get the format, but not fill any entries
@@ -1139,7 +1110,7 @@ class TreeWrapper(TreeWrapperBase):
 
         if nCleanedJets == 0:
             self.jetQGLikelihood = self.jetPhi = dummyfloatstar
-            self.Jet1Pt = None
+            self.Jet1Pt = -999
         else:
             self.Jet1Pt = t.JetPt[0]
 
@@ -1601,7 +1572,6 @@ class TreeWrapper(TreeWrapperBase):
         ]
         self.toaddtotree_float = []
         self.toaddtotree_int = [
-            "D_STXS_stage0",
             "D_4couplings_decay_raw",
             "D_4couplings_decay",
         ]
@@ -1626,8 +1596,7 @@ class TreeWrapper(TreeWrapperBase):
             "D_L1Zg_{prod}decay",
         ]
         STXSdiscriminants = [
-            "D_STXS_ggH_stage1",
-            "D_STXS_VBF_stage1",
+            "D_STXS_stage1",
             "D_4couplings_VBFdecay_raw",
             "D_4couplings_VBFdecay",
             "D_4couplings_HadVHdecay_raw",

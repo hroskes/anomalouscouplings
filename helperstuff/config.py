@@ -43,7 +43,7 @@ except NameError:
     raise ValueError("Who/where are you?\n{}\n{}".format(socket.gethostname(), getpass.getuser()))
 
 useQGTagging = False
-useVHMETTagged = True
+useVHMETTagged = False
 
 applym4lshapesystematicsUntagged = True
 applym4lshapesystematicsVBFVHtagged = True

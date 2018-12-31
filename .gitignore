@@ -9,3 +9,6 @@
 *.cc.tmp
 *.json.tmp
 .__afs*
+/slurm-*.out
+/LSFJOB_*/LSFJOB
+/LSFJOB_*/STDOUT
