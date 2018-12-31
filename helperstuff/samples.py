@@ -1,17 +1,18 @@
 #!/usr/bin/env python
+import os, tempfile
 from abc import ABCMeta, abstractproperty
 from collections import Counter
 from itertools import combinations, permutations, product as cartesianproduct
 from math import copysign, sqrt
+
 import numpy
-import os
 
 import ROOT
 
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
-from utilities import cache, cache_file, deprecate, mkdtemp, product, TFile, tlvfromptetaphim
+from utilities import cache, cache_file, deprecate, product, TFile, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 
@@ -1647,11 +1648,7 @@ class Sample(ReweightingSamplePlus):
             if self.productionmode == "qqZZ":
                 return "/work-zfs/lhc/ianderso/hep/LHEFiles/qqZZ/MG/8T/ZZJetsTo4L_TuneZ2_8TeV-madgraph-tauola.lhe"
             if self.productionmode == "data":
-                tmpdir = mkdtemp()
-                filename = os.path.join(tmpdir, "empty.lhe")
-                with open(filename, 'w') as f:
-                    pass
-                return filename
+                return tempfile.mkstemp(suffix=".lhe")
         raise self.ValueError("LHEfile")
 
     def withdiscriminantsfile(self):

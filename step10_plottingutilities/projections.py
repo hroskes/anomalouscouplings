@@ -1226,89 +1226,86 @@ class Projections(MultiEnum):
         return pt
 
   def animation(self, category, channel, floor=False, nicestyle=False, with2015=False, Dbkg_allcategories=False, forWIN=False):
-      tmpdir = mkdtemp()
-
+    with mkdtemp() as tmpdir:
       category = Category(category)
       channel = Channel(channel)
-
+  
       if category != "Untagged" and with2015: return
-
+  
       nsteps = 200
-
+  
       finaldir = os.path.join(self.saveasdir(category, channel, forWIN=forWIN), "animation")
-
+  
       if nicestyle:
-          if channel != "2e2mu": return
-          if Dbkg_allcategories:
-              if category != "Untagged": return
-              finaldir = self.saveasdir_Dbkgsum(forWIN=forWIN)
-          else:
-              finaldir = os.path.join(self.saveasdir_niceplots(category, with2015=with2015, forWIN=forWIN), "animation")
-          animation = self.animationstepsforniceplots(self.analysis)
-
+        if channel != "2e2mu": return
+        if Dbkg_allcategories:
+          if category != "Untagged": return
+          finaldir = self.saveasdir_Dbkgsum(forWIN=forWIN)
+        else:
+          finaldir = os.path.join(self.saveasdir_niceplots(category, with2015=with2015, forWIN=forWIN), "animation")
+        animation = self.animationstepsforniceplots(self.analysis)
+  
       else:
-          assert not with2015 and not Dbkg_allcategories
-          animation = []
-          for productionmode in "VBF", "VH", "ggH":
-              animation += [
-                            self.AnimationStep(
-                                               productionmode,
-                                               self.analysis,
-                                               -1+(2.*i/nsteps),
-                                               50 if ((-1+(2.*i/nsteps))*2).is_integer() else 5
-                                              ) for i in range(nsteps+1)
-                           ]
-
-          animation = sorted(set(animation))
-          while True:
-              for step, nextstep in pairwise(animation[:]):
-                  if step.fai_decay == nextstep.fai_decay:
-                      animation.remove(step)
-                      break
-              else:
-                  break
-
-      kwargs_base = {
-                     "saveasdir": tmpdir,
-                     "floor": floor,
-                     "nicestyle": nicestyle,
-                     "with2015": with2015,
-                     "Dbkg_allcategories": Dbkg_allcategories,
-                     "forWIN": forWIN,
-                    }
-
-      for i, step in enumerate(animation):
-          kwargs = kwargs_base.copy()
-          kwargs["customfaiforanimation"] = step.fai_decay, "ggH"
-          kwargs["saveasappend"] = i
-          if nicestyle:
-              kwargs["otherthingstodraw"] = [(step.niceplotsinfo, "")]
+        assert not with2015 and not Dbkg_allcategories
+        animation = []
+        for productionmode in "VBF", "VH", "ggH":
+          animation += [
+            self.AnimationStep(
+              productionmode,
+              self.analysis,
+              -1+(2.*i/nsteps),
+              50 if ((-1+(2.*i/nsteps))*2).is_integer() else 5
+            ) for i in range(nsteps+1)
+          ]
+  
+        animation = sorted(set(animation))
+        while True:
+          for step, nextstep in pairwise(animation[:]):
+            if step.fai_decay == nextstep.fai_decay:
+              animation.remove(step)
+              break
           else:
-              kwargs["otherthingstodraw"] = [(step.excludedtext, "")]
-          kwargs["muVmuf"] = step.muV, step.muf
-          self.projections(category, channel, **kwargs)
-
+            break
+  
+      kwargs_base = {
+        "saveasdir": tmpdir,
+        "floor": floor,
+        "nicestyle": nicestyle,
+        "with2015": with2015,
+        "Dbkg_allcategories": Dbkg_allcategories,
+        "forWIN": forWIN,
+      }
+  
+      for i, step in enumerate(animation):
+        kwargs = kwargs_base.copy()
+        kwargs["customfaiforanimation"] = step.fai_decay, "ggH"
+        kwargs["saveasappend"] = i
+        if nicestyle:
+          kwargs["otherthingstodraw"] = [(step.niceplotsinfo, "")]
+        else:
+          kwargs["otherthingstodraw"] = [(step.excludedtext, "")]
+        kwargs["muVmuf"] = step.muV, step.muf
+        self.projections(category, channel, **kwargs)
+  
       for j, discriminant in enumerate(self.discriminants(category)):
-          if Dbkg_allcategories and j != 2: continue
-          convertcommand = ["gm", "convert", "-loop", "0"]
-          lastdelay = None
-          for i, step in enumerate(animation):
-              if step.delay != lastdelay:
-                  convertcommand += ["-delay", str(step.delay)]
-              convertcommand.append(os.path.join(tmpdir, "{}{}.gif".format(discriminant.name, i)))
-          try:
-              os.makedirs(finaldir)
-          except OSError:
-              pass
-          finalplot = os.path.join(finaldir, "{}.gif".format(discriminant.name))
-          if Dbkg_allcategories and with2015:
-              finalplot = os.path.join(finaldir, "{}_with2015.gif".format(discriminant.name))
-          convertcommand.append(finalplot)
-          #http://stackoverflow.com/a/38792806/5228524
-          #subprocess.check_call(convertcommand)
-          os.system(" ".join(pipes.quote(_) for _ in convertcommand))
-
-      shutil.rmtree(tmpdir)
+        if Dbkg_allcategories and j != 2: continue
+        convertcommand = ["gm", "convert", "-loop", "0"]
+        lastdelay = None
+        for i, step in enumerate(animation):
+          if step.delay != lastdelay:
+            convertcommand += ["-delay", str(step.delay)]
+          convertcommand.append(os.path.join(tmpdir, "{}{}.gif".format(discriminant.name, i)))
+        try:
+          os.makedirs(finaldir)
+        except OSError:
+          pass
+        finalplot = os.path.join(finaldir, "{}.gif".format(discriminant.name))
+        if Dbkg_allcategories and with2015:
+          finalplot = os.path.join(finaldir, "{}_with2015.gif".format(discriminant.name))
+        convertcommand.append(finalplot)
+        #http://stackoverflow.com/a/38792806/5228524
+        #subprocess.check_call(convertcommand)
+        os.system(" ".join(pipes.quote(_) for _ in convertcommand))
 
   @classmethod
   def scantreeforanimations(cls, analysis):

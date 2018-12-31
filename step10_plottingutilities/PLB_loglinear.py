@@ -228,27 +228,26 @@ def animations(**kwargs):
     from projections import Projections
     forWIN = kwargs.get("forWIN", False)
     for analysis in analyses:
-        tmpdir = mkdtemp()
-        convertcommand = ["gm", "convert", "-loop", "0"]
-        animation = Projections.animationstepsforniceplots(analysis)
-        lastdelay = None
-        for i, step in enumerate(animation):
-            if step.delay != lastdelay:
-                convertcommand += ["-delay", str(step.delay)]
-            convertcommand += ["-trim", os.path.join(tmpdir, "{}.pdf".format(i))]
-            PRL_loglinear(
-                          analysis=analysis,
-                          saveas=os.path.join(tmpdir, "{}.pdf".format(i)),
-                          markerposition=(step.fai_decay, step.deltaNLL),
-                          **kwargs
-                         )
+        with mkdtemp() as tmpdir:
+            convertcommand = ["gm", "convert", "-loop", "0"]
+            animation = Projections.animationstepsforniceplots(analysis)
+            lastdelay = None
+            for i, step in enumerate(animation):
+                if step.delay != lastdelay:
+                    convertcommand += ["-delay", str(step.delay)]
+                convertcommand += ["-trim", os.path.join(tmpdir, "{}.pdf".format(i))]
+                PRL_loglinear(
+                              analysis=analysis,
+                              saveas=os.path.join(tmpdir, "{}.pdf".format(i)),
+                              markerposition=(step.fai_decay, step.deltaNLL),
+                              **kwargs
+                             )
 
-        finalplot = os.path.join(saveasdir(forWIN), getplotname(analysis).replace("root", "gif"))
-        convertcommand.append(finalplot)
-        #http://stackoverflow.com/a/38792806/5228524
-        #subprocess.check_call(convertcommand)
-        os.system(" ".join(pipes.quote(_) for _ in convertcommand))
-        shutil.rmtree(tmpdir)
+            finalplot = os.path.join(saveasdir(forWIN), getplotname(analysis).replace("root", "gif"))
+            convertcommand.append(finalplot)
+            #http://stackoverflow.com/a/38792806/5228524
+            #subprocess.check_call(convertcommand)
+            os.system(" ".join(pipes.quote(_) for _ in convertcommand))
 
 
 @cache

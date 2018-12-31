@@ -44,85 +44,87 @@ def adddiscriminants(*args):
   inputfiles = []
   if xrd.exists(sample.CJLSTfile()): inputfiles.append(sample.CJLSTfile())
 
-  with cdtemp_slurm(), KeepWhileOpenFile(newfilename+".tmp") as kwof, LSF_creating(newfilename, ignorefailure=True, inputfiles=inputfiles) as LSF:
+  with cdtemp_slurm(), KeepWhileOpenFile(newfilename+".tmp") as kwof:
     if not kwof:
       return
     if os.path.exists(newfilename):
       return
 
-    treewrapper = TreeWrapperFactory(sample, LSF=LSF)
+    with LSF_creating(newfilename, ignorefailure=True, inputfiles=inputfiles) as LSF:
 
-    if os.path.exists(newfilename):
-      return
+      treewrapper = TreeWrapperFactory(sample, LSF=LSF)
 
-    failed = False
-    try:
-      newf = ROOT.TFile.Open(LSF.basename(newfilename), "recreate")
-      if isinstance(treewrapper, TreeWrapper):
-        if sample.production == "180721_2016":
-          treewrapper.tree.SetBranchStatus("LHEweight_PDFVariation_*", 0)
-        newt = treewrapper.tree.CloneTree(0)
-        if sample.production == "180721_2016":
-          treewrapper.tree.SetBranchStatus("LHEweight_PDFVariation_*", 1)
-          pdfup = array('d', [0])
-          pdfdn = array('d', [0])
-          newt.Branch("LHEweight_PDFVariation_Up", pdfup, "LHEweight_PDFVariation_Up/D")
-          newt.Branch("LHEweight_PDFVariation_Dn", pdfdn, "LHEweight_PDFVariation_Dn/D")
-        if treewrapper.effectiveentriestree is not None:
-          treewrapper.effectiveentriestree.SetDirectory(newf)
-        if treewrapper.alternateweightxsecstree is not None:
-          treewrapper.alternateweightxsecstree.SetDirectory(newf)
-      else:
-        newt = ROOT.TTree("candTree", "candTree")
+      if os.path.exists(newfilename):
+        return
 
-      discriminants = OrderedDict()
-      for discriminant in treewrapper.toaddtotree:
-        discriminants[discriminant] = array('d', [0])
-        newt.Branch(discriminant, discriminants[discriminant], discriminant + "/D")
-      for discriminant in treewrapper.toaddtotree_int:
-        discriminants[discriminant] = array('i', [0])
-        newt.Branch(discriminant, discriminants[discriminant], discriminant + "/I")
-      for discriminant in treewrapper.toaddtotree_float:
-        discriminants[discriminant] = array('f', [0])
-        newt.Branch(discriminant, discriminants[discriminant], discriminant + "/F")
-
+      failed = False
       try:
-        for i, entry in enumerate(treewrapper, start=1):
-          for discriminant in discriminants:
-            try:
-              discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
-            except:
-              print "Error while calculating", discriminant
-              raise
+        newf = ROOT.TFile.Open(LSF.basename(newfilename), "recreate")
+        if isinstance(treewrapper, TreeWrapper):
           if sample.production == "180721_2016":
-            pdfup[0] = treewrapper.tree.LHEweight_PDFVariation_Up
-            pdfdn[0] = treewrapper.tree.LHEweight_PDFVariation_Dn
-          newt.Fill()
-          if i % 50000 == 0 and LSB_JOBID():
-            with open(LSF.basename(newfilename)): pass #access it, hopefully preventing tmp from being deleted
-            with open("touch.txt", "w") as f:     pass #touch another file, same idea
-      except:
-        treewrapper.Show()
-        raise
-    except:
-      failed = True
-      raise
-    finally:
-      try:
-        newf.Write()
-        newf.Close()
+            treewrapper.tree.SetBranchStatus("LHEweight_PDFVariation_*", 0)
+          newt = treewrapper.tree.CloneTree(0)
+          if sample.production == "180721_2016":
+            treewrapper.tree.SetBranchStatus("LHEweight_PDFVariation_*", 1)
+            pdfup = array('d', [0])
+            pdfdn = array('d', [0])
+            newt.Branch("LHEweight_PDFVariation_Up", pdfup, "LHEweight_PDFVariation_Up/D")
+            newt.Branch("LHEweight_PDFVariation_Dn", pdfdn, "LHEweight_PDFVariation_Dn/D")
+          if treewrapper.effectiveentriestree is not None:
+            treewrapper.effectiveentriestree.SetDirectory(newf)
+          if treewrapper.alternateweightxsecstree is not None:
+            treewrapper.alternateweightxsecstree.SetDirectory(newf)
+        else:
+          newt = ROOT.TTree("candTree", "candTree")
+
+        discriminants = OrderedDict()
+        for discriminant in treewrapper.toaddtotree:
+          discriminants[discriminant] = array('d', [0])
+          newt.Branch(discriminant, discriminants[discriminant], discriminant + "/D")
+        for discriminant in treewrapper.toaddtotree_int:
+          discriminants[discriminant] = array('i', [0])
+          newt.Branch(discriminant, discriminants[discriminant], discriminant + "/I")
+        for discriminant in treewrapper.toaddtotree_float:
+          discriminants[discriminant] = array('f', [0])
+          newt.Branch(discriminant, discriminants[discriminant], discriminant + "/F")
+
+        try:
+          for i, entry in enumerate(treewrapper, start=1):
+            for discriminant in discriminants:
+              try:
+                discriminants[discriminant][0] = getattr(treewrapper, discriminant)()
+              except:
+                print "Error while calculating", discriminant
+                raise
+            if sample.production == "180721_2016":
+              pdfup[0] = treewrapper.tree.LHEweight_PDFVariation_Up
+              pdfdn[0] = treewrapper.tree.LHEweight_PDFVariation_Dn
+            newt.Fill()
+            if i % 50000 == 0 and LSB_JOBID():
+              with open(LSF.basename(newfilename)): pass #access it, hopefully preventing tmp from being deleted
+              with open("touch.txt", "w") as f:     pass #touch another file, same idea
+        except:
+          treewrapper.Show()
+          raise
       except:
         failed = True
-      if failed:
+        raise
+      finally:
         try:
-          os.remove(newfilename)
+          newf.Write()
+          newf.Close()
         except:
-          pass
+          failed = True
+        if failed:
+          try:
+            os.remove(newfilename)
+          except:
+            pass
 
-def submitjobs(filter=stringandlambda("lambda sample: True")):
+def submitjobs(filter=None):
   njobs = 0
   for sample in allsamples():
-    if not filter.function(sample): continue
+    if filter and not filter.function(sample): continue
     if not os.path.exists(sample.withdiscriminantsfile()) and KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid and not sample.copyfromothersample:
       njobs += 1
   for i in range(njobs):
@@ -131,7 +133,11 @@ def submitjobs(filter=stringandlambda("lambda sample: True")):
       submitjobkwargs["queue"] = "lrgmem"
       submitjobkwargs["memory"] = "12000M"
       submitjobkwargs["docd"] = True  #since cdtemp_slurm happens in thisfile
-    submitjob("unbuffer "+os.path.join(config.repositorydir, "step2_adddiscriminants.py")+" --filter "+pipes.quote(filter.string), **submitjobkwargs)
+    job = ["unbuffer", os.path.join(config.repositorydir, "step2_adddiscriminants.py")]
+    if filter:
+      job += ["--filter", filter.string]
+    job = " ".join(pipes.quote(_) for _ in job)
+    submitjob(job, **submitjobkwargs)
 
 if __name__ == '__main__':
   if args.submitjobs:

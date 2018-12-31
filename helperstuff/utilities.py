@@ -592,6 +592,7 @@ class LSF_creating(object):
 
     def __enter__(self):
         if not LSB_JOBID(): return self
+        import config
         if self.jsonfile is not None:
             shutil.copy(self.jsonfile, "./")
             self.jsonfile = os.path.basename(self.jsonfile)
@@ -608,7 +609,9 @@ class LSF_creating(object):
                 f.write(content)
 
         for inputfile in self.inputfiles:
-            shutil.copy(inputfile, "./")
+            if not os.getcwd().startswith("/tmp") and not (hasattr(config, "scratchdir") and os.getcwd().startswith(config.scratchdir)):
+                raise RuntimeError("Have to run this from /tmp")
+            shutil.copy(inputfile, os.getcwd())
 
         return self
 
@@ -664,17 +667,25 @@ class DummyContextManager(object):
     def __enter__(self): return self
     def __exit__(*stuff): pass
 
-def mkdtemp(**kwargs):
+class mkdtemp(object):
+  def __init__(self, **kwargs):
     import config
     if "dir" not in kwargs:
-        if LSB_JOBID() is not None:
-            if config.host == "lxplus":
-                kwargs["dir"] = os.environ["LSB_JOB_TMPDIR"]
-            elif config.host == "MARCC":
-                pass
-            else:
-                assert False, config.host
-    return tempfile.mkdtemp(**kwargs)
+      if LSB_JOBID() is not None:
+        if config.host == "lxplus":
+          kwargs["dir"] = os.environ["LSB_JOB_TMPDIR"]
+        elif config.host == "MARCC":
+          kwargs["dir"] = config.scratchdir
+        else:
+          assert False, config.host
+    self.kwargs = kwargs
+
+  def __enter__(self):
+    self.tmpdir = tempfile.mkdtemp(**self.kwargs)
+    return self.tmpdir
+
+  def __exit__(self, *error):
+    shutil.rmtree(self.tmpdir)
 
 def getmembernames(*args, **kwargs):
     return [_[0] for _ in inspect.getmembers(*args, **kwargs)]
@@ -730,24 +741,16 @@ def deletemelastuff():
         if os.path.exists(thing):
             os.remove(thing)
 
-class cdtemp_slurm(object):
-    def __enter__(self):
-        import config
-        self.cd = None
-        if config.host == "lxplus":
-            return
-        elif config.host == "MARCC":
-            if LSB_JOBID() is not None:
-                self.cd = cd(mkdtemp())
-                return self.cd.__enter__()
-            else:
-                return
-        else:
-            assert False, config.host
+@contextlib.contextmanager
+def cdtemp():
+  with mkdtemp() as tmpdir, cd(tmpdir):
+    yield
 
-    def __exit__(self, *args, **kwargs):
-        if self.cd is not None:
-            return self.cd.__exit__(*args, **kwargs)
+def cdtemp_slurm():
+  import config
+  if config.host == "MARCC" and LSB_JOBID() is not None:
+    return cdtemp()
+  return DummyContextManager()
 
 def recursivesubclasses(cls):
     result = [cls]

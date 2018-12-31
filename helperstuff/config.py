@@ -21,6 +21,7 @@ def getconfiguration(hostname, username):
       repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/",
       repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/",
       plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/",
+      scratchdir = os.path.join("/scratch/users/", username, "tmparea", ""),
       slcversion = 7,
       lxplususername = "hroskes",
       email = "heshyr@gmail.com",
