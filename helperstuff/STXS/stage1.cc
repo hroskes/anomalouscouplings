@@ -28,6 +28,7 @@ float bins_hpt4[]={0,60,120,200};
 
 int stage1_reco(int Njets, float pTj1, float mjj, float deta_jj, float H_pt, string &reco_catName,int category, float D1jet){
 	static auto hpt_bin = make_unique<TH1F>("hpt_bin","",3, bins_hpt4);
+	hpt_bin->SetDirectory(0);
 	if(category>2 ){
 		switch (category){
 			case 3: reco_catName = "VH_Lep"; break; 
@@ -90,6 +91,7 @@ lineuntag:
 
 int stage1_reco_stage1(int Njets, float pTj1, float mjj, float deta_jj, float H_pt, /*string &reco_catName,*/int category){
 	static auto hpt_bin = make_unique<TH1F>("hpt_bin","",3, bins_hpt4);
+	hpt_bin->SetDirectory(0);
 	string reco_catName;
 	if(category>2 && category!=4){
 		switch (category){
