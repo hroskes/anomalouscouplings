@@ -21,7 +21,7 @@ from helperstuff.enums import hffhypotheses, ProductionMode, productions, pythia
 from helperstuff.samples import allsamples, Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.treewrapper import TreeWrapper, TreeWrapperFactory
-from helperstuff.utilities import cdtemp_slurm, deletemelastuff, KeepWhileOpenFile, LSB_JOBID, LSF_creating, mkdir_p
+from helperstuff.utilities import cdtemp_slurm, cleanupscratchdir, deletemelastuff, KeepWhileOpenFile, LSB_JOBID, LSF_creating, mkdir_p
 import os
 import pipes
 import ROOT
@@ -140,6 +140,7 @@ def submitjobs(filter=None):
     submitjob(job, **submitjobkwargs)
 
 if __name__ == '__main__':
+  cleanupscratchdir()
   if args.submitjobs:
     submitjobs(filter=args.filter)
   else:

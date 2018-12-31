@@ -4,6 +4,7 @@ import contextlib
 import cPickle
 import datetime
 import errno
+import glob
 import inspect
 import itertools
 import logging
@@ -682,10 +683,29 @@ class mkdtemp(object):
 
   def __enter__(self):
     self.tmpdir = tempfile.mkdtemp(**self.kwargs)
+    if LSB_JOBID():
+      with open(os.path.join(self.tmpdir, "JOBID"), "w") as f:
+        f.write(LSB_JOBID())
     return self.tmpdir
 
   def __exit__(self, *error):
     shutil.rmtree(self.tmpdir)
+
+def cleanupscratchdir():
+  import config
+  if not hasattr(config, "scratchdir"): return
+  for folder in glob.iglob(os.path.join(config.scratchdir, "*", "")):
+    try:
+      with open(os.path.join(folder, "JOBID")) as f:
+        jobid = f.read().strip()
+        if not jobexists(jobid):
+          print "job {} was using {}, but died --> deleting the folder".format(jobid, folder)
+          try:
+            shutil.rmtree(folder)
+          except:
+            print "failed to remove it, see if it's still there"
+    except IOError:
+      print "please check on {}, it has no JOBID file".format(folder)
 
 def getmembernames(*args, **kwargs):
     return [_[0] for _ in inspect.getmembers(*args, **kwargs)]
