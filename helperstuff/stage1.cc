@@ -19,7 +19,7 @@
 // VBF_REST = ?
 
 float bins_hpt4[]={0,60,120,200};
-TH1F *hpt_bin=new TH1F("hpt_bin","",3, bins_hpt4);
+auto hpt_bin = make_unique<TH1F>("hpt_bin","",3, bins_hpt4);
 
 int stage1_reco(int Njets, float pTj1, float mjj, float deta_jj, float H_pt, string &reco_catName,int category, float D1jet){
 	if(category>2 ){

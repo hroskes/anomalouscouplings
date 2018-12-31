@@ -562,12 +562,13 @@ def jobexists(jobid):
             raise
     assert False, config.host
 
+class Fake_LSF_creating(object):
+    def basename(self, filename): return filename
+
 class LSF_creating(object):
     def __init__(self, *files, **kwargs):
         self.files = files
-        for filename in files:
-            if not filename.startswith("/"):
-                raise ValueError("{} should be an absolute path!".format(filename))
+        self.inputfiles = []
 
         self.jsonfile = None
         self.ignorefailure = False
@@ -580,8 +581,14 @@ class LSF_creating(object):
                 self.ignorefailure = kwarg
             elif kw == "skipifexists":
                 self.skipifexists = kwarg
+            elif kw == "inputfiles":
+                self.inputfiles = tuple(kwarg)
             else:
                 raise TypeError("Unknown kwarg {}={}!".format(kw, kwarg))
+
+        for filename in files+self.inputfiles:
+            if not filename.startswith("/"):
+                raise ValueError("{} should be an absolute path!".format(filename))
 
     def __enter__(self):
         if not LSB_JOBID(): return self
@@ -600,10 +607,13 @@ class LSF_creating(object):
             with open(os.path.basename(self.jsonfile), "w") as f:
                 f.write(content)
 
+        for inputfile in self.inputfiles:
+            shutil.copy(inputfile, "./")
+
         return self
 
     def basename(self, filename):
-        if filename not in self.files: raise ValueError("Unknown filename {}!".format(filename))
+        if filename not in self.files+self.inputfiles: raise ValueError("Unknown filename {}!".format(filename))
         if LSB_JOBID():
             return os.path.basename(filename)
         else:
