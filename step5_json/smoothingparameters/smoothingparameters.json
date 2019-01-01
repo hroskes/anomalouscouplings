@@ -54319,7 +54319,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }
@@ -54474,7 +54482,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }
@@ -54629,7 +54645,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }
@@ -54818,7 +54842,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }
@@ -55004,7 +55036,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }
@@ -55190,7 +55230,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }
@@ -55364,7 +55412,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }
@@ -55536,7 +55592,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }
@@ -55708,7 +55772,15 @@
                                     null
                                 ],
                                 {
-                                    "name": "useDbkgorthogonal"
+                                    "listofkwargs": [
+                                        {
+                                            "name": "useDbkgorthogonal"
+                                        },
+                                        {
+                                            "name": "seterrorforfloor"
+                                        }
+                                    ],
+                                    "name": "multiplefunctions"
                                 }
                             ]
                         }

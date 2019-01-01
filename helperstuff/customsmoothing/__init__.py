@@ -6,19 +6,25 @@ from flatten import flatten
 from justcopy import justcopy
 from redointerference import redointerference
 from reweightthingwithobviouspeak import reweightthingwithobviouspeak
+from seterrorforfloor import seterrorforfloor
 from setbinstozero import setbinstozero
 from useDbkgorthogonal import useDbkgorthogonal
 
 def donothing(hsmooth, rawprojections, **kwargs):
-   """do nothing"""
-   return False #don't make new control plots
+  """do nothing"""
+  return False #don't make new control plots
 
-functions = {_.__name__.lower(): _ for _ in [donothing, redointerference, reweightthingwithobviouspeak, setbinstozero, flatten, justcopy, useDbkgorthogonal]}
+def multiplefunctions(hsmooth, rawprojections, listofkwargs):
+  makenewcontrolplots = False
+  for kwargs in listofkwargs:
+    makenewcontrolplots = callfunction(hsmooth, rawprojections, **kwargs) or makenewcontrolplots  #don't reverse this!  it short circuits
+  return makenewcontrolplots
+
+functions = {_.__name__.lower(): _ for _ in [donothing, redointerference, reweightthingwithobviouspeak, setbinstozero, flatten, justcopy, useDbkgorthogonal, multiplefunctions, seterrorforfloor]}
 
 def callfunction(hsmooth, rawprojections, **kwargs):
     if "name" in kwargs:
-        name = kwargs["name"].lower()
-        del kwargs["name"]
+        name = kwargs.pop("name").lower()
     else:
         if kwargs: raise ValueError("No function name given! {}".format(kwargs))
         name = "donothing"

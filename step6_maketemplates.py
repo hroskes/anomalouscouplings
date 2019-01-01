@@ -54,14 +54,17 @@ def buildtemplates(*args):
                  and templatesfile.hascustomsmoothing
                ):
                 try:
+                    bad = False
                     templatesfile.docustomsmoothing()
                 except:
-                    if os.path.exists(templatesfile.templatesfile(firststep=True)):  #this has to be true.  just to make 100% sure.
+                    bad = True
+                    raise
+                finally:
+                    if bad and os.path.exists(templatesfile.templatesfile(firststep=True)):  #the second part has to be true.  just to make 100% sure.
                         try:
                             os.remove(templatesfile.templatesfile())
                         except:
                             pass
-                    raise
 
             if not os.path.exists(templatesfile.templatesfile()):
                 raise RuntimeError("Something is wrong!  {} was not created.".format(templatesfile.templatesfile()))
