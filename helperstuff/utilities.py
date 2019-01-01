@@ -569,7 +569,7 @@ class Fake_LSF_creating(object):
 class LSF_creating(object):
     def __init__(self, *files, **kwargs):
         self.files = files
-        self.inputfiles = []
+        self.inputfiles = ()
 
         self.jsonfile = None
         self.ignorefailure = False
