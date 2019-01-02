@@ -64,6 +64,8 @@ usenewZXsystematics = True
 applyJECshapesystematics = False
 applyMINLOsystematics = False
 
+useautoMCStats = True
+
 assert getm4lsystsfromggHUntagged <= getm4lsystsfromggH
 
 lumi2015 = 2.7

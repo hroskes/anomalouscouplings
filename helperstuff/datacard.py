@@ -55,6 +55,8 @@ class SystematicsSection(Section):
         for line in result[:]:
             if len(line.split()) > 2 and all(systematicvalue == "-" for systematicvalue in line.split()[2:]):
                 result.remove(line)
+        if config.useautoMCStats and obj.analysis.usehistogramsforcombine:
+            result.append("* autoMCStats 0")
         return result
 
 class SystematicFromEnums_BaseClass(object):
@@ -630,6 +632,7 @@ class _Datacard(MultiEnum):
                 xyz = 1
                 for x, y, z in product(xrange(1, nbinsx+1), xrange(1, nbinsy+1), xrange(1, nbinsz+1)):
                     t.SetBinContent(xyz, t3D.GetBinContent(x, y, z))
+                    t.SetBinError(xyz, t3D.GetBinError(x, y, z))
                     xyz += 1
 
                 t3D.SetDirectory(f)

@@ -26,7 +26,6 @@ def seterrorforfloor(hsmooth, rawprojections):
           if hsmooth.GetBinError(x, y, z) == 0 or hsmooth.GetBinContent(x, y, z) <= mincontent*1.1:  #buffer for rounding error
             assert hsmooth.GetBinContent(x, y, z) <= mincontent*1.1
             hsmooth.SetBinError(x, y, z, errortoset)
-            print x, y, z, hsmooth.GetBinError(x, y, z)
             
 
     return False  #no need for new control plots because we didn't touch the bin content
