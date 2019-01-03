@@ -103,7 +103,7 @@ class TemplatesFile(MultiEnum):
             else:
                 assert False, self.templategroup
 
-            if self.analysis in ("fa3", "fa3_STXS", "fa3_multiparameter"):
+            if self.analysis.fais == ("fa3",):
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("0-", *args), ReweightingSample("fa30.5", *args)]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("a2", *args), ReweightingSample("fa2-0.5", *args)]
@@ -126,7 +126,7 @@ class TemplatesFile(MultiEnum):
 
         elif self.templategroup in ("vbf", "zh", "wh"):
             p = str(self.templategroup).upper()
-            if self.analysis in ("fa3", "fa3_STXS", "fa3_multiparameter"):
+            if self.analysis.fais == ("fa3",):
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "0-"), ReweightingSample(p, "fa3prod0.5"), ReweightingSample(p, "fa3dec0.5"), ReweightingSample(p, "fa3proddec-0.5")]
             if self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "a2"), ReweightingSample(p, "fa2prod0.5"), ReweightingSample(p, "fa2dec-0.5"), ReweightingSample(p, "fa2proddec-0.5")]
@@ -243,7 +243,7 @@ class TemplatesFile(MultiEnum):
     def bkgdiscriminant(self):
         from discriminants import discriminant
 
-        if self.analysis == "fa3_multiparameter": return discriminant("phistarZ2")
+        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_only6bins"): return discriminant("phistarZ2")
 
         name = "D_bkg"
         if self.production >= "180416" or self.production == "180224_newdiscriminants":
@@ -256,7 +256,7 @@ class TemplatesFile(MultiEnum):
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
             name += "_10bins"
         elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if self.category == "Untagged":
@@ -311,8 +311,10 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z2Mass")
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_ggH_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
                 return discriminant("D_4couplings_decay")
+            if self.analysis == "fa3_only6bins":
+                return discriminant("D_0minus_decay_3bins")
 
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
@@ -325,8 +327,10 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
                 return discriminant("D_4couplings_VBFdecay"+JECappend)
+            if self.analysis == "fa3_only6bins":
+                return discriminant("D_0minus_VBFdecay_3bins")
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -339,8 +343,10 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
                 return discriminant("D_4couplings_HadVHdecay"+JECappend)
+            if self.analysis == "fa3_only6bins":
+                return discriminant("D_0minus_HadVHdecay_3bins")
 
         assert False
 
@@ -384,7 +390,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins":
                 return discriminant("D_CP_decay_2bins")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
@@ -403,7 +409,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins":
                 return discriminant("D_CP_VBF_2bins"+JECappend)
 
         if self.category == "VHHadrtagged":
@@ -417,7 +423,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins":
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
 
         assert False
@@ -672,6 +678,15 @@ class TemplateBase(object):
             t.SetDirectory(0)
             return t
 
+    @property
+    def bkgdiscriminant(self):
+        return self.templatesfile.bkgdiscriminant
+    @property
+    def purediscriminant(self):
+        return self.templatesfile.purediscriminant
+    @property
+    def mixdiscriminant(self):
+        return self.templatesfile.mixdiscriminant
     @property
     def discriminants(self):
         return self.templatesfile.discriminants
@@ -956,9 +971,11 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def domirror(self):
-        if self.analysis not in ("fa3", "fa3_STXS", "fa3_multiparameter", "fa3fa2fL1fL1Zg"): return False
+        if "fa3" not in self.analysis.fais: return False
         if self.analysis == "fa3_STXS": return False #for now... could do it later
         if self.productionmode == "data": return False
+
+        assert "D_CP" in self.mixdiscriminant.name, (self, self.mixdiscriminant.name)
 
         if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
         if self.hypothesis in ("0+", "0-", "a2", "L1", "L1Zg"): return True
@@ -1284,7 +1301,7 @@ class IntTemplate(TemplateBase, MultiEnum):
             result = result.replace("gl", self.analysis.couplingnames[3])
         elif self.productionmode in ("ggH", "ttH", "bbH"):
             if self.interferencetype == "g11gi1":
-                if self.analysis in ("fa3", "fa3_STXS", "fa3_multiparameter"):
+                if self.analysis.fais == ("fa3",):
                     result = "templatea1a3IntAdapSmooth"
                 elif self.analysis == "fa2":
                     result = "templatea1a2IntAdapSmooth"
@@ -1316,7 +1333,7 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     @property
     def mirrorjsn(self):
-        if self.analysis not in ("fa3", "fa3_STXS", "fa3_multiparameter", "fa3fa2fL1fL1Zg"): return None
+        if "fa3" not in self.analysis.fais: return None
 
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH", "bbH"):

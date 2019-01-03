@@ -48,6 +48,8 @@ decaydiscriminants = [
     Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-103, 0, 162-103),
     Discriminant("D_CP_decay", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_decay_2bins"),
 
+    Discriminant("D_0minus_decay", "D_{0-}^{dec}", 3, 0, 1, identifier="D_0minus_decay_3bins"),
+
     Discriminant("D_bkg", "D_{bkg}", 10, 0, 1, identifier="D_bkg_10bins"),
     Discriminant("D_0minus_decay", "D_{0-}^{dec}", 10, 0, 1, identifier="D_0minus_decay_10bins"),
     Discriminant("D_0hplus_decay", "D_{0h+}^{dec}", 10, 0, 1, identifier="D_0hplus_decay_10bins"),
@@ -107,6 +109,8 @@ VBFdiscriminants = [
     Discriminant("D_bkg_VBFdecay_ScaleUp", "D_{bkg}^{ScaleUp}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleUp_10bins"),
     Discriminant("D_bkg_VBFdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleDown_10bins"),
 
+    Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 3, 0, 1, identifier="D_0minus_VBFdecay_3bins"),
+
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 10, 0, 1, identifier="D_0minus_VBFdecay_10bins"),
     Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBF+dec}", 10, 0, 1, identifier="D_0hplus_VBFdecay_10bins"),
     Discriminant("D_L1_VBFdecay", "D_{#Lambda1}^{VBF+dec}", 10, 0, 1, identifier="D_L1_VBFdecay_10bins"),
@@ -148,6 +152,8 @@ VHdiscriminants = [
     Discriminant("D_bkg_HadVHdecay_ResDown", "D_{bkg}^{ResDown}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ResDown_10bins"),
     Discriminant("D_bkg_HadVHdecay_ScaleUp", "D_{bkg}^{ScaleUp}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleUp_10bins"),
     Discriminant("D_bkg_HadVHdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleDown_10bins"),
+
+    Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 3, 0, 1, identifier="D_0minus_HadVHdecay_3bins"),
 
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 10, 0, 1, identifier="D_0minus_HadVHdecay_10bins"),
     Discriminant("D_0hplus_HadVHdecay", "D_{0h+}^{VH+dec}", 10, 0, 1, identifier="D_0hplus_HadVHdecay_10bins"),
