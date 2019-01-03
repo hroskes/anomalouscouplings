@@ -1028,6 +1028,11 @@ class Template(TemplateBase, MultiEnum):
       self.initsmoothingparameters()
       self.__smoothingparameters.value = value
 
+    @smoothingparameters.deleter
+    def smoothingparameters(self):
+      self.initsmoothingparameters()
+      self.__smoothingparameters.delvalue()
+
     @staticmethod
     def writedict():
       SmoothingParameters.writedict()

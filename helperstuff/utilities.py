@@ -464,6 +464,9 @@ class JsonDict(object):
             print "Error while getting value of\n{!r}".format(self)
             raise
 
+    def delvalue(self):
+        self.delnesteddictvalue(self.getdict(), *self.keys)
+
     @property
     def value(self):
         return self.getvalue()
@@ -540,6 +543,16 @@ class JsonDict(object):
             thedict[keys[0]] = {}
 
         return cls.setnesteddictvalue(thedict[keys[0]], *keys[1:], **kwargs)
+
+    @classmethod
+    def delnesteddictvalue(cls, thedict, *keys):
+        if len(keys) == 1:
+            del thedict[keys[0]]
+            return
+
+        cls.delnesteddictvalue(thedict[keys[0]], *keys[1:])
+        if not thedict[keys[0]]:
+            del thedict[keys[0]]
 
 def LSB_JOBID():
     import config
