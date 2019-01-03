@@ -1213,6 +1213,12 @@ class SmoothingParameters(MultiEnum, JsonDict):
         return super(SmoothingParameters, self).getvalue()
 
       def getvalue(self):
+        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_only6bins"):
+          if self.productionmode == "qqZZ":
+            return [[None, None, None], {"name": "seterrorforfloor"}]
+          else:
+            return [[None, None, None], {}]
+
         result = self.rawvalue
 
         if self.shapesystematic != "" and result == [None, None, None]:
