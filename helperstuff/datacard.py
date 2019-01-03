@@ -39,25 +39,32 @@ class Section(object):
     def __get__(self, obj, objtype):
         return "\n".join(self.getlines(obj, objtype))
     def getlines(self, obj, objtype):
-        result = []
         for label in self.labels:
             if label.startswith("#"):
-                result.append(label)
+                yield label
             else:
                 value = getattr(obj, label)
                 if value is None: continue
-                result.append("{} {}".format(label, value))
-        return result
+                yield "{} {}".format(label, value)
 
 class SystematicsSection(Section):
+    def __init__(self, *labels):
+        self.systematicnames = []
+        super(SystematicsSection, self).__init__(labels)
     def getlines(self, obj, objtype):
-        result = super(SystematicsSection, self).getlines(obj, objtype)
-        for line in result[:]:
+        for line in super(SystematicsSection, self).getlines(obj, objtype):
             if len(line.split()) > 2 and all(systematicvalue == "-" for systematicvalue in line.split()[2:]):
-                result.remove(line)
+                continue
+            if len(line.split()) > 2:
+                if re.match("ln[NU]|gmM|trG|shape.*|unif|dfD2?|(p|(flat|rate)P)aram|extArg|discrete", line.split()[1]):
+                    self.systematicnames.append(line.split()[0])
+                elif line.split()[1] == "group":
+                    self.systematicnames = tuple(self.systematicnames)
+                else:
+                    raise ValueError("Unknown pdf type for line:\n"+line)
+            yield line
         if config.useautoMCStats and obj.analysis.usehistogramsforcombine:
-            result.append("* autoMCStats 0")
-        return result
+            yield "* autoMCStats 0"
 
 class SystematicFromEnums_BaseClass(object):
     pass
@@ -391,7 +398,11 @@ class _Datacard(MultiEnum):
         if self.production.LHE or self.production.GEN: return None
         return "param 1 0.1 [0,2]"
 
-    section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel, "kbkg_gg")
+    @property
+    def everything_but_binbybin(self):
+        return "group = " + " ".join(self.systematicssection.systematicnames)
+
+    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel, "kbkg_gg", "everything_but_binbybin")
 
     divider = "\n------------\n"
 

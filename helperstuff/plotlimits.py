@@ -116,6 +116,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     xaxislimits = None
     adddirectories = []
     scale = 1
+    useNLLandNLL0 = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -163,6 +164,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             adddirectories = kwarg
         elif kw == "scale":
             scale = kwarg
+        elif kw == "useNLLandNLL0":
+            useNLLandNLL0 = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -240,7 +243,11 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                             if xaxislimits is not None and not (xaxislimits[0] <= fa3 <= xaxislimits[1]): continue
                         if killpoints is not None and any(_[0] < fa3 < _[1] for _ in killpoints): continue
                         if nuisance is None:
-                            deltaNLL = t.deltaNLL+t.nll+t.nll0
+                            deltaNLL = t.deltaNLL
+                            if useNLLandNLL0: deltaNLL += t.nll+t.nll0
+                            if math.isinf(deltaNLL) or math.isnan(deltaNLL):
+                                t.Show()
+                                raise ValueError("one of the NLL variables is infinity or NaN, see ^^^^")
                             NLL[fa3] = 2*deltaNLL
                         else:
                             NLL[fa3] = getattr(t, nuisance)

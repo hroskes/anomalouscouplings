@@ -40,7 +40,7 @@ runcombinetemplate = r"""
                 --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. \
                 -n _.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
                 .oO[saveorloadworkspace]Oo. \
-                --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 \
+                --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 --X-rtd MINIMIZER_analytic \
                 .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
                 -S .oO[usesystematics]Oo. \
 |& tee .oO[logfile]Oo.
@@ -52,7 +52,7 @@ gm convert .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanran
 """
 
 morecombineoptions = {
-    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis all --saveInactivePOI=1",
+    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1",
     "FitDiagnostics": "",
     "Impacts": ".oO[impactsstep.oO[impactsstep]Oo.]Oo."
 }
@@ -98,7 +98,6 @@ def runscan(repmap, submitjobs, directory=None):
     initialjobids = []
     print replaceByMap("jobs/.oO[filename]Oo.", repmap_initial)
     if not utilities.existsandvalid(replaceByMap("jobs/.oO[filename]Oo.", repmap_initial), "w"):
-      assert False
       job = "{} runscan {} directory={}".format(
                                                 os.path.join(config.repositorydir, "./step9_runcombine.py"),
                                                 pipes.quote(json.dumps(repmap_initial)),
@@ -120,7 +119,7 @@ def runscan(repmap, submitjobs, directory=None):
         "selectpoints": "--firstPoint .oO[pointindexplusoffset]Oo. --lastPoint .oO[pointindexplusoffset]Oo.",
         "pointindex": str(i),
         "pointindexplusoffset": str(i+int(replaceByMap(".oO[pointoffset]Oo.", repmap_i))),
-        "saveorloadworkspace": "--snapshotName MultiDimFit",
+        "saveorloadworkspace": "--snapshotName MultiDimFit --skipInitialFit",
         "workspacefile": replaceByMap(".oO[filename]Oo.", repmap_initial),
       })
       replaceByMap(runcombinetemplate, repmap_i) #sanity check that replaceByMap works
@@ -157,7 +156,19 @@ def runscan(repmap, submitjobs, directory=None):
       jobid = submitjob(job, **submitjobkwargs)
       jobids.add(jobid)
 
-    haddjobid = submitjob(" ".join([os.path.join(config.repositorydir, "helperstuff", "hadd.py"), finalfilename] + list(individualfilenames)), jobname="hadd", jobtime="1:0:0", waitids=jobids, docd=True)
+
+    haddjob = " ".join([os.path.join(config.repositorydir, "helperstuff", "hadd.py"), finalfilename] + list(individualfilenames))
+    submithaddjobkwargs = {
+      "jobname": "hadd",
+      "jobtime": "1:0:0",
+      "waitids": jobids,
+      "docd": True,
+    }
+    if config.host == "MARCC":
+      submithaddjobkwargs["queue"] = "lrgmem"
+      submithaddjobkwargs["memory"] = "10G"
+
+    haddjobid = submitjob(haddjob, **submithaddjobkwargs)
     return haddjobid
 
   else:
@@ -440,7 +451,7 @@ def runcombine(analysis, foldername, **kwargs):
                     raise ValueError
             except ValueError:
                 raise ValueError("xaxislimits has to be 2 floats separated by commas")
-        elif kw in ("killpoints",):
+        elif kw in ("killpoints", "useNLLandNLL0"):
             plotlimitskwargs[kw] = kwarg
         elif kw == "method":
             method = kwarg
