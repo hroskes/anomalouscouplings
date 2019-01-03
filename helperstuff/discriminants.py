@@ -109,7 +109,7 @@ VBFdiscriminants = [
     Discriminant("D_bkg_VBFdecay_ScaleUp", "D_{bkg}^{ScaleUp}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleUp_10bins"),
     Discriminant("D_bkg_VBFdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleDown_10bins"),
 
-    Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 3, 0, 1, identifier="D_0minus_VBFdecay_3bins"),
+    Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.7, 1.7, identifier="D_0minus_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .9
 
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 10, 0, 1, identifier="D_0minus_VBFdecay_10bins"),
     Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBF+dec}", 10, 0, 1, identifier="D_0hplus_VBFdecay_10bins"),
@@ -153,7 +153,7 @@ VHdiscriminants = [
     Discriminant("D_bkg_HadVHdecay_ScaleUp", "D_{bkg}^{ScaleUp}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleUp_10bins"),
     Discriminant("D_bkg_HadVHdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleDown_10bins"),
 
-    Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 3, 0, 1, identifier="D_0minus_HadVHdecay_3bins"),
+    Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 3, -0.4, 1.4, identifier="D_0minus_HadVHdecay_3bins"),   #min and max to have boundaries at .2 and .8
 
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 10, 0, 1, identifier="D_0minus_HadVHdecay_10bins"),
     Discriminant("D_0hplus_HadVHdecay", "D_{0h+}^{VH+dec}", 10, 0, 1, identifier="D_0hplus_HadVHdecay_10bins"),
