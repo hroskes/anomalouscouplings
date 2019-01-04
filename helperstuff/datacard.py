@@ -1,21 +1,26 @@
-from collections import Counter
+import collections
 import inspect
+import numbers
+import os
+import re
+import time
+
+from collections import Counter
 from itertools import chain, product
 from math import pi
-import os
-import time
 
 import ROOT
 
 from rootoverloads import histogramfloor
 
 import combineinclude
-from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1, zerotemplate
 import config
+import utilities
+
+from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1, zerotemplate
 from enums import Analysis, categories, Category, Channel, channels, Hypothesis, MultiEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
 from samples import ReweightingSample
 from templates import TemplatesFile
-import utilities
 from utilities import cache, callclassinitfunctions, cd, generatortolist, mkdir_p, multienumcache, OneAtATime, Tee
 from yields import YieldSystematic, YieldSystematicValue
 
@@ -40,26 +45,33 @@ class Section(object):
         return "\n".join(self.getlines(obj, objtype))
     def getlines(self, obj, objtype):
         for label in self.labels:
-            if label.startswith("#"):
+            if not isinstance(label, basestring) or label.startswith("#"):
                 yield label
             else:
                 value = getattr(obj, label)
                 if value is None: continue
-                yield "{} {}".format(label, value)
+                if isinstance(value, (basestring, numbers.Number)):
+                    yield "{} {}".format(label, value)
+                elif isinstance(value, (tuple, list)):
+                    yield label, value
 
 class SystematicsSection(Section):
     def __init__(self, *labels):
-        self.systematicnames = []
-        super(SystematicsSection, self).__init__(labels)
+        self.systematicnames = collections.defaultdict(list)
+        super(SystematicsSection, self).__init__(*labels)
     def getlines(self, obj, objtype):
         for line in super(SystematicsSection, self).getlines(obj, objtype):
+            if isinstance(line, (tuple, list)):
+                if line[1][0] == "group" and len(line) == len(line[1]) == 2:
+                    #syntax for group: property should return "group", lambda systematicname: return should_this_systematic_be_in_the_group(systematicname)
+                    line = line[0] + " group = " + " ".join(name for name in self.systematicnames[obj] if line[1][1](name))
+                else:
+                    raise ValueError("Unknown result for "+line[0]+":\n"+str(line))
             if len(line.split()) > 2 and all(systematicvalue == "-" for systematicvalue in line.split()[2:]):
                 continue
             if len(line.split()) > 2:
-                if re.match("ln[NU]|gmM|trG|shape.*|unif|dfD2?|(p|(flat|rate)P)aram|extArg|discrete", line.split()[1]):
-                    self.systematicnames.append(line.split()[0])
-                elif line.split()[1] == "group":
-                    self.systematicnames = tuple(self.systematicnames)
+                if re.match("ln[NU]|gmM|trG|shape.*|unif|dfD2?|(p|(flat|rate)P)aram|extArg|discrete|group", line.split()[1]):
+                    self.systematicnames[obj].append(line.split()[0])
                 else:
                     raise ValueError("Unknown pdf type for line:\n"+line)
             yield line
@@ -400,7 +412,7 @@ class _Datacard(MultiEnum):
 
     @property
     def everything_but_binbybin(self):
-        return "group = " + " ".join(self.systematicssection.systematicnames)
+        return "group", lambda systematicname: True
 
     systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel, "kbkg_gg", "everything_but_binbybin")
 
