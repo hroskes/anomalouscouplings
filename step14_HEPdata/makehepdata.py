@@ -3,7 +3,7 @@
 import argparse
 if __name__ == "__main__":
   p = argparse.ArgumentParser()
-  p.add_argument("cadi", choices=["HIG-17-011", "HIG-18-002"])
+  p.add_argument("cadi", choices=["HIG-17-011", "HIG-18-002", "HIG-17-034"])
   g = p.add_mutually_exclusive_group()
   g.add_argument("--force", "-f", action="store_true")
   g.add_argument("--check", "-c", action="store_true")
@@ -67,24 +67,28 @@ class PaperInfo(object):
     return {
       "HIG-17-011": ["P P --> HIGGS --> Z0 Z0 --> LEPTON+ LEPTON- LEPTON+ LEPTON-"],
       "HIG-18-002": ["P P --> Z0 Z0 --> LEPTON+ LEPTON- LEPTON+ LEPTON-"],
+      "HIG-17-034": ["P P --> HIGGS --> TAU+ TAU-"],
     }[self.cadi]
   @property
   def sqrts(self):
     return {
       "HIG-17-011": [13000],
       "HIG-18-002": [13000],
+      "HIG-17-034": [13000],
     }[self.cadi]
   @property
   def rootfile(self):
     return {
       "HIG-17-011": "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_production/limits/{self.fai}_limit_lumi35.8671.root",
       "HIG-18-002": "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/limits/{self.fai}_limit_lumi80.15.root",
+      "HIG-17-034": "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/limits/HTT/{self.fai}_limit_lumi80.15.root",
     }[self.cadi].format(self=self)
   @property
   def lumidict(self):
     return {
       "HIG-17-011": {7: 5.1, 8: 19.7, 13: 38.6},
       "HIG-18-002": {7: 5.1, 8: 19.7, 13: 80.2},
+      "HIG-17-034": {7: 5.1, 8: 19.7, 13: 80.2},
     }[self.cadi]
 
 class Table(PaperInfo):
@@ -99,12 +103,17 @@ class Table(PaperInfo):
   def thumbfigurename(self):
     return "thumb_"+self.figurename
   @property
-  def notpublishedyet(self):
-    if self.cadi == "HIG-18-002": return True
-    return False
+  def publishedinjournal(self):
+    if self.cadi == "HIG-17-034": return False
+    if self.cadi == "HIG-18-002": return False
+    return True
+  @property
+  def publishedonarxiv(self):
+    if self.cadi == "HIG-17-034": return False
+    return True
   @property
   def figureurl(self):
-    if self.notpublishedyet:
+    if not self.publishedonarxiv:
       result = "file:/afs/cern.ch/work/h/hroskes/AN/papers/{self.cadi}/trunk/Figure_{self.figurenumber:03d}".format(self=self)
       if self.figureletter is not None: result += "-"+self.figureletter
       result += ".pdf"
@@ -112,10 +121,10 @@ class Table(PaperInfo):
     return "http://cms-results.web.cern.ch/cms-results/public-results/publications/{self.cadi}/{self.figurename}".format(self=self)
   @property
   def location(self):
-    if self.notpublishedyet:
-      return "Fig. {:d}{} of the paper".format(self.figurenumber, self.figureletter if self.figureletter else None)
-    else:
+    if self.publishedinjournal:
       return "Fig. {:d}{} on page {:d} of the paper".format(self.figurenumber, self.figureletter if self.figureletter else None, self.figurepage)
+    else:
+      return "Fig. {:d}{} of the paper".format(self.figurenumber, self.figureletter if self.figureletter else None)
   @abc.abstractproperty
   def figurepage(self): pass
   @property
@@ -240,12 +249,20 @@ class FaiLimitTable(Table):
       if self.fai == "fa2": return {0.0003515805583447218, -1.5517587215185813e-12, -2.256646258746997e-10, 0.019600000232458115, 0.00041023208177648485, 1.6157702702912502e-05, 6.066570676921401e-07, -2.392181785992875e-09, 2.2096777740898688e-09, 0.5600000023841858, 0.01600000075995922}
       if self.fai == "fL1": return {3.816104435827583e-05, 9.086481567166516e-15, -0.3400000035762787, -0.6800000071525574, -0.3199999928474426, 4.4846903620054945e-05, 6.056595225345518e-10, 6.253050059967791e-07, 1.2750886526191607e-05, -5.451978868364904e-10, 2.5288371396925413e-10}
       if self.fai == "fL1Zg": return {0.7200000286102295, 0.7799999713897705, 5.376144329716226e-08, -0.3799999952316284, -0.0002512808714527637, 3.570632856053635e-08, -0.0002523555886000395, -0.8799999952316284, 1.2302773484407226e-06, 2.031392796197906e-05, -0.00026075352798216045, 0.800000011920929, -0.699999988079071, -0.0002693945134524256}
+    if self.cadi == "HIG-17-034":
+      if self.fai == "fa3": return {-3.248867841421088e-11, 1.760848959975192e-07, 0.0012000000569969416, 0.6800000071525574, 0.017999999225139618, -0.014000000432133675, 0.0020000000949949026, 0.3799999952316284, 1.6212986508890026e-07, -1.9253953986719807e-10, -7.212763011921197e-05, -5.048824459663592e-05, -3.469446951953614e-17, 5.018843012294383e-07, 4.964784920957754e-07, 0.012400000356137753, -5.114797474448096e-13, -2.177543423353967e-10}
+      if self.fai == "fa2": return {7.216371159302071e-05, 8.422934479312971e-05, -0.018400000408291817, -0.30000001192092896, 1.234568003383174e-13, -5.851388817923464e-12, -0.014800000004470348, 0.005200000014156103, -0.4399999976158142, 0.007199999876320362, 0.00041023208177648485, 0.019600000232458115, 0.0003515805583447218, -2.256646258746997e-10, -1.5517587215185813e-12, 0.7799999713897705, 0.006800000090152025, 2.4923905584728345e-05}
+      if self.fai == "fL1": return {5.741680979554076e-07, 1.7215561456396244e-06, -0.07999999821186066, -0.01080000028014183, 0.10000000149011612, 7.998490758609478e-11, 0.4399999976158142, 0.4000000059604645, 0.6200000047683716, 0.6000000238418579, -1.2600177845545346e-11, 0.3799999952316284, 0.5600000023841858, 0.3400000035762787, -0.8600000143051147, 3.816104435827583e-05, -0.6800000071525574, 4.4846903620054945e-05, 9.086481567166516e-15, -0.3400000035762787, -0.3199999928474426, 6.056595225345518e-10, -0.3799999952316284, 0.9200000166893005, -0.5799999833106995, -0.00839999970048666, -0.1599999964237213, -0.6600000262260437, 0.11999999731779099, 4.1646595150268695e-07, 0.009200000204145908}
+      if self.fai == "fL1Zg": return {-4.05151867610698e-09, -1.4713416931044776e-05, -3.2008043490350246e-05, -0.3799999952316284, 3.570632856053635e-08, 5.376144329716226e-08, 0.7200000286102295, 0.7799999713897705, -0.0002512808714527637, -0.0002523555886000395, -0.009600000455975533, -0.003599999938160181, 7.022480303930934e-07, -0.014800000004470348, 0.002400000113993883, 0.699999988079071, -0.03999999910593033, -4.3368086899420177e-16}
     return set()
 
   @property
   def figurenumber(self):
-    if self.cadi == "HIG-17-011": return 3
-    if self.cadi == "HIG-18-002": return 4
+    return {
+      "HIG-17-011": 3,
+      "HIG-18-002": 4,
+      "HIG-17-034": 10,
+    }[self.cadi]
     assert False
   @property
   def figureletter(self):
@@ -253,12 +270,19 @@ class FaiLimitTable(Table):
 
   @property
   def description(self):
-    return "Observed and expected likelihood scans of ${self.fancyfai}\cos{self.fancyphiai}$.  See Section 2 of the paper for more details.".format(self=self)
+    return "Observed and expected likelihood scans of ${self.fancyfai}\cos{self.fancyphiai}$.  See Section {self.paperphenosection} of the paper for more details.".format(self=self)
 
   @property
   def figurepage(self):
     if self.cadi == "HIG-17-011": return 6
     assert False
+
+  @property
+  def paperphenosection(self):
+    return {
+      "HIG-17-011": 2,
+      "HIG-17-034": 4,
+    }[self.cadi]
 
 class FaiLimitTable_TwoPartPlot(FaiLimitTable):
   def getlegendfromrootfile(self, tfile):
@@ -282,6 +306,14 @@ class FaiLimitTable_SixPartPlot(FaiLimitTable):
     legend = canvas.GetListOfPrimitives()[7]
     assert isinstance(legend, ROOT.TLegend), legend
     return legend
+
+  @property
+  def figureurl(self):
+    if self.cadi == "HIG-17-034":
+      if os.path.exists("/afs/cern.ch/work/h/hroskes/AN/papers/{self.cadi}/trunk/Figure_010-a.pdf".format(self=self)) or self.publishedonarxiv:
+        raise RuntimeError("Remove this function")
+      return "file:/afs/cern.ch/work/h/hroskes/AN/papers/{self.cadi}/trunk/Figures/{self.fai}_limit_lumi80.pdf".format(self=self)
+    return super(FaiLimitTable_SixPartPlot, self).figureurl
 
 class FaiLimitTable_HIG18002(FaiLimitTable_SixPartPlot):
   @property
@@ -343,6 +375,15 @@ class HIG18002(HEPData):
   def tables(self):
     for fai in "fa3", "fa2", "fL1", "fL1Zg":
       yield FaiLimitTable_HIG18002(self.cadi, fai)
+
+class HIG17034(HEPData):
+  @property
+  def cadi(self):
+    return "HIG-17-034"
+  @property
+  def tables(self):
+    for fai in "fa3", "fa2", "fL1", "fL1Zg":
+      yield FaiLimitTable_SixPartPlot(self.cadi, fai)
 
 @contextlib.contextmanager
 def cd(newdir):
