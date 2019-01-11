@@ -335,7 +335,13 @@ class FaiLegendEntry(object):
     return self.entry.GetObject()
   @property
   def header(self):
-    return {"name": "$-2\Delta\ln L$ "+self.entry.GetLabel()}
+    return {"name": "$-2\Delta\ln L$ "+self.label}
+  @property
+  def label(self):
+    result = self.entry.GetLabel()
+    result = result.replace("H#rightarrow4l", r"$H\to4\ell$")
+    result = result.replace("H#rightarrow#tau#tau", r"$H\to\tau\tau$")
+    return result
   @property
   def xyvalues(self):
     return [(x, y) for i, x, y in zip(range(self.tgraph.GetN()), self.tgraph.GetX(), self.tgraph.GetY()) if x not in self.removepoints]
