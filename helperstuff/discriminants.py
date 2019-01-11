@@ -40,6 +40,7 @@ decaydiscriminants = [
     Discriminant("Z1Mass", "m_{1}", defaultnbins, 20, 100),
     Discriminant("Z2Mass", "m_{2}", defaultnbins, 0, 62),
     Discriminant("Phi", "#Phi", defaultnbins, -pi, pi),
+    Discriminant("phistarZ1", "dummy", 1, -pi, pi),
     Discriminant("phistarZ2", "dummy", 1, -pi, pi),
 
     Discriminant("D_STXS_stage0", "D_{STXS0}", 2, 0, 2),

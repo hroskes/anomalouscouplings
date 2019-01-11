@@ -556,6 +556,7 @@ class Analysis(MyEnum):
                  EnumItem("fa3_STXS"),
                  EnumItem("fa3_multiparameter_nodbkg"),
                  EnumItem("fa3_only6bins"),
+                 EnumItem("fa3_onlyDCP"),
                  EnumItem("fa3fa2fL1fL1Zg"),
                 )
     def title(self, latex=False, superscript=None):
@@ -688,6 +689,7 @@ class Analysis(MyEnum):
     def doGEN(self):
         if self == "fa3_multiparameter_nodbkg": return True
         if self == "fa3_only6bins": return True
+        if self == "fa3_onlyDCP": return True
         if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
         if self == "fa3fa2fL1fL1Zg": return False
@@ -700,7 +702,7 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def fais(self):
-        if self in ("fa3_STXS", "fa3_multiparameter_nodbkg", "fa3_only6bins"): return "fa3",
+        if self in ("fa3_STXS", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"): return "fa3",
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
         if self == "fa3fa2fL1fL1Zg": return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
@@ -713,6 +715,7 @@ class Analysis(MyEnum):
     def usehistogramsforcombine(self):
         if self == "fa3_multiparameter_nodbkg": return True
         if self == "fa3_only6bins": return True
+        if self == "fa3_onlyDCP": return True
         if self == "fa3fa2fL1fL1Zg": return True
         return False
 
