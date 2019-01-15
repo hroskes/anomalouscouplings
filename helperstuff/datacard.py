@@ -76,7 +76,7 @@ class SystematicsSection(Section):
                     raise ValueError("Unknown pdf type for line:\n"+line)
             yield line
         if config.useautoMCStats and obj.analysis.usehistogramsforcombine:
-            yield "* autoMCStats 0"
+            yield "* autoMCStats 0 0 1 {}".format(obj.autoMCStatsmergebins)
 
 class SystematicFromEnums_BaseClass(object):
     pass
@@ -598,6 +598,7 @@ class _Datacard(MultiEnum):
         f = ROOT.TFile(self.rootfile_base, "RECREATE")
         cache = []
         print self
+        domirror = False  #will be set to true
         for h in chain(self.histograms, ["data"]):
             if "bkg_" in h or h == "data":
                 p = h
@@ -636,12 +637,14 @@ class _Datacard(MultiEnum):
                 if hypothesis and "positive" not in h and "negative" not in h:
                     scaleby /= getattr(ReweightingSample(p, hypothesis, "Hff0+" if p=="ttH" else None), Hypothesis(hypothesis).couplingname)**2
 
-                t3D = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic).Clone(name+"_3D")
+                originaltemplate = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic)
+                t3D = originaltemplate.Clone(name+"_3D")
                 if sign is not None:
                     if sign == "positive": pass
                     elif sign == "negative": t3D.Scale(-1)
                     else: assert False
                     t3D.Floor()
+                if "Mirror" in originaltemplate.GetName(): domirror = True
 
                 t3D.Scale(scaleby)
 
@@ -652,8 +655,11 @@ class _Datacard(MultiEnum):
 
                 t = getattr(ROOT, type(t3D).__name__.replace("3", "1"))(name, name, nbinsxyz, 0, nbinsxyz)
 
+                binindices = {}
+
                 xyz = 1
                 for x, y, z in product(xrange(1, nbinsx+1), xrange(1, nbinsy+1), xrange(1, nbinsz+1)):
+                    binindices[t3D.GetXaxis().GetBinCenter(x), t3D.GetYaxis().GetBinCenter(y), t3D.GetZaxis().GetBinCenter(z)] = xyz - 1
                     t.SetBinContent(xyz, t3D.GetBinContent(x, y, z))
                     t.SetBinError(xyz, t3D.GetBinError(x, y, z))
                     xyz += 1
@@ -673,8 +679,20 @@ class _Datacard(MultiEnum):
         expectedhistnames = expectedhistnames | {_+"_3D" for _ in expectedhistnames}
         assert allnames == expectedhistnames, (allnames, expectedhistnames, allnames ^ expectedhistnames)
 
+        self.__autoMCStatsmergebins = []
+        assert domirror
+        if domirror:
+            for (x, y, z), index in binindices.iteritems():
+                index2 = binindices[x, -y, z]
+                if index < index2:
+                    self.__autoMCStatsmergebins.append([index, index2])
+
         f.Write()
         f.Close()
+
+    @property
+    def autoMCStatsmergebins(self):
+        return ";".join(",".join(str(_) for _ in binstomerge) for binstomerge in self.__autoMCStatsmergebins)
 
     def makeCardsWorkspaces(self, outdir="."):
         mkdir_p(outdir)

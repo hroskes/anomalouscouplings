@@ -1223,7 +1223,7 @@ class SmoothingParameters(MultiEnum, JsonDict):
           if self.productionmode == "qqZZ":
             return [[None, None, None], {"name": "seterrorforfloor"}]
           else:
-            return [[None, None, None], {}]
+            return [[None, None, None], {"name": "seterrortozero"}]
 
         result = self.rawvalue
 

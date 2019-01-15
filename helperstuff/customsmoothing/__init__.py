@@ -6,8 +6,9 @@ from flatten import flatten
 from justcopy import justcopy
 from redointerference import redointerference
 from reweightthingwithobviouspeak import reweightthingwithobviouspeak
-from seterrorforfloor import seterrorforfloor
 from setbinstozero import setbinstozero
+from seterrorforfloor import seterrorforfloor
+from seterrortozero import seterrortozero
 from useDbkgorthogonal import useDbkgorthogonal
 
 def donothing(hsmooth, rawprojections, **kwargs):
@@ -20,7 +21,7 @@ def multiplefunctions(hsmooth, rawprojections, listofkwargs):
     makenewcontrolplots = callfunction(hsmooth, rawprojections, **kwargs) or makenewcontrolplots  #don't reverse this!  it short circuits
   return makenewcontrolplots
 
-functions = {_.__name__.lower(): _ for _ in [donothing, redointerference, reweightthingwithobviouspeak, setbinstozero, flatten, justcopy, useDbkgorthogonal, multiplefunctions, seterrorforfloor]}
+functions = {_.__name__.lower(): _ for _ in [donothing, redointerference, reweightthingwithobviouspeak, setbinstozero, flatten, justcopy, useDbkgorthogonal, multiplefunctions, seterrorforfloor, seterrortozero]}
 
 def callfunction(hsmooth, rawprojections, **kwargs):
     if "name" in kwargs:
