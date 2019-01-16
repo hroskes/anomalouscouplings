@@ -18,7 +18,7 @@ import config
 import utilities
 
 from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved, getrate, Luminosity, mixturesign, sigmaioversigma1, zerotemplate
-from enums import Analysis, categories, Category, Channel, channels, Hypothesis, MultiEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
+from enums import Analysis, categories, Category, Channel, channels, EnumItem, Hypothesis, MultiEnum, MyEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
 from samples import ReweightingSample
 from templates import TemplatesFile
 from utilities import cache, callclassinitfunctions, cd, generatortolist, mkdir_p, multienumcache, OneAtATime, Tee
@@ -75,17 +75,21 @@ class SystematicsSection(Section):
                 else:
                     raise ValueError("Unknown pdf type for line:\n"+line)
             yield line
-        if config.useautoMCStats and obj.analysis.usehistogramsforcombine:
-            yield "* autoMCStats 0 0 1 {}".format(obj.autoMCStatsmergebins)
 
 class SystematicFromEnums_BaseClass(object):
     pass
 
 def MakeSystematicFromEnums(*theenums, **kwargs):
+    theenums = list(theenums)
     class SystematicFromEnums(SystematicFromEnums_BaseClass):
         def __init__(self, function):
             self.name = self.origname = function.__name__
-            for enum in theenums:
+            for i, enum in enumerate(theenums[:]):
+                if isinstance(enum, int):
+                    class Index(MyEnum):
+                        enumitems = list(EnumItem(str(i)) for i in xrange(1, enum+1))
+                        enumname = "index"
+                    enum = theenums[i] = Index
                 self.name = self.name.replace(enum.enumname, "{"+enum.enumname+"}")
 
             for kw, kwarg in kwargs.iteritems():
@@ -405,6 +409,18 @@ class _Datacard(MultiEnum):
         if channel == self.channel:
           return "param 0 1 [-3,3]"
 
+    @MakeSystematicFromEnums(ProductionMode, Category, Channel, config.staticmaxbins)
+    def binbybin_category_channel_productionmode_index(self, productionmode, category, channel, index):
+        if productionmode == "data" or not productionmode.isbkg: return None
+        if not self.analysis.usehistogramsforcombine:
+          return None
+        if category != self.category or channel != self.channel:
+          return None
+        if "binbybin_{}_{}_{}_{}".format(category, channel, productionmode, index) not in self.binbybinuncertainties:
+          return None
+        result = ["shape1"]
+        return " ".join(["shape1"] + ["1" if productionmode == (h if "bkg_" in h else h.split("_")[0]) else "-" for h in self.histograms])
+
     @property
     def kbkg_gg(self):
         if self.production.LHE or self.production.GEN: return None
@@ -412,9 +428,13 @@ class _Datacard(MultiEnum):
 
     @property
     def everything_but_binbybin(self):
-        return "group", lambda systematicname: True
+        return "group", lambda systematicname: "binbybin" not in systematicname
 
-    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, CMS_fake_channel, "kbkg_gg", "everything_but_binbybin")
+    @property
+    def binbybin(self):
+        return "group", lambda systematicname: "binbybin" in systematicname
+
+    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, binbybin_category_channel_productionmode_index, CMS_fake_channel, "kbkg_gg", "binbybin", "everything_but_binbybin")
 
     divider = "\n------------\n"
 
@@ -597,6 +617,7 @@ class _Datacard(MultiEnum):
 
         f = ROOT.TFile(self.rootfile_base, "RECREATE")
         cache = []
+        self.binbybinuncertainties = []
         print self
         domirror = False  #will be set to true
         for h in chain(self.histograms, ["data"]):
@@ -618,6 +639,7 @@ class _Datacard(MultiEnum):
             for systematic, direction in chain(product(p.workspaceshapesystematics(self.category), ("Up", "Down")), [(None, None)]):
                 if systematic is not None is not direction:
                     if self.production.GEN: continue
+                    if p == "data": continue
                     systematic = ShapeSystematic(str(systematic)+direction)
 
                 name = h
@@ -659,7 +681,8 @@ class _Datacard(MultiEnum):
 
                 xyz = 1
                 for x, y, z in product(xrange(1, nbinsx+1), xrange(1, nbinsy+1), xrange(1, nbinsz+1)):
-                    binindices[t3D.GetXaxis().GetBinCenter(x), t3D.GetYaxis().GetBinCenter(y), t3D.GetZaxis().GetBinCenter(z)] = xyz - 1
+                    binindices[t3D.GetXaxis().GetBinCenter(x), t3D.GetYaxis().GetBinCenter(y), t3D.GetZaxis().GetBinCenter(z)] = xyz
+                    binindices[xyz] = t3D.GetXaxis().GetBinCenter(x), t3D.GetYaxis().GetBinCenter(y), t3D.GetZaxis().GetBinCenter(z)
                     t.SetBinContent(xyz, t3D.GetBinContent(x, y, z))
                     t.SetBinError(xyz, t3D.GetBinError(x, y, z))
                     xyz += 1
@@ -672,27 +695,43 @@ class _Datacard(MultiEnum):
                 assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
                 self.histogramintegrals[name] = t.Integral()
 
-        allnames = set(t.GetName() for t in cache)
-        assert len(allnames) == len(cache)
+                if systematic is None and config.usebinbybin and p != "data" and p.isbkg:
+                    for i in xrange(1, t.GetNbinsX()+1):
+                        if i > config.staticmaxbins:
+                            raise ValueError("config.staticmaxbins is not big enough.  If you want to use bin by bin uncertainties, increase it.")
+                        xcenter, ycenter, zcenter = binindices[i]
+                        systname = "binbybin_{self.category}_{self.channel}_{}_{}".format(p, i, self=self)
+                        newname = name + "_" + systname
+                        if domirror:
+                            if ycenter<0: continue
+                            otheri = binindices[xcenter, -ycenter, zcenter]
+
+                        up = t.Clone(newname+"Up")
+                        dn = t.Clone(newname+"Down")
+
+                        up.SetBinContent(i, t.GetBinContent(i) + t.GetBinError(i))
+                        dn.SetBinContent(i, max(t.GetBinContent(i) - t.GetBinError(i), 1e-9))
+
+                        if domirror:
+                            up.SetBinContent(otheri, t.GetBinContent(otheri) + t.GetBinError(otheri))
+                            dn.SetBinContent(otheri, max(t.GetBinContent(otheri) - t.GetBinError(otheri), 1e-9))
+
+                        up.SetDirectory(f)
+                        cache.append(up)
+                        dn.SetDirectory(f)
+                        cache.append(dn)
+
+                        self.binbybinuncertainties.append(systname)
+
+        nominalnames = set(t.GetName() for t in cache if "binbybin" not in t.GetName())
+        assert len(nominalnames) + 2*len(self.binbybinuncertainties) == len(cache)
 
         expectedhistnames = set(self.histograms) | {"data_obs"}
         expectedhistnames = expectedhistnames | {_+"_3D" for _ in expectedhistnames}
-        assert allnames == expectedhistnames, (allnames, expectedhistnames, allnames ^ expectedhistnames)
-
-        self.__autoMCStatsmergebins = []
-        assert domirror
-        if domirror:
-            for (x, y, z), index in binindices.iteritems():
-                index2 = binindices[x, -y, z]
-                if index < index2:
-                    self.__autoMCStatsmergebins.append([index, index2])
+        assert nominalnames == expectedhistnames, (nominalnames, expectedhistnames, nominalnames ^ expectedhistnames)
 
         f.Write()
         f.Close()
-
-    @property
-    def autoMCStatsmergebins(self):
-        return ";".join(",".join(str(_) for _ in binstomerge) for binstomerge in self.__autoMCStatsmergebins)
 
     def makeCardsWorkspaces(self, outdir="."):
         mkdir_p(outdir)

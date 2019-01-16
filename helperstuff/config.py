@@ -64,7 +64,8 @@ usenewZXsystematics = True
 applyJECshapesystematics = False
 applyMINLOsystematics = False
 
-useautoMCStats = True
+usebinbybin = True
+staticmaxbins = 300
 
 assert getm4lsystsfromggHUntagged <= getm4lsystsfromggH
 

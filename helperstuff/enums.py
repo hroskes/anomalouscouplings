@@ -294,7 +294,7 @@ class ProductionMode(MyEnum):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
-        assert False
+        assert False, self
     @property
     def issignal(self):
         return not self.isbkg
