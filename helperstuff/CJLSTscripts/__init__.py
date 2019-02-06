@@ -33,4 +33,4 @@ from ROOT import getDVBF2jetsConstant, getDVBF1jetConstant, getDWHhConstant, get
 from ROOT import getDVBF2jetsWP, getDVBF1jetWP, getDWHhWP, getDZHhWP
 from ROOT import getDVBF2jetsConstant_shiftWP, getDVBF1jetConstant_shiftWP, getDWHhConstant_shiftWP, getDZHhConstant_shiftWP
 
-from ROOT import D_bkg_VBFdec, D_bkg_VHdec
+from ROOT import D_bkg_VBFdec, D_bkg_VHdec, DVBF1j_ME
