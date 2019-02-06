@@ -121,6 +121,10 @@ class TreeWrapperBase(Iterator):
         for sample in cls.allsamples:
             setattr(cls, sample.weightname(), sample.get_MC_weight_function(LHE=False))
 
+    def MC_weight_nominal(self):
+        pb_to_fb = 1000
+        return self.overallEventWeight * self.genxsec * self.genBR * pb_to_fb / self.nevents
+
 ##########################
 #background discriminants#
 ##########################
@@ -888,6 +892,8 @@ class TreeWrapper(TreeWrapperBase):
             self.xsec = 0
         else:
             self.xsec = self.tree.xsec * 1000 #pb to fb
+        self.genxsec = self.tree.genxsec
+        self.genBR = self.tree.genBR
 
         self.preliminaryloop()
 
@@ -1627,6 +1633,11 @@ class TreeWrapper(TreeWrapperBase):
                 ):
                     if name not in self.exceptions:
                         self.exceptions.append(name)
+
+        if self.treesample.productionmode != "data" and self.treesample.issignal:
+            self.toaddtotree.append("MC_weight_nominal")
+        else:
+            self.exceptions.append("MC_weight_nominal")
 
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
         if len(reweightingweightnames) != len(set(reweightingweightnames)):

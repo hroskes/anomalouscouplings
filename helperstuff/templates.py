@@ -1108,6 +1108,7 @@ class Template(TemplateBase, MultiEnum):
     def postprocessingjson(self):
       result = []
       if self.smoothentriesperbin:
+        assert not self.usenewtemplatebuilder
         result.append({"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin})
         if self.reweightaxes:
           reweight = {"type": "reweight", "axes": self.reweightaxes}
@@ -1115,13 +1116,17 @@ class Template(TemplateBase, MultiEnum):
             reweight.update({"rebinning": self.reweightrebin})
           result.append(reweight)
       result.append({"type": "rescale", "factor": self.scalefactor})
+      if self.usenewtemplatebuilder:
+        result.append({"type": "floor", "floorvalue": 1e-10})
+        if self.domirror:
+          result.append({"type": "mirror", "antisymmetric": False})
       return result
 
     def getjson(self):
         if self.copyfromothertemplate: return []
         jsn = [
                {
-                "name": self.templatename(final=False),
+                "name": self.templatename(final=self.usenewtemplatebuilder),
                 "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
                 "tree": "candTree",
                 "variables": [d.name for d in self.discriminants],
@@ -1137,22 +1142,26 @@ class Template(TemplateBase, MultiEnum):
                },
               ]
 
-        if self.domirror:
-            mirrorjsn = [
-                         {
-                          "name":self.templatename(final=True),
-                          "templatesum":[
-                            {"name":self.templatename(final=False),"factor":1.0},
-                          ],
-                          "postprocessing":[
-                            {"type":"mirror", "axis":1},
-                            {"type":"floor"},
-                          ],
-                         },
-                        ]
-            jsn += mirrorjsn
-        else:
-            jsn[0]["postprocessing"].append({"type": "floor"})
+        if self.usenewtemplatebuilder:
+            del jsn[0]["conserveSumOfWeights"], jsn[0]["filloverflows"], jsn[0]["binning"]["bins"]
+
+        if not self.usenewtemplatebuilder:
+            if self.domirror:
+                mirrorjsn = [
+                             {
+                              "name":self.templatename(final=True),
+                              "templatesum":[
+                                {"name":self.templatename(final=False),"factor":1.0},
+                              ],
+                              "postprocessing":[
+                                {"type":"mirror", "axis":1},
+                                {"type":"floor"},
+                              ],
+                             },
+                            ]
+                jsn += mirrorjsn
+            else:
+                jsn[0]["postprocessing"].append({"type": "floor"})
 
         if self.productionmode == "data":
             del jsn[0]["postprocessing"]
