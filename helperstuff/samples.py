@@ -688,6 +688,16 @@ class SampleBase(object):
         a1, eL, eR = self.a1eLeR
         return (1 if a1*eR>0 else -1) * eR**2 * constants.JHUXSHZZ2e2mueR / (eL**2 * constants.JHUXSHZZ2e2mueL + eR**2 * constants.JHUXSHZZ2e2mueR + abs(a1)**2 * constants.JHUXSHZZ2e2mua1)
 
+    @property
+    def hasZZ(self):
+        return not self.g1 == self.g2 == self.g4 == self.g1prime2 == 0
+    @property
+    def hasZg(self):
+        return not self.ghzgs1prime2 == 0
+    @property
+    def hasgg(self):
+        return False
+
 class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, pdf=None):
         self.productionmode = ProductionMode(productionmode)
@@ -921,7 +931,12 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode == "ggH" and self.production.LHE:
             return [self]
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "bbH"):
-            return [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
+            result = [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
+            if self.productionmode == "VBF" and not self.hasZZ:
+                result = [_ for _ in result if not _.hasZZ]
+            if self.productionmode == "ZH" and not (self.hasZZ or self.hasZg):
+                result = [_ for _ in result if not (_.hasZZ or _.hasZg)]
+            return result
         if self.productionmode == "tqH":
             return [self]
         if self.productionmode == "data":
@@ -1602,9 +1617,11 @@ class Sample(ReweightingSamplePlus):
             if self.hypothesis == "a2": result = "{}0PH_M125".format(s)
             if self.hypothesis == "0-": result = "{}0M_M125".format(s)
             if self.hypothesis == "L1": result = "{}0L1_M125".format(s)
+            if self.hypothesis == "L1Zg": result = "{}0L1Zg_M125".format(s)
             if self.hypothesis in ("fa20.5", "fa2prod0.5"): result = "{}0PHf05ph0_M125".format(s)
             if self.hypothesis in ("fa30.5", "fa3prod0.5"): result = "{}0Mf05ph0_M125".format(s)
             if self.hypothesis in ("fL10.5", "fL1prod0.5"): result = "{}0L1f05ph0_M125".format(s)
+            if self.hypothesis in ("fL1Zg0.5", "fL1Zgprod0.5"): result = "{}0L1Zgf05ph0_M125".format(s)
             return result
         if self.productionmode in ("HJJ", "ttH"):
             s = str(self.productionmode)
