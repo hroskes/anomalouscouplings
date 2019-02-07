@@ -110,7 +110,7 @@ class SampleBase(object):
             elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
                 result *= self.g1prime2**2 / constants.g1prime2WH**2
             elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
-                result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2WH**2
+                result *= 0
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "HJJ":
@@ -1381,7 +1381,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             ghzgs1prime2 = {"dec": constants.ghzgs1prime2HZZ}
             if self.productionmode == "VBF": ghzgs1prime2["prod"] = constants.ghzgs1prime2VBF
             elif self.productionmode == "ZH":  ghzgs1prime2["prod"] = constants.ghzgs1prime2ZH
-            elif self.productionmode == "WH":  ghzgs1prime2["prod"] = constants.ghzgs1prime2WH
+            elif self.productionmode == "WH":  ghzgs1prime2["prod"] = -1000  #dummy value, should remove this entirely
             else: ghzgs1prime2["prod"] = None
             ghzgs1prime2["proddec"] = None if ghzgs1prime2["prod"] is None else -sqrt(ghzgs1prime2["prod"]*ghzgs1prime2["dec"])
 
