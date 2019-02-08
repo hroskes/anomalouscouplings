@@ -13,14 +13,14 @@ import os
 
 #========================
 #inputs
-productionmode = "VBF"
-disc           = "D_CP_VBF_10bins"
-reweightto     = samplewithfai(productionmode, fai=0.0048, analysis="fa3", productionmodeforfai="ggH")
+productionmode = "ZH"
+disc           = "DiJetMass"
+reweightto     = None
 bins           = None
 min            = None
 max            = None
 
-production     = "180530"
+production     = "GEN_181119"
 
 enrich         = False
 masscut        = True
@@ -28,7 +28,7 @@ normalizeto1   = False
 
 channel        = None
 
-category       = "VBFtagged"
+category       = "VHHadrtagged"
 analysis       = "fa3"
 
 cut            = None
