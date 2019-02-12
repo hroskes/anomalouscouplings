@@ -894,6 +894,8 @@ class Template(TemplateBase, MultiEnum):
     def weightname(self):
         if self.productionmode == "data":
             return None
+        if self.usenewtemplatebuilder:
+            return "MC_weight_nominal * (" + self.reweightingsampleplus.MC_weight + ")"
         return self.reweightingsampleplus.weightname()
 
     @property
@@ -1228,7 +1230,7 @@ class SmoothingParameters(MultiEnum, JsonDict):
         return super(SmoothingParameters, self).getvalue()
 
       def getvalue(self):
-        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"):
+        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP") and not self.usenewtemplatebuilder:
           if self.productionmode == "qqZZ":
             return [[None, None, None], {"name": "seterrorforfloor"}]
           else:
@@ -1476,20 +1478,36 @@ class IntTemplate(TemplateBase, MultiEnum):
         return templatesandfactors
 
     def getjson(self):
-        templatesum = [{
-                        "name": template.templatename(final=False),
-                        "factor": factor,
-                       } for template, factor in self.templatesandfactors if factor]
-        intjsn = [
-                  {
-                   "name": self.templatename(),
-                   "templatesum":templatesum,
-                   "postprocessing":[],
-                  },
-                 ]
+        if self.usenewtemplatebuilder:
+          intjsn = [
+                    {
+                     "name": self.templatename(final=self.usenewtemplatebuilder),
+                     "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
+                     "tree": "candTree",
+                     "variables": [d.name for d in self.discriminants],
+                     "weight": self.weightname(),
+                     "selection": self.selection,
+                     "binning": {
+                       "type": "fixed",
+                     },
+                     "postprocessing": [],
+                    },
+                   ]
+        else:
+          templatesum = [{
+                          "name": template.templatename(final=False),
+                          "factor": factor,
+                         } for template, factor in self.templatesandfactors if factor]
+          intjsn = [
+                    {
+                     "name": self.templatename(),
+                     "templatesum":templatesum,
+                     "postprocessing":[],
+                    },
+                   ]
 
         if self.domirror:
-            intjsn[0]["postprocessing"].append(self.mirrorjsn)
+          intjsn[0]["postprocessing"].append(self.mirrorjsn)
         return intjsn
 
     @property
