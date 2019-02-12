@@ -14,13 +14,11 @@ class ExtendedCounter(collections.Counter):
             result[item] += other[item]
         return result
 
+    def __neg__(self):
+        return self * -1
+
     def __sub__(self, other):
-        result = ExtendedCounter(self)
-        for item in other:
-            if item not in result:
-                result[item] = 0
-            result[item] -= other[item]
-        return result
+        return self + -other
 
     def __mul__(self, other):
         """multiply by a scalar"""

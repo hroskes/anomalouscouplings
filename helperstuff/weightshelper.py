@@ -100,6 +100,13 @@ class WeightsHelper(MultiEnum):
 
 if __name__ == "__main__":
     from samples import ArbitraryCouplingsSample, ReweightingSample
-    print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, kappa=1, kappa_tilde=4, pdf="NNPDF30_lo_as_0130").MC_weight
-    print ArbitraryCouplingsSample("bbH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, pdf="NNPDF30_lo_as_0130").MC_weight
-    print ArbitraryCouplingsSample("ggH", g1=0, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=23456, ghg2=1, ghg4=0, pdf="NNPDF30_lo_as_0130").MC_weight
+    from pprint import pprint
+#    print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, kappa=1, kappa_tilde=4).MC_weight_terms
+#    print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, kappa=1, kappa_tilde=4).MC_weight_terms_expanded
+    pprint(
+      (
+        ArbitraryCouplingsSample("ggH", g1=1, g2=1, g4=0, g1prime2=0, ghzgs1prime2=0)
+      - ArbitraryCouplingsSample("ggH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0)
+      - ArbitraryCouplingsSample("ggH", g1=0, g2=1, g4=0, g1prime2=0, ghzgs1prime2=0)
+      ).MC_weight_terms
+    )

@@ -16,7 +16,7 @@ import ROOT
 import config
 import customsmoothing
 from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, treeshapesystematics
-from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis
+from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
 from utilities import cache, is_almost_integer, JsonDict, jsonloads, TFile, tfiles
 
 class TemplatesFile(MultiEnum):
@@ -611,7 +611,12 @@ class TemplatesFile(MultiEnum):
                 if self.category == "Untagged": continue
 
             yield _
-            
+
+    @property
+    def usenewtemplatebuilder(self):
+        if self.analysis in ("fa3", "fa2", "fL1", "fL1Zg"): return False
+        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_STXS", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return True
+        assert False, self.analysis            
 
 def listfromiterator(function):
     return list(function())
@@ -732,6 +737,10 @@ class TemplateBase(object):
             except:
                 print "Error while custom smoothing {}:".format(self.templatename(final=True))
                 raise
+
+    @property
+    def usenewtemplatebuilder(self):
+        return self.templatesfile.usenewtemplatebuilder
 
 class Template(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
@@ -918,9 +927,18 @@ class Template(TemplateBase, MultiEnum):
             else:
                 result={
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5")
+                            for hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5")
                        }
-        if self.productionmode in ["VBF", "ZH", "WH"]:
+        if self.productionmode in ["VBF", "ZH"]:
+            result={
+                    Sample(self.production, self.productionmode, hypothesis)
+                        for hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5")
+                   }
+            if self.productionmode == "VBF" and self.reweightingsample.hasZZ:
+              result = {s for s in result if s.hasZZ}
+            if self.productionmode == "ZH" and (self.reweightingsample.hasZZ or self.reweightingsample.hasZg):
+              result = {s for s in result if s.hasZZ or s.hasZg}
+        if self.productionmode == "WH":
             result={
                     Sample(self.production, self.productionmode, hypothesis)
                         for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
@@ -950,6 +968,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def scalefactor(self):
+        if self.usenewtemplatebuilder: return None
         if self.shapesystematic == "MINLO_SM":
             result = len(self.reweightfrom())
         elif self.productionmode in ("VBF", "ggH", "ZH", "WH", "bbH"):
@@ -1117,7 +1136,8 @@ class Template(TemplateBase, MultiEnum):
           if self.reweightrebin and any(self.reweightrebin):
             reweight.update({"rebinning": self.reweightrebin})
           result.append(reweight)
-      result.append({"type": "rescale", "factor": self.scalefactor})
+      if self.scalefactor is not None:
+        result.append({"type": "rescale", "factor": self.scalefactor})
       if self.usenewtemplatebuilder:
         result.append({"type": "floor", "floorvalue": 1e-10})
         if self.domirror:
@@ -1126,6 +1146,7 @@ class Template(TemplateBase, MultiEnum):
 
     def getjson(self):
         if self.copyfromothertemplate: return []
+        if self.usenewtemplatebuilder and self.hypothesis is not None and not self.hypothesis.ispure: return []
         jsn = [
                {
                 "name": self.templatename(final=self.usenewtemplatebuilder),
@@ -1145,7 +1166,7 @@ class Template(TemplateBase, MultiEnum):
               ]
 
         if self.usenewtemplatebuilder:
-            del jsn[0]["conserveSumOfWeights"], jsn[0]["filloverflows"], jsn[0]["binning"]["bins"]
+            del jsn[0]["conserveSumOfWeights"], jsn[0]["filloverflows"], jsn[0]["binning"]["type"]
 
         if not self.usenewtemplatebuilder:
             if self.domirror:
@@ -1230,12 +1251,6 @@ class SmoothingParameters(MultiEnum, JsonDict):
         return super(SmoothingParameters, self).getvalue()
 
       def getvalue(self):
-        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP") and not self.usenewtemplatebuilder:
-          if self.productionmode == "qqZZ":
-            return [[None, None, None], {"name": "seterrorforfloor"}]
-          else:
-            return [[None, None, None], {"name": "seterrortozero"}]
-
         result = self.rawvalue
 
         if self.shapesystematic != "" and result == [None, None, None]:
@@ -1488,7 +1503,7 @@ class IntTemplate(TemplateBase, MultiEnum):
                      "weight": self.weightname(),
                      "selection": self.selection,
                      "binning": {
-                       "type": "fixed",
+                       "bins": self.binning,
                      },
                      "postprocessing": [],
                     },
@@ -1537,6 +1552,26 @@ class IntTemplate(TemplateBase, MultiEnum):
             assert self.domirror
             result.Scale(0)
         return result
+
+    @property
+    def sumofsamples(self):
+        return sum((t.reweightingsample*factor for t, factor in self.templatesandfactors), SumOfSamples())
+
+    def weightname(self):
+        if self.usenewtemplatebuilder:
+            return "MC_weight_nominal * (" + self.sumofsamples.MC_weight + ")"
+        assert False
+
+    def reweightfrom(self):
+        result = set.intersection(*(set(t.reweightfrom()) for t, factor in self.templatesandfactors))
+        assert result
+        return result
+
+    @property
+    def selection(self):
+        result = {t.selection for t, factor in self.templatesandfactors}
+        assert len(result) == 1, result
+        return result.pop()
 
 class DataTree(MultiEnum):
     enums = [Channel, Production, Category, Analysis]

@@ -12,13 +12,67 @@ import ROOT
 import config
 import constants
 from enums import AlternateGenerator, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
+from extendedcounter import ExtendedCounter
 from utilities import cache, cache_file, deprecate, product, TFile, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
+class SumOfSamplesBase(object):
+  __metaclass__ = ABCMeta
+  @abstractproperty
+  def samplesandfactors(self): pass
+  def __add__(self, other):
+    return SumOfSamples(self.samplesandfactors - other.samplesandfactors)
+  def __neg__(self):
+    return SumOfSamples(-self.samplesandfactors)
+  def __sub__(self, other):
+    return SumOfSamples(self.samplesandfactors - other.samplesandfactors)
+  def __mul__(self, scalar):
+    return SumOfSamples(self.samplesandfactors * scalar)
+  def __rmul__(self, scalar):
+    return self * scalar
+  def __div__(self, scalar):
+    return SumOfSamples(self.samplesandfactors / scalar)
+  @property
+  def MC_weight_terms_expanded(self):
+    terms = [(weight, weightfactor*factor) for s, factor in self.samplesandfactors.iteritems() for weight, weightfactor in s.MC_weight_terms_expanded]
+    c = ExtendedCounter()
 
-class SampleBase(object):
-    __metaclass__ = ABCMeta
+    for weight, factor in terms:
+      c[weight] += factor
 
+    maxfactor = max(abs(factor) for factor in c.values())
+    for weight, factor in c.items():
+      if abs(factor/maxfactor) < 1e-10: del c[weight]
+
+    return [(weight, factor) for weight, factor in c.iteritems()]
+
+  @property
+  def MC_weight_terms(self):
+    return [self.MC_weight_terms_expanded]  #for compatibility with SampleBase below
+
+  @property
+  def MC_weight(self):
+    result = "*".join(
+                      "("+
+                      "+".join(
+                               "({}*{})".format(weightname, couplingsq)
+                                   for weightname, couplingsq in factor
+                              )
+                      +")" for factor in self.MC_weight_terms
+                     )
+    return result
+
+
+class SumOfSamples(SumOfSamplesBase):
+  def __init__(self, samplesandfactors=None):
+    if samplesandfactors is None: samplesandfactors = ExtendedCounter()
+    self.__samplesandfactors = samplesandfactors
+  @property
+  def samplesandfactors(self): return self.__samplesandfactors
+
+class SampleBase(SumOfSamplesBase):
+    @property
+    def samplesandfactors(self): return ExtendedCounter({self: 1})
     @abstractproperty
     def g1(self):
         pass
@@ -472,6 +526,8 @@ class SampleBase(object):
 
     @property
     def MC_weight_terms(self):
+        if self.productionmode.isbkg: return [[("1", 1)]]
+
         factors = []
 
         weightshelper = WeightsHelper(self)
@@ -502,16 +558,12 @@ class SampleBase(object):
         return factors
 
     @property
-    def MC_weight(self):
-        result = "*".join(
-                          "("+
-                          "+".join(
-                                   "({}*{})".format(weightname, couplingsq)
-                                         for weightname, couplingsq in factor
-                                  )
-                          +")" for factor in self.MC_weight_terms
-                         )
-        return result
+    def MC_weight_terms_expanded(self):
+      factors = self.MC_weight_terms
+      result = []
+      for individualfactors in cartesianproduct(*factors):
+        result.append(("*".join(weightname for weightname, multiplier in individualfactors), product(multiplier for weightname, multiplier in individualfactors)))
+      return result
 
     def get_MC_weight_function(self_sample, functionname=None, reweightingonly=False, LHE=False):
         if functionname is None:
@@ -704,8 +756,6 @@ class ArbitraryCouplingsSample(SampleBase):
         self.__g1, self.__g2, self.__g4, self.__g1prime2, self.__ghzgs1prime2 = g1, g2, g4, g1prime2, ghzgs1prime2
         if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH", "bbH"):
             raise ValueError("Bad productionmode {}".format(self.productionmode))
-        if sum(bool(g) for g in (g2, g4, g1prime2 or ghzgs1prime2)) > 1:
-            raise ValueError("Can only set at most one of g2, g4, or g1prime2 and/or ghzgs1prime2")
 
         if self.productionmode == "HJJ":
             self.__ghg2, self.__ghg4 = ghg2, ghg4
@@ -1126,10 +1176,6 @@ class ReweightingSample(MultiEnum, SampleBase):
         elif self.productionmode == "ZX":
             return "MC_weight_ZX"
         raise self.ValueError("weightname")
-
-    @property
-    def MC_weight(self):
-        return self.weightname()
 
     def TDirectoryname(self):
         if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH") or self.productionmode == "ZX" and not config.usedata:
