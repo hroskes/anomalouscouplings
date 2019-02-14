@@ -1522,7 +1522,9 @@ class IntTemplate(TemplateBase, MultiEnum):
                    ]
 
         if self.domirror:
-          intjsn[0]["postprocessing"].append(self.mirrorjsn)
+          mirrorjsn = self.mirrorjsn
+          if "axis" in mirrorjsn: del mirrorjsn["axis"]
+          intjsn[0]["postprocessing"].append(mirrorjsn)
         return intjsn
 
     @property
