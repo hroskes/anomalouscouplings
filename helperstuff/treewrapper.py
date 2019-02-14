@@ -1634,10 +1634,10 @@ class TreeWrapper(TreeWrapperBase):
                     if name not in self.exceptions:
                         self.exceptions.append(name)
 
-        if self.treesample.productionmode != "data" and self.treesample.issignal:
-            self.toaddtotree.append("MC_weight_nominal")
-        else:
+        if self.treesample.productionmode == "data":
             self.exceptions.append("MC_weight_nominal")
+        else:
+            self.toaddtotree.append("MC_weight_nominal")
 
         reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
         if len(reweightingweightnames) != len(set(reweightingweightnames)):
