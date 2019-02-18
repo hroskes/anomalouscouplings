@@ -21,18 +21,27 @@ from time import sleep
 
 from helperstuff import config
 from helperstuff.discriminants import discriminants
+from helperstuff.enums import TemplateGroup
 from helperstuff.samples import Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
-from helperstuff.utilities import cd, KeepWhileOpenFile, LSB_JOBID, mkdir_p
-
-#cmssw = [int(i) for i in os.environ["CMSSW_VERSION"].split("_")[1:]]
-#if cmssw[0] == 8:
-#  raise ValueError("TemplateBuilder does not seem to work in CMSSW_8_X; the templates end up filled with NaNs.  Try CMSSW_7_4_X or CMSSW_7_6_X, I have tested that it works there.")
+from helperstuff.utilities import cd, KeepWhileOpenFile, KeepWhileOpenFiles, LSB_JOBID, mkdir_p
 
 def buildtemplates(*args):
+  if len(args) == 1 and not isinstance(args[0], TemplatesFile):
+    tg = TemplateGroup(args[0])
+    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder and not os.path.exists(tf.templatesfile()) and not os.path.exists(tf.templatesfile(firststep=True))]
+    if not tfs: return
+    assert not any(_.hascustomsmoothing for _ in tfs)
+    with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
+      if not all(kwofs): return
+      subprocess.check_call(["buildTemplates.py"] + [_.jsonfile() for _ in tfs])
+      return
+    return
+
   templatesfile = TemplatesFile(*args)
   if "Ulascan" in str(templatesfile.production): return
+  if templatesfile.usenewtemplatebuilder: return buildtemplates(templatesfile.templategroup)
   print templatesfile
   if templatesfile.copyfromothertemplatesfile is not None: return
   with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
@@ -41,9 +50,7 @@ def buildtemplates(*args):
         if not os.path.exists(templatesfile.templatesfile(firststep=True)):
           mkdir_p(os.path.dirname(templatesfile.templatesfile(firststep=True)))
           try:
-            if templatesfile.usenewtemplatebuilder: executable = "buildTemplates.py"
-            else: executable = "buildTemplate.exe"
-            subprocess.call([executable, templatesfile.jsonfile()])
+            subprocess.check_call(["buildTemplate.exe", templatesfile.jsonfile()])
           except:
             try:
               raise
@@ -121,13 +128,13 @@ def submitjobs(removefiles, jsontoo=False):
       if os.path.exists(jsonfilename):
         remove[jsonfilename] = False
 
-  njobs = 0
+  torun = set()
   for templatesfile in templatesfiles:
     if templatesfile.copyfromothertemplatesfile is not None: continue
     if templatesfile.templatesfile() in remove:
       remove[templatesfile.templatesfile()] = True
       remove[templatesfile.templatesfile(firststep=True)] = True
-      njobs += 1
+      torun.add(templatesfile)
       if jsontoo:
         if templatesfile.jsonfile() in remove:
           remove[templatesfile.jsonfile()] = True
@@ -140,7 +147,14 @@ def submitjobs(removefiles, jsontoo=False):
       if not jsontoo:
         if not os.path.exists(templatesfile.jsonfile()):
           raise ValueError(templatesfile.jsonfile()+" doesn't exist!  Try --jsontoo.")
-      njobs += 1
+      torun.add(templatesfile)
+
+  for tf in frozenset(torun):
+    if tf.usenewtemplatebuilder:
+      torun.remove(tf)
+      torun.add(tf.templategroup)
+  njobs = len(torun)
+
   if not njobs: return
   for filename, found in remove.iteritems():
     if not found:
