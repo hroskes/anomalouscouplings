@@ -21,7 +21,7 @@ class SumOfSamplesBase(object):
   @abstractproperty
   def samplesandfactors(self): pass
   def __add__(self, other):
-    return SumOfSamples(self.samplesandfactors - other.samplesandfactors)
+    return SumOfSamples(self.samplesandfactors + other.samplesandfactors)
   def __neg__(self):
     return SumOfSamples(-self.samplesandfactors)
   def __sub__(self, other):
@@ -41,8 +41,9 @@ class SumOfSamplesBase(object):
       c[weight] += factor
 
     maxfactor = max(abs(factor) for factor in c.values())
-    for weight, factor in c.items():
-      if abs(factor/maxfactor) < 1e-10: del c[weight]
+    if maxfactor:
+      for weight, factor in c.items():
+        if abs(factor/maxfactor) < 1e-10: del c[weight]
 
     return [(weight, factor) for weight, factor in c.iteritems()]
 
