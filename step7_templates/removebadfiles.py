@@ -6,7 +6,7 @@ import argparse
 import os
 
 p = argparse.ArgumentParser()
-p.add_argument("folder", nargs="*", default=os.listdir("."))
+p.add_argument("folder", nargs="*", default=os.listdir(os.path.dirname(__file__)))
 args = p.parse_args()
 
 import ROOT
@@ -16,6 +16,7 @@ delete = []
 
 with cd(os.path.dirname(__file__)):
   for directory in args.folder:
+    if not os.path.isdir(directory): continue
     for filename in os.listdir(directory):
       filename = os.path.join(directory, filename)
       if not filename.endswith(".root"): continue
