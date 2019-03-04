@@ -86,7 +86,6 @@ def copydata(*args):
   else:
     datatree = DataTree(*args)
   if "Ulascan" in str(datatree.production): return
-  print datatree
   f = ROOT.TFile(datatree.originaltreefile)
   t = f.candTree
 
