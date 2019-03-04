@@ -803,7 +803,7 @@ class TreeWrapperBase(Iterator):
       #they go negative in at least one channel for ggH fa3=0.5, ZH fa3=0.5, ZH fa3ZH=0.5, WH fa3=0.5, or WHfa3WH=0.5
       0, 6, 10, 16, 18, 25, 36, 37, 38, 39, 54, 60, 64, 65, 67, 72, 78, 90, 91, 96, 97, 100, 109, 111, 115, 123, 127, 133, 146, 147, 154,
       #more found later
-      #79, 53,
+      13,
     ), reverse=True))
 
     def D_4couplings_decay_raw(self):
