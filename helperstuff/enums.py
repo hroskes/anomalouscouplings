@@ -554,6 +554,7 @@ class Analysis(MyEnum):
                  EnumItem("fL1fL1Zg_m1_phi"),
                  EnumItem("fL1fL1Zg_m2_phi"),
                  EnumItem("fa3_STXS"),
+                 EnumItem("fa3_multiparameter"),
                  EnumItem("fa3_multiparameter_nodbkg"),
                  EnumItem("fa3_only6bins"),
                  EnumItem("fa3_onlyDCP"),
@@ -687,10 +688,12 @@ class Analysis(MyEnum):
         return False
     @property
     def doGEN(self):
+        if self == "fa3_multiparameter": return True
         if self == "fa3_multiparameter_nodbkg": return True
-        if self == "fa3_only6bins": return True
-        if self == "fa3_onlyDCP": return True
-        if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
+        if self == "fa3_only6bins": return False
+        if self == "fa3_onlyDCP": return False
+        if self == "fa3_STXS": return False
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
         if self == "fa3fa2fL1fL1Zg": return False
         assert False, self
@@ -698,11 +701,11 @@ class Analysis(MyEnum):
     def doCMS(self):
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
         if self.isfL1fL1Zg: return False
-        if self in ("fa3_STXS", "fa3_multiparameter_nodbkg", "fa3fa2fL1fL1Zg"): return False
+        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3fa2fL1fL1Zg"): return False
         assert False, self
     @property
     def fais(self):
-        if self in ("fa3_STXS", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"): return "fa3",
+        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"): return "fa3",
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
         if self == "fa3fa2fL1fL1Zg": return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
@@ -713,11 +716,14 @@ class Analysis(MyEnum):
 
     @property
     def usehistogramsforcombine(self):
+        if self == "fa3_multiparameter": return True
         if self == "fa3_multiparameter_nodbkg": return True
         if self == "fa3_only6bins": return True
         if self == "fa3_onlyDCP": return True
+        if self == "fa3_STXS": return True
         if self == "fa3fa2fL1fL1Zg": return True
-        return False
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+        assert False, self
 
 class Production(MyEnum):
     enumname = "production"

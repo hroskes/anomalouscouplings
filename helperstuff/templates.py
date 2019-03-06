@@ -256,8 +256,8 @@ class TemplatesFile(MultiEnum):
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
-            name += "_10bins"
+        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+            name += "_3bins"
         elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if self.category == "Untagged":
                 name += "_20bins"
@@ -311,7 +311,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z2Mass")
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_ggH_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_decay")
             if self.analysis == "fa3_only6bins":
                 return discriminant("D_0minus_decay_3bins")
@@ -329,7 +329,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_VBFdecay"+JECappend)
             if self.analysis == "fa3_only6bins":
                 return discriminant("D_0minus_VBFdecay_3bins")
@@ -347,7 +347,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_VBF_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_HadVHdecay"+JECappend)
             if self.analysis == "fa3_only6bins":
                 return discriminant("D_0minus_HadVHdecay_3bins")
@@ -396,7 +396,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins" or self.analysis == "fa3_onlyDCP":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_decay_2bins")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
@@ -415,7 +415,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins" or self.analysis == "fa3_onlyDCP":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_VBF_2bins"+JECappend)
 
         if self.category == "VHHadrtagged":
@@ -429,10 +429,10 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins" or self.analysis == "fa3_onlyDCP":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
 
-        assert False
+        assert False, self
 
     @property
     def discriminants(self):
@@ -615,7 +615,7 @@ class TemplatesFile(MultiEnum):
     @property
     def usenewtemplatebuilder(self):
         if self.analysis in ("fa3", "fa2", "fL1", "fL1Zg"): return False
-        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_STXS", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return True
+        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_STXS", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return True
         assert False, self.analysis            
 
 def listfromiterator(function):

@@ -49,6 +49,7 @@ decaydiscriminants = [
     Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-103, 0, 162-103),
     Discriminant("D_CP_decay", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_decay_2bins"),
 
+    Discriminant("D_bkg", "D_{bkg}", 3, -0.3, 1.2, identifier="D_bkg_3bins"),   #set min and max to have boundaries at 0.2 and 0.7
     Discriminant("D_0minus_decay", "D_{0-}^{dec}", 3, 0, 1, identifier="D_0minus_decay_3bins"),
 
     Discriminant("D_bkg", "D_{bkg}", 10, 0, 1, identifier="D_bkg_10bins"),
@@ -110,6 +111,7 @@ VBFdiscriminants = [
     Discriminant("D_bkg_VBFdecay_ScaleUp", "D_{bkg}^{ScaleUp}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleUp_10bins"),
     Discriminant("D_bkg_VBFdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleDown_10bins"),
 
+    Discriminant("D_bkg_VBFdecay", "D_{bkg}", 3, -0.3, 1.2, identifier="D_bkg_VBFdecay_3bins"),   #set min and max to have boundaries at 0.2 and 0.7
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.7, 1.7, identifier="D_0minus_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .9
 
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 10, 0, 1, identifier="D_0minus_VBFdecay_10bins"),
@@ -154,6 +156,7 @@ VHdiscriminants = [
     Discriminant("D_bkg_HadVHdecay_ScaleUp", "D_{bkg}^{ScaleUp}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleUp_10bins"),
     Discriminant("D_bkg_HadVHdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleDown_10bins"),
 
+    Discriminant("D_bkg_HadVHdecay", "D_{bkg}", 3, -0.4, 1.4, identifier="D_bkg_HadVHdecay_3bins"),   #set min and max to have boundaries at 0.2 and 0.8
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 3, -0.4, 1.4, identifier="D_0minus_HadVHdecay_3bins"),   #min and max to have boundaries at .2 and .8
 
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 10, 0, 1, identifier="D_0minus_HadVHdecay_10bins"),
