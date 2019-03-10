@@ -1,13 +1,13 @@
 [submodule "TemplateBuilder"]
-	path = CMSSW_9_4_3/src/TemplateBuilder/TemplateBuilder
+	path = CMSSW_10_2_5/src/TemplateBuilder/TemplateBuilder
 	url = git@github.com:hroskes/TemplateBuilder
 	branch = master
 [submodule "CMSSW_7_6_5/src/HiggsAnalysis/CombinedLimit"]
-	path = CMSSW_9_4_3/src/HiggsAnalysis/CombinedLimit
+	path = CMSSW_10_2_5/src/HiggsAnalysis/CombinedLimit
 	url = git@github.com:hroskes/HiggsAnalysis-CombinedLimit
 	branch = FTpl
 [submodule "CMSSW_7_6_5/src/HiggsAnalysis/HZZ4l_Combination"]
-	path = CMSSW_9_4_3/src/HiggsAnalysis/HZZ4l_Combination
+	path = CMSSW_10_2_5/src/HiggsAnalysis/HZZ4l_Combination
 	url = git@github.com:hroskes/HiggsAnalysis-HZZ4l_Combination
 	branch = master
 [submodule "helperstuff/Datacards13TeV_ICHEP2016"]
@@ -23,7 +23,7 @@
 	url = ssh://git@gitlab.cern.ch:7999/HZZ4l/Datacards13TeV.git
 	branch = Moriond2017
 [submodule "CMSSW_7_6_5/src/ZZMatrixElement"]
-	path = CMSSW_9_4_3/src/ZZMatrixElement
+	path = CMSSW_10_2_5/src/ZZMatrixElement
 	url = git@github.com:hroskes/HiggsAnalysis-ZZMatrixElement
 	branch = master
 [submodule "step10_plottingutilities/NIS_summary"]
@@ -34,6 +34,6 @@
 	path = helperstuff/constants
 	url = git@github.com:hroskes/anomalouscouplingsconstants
 [submodule "CMSSW_8_1_0/src/CombineHarvester"]
-	path = CMSSW_9_4_3/src/CombineHarvester
+	path = CMSSW_10_2_5/src/CombineHarvester
 	url = git@github.com:hroskes/CombineHarvester
 	branch = master
