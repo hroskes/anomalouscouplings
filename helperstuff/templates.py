@@ -519,11 +519,16 @@ class TemplatesFile(MultiEnum):
         return invertedmatrix
 
     def getjson(self):
-        return {
-                "inputDirectory": os.path.join("step3_withdiscriminants", str(self.production)),
-                "outputFile": self.templatesfile(firststep=self.hascustomsmoothing),
-                "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
-               }
+        result = {
+          "inputDirectory": os.path.join("step3_withdiscriminants", str(self.production)),
+          "outputFile": self.templatesfile(firststep=self.hascustomsmoothing),
+          "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
+        }
+        if self.usenewtemplatebuilder:
+          result.update({
+            "constraints": self.constraints,
+          })
+        return result
 
     @property
     def hascustomsmoothing(self):
@@ -616,7 +621,42 @@ class TemplatesFile(MultiEnum):
     def usenewtemplatebuilder(self):
         if self.analysis in ("fa3", "fa2", "fL1", "fL1Zg"): return False
         if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_STXS", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return True
-        assert False, self.analysis            
+        assert False, self.analysis
+
+    @property
+    def constraints(self):
+        if not self.usenewtemplatebuilder: assert False, self
+
+        if self.templategroup == "background": return []
+
+        productionmode = {_.productionmode for _ in self.signalsamples}
+        productionmode = productionmode.pop()
+        assert not productionmode
+
+        if self.analysis.dimensions == 1:
+            if self.templategroup in ("ggh", "tth", "bbh"):
+                constrainttype = "oneparameterggH"
+                templates = [
+                    Template(self, productionmode, self.analysis.purehypotheses[0]),
+                    IntTemplate(self, productionmode, "g11gi1"),
+                    Template(self, productionmode, self.analysis.purehypotheses[1]),
+                ]
+            if self.templategroup in ("vbf", "zh", "wh"):
+                constrainttype = "oneparameterVVH"
+                templates = [
+                    Template(self, productionmode, self.analysis.purehypotheses[0]),
+                    IntTemplate(self, productionmode, "g13gi1"),
+                    IntTemplate(self, productionmode, "g12gi2"),
+                    IntTemplate(self, productionmode, "g11gi3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[1]),
+                ]
+
+        return [
+            {
+                "type": constrainttype,
+                "templates": [_.templatename() for _ in templates],
+            }
+        ]
 
 def listfromiterator(function):
     return list(function())
