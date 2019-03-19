@@ -627,11 +627,11 @@ class TemplatesFile(MultiEnum):
     def constraints(self):
         if not self.usenewtemplatebuilder: assert False, self
 
-        if self.templategroup == "background": return []
+        if self.templategroup in ("background", "DATA"): return []
 
-        productionmode = {_.productionmode for _ in self.signalsamples}
+        productionmode = {_.productionmode for _ in self.signalsamples()}
+        assert len(productionmode) == 1
         productionmode = productionmode.pop()
-        assert not productionmode
 
         if self.analysis.dimensions == 1:
             if self.templategroup in ("ggh", "tth", "bbh"):

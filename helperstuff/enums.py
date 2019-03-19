@@ -689,7 +689,7 @@ class Analysis(MyEnum):
     @property
     def doGEN(self):
         if self == "fa3_multiparameter": return True
-        if self == "fa3_multiparameter_nodbkg": return True
+        if self == "fa3_multiparameter_nodbkg": return False
         if self == "fa3_only6bins": return False
         if self == "fa3_onlyDCP": return False
         if self == "fa3_STXS": return False
