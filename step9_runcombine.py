@@ -22,7 +22,7 @@ from helperstuff.plotlimits import plotlimits, plotlimits2D, plottitle
 from helperstuff.submitjob import submitjob
 from helperstuff.utilities import cd, deprecate, LSB_JOBID, mkdir_p, requirecmsenv, tfiles
 
-requirecmsenv(os.path.join(config.repositorydir, "CMSSW_9_4_3"))
+requirecmsenv(os.path.join(config.repositorydir, "CMSSW_10_2_5"))
 
 combinecardstemplate = r"""
 combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
