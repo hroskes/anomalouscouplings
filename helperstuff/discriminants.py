@@ -172,10 +172,10 @@ jetdiscriminants = [
     Discriminant("D_CP_HadVH_new", "D_{CP}^{VH}", 20, -1, 1, identifier="D_CP_HadVH_new_20bins"),
     Discriminant("D_int_HadVH_new", "D_{int}^{VH}", 20, -1, 1, identifier="D_int_HadVH_new_20bins"),
 
-    Discriminant("D_STXS_1p1", "D_{STXS}^{1.1}", 22, 0, 22),
-    Discriminant("D_STXS_1p1", "D_{STXS}^{1.1}", 15, 0, 15, identifier="D_STXS_1p1_untagged", formula="D_STXS_1p1 - (D_STXS_1p1 >= 18) * 7"),
-    Discriminant("D_STXS_1p1", "D_{STXS}^{1.1}", 5, 11, 16, identifier="D_STXS_1p1_VBF"),
-    Discriminant("D_STXS_1p1", "D_{STXS}^{1.1}", 2, 16, 18, identifier="D_STXS_1p1_HadVH"),
+    Discriminant("D_STXS_stage1p1", "D_{STXS}^{1.1}", 22, 0, 22),
+    Discriminant("D_STXS_stage1p1", "D_{STXS}^{1.1}", 15, 0, 15, identifier="D_STXS_stage1p1_untagged", formula="D_STXS_stage1p1 - (D_STXS_stage1p1 >= 18) * 7"),
+    Discriminant("D_STXS_stage1p1", "D_{STXS}^{1.1}", 5, 11, 16, identifier="D_STXS_stage1p1_VBF"),
+    Discriminant("D_STXS_stage1p1", "D_{STXS}^{1.1}", 2, 16, 18, identifier="D_STXS_stage1p1_HadVH"),
 ]
 categorydiscriminants = [
     Discriminant("D_2jet_0plus", "D_{2jet}^{VBF, 0+}", defaultnbins, 0, 1),

@@ -310,7 +310,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Z2Mass")
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_1p1_untagged"+JECappend)
+                return discriminant("D_STXS_stage1p1_untagged"+JECappend)
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_decay")
             if self.analysis == "fa3_only6bins":
@@ -328,7 +328,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_1p1_VBF"+JECappend)
+                return discriminant("D_STXS_stage1p1_VBF"+JECappend)
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_VBFdecay"+JECappend)
             if self.analysis == "fa3_only6bins":
@@ -346,7 +346,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_1p1_HadVH"+JECappend)
+                return discriminant("D_STXS_stage1p1_HadVH"+JECappend)
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_HadVHdecay"+JECappend)
             if self.analysis == "fa3_only6bins":
