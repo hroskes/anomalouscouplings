@@ -720,9 +720,9 @@ class TreeWrapperBase(Iterator):
 ######
 
     @MakeJECSystematics
-    def D_STXS_stage1(self):
+    def D_STXS_stage1p1(self):
         category = self.category_0P()    #no need for anomalous couplings because we only look at VH lep and ttH
-        return STXS.stage1_reco_sync(self.nCleanedJetsPt30, self.DiJetMass, self.ZZPt, category, self.HjjPt)
+        return STXS.stage1_reco_1p1(self.nCleanedJetsPt30, self.DiJetMass, self.ZZPt, category, self.HjjPt)
 
 #########################
 #4 coupling discriminant#
@@ -1604,7 +1604,7 @@ class TreeWrapper(TreeWrapperBase):
             "D_L1Zg_{prod}decay",
         ]
         STXSdiscriminants = [
-            "D_STXS_stage1",
+            "D_STXS_stage1p1",
             "D_4couplings_VBFdecay_raw",
             "D_4couplings_VBFdecay",
             "D_4couplings_HadVHdecay_raw",
