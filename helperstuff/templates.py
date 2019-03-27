@@ -310,7 +310,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Z2Mass")
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_ggH_stage1"+JECappend)
+                return discriminant("D_STXS_1p1_untagged"+JECappend)
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_decay")
             if self.analysis == "fa3_only6bins":
@@ -328,7 +328,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_VBF_stage1"+JECappend)
+                return discriminant("D_STXS_1p1_VBF"+JECappend)
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_VBFdecay"+JECappend)
             if self.analysis == "fa3_only6bins":
@@ -346,7 +346,7 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_VBF_stage1"+JECappend)
+                return discriminant("D_STXS_1p1_HadVH"+JECappend)
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_HadVHdecay"+JECappend)
             if self.analysis == "fa3_only6bins":
@@ -1039,7 +1039,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def domirror(self):
         if "fa3" not in self.analysis.fais: return False
-        if self.analysis == "fa3_STXS": return False #for now... could do it later
+        if self.analysis == "fa3_STXS": return False #for now... could do DCP later
         if self.productionmode == "data": return False
 
         assert "D_CP" in self.mixdiscriminant.name, (self, self.mixdiscriminant.name)
@@ -1192,7 +1192,7 @@ class Template(TemplateBase, MultiEnum):
                 "name": self.templatename(final=self.usenewtemplatebuilder),
                 "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
                 "tree": "candTree",
-                "variables": [d.name for d in self.discriminants],
+                "variables": [d.formula for d in self.discriminants],
                 "weight": self.weightname(),
                 "selection": self.selection,
                 "binning": {
@@ -1539,7 +1539,7 @@ class IntTemplate(TemplateBase, MultiEnum):
                      "name": self.templatename(final=self.usenewtemplatebuilder),
                      "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
                      "tree": "candTree",
-                     "variables": [d.name for d in self.discriminants],
+                     "variables": [d.formula for d in self.discriminants],
                      "weight": self.weightname(),
                      "selection": self.selection,
                      "binning": {
