@@ -21,7 +21,7 @@ import os
 import yaml
 
 from helperstuff import config
-from helperstuff.categorization import MultiCategorization, NoCategorization
+from helperstuff.categorization import MultiCategorization, NoCategorization, SingleCategorizationgm4l
 from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import AlternateWeight, analyses, categories, Category, Channel, channels, flavors, ProductionMode, pythiasystematics
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
@@ -52,7 +52,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
 
-    categorizations = [_ for _ in TreeWrapper.categorizations if isinstance(_, (MultiCategorization, NoCategorization)) and (not production.GEN or not _.issystematic)]
+    categorizations = [_ for _ in TreeWrapper.categorizations if (isinstance(_, (MultiCategorization, NoCategorization)) or isinstance(_, SingleCategorizationgm4l) and _.hypothesis == "0+") and (not production.GEN or not _.issystematic)]
 
     result = MultiplyCounter()
     for productionmode, samples in tosamples_foryields:
