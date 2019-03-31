@@ -273,7 +273,7 @@ class TemplatesFile(MultiEnum):
     def purediscriminant(self):
         from discriminants import discriminant
 
-        if self.analysis == "fa3_onlyDbkg": return "phistarZ2"
+        if self.analysis == "fa3_onlyDbkg": return discriminant("phistarZ2")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
