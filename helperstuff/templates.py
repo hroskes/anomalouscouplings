@@ -256,7 +256,7 @@ class TemplatesFile(MultiEnum):
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter":
+        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter" or self.analysis == "fa3_STXS":
             name += "_3bins"
         elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if self.category == "Untagged":
