@@ -554,6 +554,7 @@ class Analysis(MyEnum):
                  EnumItem("fL1fL1Zg_m1_phi"),
                  EnumItem("fL1fL1Zg_m2_phi"),
                  EnumItem("fa3_STXS"),
+                 EnumItem("fa3_onlyDbkg"),
                  EnumItem("fa3_multiparameter"),
                  EnumItem("fa3_multiparameter_nodbkg"),
                  EnumItem("fa3_only6bins"),
@@ -671,7 +672,15 @@ class Analysis(MyEnum):
             return Hypothesis("fL1Zgprod0.5")
         assert False
     @property
+    def isSTXS(self):
+        if self == "fa3_STXS": return True
+        if self == "fa3_onlyDbkg": return True
+        if self in ("fa3", "fa2", "fL1", "fL1Zg"): return False
+        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg"): return False
+        assert False, self
+    @property
     def categoryname(self):
+        if self.isSTXS: return "0P"
         if self.fais == ("fa3",): return "0P_or_0M"
         if self == "fa2": return "0P_or_a2"
         if self == "fL1": return "0P_or_L1"
@@ -693,6 +702,7 @@ class Analysis(MyEnum):
         if self == "fa3_only6bins": return False
         if self == "fa3_onlyDCP": return False
         if self == "fa3_STXS": return True
+        if self == "fa3_onlyDbkg": return True
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
         if self == "fa3fa2fL1fL1Zg": return False
@@ -705,7 +715,7 @@ class Analysis(MyEnum):
         assert False, self
     @property
     def fais(self):
-        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"): return "fa3",
+        if self in ("fa3_STXS", "fa3_onlyDbkg", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"): return "fa3",
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
         if self == "fa3fa2fL1fL1Zg": return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
@@ -721,6 +731,7 @@ class Analysis(MyEnum):
         if self == "fa3_only6bins": return True
         if self == "fa3_onlyDCP": return True
         if self == "fa3_STXS": return True
+        if self == "fa3_onlyDbkg": return True
         if self == "fa3fa2fL1fL1Zg": return True
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
         assert False, self

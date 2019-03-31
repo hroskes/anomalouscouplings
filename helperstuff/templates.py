@@ -256,7 +256,7 @@ class TemplatesFile(MultiEnum):
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter" or self.analysis == "fa3_STXS":
+        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter" or self.analysis.isSTXS:
             name += "_3bins"
         elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if self.category == "Untagged":
@@ -272,6 +272,8 @@ class TemplatesFile(MultiEnum):
     @property
     def purediscriminant(self):
         from discriminants import discriminant
+
+        if self.analysis == "fa3_onlyDbkg": return "phistarZ2"
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -394,7 +396,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Phi")
-            if self.analysis == "fa3_STXS":
+            if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_decay_2bins")
@@ -413,7 +415,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
-            if self.analysis == "fa3_STXS":
+            if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_VBF_2bins"+JECappend)
@@ -427,7 +429,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
-            if self.analysis == "fa3_STXS":
+            if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
@@ -620,7 +622,7 @@ class TemplatesFile(MultiEnum):
     @property
     def usenewtemplatebuilder(self):
         if self.analysis in ("fa3", "fa2", "fL1", "fL1Zg"): return False
-        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_STXS", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return True
+        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_STXS", "fa3_onlyDbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return True
         assert False, self.analysis
 
     @property
@@ -1039,7 +1041,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def domirror(self):
         if "fa3" not in self.analysis.fais: return False
-        if self.analysis == "fa3_STXS": return False #for now... could do DCP later
+        if self.analysis.isSTXS: return False #for now... could do DCP later
         if self.productionmode == "data": return False
 
         assert "D_CP" in self.mixdiscriminant.name, (self, self.mixdiscriminant.name)
@@ -1430,11 +1432,11 @@ class IntTemplate(TemplateBase, MultiEnum):
                 return {"type":"mirror", "antisymmetric":False, "axis":1}
             assert False
 
-        if self.analysis == "fa3_STXS" and self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
+        if self.analysis.isSTXS and self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
             #same (antimirror over D_CP_whatever, which doesn't exist in STXS)
             return {"type":"rescale", "factor":0}
 
-        if self.analysis == "fa3_STXS": return None #for now... could do it later
+        if self.analysis.isSTXS: return None #for now... could do it later
 
         #Mirror antisymmetric for VH in VBF category and VBF in VH category
         #the interference templates are 0 to within error bars anyway,
