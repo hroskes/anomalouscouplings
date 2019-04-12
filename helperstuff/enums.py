@@ -702,10 +702,10 @@ class Analysis(MyEnum):
         if self == "fa3_only6bins": return False
         if self == "fa3_onlyDCP": return False
         if self == "fa3_STXS": return True
-        if self == "fa3_onlyDbkg": return True
+        if self == "fa3_onlyDbkg": return False
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
-        if self == "fa3fa2fL1fL1Zg": return False
+        if self == "fa3fa2fL1fL1Zg": return True
         assert False, self
     @property
     def doCMS(self):
