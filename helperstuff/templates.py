@@ -113,7 +113,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL1Zg-0.5", *args)]
             if self.analysis.isfL1fL1Zg:
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL10.5", *args), ReweightingSample("fL1Zg0.5", *args), ReweightingSample("fL10.5fL1Zg0.5", *args)]
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis.isfa3fa2fL1fL1Zg:
                 hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
                               "fa30.5", "fa2-0.5", "fL10.5", "fL1Zg-0.5",
                               "fa30.5fa20.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5",
@@ -134,7 +134,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1"), ReweightingSample(p, "fL1prod0.5"), ReweightingSample(p, "fL1dec0.5"), ReweightingSample(p, "fL1proddec-0.5")]
             if self.analysis == "fL1Zg":
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1Zg"), ReweightingSample(p, "fL1Zgprod0.5"), ReweightingSample(p, "fL1Zgdec0.5"), ReweightingSample(p, "fL1Zgproddec-0.5")]
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis.isfa3fa2fL1fL1Zg:
                 hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
                               "fa30.5",         "fa2-0.5",        "fL10.5",         "fL1Zg-0.5",
                               "fa3prod0.5",     "fa2prod0.5",     "fL1prod0.5",     "fL1Zgprod0.5",
@@ -256,7 +256,7 @@ class TemplatesFile(MultiEnum):
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter" or self.analysis.isSTXS:
+        if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter") or self.analysis.isSTXS:
             name += "_3bins"
         elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if self.category == "Untagged":
@@ -313,7 +313,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z2Mass")
             if self.analysis == "fa3_STXS":
                 return discriminant("D_STXS_stage1p1_untagged"+JECappend)
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_decay")
             if self.analysis == "fa3_only6bins":
                 return discriminant("D_0minus_decay_3bins")
@@ -398,7 +398,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_decay_2bins")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
@@ -622,7 +622,7 @@ class TemplatesFile(MultiEnum):
     @property
     def usenewtemplatebuilder(self):
         if self.analysis in ("fa3", "fa2", "fL1", "fL1Zg"): return False
-        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_STXS", "fa3_onlyDbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return True
+        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_STXS", "fa3_onlyDbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay"): return True
         assert False, self.analysis
 
     @property
@@ -760,11 +760,11 @@ def templatesfiles():
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
                     for templategroup in TemplateGroup.items():
+                        if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                             if (production.LHE or production.GEN) and shapesystematic != "": continue
-                            if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
                             yield TemplatesFile(channel, shapesystematic, templategroup, analysis, production, category)
@@ -1511,12 +1511,12 @@ class IntTemplate(TemplateBase, MultiEnum):
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH", "bbH"):
             if (self.interferencetype == "g11gi1"
-                or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] == 1):
+                or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] == 1):
                 #ggH has no production information, and only using SM ttH, so mirror antisymmetric
                 #over the (pretend) D_CP_decay axis, which sets the whole thing to 0
                 #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
                 return {"type":"rescale", "factor":0}
-            if self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] == 0:
+            if self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] == 0:
                 return {"type":"mirror", "antisymmetric":False, "axis":1}
             assert False
 
@@ -1533,10 +1533,10 @@ class IntTemplate(TemplateBase, MultiEnum):
         #cross talk to the untagged category is exactly correct, since the decay is the same
 
         if (self.interferencetype in ("g11gi1", "g11gi3", "g13gi1")
-            or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] in (1, 3)):
+            or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] in (1, 3)):
             return {"type":"mirror", "antisymmetric":True, "axis":1}
         elif (self.interferencetype == "g12gi2"
-              or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] in (0, 2, 4)):
+              or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] in (0, 2, 4)):
             return {"type":"mirror", "antisymmetric":False, "axis":1}
         assert False
 
