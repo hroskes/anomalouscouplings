@@ -760,7 +760,7 @@ def templatesfiles():
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
                     for templategroup in TemplateGroup.items():
-                        if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
+                        if analysis.isdecayonly and templategroup not in ("bkg", "ggh", "DATA"): continue
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue

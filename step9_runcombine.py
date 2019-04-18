@@ -52,7 +52,7 @@ gm convert .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanran
 """
 
 morecombineoptions = {
-    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1",
+    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1 .oO[redefineSignalPOIs]Oo.",
     "FitDiagnostics": "",
     "Impacts": ".oO[impactsstep.oO[impactsstep]Oo.]Oo."
 }
@@ -439,8 +439,6 @@ def runcombine(analysis, foldername, **kwargs):
         elif kw == "drawCMS":
             drawCMS = bool(int(kwarg))
         elif kw == "scanfai":
-            if analysis.dimensions != 2:
-                raise ValueError("scanfai is only for 2D analyses")
             scanfai = Analysis(kwarg)
         elif kw == "faifor":
             faifor = kwarg
@@ -466,10 +464,10 @@ def runcombine(analysis, foldername, **kwargs):
         raise TypeError("Can't unblind scans!")
     if runobs and lumitype != "fordata":
         raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
-    if scanfai != analysis and scanfai not in analysis.fais:
-        raise ValueError("scanfai for {} has to be ".format(analysis) + " or ".join(str(_) for _ in list(analysis.fais)+[analysis]))
+    if scanfai not in analysis.fais:
+        raise ValueError("scanfai for {} has to be one of " + " or ".join(str(_) for _ in list(analysis.fais)))
 
-    is2dscan = (scanfai == analysis and analysis.dimensions == 2)
+    is2dscan = len(scanfai.fais) > 1
     if is2dscan:
       scanranges = list((points**2, min, max) for points, min, max in scanranges)
 
@@ -556,8 +554,11 @@ def runcombine(analysis, foldername, **kwargs):
         combinecardsappend += "_" + alsocombinename
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
-    if analysis.dimensions == 2 and not is2dscan:
-        workspacefileappend += "_scan{}".format(scanfai)
+    if scanfai != analysis:
+        if analysis.usehistogramsforcombine:
+            moreappend += "_scan{}".format(scanfai)
+        else:
+            workspacefileappend += "_scan{}".format(scanfai)
 
     if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
         raise ValueError("For decay only analysis have to specify categories=Untagged")
@@ -615,7 +616,7 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
-              "fais": " ".join("--PO {}".format(_) for _ in analysis.fais),
+              "fais": " ".join("--PO {0} --PO {0}asPOI".format(_) for _ in analysis.fais),
              }
 
     if method == "Impacts":
@@ -631,6 +632,7 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
+        repmap["redefineSignalPOIs"] = "--redefineSignalPOIs CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
         repmap["savemu"] = ""
     else:
         if analysis.dimensions == 2 and analysis.isdecayonly:
@@ -654,8 +656,11 @@ def runcombine(analysis, foldername, **kwargs):
     with cd(folder):
         with open(".gitignore", "w") as f:
             f.write("*")
-        #must make it for all categories and channels even if not using them all because of mu definition!
-        makeDCsandWSs(productions, categories, channels, analysis, lumitype)
+        if analysis.usehistogramsforcombine:
+            makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
+            #must make it for all categories and channels even if not using them all because of mu definition!
+        else:
+            makeDCsandWSs(productions, categories, channels, analysis, lumitype)
         for filename in alsocombine:
             for _ in filename, filename.replace(".input.root", ".txt"):
                 if not os.path.exists(_): raise ValueError("{} does not exist!".format(_))
