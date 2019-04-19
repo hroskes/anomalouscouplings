@@ -45,7 +45,7 @@ print "Compiling MELA..."
 
 with utilities.cd("CMSSW_10_2_5/src/ZZMatrixElement"):
     with open(".git") as f:
-        gitdir = f.read().replace("gitdir: ", "")
+        gitdir = f.read().replace("gitdir: ", "").strip()
     with open(os.path.join(gitdir, "info", "sparse_checkout"), "w") as f:
         f.write("/MELA\n/setup.sh\n/README.md\n/.gitignore")
     subprocess.check_call(["git", "config", "core.sparsecheckout", "true"])
@@ -57,17 +57,6 @@ print """Compiling CMSSW..."""
 
 with utilities.cd("CMSSW_10_2_5/src"):
     subprocess.check_call(["scram", "b", "-j", "10"])
-
-print "Compiling TemplateBuilder..."
-
-subprocess.check_call("cd CMSSW_10_2_5 && eval $(scram ru -sh) && cd ../TemplateBuilder && make", shell=True)
-gitignore = """
-obj/*
-buildTemplate.exe
-.gitignore
-"""
-with open("TemplateBuilder/.gitignore", "w") as f:
-    f.write(gitignore)
 
 print "Compiling NIS_summary..."
 subprocess.check_call("cd CMSSW_10_2_5 && eval $(scram ru -sh) && cd ../step10_plottingutilities/NIS_summary && make", shell=True)
