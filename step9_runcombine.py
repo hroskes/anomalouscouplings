@@ -52,7 +52,7 @@ gm convert .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanran
 """
 
 morecombineoptions = {
-    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1 .oO[redefineSignalPOIs]Oo.",
+    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1",
     "FitDiagnostics": "",
     "Impacts": ".oO[impactsstep.oO[impactsstep]Oo.]Oo."
 }
@@ -632,8 +632,8 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
-        repmap["redefineSignalPOIs"] = "--redefineSignalPOIs CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
-        repmap["savemu"] = ""
+        repmap["savemu"] = "--trackParameters rgx{^R.$}"
+        repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
     else:
         if analysis.dimensions == 2 and analysis.isdecayonly:
             repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"

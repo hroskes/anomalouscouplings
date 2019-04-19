@@ -39,6 +39,8 @@ def xaxistitle(POI, analysis, faifor=None):
     if faifor == "decay": faifor = None
     if POI == "CMS_zz4l_fai1": return "{} cos({})".format(analysis.title(superscript=faifor), analysis.phi_lower)
     if POI == "CMS_zz4l_fai2": return "{} cos({})".format(analysis.fais[1].title(superscript=faifor), analysis.fais[1].phi_lower)
+    if POI == "CMS_zz4l_fai3": return "{} cos({})".format(analysis.fais[2].title(superscript=faifor), analysis.fais[2].phi_lower)
+    if POI == "CMS_zz4l_fai4": return "{} cos({})".format(analysis.fais[3].title(superscript=faifor), analysis.fais[3].phi_lower)
     if POI == "RV": return "#mu_{V}"
     if POI == "RF": return "#mu_{f}"
     if nuisance == "CMS_scale_j_13TeV_2016": return nuisance
@@ -47,6 +49,8 @@ def xaxisrange(POI):
     POI = actualvariable(POI)
     if POI == "CMS_zz4l_fai1": return -1.0, 1.0
     if POI == "CMS_zz4l_fai2": return -1.0, 1.0
+    if POI == "CMS_zz4l_fai3": return -1.0, 1.0
+    if POI == "CMS_zz4l_fai4": return -1.0, 1.0
 def yaxistitle(nuisance, analysis):
     nuisance = actualvariable(nuisance)
     if nuisance is None: return "#minus2 #Deltaln L"
@@ -171,6 +175,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     if scanfai == analysis.fais[0] or analysis.dimensions == 1: pass
     elif scanfai == analysis.fais[1]: POI = "CMS_zz4l_fai2"
+    elif scanfai == analysis.fais[2]: POI = "CMS_zz4l_fai3"
+    elif scanfai == analysis.fais[3]: POI = "CMS_zz4l_fai4"
     else: assert False
 
     xmin = min(scanrange[1] for scanrange in scanranges)
