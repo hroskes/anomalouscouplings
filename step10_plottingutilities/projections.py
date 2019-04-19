@@ -816,6 +816,8 @@ class Projections(MultiEnum):
         templates += [ZZ, ZX]
 
         legendargs = [(0.20,0.57,0.58,0.90), (0.20,0.57,0.58,0.90), (0.23,0.57,0.61,0.90)]
+        if category == "VBFtagged" and self.analysis == "fa2":
+            legendargs[2] = (0.26,0.57,0.64,0.90)
         if Dbkg_allcategories:
             usecategories = categories
             templateclass = self.DbkgSum
@@ -1059,11 +1061,11 @@ class Projections(MultiEnum):
             ymax = style.ymax((hstack, "nostack"), (data[i], "P"))
             if category == "Untagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
                 hstack.SetMaximum(ymax)
-            elif category == "VBFtagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
-                if self.analysis in ("fL1", "fL1Zg"):
-                    hstack.SetMaximum(ymax * 1.25)
-                else:
-                    hstack.SetMaximum(ymax)
+#            elif category == "VBFtagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
+#                if self.analysis in ("fa2", "fL1", "fL1Zg"):
+#                    hstack.SetMaximum(ymax * 1.25)
+#                else:
+#                    hstack.SetMaximum(ymax)
             elif category == "VHHadrtagged" and discriminant.name == "D_bkg" and self.enrichstatus == "fullrange":
                 if animation:
                     hstack.SetMaximum(ymax * 1.7)
@@ -1075,7 +1077,9 @@ class Projections(MultiEnum):
                 hstack.SetMaximum(ymax * 1.4)
             elif discriminant.name in ("D_CP_VBF_new", "D_0hplus_VBFdecay", "D_int_VBF_new", "D_int_HadVH_new") and self.enrichstatus == "enrich":
                 hstack.SetMaximum(ymax * 1.7)
-            elif discriminant.name in ("D_CP_HadVH_new", "D_0hplus_HadVHdecay") and self.enrichstatus == "enrich":
+            elif discriminant.name == "D_CP_HadVH_new" and self.enrichstatus == "enrich":
+                hstack.SetMaximum(ymax * 1.7)
+            elif discriminant.name == "D_0hplus_HadVHdecay" and self.enrichstatus == "enrich":
                 if animation:
                     hstack.SetMaximum(ymax * 1.7)
                 else:

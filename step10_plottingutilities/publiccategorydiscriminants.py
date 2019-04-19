@@ -42,10 +42,8 @@ class HistAndNormalization(object):
   def Integral(self, *args):
     return self.__hnormalization.Integral(*args)
   def Add(self, other):
-    print "{} + {} =".format(self.__h.GetBinContent(10), other.__h.GetBinContent(10)),
     self.__h.Add(other.__h)
     self.__hnormalization.Add(other.__hnormalization)
-    print self.__h.GetBinContent(10)
   def Clone(self, name):
     return HistAndNormalization(self.__h.Clone(name), self.__hnormalization.Clone(name+"_normalization"))
   @property
@@ -369,11 +367,12 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   hstack.Add(totalBSM.h, "hist")
 
   ymax = style.ymax((hstack, "nostack"), (data, "P"))
-  if VBForVH == "VBF": ymax = max(ymax, 9.20351838988)
+  if VBForVH == "VBF": ymax = max(ymax, 12)
   hstack.SetMaximum(ymax)
 
   c = plotcopier.TCanvas("c", "", 8, 30, 800, 800)
   style.applycanvasstyle(c)
+  c.SetBottomMargin(0.14)
   hstack.Draw("nostack")
 
   BSMname = {
@@ -390,12 +389,22 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   hstack.GetYaxis().SetTitle("Events / bin")
   style.applyaxesstyle(hstack)
   hstack.GetXaxis().SetTitleSize(0.05)
-  hstack.GetXaxis().SetTitleOffset(1.1)
+  hstack.GetXaxis().SetTitleOffset(1.15)
 
   hstack.GetXaxis().CenterTitle()
   hstack.GetYaxis().CenterTitle()
 
-  l = ROOT.TLegend(.6, .55, .9, .9)
+  l = ROOT.TLegend(*(
+    {
+      "VBF": {
+        Analysis("fa3"):   (.4, .55, .7, .9),
+        Analysis("fa2"):   (.6, .55, .9, .9),
+        Analysis("fL1"):   (.6, .55, .9, .9),
+        Analysis("fL1Zg"): (.55, .55, .85, .9),
+      }[analysis],
+      "VH": (.6, .55, .9, .9),
+    }[VBForVH]
+  ))
   style.applylegendstyle(l)
   l.AddEntry(data, "Observed", "lp")
   l.AddEntry(totalSM.h, "Total SM", "l")
@@ -405,7 +414,7 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   l.AddEntry(ZZ.h, "ZZ/Z#gamma*", "f")
   l.AddEntry(ZX.h, "Z+X", "f")
 
-  line = ROOT.TLine(0.5, 0, 0.5, ymax)
+  line = ROOT.TLine(0.5, 0, 0.5, ymax/2)
   line.SetLineWidth(4)
   line.SetLineColor(ROOT.kViolet-1)
   line.SetLineStyle(9)
