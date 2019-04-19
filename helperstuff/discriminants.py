@@ -1,13 +1,15 @@
 from collections import namedtuple
 from math import pi
+import re
 
 from config import defaultnbins
 from utilities import rreplace
 
-class Discriminant(namedtuple("Discriminant", "name title bins min max identifier")):
-    def __new__(cls, name, title, bins, min, max, identifier=None):
+class Discriminant(namedtuple("Discriminant", "name title bins min max identifier formula")):
+    def __new__(cls, name, title, bins, min, max, identifier=None, formula=None):
         if identifier is None: identifier = name
-        return super(Discriminant, cls).__new__(cls, name=name, title=title, bins=bins, min=min, max=max, identifier=identifier)
+        if formula is None: formula = name
+        return super(Discriminant, cls).__new__(cls, name=name, title=title, bins=bins, min=min, max=max, identifier=identifier, formula=formula)
 
 decaydiscriminants = [
     Discriminant("D_bkg", "D_{bkg}", defaultnbins, 0, 1),
@@ -43,12 +45,11 @@ decaydiscriminants = [
     Discriminant("phistarZ1", "dummy", 1, -pi, pi),
     Discriminant("phistarZ2", "dummy", 1, -pi, pi),
 
-    Discriminant("D_STXS_stage0", "D_{STXS0}", 2, 0, 2),
-
     Discriminant("D_4couplings_decay_raw", "D_{4}^{dec,raw}", 162, 0, 162),
     Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-103, 0, 162-103),
     Discriminant("D_CP_decay", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_decay_2bins"),
 
+    Discriminant("D_bkg", "D_{bkg}", 3, -0.3, 1.2, identifier="D_bkg_3bins"),   #set min and max to have boundaries at 0.2 and 0.7
     Discriminant("D_0minus_decay", "D_{0-}^{dec}", 3, 0, 1, identifier="D_0minus_decay_3bins"),
 
     Discriminant("D_bkg", "D_{bkg}", 10, 0, 1, identifier="D_bkg_10bins"),
@@ -82,7 +83,7 @@ decaydiscriminants = [
     Discriminant("D_CP_decay_new", "D_{CP}^{dec}", 30, -1, 1, identifier="D_CP_decay_new_30bins"),
     Discriminant("D_int_decay_new", "D_{int}^{dec}", 30, -1, 1, identifier="D_int_decay_new_30bins"),
 ]
-VBFdiscriminants = [
+jetdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),
     Discriminant("D_CP_VBF", "D_{CP}^{VBF}", defaultnbins, -1, 1),
     Discriminant("D_0hplus_VBF", "D_{0h+}^{VBF}", defaultnbins, 0, 1),
@@ -96,9 +97,6 @@ VBFdiscriminants = [
     Discriminant("D_L1_VBFdecay", "D_{#Lambda1}^{VBF+dec}", defaultnbins, 0, 1),
     Discriminant("D_L1Zg_VBFdecay", "D_{#Lambda1}^{Z#gamma,VBF+dec}", defaultnbins, 0, 1),
 
-    Discriminant("D_STXS_ggH_stage1", "D_{STXS1}^{ggH}", 12, 0, 12),
-    Discriminant("D_STXS_VBF_stage1", "D_{STXS1}^{VBF}", 6, 0, 6),
-
     Discriminant("D_4couplings_VBFdecay_raw", "D_{4}^{VBF+dec,raw}", 162, 0, 162),
     Discriminant("D_4couplings_VBFdecay", "D_{4}^{VBF+dec}", 162-117, 0, 162-117),
 
@@ -110,6 +108,7 @@ VBFdiscriminants = [
     Discriminant("D_bkg_VBFdecay_ScaleUp", "D_{bkg}^{ScaleUp}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleUp_10bins"),
     Discriminant("D_bkg_VBFdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 10, 0, 1, identifier="D_bkg_VBFdecay_ScaleDown_10bins"),
 
+    Discriminant("D_bkg_VBFdecay", "D_{bkg}", 3, -0.3, 1.2, identifier="D_bkg_VBFdecay_3bins"),   #set min and max to have boundaries at 0.2 and 0.7
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.7, 1.7, identifier="D_0minus_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .9
 
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 10, 0, 1, identifier="D_0minus_VBFdecay_10bins"),
@@ -128,8 +127,7 @@ VBFdiscriminants = [
     Discriminant("D_L1Zg_VBFdecay", "D_{#Lambda1}^{Z#gamma,VBF+dec}", 20, 0, 1, identifier="D_L1Zg_VBFdecay_20bins"),
     Discriminant("D_CP_VBF_new", "D_{CP}^{VBF}", 20, -1, 1, identifier="D_CP_VBF_new_20bins"),
     Discriminant("D_int_VBF_new", "D_{int}^{VBF}", 20, -1, 1, identifier="D_int_VBF_new_20bins"),
-]
-VHdiscriminants = [
+
     Discriminant("D_0minus_HadVH", "D_{0-}^{VH}", defaultnbins, 0, 1),
     Discriminant("D_CP_HadVH", "D_{CP}^{VH}", defaultnbins, -.35, .35),
     Discriminant("D_0hplus_HadVH", "D_{0h+}^{VH}", defaultnbins, 0, 1),
@@ -154,6 +152,7 @@ VHdiscriminants = [
     Discriminant("D_bkg_HadVHdecay_ScaleUp", "D_{bkg}^{ScaleUp}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleUp_10bins"),
     Discriminant("D_bkg_HadVHdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ScaleDown_10bins"),
 
+    Discriminant("D_bkg_HadVHdecay", "D_{bkg}", 3, -0.4, 1.4, identifier="D_bkg_HadVHdecay_3bins"),   #set min and max to have boundaries at 0.2 and 0.8
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 3, -0.4, 1.4, identifier="D_0minus_HadVHdecay_3bins"),   #min and max to have boundaries at .2 and .8
 
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 10, 0, 1, identifier="D_0minus_HadVHdecay_10bins"),
@@ -172,6 +171,11 @@ VHdiscriminants = [
     Discriminant("D_L1Zg_HadVHdecay", "D_{#Lambda1}^{Z#gamma,VH+dec}", 20, 0, 1, identifier="D_L1Zg_HadVHdecay_20bins"),
     Discriminant("D_CP_HadVH_new", "D_{CP}^{VH}", 20, -1, 1, identifier="D_CP_HadVH_new_20bins"),
     Discriminant("D_int_HadVH_new", "D_{int}^{VH}", 20, -1, 1, identifier="D_int_HadVH_new_20bins"),
+
+    Discriminant("D_STXS_stage1p1", "D_{STXS}^{1.1}", 22, 0, 22),
+    Discriminant("D_STXS_stage1p1", "D_{STXS}^{1.1}", 15, 0, 15, identifier="D_STXS_stage1p1_untagged", formula="D_STXS_stage1p1 - (D_STXS_stage1p1 >= 18) * 7"),
+    Discriminant("D_STXS_stage1p1", "D_{STXS}^{1.1}", 5, 11, 16, identifier="D_STXS_stage1p1_VBF"),
+    Discriminant("D_STXS_stage1p1", "D_{STXS}^{1.1}", 2, 16, 18, identifier="D_STXS_stage1p1_HadVH"),
 ]
 categorydiscriminants = [
     Discriminant("D_2jet_0plus", "D_{2jet}^{VBF, 0+}", defaultnbins, 0, 1),
@@ -191,10 +195,10 @@ categorydiscriminants = [
     Discriminant("D_HadWH_L1Zg", "D_{2jet}^{WH, #Lambda1Z#gamma}", defaultnbins, 0, 1),
 ]
 
-discriminants = decaydiscriminants + VBFdiscriminants + VHdiscriminants + categorydiscriminants
+discriminants = decaydiscriminants + jetdiscriminants + categorydiscriminants
 discriminants += list(
-    Discriminant(name+"_"+JEC, rreplace(title, "}", ", "+JEC, 1), nbins, min, max, identifier+"_"+JEC)
-        for name, title, nbins, min, max, identifier in VBFdiscriminants+VHdiscriminants
+    Discriminant(name+"_"+JEC, rreplace(title, "}", ", "+JEC, 1), nbins, min, max, identifier+"_"+JEC, re.sub(r"(\b\w*\b)", r"\1"+"_"+JEC, formula))
+        for name, title, nbins, min, max, identifier, formula in jetdiscriminants
         for JEC in ("JECUp", "JECDn")
 )
 if len(discriminants) != len({d.identifier for d in discriminants}):
@@ -202,7 +206,7 @@ if len(discriminants) != len({d.identifier for d in discriminants}):
 
 discriminants = {d.identifier: d for d in discriminants}
 
-del decaydiscriminants, VBFdiscriminants, VHdiscriminants, categorydiscriminants
+del decaydiscriminants, jetdiscriminants, categorydiscriminants
 
 otherplottablethings = {
     d.identifier: d for d in [

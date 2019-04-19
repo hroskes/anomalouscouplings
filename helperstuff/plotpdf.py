@@ -1,7 +1,5 @@
 import ROOT
 
-import combineinclude
-
 def draw(w, pdfname, discname, fai, saveas="~/www/TEST/test.png"):
     w.obj("CMS_zz4l_fai1").setVal(fai)
     frame = w.obj(discname).frame()

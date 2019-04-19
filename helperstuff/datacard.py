@@ -13,7 +13,6 @@ import ROOT
 
 from rootoverloads import histogramfloor
 
-import combineinclude
 import config
 import utilities
 
@@ -144,7 +143,6 @@ def MakeSystematicFromEnums(*theenums, **kwargs):
 
     return SystematicFromEnums
 
-@callclassinitfunctions("initsystematicsfromenums")
 class _Datacard(MultiEnum):
     enums = (Analysis, Category, Channel, Luminosity)
     enumname = "datacard"
@@ -208,6 +206,7 @@ class _Datacard(MultiEnum):
     @property
     def bin(self, counter=Counter()):
         counter[self] += 1
+        print self, counter[self]
 
         bin = "hzz4l_{}S_{}_{}".format(self.channel, self.category, self.year)
 
@@ -438,12 +437,17 @@ class _Datacard(MultiEnum):
 
     divider = "\n------------\n"
 
+    __initedsystematics = False
+
     @classmethod
     def initsystematicsfromenums(cls):
+        if cls.__initedsystematics: return
+        cls.__initedsystematics = True
         for name, systematic in inspect.getmembers(cls, predicate=lambda x: isinstance(x, SystematicFromEnums_BaseClass)):
             systematic.applyallfunctions(cls)
 
     def writedatacard(self):
+        self.initsystematicsfromenums()
         sections = self.section1, self.section2, self.section3, self.section4, self.section5
         if not os.path.exists(self.rootfile):
             raise IOError("workspace file {} should exist first!".format(self.rootfile))

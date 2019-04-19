@@ -65,7 +65,7 @@ applyJECshapesystematics = False
 applyMINLOsystematics = False
 
 usebinbybin = True
-staticmaxbins = 300
+staticmaxbins = 1000
 
 assert getm4lsystsfromggHUntagged <= getm4lsystsfromggH
 

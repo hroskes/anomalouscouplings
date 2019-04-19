@@ -130,8 +130,8 @@ def submitjobs(filter=None):
   for i in range(njobs):
     submitjobkwargs = {"jobname": str(i), "jobtime": "1-0:0:0"}
     if config.host == "MARCC":
-      submitjobkwargs["queue"] = "lrgmem"
-      submitjobkwargs["memory"] = "12000M"
+      submitjobkwargs["queue"] = "shared"
+      submitjobkwargs["memory"] = "4000M"
       submitjobkwargs["docd"] = True  #since cdtemp_slurm happens in thisfile
     job = ["unbuffer", os.path.join(config.repositorydir, "step2_adddiscriminants.py")]
     if filter:

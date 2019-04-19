@@ -14,7 +14,7 @@ import os
 #========================
 #inputs
 productionmode = "ZH"
-disc           = "DiJetMass"
+disc           = "D_4couplings_HadVHdecay"
 reweightto     = None
 bins           = None
 min            = None
@@ -29,7 +29,7 @@ normalizeto1   = False
 channel        = None
 
 category       = "VHHadrtagged"
-analysis       = "fa3"
+analysis       = "fa3_multiparameter_nodbkg"
 
 cut            = None
 

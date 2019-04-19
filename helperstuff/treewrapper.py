@@ -720,9 +720,9 @@ class TreeWrapperBase(Iterator):
 ######
 
     @MakeJECSystematics
-    def D_STXS_stage1(self):
-        category = self.category_0P()    #no need for anomalous couplings because we only look at VH lep and ttH
-        return STXS.stage1_reco_sync(self.nCleanedJetsPt30, self.Jet1Pt, self.DiJetMass, abs(self.DiJetDEta), self.ZZPt, category, self.HjjPt, self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal, self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal, self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal, self.ZZMass)
+    def D_STXS_stage1p1(self):
+        category = self.category_0P()    #don't use anomalous couplings because we want the sensitivity to come from STXS reco bins
+        return STXS.stage1_reco_1p1(self.nCleanedJetsPt30, self.DiJetMass, self.ZZPt, category, self.HjjPt)
 
 #########################
 #4 coupling discriminant#
@@ -802,8 +802,8 @@ class TreeWrapperBase(Iterator):
       #additional bad ones discovered with not enough stats to populate the templates
       #they go negative in at least one channel for ggH fa3=0.5, ZH fa3=0.5, ZH fa3ZH=0.5, WH fa3=0.5, or WHfa3WH=0.5
       0, 6, 10, 16, 18, 25, 36, 37, 38, 39, 54, 60, 64, 65, 67, 72, 78, 90, 91, 96, 97, 100, 109, 111, 115, 123, 127, 133, 146, 147, 154,
-      #more found later
-      #79, 53,
+      #more found later that go negative at other points
+      13, 79, 136,
     ), reverse=True))
 
     def D_4couplings_decay_raw(self):
@@ -1604,7 +1604,7 @@ class TreeWrapper(TreeWrapperBase):
             "D_L1Zg_{prod}decay",
         ]
         STXSdiscriminants = [
-            "D_STXS_stage1",
+            "D_STXS_stage1p1",
             "D_4couplings_VBFdecay_raw",
             "D_4couplings_VBFdecay",
             "D_4couplings_HadVHdecay_raw",

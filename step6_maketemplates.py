@@ -86,13 +86,12 @@ def copydata(*args):
   else:
     datatree = DataTree(*args)
   if "Ulascan" in str(datatree.production): return
-  print datatree
   f = ROOT.TFile(datatree.originaltreefile)
   t = f.candTree
 
   discriminants_forcerange = {d: array('d', [0]) for d in discriminants.values() if hasattr(t, d.name)}
   epsilon = float("inf")
-  for (dname, dtitle, dbins, dmin, dmax, didentifier), branchaddress in discriminants_forcerange.iteritems():
+  for (dname, dtitle, dbins, dmin, dmax, didentifier, dformula), branchaddress in discriminants_forcerange.iteritems():
     t.SetBranchAddress(dname, branchaddress)
     epsilon = min(epsilon, (dmax-dmin)/dbins/1000)
 

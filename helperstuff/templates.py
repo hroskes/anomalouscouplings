@@ -113,7 +113,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL1Zg-0.5", *args)]
             if self.analysis.isfL1fL1Zg:
                 reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL10.5", *args), ReweightingSample("fL1Zg0.5", *args), ReweightingSample("fL10.5fL1Zg0.5", *args)]
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis.isfa3fa2fL1fL1Zg:
                 hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
                               "fa30.5", "fa2-0.5", "fL10.5", "fL1Zg-0.5",
                               "fa30.5fa20.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5",
@@ -134,7 +134,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1"), ReweightingSample(p, "fL1prod0.5"), ReweightingSample(p, "fL1dec0.5"), ReweightingSample(p, "fL1proddec-0.5")]
             if self.analysis == "fL1Zg":
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1Zg"), ReweightingSample(p, "fL1Zgprod0.5"), ReweightingSample(p, "fL1Zgdec0.5"), ReweightingSample(p, "fL1Zgproddec-0.5")]
-            if self.analysis == "fa3fa2fL1fL1Zg":
+            if self.analysis.isfa3fa2fL1fL1Zg:
                 hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
                               "fa30.5",         "fa2-0.5",        "fL10.5",         "fL1Zg-0.5",
                               "fa3prod0.5",     "fa2prod0.5",     "fL1prod0.5",     "fL1Zgprod0.5",
@@ -256,8 +256,8 @@ class TemplatesFile(MultiEnum):
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
-            name += "_10bins"
+        if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter") or self.analysis.isSTXS:
+            name += "_3bins"
         elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
             if self.category == "Untagged":
                 name += "_20bins"
@@ -272,6 +272,8 @@ class TemplatesFile(MultiEnum):
     @property
     def purediscriminant(self):
         from discriminants import discriminant
+
+        if self.analysis == "fa3_onlyDbkg": return discriminant("phistarZ2")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
@@ -310,8 +312,8 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Z2Mass")
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_ggH_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
+                return discriminant("D_STXS_stage1p1_untagged"+JECappend)
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_decay")
             if self.analysis == "fa3_only6bins":
                 return discriminant("D_0minus_decay_3bins")
@@ -328,8 +330,8 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_VBF_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
+                return discriminant("D_STXS_stage1p1_VBF"+JECappend)
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_VBFdecay"+JECappend)
             if self.analysis == "fa3_only6bins":
                 return discriminant("D_0minus_VBFdecay_3bins")
@@ -346,8 +348,8 @@ class TemplatesFile(MultiEnum):
             if self.analysis == "fL1Zg":
                 return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fa3_STXS":
-                return discriminant("D_STXS_VBF_stage1"+JECappend)
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg":
+                return discriminant("D_STXS_stage1p1_HadVH"+JECappend)
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
                 return discriminant("D_4couplings_HadVHdecay"+JECappend)
             if self.analysis == "fa3_only6bins":
                 return discriminant("D_0minus_HadVHdecay_3bins")
@@ -394,9 +396,9 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Phi")
-            if self.analysis == "fa3_STXS":
+            if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins" or self.analysis == "fa3_onlyDCP":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_decay_2bins")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
@@ -413,9 +415,9 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
-            if self.analysis == "fa3_STXS":
+            if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins" or self.analysis == "fa3_onlyDCP":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_VBF_2bins"+JECappend)
 
         if self.category == "VHHadrtagged":
@@ -427,12 +429,12 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
-            if self.analysis == "fa3_STXS":
+            if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis == "fa3fa2fL1fL1Zg" or self.analysis == "fa3_multiparameter_nodbkg" or self.analysis == "fa3_only6bins" or self.analysis == "fa3_onlyDCP":
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP"):
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
 
-        assert False
+        assert False, self
 
     @property
     def discriminants(self):
@@ -519,11 +521,16 @@ class TemplatesFile(MultiEnum):
         return invertedmatrix
 
     def getjson(self):
-        return {
-                "inputDirectory": os.path.join("step3_withdiscriminants", str(self.production)),
-                "outputFile": self.templatesfile(firststep=self.hascustomsmoothing),
-                "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
-               }
+        result = {
+          "inputDirectory": os.path.join("step3_withdiscriminants", str(self.production)),
+          "outputFile": self.templatesfile(firststep=self.hascustomsmoothing),
+          "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
+        }
+        if self.usenewtemplatebuilder:
+          result.update({
+            "constraints": self.constraints,
+          })
+        return result
 
     @property
     def hascustomsmoothing(self):
@@ -615,8 +622,131 @@ class TemplatesFile(MultiEnum):
     @property
     def usenewtemplatebuilder(self):
         if self.analysis in ("fa3", "fa2", "fL1", "fL1Zg"): return False
-        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_STXS", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return True
-        assert False, self.analysis            
+        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_STXS", "fa3_onlyDbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay"): return True
+        assert False, self.analysis
+
+    @property
+    def constraints(self):
+        if not self.usenewtemplatebuilder: assert False, self
+
+        if self.templategroup in ("background", "DATA"): return []
+
+        productionmode = {_.productionmode for _ in self.signalsamples()}
+        assert len(productionmode) == 1
+        productionmode = productionmode.pop()
+
+        if self.analysis.dimensions == 1:
+            if self.templategroup in ("ggh", "tth", "bbh"):
+                constrainttype = "oneparameterggH"
+                templates = [
+                    Template(self, productionmode, self.analysis.purehypotheses[0]),
+                    IntTemplate(self, productionmode, "g11gi1"),
+                    Template(self, productionmode, self.analysis.purehypotheses[1]),
+                ]
+            if self.templategroup in ("vbf", "zh", "wh"):
+                constrainttype = "oneparameterVVH"
+                templates = [
+                    Template(self, productionmode, self.analysis.purehypotheses[0]),
+                    IntTemplate(self, productionmode, "g13gi1"),
+                    IntTemplate(self, productionmode, "g12gi2"),
+                    IntTemplate(self, productionmode, "g11gi3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[1]),
+                ]
+        elif self.analysis.dimensions == 4:
+            if self.templategroup in ("ggh", "tth", "bbh"):
+                constrainttype = "fourparameterggH"
+                templates = [
+                    Template(self, productionmode, self.analysis.purehypotheses[0]),
+                    IntTemplate(self, productionmode, "g11gi1"),
+                    IntTemplate(self, productionmode, "g11gj1"),
+                    IntTemplate(self, productionmode, "g11gk1"),
+                    IntTemplate(self, productionmode, "g11gl1"),
+                    Template(self, productionmode, self.analysis.purehypotheses[1]),
+                    IntTemplate(self, productionmode, "gi1gj1"),
+                    IntTemplate(self, productionmode, "gi1gk1"),
+                    IntTemplate(self, productionmode, "gi1gl1"),
+                    Template(self, productionmode, self.analysis.purehypotheses[2]),
+                    IntTemplate(self, productionmode, "gj1gk1"),
+                    IntTemplate(self, productionmode, "gj1gl1"),
+                    Template(self, productionmode, self.analysis.purehypotheses[3]),
+                    IntTemplate(self, productionmode, "gk1gl1"),
+                    Template(self, productionmode, self.analysis.purehypotheses[4]),
+                ]
+            if self.templategroup in ("vbf", "zh", "wh"):
+                constrainttype = "fourparameterVVH"
+                templates = [
+                    Template(self, productionmode, self.analysis.purehypotheses[0]),
+                    IntTemplate(self, productionmode, "g13gi1"),
+                    IntTemplate(self, productionmode, "g13gj1"),
+                    IntTemplate(self, productionmode, "g13gk1"),
+                    IntTemplate(self, productionmode, "g13gl1"),
+                    IntTemplate(self, productionmode, "g12gi2"),
+                    IntTemplate(self, productionmode, "g12gi1gj1"),
+                    IntTemplate(self, productionmode, "g12gi1gk1"),
+                    IntTemplate(self, productionmode, "g12gi1gl1"),
+                    IntTemplate(self, productionmode, "g12gj2"),
+                    IntTemplate(self, productionmode, "g12gj1gk1"),
+                    IntTemplate(self, productionmode, "g12gj1gl1"),
+                    IntTemplate(self, productionmode, "g12gk2"),
+                    IntTemplate(self, productionmode, "g12gk1gl1"),
+                    IntTemplate(self, productionmode, "g12gl2"),
+                    IntTemplate(self, productionmode, "g11gi3"),
+                    IntTemplate(self, productionmode, "g11gi2gj1"),
+                    IntTemplate(self, productionmode, "g11gi2gk1"),
+                    IntTemplate(self, productionmode, "g11gi2gl1"),
+                    IntTemplate(self, productionmode, "g11gi1gj2"),
+                    IntTemplate(self, productionmode, "g11gi1gj1gk1"),
+                    IntTemplate(self, productionmode, "g11gi1gj1gl1"),
+                    IntTemplate(self, productionmode, "g11gi1gk1gl1"),
+                    IntTemplate(self, productionmode, "g11gj3"),
+                    IntTemplate(self, productionmode, "g11gj2gk1"),
+                    IntTemplate(self, productionmode, "g11gj2gl1"),
+                    IntTemplate(self, productionmode, "g11gj1gk1gl1"),
+                    IntTemplate(self, productionmode, "g11gk3"),
+                    IntTemplate(self, productionmode, "g11gk2gl1"),
+                    IntTemplate(self, productionmode, "g11gk1gl2"),
+                    IntTemplate(self, productionmode, "g11gl3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[1]),
+                    IntTemplate(self, productionmode, "gi3gj1"),
+                    IntTemplate(self, productionmode, "gi3gk1"),
+                    IntTemplate(self, productionmode, "gi3gl1"),
+                    IntTemplate(self, productionmode, "gi2gj2"),
+                    IntTemplate(self, productionmode, "gi2gj1gk1"),
+                    IntTemplate(self, productionmode, "gi2gj1gl1"),
+                    IntTemplate(self, productionmode, "gi2gk2"),
+                    IntTemplate(self, productionmode, "gi2gk1gl1"),
+                    IntTemplate(self, productionmode, "gi2gl2"),
+                    IntTemplate(self, productionmode, "gi1gj3"),
+                    IntTemplate(self, productionmode, "gi1gj2gk1"),
+                    IntTemplate(self, productionmode, "gi1gj2gl1"),
+                    IntTemplate(self, productionmode, "gi1gj1gk1gl1"),
+                    IntTemplate(self, productionmode, "gi1gk3"),
+                    IntTemplate(self, productionmode, "gi1gk2gl1"),
+                    IntTemplate(self, productionmode, "gi1gk1gl2"),
+                    IntTemplate(self, productionmode, "gi1gl3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[2]),
+                    IntTemplate(self, productionmode, "gj3gk1"),
+                    IntTemplate(self, productionmode, "gj3gl1"),
+                    IntTemplate(self, productionmode, "gj2gk2"),
+                    IntTemplate(self, productionmode, "gj2gk1gl1"),
+                    IntTemplate(self, productionmode, "gj2gl2"),
+                    IntTemplate(self, productionmode, "gj1gk3"),
+                    IntTemplate(self, productionmode, "gj1gk2gl1"),
+                    IntTemplate(self, productionmode, "gj1gk1gl2"),
+                    IntTemplate(self, productionmode, "gj1gl3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[3]),
+                    IntTemplate(self, productionmode, "gk3gl1"),
+                    IntTemplate(self, productionmode, "gk2gl2"),
+                    IntTemplate(self, productionmode, "gk1gl3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[4]),
+                ]
+
+        return [
+            {
+                "type": constrainttype,
+                "templates": [_.templatename() for _ in templates],
+            }
+        ]
 
 def listfromiterator(function):
     return list(function())
@@ -630,11 +760,11 @@ def templatesfiles():
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
                     for templategroup in TemplateGroup.items():
+                        if analysis.isdecayonly and templategroup not in ("bkg", "ggh", "DATA"): continue
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
                             if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                             if (production.LHE or production.GEN) and shapesystematic != "": continue
-                            if analysis.isdecayonly and templategroup not in ("bkg", "ggh"): continue
                             if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
                             yield TemplatesFile(channel, shapesystematic, templategroup, analysis, production, category)
@@ -999,7 +1129,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def domirror(self):
         if "fa3" not in self.analysis.fais: return False
-        if self.analysis == "fa3_STXS": return False #for now... could do it later
+        if self.analysis.isSTXS: return False #for now... could do DCP later
         if self.productionmode == "data": return False
 
         assert "D_CP" in self.mixdiscriminant.name, (self, self.mixdiscriminant.name)
@@ -1152,7 +1282,7 @@ class Template(TemplateBase, MultiEnum):
                 "name": self.templatename(final=self.usenewtemplatebuilder),
                 "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
                 "tree": "candTree",
-                "variables": [d.name for d in self.discriminants],
+                "variables": [d.formula for d in self.discriminants],
                 "weight": self.weightname(),
                 "selection": self.selection,
                 "binning": {
@@ -1381,20 +1511,20 @@ class IntTemplate(TemplateBase, MultiEnum):
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH", "bbH"):
             if (self.interferencetype == "g11gi1"
-                or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] == 1):
+                or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] == 1):
                 #ggH has no production information, and only using SM ttH, so mirror antisymmetric
                 #over the (pretend) D_CP_decay axis, which sets the whole thing to 0
                 #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
                 return {"type":"rescale", "factor":0}
-            if self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] == 0:
+            if self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] == 0:
                 return {"type":"mirror", "antisymmetric":False, "axis":1}
             assert False
 
-        if self.analysis == "fa3_STXS" and self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
+        if self.analysis.isSTXS and self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
             #same (antimirror over D_CP_whatever, which doesn't exist in STXS)
             return {"type":"rescale", "factor":0}
 
-        if self.analysis == "fa3_STXS": return None #for now... could do it later
+        if self.analysis.isSTXS: return None #for now... could do it later
 
         #Mirror antisymmetric for VH in VBF category and VBF in VH category
         #the interference templates are 0 to within error bars anyway,
@@ -1403,10 +1533,10 @@ class IntTemplate(TemplateBase, MultiEnum):
         #cross talk to the untagged category is exactly correct, since the decay is the same
 
         if (self.interferencetype in ("g11gi1", "g11gi3", "g13gi1")
-            or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] in (1, 3)):
+            or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] in (1, 3)):
             return {"type":"mirror", "antisymmetric":True, "axis":1}
         elif (self.interferencetype == "g12gi2"
-              or self.analysis == "fa3fa2fL1fL1Zg" and self.interferencetype.couplingpowers["i"] in (0, 2, 4)):
+              or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] in (0, 2, 4)):
             return {"type":"mirror", "antisymmetric":False, "axis":1}
         assert False
 
@@ -1499,7 +1629,7 @@ class IntTemplate(TemplateBase, MultiEnum):
                      "name": self.templatename(final=self.usenewtemplatebuilder),
                      "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
                      "tree": "candTree",
-                     "variables": [d.name for d in self.discriminants],
+                     "variables": [d.formula for d in self.discriminants],
                      "weight": self.weightname(),
                      "selection": self.selection,
                      "binning": {

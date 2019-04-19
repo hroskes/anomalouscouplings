@@ -554,10 +554,13 @@ class Analysis(MyEnum):
                  EnumItem("fL1fL1Zg_m1_phi"),
                  EnumItem("fL1fL1Zg_m2_phi"),
                  EnumItem("fa3_STXS"),
+                 EnumItem("fa3_onlyDbkg"),
+                 EnumItem("fa3_multiparameter"),
                  EnumItem("fa3_multiparameter_nodbkg"),
                  EnumItem("fa3_only6bins"),
                  EnumItem("fa3_onlyDCP"),
                  EnumItem("fa3fa2fL1fL1Zg"),
+                 EnumItem("fa3fa2fL1fL1Zg_decay"),
                 )
     def title(self, latex=False, superscript=None):
         if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -612,7 +615,7 @@ class Analysis(MyEnum):
     @property
     def couplingnames(self):
         if self.isfL1fL1Zg: return "g1prime2", "ghzgs1prime2"
-        if self == "fa3fa2fL1fL1Zg": return "g4", "g2", "g1prime2", "ghzgs1prime2"
+        if self.isfa3fa2fL1fL1Zg: return "g4", "g2", "g1prime2", "ghzgs1prime2"
         if self.dimensions == 1: return self.couplingname,
         assert False, self
     @property
@@ -644,7 +647,7 @@ class Analysis(MyEnum):
             return Hypothesis("0+"), Hypothesis("L1Zg")
         if self.isfL1fL1Zg:
             return Hypothesis("0+"), Hypothesis("L1"), Hypothesis("L1Zg")
-        if self == "fa3fa2fL1fL1Zg":
+        if self.isfa3fa2fL1fL1Zg:
             return Hypothesis("0+"), Hypothesis("a3"), Hypothesis("a2"), Hypothesis("L1"), Hypothesis("L1Zg")
         assert False, self
     @property
@@ -670,13 +673,21 @@ class Analysis(MyEnum):
             return Hypothesis("fL1Zgprod0.5")
         assert False
     @property
+    def isSTXS(self):
+        if self == "fa3_STXS": return True
+        if self == "fa3_onlyDbkg": return True
+        if self in ("fa3", "fa2", "fL1", "fL1Zg"): return False
+        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay"): return False
+        assert False, self
+    @property
     def categoryname(self):
+        if self.isdecayonly: return "nocategorization"
+        if self.isSTXS: return "0P"
         if self.fais == ("fa3",): return "0P_or_0M"
         if self == "fa2": return "0P_or_a2"
         if self == "fL1": return "0P_or_L1"
         if self == "fL1Zg": return "0P_or_L1Zg"
-        if self.isdecayonly: return "nocategorization"
-        if self == "fa3fa2fL1fL1Zg": return "0P_or_0M_or_a2_or_L1_or_L1Zg"
+        if self.isfa3fa2fL1fL1Zg: return "0P_or_0M_or_a2_or_L1_or_L1Zg"
         assert False, self
     @property
     def dimensions(self):
@@ -684,40 +695,52 @@ class Analysis(MyEnum):
     @property
     def isdecayonly(self):
         if self.isfL1fL1Zg: return True
+        if self == "fa3fa2fL1fL1Zg_decay": return True
         return False
     @property
     def doGEN(self):
-        if self == "fa3_multiparameter_nodbkg": return True
-        if self == "fa3_only6bins": return True
-        if self == "fa3_onlyDCP": return True
-        if self in ("fa2", "fa3", "fa3_STXS", "fL1", "fL1Zg"): return False
+        if self == "fa3_multiparameter": return True
+        if self == "fa3_multiparameter_nodbkg": return False
+        if self == "fa3_only6bins": return False
+        if self == "fa3_onlyDCP": return False
+        if self == "fa3_STXS": return True
+        if self == "fa3_onlyDbkg": return False
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
         if self == "fa3fa2fL1fL1Zg": return False
+        if self == "fa3fa2fL1fL1Zg_decay": return True
         assert False, self
     @property
     def doCMS(self):
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
         if self.isfL1fL1Zg: return False
-        if self in ("fa3_STXS", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg"): return False
+        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay"): return False
         assert False, self
     @property
     def fais(self):
-        if self in ("fa3_STXS", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"): return "fa3",
+        if self in ("fa3_STXS", "fa3_onlyDbkg", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"): return "fa3",
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
-        if self == "fa3fa2fL1fL1Zg": return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
+        if self.isfa3fa2fL1fL1Zg: return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
         assert False, self
     @property
     def isfL1fL1Zg(self):
-        return "fL1fL1Zg" in str(self) and self != "fa3fa2fL1fL1Zg"
+        return str(self).startswith("fL1fL1Zg")
+    @property
+    def isfa3fa2fL1fL1Zg(self):
+        return str(self).startswith("fa3fa2fL1fL1Zg")
 
     @property
     def usehistogramsforcombine(self):
+        if self == "fa3_multiparameter": return True
         if self == "fa3_multiparameter_nodbkg": return True
         if self == "fa3_only6bins": return True
         if self == "fa3_onlyDCP": return True
-        if self == "fa3fa2fL1fL1Zg": return True
-        return False
+        if self == "fa3_STXS": return True
+        if self == "fa3_onlyDbkg": return True
+        if self.isfa3fa2fL1fL1Zg: return True
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+        assert False, self
 
 class Production(MyEnum):
     enumname = "production"

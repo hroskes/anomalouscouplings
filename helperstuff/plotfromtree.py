@@ -70,7 +70,7 @@ def plotfromtree(**kwargs):
     if kwarg is mandatory:
       raise TypeError("kwarg {} is mandatory!".format(kw))
 
-  discname, title, discbins, discmin, discmax, _ = discriminant(o.disc)
+  discname, title, discbins, discmin, discmax, _, discformula = discriminant(o.disc)
   if o.transformation is not None:
     title = "f(" + title + ")"
   if o.xaxislabel is not None:
@@ -83,7 +83,7 @@ def plotfromtree(**kwargs):
     o.max = discmax
 
   if o.disc2 is not None:
-    disc2name, disc2title, disc2bins, disc2min, disc2max, _ = discriminant(o.disc2)
+    disc2name, disc2title, disc2bins, disc2min, disc2max, _, disc2formula = discriminant(o.disc2)
     if o.bins2 is None:
       o.bins2 = disc2bins
     if o.min2 is None:
@@ -116,7 +116,7 @@ def plotfromtree(**kwargs):
 
   weightfactors = [
                    weightname,
-                   "{}>-98".format(discname),
+                   "{}>-98".format(discformula),
                   ]
   if o.category is not None:
     o.category = Category(o.category)
@@ -133,19 +133,19 @@ def plotfromtree(**kwargs):
     weightfactors.append("ZZMass > {}".format(config.m4lmin))
     weightfactors.append("ZZMass < {}".format(config.m4lmax))
   if o.disc2 is not None:
-    weightfactors.append("{}>-98".format(disc2name))
+    weightfactors.append("{}>-98".format(disc2formula))
   if o.cut is not None:
     weightfactors.append(o.cut)
 
   wt = "*".join("("+_+")" for _ in weightfactors)
 
-  formula = "min(max({}, {}), {})".format(discname, o.min, o.max - (o.max-o.min)/100)
+  formula = "min(max({}, {}), {})".format(discformula, o.min, o.max - (o.max-o.min)/100)
   if o.transformation is not None:
     formula = o.transformation.format(formula)
 
   todraw = ""
   if o.disc2 is not None:
-    todraw += "min(max({}, {}), {}):".format(disc2name, o.min2, o.max2 - (o.max2-o.min2)/100)
+    todraw += "min(max({}, {}), {}):".format(disc2formula, o.min2, o.max2 - (o.max2-o.min2)/100)
   todraw += "{}".format(formula)
   todraw += ">>{}".format(o.hname)
   if o.bins != 0:
