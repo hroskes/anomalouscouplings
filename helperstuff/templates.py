@@ -697,11 +697,15 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "g11gi1gj2"),
                     IntTemplate(self, productionmode, "g11gi1gj1gk1"),
                     IntTemplate(self, productionmode, "g11gi1gj1gl1"),
+                    IntTemplate(self, productionmode, "g11gi1gk2"),
                     IntTemplate(self, productionmode, "g11gi1gk1gl1"),
+                    IntTemplate(self, productionmode, "g11gi1gl2"),
                     IntTemplate(self, productionmode, "g11gj3"),
                     IntTemplate(self, productionmode, "g11gj2gk1"),
                     IntTemplate(self, productionmode, "g11gj2gl1"),
+                    IntTemplate(self, productionmode, "g11gj1gk2"),
                     IntTemplate(self, productionmode, "g11gj1gk1gl1"),
+                    IntTemplate(self, productionmode, "g11gj1gl2"),
                     IntTemplate(self, productionmode, "g11gk3"),
                     IntTemplate(self, productionmode, "g11gk2gl1"),
                     IntTemplate(self, productionmode, "g11gk1gl2"),
@@ -719,7 +723,9 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "gi1gj3"),
                     IntTemplate(self, productionmode, "gi1gj2gk1"),
                     IntTemplate(self, productionmode, "gi1gj2gl1"),
+                    IntTemplate(self, productionmode, "gi1gj1gk2"),
                     IntTemplate(self, productionmode, "gi1gj1gk1gl1"),
+                    IntTemplate(self, productionmode, "gi1gj1gl2"),
                     IntTemplate(self, productionmode, "gi1gk3"),
                     IntTemplate(self, productionmode, "gi1gk2gl1"),
                     IntTemplate(self, productionmode, "gi1gk1gl2"),
@@ -1064,7 +1070,7 @@ class Template(TemplateBase, MultiEnum):
                     Sample(self.production, self.productionmode, hypothesis)
                         for hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5")
                    }
-            if self.productionmode == "VBF" and self.reweightingsample.hasZZ:
+            if self.productionmode == "VBF":# and self.reweightingsample.hasZZ:
               result = {s for s in result if s.hasZZ}
             if self.productionmode == "ZH" and (self.reweightingsample.hasZZ or self.reweightingsample.hasZg):
               result = {s for s in result if s.hasZZ or s.hasZg}
