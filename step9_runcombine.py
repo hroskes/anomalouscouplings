@@ -616,7 +616,7 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
-              "fais": " ".join("--PO {0} --PO {0}asPOI".format(_) for _ in analysis.fais),
+              "fais": " ".join("--PO {0} --PO {0}asPOI --PO scalegL1by10000".format(_) for _ in analysis.fais),
              }
 
     if method == "Impacts":
