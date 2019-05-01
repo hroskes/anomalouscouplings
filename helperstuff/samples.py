@@ -1818,6 +1818,16 @@ class SampleBasis(MultiEnum):
         if len(set(self.hypotheses)) != len(self.hypotheses):
             raise ValueError("Duplicate hypothesis\n{}".format(args))
 
+    def scaleby(self, i):
+        if self.productionmode in ("VBF", "ZH", "WH"):
+            return {
+                Analysis("fa3"): 1,
+                Analysis("fa2"): 1,
+                Analysis("fL1"): 1e-4,
+                Analysis("fL1Zg"): 1e-4,
+            }[self.analysis.fais[i]]
+            
+
     @property
     @cache
     def matrix(self):
@@ -1837,10 +1847,10 @@ class SampleBasis(MultiEnum):
                                 [
                                  [
                                   sample.g1**(maxpower-i-j-k-l)
-                                  * getattr(sample, self.analysis.couplingnames[0])**i
-                                  * getattr(sample, self.analysis.couplingnames[1])**j
-                                  * getattr(sample, self.analysis.couplingnames[2])**k
-                                  * getattr(sample, self.analysis.couplingnames[3])**l
+                                  * (getattr(sample, self.analysis.couplingnames[0]) * self.scaleby(0))**i
+                                  * (getattr(sample, self.analysis.couplingnames[1]) * self.scaleby(1))**j
+                                  * (getattr(sample, self.analysis.couplingnames[2]) * self.scaleby(2))**k
+                                  * (getattr(sample, self.analysis.couplingnames[3]) * self.scaleby(3))**l
                                      for l in range(maxpower+1)
                                      for k in range(maxpower+1-l)
                                      for j in range(maxpower+1-k-l)
@@ -1857,8 +1867,8 @@ class SampleBasis(MultiEnum):
                                 [
                                  [
                                   sample.g1**(maxpower-i-j)
-                                  * getattr(sample, self.analysis.couplingnames[0])**i
-                                  * getattr(sample, self.analysis.couplingnames[1])**j
+                                  * (getattr(sample, self.analysis.couplingnames[0]) * self.scaleby(0))**i
+                                  * (getattr(sample, self.analysis.couplingnames[1]) * self.scaleby(1))**j
                                      for j in range(maxpower+1)
                                      for i in range(maxpower+1-j)
                                  ]

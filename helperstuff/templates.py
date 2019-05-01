@@ -476,10 +476,9 @@ class TemplatesFile(MultiEnum):
                             yield index, h, Counter({h: 4})
 
                     for j, matrixreturns, hypothesispowers in rows():
-                        divideby = 1e4**sum(hypothesispowers[Hypothesis(_)] for _ in ("L1", "L1Zg"))
+                        divideby = 1
                         for i, matrixmultiplies in enumerate(self.signalsamples()):
                             multiplyby = 1
-                            if matrixmultiplies.hypothesis in ("L1", "L1Zg"): multiplyby = 1e16
                             threshold = 1e-10 * multiplyby / divideby
                             if abs(invertedmatrix[j,i]) < threshold: invertedmatrix[j,i] = 0
                             if abs(invertedmatrix[j,i] - 1) < 1e-10: invertedmatrix[j,i] = 1
