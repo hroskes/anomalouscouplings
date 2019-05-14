@@ -172,6 +172,8 @@ class TemplatesFile(MultiEnum):
 
                               "fa3proddec0.25fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25",
                              ]
+                if self.templategroup == "wh":
+                    hypotheses.remove("L1Zg")
                 reweightingsamples = [
                   ReweightingSample(h, p) for h in hypotheses
                 ]
@@ -229,7 +231,7 @@ class TemplatesFile(MultiEnum):
                 ] + [
                     "g{}1g{}1g{}1g{}1".format(*indices)
                         for indices in combinations("1ijkl", 4)
-                ]]
+                ] if not ("gl3" in _ and self.templategroup == "wh")]
             elif self.analysis.dimensions == 2:
                 assert False
             elif self.analysis.dimensions == 1:
@@ -744,6 +746,75 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "gk2gl2"),
                     IntTemplate(self, productionmode, "gk1gl3"),
                     Template(self, productionmode, self.analysis.purehypotheses[4]),
+                ]
+            if self.templategroup == ("wh"):
+                constrainttype = "fourparameterWWH"
+                templates = [
+                    Template(self, productionmode, self.analysis.purehypotheses[0]),
+                    IntTemplate(self, productionmode, "g13gi1"),
+                    IntTemplate(self, productionmode, "g13gj1"),
+                    IntTemplate(self, productionmode, "g13gk1"),
+                    IntTemplate(self, productionmode, "g13gl1"),
+                    IntTemplate(self, productionmode, "g12gi2"),
+                    IntTemplate(self, productionmode, "g12gi1gj1"),
+                    IntTemplate(self, productionmode, "g12gi1gk1"),
+                    IntTemplate(self, productionmode, "g12gi1gl1"),
+                    IntTemplate(self, productionmode, "g12gj2"),
+                    IntTemplate(self, productionmode, "g12gj1gk1"),
+                    IntTemplate(self, productionmode, "g12gj1gl1"),
+                    IntTemplate(self, productionmode, "g12gk2"),
+                    IntTemplate(self, productionmode, "g12gk1gl1"),
+                    IntTemplate(self, productionmode, "g12gl2"),
+                    IntTemplate(self, productionmode, "g11gi3"),
+                    IntTemplate(self, productionmode, "g11gi2gj1"),
+                    IntTemplate(self, productionmode, "g11gi2gk1"),
+                    IntTemplate(self, productionmode, "g11gi2gl1"),
+                    IntTemplate(self, productionmode, "g11gi1gj2"),
+                    IntTemplate(self, productionmode, "g11gi1gj1gk1"),
+                    IntTemplate(self, productionmode, "g11gi1gj1gl1"),
+                    IntTemplate(self, productionmode, "g11gi1gk2"),
+                    IntTemplate(self, productionmode, "g11gi1gk1gl1"),
+                    IntTemplate(self, productionmode, "g11gi1gl2"),
+                    IntTemplate(self, productionmode, "g11gj3"),
+                    IntTemplate(self, productionmode, "g11gj2gk1"),
+                    IntTemplate(self, productionmode, "g11gj2gl1"),
+                    IntTemplate(self, productionmode, "g11gj1gk2"),
+                    IntTemplate(self, productionmode, "g11gj1gk1gl1"),
+                    IntTemplate(self, productionmode, "g11gj1gl2"),
+                    IntTemplate(self, productionmode, "g11gk3"),
+                    IntTemplate(self, productionmode, "g11gk2gl1"),
+                    IntTemplate(self, productionmode, "g11gk1gl2"),
+                    Template(self, productionmode, self.analysis.purehypotheses[1]),
+                    IntTemplate(self, productionmode, "gi3gj1"),
+                    IntTemplate(self, productionmode, "gi3gk1"),
+                    IntTemplate(self, productionmode, "gi3gl1"),
+                    IntTemplate(self, productionmode, "gi2gj2"),
+                    IntTemplate(self, productionmode, "gi2gj1gk1"),
+                    IntTemplate(self, productionmode, "gi2gj1gl1"),
+                    IntTemplate(self, productionmode, "gi2gk2"),
+                    IntTemplate(self, productionmode, "gi2gk1gl1"),
+                    IntTemplate(self, productionmode, "gi2gl2"),
+                    IntTemplate(self, productionmode, "gi1gj3"),
+                    IntTemplate(self, productionmode, "gi1gj2gk1"),
+                    IntTemplate(self, productionmode, "gi1gj2gl1"),
+                    IntTemplate(self, productionmode, "gi1gj1gk2"),
+                    IntTemplate(self, productionmode, "gi1gj1gk1gl1"),
+                    IntTemplate(self, productionmode, "gi1gj1gl2"),
+                    IntTemplate(self, productionmode, "gi1gk3"),
+                    IntTemplate(self, productionmode, "gi1gk2gl1"),
+                    IntTemplate(self, productionmode, "gi1gk1gl2"),
+                    Template(self, productionmode, self.analysis.purehypotheses[2]),
+                    IntTemplate(self, productionmode, "gj3gk1"),
+                    IntTemplate(self, productionmode, "gj3gl1"),
+                    IntTemplate(self, productionmode, "gj2gk2"),
+                    IntTemplate(self, productionmode, "gj2gk1gl1"),
+                    IntTemplate(self, productionmode, "gj2gl2"),
+                    IntTemplate(self, productionmode, "gj1gk3"),
+                    IntTemplate(self, productionmode, "gj1gk2gl1"),
+                    IntTemplate(self, productionmode, "gj1gk1gl2"),
+                    Template(self, productionmode, self.analysis.purehypotheses[3]),
+                    IntTemplate(self, productionmode, "gk3gl1"),
+                    IntTemplate(self, productionmode, "gk2gl2"),
                 ]
 
         return [
