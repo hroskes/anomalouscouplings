@@ -1820,14 +1820,14 @@ class SampleBasis(MultiEnum):
             raise ValueError("Duplicate hypothesis\n{}".format(args))
 
     def scaleby(self, i):
-        if self.productionmode in ("VBF", "ZH", "WH"):
+        if self.productionmode in ("VBF", "ZH", "WH", "ggH", "ttH", "bbH"):
             return {
                 Analysis("fa3"): 1,
                 Analysis("fa2"): 1,
                 Analysis("fL1"): 1e-4,
                 Analysis("fL1Zg"): 1e-4,
             }[self.analysis.fais[i]]
-            
+        assert False
 
     @property
     @cache
