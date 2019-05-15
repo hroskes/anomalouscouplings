@@ -655,24 +655,41 @@ class TemplatesFile(MultiEnum):
                 ]
         elif self.analysis.dimensions == 4:
             if self.templategroup in ("ggh", "tth", "bbh"):
-                constrainttype = "fourparameterggH"
-                templates = [
-                    Template(self, productionmode, self.analysis.purehypotheses[0]),
-                    IntTemplate(self, productionmode, "g11gi1"),
-                    IntTemplate(self, productionmode, "g11gj1"),
-                    IntTemplate(self, productionmode, "g11gk1"),
-                    IntTemplate(self, productionmode, "g11gl1"),
-                    Template(self, productionmode, self.analysis.purehypotheses[1]),
-                    IntTemplate(self, productionmode, "gi1gj1"),
-                    IntTemplate(self, productionmode, "gi1gk1"),
-                    IntTemplate(self, productionmode, "gi1gl1"),
-                    Template(self, productionmode, self.analysis.purehypotheses[2]),
-                    IntTemplate(self, productionmode, "gj1gk1"),
-                    IntTemplate(self, productionmode, "gj1gl1"),
-                    Template(self, productionmode, self.analysis.purehypotheses[3]),
-                    IntTemplate(self, productionmode, "gk1gl1"),
-                    Template(self, productionmode, self.analysis.purehypotheses[4]),
-                ]
+                assert self.analysis.isfa3fa2fL1fL1Zg
+                if self.category == "Untagged":
+                    constrainttype = "fourparameterggH"
+                    templates = [
+                        Template(self, productionmode, self.analysis.purehypotheses[0]),
+                        IntTemplate(self, productionmode, "g11gi1"),
+                        IntTemplate(self, productionmode, "g11gj1"),
+                        IntTemplate(self, productionmode, "g11gk1"),
+                        IntTemplate(self, productionmode, "g11gl1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[1]),
+                        IntTemplate(self, productionmode, "gi1gj1"),
+                        IntTemplate(self, productionmode, "gi1gk1"),
+                        IntTemplate(self, productionmode, "gi1gl1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[2]),
+                        IntTemplate(self, productionmode, "gj1gk1"),
+                        IntTemplate(self, productionmode, "gj1gl1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[3]),
+                        IntTemplate(self, productionmode, "gk1gl1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[4]),
+                    ]
+                elif self.category in ("VBFtagged", "VHHadrtagged"):
+                    #leave out fa3, because those interferences are 0
+                    constrainttype = "threeparameterggH"
+                    templates = [
+                        Template(self, productionmode, self.analysis.purehypotheses[0]),
+                        IntTemplate(self, productionmode, "g11gj1"),
+                        IntTemplate(self, productionmode, "g11gk1"),
+                        IntTemplate(self, productionmode, "g11gl1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[2]),
+                        IntTemplate(self, productionmode, "gj1gk1"),
+                        IntTemplate(self, productionmode, "gj1gl1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[3]),
+                        IntTemplate(self, productionmode, "gk1gl1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[4]),
+                    ]
             if self.templategroup in ("vbf", "zh", "wh"):
                 constrainttype = "fourparameterVVH"
                 templates = [

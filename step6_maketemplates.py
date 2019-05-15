@@ -32,7 +32,6 @@ def buildtemplates(*args):
     tg = TemplateGroup(args[0])
     tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder and not os.path.exists(tf.templatesfile()) and not os.path.exists(tf.templatesfile(firststep=True))]
     if not tfs: return
-    assert not any(_.hascustomsmoothing for _ in tfs)
     with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
       if not all(kwofs): return
       subprocess.check_call(["buildTemplates.py"] + [_.jsonfile() for _ in tfs])
@@ -46,12 +45,15 @@ def buildtemplates(*args):
   print templatesfile
   if templatesfile.copyfromothertemplatesfile is not None: return
   with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
+    scriptname = "buildTemplate.exe"
+    if templatesfile.usenewtemplatebuilder:
+      scriptname = "buildTemplates.py"
     if f:
       if not os.path.exists(templatesfile.templatesfile()):
         if not os.path.exists(templatesfile.templatesfile(firststep=True)):
           mkdir_p(os.path.dirname(templatesfile.templatesfile(firststep=True)))
           try:
-            subprocess.check_call(["buildTemplate.exe", templatesfile.jsonfile()])
+            subprocess.check_call([scriptname, templatesfile.jsonfile()])
           except:
             try:
               raise
@@ -62,9 +64,9 @@ def buildtemplates(*args):
                 pass
       if (
         os.path.exists(templatesfile.templatesfile(firststep=True))
-         and not os.path.exists(templatesfile.templatesfile())
-         and templatesfile.hascustomsmoothing
-         ):
+        and not os.path.exists(templatesfile.templatesfile())
+        and templatesfile.hascustomsmoothing
+      ):
         try:
           bad = False
           templatesfile.docustomsmoothing()
@@ -150,7 +152,7 @@ def submitjobs(removefiles, jsontoo=False):
       torun.add(templatesfile)
 
   for tf in frozenset(torun):
-    if tf.usenewtemplatebuilder:
+    if tf.usenewtemplatebuilder and tf.templategroup in ("background", "DATA"):
       torun.remove(tf)
       torun.add(tf.templategroup)
   njobs = len(torun)
