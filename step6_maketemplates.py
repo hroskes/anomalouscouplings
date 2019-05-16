@@ -30,11 +30,11 @@ from helperstuff.utilities import cd, KeepWhileOpenFile, KeepWhileOpenFiles, LSB
 def buildtemplates(*args):
   if len(args) == 1 and not isinstance(args[0], TemplatesFile):
     tg = TemplateGroup(args[0])
-    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder and not os.path.exists(tf.templatesfile()) and not os.path.exists(tf.templatesfile(firststep=True))]
+    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder]
     if not tfs: return
     with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
       if not all(kwofs): return
-      subprocess.check_call(["buildTemplates.py"] + [_.jsonfile() for _ in tfs])
+      subprocess.check_call(["buildTemplates.py", "--use-existing-templates"] + [_.jsonfile() for _ in tfs])
       return
     return
 
@@ -45,23 +45,24 @@ def buildtemplates(*args):
   print templatesfile
   if templatesfile.copyfromothertemplatesfile is not None: return
   with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
-    scriptname = "buildTemplate.exe"
+    scriptname = ["buildTemplate.exe"]
     if templatesfile.usenewtemplatebuilder:
-      scriptname = "buildTemplates.py"
+      scriptname = ["buildTemplates.py", "--use-existing-templates"]
     if f:
-      if not os.path.exists(templatesfile.templatesfile()):
+      if templatesfile.usenewtemplatebuilder or not os.path.exists(templatesfile.templatesfile()):
         if not os.path.exists(templatesfile.templatesfile(firststep=True)):
           mkdir_p(os.path.dirname(templatesfile.templatesfile(firststep=True)))
           try:
-            subprocess.check_call([scriptname, templatesfile.jsonfile()])
+            subprocess.check_call(scriptname + [templatesfile.jsonfile()])
           except:
             try:
               raise
             finally:
-              try:
-                os.remove(templatesfile.templatesfile(firststep=templatesfile.hascustomsmoothing))
-              except:
-                pass
+              if not templatesfile.usenewtemplatebuilder:
+                try:
+                  os.remove(templatesfile.templatesfile(firststep=templatesfile.hascustomsmoothing))
+                except:
+                  pass
       if (
         os.path.exists(templatesfile.templatesfile(firststep=True))
         and not os.path.exists(templatesfile.templatesfile())
