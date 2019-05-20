@@ -10,6 +10,7 @@ import subprocess
 import sys
 
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True #https://root-forum.cern.ch/t/pyroot-crashes-when-in-arguments/25379/3
 
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 
@@ -344,6 +345,7 @@ def runcombine(analysis, foldername, **kwargs):
             scanranges = []
             kwarg = kwarg.replace(":", ";")
             for _ in kwarg.split(";"):
+                if not _: continue
                 try:
                     split = _.split(",")
                     scanrange = tuple([int(split[0])] + [float(a) for a in split[1:]])
@@ -616,7 +618,7 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
-              "fais": " ".join("--PO {0} --PO {0}asPOI --PO scalegL1by10000".format(_) for _ in analysis.fais),
+              "fais": " ".join("--PO {0} --PO {0}asPOI".format(_) for _ in analysis.fais) + " --PO scalegL1by10000",
              }
 
     if method == "Impacts":
@@ -790,7 +792,7 @@ def runcombine(analysis, foldername, **kwargs):
         if faifor != "decay":
             plotname += "_"+faifor
 
-        if method == "MultiDimFit":
+        if method == "MultiDimFit" and scanranges:
             plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
             for nuisance in plotnuisances:
                 if plottitle(nuisance) == plottitle(POI): continue
@@ -806,7 +808,7 @@ def runcombine(analysis, foldername, **kwargs):
               )),
             )
 
-        if method in ("MultiDimFit", "Impacts") and docopyplots:
+        if method in ("MultiDimFit", "Impacts") and scanranges and docopyplots:
             copyplots(os.path.join("limits", subdirectory, fullfoldername))
 
 ntry = 0
