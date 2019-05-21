@@ -1255,7 +1255,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "a2": 1
+            if self.hypothesis == "a2": return 1
             if self.hypothesis in ("0+", "0-", "L1", "L1Zg"): return 0
 
             g2 = {"dec": constants.g2HZZ}

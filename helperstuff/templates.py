@@ -495,11 +495,19 @@ class TemplatesFile(MultiEnum):
 
             if self.templategroup in ("ggh", "tth", "bbh"):
                 if self.analysis.dimensions == 4:
+                    for j in xrange(invertedmatrix.shape[0]):
+                        divideby = 1
+                        for i in xrange(invertedmatrix.shape[0]):
+                            multiplyby = 1
+                            threshold = 1e-10 * multiplyby / divideby
+                            if abs(invertedmatrix[j,i]) < threshold: invertedmatrix[j,i] = 0
+                            if abs(invertedmatrix[j,i] - 1) < 1e-10: invertedmatrix[j,i] = 1
+
                     assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 15))
-                    assert                               all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 15))
-                    assert                               all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 15))
-                    assert                               all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 15))
-                    assert                               all(invertedmatrix[14,i] == 0 for i in range(0, 4)+range(5, 15))
+                    assert invertedmatrix[2, 1] == 1 and all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 15))
+                    assert invertedmatrix[5, 2] == 1 and all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 15))
+                    assert invertedmatrix[9, 3] == 1 and all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 15))
+                    assert invertedmatrix[14, 4] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 4)+range(5, 15))
                 elif self.analysis.dimensions == 2:
                     assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
                     assert all(invertedmatrix[1,i] == 0 for i in (2, 4, 5))
@@ -631,6 +639,12 @@ class TemplatesFile(MultiEnum):
         if not self.usenewtemplatebuilder: assert False, self
 
         if self.templategroup in ("background", "DATA"): return []
+        if self.analysis == "fa3_STXS": return []
+        if (
+          self.templategroup in ("ggh", "tth", "bbh")
+          and self.category in ("VBFtagged", "VHHadrtagged")
+          and self.analysis.fais == Analysis("fa3").fais
+        ): return []
 
         productionmode = {_.productionmode for _ in self.signalsamples()}
         assert len(productionmode) == 1
