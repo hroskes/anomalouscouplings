@@ -53,7 +53,7 @@ gm convert .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanran
 """
 
 morecombineoptions = {
-    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1",
+    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1 .oO[freezeparameters]Oo.",
     "FitDiagnostics": "",
     "Impacts": ".oO[impactsstep.oO[impactsstep]Oo.]Oo."
 }
@@ -314,6 +314,7 @@ def runcombine(analysis, foldername, **kwargs):
     plotlimitskwargs = {}
     ntoys = -1
     docopyplots = True
+    freeze = {}
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -459,6 +460,13 @@ def runcombine(analysis, foldername, **kwargs):
             ntoys = int(kwarg)
         elif kw == "copyplots":
             docopyplots = bool(int(kwarg))
+        elif kw == "freeze":
+            for thing in kwarg.split(","):
+                parameter, value = thing.split(":")
+                for fai in analysis.fais:
+                    if parameter == str(fai):
+                        parameter = "CMS_zz4l_fai{}".format(analysis.fais.index(fai)+1)
+                freeze[parameter] = value
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -561,6 +569,8 @@ def runcombine(analysis, foldername, **kwargs):
             moreappend += "_scan{}".format(scanfai)
         else:
             workspacefileappend += "_scan{}".format(scanfai)
+    for k, v in freeze.iteritems():
+        moreappend += "_{}={}".format(k, v)
 
     if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
         raise ValueError("For decay only analysis have to specify categories=Untagged")
@@ -593,7 +603,12 @@ def runcombine(analysis, foldername, **kwargs):
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": "{:.2f}".format(totallumi),
               "observedappend": "obs",
-              "setphysicsmodelparameters": "CMS_zz4l_fai1=.oO[expectfai]Oo.",
+              "setphysicsmodelparameters":
+                ",".join([
+                  "CMS_zz4l_fai{}=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1)
+                ] + [
+                  ",".join("{}={}".format(k, v) for k, v in freeze.iteritems())
+                ]),
               "physicsmodelparameterranges": ":".join("{}={}".format(k, v) for k, v in physicsmodelparameterranges.iteritems()),
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
@@ -619,6 +634,8 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
               "fais": " ".join("--PO {0} --PO {0}asPOI".format(_) for _ in analysis.fais) + " --PO scalegL1by10000",
+              "freeze": ",".join(freeze),
+              "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
              }
 
     if method == "Impacts":
