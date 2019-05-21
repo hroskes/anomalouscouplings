@@ -181,7 +181,8 @@ if __name__ == "__main__":
     submitjobs(args.removefiles, args.jsontoo)
   else:
     for templatesfile in templatesfiles:
-      buildtemplates(templatesfile)
+      with cd(config.repositorydir):
+        buildtemplates(templatesfile)
       #and copy data
     for datatree in datatrees:
       copydata(datatree)

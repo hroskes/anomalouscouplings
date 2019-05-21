@@ -564,10 +564,7 @@ def runcombine(analysis, foldername, **kwargs):
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
     if scanfai != analysis:
-        if analysis.usehistogramsforcombine:
-            moreappend += "_scan{}".format(scanfai)
-        else:
-            workspacefileappend += "_scan{}".format(scanfai)
+        workspacefileappend += "_scan{}".format(scanfai)
     for k, v in freeze.iteritems():
         moreappend += "_{}={}".format(k, v)
 
@@ -632,7 +629,7 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
-              "fais": " ".join("--PO {0} --PO {0}asPOI".format(_) for _ in analysis.fais) + " --PO scalegL1by10000",
+              "fais": " ".join("--PO {0} --PO {0}asPOI".format(_) for _ in sorted(analysis.fais, key=lambda x: x!=scanfai)) + " --PO scalegL1by10000",
               "freeze": ",".join(freeze),
               "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
              }

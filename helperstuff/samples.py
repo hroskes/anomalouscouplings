@@ -1255,7 +1255,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "a2": return constants.g2HZZ if self.productionmode in ("ggH", "ttH", "bbH", "HJJ") else 1
+            if self.hypothesis == "a2": 1
             if self.hypothesis in ("0+", "0-", "L1", "L1Zg"): return 0
 
             g2 = {"dec": constants.g2HZZ}
@@ -1311,7 +1311,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g4(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "0-": return constants.g4HZZ if self.productionmode in ("ggH", "ttH", "bbH", "HJJ") else 1
+            if self.hypothesis == "0-": return 1
             if self.hypothesis in ("0+", "a2", "L1", "L1Zg"): return 0
 
             g4 = {"dec": constants.g4HZZ}
@@ -1367,7 +1367,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "L1": return constants.g1prime2HZZ if self.productionmode in ("ggH", "ttH", "bbH", "HJJ") else 1e4
+            if self.hypothesis == "L1": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1Zg"): return 0
 
             g1prime2 = {"dec": constants.g1prime2HZZ}
@@ -1423,7 +1423,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def ghzgs1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "L1Zg": return constants.ghzgs1prime2HZZ if self.productionmode in ("ggH", "ttH", "bbH", "HJJ") else 1e4
+            if self.hypothesis == "L1Zg": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1"): return 0
 
             ghzgs1prime2 = {"dec": constants.ghzgs1prime2HZZ}
