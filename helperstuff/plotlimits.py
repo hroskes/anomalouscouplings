@@ -121,6 +121,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     adddirectories = []
     scale = 1
     useNLLandNLL0 = True
+    plotcopier = ROOT
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -170,6 +171,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             scale = kwarg
         elif kw == "useNLLandNLL0":
             useNLLandNLL0 = bool(int(kwarg))
+        elif kw == "plotcopier":
+            plotcopier = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -288,7 +291,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
             finalNLL += NLL
 
-        c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+        c1 = plotcopier.TCanvas("c1", "", 8, 30, 800, 800)
         if nuisance is None: finalNLL.zero()
         g = finalNLL.TGraph()
         mg.Add(g)
@@ -496,6 +499,7 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
     fixfai = False
     CMStext = "Preliminary"
     drawCMS = True
+    plotcopier = ROOT
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -523,6 +527,8 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
             drawCMS = kwarg
         elif kw == "scanfai":
             scanfai = kwarg
+        elif kw == "plotcopier":
+            plotcopier = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -586,7 +592,7 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
                 else:
                      NLL[fa3] = getattr(t, nuisance)
 
-        c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+        c1 = plotcopier.TCanvas("c1", "", 8, 30, 800, 800)
         if nuisance is None: NLL.zero()
         g = NLL.TGraph2D()
 

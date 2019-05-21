@@ -16,12 +16,11 @@ from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replace
 
 from helperstuff import config, utilities
 from helperstuff.combinehelpers import Luminosity
-from helperstuff.copyplots import copyplots
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits, plotlimits2D, plottitle
 from helperstuff.submitjob import submitjob
-from helperstuff.utilities import cd, deprecate, LSB_JOBID, mkdir_p, requirecmsenv, tfiles
+from helperstuff.utilities import cd, deprecate, LSB_JOBID, mkdir_p, PlotCopier, requirecmsenv, tfiles
 
 requirecmsenv(os.path.join(config.repositorydir, "CMSSW_10_2_5"))
 
@@ -313,7 +312,7 @@ def runcombine(analysis, foldername, **kwargs):
     method = "MultiDimFit"
     plotlimitskwargs = {}
     ntoys = -1
-    docopyplots = True
+    plotcopier = None
     freeze = {}
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
@@ -458,8 +457,6 @@ def runcombine(analysis, foldername, **kwargs):
             method = kwarg
         elif kw == "ntoys":
             ntoys = int(kwarg)
-        elif kw == "copyplots":
-            docopyplots = bool(int(kwarg))
         elif kw == "freeze":
             for thing in kwarg.split(","):
                 parameter, value = thing.split(":")
@@ -467,6 +464,8 @@ def runcombine(analysis, foldername, **kwargs):
                     if parameter == str(fai):
                         parameter = "CMS_zz4l_fai{}".format(analysis.fais.index(fai)+1)
                 freeze[parameter] = value
+        elif kw == "plotcopier":
+            plotcopier = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -739,7 +738,13 @@ def runcombine(analysis, foldername, **kwargs):
               if method == "Impacts":
                 command = replaceByMap(plotimpactscommand, repmap_obs)
                 subprocess.check_call(command, shell=True)
-                utilities.writeplotinfo(replaceByMap(".oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..txt", repmap_obs))
+                plotbasename = replaceByMap(".oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo.", repmap_obs)
+                plotcopier.copy(plotbasename+".png")
+                plotcopier.copy(plotbasename+".pdf")
+                utilities.writeplotinfo(
+                  plotbasename+".txt",
+                  plotcopier=plotcopier,
+                )
 
           minimum = minimum[0]
           del f
@@ -810,12 +815,12 @@ def runcombine(analysis, foldername, **kwargs):
             plotname += "_"+faifor
 
         if method == "MultiDimFit" and scanranges:
-            plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
+            plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
             for nuisance in plotnuisances:
                 if plottitle(nuisance) == plottitle(POI): continue
                 if nuisance == "CMS_zz4l_fai1" and fixfai: continue
                 nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-                plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
+                plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
 
             utilities.writeplotinfo(
               os.path.join(saveasdir, plotname+".txt"),
@@ -823,10 +828,8 @@ def runcombine(analysis, foldername, **kwargs):
                 "python", "limits.py", str(analysis), foldername,
                 "--plotname="+plotname, "--poi="+POI, "--subdirectory="+subdirectory
               )),
+              plotcopier=plotcopier,
             )
-
-        if method in ("MultiDimFit", "Impacts") and scanranges and docopyplots:
-            copyplots(os.path.join("limits", subdirectory, fullfoldername))
 
 ntry = 0
 maxntries = 3
@@ -849,7 +852,11 @@ def main():
             raise TypeError("Duplicate kwarg {}!".format(kw))
         kwargs[kw] = kwarg
 
-    function(*args, **kwargs)
+    with PlotCopier() as pc:
+        if function == runcombine:
+            assert "plotcopier" not in kwargs
+            kwargs["plotcopier"] = pc
+        function(*args, **kwargs)
 
 if __name__ == "__main__":
     main()

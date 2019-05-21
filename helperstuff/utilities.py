@@ -950,7 +950,9 @@ def existsandvalid(filename, *shouldcontain):
 
     return os.path.exists(filename)
 
-def writeplotinfo(txtfilename, *morestuff):
+def writeplotinfo(txtfilename, *morestuff, **kwargs):
+  plotcopier = kwargs.pop("plotcopier", ROOT)
+  assert not kwargs, kwargs
   assert txtfilename.endswith(".txt")
   with open(txtfilename, "w") as f:
     f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
@@ -963,6 +965,8 @@ def writeplotinfo(txtfilename, *morestuff):
     f.write(subprocess.check_output(["git", "status"]))
     f.write("\n")
     f.write(subprocess.check_output(["git", "diff"]))
+  if plotcopier != ROOT:
+    plotcopier.copy(txtfilename)
 
 def debugfunction(function):
   @wraps(function)
