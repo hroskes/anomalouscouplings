@@ -20,7 +20,7 @@ from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved
 from enums import Analysis, categories, Category, Channel, channels, EnumItem, Hypothesis, MultiEnum, MyEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
 from samples import ReweightingSample
 from templates import TemplatesFile
-from utilities import cache, callclassinitfunctions, cd, generatortolist, mkdir_p, multienumcache, OneAtATime, Tee
+from utilities import cache, callclassinitfunctions, cd, deprecate, generatortolist, mkdir_p, multienumcache, OneAtATime, Tee
 from yields import YieldSystematic, YieldSystematicValue
 
 names = set()
@@ -180,6 +180,9 @@ class _Datacard(MultiEnum):
             result.remove("VBFbkg")
         if not config.usedata:
             result.remove("ZX")
+        if deprecate("VBF" in result, 2019, 5, 25):
+            for _ in result[:]:
+                if _ != "VBF" and _ != "bkg_qqzz": result.remove(_)
         return result
 
     @property
@@ -305,7 +308,6 @@ class _Datacard(MultiEnum):
         if self.production.LHE or self.production.GEN:
             if yieldsystematic == "QCDscale_ren_VV":
                 result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in productionmodes])
-                assert "1.1" in result
                 return result
             else: return None
 
