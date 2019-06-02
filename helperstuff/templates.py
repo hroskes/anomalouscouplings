@@ -17,7 +17,7 @@ import config
 import customsmoothing
 from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
-from utilities import cache, is_almost_integer, JsonDict, jsonloads, TFile, tfiles
+from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile, tfiles
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
@@ -172,8 +172,6 @@ class TemplatesFile(MultiEnum):
 
                               "fa3proddec0.25fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25",
                              ]
-                if self.templategroup == "wh":
-                    hypotheses.remove("L1Zg")
                 reweightingsamples = [
                   ReweightingSample(h, p) for h in hypotheses
                 ]
@@ -596,6 +594,12 @@ class TemplatesFile(MultiEnum):
           kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
           kwargs["production"] = "180722_Ulascan"
           return TemplatesFile(*kwargs.values())
+
+        if self.production == "GEN_181119":
+          if self.templategroup == "ggh" and self.category == "Untagged" and self.channel == "4mu" and self.analysis == "fa3fa2fL1fL1Zg_decay":
+            kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+            kwargs["channel"] = "4e"
+            return deprecate(TemplatesFile(*kwargs.values()), year=2019, month=6, day=5)
 
         return None
 

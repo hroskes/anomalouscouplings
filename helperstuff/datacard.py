@@ -180,9 +180,6 @@ class _Datacard(MultiEnum):
             result.remove("VBFbkg")
         if not config.usedata:
             result.remove("ZX")
-        if deprecate("VBF" in result, 2019, 5, 25):
-            for _ in result[:]:
-                if _ != "VBF" and _ != "bkg_qqzz": result.remove(_)
         return result
 
     @property
@@ -661,9 +658,6 @@ class _Datacard(MultiEnum):
                                 gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, self.channel).Integral()
                               ) * float(self.luminosity)
                 assert scaleby >= 0, scaleby
-
-                if hypothesis and "positive" not in h and "negative" not in h:
-                    scaleby /= getattr(ReweightingSample(p, hypothesis, "Hff0+" if p=="ttH" else None), Hypothesis(hypothesis).couplingname)**2
 
                 originaltemplate = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic)
                 t3D = originaltemplate.Clone(name+"_3D")
