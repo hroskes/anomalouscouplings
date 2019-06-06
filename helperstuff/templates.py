@@ -595,7 +595,7 @@ class TemplatesFile(MultiEnum):
           kwargs["production"] = "180722_Ulascan"
           return TemplatesFile(*kwargs.values())
 
-        if self.production == "GEN_181119":
+        if False and self.production == "GEN_181119":
           if self.templategroup == "ggh" and self.category == "Untagged" and self.channel == "4mu" and self.analysis == "fa3fa2fL1fL1Zg_decay":
             kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
             kwargs["channel"] = "4e"

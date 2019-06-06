@@ -629,7 +629,7 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
-              "fais": " ".join("--PO {0} --PO {0}asPOI".format(_) for _ in sorted(analysis.fais, key=lambda x: x!=scanfai)) + " --PO scalegL1by10000",
+              "fais": " ".join("--PO {0} --PO {0}asPOI{1}".format(_, "" if _ == scanfai else "relative") for _ in sorted(analysis.fais, key=lambda x: x!=scanfai)) + " --PO scalegL1by10000",
               "freeze": ",".join(freeze),
               "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
              }
@@ -647,7 +647,7 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
-        repmap["savemu"] = "--trackParameters rgx{^R.$}"
+        repmap["savemu"] = "--trackParameters rgx{^R.$},rgx{^CMS_zz4l_fai[0-9]+$}"
         repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
     else:
         if analysis.dimensions == 2 and analysis.isdecayonly:
