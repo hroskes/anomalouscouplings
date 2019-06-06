@@ -14,3 +14,4 @@
 /LSFJOB_*/STDOUT
 scans/
 plots/
+gurobi.log
