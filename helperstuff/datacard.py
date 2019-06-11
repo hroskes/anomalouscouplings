@@ -162,9 +162,6 @@ class _Datacard(MultiEnum):
     @property
     def rootfile_base(self):
         return "hzz4l_{}S_{}_{}.input.root".format(self.channel, self.category, self.year)
-    @property
-    def logfile(self):
-        return "log_hzz4l_{}S_{}_{}.input".format(self.channel, self.category, self.year)
 
     @property
     def productionmodes(self):
@@ -735,7 +732,7 @@ class _Datacard(MultiEnum):
 
     def makeCardsWorkspaces(self, outdir="."):
         mkdir_p(outdir)
-        with cd(outdir), Tee(self.logfile, 'w'):
+        with cd(outdir):
             if self.analysis.usehistogramsforcombine:
                 Datacard(self.channel, self.category, self.analysis, self.luminosity).makehistograms()
             else:    

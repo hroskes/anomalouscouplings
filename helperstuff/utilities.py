@@ -328,6 +328,7 @@ class Tee(object):
         self.file = open(*self.openargs, **self.openkwargs)
         self.stdout = sys.stdout
         sys.stdout = self
+        return self
     def __exit__(self, *args):
         sys.stdout = self.stdout
         self.file.close()

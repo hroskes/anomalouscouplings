@@ -29,12 +29,13 @@ combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
 """
 
 createworkspacetemplate = r"""
+set -euo pipefail &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P .oO[physicsmodel]Oo. \
                            .oO[physicsoptions]Oo. -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
-                           |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
-exit ${PIPESTATUS[0]}
+                           |& tee log.text2workspace.oO[workspacefileappend]Oo.
 """
 runcombinetemplate = r"""
+set -euo pipefail &&
 .oO[combine]Oo. -M .oO[method]Oo. -d .oO[workspacefile]Oo. --robustFit=.oO[robustfit]Oo. \
                 .oO[morecombineoptions]Oo. \
                 --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. \
@@ -314,6 +315,7 @@ def runcombine(analysis, foldername, **kwargs):
     ntoys = -1
     plotcopier = None
     freeze = {}
+    faiorder = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -466,6 +468,8 @@ def runcombine(analysis, foldername, **kwargs):
                 freeze[parameter] = value
         elif kw == "plotcopier":
             plotcopier = kwarg
+        elif kw == "faiorder":
+            faiorder = tuple(Analysis(_) if _ != "fa1" else _ for _ in kwarg.split(","))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -567,6 +571,8 @@ def runcombine(analysis, foldername, **kwargs):
         workspacefileappend += "_scan{}".format(scanfai)
     for k, v in freeze.iteritems():
         moreappend += "_{}={}".format(k, v)
+    if faiorder is not None:
+        workspacefileappend += "_"+",".join(str(_) for _ in faiorder)
 
     if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
         raise ValueError("For decay only analysis have to specify categories=Untagged")
@@ -584,6 +590,13 @@ def runcombine(analysis, foldername, **kwargs):
         os.makedirs(saveasdir)
     except OSError:
         pass
+
+    defaultfaiorder = sorted(analysis.fais, key=lambda x: x!=scanfai) + ["fa1"]
+    if faiorder is None: faiorder = defaultfaiorder
+    if set(faiorder) != set(defaultfaiorder):
+      raise ValueError("faiorder doesn't include the right fais.\n{}\n{}".format(set(faiorder), set(defaultfaiorder)))
+    if faiorder[0] != scanfai:
+      raise ValueError("{} should be first in faiorder".format(scanfai))
 
     physicsmodelparameterranges = {
                                    "CMS_zz4l_fai1": "-1,1",
@@ -629,7 +642,7 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
-              "fais": " ".join("--PO {0} --PO {0}asPOI{1}".format(_, "" if _ == scanfai else "relative") for _ in sorted(analysis.fais, key=lambda x: x!=scanfai)) + " --PO scalegL1by10000",
+              "fais": " ".join("--PO {}".format(_) for _ in faiorder) + " " + " ".join("--PO {}asPOI{}".format(_, "" if str(_) == str(scanfai) else "relative") for _ in faiorder[:-1]) + " --PO scalegL1by10000",
               "freeze": ",".join(freeze),
               "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
              }
@@ -672,9 +685,11 @@ def runcombine(analysis, foldername, **kwargs):
         with open(".gitignore", "w") as f:
             f.write("*")
         if analysis.usehistogramsforcombine:
-            makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
-            #must make it for all categories and channels even if not using them all because of mu definition!
+            for category in usecategories:
+                for channel in usechannels:
+                    makeDCsandWSs(productions, (category,), (channel,), analysis, lumitype)
         else:
+            #must make it for all categories and channels even if not using them all because of mu definition!
             makeDCsandWSs(productions, categories, channels, analysis, lumitype)
         for filename in alsocombine:
             for _ in filename, filename.replace(".input.root", ".txt"):
