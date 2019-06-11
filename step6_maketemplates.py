@@ -6,11 +6,15 @@ if __name__ == "__main__":
   p.add_argument("--submitjobs", action="store_true")
   p.add_argument("--jsontoo", action="store_true")
   p.add_argument("--removefiles", nargs="*", default=())
+  p.add_argument("--waitids", nargs="*", type=int, default=())
+  p.add_argument("--filter", type=eval, default=lambda template: True)
   args = p.parse_args()
   if args.jsontoo and not args.submitjobs:
     raise ValueError("--jsontoo doesn't make sense without --submitjobs")
   if args.removefiles and not args.submitjobs:
     raise ValueError("--removefiles doesn't make sense without --submitjobs")
+  if args.waitids and not args.submitjobs:
+    raise ValueError("--waitids doesn't make sense without --submitjobs")
 
 from array import array
 import os
@@ -173,6 +177,7 @@ def submitjobs(removefiles, jsontoo=False):
       waitids = list(step4_makejson.submitjobs(5))
     else:
       waitids = []
+    waitids += list(args.waitids)
     for i in range(njobs):
       submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0", docd=True, waitids=waitids)
 
@@ -181,6 +186,7 @@ if __name__ == "__main__":
     submitjobs(args.removefiles, args.jsontoo)
   else:
     for templatesfile in templatesfiles:
+      if not args.filter(templatesfile): continue
       with cd(config.repositorydir):
         buildtemplates(templatesfile)
       #and copy data
