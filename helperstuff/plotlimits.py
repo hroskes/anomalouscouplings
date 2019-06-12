@@ -4,10 +4,13 @@ import array
 import math
 import os
 import random
+import re
 import sys
 
 from collections import namedtuple
-from itertools import islice
+from itertools import islice, izip
+
+import numpy as np
 
 import ROOT
 
@@ -24,7 +27,9 @@ from yields import YieldValue
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
 
-Scan = namedtuple("Scan", "name title color style")
+class Scan(namedtuple("Scan", "name title color style badpoints")):
+    def __new__(cls, name, title, color, style, badpoints=None):
+        return super(Scan, cls).__new__(cls, name, title, color, style, badpoints=badpoints)
 
 def plottitle(nuisance):
     nuisance = actualvariable(nuisance)
@@ -122,6 +127,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     scale = 1
     useNLLandNLL0 = True
     plotcopier = ROOT
+    combinelogs = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -173,6 +179,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             useNLLandNLL0 = bool(int(kwarg))
         elif kw == "plotcopier":
             plotcopier = kwarg
+        elif kw == "combinelogs":
+            combinelogs = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -187,13 +195,19 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
     scans = []
     uptocolor = 1
-    for arg in args:
+
+    badpoints = [[] * len(args)]
+    if combinelogs is not None:
+        assert len(combinelogs) == len(args)
+        badpoints = [findbadpoints(*combineloglist) for combineloglist in combinelogs]
+
+    for arg, badpts in izip(args, badpoints):
         if fixfai:
             phipart = "{} = 0".format(analysis.title())
         else:
             phipart = "{} = 0 or #pi".format(analysis.phi)
         if arg == "obs":
-            scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1))
+            scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1, badpoints=badpts))
             if productions is None:
                 raise ValueError("No productions provided!")
         else:
@@ -202,10 +216,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
             if arg == 0:
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2), uptocolor, 2, badpoints=badpts))
             else:
                 assert not fixfai
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2, badpoints=badpts))
             uptocolor += 1
 
     if luminosity is None:
@@ -250,7 +264,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                             elif faifor == "VBFreco": assert len(productions) == 1; fa3 = fai_VBFreco(analysis, productions[0], fa3)
                             else: assert False
                             if xaxislimits is not None and not (xaxislimits[0] <= fa3 <= xaxislimits[1]): continue
-                        if killpoints is not None and any(_[0] < fa3 < _[1] for _ in killpoints): continue
+                        if any(_[0] < fa3 < _[1] for _ in killpoints): continue
+                        if any(np.isclose(fa3, _) for _ in scan.badpoints): continue
                         if nuisance is None:
                             deltaNLL = t.deltaNLL
                             if useNLLandNLL0: deltaNLL += t.nll+t.nll0
@@ -662,3 +677,17 @@ def feLfeRgraphs():
     gRpoint.SetMarkerSize(gRpoint.GetMarkerSize()+2)
 
     return gL, gLpoint, gR, gRpoint
+
+def findbadpoints(*combinelogs):
+    result = set()
+    for combinelog in combinelogs:
+        currentpoint = None
+        with open(combinelog) as f:
+            for line in f:
+                #https://stackoverflow.com/a/4703508/5228524
+                match = re.search(r"Point [0-9]+/[0-9]+ [A-Za-z0-9_]+ = ([-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))(?:[Ee][+-]?\d+)?)", line)
+                if match:
+                    currentpoint = float(match.group(1))
+                if "VariableMetricBuilder: matrix not pos.def." in line:
+                    result.add(currentpoint)
+    return result

@@ -311,7 +311,7 @@ def runcombine(analysis, foldername, **kwargs):
     faifor = "decay"
     xaxislimits = None
     method = "MultiDimFit"
-    plotlimitskwargs = {}
+    plotlimitskwargs = {"combinelogs": []}
     ntoys = -1
     plotcopier = None
     freeze = {}
@@ -716,6 +716,7 @@ def runcombine(analysis, foldername, **kwargs):
 
         if config.unblindscans and runobs:
           minimum = (float("nan"), float("inf"))
+          plotlimitskwargs["combinelogs"].append([])
           for scanrange, internalscanrange in izip(scanranges, internalscanranges):
               repmap_obs = repmap.copy()
               repmap_obs.update({
@@ -743,6 +744,8 @@ def runcombine(analysis, foldername, **kwargs):
                       if t.deltaNLL+t.nll+t.nll0 < minimum[1]:
                           minimum = (getattr(t, POI), t.deltaNLL+t.nll+t.nll0)
 
+              plotlimitskwargs["combinelogs"][-1].append(replaceByMap(".oO[logfile]Oo.", repmap_obs))
+
               if method == "FitDiagnostics":
                 command = replaceByMap(diffnuisancescommand, repmap_obs)
                 subprocess.check_call(command, shell=True)
@@ -762,6 +765,7 @@ def runcombine(analysis, foldername, **kwargs):
           del f
 
         for expectfai in expectvalues:
+          plotlimitskwargs["combinelogs"].append([])
           for scanrange, internalscanrange in izip(scanranges, internalscanranges):
               repmap_exp = repmap.copy()
               if expectfai == "minimum":
@@ -783,6 +787,7 @@ def runcombine(analysis, foldername, **kwargs):
               jobids.add(runscan(repmap_exp, submitjobs=submitjobs))
               repmap_exp["impactsstep"] = "3"
               finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_exp))
+              plotlimitskwargs["combinelogs"][-1].append(replaceByMap(".oO[logfile]Oo.", repmap_exp))
 
           if method == "FitDiagnostics":
             command = replaceByMap(diffnuisancescommand, repmap_exp)

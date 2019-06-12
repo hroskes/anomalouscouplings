@@ -45,7 +45,7 @@ print "Compiling MELA..."
 
 with utilities.cd("CMSSW_10_2_5/src/ZZMatrixElement"):
     with open(".git") as f:
-        gitdir = f.read().replace("gitdir: ", "")
+        gitdir = f.read().replace("gitdir: ", "").strip()
     with open(os.path.join(gitdir, "info", "sparse_checkout"), "w") as f:
         f.write("/MELA\n/setup.sh\n/README.md\n/.gitignore")
     subprocess.check_call(["git", "config", "core.sparsecheckout", "true"])
