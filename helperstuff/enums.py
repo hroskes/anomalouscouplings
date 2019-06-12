@@ -716,7 +716,7 @@ class Analysis(MyEnum):
     def doCMS(self):
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
         if self.isfL1fL1Zg: return False
-        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_only6bins"): return False
+        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDbkg"): return False
         assert False, self
     @property
     def fais(self):

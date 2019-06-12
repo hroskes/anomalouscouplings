@@ -316,6 +316,7 @@ def runcombine(analysis, foldername, **kwargs):
     plotcopier = None
     freeze = {}
     faiorder = None
+    floatothers = True
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -470,6 +471,8 @@ def runcombine(analysis, foldername, **kwargs):
             plotcopier = kwarg
         elif kw == "faiorder":
             faiorder = tuple(Analysis(_) if _ != "fa1" else _ for _ in kwarg.split(","))
+        elif kw == "floatothers":
+            floatothers = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -563,6 +566,8 @@ def runcombine(analysis, foldername, **kwargs):
         moreappend += "_scan"+plottitle(POI)
     if fixfai:
         moreappend += "_fixfai"
+    if not floatothers:
+        moreappend += "_fixothers"
     if alsocombine:
         combinecardsappend += "_" + alsocombinename
         if sqrts is None:
@@ -578,6 +583,7 @@ def runcombine(analysis, foldername, **kwargs):
         raise ValueError("For decay only analysis have to specify categories=Untagged")
     if set(usechannels) != {Channel("2e2mu")} and LHE:
         raise ValueError("For LHE analysis have to specify channels=2e2mu")
+    if len(analysis.fais) > 1: assert not fixfai
 
     if sqrts is None:
         sqrts = [13]
@@ -629,7 +635,7 @@ def runcombine(analysis, foldername, **kwargs):
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
               "POI": POI,
-              "floatotherpois": str(int(not fixfai)),
+              "floatotherpois": str(int(floatothers if len(faiorder) > 1 else not fixfai)),
               "pointindex": "",
               "sqrts": ",".join("{:d}".format(_) for _ in sqrts),
               "physicsmodel": None,
