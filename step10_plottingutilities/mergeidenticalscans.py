@@ -48,6 +48,7 @@ def mergeidenticalscans(outfile, *infiles):
 
     style.applycanvasstyle(c)
     style.applyaxesstyle(newmg)
+    newmg.GetXaxis().SetRangeUser(-1, 1)
 
     for _ in legends, text1, text2, line1, line2, text3, text4:
       _[0].Draw()

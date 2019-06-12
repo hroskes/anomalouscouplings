@@ -1648,7 +1648,7 @@ class TreeWrapper(TreeWrapperBase):
                 raise ValueError("{} not in allreweightingweightnames!".format(name))
         for sample in self.allsamples:
             if sample.weightname() in self.toaddtotree or sample.weightname() in self.exceptions: continue
-            if sample.weightname() in reweightingweightnames:
+            if sample.weightname() in reweightingweightnames and not self.treesample.issignal:
                 self.toaddtotree.append(sample.weightname())
             else:
                 self.exceptions.append(sample.weightname())
@@ -1727,6 +1727,7 @@ class TreeWrapper(TreeWrapperBase):
         if self.isdata: return
         if self.treesample.productionmode == "ggZZ": return
         if self.treesample.productionmode == "tqH": return
+        return
 
         if self.treesample.productionmode == "qqZZ":
             self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
