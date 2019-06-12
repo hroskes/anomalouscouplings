@@ -27,9 +27,11 @@ def mergeidenticalscans(outfile, *infiles):
 
     _, xxs, yys = itertools.izip(*(itertools.izip(*itertools.izip(xrange(g.GetN()), g.GetX(), g.GetY())) for g in graphs))
 
-    newxs = np.array(sorted(set.intersection(*(set(_) for _ in xxs))))
+    newxs = np.array(sorted(set.union(*(set(_) for _ in xxs))))
     newys = np.array([min(y for xx, yy in itertools.izip(xxs, yys) for x, y in itertools.izip(xx, yy) if x == target) for target in newxs])
     newn = len(newxs)
+
+    for x, y in itertools.izip_longest(newxs, newys): print x, y
 
     newg = ROOT.TGraph(newn, newxs, newys)
     newg.SetLineStyle(allthesame(g.GetLineStyle() for g in graphs))
