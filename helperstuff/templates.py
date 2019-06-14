@@ -780,6 +780,11 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "gk1gl3"),
                     Template(self, productionmode, self.analysis.purehypotheses[4]),
                 ]
+                if self.analysis.isSTXS:
+                    for i, _ in reversed(list(enumerate(templates[:]))):
+                        if isinstance(_, IntTemplate) and _.interferencetype.couplingpowers["i"] in (1, 3):
+                            del templates[i]
+                    constrainttype = "fourparameterVVH_nog4int"
             if self.templategroup == ("wh"):
                 constrainttype = "fourparameterWWH"
                 templates = [
@@ -849,6 +854,11 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "gk3gl1"),
                     IntTemplate(self, productionmode, "gk2gl2"),
                 ]
+                if self.analysis.isSTXS:
+                    for i, _ in reversed(list(enumerate(templates[:]))):
+                        if isinstance(_, IntTemplate) and _.interferencetype.couplingpowers["i"] in (1, 3):
+                            del templates[i]
+                    constrainttype = "fourparameterWWH_nog4int"
 
         return [
             {
@@ -1626,11 +1636,13 @@ class IntTemplate(TemplateBase, MultiEnum):
                 #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
                 return {"type":"rescale", "factor":0}
             if self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] == 0:
+                if self.analysis.isSTXS: return None #for now... could do it later
                 return {"type":"mirror", "antisymmetric":False, "axis":1}
             assert False
 
-        if self.analysis.isSTXS and self.interferencetype in ("g11gi1", "g11gi3", "g13gi1"):
+        if self.analysis.isSTXS and self.interferencetype.couplingpowers["i"] in (1, 3):
             #same (antimirror over D_CP_whatever, which doesn't exist in STXS)
+            assert "fa3" == self.analysis.fais[0]
             return {"type":"rescale", "factor":0}
 
         if self.analysis.isSTXS: return None #for now... could do it later
