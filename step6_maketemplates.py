@@ -4,7 +4,7 @@ import argparse
 if __name__ == "__main__":
   p = argparse.ArgumentParser()
   p.add_argument("--submitjobs", action="store_true")
-  p.add_argument("--jsontoo", action="store_true")
+  p.add_argument("--jsontoo", type=int)
   p.add_argument("--removefiles", nargs="*", default=())
   p.add_argument("--waitids", nargs="*", type=int, default=())
   p.add_argument("--filter", type=eval, default=lambda template: True)
@@ -174,7 +174,7 @@ def submitjobs(removefiles, jsontoo=False):
     if jsontoo:
       sys.dont_write_bytecode = True
       import step4_makejson
-      waitids = list(step4_makejson.submitjobs(5))
+      waitids = list(step4_makejson.submitjobs(jsontoo))
     else:
       waitids = []
     waitids += list(args.waitids)
