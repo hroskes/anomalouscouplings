@@ -13,6 +13,7 @@ import operator
 import json
 import os
 import pipes
+import re
 import shutil
 import subprocess
 import sys
@@ -976,3 +977,16 @@ def debugfunction(function):
     print "{.__name__}({}{}{})={}".format(function, ", ".join(str(_) for _ in args), ", " if args and kwargs else "", ", ".join("{}={}".format(k, v) for k, v in kwargs.iteritems()), result)
     return result
   return newfunction
+
+def reglob(path, exp, invert=False):
+  "https://stackoverflow.com/a/17197678/5228524"
+
+  m = re.compile(exp)
+
+  if invert is False:
+    res = [f for f in os.listdir(path) if m.match(f)]
+  else:
+    res = [f for f in os.listdir(path) if not m.match(f)]
+
+  res = map(lambda x: "%s/%s" % ( path, x, ), res)
+  return res

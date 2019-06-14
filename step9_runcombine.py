@@ -530,6 +530,13 @@ def runcombine(analysis, foldername, **kwargs):
         raise ValueError("Some of your productions are for LHE and some are not!")
     LHE = LHE.pop()
 
+    defaultfaiorder = tuple(sorted(analysis.fais, key=lambda x: x!=scanfai) + ["fa1"])
+    if faiorder is None: faiorder = defaultfaiorder
+    if set(faiorder) != set(defaultfaiorder):
+      raise ValueError("faiorder doesn't include the right fais.\n{}\n{}".format(set(faiorder), set(defaultfaiorder)))
+    if faiorder[0] != scanfai:
+      raise ValueError("{} should be first in faiorder".format(scanfai))
+
     combinecardsappend = "_lumi.oO[totallumi]Oo."
     workspacefileappend = ".oO[combinecardsappend]Oo."
     moreappend = ".oO[workspacefileappend]Oo."
@@ -576,7 +583,7 @@ def runcombine(analysis, foldername, **kwargs):
         workspacefileappend += "_scan{}".format(scanfai)
     for k, v in freeze.iteritems():
         moreappend += "_{}={}".format(k, v)
-    if faiorder is not None:
+    if [str(_) for _ in faiorder] != [str(_) for _ in defaultfaiorder]:
         workspacefileappend += "_"+",".join(str(_) for _ in faiorder)
 
     if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
@@ -596,13 +603,6 @@ def runcombine(analysis, foldername, **kwargs):
         os.makedirs(saveasdir)
     except OSError:
         pass
-
-    defaultfaiorder = sorted(analysis.fais, key=lambda x: x!=scanfai) + ["fa1"]
-    if faiorder is None: faiorder = defaultfaiorder
-    if set(faiorder) != set(defaultfaiorder):
-      raise ValueError("faiorder doesn't include the right fais.\n{}\n{}".format(set(faiorder), set(defaultfaiorder)))
-    if faiorder[0] != scanfai:
-      raise ValueError("{} should be first in faiorder".format(scanfai))
 
     physicsmodelparameterranges = {
                                    "CMS_zz4l_fai1": "-1,1",

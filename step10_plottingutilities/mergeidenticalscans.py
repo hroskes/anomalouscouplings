@@ -10,7 +10,7 @@ from TemplateBuilder.TemplateBuilder.fileio import RootFiles
 import helperstuff.stylefunctions as style
 
 from helperstuff.config import plotsbasedir
-from helperstuff.utilities import PlotCopier
+from helperstuff.utilities import PlotCopier, reglob
 
 def allthesame(iterable):
   s = set(iterable)
@@ -65,8 +65,9 @@ if __name__ == "__main__":
     mergeidenticalscans(
       os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_merged"),
       os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fa2,fL1Zg,fa1,fa3,fL1.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fa2,fL1,fL1Zg,fa1,fa3.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fa2,fa1,fL1Zg,fa3,fL1.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fa2,fa1,fL1,fL1Zg,fa3.root"),
+      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fixothers.root"),
+      *reglob(
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/"),
+         "limit_lumi300.00_Untagged_scanfa2_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg)).root",
+      )
     )
