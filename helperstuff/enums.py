@@ -702,11 +702,11 @@ class Analysis(MyEnum):
         return False
     @property
     def doGEN(self):
-        if self == "fa3_multiparameter": return True
+        if self == "fa3_multiparameter": return False
         if self == "fa3_multiparameter_nodbkg": return False
         if self == "fa3_only6bins": return False
         if self == "fa3_onlyDCP": return False
-        if self == "fa3_STXS": return True
+        if self == "fa3_STXS": return False
         if self == "fa3_onlyDbkg": return False
         if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False

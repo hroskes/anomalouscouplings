@@ -840,10 +840,9 @@ def runcombine(analysis, foldername, **kwargs):
         if method == "MultiDimFit" and scanranges:
             plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
             for nuisance in plotnuisances:
-                if plottitle(nuisance) == plottitle(POI): continue
                 if nuisance == "CMS_zz4l_fai1" and fixfai: continue
-                nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-                plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
+                nuisanceplotname = plotname.replace("limit", plottitle(nuisance, analysis=analysis))
+                plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faiorder=faiorder, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
 
             utilities.writeplotinfo(
               os.path.join(saveasdir, plotname+".txt"),
