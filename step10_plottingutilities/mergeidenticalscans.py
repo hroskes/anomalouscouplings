@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+import argparse
+
+if __name__ == "__main__":
+  p = argparse.ArgumentParser()
+  p.add_argument("fai", choices="fa3 fa2 fL1 fL1Zg".split())
+  args = p.parse_args()
+
 import itertools, os
 import numpy as np
 
@@ -63,11 +70,9 @@ if __name__ == "__main__":
 
   with pc:
     mergeidenticalscans(
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_merged"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fixothers.root"),
+      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scan"+args.fai+"_merged"),
       *reglob(
          os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/"),
-         "limit_lumi300.00_Untagged_scanfa2_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg)).root",
+         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|).root",
       )
     )
