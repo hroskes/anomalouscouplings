@@ -727,6 +727,6 @@ def findbadpoints(*combinelogs):
                 match = re.search(r"Point [0-9]+/[0-9]+ [A-Za-z0-9_]+ = ([-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))(?:[Ee][+-]?\d+)?)", line)
                 if match:
                     currentpoint = float(match.group(1))
-                if "VariableMetricBuilder: matrix not pos.def." in line:
+                if "VariableMetricBuilder: matrix not pos.def" in line and currentpoint is not None:
                     result.add(currentpoint)
     return result

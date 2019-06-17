@@ -43,7 +43,6 @@ set -euo pipefail &&
                 .oO[saveorloadworkspace]Oo. \
                 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 --X-rtd MINIMIZER_analytic \
                 .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-                -S .oO[usesystematics]Oo. \
 |& tee .oO[logfile]Oo.
 """
 
@@ -563,6 +562,8 @@ def runcombine(analysis, foldername, **kwargs):
         workspacefileappend += "_nobkg"
         turnoff.append("--PO nobkg")
     if not usesystematics:
+        #combine doesn't support -S anymore
+        assert False
         moreappend += "_nosystematics"
     if algo != defaultalgo:
         moreappend += "_algo"+algo
@@ -622,7 +623,7 @@ def runcombine(analysis, foldername, **kwargs):
                 ",".join([
                   "CMS_zz4l_fai{}=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1)
                 ] + [
-                  ",".join("{}={}".format(k, v) for k, v in freeze.iteritems())
+                  "{}={}".format(k, v) for k, v in freeze.iteritems()
                 ]),
               "physicsmodelparameterranges": ":".join("{}={}".format(k, v) for k, v in physicsmodelparameterranges.iteritems()),
               "usesystematics": str(int(usesystematics)),
@@ -648,7 +649,13 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
-              "fais": " ".join("--PO {}".format(_) for _ in faiorder) + " " + " ".join("--PO {}asPOI{}".format(_, "" if str(_) == str(scanfai) else "relative") for _ in faiorder[:-1]) + " --PO scalegL1by10000",
+              "fais": (
+                " ".join("--PO {}".format(_) for _ in faiorder)
+                + " "
+                + " ".join("--PO {}asPOI{}".format(_, "" if str(_) == str(scanfai) else "relative") for _ in faiorder[:-1])
+                + (" --PO {}asPOI".format(faiorder[-1]) if str(faiorder[-1]) != "fa1" else "")
+                + " --PO scalegL1by10000"
+              ),
               "freeze": ",".join(freeze),
               "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
              }
