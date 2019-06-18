@@ -866,6 +866,7 @@ def runpermutations(analysis, foldername, *args, **kwargs):
 
   analysis = Analysis(analysis)
   fullfoldername = "{}_{}".format(analysis, foldername)
+  subdirectory = kwargs.get("subdirectory", "")
 
   for permutation in permutations([str(_) for _ in analysis.fais] + ["fa1"]):
     newkwargs = kwargs.copy()
@@ -875,9 +876,9 @@ def runpermutations(analysis, foldername, *args, **kwargs):
 
     plotnuisances = ["CMS_zz4l_fai"+str(i) for i in xrange(1, len(analysis.fais)+1)] + ["CMS_zz4l_fa1"]
     del plotnuisances[analysis.fais.index(scanfai)]
-    newkwargs["plotnuisances"] = plotnuisances
+    newkwargs["plotnuisances"] = ",".join(plotnuisances)
 
-    with KeepWhileOpenFile(os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername), "permutation_scan{}_{}.tmp".format(scanfai, newkwargs["faiorder"]))) as kwof:
+    with utilities.KeepWhileOpenFile(os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername), "permutation_scan{}_{}.tmp".format(scanfai, newkwargs["faiorder"]))) as kwof:
       if not kwof: continue
       runcombine(analysis, foldername, *args, **newkwargs)
 
@@ -911,7 +912,7 @@ def main():
         kwargs[kw] = kwarg
 
     with PlotCopier() as pc:
-        if function == runcombine:
+        if function in (runcombine, runpermutations):
             assert "plotcopier" not in kwargs
             kwargs["plotcopier"] = pc
         function(*args, **kwargs)
