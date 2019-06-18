@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import getpass
 import glob
-from itertools import izip, product
+from itertools import izip, permutations, product
 import json
 import os
 import pipes
@@ -673,7 +673,7 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
-        repmap["savemu"] = "--trackParameters rgx{^R.$},rgx{^CMS_zz4l_fai[0-9]+$}"
+        repmap["savemu"] = "--saveSpecifiedFunc=CMS_zz4l_fa1," + ",".join("CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai)
         repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
     else:
         if analysis.dimensions == 2 and analysis.isdecayonly:
@@ -860,6 +860,27 @@ def runcombine(analysis, foldername, **kwargs):
               plotcopier=plotcopier,
             )
 
+def runpermutations(analysis, foldername, *args, **kwargs):
+  assert "faiorder" not in kwargs and "plotnuisances" not in kwargs
+  scanfai = kwargs["scanfai"]
+
+  analysis = Analysis(analysis)
+  fullfoldername = "{}_{}".format(analysis, foldername)
+
+  for permutation in permutations([str(_) for _ in analysis.fais] + ["fa1"]):
+    newkwargs = kwargs.copy()
+    if permutation[0] != scanfai: continue
+
+    newkwargs["faiorder"] = ",".join(permutation)
+
+    plotnuisances = ["CMS_zz4l_fai"+str(i) for i in xrange(1, len(analysis.fais)+1)] + ["CMS_zz4l_fa1"]
+    del plotnuisances[analysis.fais.index(scanfai)]
+    newkwargs["plotnuisances"] = plotnuisances
+
+    with KeepWhileOpenFile(os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername), "permutation_scan{}_{}.tmp".format(scanfai, newkwargs["faiorder"]))) as kwof:
+      if not kwof: continue
+      runcombine(analysis, foldername, *args, **newkwargs)
+
 ntry = 0
 maxntries = 3
 
@@ -868,14 +889,22 @@ def main():
         function = runscan
         repmap = json.loads(sys.argv[2])
         args = [repmap, False]
+        startkwargsfrom = 3
+    elif sys.argv[1] == "runpermutations":
+        function = runpermutations
+        analysis = Analysis(sys.argv[2])
+        foldername = sys.argv[3]
+        args = [analysis, foldername]
+        startkwargsfrom = 4
     else:
         function = runcombine
         analysis = Analysis(sys.argv[1])
         foldername = sys.argv[2]
         args = [analysis, foldername]
+        startkwargsfrom = 3
 
     kwargs = {}
-    for arg in sys.argv[3:]:
+    for arg in sys.argv[startkwargsfrom:]:
         kw, kwarg = arg.split("=")
         if kw in kwargs:
             raise TypeError("Duplicate kwarg {}!".format(kw))
