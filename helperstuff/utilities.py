@@ -896,6 +896,9 @@ class PlotCopier(object):
     def __exit__(self, *error):
         import config
         if LSB_JOBID() or config.host != self.copyfromhost or not self.__tocopy: return
+
+        raw_input("press enter when you're ready to rsync: ")
+
         command = ["rsync", "-azvP", self.copyfromfolder, self.copytoconnect + ":" + self.copytofolder] + [
           "--include="+_ for _ in self.__tocopy
         ] + ["--exclude=*", "--delete"]
