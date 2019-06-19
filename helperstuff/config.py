@@ -77,8 +77,6 @@ blindcut = lambda self: self.D_bkg() < 0.5
 
 defaultnbins = 40
 
-mergeVVH = True
-mergeffH = True
 
 
 
