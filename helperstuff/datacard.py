@@ -750,6 +750,7 @@ class _Datacard(MultiEnum):
                     cache[newname].Add(v)
                 else:
                     cache[newname] = v.Clone(newname)
+                    cache[newname].SetDirectory(f)
 
                 if "_3D" not in newname:
                     self.histogramintegrals[newname] = cache[newname].Integral()
