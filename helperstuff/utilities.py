@@ -134,8 +134,11 @@ def cache_file(filename, *argkeys, **kwargkeys):
             except KeyError:
                 result = function(*args, **kwargs)
                 with OneAtATime(filename+".tmp", 5):
-                    with open(filename, "rb") as f:
-                        cache.update(cPickle.load(f))
+                    try:
+                        with open(filename, "rb") as f:
+                            cache.update(cPickle.load(f))
+                    except IOError:
+                        pass
                     cache[keyforcache] = result
                     with open(filename, "wb") as f:
                         cPickle.dump(cache, f)
