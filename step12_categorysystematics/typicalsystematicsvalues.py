@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from helperstuff.enums import productionmodes, categories, analyses, channels
+from helperstuff.enums import categories, analyses, channels
 from helperstuff.yields import YieldSystematic, YieldSystematicValue
 
 for productionmode in "ggH", "qqH", "ZH", "WH", "ttH", "qqZZ", "ggZZ", "VBFbkg", "ZX":

@@ -177,8 +177,8 @@ class _Datacard(MultiEnum):
             result.remove("VBFbkg")
         if not config.usedata:
             result.remove("ZX")
-        for _ in result[:]:
-            if _ not in ("VBF", "qqZZ"): deprecate(result.remove(_), 2019, 6, 12, hour=16)
+#        for _ in result[:]:
+#            if _ not in ("VBF", "qqZZ"): deprecate(result.remove(_), 2019, 6, 12, hour=16)
         return result
 
     @property
@@ -205,7 +205,6 @@ class _Datacard(MultiEnum):
     @property
     def bin(self, counter=Counter()):
         counter[self] += 1
-        print self, counter[self]
 
         bin = "hzz4l_{}S_{}_{}".format(self.channel, self.category, self.year)
 
@@ -225,6 +224,20 @@ class _Datacard(MultiEnum):
     @cache
     @generatortolist
     def histograms(self):
+        for histogramname in self.allhistograms:
+            if config.mergeffH and not self.analysis.isdecayonly:
+                if "ttH" in histogramname or "bbH" in histogramname: continue
+                histogramname = histogramname.replace("ggH", "ffH")
+            if config.mergeVVH:
+                if "ZH" in histogramname or "WH" in histogramname: continue
+                histogramname = histogramname.replace("qqH", "VVH")
+            if self.histogramintegrals[histogramname] == 0: continue
+            yield histogramname
+
+    @property
+    @cache
+    @generatortolist
+    def allhistograms(self):
         if not self.analysis.usehistogramsforcombine:
             raise ValueError("Should not be calling this function for {}".format(self.analysis))
         for p in self.productionmodes:
@@ -243,7 +256,6 @@ class _Datacard(MultiEnum):
                                           .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
                         )
                         if t.templatename().startswith("templateIntAdapSmooth"): templatenamepart = "g11"+self.analysis.couplingname+"1"
-                        print t, templatenamepart
 
                         yield (p.combinename+"_"+templatenamepart+"_"+sign)
             else:
@@ -298,6 +310,7 @@ class _Datacard(MultiEnum):
     def yieldsystematic(self, yieldsystematic):
         if self.analysis.usehistogramsforcombine:
             productionmodes = [h if "bkg_" in h else h.split("_")[0] for h in self.histograms]
+            productionmodes = [_.replace("ffH", "ggH").replace("VVH", deprecate("qqH", 2019, 7, 1)) for _ in productionmodes]
         else:
             productionmodes = self.productionmodes
 
@@ -618,11 +631,11 @@ class _Datacard(MultiEnum):
             raise ValueError("Should not be calling this function for {}".format(self.analysis))
 
         f = ROOT.TFile(self.rootfile_base, "RECREATE")
-        cache = []
+        cache = {}
         self.binbybinuncertainties = []
         print self
         domirror = False  #will be set to true
-        for h in chain(self.histograms, ["data"]):
+        for h in chain(self.allhistograms, ["data"]):
             if "bkg_" in h or h == "data":
                 p = h
                 hypothesis = None
@@ -664,7 +677,7 @@ class _Datacard(MultiEnum):
                     if sign == "positive": pass
                     elif sign == "negative": t3D.Scale(-1)
                     else: assert False
-                    t3D.Floor()
+                    t3D.Floor(0)
                 if "Mirror" in originaltemplate.GetName(): domirror = True
 
                 t3D.Scale(scaleby)
@@ -687,9 +700,9 @@ class _Datacard(MultiEnum):
                     xyz += 1
 
                 t3D.SetDirectory(f)
-                cache.append(t3D)
+                cache[t3D.GetName()] = t3D
                 t.SetDirectory(f)
-                cache.append(t)
+                cache[t.GetName()] = t
 
                 assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
                 self.histogramintegrals[name] = t.Integral()
@@ -716,17 +729,39 @@ class _Datacard(MultiEnum):
                             dn.SetBinContent(otheri, max(t.GetBinContent(otheri) - t.GetBinError(otheri), 1e-9))
 
                         up.SetDirectory(f)
-                        cache.append(up)
+                        cache[up.GetName()] = up
                         dn.SetDirectory(f)
-                        cache.append(dn)
+                        cache[dn.GetName()] = dn
 
                         self.binbybinuncertainties.append(systname)
 
-        nominalnames = set(t.GetName() for t in cache if "binbybin" not in t.GetName())
+        for k in sorted(cache):
+            v = cache[k]
+            newname = None
+            if config.mergeVVH and ("qqH" in k or "ZH" in k or "WH" in k):
+                newname = k.replace("qqH", "VVH").replace("ZH", "VVH").replace("WH", "VVH")
+                assert newname.count("VVH") == 1 and newname.startswith("VVH"), newname
+            if config.mergeffH and ("ggH" in k or "ttH" in k or "bbH" in k):
+                newname = k.replace("ggH", "ffH").replace("ttH", "ffH").replace("bbH", "ffH")
+                assert newname.count("ffH") == 1 and newname.startswith("ffH"), newname
+
+            if newname is not None:
+                if newname in cache:
+                    cache[newname].Add(v)
+                else:
+                    cache[newname] = v.Clone(newname)
+                    cache[newname].SetDirectory(f)
+
+                if "_3D" not in newname:
+                    self.histogramintegrals[newname] = cache[newname].Integral()
+
+        nominalnames = set(t.GetName() for t in cache.itervalues() if "binbybin" not in t.GetName())
         assert len(nominalnames) + 2*len(self.binbybinuncertainties) == len(cache)
 
-        expectedhistnames = set(self.histograms) | {"data_obs"}
-        expectedhistnames = expectedhistnames | {_+"_3D" for _ in expectedhistnames}
+        expectedhistnames = set(self.allhistograms) | {"data_obs"}
+        expectedhistnames |= {_+"_3D" for _ in expectedhistnames}
+        if config.mergeVVH: expectedhistnames |= {_.replace("qqH", "VVH") for _ in expectedhistnames}
+        if config.mergeffH: expectedhistnames |= {_.replace("ggH", "ffH") for _ in expectedhistnames}
         assert nominalnames == expectedhistnames, (nominalnames, expectedhistnames, nominalnames ^ expectedhistnames)
 
         f.Write()

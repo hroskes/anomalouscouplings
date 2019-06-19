@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+import argparse
+
+if __name__ == "__main__":
+  p = argparse.ArgumentParser()
+  p.add_argument("fai", choices="fa3 fa2 fL1 fL1Zg".split())
+  args = p.parse_args()
+
 import itertools, os
 import numpy as np
 
@@ -10,7 +17,7 @@ from TemplateBuilder.TemplateBuilder.fileio import RootFiles
 import helperstuff.stylefunctions as style
 
 from helperstuff.config import plotsbasedir
-from helperstuff.utilities import PlotCopier
+from helperstuff.utilities import PlotCopier, reglob
 
 def allthesame(iterable):
   s = set(iterable)
@@ -51,7 +58,7 @@ def mergeidenticalscans(outfile, *infiles):
     newmg.GetXaxis().SetRangeUser(-1, 1)
 
     for _ in legends, text1, text2, line1, line2, text3, text4:
-      _[0].Draw()
+      [thing for thing in _ if thing][0].Draw()
 
     c.SaveAs(outfile+".png")
     c.SaveAs(outfile+".root")
@@ -63,10 +70,9 @@ if __name__ == "__main__":
 
   with pc:
     mergeidenticalscans(
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_merged"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fa2,fL1Zg,fa1,fa3,fL1.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fa2,fL1,fL1Zg,fa1,fa3.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fa2,fa1,fL1Zg,fa3,fL1.root"),
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_editingcombine/limit_lumi300.00_Untagged_scanfa2_fa2,fa1,fL1,fL1Zg,fa3.root"),
+      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/limit_lumi300.00_Untagged_scan"+args.fai+"_merged"),
+      *reglob(
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/"),
+         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|).root",
+      )
     )
