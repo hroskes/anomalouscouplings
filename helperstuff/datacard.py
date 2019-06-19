@@ -205,7 +205,6 @@ class _Datacard(MultiEnum):
     @property
     def bin(self, counter=Counter()):
         counter[self] += 1
-        print self, counter[self]
 
         bin = "hzz4l_{}S_{}_{}".format(self.channel, self.category, self.year)
 
@@ -225,6 +224,12 @@ class _Datacard(MultiEnum):
     @cache
     @generatortolist
     def histograms(self):
+        return [_ for _ in self.allhistograms if self.histogramintegrals[_] != 0]
+
+    @property
+    @cache
+    @generatortolist
+    def allhistograms(self):
         if not self.analysis.usehistogramsforcombine:
             raise ValueError("Should not be calling this function for {}".format(self.analysis))
         for p in self.productionmodes:
@@ -243,7 +248,6 @@ class _Datacard(MultiEnum):
                                           .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
                         )
                         if t.templatename().startswith("templateIntAdapSmooth"): templatenamepart = "g11"+self.analysis.couplingname+"1"
-                        print t, templatenamepart
 
                         yield (p.combinename+"_"+templatenamepart+"_"+sign)
             else:
@@ -622,7 +626,7 @@ class _Datacard(MultiEnum):
         self.binbybinuncertainties = []
         print self
         domirror = False  #will be set to true
-        for h in chain(self.histograms, ["data"]):
+        for h in chain(self.allhistograms, ["data"]):
             if "bkg_" in h or h == "data":
                 p = h
                 hypothesis = None
@@ -664,7 +668,7 @@ class _Datacard(MultiEnum):
                     if sign == "positive": pass
                     elif sign == "negative": t3D.Scale(-1)
                     else: assert False
-                    t3D.Floor()
+                    t3D.Floor(0)
                 if "Mirror" in originaltemplate.GetName(): domirror = True
 
                 t3D.Scale(scaleby)
@@ -725,7 +729,7 @@ class _Datacard(MultiEnum):
         nominalnames = set(t.GetName() for t in cache if "binbybin" not in t.GetName())
         assert len(nominalnames) + 2*len(self.binbybinuncertainties) == len(cache)
 
-        expectedhistnames = set(self.histograms) | {"data_obs"}
+        expectedhistnames = set(self.allhistograms) | {"data_obs"}
         expectedhistnames = expectedhistnames | {_+"_3D" for _ in expectedhistnames}
         assert nominalnames == expectedhistnames, (nominalnames, expectedhistnames, nominalnames ^ expectedhistnames)
 
