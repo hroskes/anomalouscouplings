@@ -882,6 +882,12 @@ def runpermutations(analysis, foldername, *args, **kwargs):
       if not kwof: continue
       runcombine(analysis, foldername, *args, **newkwargs)
 
+  newkwargs = kwargs.copy()
+  newkwargs["floatothers"] = False
+  with utilities.KeepWhileOpenFile(os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername), "permutation_scan{}_{}.tmp".format(scanfai, "fixothers"))) as kwof:
+    if not kwof: return
+    runcombine(analysis, foldername, *args, **newkwargs)
+
 ntry = 0
 maxntries = 3
 

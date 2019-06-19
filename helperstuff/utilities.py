@@ -4,6 +4,7 @@ import contextlib
 import cPickle
 import datetime
 import errno
+import getpass
 import glob
 import inspect
 import itertools
@@ -897,7 +898,8 @@ class PlotCopier(object):
         import config
         if LSB_JOBID() or config.host != self.copyfromhost or not self.__tocopy: return
 
-        raw_input("press enter when you're ready to rsync: ")
+        #getpass instead of raw_input in case you accidentally type your password here
+        getpass.getpass("press enter when you're ready to rsync: ")
 
         command = ["rsync", "-azvP", self.copyfromfolder, self.copytoconnect + ":" + self.copytofolder] + [
           "--include="+_ for _ in self.__tocopy
