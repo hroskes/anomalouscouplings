@@ -13,6 +13,7 @@ def getconfiguration(hostname, username):
       marccusername = "jroskes1@jhu.edu",
       svndir = "/afs/cern.ch/work/h/hroskes/AN/",
       connect = "hroskes@lxplus.cern.ch",
+      name="heshy",
     )
 
   elif ("login-node" in hostname or "bc-login" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
@@ -26,6 +27,7 @@ def getconfiguration(hostname, username):
       lxplususername = "hroskes",
       email = "heshyr@gmail.com",
       connect = "jroskes1@jhu.edu@gateway2.marcc.jhu.edu",
+      name="heshy",
     )
   elif (".cern.ch" in hostname or "lxplus" in hostname) and username == "skyriaco":
     return dict(
@@ -36,6 +38,7 @@ def getconfiguration(hostname, username):
       marccusername = "skyriac2@jhu.edu",
       svndir = "/afs/cern.ch/work/s/skyriaco/",
       connect = "skyriaco@lxplus.cern.ch",
+      name="savvas",
     )
 
   elif ("login-node" in hostname or "bc-login" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "skyriac2@jhu.edu":
@@ -49,6 +52,7 @@ def getconfiguration(hostname, username):
       lxplususername = "skyriaco",
       email = "savasphy@gmail.com",
       connect = "skyriac2@jhu.edu@gateway2.marcc.jhu.edu",
+      name="savvas",
     )
 
 configuration = getconfiguration(socket.gethostname(), getpass.getuser())
