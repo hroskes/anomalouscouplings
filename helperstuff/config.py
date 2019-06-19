@@ -4,11 +4,34 @@ import re
 import socket
 
 def getconfiguration(hostname, username):
-  if (".cern.ch" in hostname or "lxplus" in hostname) and username == "skyriaco":
+  if (".cern.ch" in hostname or "lxplus" in hostname) and username == "hroskes":
+    return dict(
+      host = "lxplus",
+      repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings/",
+      plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_multiparameter/" if hostname != socket.gethostname() else "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/",
+      slcversion = 6,
+      marccusername = "jroskes1@jhu.edu",
+      svndir = "/afs/cern.ch/work/h/hroskes/AN/",
+      connect = "hroskes@lxplus.cern.ch",
+    )
+
+  elif ("login-node" in hostname or "bc-login" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
+    return dict(
+      host = "MARCC",
+      repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/",
+      repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/",
+      plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/",
+      scratchdir = os.path.join("/scratch/users/", username, "tmparea", ""),
+      slcversion = 7,
+      lxplususername = "hroskes",
+      email = "heshyr@gmail.com",
+      connect = "jroskes1@jhu.edu@gateway2.marcc.jhu.edu",
+    )
+  elif (".cern.ch" in hostname or "lxplus" in hostname) and username == "skyriaco":
     return dict(
       host = "lxplus",
       repositorydir = "/afs/cern.ch/work/s/skyriac2/anomalouscouplings/",
-      plotsbasedir = "/afs/cern.ch/work/s/skyriac2/" if hostname != socket.gethostname() else "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/",
+      plotsbasedir = "/afs/cern.ch/work/s/skyriac2/",
       slcversion = 6,
       marccusername = "skyriac2@jhu.edu",
       svndir = "/afs/cern.ch/work/s/skyriaco/",
@@ -25,7 +48,7 @@ def getconfiguration(hostname, username):
       slcversion = 7,
       lxplususername = "skyriaco",
       email = "savasphy@gmail.com",
-      connect = "jroskes1@jhu.edu@gateway2.marcc.jhu.edu",
+      connect = "skyriac2@jhu.edu@gateway2.marcc.jhu.edu",
     )
 
 configuration = getconfiguration(socket.gethostname(), getpass.getuser())
@@ -77,8 +100,6 @@ blindcut = lambda self: self.D_bkg() < 0.5
 
 defaultnbins = 40
 
-mergeVVH = True
-mergeffH = True
 
 
 

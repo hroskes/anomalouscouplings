@@ -225,10 +225,9 @@ class _Datacard(MultiEnum):
     @generatortolist
     def histograms(self):
         for histogramname in self.allhistograms:
-            if config.mergeffH and not self.analysis.isdecayonly:
+            if self.analysis.mergeallVVHandallffH:
                 if "ttH" in histogramname or "bbH" in histogramname: continue
                 histogramname = histogramname.replace("ggH", "ffH")
-            if config.mergeVVH:
                 if "ZH" in histogramname or "WH" in histogramname: continue
                 histogramname = histogramname.replace("qqH", "VVH")
             if self.histogramintegrals[histogramname] == 0: continue
@@ -738,12 +737,13 @@ class _Datacard(MultiEnum):
         for k in sorted(cache):
             v = cache[k]
             newname = None
-            if config.mergeVVH and ("qqH" in k or "ZH" in k or "WH" in k):
-                newname = k.replace("qqH", "VVH").replace("ZH", "VVH").replace("WH", "VVH")
-                assert newname.count("VVH") == 1 and newname.startswith("VVH"), newname
-            if config.mergeffH and ("ggH" in k or "ttH" in k or "bbH" in k):
-                newname = k.replace("ggH", "ffH").replace("ttH", "ffH").replace("bbH", "ffH")
-                assert newname.count("ffH") == 1 and newname.startswith("ffH"), newname
+            if self.analysis.mergeallVVHandallffH:
+                if "qqH" in k or "ZH" in k or "WH" in k:
+                    newname = k.replace("qqH", "VVH").replace("ZH", "VVH").replace("WH", "VVH")
+                    assert newname.count("VVH") == 1 and newname.startswith("VVH"), newname
+                if "ggH" in k or "ttH" in k or "bbH" in k:
+                    newname = k.replace("ggH", "ffH").replace("ttH", "ffH").replace("bbH", "ffH")
+                    assert newname.count("ffH") == 1 and newname.startswith("ffH"), newname
 
             if newname is not None:
                 if newname in cache:
@@ -760,8 +760,8 @@ class _Datacard(MultiEnum):
 
         expectedhistnames = set(self.allhistograms) | {"data_obs"}
         expectedhistnames |= {_+"_3D" for _ in expectedhistnames}
-        if config.mergeVVH: expectedhistnames |= {_.replace("qqH", "VVH") for _ in expectedhistnames}
-        if config.mergeffH: expectedhistnames |= {_.replace("ggH", "ffH") for _ in expectedhistnames}
+        if self.analysis.mergeallVVHandallffH:
+            expectedhistnames |= {_.replace("qqH", "VVH").replace("ggH", "ffH") for _ in expectedhistnames}
         assert nominalnames == expectedhistnames, (nominalnames, expectedhistnames, nominalnames ^ expectedhistnames)
 
         f.Write()

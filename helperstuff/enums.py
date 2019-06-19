@@ -703,6 +703,12 @@ class Analysis(MyEnum):
         if self == "fa3fa2fL1fL1Zg_decay": return True
         return False
     @property
+    def mergeallVVHandallffH(self):
+        if self.isdecayonly: return False
+        if self.dimensions >= 3: return True
+        if self.dimensions == 1: return False
+        assert False, self
+    @property
     def doGEN(self):
         if config.name ==  "heshy" : 
             if self == "fa3_multiparameter": return False
