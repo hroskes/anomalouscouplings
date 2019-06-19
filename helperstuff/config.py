@@ -4,27 +4,27 @@ import re
 import socket
 
 def getconfiguration(hostname, username):
-  if (".cern.ch" in hostname or "lxplus" in hostname) and username == "hroskes":
+  if (".cern.ch" in hostname or "lxplus" in hostname) and username == "skyriaco":
     return dict(
       host = "lxplus",
-      repositorydir = "/afs/cern.ch/work/h/hroskes/anomalouscouplings/",
-      plotsbasedir = "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_multiparameter/" if hostname != socket.gethostname() else "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/",
+      repositorydir = "/afs/cern.ch/work/s/skyriac2/anomalouscouplings/",
+      plotsbasedir = "/afs/cern.ch/work/s/skyriac2/" if hostname != socket.gethostname() else "/afs/cern.ch/user/h/hroskes/www/anomalouscouplings_HIG18002/",
       slcversion = 6,
-      marccusername = "jroskes1@jhu.edu",
-      svndir = "/afs/cern.ch/work/h/hroskes/AN/",
-      connect = "hroskes@lxplus.cern.ch",
+      marccusername = "skyriac2@jhu.edu",
+      svndir = "/afs/cern.ch/work/s/skyriaco/",
+      connect = "skyriaco@lxplus.cern.ch",
     )
 
-  elif ("login-node" in hostname or "bc-login" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "jroskes1@jhu.edu":
+  elif ("login-node" in hostname or "bc-login" in hostname or "compute" in hostname or "bigmem" in hostname) and username == "skyriac2@jhu.edu":
     return dict(
       host = "MARCC",
-      repositorydir = "/work-zfs/lhc/heshy/anomalouscouplings/",
-      repositorydir2015 = "/work-zfs/lhc/heshy/ICHEPanomalouscouplings/",
-      plotsbasedir = "/work-zfs/lhc/heshy/anomalouscouplings/plots/",
+      repositorydir = "/work-zfs/lhc/skyriaco/Combine/ggf/anomalouscouplings/",
+      repositorydir2015 = "/work-zfs/lhc/skyriaco/Combine/ggf/anomalouscouplings/",
+      plotsbasedir = "/work-zfs/lhc/skyriaco/Combine/ggf/anomalouscouplings/plots/",
       scratchdir = os.path.join("/scratch/users/", username, "tmparea", ""),
       slcversion = 7,
-      lxplususername = "hroskes",
-      email = "heshyr@gmail.com",
+      lxplususername = "skyriaco",
+      email = "savasphy@gmail.com",
       connect = "jroskes1@jhu.edu@gateway2.marcc.jhu.edu",
     )
 
