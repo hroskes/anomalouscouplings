@@ -878,7 +878,10 @@ def runpermutations(analysis, foldername, *args, **kwargs):
     del plotnuisances[analysis.fais.index(scanfai)]
     newkwargs["plotnuisances"] = ",".join(plotnuisances)
 
-    with utilities.KeepWhileOpenFile(os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername), "permutation_scan{}_{}.tmp".format(scanfai, newkwargs["faiorder"]))) as kwof:
+    folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
+    mkdir_p(folder)
+
+    with utilities.KeepWhileOpenFile(os.path.join(folder, "permutation_scan{}_{}.tmp".format(scanfai, newkwargs["faiorder"]))) as kwof:
       if not kwof: continue
       runcombine(analysis, foldername, *args, **newkwargs)
 
