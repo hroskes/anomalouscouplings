@@ -866,8 +866,8 @@ class PlotCopier(object):
 
     def __init__(
       self,
-      copyfromconfig=config.getconfiguration("login-node", "jroskes1@jhu.edu"),
-      copytoconfig=config.getconfiguration("lxplus", "hroskes"),
+      copyfromconfig=config.getconfiguration("login-node", config.marccusername),
+      copytoconfig=config.getconfiguration("lxplus", config.lxplususername),
       copyfromfolder=None,
       copytofolder=None,
       copyfromhost=None,
