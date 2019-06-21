@@ -172,6 +172,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     plotcopier = ROOT
     combinelogs = None
     faiorder = None
+    zeroNLL = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -227,6 +228,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             combinelogs = kwarg
         elif kw == "faiorder":
             faiorder = kwarg
+        elif kw == "zeroNLL":
+            zeroNLL = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -346,7 +349,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             finalNLL += NLL
 
         c1 = plotcopier.TCanvas("c1", "", 8, 30, 800, 800)
-        if nuisance is None: finalNLL.zero()
+        if zeroNLL and nuisance is None: finalNLL.zero()
         g = finalNLL.TGraph()
         mg.Add(g)
 

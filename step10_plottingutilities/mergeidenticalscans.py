@@ -152,6 +152,6 @@ if __name__ == "__main__":
       os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/limit_lumi300.00_Untagged_scan"+args.fai+"_merged"),
       *reglob(
          os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/"),
-         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|).root",
+         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?|_fixothers|).root",
       )
     )

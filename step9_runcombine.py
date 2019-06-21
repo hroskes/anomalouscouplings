@@ -38,11 +38,12 @@ runcombinetemplate = r"""
 set -euo pipefail &&
 .oO[combine]Oo. -M .oO[method]Oo. -d .oO[workspacefile]Oo. --robustFit=.oO[robustfit]Oo. \
                 .oO[morecombineoptions]Oo. \
-                --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. \
+                --setParameterRanges .oO[parameterranges]Oo. -m 125 .oO[setPOI]Oo. \
                 -n _.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
                 .oO[saveorloadworkspace]Oo. \
                 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 --X-rtd MINIMIZER_analytic \
-                .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
+                .oO[-t -1]Oo. --setParameters .oO[setparameters]Oo. -V -v 3 --saveNLL \
+                --setParametersForGrid=.oO[setparametersforgrid]Oo. \
 |& tee .oO[logfile]Oo.
 """
 
@@ -316,6 +317,7 @@ def runcombine(analysis, foldername, **kwargs):
     freeze = {}
     faiorder = None
     floatothers = True
+    setparametersforgrid = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -472,6 +474,8 @@ def runcombine(analysis, foldername, **kwargs):
             faiorder = tuple(Analysis(_) if _ != "fa1" else _ for _ in kwarg.split(","))
         elif kw == "floatothers":
             floatothers = bool(int(kwarg))
+        elif kw == "setparametersforgrid":
+            setparametersforgrid = kwarg.replace(":", "=")
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -586,6 +590,8 @@ def runcombine(analysis, foldername, **kwargs):
         moreappend += "_{}={}".format(k, v)
     if [str(_) for _ in faiorder] != [str(_) for _ in defaultfaiorder]:
         workspacefileappend += "_"+",".join(str(_) for _ in faiorder)
+    if setparametersforgrid:
+        moreappend += "_"+setparametersforgrid
 
     if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
         raise ValueError("For decay only analysis have to specify categories=Untagged")
@@ -605,10 +611,10 @@ def runcombine(analysis, foldername, **kwargs):
     except OSError:
         pass
 
-    physicsmodelparameterranges = {
-                                   "CMS_zz4l_fai1": "-1,1",
-                                   POI: ".oO[internalscanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
-                                  }
+    parameterranges = {
+      "CMS_zz4l_fai1": "-1,1",
+      POI: ".oO[internalscanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
+    }
 
     repmap = {
               "cardstocombine": " ".join(["hzz4l_{}S_{}_{}.lumi{:.2f}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)] + alsocombine),
@@ -619,13 +625,13 @@ def runcombine(analysis, foldername, **kwargs):
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": "{:.2f}".format(totallumi),
               "observedappend": "obs",
-              "setphysicsmodelparameters":
+              "setparameters":
                 ",".join([
                   "CMS_zz4l_fai{}=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1)
                 ] + [
                   "{}={}".format(k, v) for k, v in freeze.iteritems()
                 ]),
-              "physicsmodelparameterranges": ":".join("{}={}".format(k, v) for k, v in physicsmodelparameterranges.iteritems()),
+              "parameterranges": ":".join("{}={}".format(k, v) for k, v in parameterranges.iteritems()),
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "turnoff": " ".join(turnoff),
@@ -658,6 +664,7 @@ def runcombine(analysis, foldername, **kwargs):
               ),
               "freeze": ",".join(freeze),
               "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
+              "setparametersforgrid": setparametersforgrid if setparametersforgrid else ".oO[setparameters]Oo.",
              }
 
     if method == "Impacts":
