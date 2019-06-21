@@ -367,6 +367,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     if xaxisrange(POI) is not None:
         mg.GetXaxis().SetRangeUser(*xaxisrange(POI))
     mg.GetYaxis().SetTitle(yaxistitle(nuisance, analysis))
+    if nuisance is None:
+        mg.SetMinimum(0)
     l.Draw()
 
     style.applycanvasstyle(c1)

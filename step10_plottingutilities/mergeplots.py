@@ -176,6 +176,7 @@ def mergeplots(analysis, **kwargs):
     mg.GetXaxis().SetTitle(folders[0].xtitle)
     mg.GetYaxis().SetTitle(folders[0].ytitle)
     mg.GetXaxis().SetRangeUser(xmin, xmax)
+    mg.SetMinimum(0)
 
     if PRL:
         mg.GetXaxis().CenterTitle()
