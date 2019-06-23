@@ -898,6 +898,48 @@ def runpermutations(analysis, foldername, *args, **kwargs):
     if not kwof: return
     runcombine(analysis, foldername, *args, **newkwargs)
 
+def rungrid(analysis, foldername, npoints, *args, **kwargs):
+  assert "setparametersforgrid" not in kwargs and "plotnuisances" not in kwargs
+  analysis = Analysis(analysis)
+  fullfoldername = "{}_{}".format(analysis, foldername)
+  subdirectory = kwargs.get("subdirectory", "")
+  scanfai = kwargs["scanfai"]
+
+  otherfais = ["CMS_zz4l_fai"+str(i) for i in xrange(1, len(analysis.fais)+1)] + ["CMS_zz4l_fa1"]
+
+  indicestoremove = [analysis.fais.index(scanfai)]
+  if "faiorder" in kwargs:
+    faiorder = tuple(Analysis(_) if _ != "fa1" else _ for _ in kwargs["faiorder"].split(","))
+  else: 
+    faiorder = tuple(analysis.fais) + ("fa1",)
+
+  if str(faiorder[-1]) == "fa1":
+    indicestoremove.append(len(otherfais)-1)
+  else:
+    assert False #not set up to handle minus sign
+    indicestoremove.append(analysis.fais.index(faiorder[-1]))
+  for _ in sorted(indicestoremove, reverse=True):
+    del otherfais[_]
+
+  otherfais = [_+"_relative" for _ in otherfais]
+
+  plotnuisances = ["CMS_zz4l_fai"+str(i) for i in xrange(1, len(analysis.fais)+1)] + ["CMS_zz4l_fa1"]
+  del plotnuisances[analysis.fais.index(scanfai)]
+  kwargs["plotnuisances"] = ",".join(plotnuisances)
+
+  for indices in product(*(xrange(npoints+1) for _ in otherfais)):
+    otherfaivalues = [-1 + 2.0*index/npoints for index in indices]
+    newkwargs = kwargs.copy()
+
+    newkwargs["setparametersforgrid"] = ",".join("{}:{:g}".format(otherfai, otherfaivalue) for otherfai, otherfaivalue in izip(otherfais, otherfaivalues))
+
+    folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
+    mkdir_p(folder)
+
+    with utilities.KeepWhileOpenFile(os.path.join(folder, "grid_scan{}_{}.tmp".format(scanfai, newkwargs["setparametersforgrid"]))) as kwof:
+      if not kwof: continue
+      runcombine(analysis, foldername, *args, **newkwargs)
+
 ntry = 0
 maxntries = 3
 
@@ -913,6 +955,13 @@ def main():
         foldername = sys.argv[3]
         args = [analysis, foldername]
         startkwargsfrom = 4
+    elif sys.argv[1] == "rungrid":
+        function = rungrid
+        analysis = Analysis(sys.argv[2])
+        foldername = sys.argv[3]
+        npoints = int(sys.argv[4])
+        args = [analysis, foldername, npoints]
+        startkwargsfrom = 5
     else:
         function = runcombine
         analysis = Analysis(sys.argv[1])
@@ -928,7 +977,7 @@ def main():
         kwargs[kw] = kwarg
 
     with PlotCopier() as pc:
-        if function in (runcombine, runpermutations):
+        if function != runscan:
             assert "plotcopier" not in kwargs
             kwargs["plotcopier"] = pc
         function(*args, **kwargs)
