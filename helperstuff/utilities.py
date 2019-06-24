@@ -986,15 +986,20 @@ def debugfunction(function):
     return result
   return newfunction
 
-def reglob(path, exp, invert=False):
+def reiglob(path, exp, invert=False, verbose=False):
   "https://stackoverflow.com/a/17197678/5228524"
+
+  if verbose: print "reiglobbing "+os.path.join(path, exp)
 
   m = re.compile(exp)
 
-  if invert is False:
-    res = [f for f in os.listdir(path) if m.match(f)]
-  else:
-    res = [f for f in os.listdir(path) if not m.match(f)]
+  n = 0
 
-  res = map(lambda x: "%s/%s" % ( path, x, ), res)
-  return res
+  for f in os.listdir(path):
+    if bool(m.match(f)) != bool(invert):
+      n += 1
+      if verbose and n % 100 == 0: print "Found {} files so far".format(n)
+      yield os.path.join(path, f)
+
+def reglob(*args, **kwargs):
+  return list(reiglob(*args, **kwargs))
