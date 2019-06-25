@@ -705,7 +705,7 @@ class Analysis(MyEnum):
     @property
     def mergeallVVHandallffH(self):
         if self.isdecayonly: return False
-        if self.dimensions >= 3: return True
+        if self.dimensions >= 3: return False#True
         if self.dimensions == 1: return False
         assert False, self
     @property
