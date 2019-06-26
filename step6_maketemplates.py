@@ -44,7 +44,7 @@ def buildtemplates(*args):
 
   templatesfile = TemplatesFile(*args)
   if "Ulascan" in str(templatesfile.production): return
-  if templatesfile.usenewtemplatebuilder and templatesfile.templategroup in ("background", "DATA"):
+  if templatesfile.usenewtemplatebuilder and templatesfile.templategroup in ("background", "DATA", "tth", "bbh"):
     return buildtemplates(templatesfile.templategroup)
   print templatesfile
   if templatesfile.copyfromothertemplatesfile is not None: return
