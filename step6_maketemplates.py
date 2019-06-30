@@ -8,6 +8,7 @@ if __name__ == "__main__":
   p.add_argument("--removefiles", nargs="*", default=())
   p.add_argument("--waitids", nargs="*", type=int, default=())
   p.add_argument("--filter", type=eval, default=lambda template: True)
+  p.add_argument("--start-with-bin", type=int, nargs=3)
   args = p.parse_args()
   if args.jsontoo and not args.submitjobs:
     raise ValueError("--jsontoo doesn't make sense without --submitjobs")
@@ -31,14 +32,17 @@ from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
 from helperstuff.utilities import cd, KeepWhileOpenFile, KeepWhileOpenFiles, LSB_JOBID, mkdir_p
 
-def buildtemplates(*args):
+def buildtemplates(*args, **kwargs):
+  morebuildtemplatesargs = kwargs.pop("morebuildtemplatesargs", [])
+  assert not kwargs, kwargs
+
   if len(args) == 1 and not isinstance(args[0], TemplatesFile):
     tg = TemplateGroup(args[0])
-    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder]
+    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder and not os.path.exists(tf.templatesfile().replace(".root", ".done"))]
     if not tfs: return
     with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
       if not all(kwofs): return
-      subprocess.check_call(["buildTemplates.py", "--use-existing-templates"] + [_.jsonfile() for _ in tfs])
+      subprocess.check_call(["buildTemplates.py", "--use-existing-templates"] + [_.jsonfile() for _ in tfs] + morebuildtemplatesargs)
       return
     return
 
@@ -51,9 +55,12 @@ def buildtemplates(*args):
   with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
     scriptname = ["buildTemplate.exe"]
     if templatesfile.usenewtemplatebuilder:
-      scriptname = ["buildTemplates.py", "--use-existing-templates"]
+      scriptname = ["buildTemplates.py", "--use-existing-templates"] + morebuildtemplatesargs
     if f:
-      if templatesfile.usenewtemplatebuilder or not os.path.exists(templatesfile.templatesfile()):
+      if (
+        not os.path.exists(templatesfile.templatesfile())
+        or templatesfile.usenewtemplatebuilder and not os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
+      ):
         if not os.path.exists(templatesfile.templatesfile(firststep=True)):
           mkdir_p(os.path.dirname(templatesfile.templatesfile(firststep=True)))
           try:
@@ -185,10 +192,12 @@ if __name__ == "__main__":
   if args.submitjobs:
     submitjobs(args.removefiles, args.jsontoo)
   else:
+    morebuildtemplatesargs = []
+    if args.start_with_bin: morebuildtemplatesargs += ["--start-with-bin"] + [str(_) for _ in args.start_with_bin]
     for templatesfile in templatesfiles:
       if not args.filter(templatesfile): continue
       with cd(config.repositorydir):
-        buildtemplates(templatesfile)
+        buildtemplates(templatesfile, morebuildtemplatesargs=morebuildtemplatesargs)
       #and copy data
     for datatree in datatrees:
       copydata(datatree)
