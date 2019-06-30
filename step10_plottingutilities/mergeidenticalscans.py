@@ -17,6 +17,7 @@ from TemplateBuilder.TemplateBuilder.fileio import RootFile, RootFiles
 import helperstuff.stylefunctions as style
 
 from helperstuff.config import plotsbasedir
+from helperstuff.plotlimits import drawlines
 from helperstuff.utilities import PlotCopier, reglob
 
 def allthesame(iterable):
@@ -43,13 +44,14 @@ def mergeidenticalscans(outfile, *infiles):
 
   xxs = []
   yyswithfais = []
+  xtitle = None
+  ytitle = None
+  othercouplingytitle = None
 
-  othercouplings = [coupling for coupling in ("fa3", "fa2", "fL1", "fL1Zg", "fa1") if "scan"+coupling not in outfile]
-
-  fileforotherstuff = None
+  othercouplings = [coupling for coupling in ("fa3", "fa2", "fL1", "fL1Zg", "fa1") if "scan"+coupling+"_" not in outfile]
 
   for i, infile in enumerate(infiles, start=1):
-    if i % 100 == 0 or i == nfiles: print i, "/", nfiles
+    if i % 1 == 0 or i == nfiles: print i, "/", nfiles
     othercouplingfile = {
       coupling: infile.replace("limit_", coupling+"_") if "fixothers" not in infile else None
       for coupling in othercouplings
@@ -84,14 +86,16 @@ def mergeidenticalscans(outfile, *infiles):
         for j in range(len(yy))
       ])
 
-      if fileforotherstuff is None:
-        if len(c.GetListOfPrimitives()) == 9:
-          fileforotherstuff = infile
+      if xtitle is None and any(othercouplingmg.itervalues()):
+        xtitle = mg.GetXaxis().GetTitle()
+        ytitle = mg.GetYaxis().GetTitle()
+        othercouplingytitle = {k: v.GetYaxis().GetTitle() for k, v in othercouplingmg.iteritems() if v is not None}
 
   newxs = np.array(sorted(set.union(*(set(_) for _ in xxs))))
   newyswithfais = [min(y for xx, yy in itertools.izip(xxs, yyswithfais) for x, y in itertools.izip(xx, yy) if x == target) for target in newxs]
   newys = np.array([y[0] for y in newyswithfais])
   newfais = {k: np.array([y[1][k] for y in newyswithfais]) for k in othercouplings}
+  if "fa3" in newfais: newfais["fa3"] = abs(newfais["fa3"]) #because sign doesn't matter
   newn = len(newxs)
 
   for x, y in itertools.izip_longest(newxs, newys): print x, y
@@ -118,32 +122,32 @@ def mergeidenticalscans(outfile, *infiles):
   newmg.Draw("AL")
   style.applyaxesstyle(newmg)
   newmg.GetXaxis().SetRangeUser(-1, 1)
+  newmg.GetXaxis().SetTitle(xtitle)
+  newmg.GetYaxis().SetTitle(ytitle)
   newmg.SetMinimum(0)
 
-  with RootFilesOrDummies(fileforotherstuff) as (f,):
-    if f is not None:
-      _, _, legend, text1, text2, line1, line2, text3, text4 = f.c1.GetListOfPrimitives()
-      for _ in legend, text1, text2, line1, line2, text3, text4:
-        _.Draw()
-        _.SetBit(ROOT.kCanDelete, False)
+  style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(300))
+  drawlines()
 
-    c.SaveAs(outfile+".png")
-    c.SaveAs(outfile+".root")
-    c.SaveAs(outfile+".pdf")
-    c.SaveAs(outfile+".C")
+  c.SaveAs(outfile+".png")
+  c.SaveAs(outfile+".root")
+  c.SaveAs(outfile+".pdf")
+  c.SaveAs(outfile+".C")
 
-    for k, faimg in faimgs.iteritems():
-      faimg.Draw("AL")
-      style.applyaxesstyle(faimg)
-      faimg.GetXaxis().SetRangeUser(-1, 1)
-      if f is not None:
-        for _ in legend, text1, text2:
-          _.Draw()
+  for k, faimg in faimgs.iteritems():
+    faimg.Draw("AL")
+    style.applyaxesstyle(faimg)
+    faimg.GetXaxis().SetRangeUser(-1, 1)
+    faimg.GetXaxis().SetTitle(xtitle)
+    print othercouplingytitle
+    faimg.GetYaxis().SetTitle(othercouplingytitle[k])
 
-      c.SaveAs(outfile.replace("limit_", k+"_")+".png")
-      c.SaveAs(outfile.replace("limit_", k+"_")+".root")
-      c.SaveAs(outfile.replace("limit_", k+"_")+".pdf")
-      c.SaveAs(outfile.replace("limit_", k+"_")+".C")
+    style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(300))
+
+    c.SaveAs(outfile.replace("limit_", k+"_")+".png")
+    c.SaveAs(outfile.replace("limit_", k+"_")+".root")
+    c.SaveAs(outfile.replace("limit_", k+"_")+".pdf")
+    c.SaveAs(outfile.replace("limit_", k+"_")+".C")
 
 if __name__ == "__main__":
   pc = PlotCopier()
@@ -153,6 +157,9 @@ if __name__ == "__main__":
       os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/limit_lumi300.00_Untagged_scan"+args.fai+"_merged"),
       *reglob(
          os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/"),
+         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?.root",
+      ) + reglob(
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/gridscan/"),
          "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?.root",
       )
     )

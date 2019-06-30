@@ -111,7 +111,7 @@ def mergeplots(analysis, **kwargs):
         elif kw == "outdir":
             outdir = kwarg
         elif kw == "lumi":
-            lumi = kwarg
+            lumi = float(kwarg)
         elif kw == "plotcopier":
             plotcopier = kwarg
         else:
@@ -205,7 +205,7 @@ def mergeplots(analysis, **kwargs):
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
     if lumi is not None:
-        style.CMS("", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(lumi), drawCMS=False)
+        style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(lumi))
     for k, v in drawlineskwargs.items():
         if k == "xpostext":
             try:
