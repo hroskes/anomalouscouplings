@@ -155,7 +155,13 @@ def submitjobs(removefiles, jsontoo=False):
       else:
         if not os.path.exists(templatesfile.jsonfile()):
           raise ValueError(templatesfile.jsonfile()+" doesn't exist!  Try --jsontoo.")
-    elif os.path.exists(templatesfile.templatesfile()) or not KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp").wouldbevalid:
+    elif (
+      (
+        not templatesfile.usenewtemplatebuilder and os.path.exists(templatesfile.templatesfile())
+        or templatesfile.usenewtemplatebuilder and os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
+      )
+      or not KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp").wouldbevalid
+    ):
       pass
     else:
       if not jsontoo:
