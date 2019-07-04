@@ -309,7 +309,6 @@ class _Datacard(MultiEnum):
     def yieldsystematic(self, yieldsystematic):
         if self.analysis.usehistogramsforcombine:
             productionmodes = [h if "bkg_" in h else h.split("_")[0] for h in self.histograms]
-            productionmodes = [_.replace("ffH", "ggH").replace("VVH", deprecate("qqH", 2019, 7, 1)) for _ in productionmodes]
         else:
             productionmodes = self.productionmodes
 

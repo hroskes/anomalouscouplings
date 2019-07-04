@@ -484,7 +484,7 @@ def runcombine(analysis, foldername, **kwargs):
     if runobs and lumitype != "fordata":
         raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
     if scanfai not in analysis.fais:
-        raise ValueError("scanfai for {} has to be one of " + " or ".join(str(_) for _ in list(analysis.fais)))
+        raise ValueError("scanfai for "+str(analysis)+" has to be one of " + " or ".join(str(_) for _ in list(analysis.fais)) + ", "+str(scanfai)+" is invalid")
 
     is2dscan = len(scanfai.fais) > 1
     if is2dscan:
