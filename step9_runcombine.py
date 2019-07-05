@@ -88,6 +88,9 @@ def runscan(repmap, submitjobs, directory=None):
       "npoints": "101",
       "scanrange": {
         "CMS_zz4l_fai1": "-1,1",
+        "CMS_zz4l_fai2": "-1,1",
+        "CMS_zz4l_fai3": "-1,1",
+        "CMS_zz4l_fai4": "-1,1",
       }[repmap["POI"]],
       "scanrangeappend": ".oO[pointindex]Oo.",
       "expectfai": "0.0",
@@ -299,7 +302,7 @@ def runcombine(analysis, foldername, **kwargs):
     plotnuisances = []
     defaultalgo = algo = "grid"
     robustfit = False
-    defaultPOI = POI = "CMS_zz4l_fai1"
+    POI = None
     submitjobs = False
     alsocombinename = None
     alsocombine = []
@@ -479,6 +482,9 @@ def runcombine(analysis, foldername, **kwargs):
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
+    defaultPOI = "CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
+    if POI is None: POI = defaultPOI
+
     if runobs and not config.unblindscans:
         raise TypeError("Can't unblind scans!")
     if runobs and lumitype != "fordata":
@@ -495,10 +501,10 @@ def runcombine(analysis, foldername, **kwargs):
       internalscanrange = list(scanrange) + [0] #0 is the offset
       internalscanranges.append(internalscanrange)
       assert not is2dscan
-      if POI == "CMS_zz4l_fai1":
+      if POI in ("CMS_zz4l_fai1", "CMS_zz4l_fai2", "CMS_zz4l_fai3", "CMS_zz4l_fai4"):
         hastoinclude = 0
       else:
-        assert False, poi
+        assert False, POI
       assert scanrange[2] > scanrange[1], (scanrange[2], scanrange[1])
       while not internalscanrange[1] < hastoinclude:
         internalscanrange[1] -= (internalscanrange[2] - internalscanrange[1])
@@ -612,7 +618,7 @@ def runcombine(analysis, foldername, **kwargs):
         pass
 
     parameterranges = {
-      "CMS_zz4l_fai1": "-1,1",
+      defaultPOI: "-1,1",
       POI: ".oO[internalscanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
     }
 
@@ -854,7 +860,7 @@ def runcombine(analysis, foldername, **kwargs):
         if method == "MultiDimFit" and scanranges:
             plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
             for nuisance in plotnuisances:
-                if nuisance == "CMS_zz4l_fai1" and fixfai: continue
+                if nuisance == defaultPOI and fixfai: continue
                 nuisanceplotname = plotname.replace("limit", plottitle(nuisance, analysis=analysis))
                 plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faiorder=faiorder, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
 
