@@ -177,8 +177,8 @@ class _Datacard(MultiEnum):
             result.remove("VBFbkg")
         if not config.usedata:
             result.remove("ZX")
-#        for _ in result[:]:
-#            if _ not in ("VBF", "qqZZ"): deprecate(result.remove(_), 2019, 6, 12, hour=16)
+        for _ in result[:]:
+            if _ == "WH": deprecate(result.remove(_), 2019, 7, 5, hour=10)
         return result
 
     @property
