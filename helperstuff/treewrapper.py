@@ -761,11 +761,9 @@ class TreeWrapperBase(Iterator):
       ("D_int_decay", [.8]),
     )
     foldbins_4couplings_decay = tuple(sorted((
-      #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      18, 19, 33, 35, 36, 37, 38, 39, 40, 41, 42, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 68, 69, 90, 91, 95, 107, 108, 110, 116, 120, 121, 122, 123, 124, 125, 126, 140, 141, 161,
-      #additional bad ones discovered with not enough stats to populate the templates
-      #they go negative in at least one channel for ggH fa3=0.5
-      0, 1, 4, 6, 10, 12, 14, 15, 16, 17, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 34, 44, 55, 60, 66, 70, 71, 72, 73, 85, 86, 87, 88, 89, 97, 100, 101, 102, 103, 104, 105, 106, 109, 112, 114, 118, 127, 139, 142, 143, 144, 145, 149, 151, 153, 154, 155, 156, 157, 158, 159, 160,
+      #bins with very few entries, summed over all production modes
+      #see misc/foldbins
+      15, 17, 22, 33, 34, 35, 36, 37, 38, 39, 40, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 68, 69, 70, 71, 89, 101, 103, 105, 106, 107, 114, 116, 118, 120, 121, 122, 123, 124, 125, 140, 141, 143, 155, 157, 159, 160, 161,
     ), reverse=True))
 
     binning_4couplings_VBFdecay = (
@@ -779,11 +777,9 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_VBFdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_VBFdecay)
 
     foldbins_4couplings_VBFdecay = tuple(sorted((
-      #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      4, 5, 12, 13, 14, 15, 16, 17, 22, 23, 30, 31, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 67, 68, 69, 70, 71, 76, 77, 84, 85, 92, 93, 94, 95, 96, 97, 102, 103, 108, 110, 112, 113, 114, 115, 118, 119, 120, 121, 122, 123, 124, 125, 130, 131, 132, 133, 138, 139, 144, 145, 146, 147, 148, 149, 150, 151, 156, 157,
-      #additional bad ones discovered with not enough stats to populate the templates
-      #they go negative in at least one channel for ggH fa3=0.5, VBF fa3=0.5, or VBF fa3VBF=0.5
-      10, 11, 28, 29, 32, 33, 34, 82, 83, 86, 87, 88, 89, 90, 91, 98, 99, 100, 101, 104, 105, 106, 107, 109, 111, 116, 126, 127, 128, 129, 152, 153, 154, 155, 158, 159,
+      #bins with very few entries, summed over all production modes
+      #see misc/foldbins
+      4, 5, 12, 13, 14, 15, 17, 22, 23, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 67, 68, 69, 70, 71, 76, 77, 90, 91, 92, 93, 94, 95, 102, 103, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 138, 139, 144, 145, 146, 147, 148, 149, 156, 157,
     ), reverse=True))
 
     binning_4couplings_HadVHdecay = (
@@ -797,13 +793,9 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_HadVHdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_HadVHdecay)
 
     foldbins_4couplings_HadVHdecay = tuple(sorted((
-      #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      4, 5, 11, 12, 17, 22, 23, 24, 28, 29, 30, 31, 34, 35, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 71, 76, 77, 83, 84, 85, 89, 94, 95, 101, 102, 103, 108, 112, 113, 114, 119, 120, 121, 125, 126, 130, 131, 132, 137, 138, 139, 143, 144, 145, 148, 149, 150, 151, 155, 156, 157,
-      #additional bad ones discovered with not enough stats to populate the templates
-      #they go negative in at least one channel for ggH fa3=0.5, ZH fa3=0.5, ZH fa3ZH=0.5, WH fa3=0.5, or WHfa3WH=0.5
-      0, 6, 10, 16, 18, 25, 36, 37, 38, 39, 54, 60, 64, 65, 67, 72, 78, 90, 91, 96, 97, 100, 109, 111, 115, 123, 127, 133, 146, 147, 154,
-      #more found later that go negative at other points
-      13, 79, 136,
+      #bins with very few entries, summed over all production modes
+      #see misc/foldbins
+      0, 4, 6, 18, 22, 23, 24, 25, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 72, 76, 77, 78, 90, 91, 92, 94, 95, 96, 97, 100, 108, 110, 112, 113, 114, 120, 121, 125, 126, 127, 128, 130, 131, 132, 133, 137, 144, 145, 146, 147, 148, 149, 150, 151, 154, 155,
     ), reverse=True))
 
     def D_4couplings_decay_raw(self):
