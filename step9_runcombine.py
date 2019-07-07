@@ -42,6 +42,7 @@ set -euo pipefail &&
                 -n _.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
                 .oO[saveorloadworkspace]Oo. \
                 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 --X-rtd MINIMIZER_analytic \
+                --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_MaxCalls=999999999 \
                 .oO[-t -1]Oo. --setParameters .oO[setparameters]Oo. -V -v 3 --saveNLL \
                 --setParametersForGrid=.oO[setparametersforgrid]Oo. \
 |& tee .oO[logfile]Oo.

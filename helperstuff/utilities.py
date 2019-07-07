@@ -902,7 +902,6 @@ class PlotCopier(object):
         if config.host != self.copyfromhost or not self.__tocopy: return
 
         #getpass instead of raw_input in case you accidentally type your password here
-        getpass.getpass("press enter when you're ready to rsync: ")
 
         command = ["rsync", "-azvP", self.copyfromfolder, self.copytoconnect + ":" + self.copytofolder] + [
           "--include="+_ for _ in self.__tocopy
@@ -916,6 +915,7 @@ class PlotCopier(object):
             print
             return
 
+        getpass.getpass("press enter when you're ready to rsync: ")
         try:
             subprocess.check_call(command)
         except:
