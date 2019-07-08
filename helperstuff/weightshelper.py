@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from itertools import combinations
 
+import config
 from enums import Analysis, MultiEnum, ProductionMode
 
 class WeightsHelper(MultiEnum):
@@ -41,7 +42,10 @@ class WeightsHelper(MultiEnum):
       if prodordec == "dec" or prodordec == "prod" and self.productionmode == "ZH":
         return "ghz1", "ghz1prime2", "ghz2", "ghz4", "ghza1prime2"
       if prodordec == "prod" and self.productionmode == "VBF":
-        return "ghv1", "ghv1prime2", "ghv2", "ghv4", "ghza1prime2"
+        if config.separateZZWWVBFweights:
+          return "ghz1", "ghw1", "ghz1prime2", "ghw1prime2", "ghz2", "ghw2", "ghz4", "ghw4", "ghza1prime2"
+        else:
+          return "ghv1", "ghv1prime2", "ghv2", "ghv4", "ghza1prime2"
       if prodordec == "prod" and self.productionmode == "WH":
         return "ghw1", "ghw1prime2", "ghw2", "ghw4"
       if prodordec == "prod" and self.productionmode == "ttH":
@@ -105,8 +109,8 @@ if __name__ == "__main__":
 #    print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, kappa=1, kappa_tilde=4).MC_weight_terms_expanded
     pprint(
       (
-        ArbitraryCouplingsSample("ggH", g1=1, g2=1, g4=0, g1prime2=0, ghzgs1prime2=0)
-      - ArbitraryCouplingsSample("ggH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0)
-      - ArbitraryCouplingsSample("ggH", g1=0, g2=1, g4=0, g1prime2=0, ghzgs1prime2=0)
+        ArbitraryCouplingsSample("VBF", g1=1, g2=1, g4=1, g1prime2=1e4, ghzgs1prime2=1e4)
+#      - ArbitraryCouplingsSample("VBF", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0)
+#      - ArbitraryCouplingsSample("VBF", g1=0, g2=1, g4=0, g1prime2=0, ghzgs1prime2=0)
       ).MC_weight_terms
     )

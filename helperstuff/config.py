@@ -124,8 +124,10 @@ if host == "MARCC":
   unblinddistributions = False
   unblindscans = False
 #  productionsforcombine = ["GEN_181119"]
+#  separateZZWWVBFweights = False
 #  productionsforcombine = ["180721_2016", "180721_2017"]
   productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
+  separateZZWWVBFweights = True
 elif host == "lxplus":
   usedata = False
   showblinddistributions = False
@@ -133,6 +135,7 @@ elif host == "lxplus":
   unblindscans = False
 #  productionsforcombine = ["180721_2016", "180721_2017"]
   productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
+  separateZZWWVBFweights = True
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
