@@ -15,6 +15,7 @@ import categorization
 import CJLSTscripts
 import config
 import constants
+import discriminants
 import enums
 import STXS
 import xrd
@@ -765,6 +766,7 @@ class TreeWrapperBase(Iterator):
       #see misc/foldbins
       15, 17, 22, 33, 34, 35, 36, 37, 38, 39, 40, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 68, 69, 70, 71, 89, 101, 103, 105, 106, 107, 114, 116, 118, 120, 121, 122, 123, 124, 125, 140, 141, 143, 155, 157, 159, 160, 161,
     ), reverse=True))
+    assert 162 - len(foldbins_4couplings_decay) == discriminants.discriminant("D_4couplings_decay").bins == discriminants.discriminant("D_4couplings_decay").max, (162 - len(foldbins_4couplings_decay), discriminants.discriminant("D_4couplings_decay").bins)
 
     binning_4couplings_VBFdecay = (
       ("D_0minus_VBFdecay", [.1, .9]),
@@ -781,6 +783,7 @@ class TreeWrapperBase(Iterator):
       #see misc/foldbins
       4, 5, 12, 13, 14, 15, 17, 22, 23, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 67, 68, 69, 70, 71, 76, 77, 90, 91, 92, 93, 94, 95, 102, 103, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 138, 139, 144, 145, 146, 147, 148, 149, 156, 157,
     ), reverse=True))
+    assert 162 - len(foldbins_4couplings_VBFdecay) == discriminants.discriminant("D_4couplings_VBFdecay").bins == discriminants.discriminant("D_4couplings_VBFdecay").max, (162 - len(foldbins_4couplings_VBFdecay), discriminants.discriminant("D_4couplings_VBFdecay").bins)
 
     binning_4couplings_HadVHdecay = (
       ("D_0minus_HadVHdecay", [.2, .8]),
@@ -797,6 +800,7 @@ class TreeWrapperBase(Iterator):
       #see misc/foldbins
       0, 4, 6, 18, 22, 23, 24, 25, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 72, 76, 77, 78, 90, 91, 92, 94, 95, 96, 97, 100, 108, 110, 112, 113, 114, 120, 121, 125, 126, 127, 128, 130, 131, 132, 133, 137, 144, 145, 146, 147, 148, 149, 150, 151, 154, 155,
     ), reverse=True))
+    assert 162 - len(foldbins_4couplings_HadVHdecay) == discriminants.discriminant("D_4couplings_HadVHdecay").bins == discriminants.discriminant("D_4couplings_HadVHdecay").max, (162 - len(foldbins_4couplings_HadVHdecay), discriminants.discriminant("D_4couplings_HadVHdecay").bins)
 
     def D_4couplings_decay_raw(self):
       return self.D_4couplings_general_raw(*self.binning_4couplings_decay)
