@@ -859,17 +859,17 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/GENtrees/181119_2017MC"
         if self == "190703_2016":
             if config.host == "lxplus":
-                assert False
+                return "root://lxcms03//data3/Higgs/190703_2016anomalous"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190703_2016anomalous"
         if self == "190703_2017":
             if config.host == "lxplus":
-                assert False
+                return "root://lxcms03//data3/Higgs/190703_2017anomalous"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190703_2017anomalous"
         if self == "190703_2018":
             if config.host == "lxplus":
-                assert False
+                return "root://lxcms03//data3/Higgs/190703_2018anomalous"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190703_2018anomalous"
         assert False

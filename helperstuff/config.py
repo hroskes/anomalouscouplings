@@ -127,11 +127,12 @@ if host == "MARCC":
 #  productionsforcombine = ["180721_2016", "180721_2017"]
   productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
 elif host == "lxplus":
-  usedata = True
-  showblinddistributions = True
-  unblinddistributions = True
-  unblindscans = True
-  productionsforcombine = ["180721_2016", "180721_2017"]
+  usedata = False
+  showblinddistributions = False
+  unblinddistributions = False
+  unblindscans = False
+#  productionsforcombine = ["180721_2016", "180721_2017"]
+  productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
