@@ -37,9 +37,6 @@ class TreeWrapperBase(Iterator):
         self.productionmode = str(treesample.productionmode)
         self.hypothesis = str(treesample.hypothesis)
 
-        if self.isZX:
-            ZX.setup(treesample.production)
-
         self.year = treesample.production.year
 
         if self.isdata:
@@ -117,14 +114,20 @@ class TreeWrapperBase(Iterator):
         if error:
             raise SyntaxError(error)
 
-    @classmethod
-    def initweightfunctions(cls):
-        for sample in cls.allsamples:
-            setattr(cls, sample.weightname(), sample.get_MC_weight_function(LHE=False))
+    def per_event_scale_factor(self):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH"): return 1
+        if self.productionmode == "ggZZ": return self.KFactor_QCD_ggZZ_Nominal
+        if self.productionmode == "qqZZ":
+            if self.GEN: return 1
+            return self.KFactor_EW_qqZZ * self.KFactor_QCD_qqZZ_M
+        if self.productionmode == "ZX":
+            LepPt, LepEta, LepLepId = self.LepPt, self.LepEta, self.LepLepId
+            return ZX.getfakerate(self.year, LepPt[2], LepEta[2], LepLepId[2]) * ZX.getfakerate(self.year, LepPt[3], LepEta[3], LepLepId[3])
+        assert False, self
 
     def MC_weight_nominal(self):
         pb_to_fb = 1000
-        return self.overallEventWeight * self.genxsec * self.genBR * pb_to_fb / self.nevents
+        return self.overallEventWeight * self.genxsec * self.genBR * pb_to_fb * self.per_event_scale_factor() / self.nevents
 
 ##########################
 #background discriminants#
@@ -833,7 +836,7 @@ class FixWrongWH(object):
     except AttributeError:
       return getattr(self.tree, attr.replace("ghw", "ghv"))
 
-@callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
+@callclassinitfunctions("initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
     definitelyexists = Sample("ggH", "0+", config.productionsforcombine[0])
@@ -890,10 +893,6 @@ class TreeWrapper(TreeWrapperBase):
             self.xsec = self.tree.xsec * 1000 #pb to fb
         self.genxsec = self.tree.genxsec
         self.genBR = self.tree.genBR
-
-        self.preliminaryloop()
-
-        if self.treesample.production == "180224": self.tree = FixWrongWH(self.tree)
 
     @property
     @cache_instancemethod
@@ -1084,11 +1083,7 @@ class TreeWrapper(TreeWrapperBase):
         self.g1prime2WH_m4l      = gconstant("WH",       "L1", self.ZZMass)
         #self.ghzgs1prime2WH_m4l  = gconstant("WH",       "L1Zg", self.ZZMass)
 
-        #Gen MEs
-        #for weightname in self.genMEs:
-        #    setattr(self, weightname, getattr(t, weightname))
-
-        #Gen MEs
+        #k factors
         for kfactor in self.kfactors:
             setattr(self, kfactor, getattr(t, kfactor))
 
@@ -1421,9 +1416,6 @@ class TreeWrapper(TreeWrapperBase):
 #Init things#
 #############
 
-    def getweightfunction(self, sample):
-        return getattr(self, sample.weightname())
-
     @classmethod
     def initcategoryfunctions(cls):
         for _ in cls.categorizations:
@@ -1541,13 +1533,10 @@ class TreeWrapper(TreeWrapperBase):
             "failedtree",
             "filename",
             "GEN",
-            "genMEs",
-            "getweightfunction",
             "hypothesis",
             "initcategoryfunctions",
             "initlists",
             "initsystematics",
-            "initweightfunctions",
             "isalternate",
             "isbkg",
             "isdata",
@@ -1561,9 +1550,9 @@ class TreeWrapper(TreeWrapperBase):
             "next",
             "onlyweights",
             "passesblindcut",
+            "per_event_scale_factor",
             "printevery",
             "productionmode",
-            "preliminaryloop",
             "toaddtotree",
             "toaddtotree_float",
             "toaddtotree_int",
@@ -1635,36 +1624,12 @@ class TreeWrapper(TreeWrapperBase):
         else:
             self.toaddtotree.append("MC_weight_nominal")
 
-        reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
-        if len(reweightingweightnames) != len(set(reweightingweightnames)):
-            raise ValueError("Duplicate reweightingweightname!\n".format(reweightingweightnames))
-        allreweightingweightnames = [sample.weightname() for sample in self.allsamples]
-        for name in reweightingweightnames:
-            if name not in allreweightingweightnames:
-                raise ValueError("{} not in allreweightingweightnames!".format(name))
-        for sample in self.allsamples:
-            if sample.weightname() in self.toaddtotree or sample.weightname() in self.exceptions: continue
-            if sample.weightname() in reweightingweightnames and not self.treesample.issignal:
-                self.toaddtotree.append(sample.weightname())
-            else:
-                self.exceptions.append(sample.weightname())
-
         if self.GEN:
             for lst in self.toaddtotree, self.toaddtotree_int, self.toaddtotree_float:
                 for _ in lst[:]:
                     if "jecup" in _.lower() or "jecdn" in _.lower():
                         lst.remove(_)
                         self.exceptions.append(_)
-
-        self.genMEs = []
-        if not self.isbkg and not self.isalternate and self.treesample.productionmode not in ("tqH",):
-            for sample in self.treesample.reweightingsamples():
-                for factor in sample.MC_weight_terms:
-                    for weightname, couplingsq in factor:
-                        if "WH" in weightname and "ghza" in weightname: continue
-                        self.genMEs.append(weightname)
-        if self.treesample.productionmode == "VBFbkg":
-            self.genMEs.append("p_Gen_JJQCD_BKG_MCFM")
 
         self.kfactors = []
         if not self.GEN:
@@ -1707,154 +1672,6 @@ class TreeWrapper(TreeWrapperBase):
             self.tree.SetBranchStatus(variable, 1)
         for variable in self.treesample.weightingredients():
             self.tree.SetBranchStatus(variable, 1)
-
-    def preliminaryloop(self):
-        """
-        Do the initial loops through the tree to find, for each hypothesis,
-        the cutoff and then the sum of weights for 2e2mu
-        """
-        doalternateweightxsecstree = []
-        if self.treesample.reweightingsampleplus == ReweightingSamplePlus("ggH", "0+", "POWHEG") and not self.treesample.production.GEN:
-            doalternateweightxsecstree = enums.AlternateWeight.items(lambda x: "LHEweight" in x.weightname or x == "1")
-
-        if self.isalternate and not doalternateweightxsecstree: return
-        if self.isdummy: return
-        if self.isZX: return
-        if self.isdata: return
-        if self.treesample.productionmode == "ggZZ": return
-        if self.treesample.productionmode == "tqH": return
-        return
-
-        if self.treesample.productionmode == "qqZZ":
-            self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
-            branch = array('d', [self.nevents])
-            self.effectiveentriestree.Branch(self.treesample.weightname(), branch, self.treesample.weightname()+"/D")
-            self.effectiveentriestree.Fill()
-            return
-
-        print "Doing initial loop through tree"
-        if self.failedtree is None: raise ValueError("No failedtree provided for {} which has reweighting!".format(self.treesample))
-
-        if doalternateweightxsecstree:
-            alternateweightxsecs = MultiplyCounter()
-
-        for tree in self.tree, self.failedtree:
-            tree.SetBranchStatus("*", 0)
-            for weightname in self.genMEs:
-                tree.SetBranchStatus(weightname, 1)
-            for alternateweight in doalternateweightxsecstree:
-                if alternateweight == "1": continue
-                tree.SetBranchStatus(alternateweight.weightname, 1)
-            tree.SetBranchStatus("genHEPMCweight", 1)
-            tree.SetBranchStatus("GenZ*Flav", 1)
-            tree.SetBranchStatus("LHEDaughter*", 1)
-            tree.SetBranchStatus("LHEAssociated*", 1)
-
-        reweightingsamples = self.treesample.reweightingsamples()
-        if self.treesample.productionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
-
-        functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True, LHE=False), []) for sample in reweightingsamples}
-        is2e2mu = []
-        genweights = []
-        flavs2e2mu = {11*11*13*13}
-        if self.treesample.productionmode == "VBFbkg":
-            flavs2e2mu |= {11**4, 13**4, 15**4, 11*11*15*15, 13*13*15*15}
-
-        values = functionsandarrays.values()
-        #will fail if multiple have the same str() which would make no sense
-        assert len(functionsandarrays) == len(reweightingsamples)
-        if doalternateweightxsecstree: assert len(functionsandarrays) == 1
-
-        length = self.tree.GetEntries() + self.failedtree.GetEntries()
-        for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
-            is2e2mu.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2e2mu)
-            genweights.append(entry.genHEPMCweight)
-
-            for function, weightarray in values:
-                weightarray.append(function(entry))
-            if i % self.printevery == 0 or i == length:
-                print i, "/", length, "   (preliminary run)"
-                #break
-
-            for alternateweight in doalternateweightxsecstree:
-                #see if doalternateweightxsecstree: assert len(functionsandarrays) == 1 above!
-                toadd = function(entry) * (
-                  1 if alternateweight.weightname == "1" else getattr(entry, alternateweight.weightname)
-                )
-                if numpy.isfinite(toadd):
-                    alternateweightxsecs[alternateweight] += toadd
-
-        self.cutoffs = {}
-        self.nevents2e2mu = {}
-        self.effectiveentries = {}
-        self.multiplyweight = {}
-
-        self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
-        self.branches = []
-
-        for sample, (function, weightarray) in functionsandarrays.iteritems():
-            if sample.productionmode == "qqZZ":
-                with TFile(Sample(sample.productionmode, self.treesample.production).CJLSTfile()) as f:
-                    t = f.Get("ZZTree/candTree")
-                    t.GetEntry(0)
-                    counters = f.Get("ZZTree/Counters")
-                    SMxsec = t.xsec * counters.GetBinContent(self.treesample.flavor.countersbin)
-            else:
-                SMxsec = sample.SMxsec
-
-            strsample = str(sample)
-
-            percentile = 99.99
-
-            weightarray = numpy.array(weightarray)
-            cutoff = self.cutoffs[strsample] = numpy.percentile(weightarray, percentile)
-            weightarray[weightarray>cutoff] = cutoff**2/weightarray[weightarray>cutoff]
-            self.nevents2e2mu[strsample] = sum(
-                                                weight*genweight*isthis2e2mu #multiply by isthis2e2mu, which is supposed to be True=1, to make sure it's not None due to izip_longest, which would indicate a bug
-                                                     for weight, genweight, isthis2e2mu in izip_longest(weightarray, genweights, is2e2mu)
-                                                     if isthis2e2mu!=False
-                                               )
-            #https://root.cern.ch/doc/master/classTH1.html#a79f9811dc6c4b9e68e683342bfc96f5e
-            if self.nevents2e2mu[strsample]:
-                self.effectiveentries[strsample] = sum(weightarray)**2 / sum(weightarray**2)
-                self.multiplyweight[strsample] = SMxsec / self.nevents2e2mu[strsample] * self.effectiveentries[strsample]
-            else:
-                self.effectiveentries[strsample] = self.multiplyweight[strsample] = 0
-
-            branch = array('d', [self.effectiveentries[strsample]])
-            self.branches.append(branch) #so it stays alive until we do Fill()
-            self.effectiveentriestree.Branch(sample.weightname(), branch, sample.weightname()+"/D")
-
-        self.effectiveentriestree.Fill()  #will be written when newf.Write() is called in step2.py
-
-        if doalternateweightxsecstree:
-            alternateweightxsecs /= alternateweightxsecs[enums.AlternateWeight("1")]
-            self.alternateweightxsecstree = ROOT.TTree("alternateweightxsecstree", "")
-            for alternateweight in doalternateweightxsecstree:
-                if alternateweight == "1":
-                    assert alternateweightxsecs[alternateweight] == 1
-                    continue
-                branch = array('d', [alternateweightxsecs[alternateweight]])
-                self.branches.append(branch) #so it stays alive until we do Fill()
-                branchname = str(alternateweight)
-                self.alternateweightxsecstree.Branch(alternateweight.weightname, branch, alternateweight.weightname+"/D")
-
-            self.alternateweightxsecstree.Fill()  #will be written when newf.Write() is called in step2.py
-
-        self.tree.SetBranchStatus("*", 1)
-
-        print "Cutoffs:"
-        for sample, cutoff in self.cutoffs.iteritems():
-             print "    {:15} {}".format(sample, cutoff)
-        print "nevents 2e2mu:"
-        for sample, nevents in self.nevents2e2mu.iteritems():
-             print "    {:15} {}".format(sample, nevents)
-        print "effective entries:"
-        for sample, nevents in self.effectiveentries.iteritems():
-             print "    {:15} {}".format(sample, nevents)
-        print "multiply weight:"
-        for sample, mw in self.multiplyweight.iteritems():
-             print "    {:15} {}".format(sample, mw)
 
     passesblindcut = config.blindcut
 
