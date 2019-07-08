@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import getpass
 import glob
-from itertools import izip, product
+from itertools import izip, permutations, product
 import json
 import os
 import pipes
@@ -10,17 +10,17 @@ import subprocess
 import sys
 
 import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True #https://root-forum.cern.ch/t/pyroot-crashes-when-in-arguments/25379/3
 
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap  #easiest place to get it
 
 from helperstuff import config, utilities
 from helperstuff.combinehelpers import Luminosity
-from helperstuff.copyplots import copyplots
 from helperstuff.datacard import makeDCsandWSs
 from helperstuff.enums import Analysis, categories, Category, Channel, channels, Production, ProductionMode
 from helperstuff.plotlimits import plotlimits, plotlimits2D, plottitle
 from helperstuff.submitjob import submitjob
-from helperstuff.utilities import cd, deprecate, LSB_JOBID, mkdir_p, requirecmsenv, tfiles
+from helperstuff.utilities import cd, deprecate, LSB_JOBID, mkdir_p, PlotCopier, requirecmsenv, tfiles
 
 requirecmsenv(os.path.join(config.repositorydir, "CMSSW_10_2_5"))
 
@@ -29,20 +29,22 @@ combineCards.py .oO[cardstocombine]Oo. > .oO[combinecardsfile]Oo.
 """
 
 createworkspacetemplate = r"""
+set -euo pipefail &&
 unbuffer text2workspace.py -m 125 .oO[combinecardsfile]Oo. -P .oO[physicsmodel]Oo. \
                            .oO[physicsoptions]Oo. -o .oO[workspacefile]Oo. -v 7 .oO[turnoff]Oo. \
-                           |& tee log.text2workspace.oO[workspacefileappend]Oo. &&
-exit ${PIPESTATUS[0]}
+                           |& tee log.text2workspace.oO[workspacefileappend]Oo.
 """
 runcombinetemplate = r"""
+set -euo pipefail &&
 .oO[combine]Oo. -M .oO[method]Oo. -d .oO[workspacefile]Oo. --robustFit=.oO[robustfit]Oo. \
                 .oO[morecombineoptions]Oo. \
-                --setParameterRanges .oO[physicsmodelparameterranges]Oo. -m 125 .oO[setPOI]Oo. \
+                --setParameterRanges .oO[parameterranges]Oo. -m 125 .oO[setPOI]Oo. \
                 -n _.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo. .oO[selectpoints]Oo. \
                 .oO[saveorloadworkspace]Oo. \
                 --X-rtd OPTIMIZE_BOUNDS=0 --X-rtd TMCSO_AdaptivePseudoAsimov=0 --X-rtd MINIMIZER_analytic \
-                .oO[-t -1]Oo. --setParameters .oO[setphysicsmodelparameters]Oo. -V -v 3 --saveNLL \
-                -S .oO[usesystematics]Oo. \
+                --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_MaxCalls=999999999 \
+                .oO[-t -1]Oo. --setParameters .oO[setparameters]Oo. -V -v 3 --saveNLL \
+                --setParametersForGrid=.oO[setparametersforgrid]Oo. \
 |& tee .oO[logfile]Oo.
 """
 
@@ -52,7 +54,7 @@ gm convert .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanran
 """
 
 morecombineoptions = {
-    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1",
+    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1 .oO[freezeparameters]Oo.",
     "FitDiagnostics": "",
     "Impacts": ".oO[impactsstep.oO[impactsstep]Oo.]Oo."
 }
@@ -87,6 +89,9 @@ def runscan(repmap, submitjobs, directory=None):
       "npoints": "101",
       "scanrange": {
         "CMS_zz4l_fai1": "-1,1",
+        "CMS_zz4l_fai2": "-1,1",
+        "CMS_zz4l_fai3": "-1,1",
+        "CMS_zz4l_fai4": "-1,1",
       }[repmap["POI"]],
       "scanrangeappend": ".oO[pointindex]Oo.",
       "expectfai": "0.0",
@@ -298,7 +303,7 @@ def runcombine(analysis, foldername, **kwargs):
     plotnuisances = []
     defaultalgo = algo = "grid"
     robustfit = False
-    defaultPOI = POI = "CMS_zz4l_fai1"
+    POI = None
     submitjobs = False
     alsocombinename = None
     alsocombine = []
@@ -310,9 +315,13 @@ def runcombine(analysis, foldername, **kwargs):
     faifor = "decay"
     xaxislimits = None
     method = "MultiDimFit"
-    plotlimitskwargs = {}
+    plotlimitskwargs = {"combinelogs": []}
     ntoys = -1
-    docopyplots = True
+    plotcopier = None
+    freeze = {}
+    faiorder = None
+    floatothers = True
+    setparametersforgrid = None
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -344,6 +353,7 @@ def runcombine(analysis, foldername, **kwargs):
             scanranges = []
             kwarg = kwarg.replace(":", ";")
             for _ in kwarg.split(";"):
+                if not _: continue
                 try:
                     split = _.split(",")
                     scanrange = tuple([int(split[0])] + [float(a) for a in split[1:]])
@@ -455,17 +465,33 @@ def runcombine(analysis, foldername, **kwargs):
             method = kwarg
         elif kw == "ntoys":
             ntoys = int(kwarg)
-        elif kw == "copyplots":
-            docopyplots = bool(int(kwarg))
+        elif kw == "freeze":
+            for thing in kwarg.split(","):
+                parameter, value = thing.split(":")
+                for fai in analysis.fais:
+                    if parameter == str(fai):
+                        parameter = "CMS_zz4l_fai{}".format(analysis.fais.index(fai)+1)
+                freeze[parameter] = value
+        elif kw == "plotcopier":
+            plotcopier = kwarg
+        elif kw == "faiorder":
+            faiorder = tuple(Analysis(_) if _ != "fa1" else _ for _ in kwarg.split(","))
+        elif kw == "floatothers":
+            floatothers = bool(int(kwarg))
+        elif kw == "setparametersforgrid":
+            setparametersforgrid = kwarg.replace(":", "=")
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
+
+    defaultPOI = "CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
+    if POI is None: POI = defaultPOI
 
     if runobs and not config.unblindscans:
         raise TypeError("Can't unblind scans!")
     if runobs and lumitype != "fordata":
         raise TypeError("For unblindscans, if you want to adjust the luminosity do it in the Production class (in enums.py)")
     if scanfai not in analysis.fais:
-        raise ValueError("scanfai for {} has to be one of " + " or ".join(str(_) for _ in list(analysis.fais)))
+        raise ValueError("scanfai for "+str(analysis)+" has to be one of " + " or ".join(str(_) for _ in list(analysis.fais)) + ", "+str(scanfai)+" is invalid")
 
     is2dscan = len(scanfai.fais) > 1
     if is2dscan:
@@ -476,10 +502,10 @@ def runcombine(analysis, foldername, **kwargs):
       internalscanrange = list(scanrange) + [0] #0 is the offset
       internalscanranges.append(internalscanrange)
       assert not is2dscan
-      if POI == "CMS_zz4l_fai1":
+      if POI in ("CMS_zz4l_fai1", "CMS_zz4l_fai2", "CMS_zz4l_fai3", "CMS_zz4l_fai4"):
         hastoinclude = 0
       else:
-        assert False, poi
+        assert False, POI
       assert scanrange[2] > scanrange[1], (scanrange[2], scanrange[1])
       while not internalscanrange[1] < hastoinclude:
         internalscanrange[1] -= (internalscanrange[2] - internalscanrange[1])
@@ -514,6 +540,13 @@ def runcombine(analysis, foldername, **kwargs):
         raise ValueError("Some of your productions are for LHE and some are not!")
     LHE = LHE.pop()
 
+    defaultfaiorder = tuple(sorted(analysis.fais, key=lambda x: x!=scanfai) + ["fa1"])
+    if faiorder is None: faiorder = defaultfaiorder
+    if set(faiorder) != set(defaultfaiorder):
+      raise ValueError("faiorder doesn't include the right fais.\n{}\n{}".format(set(faiorder), set(defaultfaiorder)))
+    if faiorder[0] != scanfai:
+      raise ValueError("{} should be first in faiorder".format(scanfai))
+
     combinecardsappend = "_lumi.oO[totallumi]Oo."
     workspacefileappend = ".oO[combinecardsappend]Oo."
     moreappend = ".oO[workspacefileappend]Oo."
@@ -540,6 +573,8 @@ def runcombine(analysis, foldername, **kwargs):
         workspacefileappend += "_nobkg"
         turnoff.append("--PO nobkg")
     if not usesystematics:
+        #combine doesn't support -S anymore
+        assert False
         moreappend += "_nosystematics"
     if algo != defaultalgo:
         moreappend += "_algo"+algo
@@ -550,20 +585,26 @@ def runcombine(analysis, foldername, **kwargs):
         moreappend += "_scan"+plottitle(POI)
     if fixfai:
         moreappend += "_fixfai"
+    if not floatothers:
+        moreappend += "_fixothers"
     if alsocombine:
         combinecardsappend += "_" + alsocombinename
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
     if scanfai != analysis:
-        if analysis.usehistogramsforcombine:
-            moreappend += "_scan{}".format(scanfai)
-        else:
-            workspacefileappend += "_scan{}".format(scanfai)
+        workspacefileappend += "_scan{}".format(scanfai)
+    for k, v in freeze.iteritems():
+        moreappend += "_{}={}".format(k, v)
+    if [str(_) for _ in faiorder] != [str(_) for _ in defaultfaiorder]:
+        workspacefileappend += "_"+",".join(str(_) for _ in faiorder)
+    if setparametersforgrid:
+        moreappend += "_"+setparametersforgrid
 
     if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
         raise ValueError("For decay only analysis have to specify categories=Untagged")
     if set(usechannels) != {Channel("2e2mu")} and LHE:
         raise ValueError("For LHE analysis have to specify channels=2e2mu")
+    if len(analysis.fais) > 1: assert not fixfai
 
     if sqrts is None:
         sqrts = [13]
@@ -577,10 +618,10 @@ def runcombine(analysis, foldername, **kwargs):
     except OSError:
         pass
 
-    physicsmodelparameterranges = {
-                                   "CMS_zz4l_fai1": "-1,1",
-                                   POI: ".oO[internalscanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
-                                  }
+    parameterranges = {
+      defaultPOI: "-1,1",
+      POI: ".oO[internalscanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
+    }
 
     repmap = {
               "cardstocombine": " ".join(["hzz4l_{}S_{}_{}.lumi{:.2f}.txt".format(channel, category, production.year, float(Luminosity(lumitype, production))) for channel, category, production in product(usechannels, usecategories, productions)] + alsocombine),
@@ -591,8 +632,13 @@ def runcombine(analysis, foldername, **kwargs):
               "expectedappend": "exp_.oO[expectfai]Oo.",
               "totallumi": "{:.2f}".format(totallumi),
               "observedappend": "obs",
-              "setphysicsmodelparameters": "CMS_zz4l_fai1=.oO[expectfai]Oo.",
-              "physicsmodelparameterranges": ":".join("{}={}".format(k, v) for k, v in physicsmodelparameterranges.iteritems()),
+              "setparameters":
+                ",".join([
+                  "CMS_zz4l_fai{}=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1)
+                ] + [
+                  "{}={}".format(k, v) for k, v in freeze.iteritems()
+                ]),
+              "parameterranges": ":".join("{}={}".format(k, v) for k, v in parameterranges.iteritems()),
               "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "turnoff": " ".join(turnoff),
@@ -603,7 +649,7 @@ def runcombine(analysis, foldername, **kwargs):
               "robustfit": str(int(robustfit)),
               "setPOI": "" if POI==defaultPOI else "-P .oO[POI]Oo.",
               "POI": POI,
-              "floatotherpois": str(int(not fixfai)),
+              "floatotherpois": str(int(floatothers if len(faiorder) > 1 else not fixfai)),
               "pointindex": "",
               "sqrts": ",".join("{:d}".format(_) for _ in sqrts),
               "physicsmodel": None,
@@ -616,7 +662,16 @@ def runcombine(analysis, foldername, **kwargs):
               "impactsstep2": "--doFits",
               "impactsstep3": "-o .oO[filename]Oo.",
               "saveasdir": saveasdir,
-              "fais": " ".join("--PO {0} --PO {0}asPOI".format(_) for _ in analysis.fais),
+              "fais": (
+                " ".join("--PO {}".format(_) for _ in faiorder)
+                + " "
+                + " ".join("--PO {}asPOI{}".format(_, "" if str(_) == str(scanfai) else "relative") for _ in faiorder[:-1])
+                + (" --PO {}asPOI".format(faiorder[-1]) if str(faiorder[-1]) != "fa1" else "")
+                + " --PO scalegL1by10000"
+              ),
+              "freeze": ",".join(freeze),
+              "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
+              "setparametersforgrid": setparametersforgrid if setparametersforgrid else ".oO[setparameters]Oo.",
              }
 
     if method == "Impacts":
@@ -632,7 +687,7 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.usehistogramsforcombine:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
         repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
-        repmap["savemu"] = "--trackParameters rgx{^R.$}"
+        repmap["savemu"] = "--saveSpecifiedFunc=CMS_zz4l_fa1," + ",".join("CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai)
         repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
     else:
         if analysis.dimensions == 2 and analysis.isdecayonly:
@@ -657,9 +712,11 @@ def runcombine(analysis, foldername, **kwargs):
         with open(".gitignore", "w") as f:
             f.write("*")
         if analysis.usehistogramsforcombine:
-            makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
-            #must make it for all categories and channels even if not using them all because of mu definition!
+            for category in usecategories:
+                for channel in usechannels:
+                    makeDCsandWSs(productions, (category,), (channel,), analysis, lumitype)
         else:
+            #must make it for all categories and channels even if not using them all because of mu definition!
             makeDCsandWSs(productions, categories, channels, analysis, lumitype)
         for filename in alsocombine:
             for _ in filename, filename.replace(".input.root", ".txt"):
@@ -686,6 +743,7 @@ def runcombine(analysis, foldername, **kwargs):
 
         if config.unblindscans and runobs:
           minimum = (float("nan"), float("inf"))
+          plotlimitskwargs["combinelogs"].append([])
           for scanrange, internalscanrange in izip(scanranges, internalscanranges):
               repmap_obs = repmap.copy()
               repmap_obs.update({
@@ -713,6 +771,8 @@ def runcombine(analysis, foldername, **kwargs):
                       if t.deltaNLL+t.nll+t.nll0 < minimum[1]:
                           minimum = (getattr(t, POI), t.deltaNLL+t.nll+t.nll0)
 
+              plotlimitskwargs["combinelogs"][-1].append(replaceByMap(".oO[logfile]Oo.", repmap_obs))
+
               if method == "FitDiagnostics":
                 command = replaceByMap(diffnuisancescommand, repmap_obs)
                 subprocess.check_call(command, shell=True)
@@ -720,12 +780,19 @@ def runcombine(analysis, foldername, **kwargs):
               if method == "Impacts":
                 command = replaceByMap(plotimpactscommand, repmap_obs)
                 subprocess.check_call(command, shell=True)
-                utilities.writeplotinfo(replaceByMap(".oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo..txt", repmap_obs))
+                plotbasename = replaceByMap(".oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanrangeappend]Oo.", repmap_obs)
+                plotcopier.copy(plotbasename+".png")
+                plotcopier.copy(plotbasename+".pdf")
+                utilities.writeplotinfo(
+                  plotbasename+".txt",
+                  plotcopier=plotcopier,
+                )
 
           minimum = minimum[0]
           del f
 
         for expectfai in expectvalues:
+          plotlimitskwargs["combinelogs"].append([])
           for scanrange, internalscanrange in izip(scanranges, internalscanranges):
               repmap_exp = repmap.copy()
               if expectfai == "minimum":
@@ -747,6 +814,7 @@ def runcombine(analysis, foldername, **kwargs):
               jobids.add(runscan(repmap_exp, submitjobs=submitjobs))
               repmap_exp["impactsstep"] = "3"
               finalfiles.append(replaceByMap(".oO[filename]Oo.", repmap_exp))
+              plotlimitskwargs["combinelogs"][-1].append(replaceByMap(".oO[logfile]Oo.", repmap_exp))
 
           if method == "FitDiagnostics":
             command = replaceByMap(diffnuisancescommand, repmap_exp)
@@ -790,13 +858,12 @@ def runcombine(analysis, foldername, **kwargs):
         if faifor != "decay":
             plotname += "_"+faifor
 
-        if method == "MultiDimFit":
-            plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
+        if method == "MultiDimFit" and scanranges:
+            plotlimitsfunction(os.path.join(saveasdir, plotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
             for nuisance in plotnuisances:
-                if plottitle(nuisance) == plottitle(POI): continue
-                if nuisance == "CMS_zz4l_fai1" and fixfai: continue
-                nuisanceplotname = plotname.replace("limit", plottitle(nuisance))
-                plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, faifor=faifor, xaxislimits=xaxislimits, **plotlimitskwargs)
+                if nuisance == defaultPOI and fixfai: continue
+                nuisanceplotname = plotname.replace("limit", plottitle(nuisance, analysis=analysis))
+                plotlimitsfunction(os.path.join(saveasdir, nuisanceplotname), analysis, *plotscans, productions=productions, legendposition=legendposition, CLtextposition=CLtextposition, moreappend=replaceByMap(".oO[moreappend]Oo.", repmap), luminosity=totallumi, scanranges=scanranges, nuisance=nuisance, POI=POI, fixfai=fixfai, drawCMS=drawCMS, CMStext=CMStext, scanfai=scanfai, faiorder=faiorder, faifor=faifor, xaxislimits=xaxislimits, plotcopier=plotcopier, **plotlimitskwargs)
 
             utilities.writeplotinfo(
               os.path.join(saveasdir, plotname+".txt"),
@@ -804,10 +871,81 @@ def runcombine(analysis, foldername, **kwargs):
                 "python", "limits.py", str(analysis), foldername,
                 "--plotname="+plotname, "--poi="+POI, "--subdirectory="+subdirectory
               )),
+              plotcopier=plotcopier,
             )
 
-        if method in ("MultiDimFit", "Impacts") and docopyplots:
-            copyplots(os.path.join("limits", subdirectory, fullfoldername))
+def runpermutations(analysis, foldername, *args, **kwargs):
+  assert "faiorder" not in kwargs and "plotnuisances" not in kwargs
+  scanfai = kwargs["scanfai"]
+
+  analysis = Analysis(analysis)
+  fullfoldername = "{}_{}".format(analysis, foldername)
+  subdirectory = kwargs.get("subdirectory", "")
+
+  for permutation in permutations([str(_) for _ in analysis.fais] + ["fa1"]):
+    newkwargs = kwargs.copy()
+    if permutation[0] != scanfai: continue
+
+    newkwargs["faiorder"] = ",".join(permutation)
+
+    plotnuisances = ["CMS_zz4l_fai"+str(i) for i in xrange(1, len(analysis.fais)+1)] + ["CMS_zz4l_fa1"]
+    del plotnuisances[analysis.fais.index(scanfai)]
+    newkwargs["plotnuisances"] = ",".join(plotnuisances)
+
+    folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
+    mkdir_p(folder)
+
+    with utilities.KeepWhileOpenFile(os.path.join(folder, "permutation_scan{}_{}.tmp".format(scanfai, newkwargs["faiorder"]))) as kwof:
+      if not kwof: continue
+      runcombine(analysis, foldername, *args, **newkwargs)
+
+  newkwargs = kwargs.copy()
+  newkwargs["floatothers"] = False
+  with utilities.KeepWhileOpenFile(os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername), "permutation_scan{}_{}.tmp".format(scanfai, "fixothers"))) as kwof:
+    if not kwof: return
+    runcombine(analysis, foldername, *args, **newkwargs)
+
+def rungrid(analysis, foldername, npoints, *args, **kwargs):
+  assert "setparametersforgrid" not in kwargs and "plotnuisances" not in kwargs
+  analysis = Analysis(analysis)
+  fullfoldername = "{}_{}".format(analysis, foldername)
+  subdirectory = kwargs.get("subdirectory", "")
+  scanfai = kwargs["scanfai"]
+
+  otherfais = ["CMS_zz4l_fai"+str(i) for i in xrange(1, len(analysis.fais)+1)] + ["CMS_zz4l_fa1"]
+
+  indicestoremove = [analysis.fais.index(scanfai)]
+  if "faiorder" in kwargs:
+    faiorder = tuple(Analysis(_) if _ != "fa1" else _ for _ in kwargs["faiorder"].split(","))
+  else: 
+    faiorder = tuple(analysis.fais) + ("fa1",)
+
+  if str(faiorder[-1]) == "fa1":
+    indicestoremove.append(len(otherfais)-1)
+  else:
+    assert False #not set up to handle minus sign
+    indicestoremove.append(analysis.fais.index(faiorder[-1]))
+  for _ in sorted(indicestoremove, reverse=True):
+    del otherfais[_]
+
+  otherfais = [_+"_relative" for _ in otherfais]
+
+  plotnuisances = ["CMS_zz4l_fai"+str(i) for i in xrange(1, len(analysis.fais)+1)] + ["CMS_zz4l_fa1"]
+  del plotnuisances[analysis.fais.index(scanfai)]
+  kwargs["plotnuisances"] = ",".join(plotnuisances)
+
+  for indices in product(*(xrange(npoints+1) for _ in otherfais)):
+    otherfaivalues = [-1 + 2.0*index/npoints for index in indices]
+    newkwargs = kwargs.copy()
+
+    newkwargs["setparametersforgrid"] = ",".join("{}:{:g}".format(otherfai, otherfaivalue) for otherfai, otherfaivalue in izip(otherfais, otherfaivalues))
+
+    folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
+    mkdir_p(folder)
+
+    with utilities.KeepWhileOpenFile(os.path.join(folder, "grid_scan{}_{}.tmp".format(scanfai, newkwargs["setparametersforgrid"]))) as kwof:
+      if not kwof: continue
+      runcombine(analysis, foldername, *args, **newkwargs)
 
 ntry = 0
 maxntries = 3
@@ -817,20 +955,39 @@ def main():
         function = runscan
         repmap = json.loads(sys.argv[2])
         args = [repmap, False]
+        startkwargsfrom = 3
+    elif sys.argv[1] == "runpermutations":
+        function = runpermutations
+        analysis = Analysis(sys.argv[2])
+        foldername = sys.argv[3]
+        args = [analysis, foldername]
+        startkwargsfrom = 4
+    elif sys.argv[1] == "rungrid":
+        function = rungrid
+        analysis = Analysis(sys.argv[2])
+        foldername = sys.argv[3]
+        npoints = int(sys.argv[4])
+        args = [analysis, foldername, npoints]
+        startkwargsfrom = 5
     else:
         function = runcombine
         analysis = Analysis(sys.argv[1])
         foldername = sys.argv[2]
         args = [analysis, foldername]
+        startkwargsfrom = 3
 
     kwargs = {}
-    for arg in sys.argv[3:]:
+    for arg in sys.argv[startkwargsfrom:]:
         kw, kwarg = arg.split("=")
         if kw in kwargs:
             raise TypeError("Duplicate kwarg {}!".format(kw))
         kwargs[kw] = kwarg
 
-    function(*args, **kwargs)
+    with PlotCopier() as pc:
+        if function != runscan:
+            assert "plotcopier" not in kwargs
+            kwargs["plotcopier"] = pc
+        function(*args, **kwargs)
 
 if __name__ == "__main__":
     main()

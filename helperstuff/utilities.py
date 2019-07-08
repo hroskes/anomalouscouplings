@@ -4,6 +4,7 @@ import contextlib
 import cPickle
 import datetime
 import errno
+import getpass
 import glob
 import inspect
 import itertools
@@ -13,6 +14,7 @@ import operator
 import json
 import os
 import pipes
+import re
 import shutil
 import subprocess
 import sys
@@ -132,8 +134,11 @@ def cache_file(filename, *argkeys, **kwargkeys):
             except KeyError:
                 result = function(*args, **kwargs)
                 with OneAtATime(filename+".tmp", 5):
-                    with open(filename, "rb") as f:
-                        cache.update(cPickle.load(f))
+                    try:
+                        with open(filename, "rb") as f:
+                            cache.update(cPickle.load(f))
+                    except IOError:
+                        pass
                     cache[keyforcache] = result
                     with open(filename, "wb") as f:
                         cPickle.dump(cache, f)
@@ -328,6 +333,7 @@ class Tee(object):
         self.file = open(*self.openargs, **self.openkwargs)
         self.stdout = sys.stdout
         sys.stdout = self
+        return self
     def __exit__(self, *args):
         sys.stdout = self.stdout
         self.file.close()
@@ -860,8 +866,8 @@ class PlotCopier(object):
 
     def __init__(
       self,
-      copyfromconfig=config.getconfiguration("login-node", "jroskes1@jhu.edu"),
-      copytoconfig=config.getconfiguration("lxplus", "hroskes"),
+      copyfromconfig=config.getconfiguration("login-node", config.marccusername),
+      copytoconfig=config.getconfiguration("lxplus", config.lxplususername),
       copyfromfolder=None,
       copytofolder=None,
       copyfromhost=None,
@@ -893,10 +899,23 @@ class PlotCopier(object):
 
     def __exit__(self, *error):
         import config
-        if LSB_JOBID() or config.host != self.copyfromhost or not self.__tocopy: return
+        if config.host != self.copyfromhost or not self.__tocopy: return
+
+        #getpass instead of raw_input in case you accidentally type your password here
+
         command = ["rsync", "-azvP", self.copyfromfolder, self.copytoconnect + ":" + self.copytofolder] + [
           "--include="+_ for _ in self.__tocopy
         ] + ["--exclude=*", "--delete"]
+
+        if LSB_JOBID():
+            print
+            print "To copy plots, try:"
+            print
+            print " ".join(pipes.quote(_) for _ in command)
+            print
+            return
+
+        getpass.getpass("press enter when you're ready to rsync: ")
         try:
             subprocess.check_call(command)
         except:
@@ -950,7 +969,9 @@ def existsandvalid(filename, *shouldcontain):
 
     return os.path.exists(filename)
 
-def writeplotinfo(txtfilename, *morestuff):
+def writeplotinfo(txtfilename, *morestuff, **kwargs):
+  plotcopier = kwargs.pop("plotcopier", ROOT)
+  assert not kwargs, kwargs
   assert txtfilename.endswith(".txt")
   with open(txtfilename, "w") as f:
     f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
@@ -963,6 +984,8 @@ def writeplotinfo(txtfilename, *morestuff):
     f.write(subprocess.check_output(["git", "status"]))
     f.write("\n")
     f.write(subprocess.check_output(["git", "diff"]))
+  if plotcopier != ROOT:
+    plotcopier.copy(txtfilename)
 
 def debugfunction(function):
   @wraps(function)
@@ -971,3 +994,21 @@ def debugfunction(function):
     print "{.__name__}({}{}{})={}".format(function, ", ".join(str(_) for _ in args), ", " if args and kwargs else "", ", ".join("{}={}".format(k, v) for k, v in kwargs.iteritems()), result)
     return result
   return newfunction
+
+def reiglob(path, exp, invert=False, verbose=False):
+  "https://stackoverflow.com/a/17197678/5228524"
+
+  if verbose: print "reiglobbing "+os.path.join(path, exp)
+
+  m = re.compile(exp)
+
+  n = 0
+
+  for f in os.listdir(path):
+    if bool(m.match(f)) != bool(invert):
+      n += 1
+      if verbose and n % 100 == 0: print "Found {} files so far".format(n)
+      yield os.path.join(path, f)
+
+def reglob(*args, **kwargs):
+  return list(reiglob(*args, **kwargs))

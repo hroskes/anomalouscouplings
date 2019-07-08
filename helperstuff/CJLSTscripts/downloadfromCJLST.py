@@ -59,21 +59,22 @@ class CJLSTScript_Cpp(CJLSTScript_base):
     def filenameisvalid(self, filename):
         if filename == "cConstants.cc": return False
         ext = os.path.splitext(filename)[1]
-        return ext in [".cc", ".C", ".h"]
+        return ext in [".cc", ".C", ".h", ".cpp"]
     def fixandmove(self, tmpfilename):
         with open(tmpfilename) as tmpf, open(self.filename, "w") as f:
             for line in tmpf:
                 if line.startswith("#include "):
                     include = line.split("#include ")[1].strip()[1:-1]
                     if "ZZAnalysis" in include or ".." in include:
-                        if include.split("/")[-2] in ("interface", "src"):
+                        if include.split("/")[-2] in ("interface", "src", "include"):
                             newinclude = include.split("/")[-1]
                             newinclude = newinclude.replace(".cc", ".h")
-                        try:
-                            line = line.replace(include, newinclude).replace("<", '"').replace(">", '"')
-                            del newinclude
-                        except UnboundLocalError:
+                        else:
                             raise OSError("Can't handle #including " + include)
+
+                        line = line.replace(include, newinclude).replace("<", '"').replace(">", '"')
+                        del newinclude
+
                 line = line.replace('extern "C" ', "")
                 f.write(line)
 

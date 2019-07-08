@@ -4,13 +4,18 @@ import argparse
 if __name__ == "__main__":
   p = argparse.ArgumentParser()
   p.add_argument("--submitjobs", action="store_true")
-  p.add_argument("--jsontoo", action="store_true")
+  p.add_argument("--jsontoo", type=int)
   p.add_argument("--removefiles", nargs="*", default=())
+  p.add_argument("--waitids", nargs="*", type=int, default=())
+  p.add_argument("--filter", type=eval, default=lambda template: True)
+  p.add_argument("--start-with-bin", type=int, nargs=3)
   args = p.parse_args()
   if args.jsontoo and not args.submitjobs:
     raise ValueError("--jsontoo doesn't make sense without --submitjobs")
   if args.removefiles and not args.submitjobs:
     raise ValueError("--removefiles doesn't make sense without --submitjobs")
+  if args.waitids and not args.submitjobs:
+    raise ValueError("--waitids doesn't make sense without --submitjobs")
 
 from array import array
 import os
@@ -27,43 +32,53 @@ from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
 from helperstuff.utilities import cd, KeepWhileOpenFile, KeepWhileOpenFiles, LSB_JOBID, mkdir_p
 
-def buildtemplates(*args):
+def buildtemplates(*args, **kwargs):
+  morebuildtemplatesargs = kwargs.pop("morebuildtemplatesargs", [])
+  assert not kwargs, kwargs
+
   if len(args) == 1 and not isinstance(args[0], TemplatesFile):
     tg = TemplateGroup(args[0])
-    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder and not os.path.exists(tf.templatesfile()) and not os.path.exists(tf.templatesfile(firststep=True))]
+    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder and not os.path.exists(tf.templatesfile().replace(".root", ".done"))]
     if not tfs: return
-    assert not any(_.hascustomsmoothing for _ in tfs)
     with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
       if not all(kwofs): return
-      subprocess.check_call(["buildTemplates.py"] + [_.jsonfile() for _ in tfs])
+      subprocess.check_call(["buildTemplates.py", "--use-existing-templates"] + [_.jsonfile() for _ in tfs] + morebuildtemplatesargs)
       return
     return
 
   templatesfile = TemplatesFile(*args)
   if "Ulascan" in str(templatesfile.production): return
-  if templatesfile.usenewtemplatebuilder: return buildtemplates(templatesfile.templategroup)
+  if templatesfile.usenewtemplatebuilder and templatesfile.templategroup in ("background", "DATA", "tth", "bbh"):
+    return buildtemplates(templatesfile.templategroup)
   print templatesfile
   if templatesfile.copyfromothertemplatesfile is not None: return
   with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
+    scriptname = ["buildTemplate.exe"]
+    if templatesfile.usenewtemplatebuilder:
+      scriptname = ["buildTemplates.py", "--use-existing-templates"] + morebuildtemplatesargs
     if f:
-      if not os.path.exists(templatesfile.templatesfile()):
+      if (
+        not os.path.exists(templatesfile.templatesfile())
+        or templatesfile.usenewtemplatebuilder and not os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
+      ):
         if not os.path.exists(templatesfile.templatesfile(firststep=True)):
           mkdir_p(os.path.dirname(templatesfile.templatesfile(firststep=True)))
           try:
-            subprocess.check_call(["buildTemplate.exe", templatesfile.jsonfile()])
+            subprocess.check_call(scriptname + [templatesfile.jsonfile()])
           except:
             try:
               raise
             finally:
-              try:
-                os.remove(templatesfile.templatesfile(firststep=templatesfile.hascustomsmoothing))
-              except:
-                pass
+              if not templatesfile.usenewtemplatebuilder:
+                try:
+                  os.remove(templatesfile.templatesfile(firststep=templatesfile.hascustomsmoothing))
+                except:
+                  pass
       if (
         os.path.exists(templatesfile.templatesfile(firststep=True))
-         and not os.path.exists(templatesfile.templatesfile())
-         and templatesfile.hascustomsmoothing
-         ):
+        and not os.path.exists(templatesfile.templatesfile())
+        and templatesfile.hascustomsmoothing
+      ):
         try:
           bad = False
           templatesfile.docustomsmoothing()
@@ -140,7 +155,13 @@ def submitjobs(removefiles, jsontoo=False):
       else:
         if not os.path.exists(templatesfile.jsonfile()):
           raise ValueError(templatesfile.jsonfile()+" doesn't exist!  Try --jsontoo.")
-    elif os.path.exists(templatesfile.templatesfile()) or not KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp").wouldbevalid:
+    elif (
+      (
+        not templatesfile.usenewtemplatebuilder and os.path.exists(templatesfile.templatesfile())
+        or templatesfile.usenewtemplatebuilder and os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
+      )
+      or not KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp").wouldbevalid
+    ):
       pass
     else:
       if not jsontoo:
@@ -149,7 +170,7 @@ def submitjobs(removefiles, jsontoo=False):
       torun.add(templatesfile)
 
   for tf in frozenset(torun):
-    if tf.usenewtemplatebuilder:
+    if tf.usenewtemplatebuilder and tf.templategroup in ("background", "DATA"):
       torun.remove(tf)
       torun.add(tf.templategroup)
   njobs = len(torun)
@@ -166,9 +187,10 @@ def submitjobs(removefiles, jsontoo=False):
     if jsontoo:
       sys.dont_write_bytecode = True
       import step4_makejson
-      waitids = list(step4_makejson.submitjobs(5))
+      waitids = list(step4_makejson.submitjobs(jsontoo))
     else:
       waitids = []
+    waitids += list(args.waitids)
     for i in range(njobs):
       submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0", docd=True, waitids=waitids)
 
@@ -176,8 +198,12 @@ if __name__ == "__main__":
   if args.submitjobs:
     submitjobs(args.removefiles, args.jsontoo)
   else:
+    morebuildtemplatesargs = []
+    if args.start_with_bin: morebuildtemplatesargs += ["--start-with-bin"] + [str(_) for _ in args.start_with_bin]
     for templatesfile in templatesfiles:
-      buildtemplates(templatesfile)
+      if not args.filter(templatesfile): continue
+      with cd(config.repositorydir):
+        buildtemplates(templatesfile, morebuildtemplatesargs=morebuildtemplatesargs)
       #and copy data
     for datatree in datatrees:
       copydata(datatree)

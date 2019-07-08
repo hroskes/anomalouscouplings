@@ -59,7 +59,8 @@ class SumOfSamplesBase(object):
                                "({}*{})".format(weightname, couplingsq)
                                    for weightname, couplingsq in factor
                               )
-                      +")" for factor in self.MC_weight_terms
+                      +")" if factor else "0"
+                      for factor in self.MC_weight_terms
                      )
     return result
 
@@ -565,125 +566,6 @@ class SampleBase(SumOfSamplesBase):
       for individualfactors in cartesianproduct(*factors):
         result.append(("*".join(weightname for weightname, multiplier in individualfactors), product(multiplier for weightname, multiplier in individualfactors)))
       return result
-
-    def get_MC_weight_function(self_sample, functionname=None, reweightingonly=False, LHE=False):
-        if functionname is None:
-            functionname = self_sample.weightname()
-
-        strsample = str(self_sample)
-
-        if not LHE:
-
-            if self_sample.productionmode == "ggZZ":
-                def MC_weight_function(self_tree):
-                    KFactor = self_tree.KFactor_QCD_ggZZ_Nominal
-                    return self_tree.overallEventWeight * self_tree.xsec * KFactor / self_tree.nevents
-
-            elif self_sample.productionmode == "qqZZ":
-                def MC_weight_function(self_tree):
-                    if self_tree.GEN:
-                        assert not hasattr(self_tree, "KFactor_EW_qqZZ")
-                        return self_tree.overallEventWeight * self_tree.xsec #/ self_tree.nevents
-                                                                             #Do NOT divide by nevents.  This will happen
-                                                                             #in creating the templates when we divide by
-                                                                             #sum(effectiveentries[==nevents])
-                    if hasattr(self_tree, "KFactor_EW_qqZZ"): #qqZZ->itself
-                        KFactor = self_tree.KFactor_EW_qqZZ * self_tree.KFactor_QCD_qqZZ_M
-                        return self_tree.overallEventWeight * self_tree.xsec * KFactor #/ self_tree.nevents
-                                                                                       #Do NOT divide by nevents.  This will happen
-                                                                                       #in creating the templates when we divide by
-                                                                                       #sum(effectiveentries[==nevents])
-                    else:                                     #VBFbkg->qqZZ
-                        result = self_tree.p_Gen_JJQCD_BKG_MCFM
-                        if not reweightingonly and result != 0:
-                            cutoff = self_tree.cutoffs[strsample]
-                            if result > cutoff:
-                                result = cutoff**2 / result
-                            result *= (
-                                         self_tree.overallEventWeight
-                                       * self_tree.multiplyweight[strsample]
-                                      )
-                        return result
-
-
-            elif self_sample.productionmode == "ZX":
-                import ZX
-                def MC_weight_function(self_tree):
-                    LepPt, LepEta, LepLepId = self_tree.tree.LepPt, self_tree.tree.LepEta, self_tree.tree.LepLepId
-                    return ZX.fakeRate13TeV(LepPt[2],LepEta[2],LepLepId[2]) * ZX.fakeRate13TeV(LepPt[3],LepEta[3],LepLepId[3])
-
-            elif (self_sample.productionmode in ("VBF bkg", "tqH")
-                       or hasattr(self_sample, "alternategenerator") and self_sample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS")
-                       or hasattr(self_sample, "pythiasystematic") and self_sample.pythiasystematic is not None):
-                def MC_weight_function(self_tree):
-                    if reweightingonly: return 1
-                    return self_tree.overallEventWeight * self_tree.xsec / self_tree.nevents
-
-            elif self_sample.issignal:
-
-                factors = self_sample.MC_weight_terms
-
-                photoncut_decay = False
-                photoncut_ZH = False and self_sample.productionmode == "ZH"
-                photoncut_VBF = False and self_sample.productionmode == "VBF"
-
-                def MC_weight_function(self_tree):
-                    if photoncut_decay:
-                        leptons = [(id, tlvfromptetaphim(pt, eta, phi, m)) for id, pt, eta, phi, m in zip(self_tree.LHEDaughterId, self_tree.LHEDaughterPt, self_tree.LHEDaughterEta, self_tree.LHEDaughterPhi, self_tree.LHEDaughterMass)]
-                        for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
-                            if id1 == -id2 and (p1+p2).M() < 4: return 0
-                    if photoncut_ZH:
-                        Zdecay = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
-                        assert len(Zdecay) == 2
-                        if (Zdecay[0]+Zdecay[1]).M() < 4: return 0
-                    if photoncut_VBF:
-                        jets = [tlvfromptetaphim(pt, eta, phi, m) for pt, eta, phi, m in zip(self_tree.LHEAssociatedParticlePt, self_tree.LHEAssociatedParticleEta, self_tree.LHEAssociatedParticlePhi, self_tree.LHEAssociatedParticleMass)]
-                        assert len(jets) == 2
-                        if any(jet.Pt() < 15 for jet in jets): return 0
-                    result = product(
-                                     sum(
-                                         getattr(self_tree, weightname) * couplingsq
-                                               for weightname, couplingsq in factor
-                                        ) for factor in factors
-                                    )
-
-                    if not reweightingonly and result != 0:
-                        cutoff = self_tree.cutoffs[strsample]
-                        if result > cutoff:
-                            result = cutoff**2 / result
-                        result *= (
-                                     self_tree.overallEventWeight
-                                   * self_tree.multiplyweight[strsample]
-                                  )
-                    return result
-
-            else:
-                raise ValueError("No MC weight function defined for {}".format(self_sample))
-
-        else: #LHE
-            photoncut_decay = False
-            if self_sample.productionmode == "ggH":
-                def MC_weight_function(self_tree):
-                    if photoncut_decay:
-                        leptons = [(id, tlv) for id, tlv in self_tree.event.gendaughters]
-                        for (id1, p1), (id2, p2) in cartesianproduct(leptons, leptons):
-                            if id1 == -id2 and (p1+p2).M() < 4: return 0
-                    result = self_tree.event.weight
-                    if not reweightingonly and result != 0:
-                        result *= self_sample.SMxsec / self_tree.sumofweights
-                    return result
-            elif self_sample.productionmode == "qqZZ":
-                xsec = 1.256 * 1000
-                def MC_weight_function(self_tree):
-                    result = self_tree.event.weight
-                    if not reweightingonly and result != 0:
-                        result *= xsec / self_tree.sumofweights
-                    return result
-            else:
-                raise ValueError("No MC weight function defined for {}".format(self_sample))
-
-        MC_weight_function.__name__ = functionname
-        return MC_weight_function
 
     def fai(self, productionmode, analysis, withdecay=False):
         from combinehelpers import mixturesign
@@ -1254,7 +1136,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "a2": return constants.g2HZZ if self.productionmode in ("ggH", "ttH", "bbH", "HJJ") else 1
+            if self.hypothesis == "a2": return 1
             if self.hypothesis in ("0+", "0-", "L1", "L1Zg"): return 0
 
             g2 = {"dec": constants.g2HZZ}
@@ -1310,7 +1192,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g4(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "0-": return constants.g4HZZ if self.productionmode in ("ggH", "ttH", "bbH", "HJJ") else 1
+            if self.hypothesis == "0-": return 1
             if self.hypothesis in ("0+", "a2", "L1", "L1Zg"): return 0
 
             g4 = {"dec": constants.g4HZZ}
@@ -1366,7 +1248,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def g1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "L1": return constants.g1prime2HZZ if self.productionmode in ("ggH", "ttH", "bbH", "HJJ") else 1
+            if self.hypothesis == "L1": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1Zg"): return 0
 
             g1prime2 = {"dec": constants.g1prime2HZZ}
@@ -1422,7 +1304,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def ghzgs1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
-            if self.hypothesis == "L1Zg": return constants.ghzgs1prime2HZZ if self.productionmode in ("ggH", "ttH", "bbH", "HJJ") else 1
+            if self.hypothesis == "L1Zg": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1"): return 0
 
             ghzgs1prime2 = {"dec": constants.ghzgs1prime2HZZ}
@@ -1818,6 +1700,16 @@ class SampleBasis(MultiEnum):
         if len(set(self.hypotheses)) != len(self.hypotheses):
             raise ValueError("Duplicate hypothesis\n{}".format(args))
 
+    def scaleby(self, i):
+        if self.productionmode in ("VBF", "ZH", "WH", "ggH", "ttH", "bbH"):
+            return {
+                Analysis("fa3"): 1,
+                Analysis("fa2"): 1,
+                Analysis("fL1"): 1e-4,
+                Analysis("fL1Zg"): 1e-4,
+            }[self.analysis.fais[i]]
+        assert False
+
     @property
     @cache
     def matrix(self):
@@ -1837,10 +1729,10 @@ class SampleBasis(MultiEnum):
                                 [
                                  [
                                   sample.g1**(maxpower-i-j-k-l)
-                                  * getattr(sample, self.analysis.couplingnames[0])**i
-                                  * getattr(sample, self.analysis.couplingnames[1])**j
-                                  * getattr(sample, self.analysis.couplingnames[2])**k
-                                  * getattr(sample, self.analysis.couplingnames[3])**l
+                                  * (getattr(sample, self.analysis.couplingnames[0]) * self.scaleby(0))**i
+                                  * (getattr(sample, self.analysis.couplingnames[1]) * self.scaleby(1))**j
+                                  * (getattr(sample, self.analysis.couplingnames[2]) * self.scaleby(2))**k
+                                  * (getattr(sample, self.analysis.couplingnames[3]) * self.scaleby(3))**l
                                      for l in range(maxpower+1)
                                      for k in range(maxpower+1-l)
                                      for j in range(maxpower+1-k-l)
@@ -1857,8 +1749,8 @@ class SampleBasis(MultiEnum):
                                 [
                                  [
                                   sample.g1**(maxpower-i-j)
-                                  * getattr(sample, self.analysis.couplingnames[0])**i
-                                  * getattr(sample, self.analysis.couplingnames[1])**j
+                                  * (getattr(sample, self.analysis.couplingnames[0]) * self.scaleby(0))**i
+                                  * (getattr(sample, self.analysis.couplingnames[1]) * self.scaleby(1))**j
                                      for j in range(maxpower+1)
                                      for i in range(maxpower+1-j)
                                  ]

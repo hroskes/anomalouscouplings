@@ -258,6 +258,8 @@ class ProductionMode(MyEnum):
                  EnumItem("WminusH"),
                  EnumItem("bbH"),
                  EnumItem("tqH"),
+                 EnumItem("ffH"),
+                 EnumItem("VVH"),
                 )
     @property
     def combinename(self):
@@ -290,7 +292,7 @@ class ProductionMode(MyEnum):
         return str(self)
     @property
     def isbkg(self):
-        if self in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH"):
+        if self in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH", "ffH", "VVH"):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
@@ -561,6 +563,8 @@ class Analysis(MyEnum):
                  EnumItem("fa3_onlyDCP"),
                  EnumItem("fa3fa2fL1fL1Zg"),
                  EnumItem("fa3fa2fL1fL1Zg_decay"),
+                 EnumItem("fa3fa2fL1fL1Zg_only6bins"),
+                 EnumItem("fa3fa2fL1fL1Zg_STXS"),
                 )
     def title(self, latex=False, superscript=None):
         if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -676,8 +680,9 @@ class Analysis(MyEnum):
     def isSTXS(self):
         if self == "fa3_STXS": return True
         if self == "fa3_onlyDbkg": return True
+        if self == "fa3fa2fL1fL1Zg_STXS": return True
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return False
-        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay"): return False
+        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_only6bins"): return False
         assert False, self
     @property
     def categoryname(self):
@@ -699,22 +704,38 @@ class Analysis(MyEnum):
         return False
     @property
     def doGEN(self):
-        if self == "fa3_multiparameter": return True
-        if self == "fa3_multiparameter_nodbkg": return False
-        if self == "fa3_only6bins": return False
-        if self == "fa3_onlyDCP": return False
-        if self == "fa3_STXS": return True
-        if self == "fa3_onlyDbkg": return False
-        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
-        if self.isfL1fL1Zg: return False
-        if self == "fa3fa2fL1fL1Zg": return False
-        if self == "fa3fa2fL1fL1Zg_decay": return True
+        if config.name ==  "heshy" : 
+            if self == "fa3_multiparameter": return False
+            if self == "fa3_multiparameter_nodbkg": return False
+            if self == "fa3_only6bins": return False
+            if self == "fa3_onlyDCP": return False
+            if self == "fa3_STXS": return False
+            if self == "fa3_onlyDbkg": return False
+            if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+            if self.isfL1fL1Zg: return False
+            if self == "fa3fa2fL1fL1Zg": return True
+            if self == "fa3fa2fL1fL1Zg_decay": return True
+            if self == "fa3fa2fL1fL1Zg_only6bins": return True
+            if self == "fa3fa2fL1fL1Zg_STXS": return True
+        if config.name ==  "savvas" : 
+            if self == "fa3_multiparameter": return True
+            if self == "fa3_multiparameter_nodbkg": return False
+            if self == "fa3_only6bins": return False
+            if self == "fa3_onlyDCP": return False
+            if self == "fa3_STXS": return True
+            if self == "fa3_onlyDbkg": return False
+            if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
+            if self.isfL1fL1Zg: return False
+            if self == "fa3fa2fL1fL1Zg": return False
+            if self == "fa3fa2fL1fL1Zg_decay": return False
+            if self == "fa3fa2fL1fL1Zg_only6bins": return False
+            if self == "fa3fa2fL1fL1Zg_STXS": return False
         assert False, self
     @property
     def doCMS(self):
-        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return True
+        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
         if self.isfL1fL1Zg: return False
-        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay"): return False
+        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDbkg", "fa3fa2fL1fL1Zg_STXS"): return False
         assert False, self
     @property
     def fais(self):
@@ -762,6 +783,9 @@ class Production(MyEnum):
                  EnumItem("180721_Ulascan"),
                  EnumItem("180722", "180721_2017"),
                  EnumItem("180722_Ulascan"),
+                 EnumItem("190703_2016"),
+                 EnumItem("190703_2017"),
+                 EnumItem("190703_2018"),
                  EnumItem("LHE_170509"),
                  EnumItem("GEN_Meng"),
                  EnumItem("GEN_181119"),
@@ -769,7 +793,7 @@ class Production(MyEnum):
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
-        if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
+        if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self) and "190703" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
         if self == "170203":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170203"
@@ -833,6 +857,21 @@ class Production(MyEnum):
                 assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/GENtrees/181119_2017MC"
+        if self == "190703_2016":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190703_2016anomalous"
+        if self == "190703_2017":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190703_2017anomalous"
+        if self == "190703_2018":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190703_2018anomalous"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -863,6 +902,9 @@ class Production(MyEnum):
         return int(str(self))
     @property
     def year(self):
+        if self == "190703_2016": return 2016
+        if self == "190703_2017": return 2017
+        if self == "190703_2018": return 2018
         if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).year
         if self <= "180224" or self == "180531_2016" or self == "180721_2016":
             return 2016
@@ -900,6 +942,7 @@ class Production(MyEnum):
     def pdf(self):
       if self.year == 2016: return "NNPDF30_lo_as_0130"
       if self.year == 2017: return "NNPDF31_lo_as_0130"
+      if self.year == 2018: return "NNPDF31_lo_as_0130"
       assert False, self
 
 class Category(MyEnum):

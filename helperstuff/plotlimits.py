@@ -4,10 +4,13 @@ import array
 import math
 import os
 import random
+import re
 import sys
 
 from collections import namedtuple
-from itertools import islice
+from itertools import islice, izip
+
+import numpy as np
 
 import ROOT
 
@@ -24,12 +27,18 @@ from yields import YieldValue
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
 
-Scan = namedtuple("Scan", "name title color style")
+class Scan(namedtuple("Scan", "name title color style badpoints")):
+    def __new__(cls, name, title, color, style, badpoints=None):
+        return super(Scan, cls).__new__(cls, name, title, color, style, badpoints=badpoints)
 
-def plottitle(nuisance):
+def plottitle(nuisance, analysis=None):
     nuisance = actualvariable(nuisance)
-    if nuisance == "CMS_zz4l_fai1": return "fai"
-    if nuisance == "CMS_zz4l_fai2": return "faj"
+    if analysis is not None:
+        if nuisance == "CMS_zz4l_fai1": return str(analysis.fais[0])
+        if nuisance == "CMS_zz4l_fai2": return str(analysis.fais[1])
+        if nuisance == "CMS_zz4l_fai3": return str(analysis.fais[2])
+        if nuisance == "CMS_zz4l_fai4": return str(analysis.fais[3])
+    if nuisance == "CMS_zz4l_fa1": return "fa1"
     if nuisance == "RV": return "muV"
     if nuisance == "RF": return "muf"
     if nuisance == "CMS_scale_j_13TeV_2016": return nuisance
@@ -41,9 +50,10 @@ def xaxistitle(POI, analysis, faifor=None):
     if POI == "CMS_zz4l_fai2": return "{} cos({})".format(analysis.fais[1].title(superscript=faifor), analysis.fais[1].phi_lower)
     if POI == "CMS_zz4l_fai3": return "{} cos({})".format(analysis.fais[2].title(superscript=faifor), analysis.fais[2].phi_lower)
     if POI == "CMS_zz4l_fai4": return "{} cos({})".format(analysis.fais[3].title(superscript=faifor), analysis.fais[3].phi_lower)
+    if POI == "CMS_zz4l_fa1": return "f_{a1} cos(#phi_{#lower[-0.25]{a1}})"
     if POI == "RV": return "#mu_{V}"
     if POI == "RF": return "#mu_{f}"
-    if nuisance == "CMS_scale_j_13TeV_2016": return nuisance
+    if POI == "CMS_scale_j_13TeV_2016": return POI
     assert False
 def xaxisrange(POI):
     POI = actualvariable(POI)
@@ -59,6 +69,44 @@ def actualvariable(variable):
     #if variable in ("r_VVH", "muV", "RV"): return "muV_scaled"
     #if variable in ("r_ffH", "muf", "RF"): return "muf_scaled"
     return variable
+
+def getvaluefromtree(t, nuisance, useNLLandNLL0, analysis=None, faiorder=None):
+    if nuisance is None:
+        deltaNLL = t.deltaNLL
+        if useNLLandNLL0: deltaNLL += t.nll+t.nll0
+        if math.isinf(deltaNLL) or math.isnan(deltaNLL):
+            t.Show()
+            raise ValueError("one of the NLL variables is infinity or NaN, see ^^^^")
+        return 2*deltaNLL
+    elif nuisance in ("CMS_zz4l_fai1", "CMS_zz4l_fai2", "CMS_zz4l_fai3", "CMS_zz4l_fai4", "CMS_zz4l_fa1") and not hasattr(t, nuisance):
+        if faiorder is None:
+            raise ValueError("Can't get {} when faiorder or analysis is None".format(nuisance))
+        faiorder = [str(_) for _ in faiorder]
+
+        if nuisance == "CMS_zz4l_fa1":
+            thisfai = "fa1"
+        else:
+            thisfai = str(analysis.fais[int(nuisance.replace("CMS_zz4l_fai", ""))-1])
+
+        remaining = 1
+        for fai in faiorder:
+            if fai == "fa1":
+                parametername = "CMS_zz4l_fa1"
+            else:
+                parametername = "CMS_zz4l_fai{:d}".format(analysis.fais.index(fai)+1)
+            if fai == faiorder[-1]:
+                faivalue = remaining
+            elif hasattr(t, parametername):
+                faivalue = getattr(t, parametername)
+            else:
+                faivalue = remaining * getattr(t, parametername+"_relative")
+            remaining -= abs(faivalue)
+
+            if fai == thisfai:
+                return faivalue
+    else:
+        return getattr(t, nuisance)
+
 
 
 @cache
@@ -121,6 +169,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     adddirectories = []
     scale = 1
     useNLLandNLL0 = True
+    plotcopier = ROOT
+    combinelogs = None
+    faiorder = None
+    zeroNLL = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -170,6 +222,14 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             scale = kwarg
         elif kw == "useNLLandNLL0":
             useNLLandNLL0 = bool(int(kwarg))
+        elif kw == "plotcopier":
+            plotcopier = kwarg
+        elif kw == "combinelogs":
+            combinelogs = kwarg
+        elif kw == "faiorder":
+            faiorder = kwarg
+        elif kw == "zeroNLL":
+            zeroNLL = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -177,20 +237,26 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     elif scanfai == analysis.fais[1]: POI = "CMS_zz4l_fai2"
     elif scanfai == analysis.fais[2]: POI = "CMS_zz4l_fai3"
     elif scanfai == analysis.fais[3]: POI = "CMS_zz4l_fai4"
-    else: assert False
+    else: assert False, scanfai
 
     xmin = min(scanrange[1] for scanrange in scanranges)
     xmax = max(scanrange[2] for scanrange in scanranges)
 
     scans = []
     uptocolor = 1
-    for arg in args:
+
+    badpoints = [[] * len(args)]
+    if combinelogs is not None:
+        assert len(combinelogs) == len(args)
+        badpoints = [findbadpoints(*combineloglist) for combineloglist in combinelogs]
+
+    for arg, badpts in izip(args, badpoints):
         if fixfai:
             phipart = "{} = 0".format(analysis.title())
         else:
             phipart = "{} = 0 or #pi".format(analysis.phi)
         if arg == "obs":
-            scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1))
+            scans.append(Scan("obs{}".format(moreappend), "Observed, {}".format(phipart), 1, 1, badpoints=badpts))
             if productions is None:
                 raise ValueError("No productions provided!")
         else:
@@ -199,10 +265,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
             except ValueError:
                 raise TypeError("Extra arguments to plotlimits have to be 'obs' or a float!")
             if arg == 0:
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {}".format(phipart, uptocolor, 2), uptocolor, 2, badpoints=badpts))
             else:
                 assert not fixfai
-                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2))
+                scans.append(Scan("exp_{}{}".format(arg, moreappend), "Expected, {} = {:+.2f}, {}".format(analysis.title(), arg, phipart).replace("+", "#plus ").replace("-", "#minus "), uptocolor, 2, badpoints=badpts))
             uptocolor += 1
 
     if luminosity is None:
@@ -247,16 +313,10 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                             elif faifor == "VBFreco": assert len(productions) == 1; fa3 = fai_VBFreco(analysis, productions[0], fa3)
                             else: assert False
                             if xaxislimits is not None and not (xaxislimits[0] <= fa3 <= xaxislimits[1]): continue
-                        if killpoints is not None and any(_[0] < fa3 < _[1] for _ in killpoints): continue
-                        if nuisance is None:
-                            deltaNLL = t.deltaNLL
-                            if useNLLandNLL0: deltaNLL += t.nll+t.nll0
-                            if math.isinf(deltaNLL) or math.isnan(deltaNLL):
-                                t.Show()
-                                raise ValueError("one of the NLL variables is infinity or NaN, see ^^^^")
-                            NLL[fa3] = 2*deltaNLL
-                        else:
-                            NLL[fa3] = getattr(t, nuisance)
+                        if any(_[0] < fa3 < _[1] for _ in killpoints): continue
+                        if any(np.isclose(fa3, _) for _ in scan.badpoints): continue
+
+                        NLL[fa3] = getvaluefromtree(t, nuisance, useNLLandNLL0, analysis=analysis, faiorder=faiorder)
                     if 1 not in NLL and -1 in NLL and xaxislimits is None and POI == "CMS_zz4l_fai1":
                         NLL[1] = NLL[-1]
 
@@ -288,8 +348,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
             finalNLL += NLL
 
-        c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
-        if nuisance is None: finalNLL.zero()
+        c1 = plotcopier.TCanvas("c1", "", 8, 30, 800, 800)
+        if zeroNLL and nuisance is None: finalNLL.zero()
         g = finalNLL.TGraph()
         mg.Add(g)
 
@@ -307,6 +367,8 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
     if xaxisrange(POI) is not None:
         mg.GetXaxis().SetRangeUser(*xaxisrange(POI))
     mg.GetYaxis().SetTitle(yaxistitle(nuisance, analysis))
+    if nuisance is None:
+        mg.SetMinimum(0)
     l.Draw()
 
     style.applycanvasstyle(c1)
@@ -496,6 +558,7 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
     fixfai = False
     CMStext = "Preliminary"
     drawCMS = True
+    plotcopier = ROOT
     for kw, kwarg in kwargs.iteritems():
         if kw == "productions":
             productions = kwarg
@@ -523,6 +586,8 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
             drawCMS = kwarg
         elif kw == "scanfai":
             scanfai = kwarg
+        elif kw == "plotcopier":
+            plotcopier = kwarg
         else:
             raise TypeError("Unknown kwarg {}={}".format(kw, kwarg))
 
@@ -586,7 +651,7 @@ def plotlimits2D(outputfilename, analysis, *args, **kwargs):
                 else:
                      NLL[fa3] = getattr(t, nuisance)
 
-        c1 = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+        c1 = plotcopier.TCanvas("c1", "", 8, 30, 800, 800)
         if nuisance is None: NLL.zero()
         g = NLL.TGraph2D()
 
@@ -656,3 +721,17 @@ def feLfeRgraphs():
     gRpoint.SetMarkerSize(gRpoint.GetMarkerSize()+2)
 
     return gL, gLpoint, gR, gRpoint
+
+def findbadpoints(*combinelogs):
+    result = set()
+    for combinelog in combinelogs:
+        currentpoint = None
+        with open(combinelog) as f:
+            for line in f:
+                #https://stackoverflow.com/a/4703508/5228524
+                match = re.search(r"Point [0-9]+/[0-9]+ [A-Za-z0-9_]+ = ([-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))(?:[Ee][+-]?\d+)?)", line)
+                if match:
+                    currentpoint = float(match.group(1))
+                if "VariableMetricBuilder: matrix not pos.def" in line and currentpoint is not None:
+                    result.add(currentpoint)
+    return result

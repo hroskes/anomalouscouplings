@@ -15,6 +15,7 @@ import categorization
 import CJLSTscripts
 import config
 import constants
+import discriminants
 import enums
 import STXS
 import xrd
@@ -35,9 +36,6 @@ class TreeWrapperBase(Iterator):
         self.treesample = treesample
         self.productionmode = str(treesample.productionmode)
         self.hypothesis = str(treesample.hypothesis)
-
-        if self.isZX:
-            ZX.setup(treesample.production)
 
         self.year = treesample.production.year
 
@@ -116,14 +114,20 @@ class TreeWrapperBase(Iterator):
         if error:
             raise SyntaxError(error)
 
-    @classmethod
-    def initweightfunctions(cls):
-        for sample in cls.allsamples:
-            setattr(cls, sample.weightname(), sample.get_MC_weight_function(LHE=False))
+    def per_event_scale_factor(self):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH"): return 1
+        if self.productionmode == "ggZZ": return self.KFactor_QCD_ggZZ_Nominal
+        if self.productionmode == "qqZZ":
+            if self.GEN: return 1
+            return self.KFactor_EW_qqZZ * self.KFactor_QCD_qqZZ_M
+        if self.productionmode == "ZX":
+            LepPt, LepEta, LepLepId = self.LepPt, self.LepEta, self.LepLepId
+            return ZX.getfakerate(self.year, LepPt[2], LepEta[2], LepLepId[2]) * ZX.getfakerate(self.year, LepPt[3], LepEta[3], LepLepId[3])
+        assert False, self
 
     def MC_weight_nominal(self):
         pb_to_fb = 1000
-        return self.overallEventWeight * self.genxsec * self.genBR * pb_to_fb / self.nevents
+        return self.overallEventWeight * self.genxsec * self.genBR * pb_to_fb * self.per_event_scale_factor() / self.nevents
 
 ##########################
 #background discriminants#
@@ -761,12 +765,11 @@ class TreeWrapperBase(Iterator):
       ("D_int_decay", [.8]),
     )
     foldbins_4couplings_decay = tuple(sorted((
-      #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      18, 19, 33, 35, 36, 37, 38, 39, 40, 41, 42, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 68, 69, 90, 91, 95, 107, 108, 110, 116, 120, 121, 122, 123, 124, 125, 126, 140, 141, 161,
-      #additional bad ones discovered with not enough stats to populate the templates
-      #they go negative in at least one channel for ggH fa3=0.5
-      0, 1, 4, 6, 10, 12, 14, 15, 16, 17, 22, 23, 24, 25, 27, 28, 29, 30, 31, 32, 34, 44, 55, 60, 66, 70, 71, 72, 73, 85, 86, 87, 88, 89, 97, 100, 101, 102, 103, 104, 105, 106, 109, 112, 114, 118, 127, 139, 142, 143, 144, 145, 149, 151, 153, 154, 155, 156, 157, 158, 159, 160,
+      #bins with very few entries, summed over all production modes
+      #see misc/foldbins
+      15, 17, 22, 33, 34, 35, 36, 37, 38, 39, 40, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 68, 69, 70, 71, 89, 101, 103, 105, 106, 107, 114, 116, 118, 120, 121, 122, 123, 124, 125, 140, 141, 143, 155, 157, 159, 160, 161,
     ), reverse=True))
+    assert 162 - len(foldbins_4couplings_decay) == discriminants.discriminant("D_4couplings_decay").bins == discriminants.discriminant("D_4couplings_decay").max, (162 - len(foldbins_4couplings_decay), discriminants.discriminant("D_4couplings_decay").bins)
 
     binning_4couplings_VBFdecay = (
       ("D_0minus_VBFdecay", [.1, .9]),
@@ -779,12 +782,11 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_VBFdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_VBFdecay)
 
     foldbins_4couplings_VBFdecay = tuple(sorted((
-      #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      4, 5, 12, 13, 14, 15, 16, 17, 22, 23, 30, 31, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 67, 68, 69, 70, 71, 76, 77, 84, 85, 92, 93, 94, 95, 96, 97, 102, 103, 108, 110, 112, 113, 114, 115, 118, 119, 120, 121, 122, 123, 124, 125, 130, 131, 132, 133, 138, 139, 144, 145, 146, 147, 148, 149, 150, 151, 156, 157,
-      #additional bad ones discovered with not enough stats to populate the templates
-      #they go negative in at least one channel for ggH fa3=0.5, VBF fa3=0.5, or VBF fa3VBF=0.5
-      10, 11, 28, 29, 32, 33, 34, 82, 83, 86, 87, 88, 89, 90, 91, 98, 99, 100, 101, 104, 105, 106, 107, 109, 111, 116, 126, 127, 128, 129, 152, 153, 154, 155, 158, 159,
+      #bins with very few entries, summed over all production modes
+      #see misc/foldbins
+      4, 5, 12, 13, 14, 15, 17, 22, 23, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 67, 68, 69, 70, 71, 76, 77, 90, 91, 92, 93, 94, 95, 102, 103, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 138, 139, 144, 145, 146, 147, 148, 149, 156, 157,
     ), reverse=True))
+    assert 162 - len(foldbins_4couplings_VBFdecay) == discriminants.discriminant("D_4couplings_VBFdecay").bins == discriminants.discriminant("D_4couplings_VBFdecay").max, (162 - len(foldbins_4couplings_VBFdecay), discriminants.discriminant("D_4couplings_VBFdecay").bins)
 
     binning_4couplings_HadVHdecay = (
       ("D_0minus_HadVHdecay", [.2, .8]),
@@ -797,14 +799,11 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_HadVHdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_HadVHdecay)
 
     foldbins_4couplings_HadVHdecay = tuple(sorted((
-      #bins with <100 entries, summed over all trees we process (not data or Z+X)
-      4, 5, 11, 12, 17, 22, 23, 24, 28, 29, 30, 31, 34, 35, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 58, 59, 66, 71, 76, 77, 83, 84, 85, 89, 94, 95, 101, 102, 103, 108, 112, 113, 114, 119, 120, 121, 125, 126, 130, 131, 132, 137, 138, 139, 143, 144, 145, 148, 149, 150, 151, 155, 156, 157,
-      #additional bad ones discovered with not enough stats to populate the templates
-      #they go negative in at least one channel for ggH fa3=0.5, ZH fa3=0.5, ZH fa3ZH=0.5, WH fa3=0.5, or WHfa3WH=0.5
-      0, 6, 10, 16, 18, 25, 36, 37, 38, 39, 54, 60, 64, 65, 67, 72, 78, 90, 91, 96, 97, 100, 109, 111, 115, 123, 127, 133, 146, 147, 154,
-      #more found later that go negative at other points
-      13, 79, 136,
+      #bins with very few entries, summed over all production modes
+      #see misc/foldbins
+      0, 4, 6, 18, 22, 23, 24, 25, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 58, 72, 76, 77, 78, 90, 91, 92, 94, 95, 96, 97, 100, 108, 110, 112, 113, 114, 120, 121, 125, 126, 127, 128, 130, 131, 132, 133, 137, 144, 145, 146, 147, 148, 149, 150, 151, 154, 155,
     ), reverse=True))
+    assert 162 - len(foldbins_4couplings_HadVHdecay) == discriminants.discriminant("D_4couplings_HadVHdecay").bins == discriminants.discriminant("D_4couplings_HadVHdecay").max, (162 - len(foldbins_4couplings_HadVHdecay), discriminants.discriminant("D_4couplings_HadVHdecay").bins)
 
     def D_4couplings_decay_raw(self):
       return self.D_4couplings_general_raw(*self.binning_4couplings_decay)
@@ -837,10 +836,10 @@ class FixWrongWH(object):
     except AttributeError:
       return getattr(self.tree, attr.replace("ghw", "ghv"))
 
-@callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
+@callclassinitfunctions("initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
-    definitelyexists = Sample("qqZZ", config.productionsforcombine[0])
+    definitelyexists = Sample("ggH", "0+", config.productionsforcombine[0])
     if not xrd.exists(definitelyexists.CJLSTfile()):
         raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
 
@@ -881,7 +880,7 @@ class TreeWrapper(TreeWrapperBase):
         if self.counters is not None:
             self.nevents = self.counters.GetBinContent(40)
             #========================
-            assert self.treesample.production == "GEN_181119", "remove this section"
+            if "GEN" in str(self.treesample.production): assert self.treesample.production == "GEN_181119", "remove this section"
             if self.nevents == 0:
                 self.nevents = self.counters.GetBinContent(41)
             assert self.nevents != 0
@@ -894,10 +893,6 @@ class TreeWrapper(TreeWrapperBase):
             self.xsec = self.tree.xsec * 1000 #pb to fb
         self.genxsec = self.tree.genxsec
         self.genBR = self.tree.genBR
-
-        self.preliminaryloop()
-
-        if self.treesample.production == "180224": self.tree = FixWrongWH(self.tree)
 
     @property
     @cache_instancemethod
@@ -1088,11 +1083,7 @@ class TreeWrapper(TreeWrapperBase):
         self.g1prime2WH_m4l      = gconstant("WH",       "L1", self.ZZMass)
         #self.ghzgs1prime2WH_m4l  = gconstant("WH",       "L1Zg", self.ZZMass)
 
-        #Gen MEs
-        for weightname in self.genMEs:
-            setattr(self, weightname, getattr(t, weightname))
-
-        #Gen MEs
+        #k factors
         for kfactor in self.kfactors:
             setattr(self, kfactor, getattr(t, kfactor))
 
@@ -1425,9 +1416,6 @@ class TreeWrapper(TreeWrapperBase):
 #Init things#
 #############
 
-    def getweightfunction(self, sample):
-        return getattr(self, sample.weightname())
-
     @classmethod
     def initcategoryfunctions(cls):
         for _ in cls.categorizations:
@@ -1545,13 +1533,10 @@ class TreeWrapper(TreeWrapperBase):
             "failedtree",
             "filename",
             "GEN",
-            "genMEs",
-            "getweightfunction",
             "hypothesis",
             "initcategoryfunctions",
             "initlists",
             "initsystematics",
-            "initweightfunctions",
             "isalternate",
             "isbkg",
             "isdata",
@@ -1565,9 +1550,9 @@ class TreeWrapper(TreeWrapperBase):
             "next",
             "onlyweights",
             "passesblindcut",
+            "per_event_scale_factor",
             "printevery",
             "productionmode",
-            "preliminaryloop",
             "toaddtotree",
             "toaddtotree_float",
             "toaddtotree_int",
@@ -1639,36 +1624,12 @@ class TreeWrapper(TreeWrapperBase):
         else:
             self.toaddtotree.append("MC_weight_nominal")
 
-        reweightingweightnames = [sample.weightname() for sample in self.treesample.reweightingsamples()]
-        if len(reweightingweightnames) != len(set(reweightingweightnames)):
-            raise ValueError("Duplicate reweightingweightname!\n".format(reweightingweightnames))
-        allreweightingweightnames = [sample.weightname() for sample in self.allsamples]
-        for name in reweightingweightnames:
-            if name not in allreweightingweightnames:
-                raise ValueError("{} not in allreweightingweightnames!".format(name))
-        for sample in self.allsamples:
-            if sample.weightname() in self.toaddtotree or sample.weightname() in self.exceptions: continue
-            if sample.weightname() in reweightingweightnames:
-                self.toaddtotree.append(sample.weightname())
-            else:
-                self.exceptions.append(sample.weightname())
-
         if self.GEN:
             for lst in self.toaddtotree, self.toaddtotree_int, self.toaddtotree_float:
                 for _ in lst[:]:
                     if "jecup" in _.lower() or "jecdn" in _.lower():
                         lst.remove(_)
                         self.exceptions.append(_)
-
-        self.genMEs = []
-        if not self.isbkg and not self.isalternate and self.treesample.productionmode not in ("tqH",):
-            for sample in self.treesample.reweightingsamples():
-                for factor in sample.MC_weight_terms:
-                    for weightname, couplingsq in factor:
-                        if "WH" in weightname and "ghza" in weightname: continue
-                        self.genMEs.append(weightname)
-        if self.treesample.productionmode == "VBFbkg":
-            self.genMEs.append("p_Gen_JJQCD_BKG_MCFM")
 
         self.kfactors = []
         if not self.GEN:
@@ -1711,153 +1672,6 @@ class TreeWrapper(TreeWrapperBase):
             self.tree.SetBranchStatus(variable, 1)
         for variable in self.treesample.weightingredients():
             self.tree.SetBranchStatus(variable, 1)
-
-    def preliminaryloop(self):
-        """
-        Do the initial loops through the tree to find, for each hypothesis,
-        the cutoff and then the sum of weights for 2e2mu
-        """
-        doalternateweightxsecstree = []
-        if self.treesample.reweightingsampleplus == ReweightingSamplePlus("ggH", "0+", "POWHEG") and not self.treesample.production.GEN:
-            doalternateweightxsecstree = enums.AlternateWeight.items(lambda x: "LHEweight" in x.weightname or x == "1")
-
-        if self.isalternate and not doalternateweightxsecstree: return
-        if self.isdummy: return
-        if self.isZX: return
-        if self.isdata: return
-        if self.treesample.productionmode == "ggZZ": return
-        if self.treesample.productionmode == "tqH": return
-
-        if self.treesample.productionmode == "qqZZ":
-            self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
-            branch = array('d', [self.nevents])
-            self.effectiveentriestree.Branch(self.treesample.weightname(), branch, self.treesample.weightname()+"/D")
-            self.effectiveentriestree.Fill()
-            return
-
-        print "Doing initial loop through tree"
-        if self.failedtree is None: raise ValueError("No failedtree provided for {} which has reweighting!".format(self.treesample))
-
-        if doalternateweightxsecstree:
-            alternateweightxsecs = MultiplyCounter()
-
-        for tree in self.tree, self.failedtree:
-            tree.SetBranchStatus("*", 0)
-            for weightname in self.genMEs:
-                tree.SetBranchStatus(weightname, 1)
-            for alternateweight in doalternateweightxsecstree:
-                if alternateweight == "1": continue
-                tree.SetBranchStatus(alternateweight.weightname, 1)
-            tree.SetBranchStatus("genHEPMCweight", 1)
-            tree.SetBranchStatus("GenZ*Flav", 1)
-            tree.SetBranchStatus("LHEDaughter*", 1)
-            tree.SetBranchStatus("LHEAssociated*", 1)
-
-        reweightingsamples = self.treesample.reweightingsamples()
-        if self.treesample.productionmode == "VBFbkg": reweightingsamples.remove(self.treesample)
-
-        functionsandarrays = {sample: (sample.get_MC_weight_function(reweightingonly=True, LHE=False), []) for sample in reweightingsamples}
-        is2e2mu = []
-        genweights = []
-        flavs2e2mu = {11*11*13*13}
-        if self.treesample.productionmode == "VBFbkg":
-            flavs2e2mu |= {11**4, 13**4, 15**4, 11*11*15*15, 13*13*15*15}
-
-        values = functionsandarrays.values()
-        #will fail if multiple have the same str() which would make no sense
-        assert len(functionsandarrays) == len(reweightingsamples)
-        if doalternateweightxsecstree: assert len(functionsandarrays) == 1
-
-        length = self.tree.GetEntries() + self.failedtree.GetEntries()
-        for i, entry in enumerate(chain(self.tree, self.failedtree), start=1):
-            is2e2mu.append(entry.GenZ1Flav * entry.GenZ2Flav in flavs2e2mu)
-            genweights.append(entry.genHEPMCweight)
-
-            for function, weightarray in values:
-                weightarray.append(function(entry))
-            if i % self.printevery == 0 or i == length:
-                print i, "/", length, "   (preliminary run)"
-                #break
-
-            for alternateweight in doalternateweightxsecstree:
-                #see if doalternateweightxsecstree: assert len(functionsandarrays) == 1 above!
-                toadd = function(entry) * (
-                  1 if alternateweight.weightname == "1" else getattr(entry, alternateweight.weightname)
-                )
-                if numpy.isfinite(toadd):
-                    alternateweightxsecs[alternateweight] += toadd
-
-        self.cutoffs = {}
-        self.nevents2e2mu = {}
-        self.effectiveentries = {}
-        self.multiplyweight = {}
-
-        self.effectiveentriestree = ROOT.TTree("effectiveentries", "")
-        self.branches = []
-
-        for sample, (function, weightarray) in functionsandarrays.iteritems():
-            if sample.productionmode == "qqZZ":
-                with TFile(Sample(sample.productionmode, self.treesample.production).CJLSTfile()) as f:
-                    t = f.Get("ZZTree/candTree")
-                    t.GetEntry(0)
-                    counters = f.Get("ZZTree/Counters")
-                    SMxsec = t.xsec * counters.GetBinContent(self.treesample.flavor.countersbin)
-            else:
-                SMxsec = sample.SMxsec
-
-            strsample = str(sample)
-
-            percentile = 99.99
-
-            weightarray = numpy.array(weightarray)
-            cutoff = self.cutoffs[strsample] = numpy.percentile(weightarray, percentile)
-            weightarray[weightarray>cutoff] = cutoff**2/weightarray[weightarray>cutoff]
-            self.nevents2e2mu[strsample] = sum(
-                                                weight*genweight*isthis2e2mu #multiply by isthis2e2mu, which is supposed to be True=1, to make sure it's not None due to izip_longest, which would indicate a bug
-                                                     for weight, genweight, isthis2e2mu in izip_longest(weightarray, genweights, is2e2mu)
-                                                     if isthis2e2mu!=False
-                                               )
-            #https://root.cern.ch/doc/master/classTH1.html#a79f9811dc6c4b9e68e683342bfc96f5e
-            if self.nevents2e2mu[strsample]:
-                self.effectiveentries[strsample] = sum(weightarray)**2 / sum(weightarray**2)
-                self.multiplyweight[strsample] = SMxsec / self.nevents2e2mu[strsample] * self.effectiveentries[strsample]
-            else:
-                self.effectiveentries[strsample] = self.multiplyweight[strsample] = 0
-
-            branch = array('d', [self.effectiveentries[strsample]])
-            self.branches.append(branch) #so it stays alive until we do Fill()
-            self.effectiveentriestree.Branch(sample.weightname(), branch, sample.weightname()+"/D")
-
-        self.effectiveentriestree.Fill()  #will be written when newf.Write() is called in step2.py
-
-        if doalternateweightxsecstree:
-            alternateweightxsecs /= alternateweightxsecs[enums.AlternateWeight("1")]
-            self.alternateweightxsecstree = ROOT.TTree("alternateweightxsecstree", "")
-            for alternateweight in doalternateweightxsecstree:
-                if alternateweight == "1":
-                    assert alternateweightxsecs[alternateweight] == 1
-                    continue
-                branch = array('d', [alternateweightxsecs[alternateweight]])
-                self.branches.append(branch) #so it stays alive until we do Fill()
-                branchname = str(alternateweight)
-                self.alternateweightxsecstree.Branch(alternateweight.weightname, branch, alternateweight.weightname+"/D")
-
-            self.alternateweightxsecstree.Fill()  #will be written when newf.Write() is called in step2.py
-
-        self.tree.SetBranchStatus("*", 1)
-
-        print "Cutoffs:"
-        for sample, cutoff in self.cutoffs.iteritems():
-             print "    {:15} {}".format(sample, cutoff)
-        print "nevents 2e2mu:"
-        for sample, nevents in self.nevents2e2mu.iteritems():
-             print "    {:15} {}".format(sample, nevents)
-        print "effective entries:"
-        for sample, nevents in self.effectiveentries.iteritems():
-             print "    {:15} {}".format(sample, nevents)
-        print "multiply weight:"
-        for sample, mw in self.multiplyweight.iteritems():
-             print "    {:15} {}".format(sample, mw)
 
     passesblindcut = config.blindcut
 

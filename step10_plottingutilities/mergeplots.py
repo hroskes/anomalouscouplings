@@ -11,11 +11,10 @@ import ROOT
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
 
 from helperstuff import config
-from helperstuff.copyplots import copyplots
 from helperstuff.enums import Analysis, Production
 from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
-from helperstuff.utilities import cache, tfiles
+from helperstuff.utilities import cache, PlotCopier, tfiles
 
 from limits import findwhereyequals, Point
 
@@ -82,8 +81,8 @@ def mergeplots(analysis, **kwargs):
     xmin, xmax = -1, 1
     subdir = ""
     lumi = None
-    outdir = "fL1fL1Zg_comparison"
-    copy = True
+    outdir = "fa3fa2fL1fL1Zg_decay_fixsign"
+    plotcopier = ROOT
     for kw, kwarg in kwargs.iteritems():
         if kw == "logscale":
             logscale = bool(int(kwarg))
@@ -112,18 +111,18 @@ def mergeplots(analysis, **kwargs):
         elif kw == "outdir":
             outdir = kwarg
         elif kw == "lumi":
-            lumi = kwarg
-        elif kw == "copy":
-            copy = bool(int(kwarg))
+            lumi = float(kwarg)
+        elif kw == "plotcopier":
+            plotcopier = kwarg
         else:
             drawlineskwargs[kw] = kwarg
 
     analysis = Analysis(analysis)
     repmap = {"analysis": str(analysis)}
-    plotname = ".oO[analysis]Oo..root"
+    plotname = "limit_lumi300.00_Untagged_scan.oO[analysis]Oo._compare.root"
     folders = [
-               Folder(".oO[analysis]Oo._all/", "Expected", 2, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
-               Folder(".oO[analysis]Oo._13TeV/", "Expected, 13 TeV", 1, analysis, subdir, plotname=plotname, graphnumber=0, repmap=repmap, linestyle=2, linewidth=1),
+               Folder("fa3fa2fL1fL1Zg_decay_fixsign/", "Float others", 2, analysis, subdir, plotname="limit_lumi300.00_Untagged_scan.oO[analysis]Oo._merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_decay_fixsign/", "Fix others", 4, analysis, subdir, plotname="limit_lumi300.00_Untagged_scan.oO[analysis]Oo._fixothers.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
               ]
 
     if logscale and config.minimainlegend:
@@ -172,11 +171,12 @@ def mergeplots(analysis, **kwargs):
     if all(folder.secondcolumn is not None for folder in folders):
         l.SetNColumns(2)
 
-    c = ROOT.TCanvas("c1", "", 8, 30, 800, 800)
+    c = plotcopier.TCanvas("c1", "", 8, 30, 800, 800)
     mg.Draw("al")
     mg.GetXaxis().SetTitle(folders[0].xtitle)
     mg.GetYaxis().SetTitle(folders[0].ytitle)
     mg.GetXaxis().SetRangeUser(xmin, xmax)
+    mg.SetMinimum(0)
 
     if PRL:
         mg.GetXaxis().CenterTitle()
@@ -205,7 +205,7 @@ def mergeplots(analysis, **kwargs):
     style.applycanvasstyle(c)
     style.applyaxesstyle(mg)
     if lumi is not None:
-        style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)".format(lumi), drawCMS=False)
+        style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(lumi))
     for k, v in drawlineskwargs.items():
         if k == "xpostext":
             try:
@@ -237,7 +237,9 @@ def mergeplots(analysis, **kwargs):
         f.write(subprocess.check_output(["git", "status"]))
         f.write("\n")
         f.write(subprocess.check_output(["git", "diff"]))
-    if copy: copyplots(os.path.relpath(saveasdir, config.plotsbasedir))
+
+    if plotcopier != ROOT:
+        pc.copy(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)))
 
 if __name__ == "__main__":
     args = []
@@ -248,6 +250,8 @@ if __name__ == "__main__":
         else:
             args.append(arg)
     if args or kwargs:
-        mergeplots(*args, **kwargs)
+        with PlotCopier() as pc:
+            kwargs["plotcopier"] = pc
+            mergeplots(*args, **kwargs)
     else:
         raise TypeError("Need to give args or kwargs")
