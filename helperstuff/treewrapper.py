@@ -836,7 +836,7 @@ class FixWrongWH(object):
 @callclassinitfunctions("initweightfunctions", "initcategoryfunctions", "initsystematics")
 class TreeWrapper(TreeWrapperBase):
 
-    definitelyexists = Sample("qqZZ", config.productionsforcombine[0])
+    definitelyexists = Sample("ggH", "0+", config.productionsforcombine[0])
     if not xrd.exists(definitelyexists.CJLSTfile()):
         raise ValueError("{} does not exist!".format(definitelyexists.CJLSTfile()))
 
@@ -877,7 +877,7 @@ class TreeWrapper(TreeWrapperBase):
         if self.counters is not None:
             self.nevents = self.counters.GetBinContent(40)
             #========================
-            assert self.treesample.production == "GEN_181119", "remove this section"
+            if "GEN" in str(self.treesample.production): assert self.treesample.production == "GEN_181119", "remove this section"
             if self.nevents == 0:
                 self.nevents = self.counters.GetBinContent(41)
             assert self.nevents != 0
@@ -1085,8 +1085,8 @@ class TreeWrapper(TreeWrapperBase):
         #self.ghzgs1prime2WH_m4l  = gconstant("WH",       "L1Zg", self.ZZMass)
 
         #Gen MEs
-        for weightname in self.genMEs:
-            setattr(self, weightname, getattr(t, weightname))
+        #for weightname in self.genMEs:
+        #    setattr(self, weightname, getattr(t, weightname))
 
         #Gen MEs
         for kfactor in self.kfactors:

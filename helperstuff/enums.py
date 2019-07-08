@@ -783,6 +783,9 @@ class Production(MyEnum):
                  EnumItem("180721_Ulascan"),
                  EnumItem("180722", "180721_2017"),
                  EnumItem("180722_Ulascan"),
+                 EnumItem("190703_2016"),
+                 EnumItem("190703_2017"),
+                 EnumItem("190703_2018"),
                  EnumItem("LHE_170509"),
                  EnumItem("GEN_Meng"),
                  EnumItem("GEN_181119"),
@@ -790,7 +793,7 @@ class Production(MyEnum):
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
-        if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
+        if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self) and "190703" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
         if self == "170203":
             if config.host == "lxplus":
                 return "root://lxcms03//data3/Higgs/170203"
@@ -854,6 +857,21 @@ class Production(MyEnum):
                 assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/GENtrees/181119_2017MC"
+        if self == "190703_2016":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190703_2016anomalous"
+        if self == "190703_2017":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190703_2017anomalous"
+        if self == "190703_2018":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190703_2018anomalous"
         assert False
     def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
@@ -884,6 +902,9 @@ class Production(MyEnum):
         return int(str(self))
     @property
     def year(self):
+        if self == "190703_2016": return 2016
+        if self == "190703_2017": return 2017
+        if self == "190703_2018": return 2018
         if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).year
         if self <= "180224" or self == "180531_2016" or self == "180721_2016":
             return 2016
@@ -921,6 +942,7 @@ class Production(MyEnum):
     def pdf(self):
       if self.year == 2016: return "NNPDF30_lo_as_0130"
       if self.year == 2017: return "NNPDF31_lo_as_0130"
+      if self.year == 2018: return "NNPDF31_lo_as_0130"
       assert False, self
 
 class Category(MyEnum):

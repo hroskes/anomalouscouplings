@@ -123,8 +123,9 @@ if host == "MARCC":
   showblinddistributions = False
   unblinddistributions = False
   unblindscans = False
-  productionsforcombine = ["GEN_181119"]
+#  productionsforcombine = ["GEN_181119"]
 #  productionsforcombine = ["180721_2016", "180721_2017"]
+  productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
 elif host == "lxplus":
   usedata = True
   showblinddistributions = True

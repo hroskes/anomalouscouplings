@@ -2,13 +2,6 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import inspect
 import re
 
-#The following imports are not needed for any of the code written explicitly here,
-#but when the functions are defined with exec, it looks for the global variables
-#in this module, rather than where the original function was defined.
-import CJLSTscripts
-import constants
-from math import sqrt
-
 class MakeSystematics(object):
     __metaclass__ = ABCMeta
     def __init__(self, function):
@@ -91,3 +84,14 @@ class MakeJECSystematics(MakeSystematics):
             raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
 
         return code
+
+
+#The following imports are not needed for any of the code written explicitly here,
+#but when the functions are defined with exec, it looks for the global variables
+#in this module, rather than where the original function was defined.
+
+from math import sqrt
+
+import CJLSTscripts
+import constants
+import STXS
