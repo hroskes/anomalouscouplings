@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+import argparse
+
+p = argparse.ArgumentParser()
+p.add_argument("directory", nargs="*")
+args = p.parse_args()
+
 import os
 
 import ROOT
@@ -10,6 +16,7 @@ delete = []
 with cd(os.path.dirname(__file__)):
   for directory in os.listdir("."):
     if not os.path.isdir(directory): continue
+    if args.directory and directory not in args.directory: continue
     for filename in os.listdir(directory):
       filename = os.path.join(directory, filename)
       if not filename.endswith(".root"): continue
