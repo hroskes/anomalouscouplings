@@ -10,6 +10,7 @@ import urllib
 
 from utilities import recursivesubclasses, rreplace
 
+CJLSTscriptsfolder = os.path.dirname(os.path.abspath(__file__))
 
 class CJLSTScript_base(object):
     __metaclass__ = ABCMeta
@@ -86,7 +87,7 @@ class CJLSTScript_cconstants(CJLSTScript_Cpp):
         super(CJLSTScript_cconstants, self).fixandmove(tmpfilename)
         shutil.move(self.filename, tmpfilename)
         with open(tmpfilename) as tmpf, open(self.filename, "w") as f:
-            f.write(tmpf.read().replace("$CMSSW_BASE/src/ZZAnalysis/AnalysisStep/data/cconstants", os.path.abspath(os.path.dirname(__file__))))
+            f.write(tmpf.read().replace("$CMSSW_BASE/src/ZZAnalysis/AnalysisStep/data/cconstants", CJLSTscriptsfolder))
 
 class CJLSTScript_other(CJLSTScript_base):
     def filenameisvalid(self, filename):
