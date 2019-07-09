@@ -57,7 +57,6 @@ def writeyields(productionmodelist=None, productionlist=None):
     result = MultiplyCounter()
     for productionmode, samples in tosamples_foryields:
       if productionmodelist and productionmode not in productionmodelist: continue
-      if productionmode == "ZX" or productionmode == "VBF bkg" and production == "180722": continue
       print productionmode
       samplegroups = [samples]
       if productionmode.issignal and productionmode != "bbH" and not production.GEN:
@@ -199,17 +198,6 @@ def writeyields(productionmodelist=None, productionlist=None):
           nominalyield = sum(result[tosample, categorization, AlternateWeight("1")] for tosample in samples)
           if productionmode == "ZX" or analysis.isdecayonly:
             JECUp = JECDn = btSFUp = btSFDn = 1
-          elif productionmode == "VBF bkg" and production == "180722":
-            _ = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_2017", "180721").value
-            if _ is None:
-              JECUp = JECDn = 1
-            else:
-              JECUp, JECDn = _
-            _ = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_2017", "180721").value
-            if _ is None:
-              btSFUp = btSFDn = 1
-            else:
-              btSFUp, btSFDn = _
           else:
             JECUp = sum(result[tosample, findsystematic(categorizations, categorization, "JECUp", "Nominal"), AlternateWeight("1"), category] for tosample in samples) / nominal
             JECDn = sum(result[tosample, findsystematic(categorizations, categorization, "JECDn", "Nominal"), AlternateWeight("1"), category] for tosample in samples) / nominal
