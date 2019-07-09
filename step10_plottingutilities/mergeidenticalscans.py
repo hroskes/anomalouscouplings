@@ -149,6 +149,9 @@ def mergeidenticalscans(outfile, *infiles):
     c.SaveAs(outfile.replace("limit_", k+"_")+".pdf")
     c.SaveAs(outfile.replace("limit_", k+"_")+".C")
 
+  indices = [{i for xx, yy in itertools.izip(xxs, yyswithfais) for i, (x, y) in enumerate(itertools.izip(xx, yy)) if x == target and np.isclose(y, miny)} for target in newxs]
+  print indices
+
 if __name__ == "__main__":
   pc = PlotCopier()
 
