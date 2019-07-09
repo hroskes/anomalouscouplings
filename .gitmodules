@@ -10,18 +10,6 @@
 	path = CMSSW_10_2_5/src/HiggsAnalysis/HZZ4l_Combination
 	url = git@github.com:hroskes/HiggsAnalysis-HZZ4l_Combination
 	branch = master
-[submodule "helperstuff/Datacards13TeV_ICHEP2016"]
-	path = helperstuff/Datacards13TeV_ICHEP2016
-	url = ssh://git@gitlab.cern.ch:7999/HZZ4l/Datacards13TeV.git
-	branch = ICHEP2016
-[submodule "helperstuff/Datacards13TeV_Moriond2016"]
-	path = helperstuff/Datacards13TeV_Moriond2016
-	url = ssh://git@gitlab.cern.ch:7999/HZZ4l/Datacards13TeV.git
-	branch = Moriond2016
-[submodule "helperstuff/Datacards13TeV_Moriond2017"]
-	path = helperstuff/Datacards13TeV_Moriond2017
-	url = ssh://git@gitlab.cern.ch:7999/HZZ4l/Datacards13TeV.git
-	branch = Moriond2017
 [submodule "CMSSW_7_6_5/src/ZZMatrixElement"]
 	path = CMSSW_10_2_5/src/ZZMatrixElement
 	url = git@github.com:hroskes/HiggsAnalysis-ZZMatrixElement

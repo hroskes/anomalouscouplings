@@ -54,12 +54,6 @@ class YieldSystematic(MyEnum):
                 )
 
     def yamlfilename(self, channel=None):
-      if self in ("BRhiggs_hzz4l", "QCDscale_ggVV_bonly", "EWcorr_VV"):
-        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_theory_13TeV.yaml")
-      if self in ("CMS_eff_e", "CMS_eff_m"):
-        if channel is None:
-          raise ValueError("Need to give channel for {}".format(self))
-        return os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "systematics_13TeV_{}.yaml".format(Channel(channel)))
       raise ValueError("{} is not from yaml!".format(self))
 
     def getfromyaml(self, channel=None):
@@ -196,37 +190,6 @@ class YieldSystematicValue(MultiEnum, JsonDict):
 
 class _TotalRate(MultiEnum):
   enums = [ProductionMode, Luminosity]
-
-  @property
-  def yamlrate(self):
-    lumi = None
-    result = 0
-    tags = [tag.replace("Mor17", "").replace("tagged", "Tagged") for category in categories for tag in category.names if "Mor17" in tag]
-    for channel in channels:
-      filename = os.path.join(config.repositorydir, "helperstuff", "Datacards13TeV_Moriond2017", "STXSCards", "configs", "inputs", "yields_per_tag_category_13TeV_{}.yaml".format(channel))
-      with open(filename) as f:
-        y = yaml.load(f)
-      with open(filename) as f:
-        for line in f:
-          if "fb-1" in line:
-            if lumi is None:
-              lumi = float(line.split("=")[1].split("fb-1")[0])
-            if lumi != float(line.split("=")[1].split("fb-1")[0]):
-              raise ValueError("Different lumis in yaml files! {} {}".format(lumi, float(line.split("=")[1].split("fb-1")[0])))
-            break
-        else:
-          raise IOError("No luminosity in {}".format(filename))
-
-      pnames = [p for p in self.productionmode.yamlratenames]
-      assert pnames
-
-      for tag, p in itertools.product(tags, pnames):
-        try:
-          result += float(y[tag][p]) * float(self.luminosity) / lumi
-        except ValueError:
-          result += eval(y[tag][p].replace("@0", "125")) * float(self.luminosity) / lumi
-
-    return result
 
   @property
   @cache

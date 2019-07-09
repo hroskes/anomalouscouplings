@@ -277,13 +277,6 @@ class ProductionMode(MyEnum):
             return ["{}_{}".format(self, dec) for dec in ("lep", "had")]
         return [str(self)]
     @property
-    def yamlratenames2015(self):
-        if self == "VBF":
-            return ["qqH"]
-        elif self == "ZX":
-            return ["zjets"]
-        return [str(self)]
-    @property
     def yamlsystname(self):
         if self in ("VBF", "VBF bkg"):
             return "qqH"

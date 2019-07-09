@@ -20,7 +20,7 @@ import uncertainties
 
 from helperstuff import config
 
-from helperstuff.combinehelpers import getdatatree, getrate, getrate2015, Luminosity
+from helperstuff.combinehelpers import getdatatree, getrate, Luminosity
 from helperstuff.enums import analyses, Analysis, Category, Channel, EnumItem, flavors, HffHypothesis, Hypothesis, JECSystematic, MultiEnum, MultiEnumABCMeta, MyEnum, ProductionMode
 from helperstuff.samples import ReweightingSample, ReweightingSampleWithPdf, Sample
 from helperstuff.treewrapper import TreeWrapper
@@ -91,14 +91,12 @@ class RowBase(RowBaseBase):
     if tabletype == "HIG17011PAS":
       result += " & "
     result = "{}".format(self.title)
-    for category in list(categories)+[2015]:
-      if tabletype == "HIG18002" and isinstance(category, int) and category == 2015: continue
+    for category in list(categories):
       result += " & "
       total = 0
       for channel in channels:
         channel = Channel(channel)
         amount = self.categorydistribution[channel, category]
-#        if tabletype == "HIG18002" and category == "Untagged": amount += self.categorydistribution[channel, 2015]
         total += amount
         if tabletype == "HIG17011PAS":
           result += self.fmt.format(amount)+"/"
@@ -218,8 +216,7 @@ class SlashRow(RowBaseBase):
     assert tabletype != "HIG17011PAS"
 
     result = "{}".format(self.title)
-    for category in categories+[2015]:
-      if tabletype == "HIG18002" and isinstance(category, int) and category == 2015: continue
+    for category in categories:
       result += " & "
       parts = []
       for row in self.rows:
@@ -227,7 +224,6 @@ class SlashRow(RowBaseBase):
         for channel in channels:
           channel = Channel(channel)
           total += row.categorydistribution[channel, category]
-#          if tabletype == "HIG18002" and category == "Untagged": total += row.categorydistribution[channel, 2015]
         parts.append(self.fmt.format(total))
       assert len(parts) == 2
       result += "{} ({})".format(*parts)
@@ -268,7 +264,6 @@ class RowChannel(Row, MultiEnum):
 
   def getcategorydistribution(self):
     result = sum((self.getcategorydistributionproduction(production) for production in config.productionsforcombine), MultiplyCounter())
-    result[self.channel, 2015] = getrate2015(self.channel, self.productionmode)
     return result
 
   @property
@@ -320,13 +315,6 @@ def scalerows(scalethese, tothese):
   previoustotal = sum(row.categorydistribution[channel, category] for row in scalethese for channel in channels for category in categories)
   for row in scalethese:
     row.scale(wanttotal / previoustotal)
-
-  sum2015 = sum(row.categorydistribution[channel, 2015] for row in scalethese for channel in channels)
-
-  if any(isinstance(_[1], int) and _[1] == 2015 for _ in sum((row.categorydistribution.keys() for row in scalethese+tothese), [])):
-    for row in scalethese:
-      for channel in channels:
-        row.categorydistribution[channel, 2015] = sum2015 / wanttotal * sum(row.categorydistribution[channel, category] for category in categories)
 
 def scaleslashrows(rows):
   for row in rows: assert len(row.rows) == 2
