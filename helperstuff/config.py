@@ -76,8 +76,8 @@ except NameError:
 useQGTagging = False
 useVHMETTagged = False
 
-applym4lshapesystematicsUntagged = True
-applym4lshapesystematicsVBFVHtagged = True
+applym4lshapesystematicsUntagged = False
+applym4lshapesystematicsVBFVHtagged = False
 applym4lshapesystematicsggH = False
 applym4lshapesystematicsggHUntagged = False
 applym4lshapesystematicsdiagonal = False #VBF in VBFtagged, VH in VHHadrtagged

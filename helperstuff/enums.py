@@ -260,6 +260,7 @@ class ProductionMode(MyEnum):
                  EnumItem("tqH"),
                  EnumItem("ffH"),
                  EnumItem("VVH"),
+                 EnumItem("VH"),
                 )
     @property
     def combinename(self):
@@ -285,7 +286,7 @@ class ProductionMode(MyEnum):
         return str(self)
     @property
     def isbkg(self):
-        if self in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH", "ffH", "VVH"):
+        if self in ("ggH", "VBF", "ZH", "WH", "VH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH", "ffH", "VVH"):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
@@ -305,6 +306,8 @@ class ProductionMode(MyEnum):
         if self == "ZH":
             return Hypothesis.items(lambda x: x in proddechypotheses)
         if self == "WH":
+            return Hypothesis.items(lambda x: x in proddechypotheses)
+        if self == "VH":
             return Hypothesis.items(lambda x: x in proddechypotheses)
         if self in ("WplusH", "WminusH", "tqH"):
             return Hypothesis.items(lambda x: x == "0+")
@@ -343,7 +346,7 @@ class ProductionMode(MyEnum):
     def QCDfacsystematicname(self):
       if self == "ggH": return "QCDscale_fac_ggH"
       if self == "qqH": return "QCDscale_fac_qqH"
-      if self in ("ZH", "WH"): return "QCDscale_fac_VH"
+      if self in ("ZH", "WH", "VH"): return "QCDscale_fac_VH"
       if self == "ttH": return "QCDscale_fac_ttH"
       if self == "bbH": return "QCDscale_fac_bbH"
       if self == "qqZZ": return "QCDscale_fac_VV"
@@ -353,7 +356,7 @@ class ProductionMode(MyEnum):
     def QCDrensystematicname(self):
       if self == "ggH": return "QCDscale_ren_ggH"
       if self == "qqH": return "QCDscale_ren_qqH"
-      if self in ("ZH", "WH"): return "QCDscale_ren_VH"
+      if self in ("ZH", "WH", "VH"): return "QCDscale_ren_VH"
       if self == "ttH": return "QCDscale_ren_ttH"
       if self == "bbH": return "QCDscale_ren_bbH"
       if self == "qqZZ": return "QCDscale_ren_VV"
@@ -362,20 +365,20 @@ class ProductionMode(MyEnum):
     @property
     def pdfvariationsystematicname(self):
       if self in ("ggH", "ttH", "bbH"): return "pdf_variation_Higgs_gg"
-      if self in ("qqH", "ZH", "WH"): return "pdf_variation_Higgs_qqbar"
+      if self in ("qqH", "ZH", "WH", "VH"): return "pdf_variation_Higgs_qqbar"
       if self == "qqZZ": return "pdf_variation_qqbar"
       return None
 
     @property
     def pdfasmzsystematicname(self):
       if self in ("ggH", "ttH", "bbH"): return "pdf_asmz_Higgs_gg"
-      if self in ("qqH", "ZH", "WH"): return "pdf_asmz_Higgs_qqbar"
+      if self in ("qqH", "ZH", "WH", "VH"): return "pdf_asmz_Higgs_qqbar"
       if self == "qqZZ": return "pdf_asmz_qqbar"
       return None
 
     def workspaceshapesystematics(self, category):
       result = []
-      if self in ("ggH", "qqH", "ZH", "WH", "ttH", "bbH"):
+      if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH"):
         if (
             config.applym4lshapesystematicsUntagged and category == "Untagged"
             or config.applym4lshapesystematicsVBFVHtagged and category != "Untagged"
@@ -402,7 +405,7 @@ class ProductionMode(MyEnum):
         if systematic == "PythiaScaleUp" or systematic == "PythiaScaleDown" and year == 2016: return False
         return True
 
-      if self in ("ggH", "qqH", "ZH", "WH", "ttH"):
+      if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH"):
         return AlternateWeight.items(lambda x: x!="EWcorrUp" and x!="EWcorrDn" and yearcondition(x))
       if self == "qqZZ":
         return AlternateWeight.items(yearcondition)
@@ -528,6 +531,7 @@ class TemplateGroup(MyEnum):
                  EnumItem("vbf"),
                  EnumItem("zh"),
                  EnumItem("wh"),
+                 EnumItem("vh"),
                  EnumItem("tth"),
                  EnumItem("bbh"),
                  EnumItem("background", "bkg"),
@@ -852,21 +856,36 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/GENtrees/181119_2017MC"
         if self == "190703_2016":
             if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/190703_2016anomalous"
+                return "/eos/user/a/amapane/CJLST-backup/190617/MC_2016"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190617/MC_2016"
+        if self == "190703_2017":
+            if config.host == "lxplus":
+                return "/eos/user/a/amapane/CJLST-backup/190617/MC_2017"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190617/MC_2017"
+        if self == "190703_2018":
+            if config.host == "lxplus":
+                return "/eos/user/a/amapane/CJLST-backup/190708_MC2018"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190708_MC2018"
+        assert False
+    def CJLSTdir_anomalous(self):
+        if self == "190703_2016":
+            if config.host == "lxplus":
+                assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190703_2016anomalous"
         if self == "190703_2017":
             if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/190703_2017anomalous"
+                assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190703_2017anomalous"
         if self == "190703_2018":
             if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/190703_2018anomalous"
+                assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190703_2018anomalous"
-        assert False
-    def CJLSTdir_anomalous(self):
         return self.CJLSTdir()
     def CJLSTdir_data(self):
         if self == "170712":
@@ -876,9 +895,9 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/170712_Data2017"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
-        return self.CJLSTdir()
+        return self.CJLSTdir_anomalous()
     def CJLSTdir_anomalous_VH(self):
-        return self.CJLSTdir()
+        return self.CJLSTdir_anomalous()
     def CJLSTdir_MINLO(self):
         return self.CJLSTdir()
     @property
@@ -1088,6 +1107,7 @@ if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
 productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
+templategroups = TemplateGroup.items(lambda x: x not in ("zh", "wh"))
 
 _ = [""]
 if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBFVHtagged:

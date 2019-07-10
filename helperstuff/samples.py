@@ -808,7 +808,7 @@ class ReweightingSample(MultiEnum, SampleBase):
     def check(self, *args):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
-        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "HJJ", "ttH", "bbH", "tqH"):
+        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "HJJ", "ttH", "bbH", "tqH", "VH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hypothesis not in self.productionmode.validhypotheses:

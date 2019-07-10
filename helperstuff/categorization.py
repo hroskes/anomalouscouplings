@@ -94,54 +94,29 @@ class BaseSingleCategorization(BaseCategorization):
 
         @setname(self_categorization.category_function_name)
         def function(self_tree):
-            if self_tree.year == 2016:
-                result = self_categorization.lastvalue = categoryMor17(
-                    self_tree.nExtraLep,
-                    self_tree.nExtraZ,
-                      getattr(self_tree, njets_variable_name),
-                      getattr(self_tree, nbtagged_variable_name),
-                      getattr(self_tree, QGL_variable_name),
-                      getattr(self_tree, pHJJ_function_name)(),
-                      getattr(self_tree, pHJ_variable_name),
-                      getattr(self_tree, pVBF_function_name)(),
-                      getattr(self_tree, pVBF1j_variable_name),
-                      getattr(self_tree, pAux_variable_name),
-                      getattr(self_tree, pWH_function_name)(),
-                      getattr(self_tree, pZH_function_name)(),
-                      getattr(self_tree, p_HadWH_mavjj_variable_name),
-                      getattr(self_tree, p_HadWH_mavjj_true_variable_name),
-                      getattr(self_tree, p_HadZH_mavjj_variable_name),
-                      getattr(self_tree, p_HadZH_mavjj_true_variable_name),
-                      getattr(self_tree, phi_variable_name),
-                    self_tree.ZZMass,
-                    self_tree.PFMET,
-                    config.useVHMETTagged,
-                    config.useQGTagging,
-                )
-            elif self_tree.year == 2017:
-                result = self_categorization.lastvalue = categoryMor18(
-                    self_tree.nExtraLep,
-                    self_tree.nExtraZ,
-                      getattr(self_tree, njets_variable_name),
-                      getattr(self_tree, nbtagged_variable_name),
-                      getattr(self_tree, QGL_variable_name),
-                      getattr(self_tree, pHJJ_function_name)(),
-                      getattr(self_tree, pHJ_variable_name),
-                      getattr(self_tree, pVBF_function_name)(),
-                      getattr(self_tree, pVBF1j_variable_name),
-                      getattr(self_tree, pAux_variable_name),
-                      getattr(self_tree, pWH_function_name)(),
-                      getattr(self_tree, pZH_function_name)(),
-                      getattr(self_tree, p_HadWH_mavjj_variable_name),
-                      getattr(self_tree, p_HadWH_mavjj_true_variable_name),
-                      getattr(self_tree, p_HadZH_mavjj_variable_name),
-                      getattr(self_tree, p_HadZH_mavjj_true_variable_name),
-                      getattr(self_tree, phi_variable_name),
-                    self_tree.ZZMass,
-                    self_tree.PFMET,
-                    config.useVHMETTagged,
-                    config.useQGTagging,
-                )
+            result = self_categorization.lastvalue = categoryMor18(
+                self_tree.nExtraLep,
+                self_tree.nExtraZ,
+                  getattr(self_tree, njets_variable_name),
+                  getattr(self_tree, nbtagged_variable_name),
+                  getattr(self_tree, QGL_variable_name),
+                  getattr(self_tree, pHJJ_function_name)(),
+                  getattr(self_tree, pHJ_variable_name),
+                  getattr(self_tree, pVBF_function_name)(),
+                  getattr(self_tree, pVBF1j_variable_name),
+                  getattr(self_tree, pAux_variable_name),
+                  getattr(self_tree, pWH_function_name)(),
+                  getattr(self_tree, pZH_function_name)(),
+                  getattr(self_tree, p_HadWH_mavjj_variable_name),
+                  getattr(self_tree, p_HadWH_mavjj_true_variable_name),
+                  getattr(self_tree, p_HadZH_mavjj_variable_name),
+                  getattr(self_tree, p_HadZH_mavjj_true_variable_name),
+                  getattr(self_tree, phi_variable_name),
+                self_tree.ZZMass,
+                self_tree.PFMET,
+                config.useVHMETTagged,
+                config.useQGTagging,
+            )
             return result
         return function
 

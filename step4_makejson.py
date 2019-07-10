@@ -5,6 +5,7 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--overwrite", help="redo the json files that already exist", action="store_false", dest="keep")
     p.add_argument("--submitjobs", help="submit jobs", metavar="FILES_PER_JOB", type=int)
+    p.add_argument("--filter", type=eval, default=lambda template: True)
     args = p.parse_args()
 
 import datetime
@@ -19,12 +20,12 @@ from helperstuff.utilities import KeepWhileOpenFile, LSB_JOBID, mkdir_p
 def makejson(*args):
     templatesfile = TemplatesFile(*args)
     if templatesfile.copyfromothertemplatesfile is not None: return
-    with KeepWhileOpenFile(templatesfile.jsonfile()+".tmp") as f:
+    filename = templatesfile.jsonfile()
+    mkdir_p(os.path.dirname(filename))
+    with KeepWhileOpenFile(filename+".tmp") as f:
         if not f: return
         print templatesfile, datetime.datetime.now()
 
-        filename = templatesfile.jsonfile()
-        mkdir_p(os.path.dirname(filename))
         jsonstring = json.dumps(templatesfile.getjson(), sort_keys=True, indent=4, separators=(',', ': '))
         with open(filename, "w") as f:
             f.write(jsonstring)
@@ -32,9 +33,11 @@ def makejson(*args):
 def submitjobs(filesperjob):
     i = 0
     for templatesfile in templatesfiles:
-        if os.path.exists(templatesfile.jsonfile()): continue
+        filename = templatesfile.jsonfile()
+        if os.path.exists(filename): continue
         if templatesfile.copyfromothertemplatesfile is not None: continue
-        kwof = KeepWhileOpenFile(templatesfile.jsonfile()+".tmp")
+        mkdir_p(os.path.dirname(filename))
+        kwof = KeepWhileOpenFile(filename+".tmp")
         if not kwof.wouldbevalid:
             jobid = kwof.runningjobid
             if jobid: yield jobid
@@ -46,5 +49,6 @@ if __name__ == "__main__":
         list(submitjobs(args.submitjobs))
     else:
         for templatesfile in templatesfiles:
+            if not args.filter(templatesfile): continue
             if args.keep and os.path.exists(templatesfile.jsonfile()): continue
             makejson(templatesfile)

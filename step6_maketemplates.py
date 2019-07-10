@@ -38,7 +38,7 @@ def buildtemplates(*args, **kwargs):
 
   if len(args) == 1 and not isinstance(args[0], TemplatesFile):
     tg = TemplateGroup(args[0])
-    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.usenewtemplatebuilder and not os.path.exists(tf.templatesfile().replace(".root", ".done"))]
+    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and not os.path.exists(tf.templatesfile().replace(".root", ".done"))]
     if not tfs: return
     with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
       if not all(kwofs): return
@@ -48,32 +48,20 @@ def buildtemplates(*args, **kwargs):
 
   templatesfile = TemplatesFile(*args)
   if "Ulascan" in str(templatesfile.production): return
-  if templatesfile.usenewtemplatebuilder and templatesfile.templategroup in ("background", "DATA", "tth", "bbh"):
+  if templatesfile.templategroup in ("background", "DATA", "tth", "bbh"):
     return buildtemplates(templatesfile.templategroup)
   print templatesfile
   if templatesfile.copyfromothertemplatesfile is not None: return
   with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
-    scriptname = ["buildTemplate.exe"]
-    if templatesfile.usenewtemplatebuilder:
-      scriptname = ["buildTemplates.py", "--use-existing-templates"] + morebuildtemplatesargs
+    scriptname = ["buildTemplates.py", "--use-existing-templates"] + morebuildtemplatesargs
     if f:
       if (
         not os.path.exists(templatesfile.templatesfile())
-        or templatesfile.usenewtemplatebuilder and not os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
+        or not os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
       ):
         if not os.path.exists(templatesfile.templatesfile(firststep=True)):
           mkdir_p(os.path.dirname(templatesfile.templatesfile(firststep=True)))
-          try:
-            subprocess.check_call(scriptname + [templatesfile.jsonfile()])
-          except:
-            try:
-              raise
-            finally:
-              if not templatesfile.usenewtemplatebuilder:
-                try:
-                  os.remove(templatesfile.templatesfile(firststep=templatesfile.hascustomsmoothing))
-                except:
-                  pass
+          subprocess.check_call(scriptname + [templatesfile.jsonfile()])
       if (
         os.path.exists(templatesfile.templatesfile(firststep=True))
         and not os.path.exists(templatesfile.templatesfile())
@@ -156,9 +144,9 @@ def submitjobs(removefiles, jsontoo=False):
         if not os.path.exists(templatesfile.jsonfile()):
           raise ValueError(templatesfile.jsonfile()+" doesn't exist!  Try --jsontoo.")
     elif (
-      (
-        not templatesfile.usenewtemplatebuilder and os.path.exists(templatesfile.templatesfile())
-        or templatesfile.usenewtemplatebuilder and os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
+      not (
+        os.path.exists(templatesfile.templatesfile())
+        and os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
       )
       or not KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp").wouldbevalid
     ):
@@ -170,7 +158,7 @@ def submitjobs(removefiles, jsontoo=False):
       torun.add(templatesfile)
 
   for tf in frozenset(torun):
-    if tf.usenewtemplatebuilder and tf.templategroup in ("background", "DATA"):
+    if tf.templategroup in ("background", "DATA"):
       torun.remove(tf)
       torun.add(tf.templategroup)
   njobs = len(torun)

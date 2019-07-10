@@ -14,8 +14,7 @@ import numpy
 import ROOT
 
 import config
-import customsmoothing
-from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, treeshapesystematics
+from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
 from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile, tfiles
 
@@ -40,7 +39,7 @@ class TemplatesFile(MultiEnum):
         if self.analysis.isdecayonly:
             if self.category != "Untagged":
                 raise ValueError("decay only analysis is only done for untagged!\n{}".format(args))
-            if self.templategroup in ("vbf", "zh", "wh", "tth"):
+            if self.templategroup in ("vbf", "zh", "wh", "vh", "tth"):
                 raise ValueError("decay only analysis is only done with decay information!\n{}".format(args))
         if self.production.LHE:
             if self.channel != "2e2mu":
@@ -124,7 +123,7 @@ class TemplatesFile(MultiEnum):
                   ReweightingSample(h, *args) for h in hypotheses
                 ]
 
-        elif self.templategroup in ("vbf", "zh", "wh"):
+        elif self.templategroup in ("vbf", "zh", "wh", "vh"):
             p = str(self.templategroup).upper()
             if self.analysis.fais == ("fa3",):
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "0-"), ReweightingSample(p, "fa3prod0.5"), ReweightingSample(p, "fa3dec0.5"), ReweightingSample(p, "fa3proddec-0.5")]
@@ -173,13 +172,13 @@ class TemplatesFile(MultiEnum):
                               "fa3proddec0.25fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25",
                              ]
                 reweightingsamples = [
-                  ReweightingSample(h, p) for h in hypotheses
+                  ReweightingSamplePlus(h, p) for h in hypotheses
                 ]
 
         return reweightingsamples
 
     def templates(self):
-        if self.templategroup in ["ggh", "vbf", "zh", "wh", "tth", "bbh"]:
+        if self.templategroup in ["ggh", "vbf", "zh", "wh", "vh", "tth", "bbh"]:
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
             if self.production.LHE or self.production.GEN: return [Template(self, "qqZZ")]
@@ -205,7 +204,7 @@ class TemplatesFile(MultiEnum):
             elif self.analysis.dimensions == 1:
                 return [IntTemplate(self, h, "g11gi1")]
 
-        elif self.templategroup in ("vbf", "zh", "wh"):
+        elif self.templategroup in ("vbf", "zh", "wh", "vh"):
             h = str(self.templategroup).upper()
             if self.analysis.dimensions == 4:
                 return [IntTemplate(self, h, _) for _ in [
@@ -447,7 +446,7 @@ class TemplatesFile(MultiEnum):
         basis = SampleBasis([template.hypothesis for template in self.templates()], productionmode, self.analysis)
         invertedmatrix = basis.invertedmatrix
         try:
-            if self.templategroup in ("vbf", "zh", "wh"):
+            if self.templategroup in ("vbf", "zh", "wh", "vh"):
                 """
                 basis.matrix looks something like this:
                 1,    0,      0,        0,      0
@@ -530,33 +529,11 @@ class TemplatesFile(MultiEnum):
     def getjson(self):
         result = {
           "inputDirectory": os.path.join("step3_withdiscriminants", str(self.production)),
-          "outputFile": self.templatesfile(firststep=self.hascustomsmoothing),
+          "outputFile": self.templatesfile(firststep=False),
           "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
+          "constraints": self.constraints,
         }
-        if self.usenewtemplatebuilder:
-          result.update({
-            "constraints": self.constraints,
-          })
         return result
-
-    @property
-    def hascustomsmoothing(self):
-        result = any(_.hascustomsmoothing for _ in self.templates() + self.inttemplates())
-        return result
-
-    def docustomsmoothing(self):
-        if not self.hascustomsmoothing: return
-        newf = ROOT.TFile(self.templatesfile(), "RECREATE")
-        oldf = ROOT.TFile(self.templatesfile(firststep=True))
-        newf.cd()
-
-        controlplotsdir = newf.mkdir("controlPlots")
-        controlplotsdir.cd()
-        for key in oldf.controlPlots.GetListOfKeys():
-            key.ReadObj().Write()
-
-        for template in self.templates()+self.inttemplates():
-            template.docustomsmoothing(newf, controlplotsdir)
 
     @property
     def copyfromothertemplatesfile(self):
@@ -626,20 +603,14 @@ class TemplatesFile(MultiEnum):
             if not _.appliesto(self.templategroup): continue
 
             if _ in ("JECUp", "JECDn"):
-                if self.templategroup not in ("ggh", "zh", "wh"): continue
-                if self.templategroup in ("zh", "wh") and self.category == "VBFtagged": continue
+                if self.templategroup not in ("ggh", "zh", "wh", "vh"): continue
+                if self.templategroup in ("zh", "wh", "vh") and self.category == "VBFtagged": continue
                 if self.category == "Untagged": continue
 
             yield _
 
     @property
-    def usenewtemplatebuilder(self):
-        return self.analysis.usehistogramsforcombine
-
-    @property
     def constraints(self):
-        if not self.usenewtemplatebuilder: assert False, self
-
         if self.templategroup in ("background", "DATA"): return []
         if self.analysis == "fa3_STXS": return []
         if (
@@ -660,7 +631,7 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "g11gi1"),
                     Template(self, productionmode, self.analysis.purehypotheses[1]),
                 ]
-            if self.templategroup in ("vbf", "zh", "wh"):
+            if self.templategroup in ("vbf", "zh", "wh", "vh"):
                 constrainttype = "oneparameterVVH"
                 templates = [
                     Template(self, productionmode, self.analysis.purehypotheses[0]),
@@ -706,7 +677,7 @@ class TemplatesFile(MultiEnum):
                         IntTemplate(self, productionmode, "gk1gl1"),
                         Template(self, productionmode, self.analysis.purehypotheses[4]),
                     ]
-            if self.templategroup in ("vbf", "zh", "wh"):
+            if self.templategroup in ("vbf", "zh", "wh", "vh"):
                 constrainttype = "fourparameterVVH"
                 templates = [
                     Template(self, productionmode, self.analysis.purehypotheses[0]),
@@ -878,7 +849,7 @@ def templatesfiles():
             for analysis in analyses:
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
-                    for templategroup in TemplateGroup.items():
+                    for templategroup in templategroups:
                         if analysis.isdecayonly and templategroup not in ("bkg", "ggh", "DATA"): continue
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
@@ -902,6 +873,8 @@ class TemplateBase(object):
                 enumsdict[TemplateGroup] = "wh"
             elif enumsdict[ProductionMode] == "ZH":
                 enumsdict[TemplateGroup] = "zh"
+            elif enumsdict[ProductionMode] == "VH":
+                enumsdict[TemplateGroup] = "vh"
             elif enumsdict[ProductionMode] == "ttH":
                 enumsdict[TemplateGroup] = "tth"
             elif enumsdict[ProductionMode] == "bbH":
@@ -960,37 +933,6 @@ class TemplateBase(object):
     def getjson(self):
         pass
 
-    @abc.abstractproperty
-    def customsmoothingkwargs(self):
-        pass
-
-    @abc.abstractmethod
-    def hascustomsmoothing(self):
-        pass
-
-    def docustomsmoothing(self, newf, controlplotsdir):
-        f = ROOT.TFile(self.templatesfile.templatesfile(firststep=True))
-        h = getattr(f, self.templatename(final=False))
-        rawprojections = [f.Get("controlPlots/control_{}_projAxis{}_afterNormalization".format(self.templatename(final=False), i)).GetListOfPrimitives()[0]
-                              for i in range(3)]
-        try:
-            customsmoothing.customsmoothing(h, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)
-        except:
-            print "Error while smoothing {}:".format(self.templatename(final=False))
-            raise
-        if self.domirror and not isinstance(self, IntTemplate):
-            assert "axes" not in self.customsmoothingkwargs or 1 not in self.customsmoothingkwargs["axes"]
-            hmirror = getattr(f, self.templatename(final=True))
-            try:
-                customsmoothing.customsmoothing(hmirror, rawprojections, newf, controlplotsdir, **self.customsmoothingkwargs)
-            except:
-                print "Error while custom smoothing {}:".format(self.templatename(final=True))
-                raise
-
-    @property
-    def usenewtemplatebuilder(self):
-        return self.templatesfile.usenewtemplatebuilder
-
 class Template(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
     enums = [TemplatesFile, ReweightingSamplePlus]
@@ -1008,7 +950,7 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
 
-        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH"):
+        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "VH", "ttH", "bbH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.reweightingsampleplus not in self.templatesfile.signalsamples():
@@ -1059,7 +1001,7 @@ class Template(TemplateBase, MultiEnum):
                 name = "templateMix{}{}{}AdapSmooth".format(match2.group(1), match2.group(2), "Pi" if match2.group(3) else "")
             else:
                 print self.hypothesis
-        elif self.productionmode in ("VBF", "ZH", "WH"):
+        elif self.productionmode in ("VBF", "ZH", "WH", "VH"):
             match1 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)(?P<sign>-?)0[.]5$", str(self.hypothesis))
             match2 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]5f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]5$", str(self.hypothesis))
             match3 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]33f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]33$", str(self.hypothesis))
@@ -1137,7 +1079,7 @@ class Template(TemplateBase, MultiEnum):
         return name
 
     def title(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "VH", "ttH", "bbH"):
             return "{} {}".format(self.productionmode, self.hypothesis)
         if self.productionmode == "ggZZ" or self.productionmode == "qqZZ":
             return str(self.productionmode).replace("ZZ", "#rightarrowZZ")
@@ -1152,9 +1094,13 @@ class Template(TemplateBase, MultiEnum):
     def weightname(self):
         if self.productionmode == "data":
             return None
-        if self.usenewtemplatebuilder:
-            return "MC_weight_nominal * (" + self.reweightingsampleplus.MC_weight + ")"
-        return self.reweightingsampleplus.weightname()
+        if self.productionmode == "VH":
+            samples = [ReweightingSample("ZH", self.hypothesis)]
+            if self.hypothesis != "L1Zg":
+                samples.append(ReweightingSample("WH", self.hypothesis))
+        else:
+            samples = [self.reweightingsampleplus]
+        return ["MC_weight_nominal * (" + sample.MC_weight + ")" for sample in samples]
 
     @property
     def categoryname(self):
@@ -1170,80 +1116,65 @@ class Template(TemplateBase, MultiEnum):
     def reweightfrom(self):
         if self.productionmode == "ggH":
             if self.production.LHE:
-                result = {Sample(self.production, self.productionmode, self.hypothesis)}
+                result = [{Sample(self.production, self.productionmode, self.hypothesis)}]
             elif self.shapesystematic == "MINLO_SM":
-                result = {Sample(self.production, self.productionmode, self.hypothesis, "MINLO")}
+                result = [{Sample(self.production, self.productionmode, self.hypothesis, "MINLO")}]
             else:
-                result={
+                result=[{
                         Sample(self.production, self.productionmode, hypothesis)
-                            for hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa2dec0.5", "fa3dec0.5", "fL1dec0.5", "fL1Zgdec0.5")
-                       }
+                            for hypothesis in self.productionmode.generatedhypotheses(self.production)
+                       }]
         if self.productionmode in ["VBF", "ZH"]:
-            result={
+            result=[{
                     Sample(self.production, self.productionmode, hypothesis)
-                        for hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5", "fL1Zgprod0.5")
-                   }
-            if self.productionmode == "VBF":# and self.reweightingsample.hasZZ:
-              result = {s for s in result if s.hasZZ}
+                    for hypothesis in self.productionmode.generatedhypotheses(self.production)
+                   }]
+            if self.productionmode == "VBF" and self.reweightingsample.hasZZ:
+              result = [{s for s in st if s.hasZZ} for st in result]
             if self.productionmode == "ZH" and (self.reweightingsample.hasZZ or self.reweightingsample.hasZg):
-              result = {s for s in result if s.hasZZ or s.hasZg}
+              result = [{s for s in st if s.hasZZ or s.hasZg} for st in result]
         if self.productionmode == "WH":
-            result={
+            result=[{
                     Sample(self.production, self.productionmode, hypothesis)
-                        for hypothesis in ("0+", "0-", "a2", "L1", "fa2prod0.5", "fa3prod0.5", "fL1prod0.5")
-                   }
+                    for hypothesis in self.productionmode.generatedhypotheses(self.production)
+                   }]
+        if self.productionmode == "VH":
+            result = [
+                {
+                    Sample(self.production, "ZH", hypothesis)
+                    for hypothesis in ProductionMode("ZH").generatedhypotheses(self.production)
+                }, {
+                    Sample(self.production, "WH", hypothesis)
+                    for hypothesis in ProductionMode("WH").generatedhypotheses(self.production)
+                }
+            ]
+            if self.hypothesis == "L1Zg":
+                del result[1]
         if self.productionmode in ("ttH", "bbH"):
-            result={
+            result=[{
                     Sample(self.production, self.productionmode, "0+", self.hffhypothesis)
-                   }
+                   }]
         if self.productionmode == "ZX":
-            result = {Sample(self.production, self.productionmode)}
+            result = [{Sample(self.production, self.productionmode)}]
         if self.productionmode == "qqZZ":
-            result = {Sample(self.production, self.productionmode), Sample(self.production, self.productionmode, "ext")}
+            result = [{Sample(self.production, self.productionmode), Sample(self.production, self.productionmode, "ext")}]
         if self.productionmode == "ggZZ":
-            result = {Sample(self.production, self.productionmode, flavor) for flavor in flavors}
+            result = [{Sample(self.production, self.productionmode, flavor)} for flavor in flavors]
         if self.productionmode == "VBF bkg":
-            result = {Sample(self.production, self.productionmode, flavor) for flavor in flavors if not flavor.hastaus}
+            result = [{Sample(self.production, self.productionmode, flavor)} for flavor in flavors if not flavor.hastaus]
         if self.productionmode == "data":
             if config.showblinddistributions:
-                result = {Sample(self.production, self.productionmode)}
+                result = [{Sample(self.production, self.productionmode)}]
             elif self.production.GEN or self.production.LHE:
-                result = {Sample("WplusH", "POWHEG", "ext", self.production, "0+")}
+                result = [{Sample("WplusH", "POWHEG", "ext", self.production, "0+")}]
             else:
-                result = {Sample("ggZZ", self.production, "4tau")}
-        result = {sample for sample in result if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0}
+                result = [{Sample("ggZZ", self.production, "4tau")}]
+        result = [{sample for sample in st if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0} for st in result]
         assert result, self
         return result
 
     @property
-    def scalefactor(self):
-        if self.usenewtemplatebuilder: return None
-        if self.shapesystematic == "MINLO_SM":
-            result = len(self.reweightfrom())
-        elif self.productionmode in ("VBF", "ggH", "ZH", "WH", "bbH"):
-            result = uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, self.hypothesis, self.production).xsec) / uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, "SM", self.production).xsec)
-        elif self.productionmode == "ttH":
-            result = uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, self.hypothesis, self.hffhypothesis, self.production).xsec) / uncertainties.nominal_value(ReweightingSampleWithPdf(self.productionmode, "SM", "Hff0+", self.production).xsec)
-        elif self.productionmode == "data" and not config.showblinddistributions:
-            return None  #this is to avoid calling effectiveentries
-        elif self.productionmode in ("VBF bkg", "ggZZ", "ZX", "data"):
-            result = len(self.reweightfrom())
-        elif self.productionmode == "qqZZ":
-            result = 1
-        try:
-            result /= sum(
-                          Sample.effectiveentries(
-                                                  reweightfrom=reweightfrom,
-                                                  reweightto=ReweightingSample(self.productionmode, self.hypothesis, self.hffhypothesis)
-                                                 )
-                           for reweightfrom in self.reweightfrom()
-                         )
-        except ZeroDivisionError:
-            result = 0
-        if isnan(result): result = 0
-        if self.productionmode in ("VBF bkg", "ggZZ", "ZX", "data"):
-            assert result == 1
-        return result
+    def scalefactor(self): return None
 
     @property
     def domirror(self):
@@ -1357,83 +1288,32 @@ class Template(TemplateBase, MultiEnum):
         self.smoothingparameters[0][2] = value
 
     @property
-    def customsmoothingkwargs(self):
-      result = self.smoothingparameters[1].copy()
-      if "othertemplateargs" in result:
-        result["othertemplate"] = Template(*result["othertemplateargs"])
-        del result["othertemplateargs"]
-      return result
-
-    @customsmoothingkwargs.setter
-    def customsmoothingkwargs(self, value):
-      result = self.smoothingparameters
-      result[1] = value
-      self.smoothingparameters = result
-
-    @property
-    def hascustomsmoothing(self):
-        return bool(self.customsmoothingkwargs)
-
-    @property
     def postprocessingjson(self):
       result = []
-      if self.smoothentriesperbin:
-        assert not self.usenewtemplatebuilder
-        result.append({"type": "smooth", "kernel": "adaptive", "entriesperbin": self.smoothentriesperbin})
-        if self.reweightaxes:
-          reweight = {"type": "reweight", "axes": self.reweightaxes}
-          if self.reweightrebin and any(self.reweightrebin):
-            reweight.update({"rebinning": self.reweightrebin})
-          result.append(reweight)
       if self.scalefactor is not None:
         result.append({"type": "rescale", "factor": self.scalefactor})
-      if self.usenewtemplatebuilder:
-        result.append({"type": "floor", "floorvalue": 1e-10})
-        if self.domirror:
-          result.append({"type": "mirror", "antisymmetric": False})
+      result.append({"type": "floor", "floorvalue": 1e-10})
+      if self.domirror:
+        result.append({"type": "mirror", "antisymmetric": False})
       return result
 
     def getjson(self):
         if self.copyfromothertemplate: return []
-        if self.usenewtemplatebuilder and self.hypothesis is not None and not self.hypothesis.ispure: return []
+        if self.hypothesis is not None and not self.hypothesis.ispure: return []
         jsn = [
                {
-                "name": self.templatename(final=self.usenewtemplatebuilder),
-                "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
+                "name": self.templatename(final=True),
+                "files": [sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in st]) for st in self.reweightfrom()],
                 "tree": "candTree",
                 "variables": [d.formula for d in self.discriminants],
                 "weight": self.weightname(),
                 "selection": self.selection,
                 "binning": {
-                  "type": "fixed",
                   "bins": self.binning,
                 },
-                "conserveSumOfWeights": True,
                 "postprocessing": self.postprocessingjson,
-                "filloverflows": True,
                },
               ]
-
-        if self.usenewtemplatebuilder:
-            del jsn[0]["conserveSumOfWeights"], jsn[0]["filloverflows"], jsn[0]["binning"]["type"]
-
-        if not self.usenewtemplatebuilder:
-            if self.domirror:
-                mirrorjsn = [
-                             {
-                              "name":self.templatename(final=True),
-                              "templatesum":[
-                                {"name":self.templatename(final=False),"factor":1.0},
-                              ],
-                              "postprocessing":[
-                                {"type":"mirror", "axis":1},
-                                {"type":"floor"},
-                              ],
-                             },
-                            ]
-                jsn += mirrorjsn
-            else:
-                jsn[0]["postprocessing"].append({"type": "floor"})
 
         if self.productionmode == "data":
             del jsn[0]["postprocessing"]
@@ -1578,7 +1458,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         if self.productionmode in ("ggH", "ttH", "bbH"):
             if self.interferencetype.totalpower != 2:
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
-        elif self.productionmode in ("VBF", "ZH", "WH"):
+        elif self.productionmode in ("VBF", "ZH", "WH", "VH"):
             if self.interferencetype.totalpower != 4:
                 raise ValueError("Invalid interferencetype {} for productionmode {}!\n{}".format(self.interferencetype, self.productionmode, args))
         else:
@@ -1611,7 +1491,7 @@ class IntTemplate(TemplateBase, MultiEnum):
             elif self.interferencetype == "gi1gj1":
                 if self.analysis.isfL1fL1Zg:
                     result = "templateL1L1ZgIntAdapSmooth"
-        elif self.productionmode in ("VBF", "ZH", "WH"):
+        elif self.productionmode in ("VBF", "ZH", "WH", "VH"):
             if self.interferencetype == "g11gi3":
                 result = "templateg11{}3AdapSmooth".format(self.analysis.couplingname)
             if self.interferencetype == "g12gi2":
@@ -1744,59 +1624,26 @@ class IntTemplate(TemplateBase, MultiEnum):
         return templatesandfactors
 
     def getjson(self):
-        if self.usenewtemplatebuilder:
-          intjsn = [
-                    {
-                     "name": self.templatename(final=self.usenewtemplatebuilder),
-                     "files": sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in self.reweightfrom()]),
-                     "tree": "candTree",
-                     "variables": [d.formula for d in self.discriminants],
-                     "weight": self.weightname(),
-                     "selection": self.selection,
-                     "binning": {
-                       "bins": self.binning,
-                     },
-                     "postprocessing": [],
-                    },
-                   ]
-        else:
-          templatesum = [{
-                          "name": template.templatename(final=False),
-                          "factor": factor,
-                         } for template, factor in self.templatesandfactors if factor]
-          intjsn = [
-                    {
-                     "name": self.templatename(),
-                     "templatesum":templatesum,
-                     "postprocessing":[],
-                    },
-                   ]
+        intjsn = [
+          {
+            "name": self.templatename(final=True),
+            "files": [sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in st]) for st in self.reweightfrom()],
+            "tree": "candTree",
+            "variables": [d.formula for d in self.discriminants],
+            "weight": self.weightname(),
+            "selection": self.selection,
+            "binning": {
+              "bins": self.binning,
+            },
+            "postprocessing": [],
+          },
+        ]
 
         if self.domirror:
           mirrorjsn = self.mirrorjsn
           if "axis" in mirrorjsn: del mirrorjsn["axis"]
           intjsn[0]["postprocessing"].append(mirrorjsn)
         return intjsn
-
-    @property
-    def hascustomsmoothing(self):
-        return any(template.hascustomsmoothing for template, factor in self.templatesandfactors if factor)
-
-    @property
-    def customsmoothingkwargs(self):
-        return {
-                "name": "redointerference",
-                "newf": self.customsmoothing_newf,
-                "templatesandfactors": self.templatesandfactors,
-                "mirrorjsn": self.mirrorjsn,
-               }
-
-    def docustomsmoothing(self, newf, controlplotsdir):
-        self.customsmoothing_newf = newf
-        try:
-            return super(IntTemplate, self).docustomsmoothing(newf, controlplotsdir)
-        finally:
-            del self.customsmoothing_newf
 
     @cache
     def gettemplate(self, *args, **kwargs):
@@ -1807,21 +1654,48 @@ class IntTemplate(TemplateBase, MultiEnum):
         return result
 
     @property
-    def sumofsamples(self):
-        return sum((t.reweightingsample*factor for t, factor in self.templatesandfactors), SumOfSamples())
+    def sumsofsamples(self):
+        if self.productionmode == "VH":
+            result = []
+            kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in type(self).needenums}
+            kwargs["productionmode"] = "ZH"
+            kwargs["templategroup"] = "zh"
+            ZHtemplate = type(self)(*kwargs.itervalues())
+            result.append(sum((t.reweightingsample*factor for t, factor in ZHtemplate.templatesandfactors), SumOfSamples()))
+            
+            if not self.analysis.isfa3fa2fL1fL1Zg: assert False
+            if self.interferencetype.couplingpowers["l"] < 3:
+                kwargs["productionmode"] = "WH"
+                kwargs["templategroup"] = "wh"
+                WHtemplate = type(self)(*kwargs.itervalues())
+                result.append(sum((t.reweightingsample*factor for t, factor in WHtemplate.templatesandfactors), SumOfSamples()))
+            return result
+        return [sum((t.reweightingsample*factor for t, factor in self.templatesandfactors), SumOfSamples())]
 
     def weightname(self):
-        if self.usenewtemplatebuilder:
-            return "MC_weight_nominal * (" + self.sumofsamples.MC_weight + ")"
-        assert False
+        return ["MC_weight_nominal * (" + sumofsamples.MC_weight + ")" for sumofsamples in self.sumsofsamples]
 
     def reweightfrom(self):
-        result = set.intersection(*(set(t.reweightfrom()) for t, factor in self.templatesandfactors))
-        assert result
+        if self.productionmode == "VH":
+            if not self.analysis.isfa3fa2fL1fL1Zg: assert False
+            kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+            del kwargs["interferencetype"]; kwargs["hypothesis"] = "0+"
+            result = Template(*kwargs.itervalues()).reweightfrom()[:]
+            if self.interferencetype.couplingpowers["l"] >= 3:
+                del result[1]
+        else:
+            others = [t.reweightfrom() for t, factor in self.templatesandfactors]
+            assert all(len(other) == 1 for other in others)
+            result = [set.intersection(*(other[0] for other in others))]
+        assert result and all(result), result
         return result
 
     @property
     def selection(self):
+        if self.productionmode == "VH":
+            kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
+            del kwargs["interferencetype"]; kwargs["hypothesis"] = "0+"
+            return Template(*kwargs.itervalues()).selection
         result = {t.selection for t, factor in self.templatesandfactors}
         assert len(result) == 1, result
         return result.pop()
