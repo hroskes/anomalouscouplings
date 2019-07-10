@@ -901,8 +901,6 @@ class PlotCopier(object):
         import config
         if config.host != self.copyfromhost or not self.__tocopy: return
 
-        #getpass instead of raw_input in case you accidentally type your password here
-
         command = ["rsync", "-azvP", self.copyfromfolder, self.copytoconnect + ":" + self.copytofolder] + [
           "--include="+_ for _ in self.__tocopy
         ] + ["--exclude=*", "--delete"]
@@ -915,9 +913,13 @@ class PlotCopier(object):
             print
             return
 
-        getpass.getpass("press enter when you're ready to rsync: ")
+        #getpass instead of raw_input in case you accidentally type your password here
+        answer = None
+        while answer not in ("", "no"):
+            answer = getpass.getpass("press enter when you're ready to rsync, or type no if you don't want to: ")
         try:
-            subprocess.check_call(command)
+            if answer != "no":
+                subprocess.check_call(command)
         except:
             print
             print "Failed to copy plots.  To do it yourself, try:"
