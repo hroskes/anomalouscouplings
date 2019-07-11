@@ -530,7 +530,6 @@ class TemplatesFile(MultiEnum):
 
     def getjson(self):
         result = {
-          "inputDirectory": os.path.join("step3_withdiscriminants", str(self.production)),
           "outputFile": self.templatesfile(firststep=False),
           "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
           "constraints": self.constraints,
@@ -1100,6 +1099,8 @@ class Template(TemplateBase, MultiEnum):
             samples = [ReweightingSample("ZH", self.hypothesis)]
             if self.hypothesis != "L1Zg":
                 samples.append(ReweightingSample("WH", self.hypothesis))
+        elif self.productionmode == "ggZZ":
+            samples = [self.reweightingsampleplus]*6
         else:
             samples = [self.reweightingsampleplus]
         return ["MC_weight_nominal * (" + sample.MC_weight + ")" for sample in samples]
@@ -1318,7 +1319,7 @@ class Template(TemplateBase, MultiEnum):
         jsn = [
                {
                 "name": self.templatename(final=True),
-                "files": [sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in st]) for st in self.reweightfrom()],
+                "files": [sorted([sample.withdiscriminantsfile() for sample in st]) for st in self.reweightfrom()],
                 "tree": "candTree",
                 "variables": [d.formula for d in self.discriminants],
                 "weight": self.weightname(),
@@ -1642,7 +1643,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         intjsn = [
           {
             "name": self.templatename(final=True),
-            "files": [sorted([os.path.basename(sample.withdiscriminantsfile()) for sample in st]) for st in self.reweightfrom()],
+            "files": [sorted([sample.withdiscriminantsfile() for sample in st]) for st in self.reweightfrom()],
             "tree": "candTree",
             "variables": [d.formula for d in self.discriminants],
             "weight": self.weightname(),

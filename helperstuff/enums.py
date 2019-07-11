@@ -712,7 +712,7 @@ class Analysis(MyEnum):
             if self.isfL1fL1Zg: return False
             if self == "fa3fa2fL1fL1Zg": return True
             if self == "fa3fa2fL1fL1Zg_decay": return True
-            if self == "fa3fa2fL1fL1Zg_only6bins": return True
+            if self == "fa3fa2fL1fL1Zg_only6bins": return False
             if self == "fa3fa2fL1fL1Zg_STXS": return True
         if config.name ==  "savvas" : 
             if self == "fa3_multiparameter": return True

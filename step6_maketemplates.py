@@ -144,7 +144,7 @@ def submitjobs(removefiles, jsontoo=False):
         if not os.path.exists(templatesfile.jsonfile()):
           raise ValueError(templatesfile.jsonfile()+" doesn't exist!  Try --jsontoo.")
     elif (
-      not (
+      (
         os.path.exists(templatesfile.templatesfile())
         and os.path.exists(templatesfile.templatesfile().replace(".root", ".done"))
       )
