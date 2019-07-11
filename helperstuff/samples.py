@@ -1454,15 +1454,6 @@ class ReweightingSamplePlus(ReweightingSample):
            ):
             raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hffhypothesis, self.alternategenerator, args))
 
-        if (
-            self.extension == "ext"
-            and not (
-                     self.productionmode == "qqZZ"
-                     or self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH") and self.alternategenerator == "POWHEG"
-                    )
-           ):
-            raise ValueError("No extra {} sample produced\n{}".format(self.productionmode, args))
-
         if self.pythiasystematic is not None:
             if (
                 self.hypothesis != "0+"
@@ -1526,7 +1517,7 @@ class Sample(ReweightingSamplePlus):
                     if self.hypothesis == "0+": result = "{}125".format(s)
                 if self.pythiasystematic is not None:
                     result += self.pythiasystematic.appendname
-                if self.extension == "ext": result += "ext"
+                if self.extension is not None: result += str(self.extension)
                 return result
         if self.alternategenerator in ("MINLO", "NNLOPS"):
             if self.productionmode == "ggH":
@@ -1551,12 +1542,15 @@ class Sample(ReweightingSamplePlus):
             if self.hypothesis in ("fa30.5", "fa3prod0.5"): result = "{}0Mf05ph0_M125".format(s)
             if self.hypothesis in ("fL10.5", "fL1prod0.5"): result = "{}0L1f05ph0_M125".format(s)
             if self.hypothesis in ("fL1Zg0.5", "fL1Zgprod0.5"): result = "{}0L1Zgf05ph0_M125".format(s)
+            if self.extension is not None: result += "_" + str(self.extension)
             return result
         if self.productionmode in ("HJJ", "ttH"):
             s = str(self.productionmode)
-            if self.hffhypothesis == "Hff0+": return "{}0PM_M125".format(s)
-            if self.hffhypothesis == "Hff0-": return "{}0M_M125".format(s)
-            if self.hffhypothesis == "fCP0.5": return "{}0Mf05ph0_M125".format(s)
+            if self.hffhypothesis == "Hff0+": result = "{}0PM_M125".format(s)
+            if self.hffhypothesis == "Hff0-": result = "{}0M_M125".format(s)
+            if self.hffhypothesis == "fCP0.5": result = "{}0Mf05ph0_M125".format(s)
+            if self.extension is not None: result += "_" + str(self.extension)
+            return result
         if self.productionmode == "bbH": return "bbH125"
         if self.productionmode == "tqH": return "tqH125"
         if self.productionmode == "ggZZ":
@@ -1566,10 +1560,9 @@ class Sample(ReweightingSamplePlus):
         if self.productionmode == "VBF bkg":
             return "VBFTo{}JJ_Contin_phantom128".format(self.flavor)
         if self.productionmode == "qqZZ":
-            if self.extension == "ext":
-                return "ZZTo4lext"
-            else:
-                return "ZZTo4l"
+            result = "ZZTo4l"
+            if self.extension is not None: result += str(self.extension)
+            return result
         if self.productionmode == "ZX" or self.productionmode == "data":
             return "AllData"
         raise self.ValueError("CJLSTdirname")
@@ -1807,9 +1800,22 @@ def allsamples():
         for productionmode in "ggH", "VBF", "ZH", "WH", "bbH":
             for hypothesis in ProductionMode(productionmode).generatedhypotheses(production):
                 yield Sample(productionmode, hypothesis, production)
+                if production.year == 2017 and (
+                   productionmode == "ggH" and hypothesis in (
+                       "fL1Zg0.5", "fa30.5",
+                   ) or productionmode == "VBF" and hypothesis in (
+                       "fL1prod0.5", "a3", "fa3prod0.5", "a2", "a1",
+                   ) or productionmode == "ZH" and hypothesis in (
+                       "a1", "a2", "a3", "L1", "L1Zg", "fa3prod0.5", "fL1Zgprod0.5",
+                   ) or productionmode == "WH"
+                ):
+                    yield Sample(productionmode, hypothesis, production, "ext1")
         for hypothesis in hffhypotheses:
             yield Sample("HJJ", hypothesis, "0+", production)
+            yield Sample("HJJ", hypothesis, "0+", production, "ext1")
+            if production.year == 2017: yield Sample("HJJ", hypothesis, "0+", production, "ext2")
             yield Sample("ttH", hypothesis, "0+", production)
+            if production.year == 2017: yield Sample("ttH", hypothesis, "0+", production, "ext1")
         yield Sample("tqH", "0+", "Hff0+", production)
         for flavor in flavors:
             yield Sample("ggZZ", flavor, production)
@@ -1829,7 +1835,11 @@ def allsamples():
             yield Sample("ttH", "Hff0+", "0+", "POWHEG", production, systematic)
             yield Sample("ggH", "0+", "MINLO", production, systematic)
         yield Sample("qqZZ", production)
-        yield Sample("qqZZ", "ext", production)
+        if production.year == 2018:
+            yield Sample("qqZZ", "ext1", production)
+            yield Sample("qqZZ", "ext2", production)
+        else:
+            yield Sample("qqZZ", "ext", production)
         yield Sample("ZX", production)
         yield Sample("data", production)
 

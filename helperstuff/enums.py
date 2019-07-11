@@ -1021,6 +1021,8 @@ class Extension(MyEnum):
     enumname = "extension"
     enumitems = (
                  EnumItem("ext"),
+                 EnumItem("ext1"),
+                 EnumItem("ext2"),
                 )
 
 class PythiaSystematic(MyEnum):
