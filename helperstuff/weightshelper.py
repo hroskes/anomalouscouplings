@@ -43,7 +43,7 @@ class WeightsHelper(MultiEnum):
         return "ghz1", "ghz1prime2", "ghz2", "ghz4", "ghza1prime2"
       if prodordec == "prod" and self.productionmode == "VBF":
         if config.separateZZWWVBFweights:
-          return "ghz1", "ghw1", "ghz1prime2", "ghw1prime2", "ghz2", "ghw2", "ghz4", "ghw4", "ghza1prime2"
+          return "ghv1", "ghz1prime2", "ghw1prime2", "ghz2", "ghw2", "ghz4", "ghw4", "ghza1prime2"
         else:
           return "ghv1", "ghv1prime2", "ghv2", "ghv4", "ghza1prime2"
       if prodordec == "prod" and self.productionmode == "WH":
@@ -85,9 +85,16 @@ class WeightsHelper(MultiEnum):
             "coupling2": coupling2,
             "coupling2value": coupling2value,
           }
+          if coupling1.replace("z", "w") == coupling2 and coupling1value == coupling2value:
+            dct["coupling"] = dct["coupling1"].replace("z", "v")
+            dct["couplingvalue"] = dct["coupling1value"]
+            wt = self.weight(prodordec).format(**dct)
+          else:
+            wt = self.weightmix(prodordec).format(**dct)
+
           coupling1 = self.couplingname(coupling1)
           coupling2 = self.couplingname(coupling2)
-          yield (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2), self.weightmix(prodordec).format(**dct)
+          yield (coupling1, coupling1value, weight1), (coupling2, coupling2value, weight2), wt
 
     def weight(self, prodordec):
         result = "p_Gen_{weightstring}_SIG_"
@@ -109,7 +116,8 @@ if __name__ == "__main__":
 #    print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=12345, ghzgs1prime2=0, kappa=1, kappa_tilde=4).MC_weight_terms_expanded
     pprint(
       (
-        ArbitraryCouplingsSample("VBF", g1=1, g2=1, g4=1, g1prime2=1e4, ghzgs1prime2=1e4)
+#        ArbitraryCouplingsSample("VBF", g1=1, g2=1, g4=1, g1prime2=1e4, ghzgs1prime2=1e4)
+        ArbitraryCouplingsSample("VBF", g1=1, g2=0, g4=1, g1prime2=0, ghzgs1prime2=0)
 #      - ArbitraryCouplingsSample("VBF", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0)
 #      - ArbitraryCouplingsSample("VBF", g1=0, g2=1, g4=0, g1prime2=0, ghzgs1prime2=0)
       ).MC_weight_terms

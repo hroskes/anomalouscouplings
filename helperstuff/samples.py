@@ -1632,6 +1632,10 @@ class Sample(ReweightingSamplePlus):
     def copyfromothersample(self):
         if self == Sample("190703_2017", "ttH", "0+", "Hff0+"):
             return Sample("190703_2016", "ttH", "0+", "Hff0+")
+        if self == Sample("190703_2018", "ttH", "0+", "Hff0+"):
+            return Sample("190703_2016", "ttH", "0+", "Hff0+")
+        if self == Sample("190703_2018", "bbH", "0+"):
+            return Sample("190703_2017", "bbH", "0+")
         return None
 
     @property

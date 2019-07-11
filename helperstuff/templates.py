@@ -16,7 +16,7 @@ import ROOT
 import config
 from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
-from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile, tfiles
+from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
@@ -183,6 +183,8 @@ class TemplatesFile(MultiEnum):
         elif self.templategroup == "bkg":
             if self.production.LHE or self.production.GEN: return [Template(self, "qqZZ")]
             result = ["qqZZ", "ggZZ", "VBF bkg"]
+            if deprecate(True, 2019, 7, 15):
+                result.remove("VBF bkg")
             if config.usedata:
                 result.append("ZX")
             if self.shapesystematic in ("ZXUp", "ZXDown"):
@@ -1121,13 +1123,15 @@ class Template(TemplateBase, MultiEnum):
                 result = [{Sample(self.production, self.productionmode, self.hypothesis, "MINLO")}]
             else:
                 result=[{
-                        Sample(self.production, self.productionmode, hypothesis)
+                        Sample(self.production, self.productionmode, hypothesis, ext)
                             for hypothesis in self.productionmode.generatedhypotheses(self.production)
+                            for ext in (None, "ext1")
                        }]
         if self.productionmode in ["VBF", "ZH"]:
             result=[{
-                    Sample(self.production, self.productionmode, hypothesis)
+                    Sample(self.production, self.productionmode, hypothesis, ext)
                     for hypothesis in self.productionmode.generatedhypotheses(self.production)
+                    for ext in (None, "ext1")
                    }]
             if self.productionmode == "VBF" and self.reweightingsample.hasZZ:
               result = [{s for s in st if s.hasZZ} for st in result]
@@ -1135,17 +1139,20 @@ class Template(TemplateBase, MultiEnum):
               result = [{s for s in st if s.hasZZ or s.hasZg} for st in result]
         if self.productionmode == "WH":
             result=[{
-                    Sample(self.production, self.productionmode, hypothesis)
+                    Sample(self.production, self.productionmode, hypothesis, ext)
                     for hypothesis in self.productionmode.generatedhypotheses(self.production)
+                    for ext in (None, "ext1")
                    }]
         if self.productionmode == "VH":
             result = [
                 {
                     Sample(self.production, "ZH", hypothesis)
                     for hypothesis in ProductionMode("ZH").generatedhypotheses(self.production)
+                    for ext in (None, "ext1")
                 }, {
                     Sample(self.production, "WH", hypothesis)
                     for hypothesis in ProductionMode("WH").generatedhypotheses(self.production)
+                    for ext in (None, "ext1")
                 }
             ]
             if self.hypothesis == "L1Zg":
@@ -1157,7 +1164,7 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "ZX":
             result = [{Sample(self.production, self.productionmode)}]
         if self.productionmode == "qqZZ":
-            result = [{Sample(self.production, self.productionmode), Sample(self.production, self.productionmode, "ext")}]
+            result = [{Sample(self.production, self.productionmode, ext) for ext in (None, "ext", "ext1", "ext2")}]
         if self.productionmode == "ggZZ":
             result = [{Sample(self.production, self.productionmode, flavor)} for flavor in flavors]
         if self.productionmode == "VBF bkg":
@@ -1169,8 +1176,16 @@ class Template(TemplateBase, MultiEnum):
                 result = [{Sample("WplusH", "POWHEG", "ext", self.production, "0+")}]
             else:
                 result = [{Sample("ggZZ", self.production, "4tau")}]
-        result = [{sample for sample in st if tfiles[sample.withdiscriminantsfile()].candTree.GetEntries() != 0} for st in result]
-        assert result, self
+
+        for st in result:
+            for sample in set(st):
+                if not os.path.exists(sample.withdiscriminantsfile()):
+                    st.remove(sample)
+                    continue
+                with TFile(sample.withdiscriminantsfile()) as f:
+                    if (not f) or (f.candTree.GetEntries() == 0):
+                        st.remove(sample)
+        assert result and all(result), self
         return result
 
     @property
