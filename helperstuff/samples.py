@@ -1637,15 +1637,8 @@ class Sample(ReweightingSamplePlus):
 
     @property
     def copyfromothersample(self):
-        if not self.production.LHE and self == Sample("170203", "ggH", "MINLO", "0+"):
-            return Sample("170222", "ggH", "MINLO", "0+")
-        if self.production == "170712" and self.productionmode in ("ggH", "HJJ", "VBF", "WH", "ZH", "ttH") and self.alternategenerator is None:
-            args = [self.reweightingsampleplus, self.flavor, "170222"]
-            return Sample(*args)
-        if self.production in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
-            production = str(self.production).split("_")[0]
-            args = [self.flavor, self.reweightingsampleplus, production]
-            return Sample(*args)
+        if self == Sample("190703_2017", "ttH", "0+", "Hff0+"):
+            return Sample("190703_2016", "ttH", "0+", "Hff0+")
         return None
 
     @property
@@ -1864,6 +1857,7 @@ def __xcheck():
 
     for sample in allsamples():
         if sample.productionmode == "data": continue
+        if sample.copyfromothersample: continue
         try:
             CJ2wd[CJLSTfile(sample)] = sample.withdiscriminantsfile()
             wd2CJ[sample.withdiscriminantsfile()] = CJLSTfile(sample)
