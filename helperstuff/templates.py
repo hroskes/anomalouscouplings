@@ -1147,11 +1147,11 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "VH":
             result = [
                 {
-                    Sample(self.production, "ZH", hypothesis)
+                    Sample(self.production, "ZH", hypothesis, ext)
                     for hypothesis in ProductionMode("ZH").generatedhypotheses(self.production)
                     for ext in (None, "ext1")
                 }, {
-                    Sample(self.production, "WH", hypothesis)
+                    Sample(self.production, "WH", hypothesis, ext)
                     for hypothesis in ProductionMode("WH").generatedhypotheses(self.production)
                     for ext in (None, "ext1")
                 }
