@@ -70,10 +70,6 @@ def adddiscriminants(*args):
             pdfdn = array('d', [0])
             newt.Branch("LHEweight_PDFVariation_Up", pdfup, "LHEweight_PDFVariation_Up/D")
             newt.Branch("LHEweight_PDFVariation_Dn", pdfdn, "LHEweight_PDFVariation_Dn/D")
-          if treewrapper.effectiveentriestree is not None:
-            treewrapper.effectiveentriestree.SetDirectory(newf)
-          if treewrapper.alternateweightxsecstree is not None:
-            treewrapper.alternateweightxsecstree.SetDirectory(newf)
         else:
           newt = ROOT.TTree("candTree", "candTree")
 

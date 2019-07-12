@@ -178,7 +178,7 @@ class _Datacard(MultiEnum):
         if not config.usedata:
             result.remove("ZX")
         for _ in result[:]:
-            if _ == "WH": deprecate(result.remove(_), 2019, 7, 5, hour=10)
+            if _ == "VBFbkg": deprecate(result.remove(_), 2019, 7, 13, hour=10)
         return result
 
     @property
@@ -415,6 +415,7 @@ class _Datacard(MultiEnum):
     @MakeSystematicFromEnums(ProductionMode, Category, Channel, config.staticmaxbins)
     def binbybin_category_channel_productionmode_index(self, productionmode, category, channel, index):
         if productionmode == "data" or not productionmode.isbkg: return None
+        if deprecate(productionmode != "qqZZ", 2019, 7, 13): return None
         if not self.analysis.usehistogramsforcombine:
           return None
         if category != self.category or channel != self.channel:
@@ -437,7 +438,8 @@ class _Datacard(MultiEnum):
     def binbybin(self):
         return "group", lambda systematicname: "binbybin" in systematicname
 
-    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, binbybin_category_channel_productionmode_index, CMS_fake_channel, "kbkg_gg", "binbybin", "everything_but_binbybin")
+    #systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, binbybin_category_channel_productionmode_index, CMS_fake_channel, "kbkg_gg", "binbybin", "everything_but_binbybin")
+    systematicssection = section5 = deprecate(SystematicsSection("binbybin", "everything_but_binbybin"), 2019, 7, 13)
 
     divider = "\n------------\n"
 

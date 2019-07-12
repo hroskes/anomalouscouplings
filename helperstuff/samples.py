@@ -1630,27 +1630,67 @@ class Sample(ReweightingSamplePlus):
 
     @property
     def copyfromothersample(self):
+        otherproduction = None
+
+        kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in type(self).needenums}
+
+        if self == Sample("190703_2016", "WplusH", "0+", "POWHEG"):
+            otherproduction = "190703_2017"
+        if self == Sample("190703_2016", "WplusH", "0+", "POWHEG"):
+            otherproduction = "190703_2017"
+        if self.production == "190703_2016" and self.pythiasystematic in ("ScaleUp", "ScaleDown"):
+            del kwargs["pythiasystematic"]
+            kwargs["extension"] = "ext"
+            otherproduction = "190703_2017"
+
         if self == Sample("190703_2017", "ttH", "0+", "Hff0+"):
-            return Sample("190703_2016", "ttH", "0+", "Hff0+")
+            otherproduction = "190703_2016"
+        if self == Sample("190703_2017", "WplusH", "0+", "POWHEG", "ext"):
+            otherproduction = "190703_2018"
+            del kwargs["extension"]
+        if self == Sample("190703_2017", "ggH", "0+", "POWHEG", "ext"):
+            otherproduction = "190703_2018"
+            del kwargs["extension"]
+        if self == Sample("190703_2017", "ggH", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190703_2016"
+        if self == Sample("190703_2017", "ggH", "0+", "POWHEG", "TuneDown"):
+            otherproduction = "190703_2016"
+        if self == Sample("190703_2017", "WplusH", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190703_2018"
+        if self == Sample("190703_2017", "ZH", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190703_2018"
+        if self == Sample("190703_2017", "ZH", "0+", "POWHEG", "TuneDown"):
+            otherproduction = "190703_2018"
+
         if self == Sample("190703_2018", "ttH", "0+", "Hff0+"):
-            return Sample("190703_2016", "ttH", "0+", "Hff0+")
+            otherproduction = "190703_2016"
         if self == Sample("190703_2018", "bbH", "0+"):
-            return Sample("190703_2017", "bbH", "0+")
+            otherproduction = "190703_2017"
+        if self == Sample("190703_2018", "VBF", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190703_2017"
+        if self == Sample("190703_2018", "ttH", "0+", "Hff0+", "POWHEG"):
+            otherproduction = "190703_2017"
+        if self == Sample("190703_2018", "ggH", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190703_2016"
+        if self == Sample("190703_2018", "ggH", "0+", "POWHEG", "TuneDown"):
+            otherproduction = "190703_2016"
+        if self == Sample("190703_2018", "ggH", "0+", "POWHEG"):
+            otherproduction = "190703_2018"
+            del kwargs["alternategenerator"]
+        if self == Sample("190703_2018", "ttH", "0+", "POWHEG", "TuneUp", "Hff0+"):
+            otherproduction = "190703_2017"
+        if self == Sample("190703_2018", "ttH", "0+", "POWHEG", "TuneDown", "Hff0+"):
+            otherproduction = "190703_2017"
         if self.productionmode == "ggZZ" and self.production == "190703_2018":
-            return Sample("190703_2017", self.productionmode, self.flavor)
-        return None
+            otherproduction = "190703_2017"
+
+        if otherproduction is None: return None
+
+        kwargs["production"] = otherproduction
+        return Sample(*kwargs.values())
 
     @property
     def pdf(self): return self.reweightingsamplewithpdf.pdf
-
-    @cache
-    def alternateweightxsec(self, alternateweight):
-        if alternateweight in ("1", "PythiaScaleUp", "PythiaScaleDown"):
-            return 1
-        with TFile(self.withdiscriminantsfile()) as f:
-             t = f.alternateweightxsecstree
-             t.GetEntry(0)
-             return getattr(t, alternateweight.weightname)
 
 @cache_file(os.path.join(config.repositorydir, "data", "invertedmatrices.pkl"), lambda x: bytes(x.data))
 def invertnumpymatrix(numpymatrix):

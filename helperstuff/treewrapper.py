@@ -872,8 +872,6 @@ class TreeWrapper(TreeWrapperBase):
 
         self.nevents = self.nevents2e2mu = self.cutoffs = None
         self.xsec = None
-        self.effectiveentriestree = None
-        self.alternateweightxsecstree = None
 
         super(TreeWrapper, self).__init__(treesample, minevent, maxevent)
 
@@ -1517,7 +1515,6 @@ class TreeWrapper(TreeWrapperBase):
             "D_bkg_kin_HadVHdecay_JECDn",
 
             "allsamples",
-            "alternateweightxsecstree",
             "categorizations",
             "cconstantforDbkg",
             "cconstantforD2jet",
@@ -1527,7 +1524,6 @@ class TreeWrapper(TreeWrapperBase):
             "counters",
             "cutoffs",
             "definitelyexists",
-            "effectiveentriestree",
             "exceptions",
             "f",
             "failedtree",

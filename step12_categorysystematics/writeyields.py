@@ -27,7 +27,7 @@ from helperstuff.enums import AlternateWeight, analyses, categories, Category, C
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import deprecate, MultiplyCounter, sgn
-from helperstuff.yields import count, totalrate, YieldSystematicValue, YieldValue
+from helperstuff.yields import count, YieldSystematicValue, YieldValue
 
 from categorysystematics import findsystematic
 
@@ -47,7 +47,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     ] + [
       SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
       SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
-    ] * (not production.GEN)
+    ][0:deprecate(1, 2019, 7, 15)] * (not production.GEN)
 
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
@@ -66,6 +66,10 @@ def writeyields(productionmodelist=None, productionlist=None):
           samplegroups += [{ReweightingSamplePlus(s, "ext")} for s in samples]
           if productionmode == "ggH":
             samplegroups += [{ReweightingSamplePlus(s.reweightingsample, "MINLO")} for s in samples]
+      if productionmode == "qqZZ":
+          if production.year == 2018:
+            samples.pop(); samples.pop()
+            samples |= {ReweightingSamplePlus("qqZZ", "ext1"), ReweightingSamplePlus("qqZZ", "ext2")}
 
       for usesamples in samplegroups:
         tmpresult = MultiplyCounter()
@@ -103,8 +107,6 @@ def writeyields(productionmodelist=None, productionlist=None):
         assert len(categorization) == 1, categorization
         categorization = categorization.pop()
 
-        total = totalrate(productionmode, production, 1.0)
-        if analysis.isdecayonly and productionmode == "ggH": total += sum(totalrate(_, production, 1.0) for _ in ("VBF", "ZH", "WH", "ttH"))
         for channel, category in itertools.product(channels, categories):
           yv = YieldValue(channel, category, analysis, productionmode, production)
           if productionmode == "ZX":
@@ -114,13 +116,9 @@ def writeyields(productionmodelist=None, productionlist=None):
             yv.value = gettemplate(productionmode, category, channel, production, analysis).Integral()
             continue
 
-          yv.value = total * (
-            sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
-          ) / (
-            sum(result[tosample, categorization, AlternateWeight("1"), ca, ch] for tosample in samples for ca in categories for ch in channels)
-          )
+          yv.value = sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
 
-        if production.GEN: continue
+        if production.GEN or deprecate(True, 2019, 7, 13): continue
 
         #same for all categories and channels
         #from yaml
@@ -207,8 +205,10 @@ def writeyields(productionmodelist=None, productionlist=None):
           for channel in channels:
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_{}".format(production.year), production).value = (JECDn, JECUp)
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_{}".format(production.year), production).value = (btSFDn, btSFUp)
-            YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_{}".format(4033-production.year), production).value = None
-            YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_{}".format(4033-production.year), production).value = None
+            for year in 2016, 2017, 2018:
+              if year == production.year: continue
+              YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_{}".format(year), production).value = None
+              YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_{}".format(year), production).value = None
 
           #QCD and PDF weight variations
 
@@ -277,11 +277,11 @@ def writeyields(productionmodelist=None, productionlist=None):
                   syst.value = None
 
           #pythia scale and tune
-          if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH") and productionmode != deprecate("ZH", 2018, 9, 15):
+          if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
             if production.year == 2016:
               scaleup = sum(result[ReweightingSamplePlus(tosample, "ScaleUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
               scaledn = sum(result[ReweightingSamplePlus(tosample, "ScaleDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
-            elif production.year == 2017:
+            elif production.year == 2017 or production.year == 2018:
               scaleup = sum(result[ReweightingSamplePlus(tosample, "ext"), categorization, AlternateWeight("PythiaScaleUp"), category] for tosample in samples) / nominal
               scaledn = sum(result[ReweightingSamplePlus(tosample, "ext"), categorization, AlternateWeight("PythiaScaleDn"), category] for tosample in samples) / nominal
             tuneup = sum(result[ReweightingSamplePlus(tosample, "TuneUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal

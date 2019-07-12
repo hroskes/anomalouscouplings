@@ -21,6 +21,8 @@ class YieldSystematic(MyEnum):
                  EnumItem("CMS_scale_j_13TeV_2016"),
                  EnumItem("CMS_btag_comb_13TeV_2017"),
                  EnumItem("CMS_scale_j_13TeV_2017"),
+                 EnumItem("CMS_btag_comb_13TeV_2018"),
+                 EnumItem("CMS_scale_j_13TeV_2018"),
                  EnumItem("QCDscale_fac_ggH"),
                  EnumItem("QCDscale_fac_qqH"),
                  EnumItem("QCDscale_fac_VH"),
@@ -45,6 +47,7 @@ class YieldSystematic(MyEnum):
                  EnumItem("CMS_tune_pythia"),
                  EnumItem("lumi_13TeV_2016"),
                  EnumItem("lumi_13TeV_2017"),
+                 EnumItem("lumi_13TeV_2018"),
                  EnumItem("CMS_eff_e"),
                  EnumItem("CMS_eff_m"),
                  EnumItem("CMS_hzz4l_zz4e_zjets"),
@@ -207,42 +210,26 @@ class _TotalRate(MultiEnum):
     t.SetBranchStatus("genxsec", 1)
     t.SetBranchStatus("genBR", 1)
     if self.productionmode in ("ggH", "ggZZ"): t.SetBranchStatus("KFactor_QCD_ggZZ_Nominal", 1)
-    weightname = set()
-    effectiveentriestree = ROOT.TChain("effectiveentries", "effectiveentries")
     if self.productionmode == "VBF bkg":
       for flavor in "2e2mu", "4e", "4mu":
         t.Add(Sample(self.productionmode, flavor, self.production).withdiscriminantsfile())
-        weightname.add(Sample(self.productionmode, flavor, self.production).weightname())
     elif self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
       if self.productionmode == "ggH":
         s = Sample(self.productionmode, "0+", "POWHEG", self.production)
         t.Add(Sample(s).withdiscriminantsfile())
-        weightname.add("({}) * (genxsec * genBR * KFactor_QCD_ggZZ_Nominal / xsec)".format(s.weightname()))
       else:
         s = Sample(self.productionmode, "0+", "POWHEG", self.production, "Hff0+" if self.productionmode == "ttH" else None)
         t.Add(s.withdiscriminantsfile())
-        weightname.add("({}) * (genxsec * genBR / xsec)".format(s.weightname()))
     elif self.productionmode == "bbH":
       s = Sample(self.productionmode, self.production, "0+")
       t.Add(s.withdiscriminantsfile())
-      weightname.add(s.weightname())
-      effectiveentriestree.Add(s.withdiscriminantsfile())
     elif self.productionmode == "qqZZ":
       s = Sample(self.productionmode, self.production)
       t.Add(s.withdiscriminantsfile())
-      weightname.add(s.weightname())
-      effectiveentriestree.Add(s.withdiscriminantsfile())
     else:
       assert False
-    assert len(weightname) == 1, weightname
-    weightname = weightname.pop()
-    t.Draw("1", "{}*(ZZMass>{} && ZZMass<{})".format(weightname, config.m4lmin, config.m4lmax))
+    t.Draw("1", "MC_weight_nominal*(ZZMass>{} && ZZMass<{})".format(config.m4lmin, config.m4lmax))
     result = c.FindObject("htemp").Integral() * float(self.luminosity)
-
-    if effectiveentriestree.GetEntries() != 0:
-      assert effectiveentriestree.GetEntries() == 1, effectiveentriestree.GetEntries()
-      effectiveentriestree.GetEntry(0)
-      result /= getattr(effectiveentriestree, weightname)
 
     return result
 
@@ -303,10 +290,11 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
       if _ in ("1", "EWcorrUp", "EWcorrDn", "PythiaScaleUp", "PythiaScaleDown"):
         pass
       else:
-        t.SetBranchStatus(_.weightname, 1)
+        t.SetBranchStatus("MC_weight_nominal", 1)
     if "PythiaScaleUp" in alternateweights or "PythiaScaleDown" in alternateweights:
       t.SetBranchStatus("PythiaWeight_*sr_muR0p25", 1)
       t.SetBranchStatus("PythiaWeight_*sr_muR4", 1)
+    t.SetBranchStatus("LHEweight_*", 1)
 
     c = ROOT.TCanvas()
 
@@ -314,13 +302,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
         try:
             if tosample.productionmode == "WH" and tosample.hypothesis == "L1Zg": continue
             if alternateweight.issystematic and categorization.issystematic: continue
-            t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "{}*(ZZMass>{} && ZZMass<{})*{}".format(tosample.weightname(), config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
+            t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "MC_weight_nominal*(ZZMass>{} && ZZMass<{})*{}".format(config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
             h = c.FindObject("htemp")
-            if tosample.productionmode == "ggH":
-                t.GetEntry(0)
-                assert all(_.productionmode == "ggH" for _ in fromsamples)
-                assert len(fromsamples) == 1
-                h.Scale(t.genxsec * t.genBR * getattr(t, alternateweight.kfactorname) / next(iter(fromsamples)).alternateweightxsec(alternateweight))
             for i in range(h.GetNbinsY()):
                 for channel in channels:
                     toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
@@ -332,10 +315,16 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
 
             result[tosample,categorization,alternateweight] = h.Integral()
         except:
-            if tosample.productionmode == "ZH" and (tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneUp") or tosample == ReweightingSamplePlus("ZH", "0+", "POWHEG", "TuneDn")):
-              result[tosample,categorization,alternateweight] = result[ReweightingSamplePlus("ZH", "0+", "POWHEG"), categorization,alternateweight]
-            else:
+#            if hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None or fromsample.extension == "ext":
+#              deprecate(None, 2019, 7, 13)
+#              kwargs = {enum.enumname: getattr(tosample, enum.enumname) for enum in tosample.enums}
+#              del kwargs["pythiasystematic"]
+#              othertosample = ReweightingSamplePlus(*kwargs.itervalues())
+#              result[tosample,categorization,alternateweight] = result[othertosample,categorization,alternateweight]
+#            else:
               print tosample, categorization, alternateweight
+              for fromsample in fromsamples:
+                print fromsample.withdiscriminantsfile()
               raise
 
     return result

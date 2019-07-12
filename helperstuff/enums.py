@@ -397,7 +397,7 @@ class ProductionMode(MyEnum):
       if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyMINLOsystematics:
         result += ["MINLO"]
       if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
-        result += ["CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017"]
+        result += ["CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
     def alternateweights(self, year):
@@ -420,18 +420,20 @@ class WorkspaceShapeSystematic(MyEnum):
                  EnumItem("QCDscale_ggH2in", "MINLO"),
                  EnumItem("CMS_scale_j_13TeV_2016"),
                  EnumItem("CMS_scale_j_13TeV_2017"),
+                 EnumItem("CMS_scale_j_13TeV_2018"),
                 )
     @property
     def isperchannel(self):
         if self in ("Res", "Scale", "ScaleRes"): return True
-        if self in ("MINLO", "CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017"): return False
+        if self in ("MINLO", "CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"): return False
         assert False, self
 
     @property
     def years(self):
         if self == "CMS_scale_j_13TeV_2016": return 2016,
         if self == "CMS_scale_j_13TeV_2017": return 2017,
-        if self in ("Res", "Scale", "ScaleRes", "MINLO"): return 2016, 2017
+        if self == "CMS_scale_j_13TeV_2018": return 2017,
+        if self in ("Res", "Scale", "ScaleRes", "MINLO"): return 2016, 2017, 2018
         assert False, self
 
     @property
@@ -439,7 +441,7 @@ class WorkspaceShapeSystematic(MyEnum):
       for _ in "Res", "Scale", "ScaleRes", "MINLO":
         if self == _:
           return _
-      if self in ("CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017"): return "JEC"
+      if self in ("CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"): return "JEC"
       return str(self)
 
 class SystematicDirection(MyEnum):
@@ -904,10 +906,15 @@ class Production(MyEnum):
     def dataluminosity(self):
         if self in ("170203", "170222", "170825", "180121", "180224", "180531_2016", "180721_2016"): return 35.921875594646
         if self in ("180416", "180531", "180721_2017"): return 41.529343499127
+        
         if self.LHE or self.GEN: return 300
 
         if self in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
             return type(self)(str(self).split("_")[0]).dataluminosity
+
+        if self == "190703_2016": return 35.9
+        if self == "190703_2017": return 41.5
+        if self == "190703_2018": return 59.7
 
         assert False
     def __int__(self):
@@ -1038,9 +1045,9 @@ class PythiaSystematic(MyEnum):
     def appendname(self):
         return "_" + str(self).lower().replace("dn", "down")
     def hassample(self, year):
-        if self in ("TuneUp", "TuneDn") and year in (2016, 2017): return True
+        if self in ("TuneUp", "TuneDn") and year in (2016, 2017, 2018): return True
         if self in ("ScaleUp", "ScaleDn") and year == 2016: return True
-        if self in ("ScaleUp", "ScaleDn") and year == 2017: return False
+        if self in ("ScaleUp", "ScaleDn") and year in (2017, 2018): return False
         assert False, (self, year)
 
 class AlternateWeight(MyEnum):
