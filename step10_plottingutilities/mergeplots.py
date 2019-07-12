@@ -81,7 +81,7 @@ def mergeplots(analysis, **kwargs):
     xmin, xmax = -1, 1
     subdir = ""
     lumi = None
-    outdir = "fa3fa2fL1fL1Zg_decay_fixsign"
+    outdir = "fa3fa2fL1fL1Zg_decay_CMSfirsttry"
     plotcopier = ROOT
     for kw, kwarg in kwargs.iteritems():
         if kw == "logscale":
@@ -119,10 +119,10 @@ def mergeplots(analysis, **kwargs):
 
     analysis = Analysis(analysis)
     repmap = {"analysis": str(analysis)}
-    plotname = "limit_lumi300.00_Untagged_scan.oO[analysis]Oo._compare.root"
+    plotname = "limit_lumi137.10_Untagged_scan.oO[analysis]Oo._compare.root"
     folders = [
-               Folder("fa3fa2fL1fL1Zg_decay_fixsign/", "Float others", 2, analysis, subdir, plotname="limit_lumi300.00_Untagged_scan.oO[analysis]Oo._merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
-               Folder("fa3fa2fL1fL1Zg_decay_fixsign/", "Fix others", 4, analysis, subdir, plotname="limit_lumi300.00_Untagged_scan.oO[analysis]Oo._fixothers.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_decay_CMSfirsttry/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_Untagged_scan.oO[analysis]Oo._merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_decay_CMSfirsttry/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_Untagged_scan.oO[analysis]Oo._fixothers.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
               ]
 
     if logscale and config.minimainlegend:

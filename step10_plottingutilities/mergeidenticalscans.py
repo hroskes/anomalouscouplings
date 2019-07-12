@@ -126,7 +126,7 @@ def mergeidenticalscans(outfile, *infiles):
   newmg.GetYaxis().SetTitle(ytitle)
   newmg.SetMinimum(0)
 
-  style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(300))
+  style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(137.1))
   drawlines()
 
   c.SaveAs(outfile+".png")
@@ -142,7 +142,7 @@ def mergeidenticalscans(outfile, *infiles):
     print othercouplingytitle
     faimg.GetYaxis().SetTitle(othercouplingytitle[k])
 
-    style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(300))
+    style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(137.1))
 
     c.SaveAs(outfile.replace("limit_", k+"_")+".png")
     c.SaveAs(outfile.replace("limit_", k+"_")+".root")
@@ -167,12 +167,12 @@ if __name__ == "__main__":
 
   with pc:
     mergeidenticalscans(
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/limit_lumi300.00_Untagged_scan"+args.fai+"_merged"),
+      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_CMSfirsttry/limit_lumi137.10_Untagged_scan"+args.fai+"_merged"),
       *reglob(
-         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/"),
-         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?.root",
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_CMSfirsttry/"),
+         "limit_lumi137.10_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?.root",
       ) + reglob(
-         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/gridscan/"),
-         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?.root",
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_CMSfirsttry/gridscan/"),
+         "limit_lumi137.10_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?.root",
       )
     )
