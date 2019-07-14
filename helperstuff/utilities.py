@@ -1014,3 +1014,12 @@ def reiglob(path, exp, invert=False, verbose=False):
 
 def reglob(*args, **kwargs):
   return list(reiglob(*args, **kwargs))
+
+@cache
+def withdiscriminantsfileisvalid(filename):
+  if not os.path.exists(filename):
+    return False
+  with TFile(filename) as f:
+    if (not f) or (f.candTree.GetEntries() == 0):
+      return False
+  return True

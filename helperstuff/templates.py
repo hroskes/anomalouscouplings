@@ -16,7 +16,7 @@ import ROOT
 import config
 from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
-from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile
+from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile, withdiscriminantsfileisvalid
 
 class TemplatesFile(MultiEnum):
     enumname = "templatesfile"
@@ -1116,6 +1116,7 @@ class Template(TemplateBase, MultiEnum):
             if categorization.category_function_name == result: return result
         assert False, "{} does not exist in TreeWrapper".format(result)
 
+    @cache
     def reweightfrom(self):
         if self.productionmode == "ggH":
             if self.production.LHE:
@@ -1180,12 +1181,8 @@ class Template(TemplateBase, MultiEnum):
 
         for st in result:
             for sample in set(st):
-                if not os.path.exists(sample.withdiscriminantsfile()):
+                if not withdiscriminantsfileisvalid(sample.withdiscriminantsfile()):
                     st.remove(sample)
-                    continue
-                with TFile(sample.withdiscriminantsfile()) as f:
-                    if (not f) or (f.candTree.GetEntries() == 0):
-                        st.remove(sample)
         assert result and all(result), self
         return result
 
@@ -1314,6 +1311,7 @@ class Template(TemplateBase, MultiEnum):
       return result
 
     def getjson(self):
+        import datetime; print "   ", self, datetime.datetime.now()
         if self.copyfromothertemplate: return []
         if self.hypothesis is not None and not self.hypothesis.ispure: return []
         jsn = [
@@ -1640,6 +1638,7 @@ class IntTemplate(TemplateBase, MultiEnum):
         return templatesandfactors
 
     def getjson(self):
+        import datetime; print "   ", self, datetime.datetime.now()
         intjsn = [
           {
             "name": self.templatename(final=True),
@@ -1691,6 +1690,7 @@ class IntTemplate(TemplateBase, MultiEnum):
     def weightname(self):
         return ["MC_weight_nominal * (" + sumofsamples.MC_weight + ")" for sumofsamples in self.sumsofsamples]
 
+    @cache
     def reweightfrom(self):
         if self.productionmode == "VH":
             if not self.analysis.isfa3fa2fL1fL1Zg: assert False
