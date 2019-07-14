@@ -180,7 +180,7 @@ def submitjobs(removefiles, jsontoo=False):
       waitids = []
     waitids += list(args.waitids)
     for i in range(njobs):
-      submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="1-0:0:0", docd=True, waitids=waitids)
+      submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="2-0:0:0", docd=True, waitids=waitids)
 
 if __name__ == "__main__":
   if args.submitjobs:
