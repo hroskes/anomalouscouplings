@@ -47,7 +47,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     ] + [
       SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
       SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
-    ][0:deprecate(1, 2019, 7, 15)] * (not production.GEN)
+    ][0:deprecate(1, 2019, 7, 20)] * (not production.GEN)
 
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
@@ -118,10 +118,9 @@ def writeyields(productionmodelist=None, productionlist=None):
 
           yv.value = sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
 
-        if production.GEN or deprecate(True, 2019, 7, 13): continue
+        if production.GEN or deprecate(True, 2019, 7, 17): continue
 
         #same for all categories and channels
-        #from yaml
         for category, channel in itertools.product(categories, channels):
           if analysis.isdecayonly and category != "Untagged": continue
 

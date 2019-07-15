@@ -47,7 +47,7 @@ decaydiscriminants = [
 
     Discriminant("D_4couplings_decay_raw", "D_{4}^{dec,raw}", 162, 0, 162),
     Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-50, 0, 162-50),
-    Discriminant("D_CP_decay", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_decay_2bins"),
+    Discriminant("D_CP_decay", "D_{CP}^{dec}", 2, -1, 1, identifier="D_CP_decay_2bins"),
 
     Discriminant("D_bkg", "D_{bkg}", 3, -0.3, 1.2, identifier="D_bkg_3bins"),   #set min and max to have boundaries at 0.2 and 0.7
     Discriminant("D_0minus_decay", "D_{0-}^{dec}", 3, 0, 1, identifier="D_0minus_decay_3bins"),
@@ -100,7 +100,7 @@ jetdiscriminants = [
     Discriminant("D_4couplings_VBFdecay_raw", "D_{4}^{VBF+dec,raw}", 162, 0, 162),
     Discriminant("D_4couplings_VBFdecay", "D_{4}^{VBF+dec}", 162-86, 0, 162-86),
 
-    Discriminant("D_CP_VBF", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_VBF_2bins"),
+    Discriminant("D_CP_VBF", "D_{CP}^{dec}", 2, -1, 1, identifier="D_CP_VBF_2bins"),
 
     Discriminant("D_bkg_VBFdecay", "D_{bkg}", 10, 0, 1, identifier="D_bkg_VBFdecay_10bins"),
     Discriminant("D_bkg_VBFdecay_ResUp", "D_{bkg}^{ResUp}", 10, 0, 1, identifier="D_bkg_VBFdecay_ResUp_10bins"),
@@ -144,7 +144,7 @@ jetdiscriminants = [
     Discriminant("D_4couplings_HadVHdecay_raw", "D_{4}^{VH+dec,raw}", 162, 0, 162),
     Discriminant("D_4couplings_HadVHdecay", "D_{4}^{VH+dec}", 162-73, 0, 162-73),
 
-    Discriminant("D_CP_HadVH", "D_{CP}^{dec}", 2, -0.5, 0.5, identifier="D_CP_HadVH_2bins"),
+    Discriminant("D_CP_HadVH", "D_{CP}^{dec}", 2, -1, 1, identifier="D_CP_HadVH_2bins"),
 
     Discriminant("D_bkg_HadVHdecay", "D_{bkg}", 10, 0, 1, identifier="D_bkg_HadVHdecay_10bins"),
     Discriminant("D_bkg_HadVHdecay_ResUp", "D_{bkg}^{ResUp}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ResUp_10bins"),
