@@ -123,16 +123,16 @@ def copydata(*args):
   f.Close()
   newf.Close()
 
-def submitjobs(removefiles, jsontoo=False):
+def submitjobs(args):
   remove = {}
-  for filename in removefiles:
+  for filename in args.removefiles:
     if not filename.endswith(".root"): filename += ".root"
     filename = os.path.basename(filename)
     filename = os.path.join(config.repositorydir, "step7_templates", filename)
     if not os.path.exists(filename):
       raise ValueError("{} does not exist!".format(filename))
     remove[filename] = False
-    if jsontoo:
+    if args.jsontoo:
       jsonfilename = os.path.relpath(filename, config.repositorydir).replace("step7_templates", "step5_json").replace(".root", ".json")
       if os.path.exists(jsonfilename):
         remove[jsonfilename] = False
@@ -140,11 +140,12 @@ def submitjobs(removefiles, jsontoo=False):
   torun = set()
   for templatesfile in templatesfiles:
     if templatesfile.copyfromothertemplatesfile is not None: continue
+    if not args.filter(templatesfile): continue
     if templatesfile.templatesfile() in remove:
       remove[templatesfile.templatesfile()] = True
       remove[templatesfile.templatesfile(firststep=True)] = True
       torun.add(templatesfile)
-      if jsontoo:
+      if args.jsontoo:
         if templatesfile.jsonfile() in remove:
           remove[templatesfile.jsonfile()] = True
       else:
@@ -159,7 +160,7 @@ def submitjobs(removefiles, jsontoo=False):
     ):
       pass
     else:
-      if not jsontoo:
+      if not args.jsontoo:
         if not os.path.exists(templatesfile.jsonfile()):
           raise ValueError(templatesfile.jsonfile()+" doesn't exist!  Try --jsontoo.")
       torun.add(templatesfile)
@@ -179,19 +180,19 @@ def submitjobs(removefiles, jsontoo=False):
     for filename in remove:
       if os.path.exists(filename):
         os.remove(filename)
-    if jsontoo:
+    if args.jsontoo:
       sys.dont_write_bytecode = True
       import step4_makejson
-      waitids = list(step4_makejson.submitjobs(jsontoo))
+      waitids = list(step4_makejson.submitjobs(args.jsontoo))
     else:
       waitids = []
     waitids += list(args.waitids)
     for i in range(njobs):
-      submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py")+" --on-queue " + " ".join(pipes.quote(_) for _ in sys.argv[2:]), jobname=str(i), jobtime="2-0:0:0", docd=True, waitids=waitids, memory="{}M".format(args.nthreads*3000), nthreads=args.nthreads)
+      submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py")+" --on-queue " + " ".join(pipes.quote(_) for _ in sys.argv[2:]), jobname=str(i), jobtime="2-0:0:0", docd=True, waitids=waitids, memory="{}M".format(args.nthreads*6000), nthreads=args.nthreads)
 
 if __name__ == "__main__":
   if args.submitjobs:
-    submitjobs(args.removefiles, args.jsontoo)
+    submitjobs(args)
   else:
     morebuildtemplatesargs = []
     if args.start_with_bin: morebuildtemplatesargs += ["--start-with-bin"] + [str(_) for _ in args.start_with_bin]
