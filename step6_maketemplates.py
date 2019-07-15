@@ -9,7 +9,13 @@ if __name__ == "__main__":
   p.add_argument("--waitids", nargs="*", type=int, default=())
   p.add_argument("--filter", type=eval, default=lambda template: True)
   p.add_argument("--start-with-bin", type=int, nargs=3)
+  p.add_argument("--nthreads", type=int, default=8)
+  p.add_argument("--on-queue", action="store_true", help=argparse.SUPPRESS)
   args = p.parse_args()
+  if args.on_queue:
+    args.jsontoo = None
+    args.removefiles = args.waitids = ()
+    args.submitjobs = False
   if args.jsontoo and not args.submitjobs:
     raise ValueError("--jsontoo doesn't make sense without --submitjobs")
   if args.removefiles and not args.submitjobs:
@@ -19,6 +25,7 @@ if __name__ == "__main__":
 
 from array import array
 import os
+import pipes
 import ROOT
 import subprocess
 import sys
@@ -180,7 +187,7 @@ def submitjobs(removefiles, jsontoo=False):
       waitids = []
     waitids += list(args.waitids)
     for i in range(njobs):
-      submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py"), jobname=str(i), jobtime="2-0:0:0", docd=True, waitids=waitids)
+      submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py")+" --on-queue " + " ".join(pipes.quote(_) for _ in sys.argv[2:]), jobname=str(i), jobtime="2-0:0:0", docd=True, waitids=waitids, memory="{}M".format(args.nthreads*3000), nthreads=args.nthreads)
 
 if __name__ == "__main__":
   if args.submitjobs:
@@ -188,6 +195,7 @@ if __name__ == "__main__":
   else:
     morebuildtemplatesargs = []
     if args.start_with_bin: morebuildtemplatesargs += ["--start-with-bin"] + [str(_) for _ in args.start_with_bin]
+    morebuildtemplatesargs += ["--nthreads", str(args.nthreads)]
     for templatesfile in templatesfiles:
       if not args.filter(templatesfile): continue
       with cd(config.repositorydir):

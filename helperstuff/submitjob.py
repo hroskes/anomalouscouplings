@@ -67,7 +67,7 @@ if config.host == "lxplus":
             return jobid
 
 elif config.host == "MARCC":
-    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None, email=False, memory="3000M"):
+    def submitjob(jobtext, jobname=None, jobtime=None, queue=None, interactive=False, waitids=[], outputfile=None, errorfile=None, docd=False, morerepmap=None, email=False, memory="3000M", nthreads=1):
         if queue is None:
             queue = "shared"
         if outputfile is not None:
@@ -105,11 +105,11 @@ elif config.host == "MARCC":
                    "--job-name": ".oO[jobname]Oo.",
                    "--time": ".oO[jobtime]Oo.",
                    "--nodes": "1",
-                   "--ntasks-per-node": "1",
                    "--partition": ".oO[queue]Oo.",
                    "--mem": memory,
                    "--output": outputfile,
                    "--error": errorfile,
+                   "--cpus-per-task": "{:d}".format(nthreads),
                   }
         if waitids:
             options["--dependency"] = "afterany:.oO[waitids]Oo."
