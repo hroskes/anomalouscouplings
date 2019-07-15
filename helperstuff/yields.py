@@ -229,7 +229,11 @@ class _TotalRate(MultiEnum):
     else:
       assert False
     t.Draw("1", "MC_weight_nominal*(ZZMass>{} && ZZMass<{})".format(config.m4lmin, config.m4lmax))
-    result = c.FindObject("htemp").Integral() * float(self.luminosity)
+    h = c.FindObject("htemp")
+    t.GetEntry(0)
+    h.Scale(t.xsec / (t.genxsec * t.genBR))
+
+    result = h.Integral() * float(self.luminosity)
 
     return result
 
@@ -284,6 +288,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     t.SetBranchStatus("Z*Flav", 1)
     t.SetBranchStatus("ZZMass", 1)
     if any(_.productionmode in ("ggH", "ggZZ", "qqZZ") for _ in fromsamples): t.SetBranchStatus("KFactor_*", 1)
+    t.SetBranchStatus("xsec", 1)
     t.SetBranchStatus("genxsec", 1)
     t.SetBranchStatus("genBR", 1)
     for _ in alternateweights:
@@ -304,6 +309,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
             if alternateweight.issystematic and categorization.issystematic: continue
             t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "MC_weight_nominal*(ZZMass>{} && ZZMass<{})*{}".format(config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
             h = c.FindObject("htemp")
+            t.GetEntry(0)
+            h.Scale(t.xsec / (t.genxsec * t.genBR))
             for i in range(h.GetNbinsY()):
                 for channel in channels:
                     toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
