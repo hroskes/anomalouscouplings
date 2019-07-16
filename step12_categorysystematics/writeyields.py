@@ -115,12 +115,12 @@ def writeyields(productionmodelist=None, productionlist=None):
       print productionmode
       for analysis in analyses:
         if analysis.isdecayonly and productionmode in ("VBF", "ZH", "WH", "ttH", "bbH"): continue
-        if analysis.isdecayonly and category != "Untagged": continue
         categorization = {_ for _ in categorizations if _.category_function_name == "category_"+analysis.categoryname}
         assert len(categorization) == 1, categorization
         categorization = categorization.pop()
 
         for channel, category in itertools.product(channels, categories):
+          if analysis.isdecayonly and category != "Untagged": continue
           yv = YieldValue(channel, category, analysis, productionmode, production)
           if productionmode == "ZX":
             yv.value = gettemplate(productionmode, category, channel, production, analysis).Integral()

@@ -702,7 +702,7 @@ class Analysis(MyEnum):
         if self == "fa3fa2fL1fL1Zg_decay": return True
         return False
     @property
-    def doGEN(self):
+    def doanalysis(self):
         if config.name ==  "heshy" : 
             if self == "fa3_multiparameter": return False
             if self == "fa3_multiparameter_nodbkg": return False
@@ -729,12 +729,6 @@ class Analysis(MyEnum):
             if self == "fa3fa2fL1fL1Zg_decay": return False
             if self == "fa3fa2fL1fL1Zg_only6bins": return False
             if self == "fa3fa2fL1fL1Zg_STXS": return False
-        assert False, self
-    @property
-    def doCMS(self):
-        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
-        if self.isfL1fL1Zg: return False
-        if self in ("fa3_STXS", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDbkg", "fa3fa2fL1fL1Zg_STXS"): return False
         assert False, self
     @property
     def fais(self):
@@ -1110,7 +1104,7 @@ proddechypotheses = Hypothesis.items(lambda x: True)
 purehypotheses = Hypothesis.items(lambda x: x.ispure)
 hffhypotheses = HffHypothesis.items()
 productionmodes = ProductionMode.items()
-analyses = Analysis.items(lambda x: x.doGEN if config.host == "MARCC" else x.doCMS)
+analyses = Analysis.items(lambda x: x.doanalysis)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
