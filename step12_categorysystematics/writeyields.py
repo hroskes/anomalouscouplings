@@ -41,8 +41,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     if productionlist and production not in productionlist: continue
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), [[ReweightingSamplePlus("VBF", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("ZH"), [[ReweightingSamplePlus("ZH", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("WH"), [[ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("VH"), [[ReweightingSamplePlus("ZH", "0+", "POWHEG")], [ReweightingSamplePlus("WplusH", "0+", "POWHEG")], [ReweightingSamplePlus("WminusH", "0+", "POWHEG")]]),
       SampleCount(ProductionMode("ttH"), [[ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")]]),
       SampleCount(ProductionMode("bbH"), [[ReweightingSamplePlus("bbH", "0+")]]),
       SampleCount(ProductionMode("ggH"), [[ReweightingSamplePlus("ggH", "0+", "POWHEG")]]),
@@ -114,7 +113,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       if productionmodelist and productionmode not in productionmodelist: continue
       print productionmode
       for analysis in analyses:
-        if analysis.isdecayonly and productionmode in ("VBF", "ZH", "WH", "ttH", "bbH"): continue
+        if analysis.isdecayonly and productionmode in ("VBF", "ZH", "WH", "VH", "ttH", "bbH"): continue
         categorization = {_ for _ in categorizations if _.category_function_name == "category_"+analysis.categoryname}
         assert len(categorization) == 1, categorization
         categorization = categorization.pop()
