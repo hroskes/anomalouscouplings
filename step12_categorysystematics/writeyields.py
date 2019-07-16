@@ -18,7 +18,10 @@ import itertools
 import logging
 from math import exp, log, sqrt
 import os
+import pprint
 import yaml
+
+from TemplateBuilder.TemplateBuilder.moremath import weightedaverage
 
 from helperstuff import config
 from helperstuff.categorization import MultiCategorization, NoCategorization, SingleCategorizationgm4l
@@ -37,42 +40,46 @@ def writeyields(productionmodelist=None, productionlist=None):
   for production in sorted({_.productionforrate for _ in config.productionsforcombine if not _.LHE}):
     if productionlist and production not in productionlist: continue
     tosamples_foryields = [
-      SampleCount(ProductionMode("VBF"), {ReweightingSamplePlus("VBF", "0+", "POWHEG")}),
-      SampleCount(ProductionMode("ZH"), {ReweightingSamplePlus("ZH", "0+", "POWHEG")}),
-      SampleCount(ProductionMode("WH"), {ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG")}),
-      SampleCount(ProductionMode("ttH"), {ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")}),
-      SampleCount(ProductionMode("bbH"), {ReweightingSamplePlus("bbH", "0+")}),
-      SampleCount(ProductionMode("ggH"), {ReweightingSamplePlus("ggH", "0+", "POWHEG")}),
-      SampleCount(ProductionMode("qqZZ"), {ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")}),
+      SampleCount(ProductionMode("VBF"), [[ReweightingSamplePlus("VBF", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("ZH"), [[ReweightingSamplePlus("ZH", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("WH"), [[ReweightingSamplePlus("WplusH", "0+", "POWHEG"), ReweightingSamplePlus("WminusH", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("ttH"), [[ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")]]),
+      SampleCount(ProductionMode("bbH"), [[ReweightingSamplePlus("bbH", "0+")]]),
+      SampleCount(ProductionMode("ggH"), [[ReweightingSamplePlus("ggH", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("qqZZ"), [[ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")]]),
     ] + [
-      SampleCount(ProductionMode("ggZZ"), {ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors}),
-      SampleCount(ProductionMode("VBF bkg"), {ReweightingSampleWithFlavor("VBF bkg", flavor) for flavor in ("2e2mu", "4e", "4mu")})
+      SampleCount(ProductionMode("ggZZ"), [[ReweightingSampleWithFlavor("ggZZ", flavor)] for flavor in flavors]),
+      SampleCount(ProductionMode("VBF bkg"), [[ReweightingSampleWithFlavor("VBF bkg", flavor)] for flavor in ("2e2mu", "4e", "4mu")])
     ][0:deprecate(1, 2019, 7, 20)] * (not production.GEN)
 
     if config.usedata and not production.GEN:
-      tosamples_foryields.append(SampleCount(ProductionMode("ZX"), {ReweightingSample("ZX")}))
+      tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[ReweightingSample("ZX")]]))
 
     categorizations = [_ for _ in TreeWrapper.categorizations if (isinstance(_, (MultiCategorization, NoCategorization)) or isinstance(_, SingleCategorizationgm4l) and _.hypothesis == "0+") and (not production.GEN or not _.issystematic)]
 
     result = MultiplyCounter()
-    for productionmode, samples in tosamples_foryields:
+    for productionmode, samplegroups in tosamples_foryields:
       if productionmodelist and productionmode not in productionmodelist: continue
       print productionmode
-      samplegroups = [samples]
-      if productionmode.issignal and productionmode != "bbH" and not production.GEN:
-        samplegroups += [{ReweightingSamplePlus(s, systematic) for s in samples} for systematic in pythiasystematics
-                            if systematic.hassample(production.year)]
-        if production.year == 2017:
-          samplegroups += [{ReweightingSamplePlus(s, "ext")} for s in samples]
-          if productionmode == "ggH":
-            samplegroups += [{ReweightingSamplePlus(s.reweightingsample, "MINLO")} for s in samples]
-      if productionmode == "qqZZ":
+      for g in samplegroups:
+        if productionmode.issignal and productionmode != "bbH" and not production.GEN:
+          g += [
+            ReweightingSamplePlus(s, systematic)
+            for s in g
+            for systematic in pythiasystematics
+            if systematic.hassample(production.year)
+          ]
+          if production.year == 2017:
+            g += [ReweightingSamplePlus(s, "ext") for s in g if s.pythiasystematic is None]
+            if productionmode == "ggH":
+              g += [ReweightingSamplePlus(s.reweightingsample, "MINLO") for s in g if s.pythiasystematic is None and s.extension is None]
+        if productionmode == "qqZZ":
           if production.year == 2018:
-            samples.pop(); samples.pop()
-            samples |= {ReweightingSamplePlus("qqZZ", "ext1"), ReweightingSamplePlus("qqZZ", "ext2")}
+            del g[:]
+            g += [ReweightingSamplePlus("qqZZ", "ext1"), ReweightingSamplePlus("qqZZ", "ext2")]
 
       for usesamples in samplegroups:
-        tmpresult = MultiplyCounter()
+        tmpresults = []
         for tosample in usesamples:
           if (productionmode in ("ggZZ", "VBF bkg", "ZX", "bbH")
                or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None
@@ -85,16 +92,21 @@ def writeyields(productionmodelist=None, productionlist=None):
           else:
             usealternateweights = productionmode.alternateweights(production.year)
 
-          tmpresult += count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights)
+          tmpresults.append(count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights))
 
-        result += tmpresult
-
-      #if productionmode.issignal():
-      #  result += count(
-      #                  {ReweightingSample(productionmode, "0+")},
-      #                  {Sample(productionmode, h, production) for h in productionmode.generatedhypotheses(production)},
-      #                  TreeWrapper.categorizations,
-      #                 )
+        try:
+          result += MultiplyCounter({
+            k:
+            weightedaverage(
+              tmpresult[k]
+              for tmpresult in tmpresults
+              if k in tmpresult
+            )
+            for k in frozenset.union(*(frozenset(tmpresult) for tmpresult in tmpresults))
+          })
+        except ZeroDivisionError:
+          pprint.pprint([dict(_) for _ in tmpresults])
+          raise
 
     result.freeze()
 
@@ -103,6 +115,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       print productionmode
       for analysis in analyses:
         if analysis.isdecayonly and productionmode in ("VBF", "ZH", "WH", "ttH", "bbH"): continue
+        if analysis.isdecayonly and category != "Untagged": continue
         categorization = {_ for _ in categorizations if _.category_function_name == "category_"+analysis.categoryname}
         assert len(categorization) == 1, categorization
         categorization = categorization.pop()
@@ -116,7 +129,24 @@ def writeyields(productionmodelist=None, productionlist=None):
             yv.value = gettemplate(productionmode, category, channel, production, analysis).Integral()
             continue
 
-          yv.value = sum(result[tosample, categorization, AlternateWeight("1"), category, channel] for tosample in samples)
+          yvvalue = 0
+          
+          for g in samples:
+            key = type(g[0])(*(getattr(g[0], needenum.enumname) for needenum in g[0].needenums if needenum.enumname != "extension")), categorization, AlternateWeight("1"), category, channel
+            try:
+              yvvalue += result[key].nominal_value
+            except AttributeError:
+              #result.key == 0, it's an int, so it doesn't have nominal_value
+              if hasattr(g[0], "flavor") and str(channel) != g[0].flavor:
+                  pass #e.g. ggZZ 2e2mu in the 4e channel: doesn't happen
+              else:
+                  #sanity check
+                  pprint.pprint(dict(result))
+                  print key
+                  print result[key]
+                  raise
+
+          yv.value = yvvalue
 
         if production.GEN or deprecate(True, 2019, 7, 17): continue
 

@@ -1,3 +1,4 @@
+import array
 from collections import Sequence
 import itertools
 import json
@@ -5,6 +6,8 @@ from math import sqrt
 from numbers import Number
 import os
 import yaml
+
+import uncertainties
 
 import ROOT
 
@@ -219,6 +222,10 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     c = ROOT.TCanvas()
 
     for tosample, categorization, alternateweight in itertools.product(tosamples, categorizations, alternateweights):
+        if getattr(tosample, "extension", None) is not None:
+            kwargs = {enum.enumname: getattr(tosample, enum.enumname) for enum in type(tosample).needenums}
+            kwargs["extension"] = None
+            tosample = type(tosample)(*kwargs.itervalues())
         try:
             if tosample.productionmode == "WH" and tosample.hypothesis == "L1Zg": continue
             if alternateweight.issystematic and categorization.issystematic: continue
@@ -228,25 +235,21 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
             h.Scale(t.xsec / (t.genxsec * t.genBR))
             for i in range(h.GetNbinsY()):
                 for channel in channels:
-                    toadd = h.GetBinContent(h.FindBin(channel.ZZFlav, i))
+                    binnumber = h.FindBin(channel.ZZFlav, i)
+                    toadd = uncertainties.ufloat(h.GetBinContent(binnumber), h.GetBinError(binnumber))
+                    if not toadd.n and not toadd.s: continue
 #                    print i, Category.fromid(i), channel, toadd
                     result[tosample, categorization, alternateweight, Category.fromid(i), channel] += toadd
                     result[tosample, categorization, alternateweight, Category.fromid(i)] += toadd
 #            for k, v in result.iteritems(): print k, v
 #            assert 0
 
-            result[tosample,categorization,alternateweight] = h.Integral()
+            error = array.array("d", [0])
+            result[tosample,categorization,alternateweight] = uncertainties.ufloat(h.IntegralAndError(1, h.GetNbinsX(), 1, h.GetNbinsY(), error), error[0])
         except:
-#            if hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None or fromsample.extension == "ext":
-#              deprecate(None, 2019, 7, 13)
-#              kwargs = {enum.enumname: getattr(tosample, enum.enumname) for enum in tosample.enums}
-#              del kwargs["pythiasystematic"]
-#              othertosample = ReweightingSamplePlus(*kwargs.itervalues())
-#              result[tosample,categorization,alternateweight] = result[othertosample,categorization,alternateweight]
-#            else:
-              print tosample, categorization, alternateweight
-              for fromsample in fromsamples:
-                print fromsample.withdiscriminantsfile()
-              raise
+            print tosample, categorization, alternateweight
+            for fromsample in fromsamples:
+              print fromsample.withdiscriminantsfile()
+            raise
 
     return result
