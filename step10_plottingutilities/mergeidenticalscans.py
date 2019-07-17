@@ -98,7 +98,10 @@ def mergeidenticalscans(outfile, *infiles):
   if "fa3" in newfais: newfais["fa3"] = abs(newfais["fa3"]) #because sign doesn't matter
   newn = len(newxs)
 
-  for x, y in itertools.izip_longest(newxs, newys): print x, y
+  fmt = " ".join(["{:>10}"] * (2+len(newfais)))
+  print fmt.format("x", "y", *(k for k, v in sorted(newfais.iteritems())))
+  fmt = " ".join(["{:10.3g}"] * (2+len(newfais)))
+  for xyfais in itertools.izip_longest(newxs, newys, *(v for k, v in sorted(newfais.iteritems()))): print fmt.format(*xyfais)
 
   newg = ROOT.TGraph(newn, newxs, newys)
   faigs = {k: ROOT.TGraph(newn, newxs, faiys) for k, faiys in newfais.iteritems()}
