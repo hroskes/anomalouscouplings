@@ -539,47 +539,6 @@ class TemplatesFile(MultiEnum):
 
     @property
     def copyfromothertemplatesfile(self):
-        if self.production == "170203" and self.templategroup == "DATA":
-          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-          kwargs["production"] = "170222"
-          return TemplatesFile(*kwargs.values())
-        if self.production == "170222" and self.templategroup != "DATA":
-          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-          kwargs["production"] = "170203"
-          return TemplatesFile(*kwargs.values())
-        if self.production == "170712":
-          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-          kwargs["production"] = "170222"
-          return TemplatesFile(*kwargs.values())
-        if self.production == "180224":
-          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-          kwargs["production"] = "170222"
-          return TemplatesFile(*kwargs.values())
-
-        if self.production == "180721":
-          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-          kwargs["production"] = "180530"
-          return TemplatesFile(*kwargs.values())
-        if self.production == "180722" and self.templategroup != "ggh":
-          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-          kwargs["production"] = "180531"
-          return TemplatesFile(*kwargs.values())
-
-        if self.production == "180530_Ulascan":
-          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-          kwargs["production"] = "180721_Ulascan"
-          return TemplatesFile(*kwargs.values())
-        if self.production == "180531_Ulascan":
-          kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-          kwargs["production"] = "180722_Ulascan"
-          return TemplatesFile(*kwargs.values())
-
-        if False and self.production == "GEN_181119":
-          if self.templategroup == "ggh" and self.category == "Untagged" and self.channel == "4mu" and self.analysis == "fa3fa2fL1fL1Zg_decay":
-            kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
-            kwargs["channel"] = "4e"
-            return deprecate(TemplatesFile(*kwargs.values()), year=2019, month=6, day=5)
-
         return None
 
     @property
@@ -1498,8 +1457,6 @@ class IntTemplate(TemplateBase, MultiEnum):
                     result = "templatea1L1ZgIntAdapSmooth"
                 else:
                     assert False
-                if "170203" in self.templatesfile.templatesfile():
-                    result = "templateIntAdapSmooth"
             elif self.interferencetype == "g11gj1":
                 if self.analysis.isfL1fL1Zg:
                     result = "templatea1L1ZgIntAdapSmooth"

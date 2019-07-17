@@ -759,92 +759,15 @@ class Analysis(MyEnum):
 class Production(MyEnum):
     enumname = "production"
     enumitems = (
-                 EnumItem("170203"),
-                 EnumItem("170222"),
-                 EnumItem("170712"),
-                 EnumItem("170825"),
-                 EnumItem("180121"),
-                 EnumItem("180224"),
-                 EnumItem("180224_10bins"),
-                 EnumItem("180224_newdiscriminants"),
-                 EnumItem("180416"),
-                 EnumItem("180530", "180531_2016"),
-                 EnumItem("180530_Ulascan"),
-                 EnumItem("180531", "180531_2017"),
-                 EnumItem("180531_Ulascan"),
-                 EnumItem("180721", "180721_2016"),
-                 EnumItem("180721_Ulascan"),
-                 EnumItem("180722", "180721_2017"),
-                 EnumItem("180722_Ulascan"),
                  EnumItem("190703_2016"),
                  EnumItem("190703_2017"),
                  EnumItem("190703_2018"),
-                 EnumItem("LHE_170509"),
-                 EnumItem("GEN_Meng"),
                  EnumItem("GEN_181119"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
         if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self) and "190703" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
-        if self == "170203":
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/170203"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/170203"
-        if self == "170222":
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/170222"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/170222"
-        if self == "170712":
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/170623"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/170623"
-        if self == "170825":
-            if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/170825_Heshy_fL1fL1Zg"
-        if self == "180121":
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/180121"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/180121"
-        if self in ("180224", "180224_10bins", "180224_newdiscriminants"):
-            if config.host == "lxplus":
-                return "/eos/user/u/usarica/CJLST/4l/180224"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/180224"
-        if self == "180416":
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/180416"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/180416"
-        if self in ("180531_2016", "180530_Ulascan"):
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/180531_2016"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/180530"
-        if self in ("180531", "180531_Ulascan"):
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/180531"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/180531"
-        if self in ("180721_2016", "180721_Ulascan"):
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/180721_2016"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/180721"
-        if self in ("180721_2017", "180722_Ulascan"):
-            if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/180721_2017"
-            elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/180722"
-        if self == "GEN_Meng":
-            if config.host == "lxplus":
-                return "/eos/cms/store/user/xiaomeng/writeupTrees/"
-            elif config.host == "MARCC":
-                assert False
         if self == "GEN_181119":
             if config.host == "lxplus":
                 assert False
@@ -884,11 +807,21 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/190703_2018anomalous"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
-        if self == "170712":
+        if self == "190703_2016":
             if config.host == "lxplus":
-                return "root://lxcms03//data3/Higgs/170712_Data2017"
+                return "/eos/user/a/amapane/CJLST-backup/190617/Data_2016"
             elif config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/170712_Data2017"
+                return "/work-zfs/lhc/CJLSTtrees/190617/Data_2016"
+        if self == "190703_2017":
+            if config.host == "lxplus":
+                return "/eos/user/a/amapane/CJLST-backup/190617/Data_2017"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190617/Data_2017"
+        if self == "190703_2018":
+            if config.host == "lxplus":
+                return "/eos/user/a/amapane/CJLST-backup/190617/Data_2018"
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190617/Data_2018"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
         return self.CJLSTdir_anomalous()
@@ -898,13 +831,7 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self in ("170203", "170222", "170825", "180121", "180224", "180531_2016", "180721_2016"): return 35.921875594646
-        if self in ("180416", "180531", "180721_2017"): return 41.529343499127
-        
         if self.LHE or self.GEN: return 300
-
-        if self in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
-            return type(self)(str(self).split("_")[0]).dataluminosity
 
         if self == "190703_2016": return 35.9
         if self == "190703_2017": return 41.5
@@ -918,32 +845,9 @@ class Production(MyEnum):
         if self == "190703_2016": return 2016
         if self == "190703_2017": return 2017
         if self == "190703_2018": return 2018
-        if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self): return type(self)(str(self).split("_")[0]).year
-        if self <= "180224" or self == "180531_2016" or self == "180721_2016":
-            return 2016
-        if self == "180416" or self == "180531" or self == "180721_2017" or self == "GEN_Meng" or self == "GEN_181119":
-            return 2017
         assert False
     @property
-    def productionforsmoothingparameters(self):
-        if self == "170222": return type(self)("170203")
-        if self == "170825": return type(self)("170203")
-        if self == "180121": return type(self)("170203")
-        if self == "180224": return type(self)("170203")
-
-        if self == "180224_10bins": return type(self)("180416")
-        if self == "180224_newdiscriminants": return type(self)("180416")
-
-        if self == "180531": return type(self)("180416")
-        if self == "180531_2016": return type(self)("180416")  #10 bins
-
-        if self == "180721_2016": return type(self)("180416")
-        if self == "180721_2017": return type(self)("180416")
-        return self
-    @property
     def productionforrate(self):
-        if self in ("180224_10bins", "180224_newdiscriminants") or "_Ulascan" in str(self):
-            return type(self)(str(self).split("_")[0])
         return self
     @property
     def LHE(self):

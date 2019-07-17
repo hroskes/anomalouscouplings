@@ -118,24 +118,12 @@ LHEsmearptelectron = 2.399/6
 LHEsmearptmuon = 2.169/6
 LHEsmearptjet = 18./6
 
-if host == "MARCC":
-  usedata = False
-  showblinddistributions = False
-  unblinddistributions = False
-  unblindscans = False
-#  productionsforcombine = ["GEN_181119"]
-#  separateZZWWVBFweights = False
-#  productionsforcombine = ["180721_2016", "180721_2017"]
-  productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
-  separateZZWWVBFweights = True
-elif host == "lxplus":
-  usedata = False
-  showblinddistributions = False
-  unblinddistributions = False
-  unblindscans = False
-#  productionsforcombine = ["180721_2016", "180721_2017"]
-  productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
-  separateZZWWVBFweights = True
+usedata = True
+showblinddistributions = False
+unblinddistributions = False
+unblindscans = False
+productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
+separateZZWWVBFweights = True
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata
 
