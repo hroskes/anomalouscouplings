@@ -534,6 +534,7 @@ class TemplatesFile(MultiEnum):
           "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
           "constraints": self.constraints,
         }
+        if any(sum(len(filelist) for filelist in template["files"]) > 15 for template in result["templates"]): result["maxthreads"] = 1
         return result
 
     @property
