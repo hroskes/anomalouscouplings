@@ -23,10 +23,11 @@ from helperstuff.utilities import cache, cd, mkdtemp, PlotCopier, tfiles
 from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
+preliminary = False
 setmax = 1
-def saveasdir(forWIN=False):
-    return os.path.join(config.plotsbasedir, "limits", "forPAS" if forWIN else "")
-baseplotname = "limit_lumi80.15.root"
+saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_CMSfirsttry")
+def getplotname(analysis):
+    return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
 
 def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
     assert len(mgs) == len(mglogs) == len(xdivides)+1
@@ -65,10 +66,6 @@ def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
         mg.GetYaxis().SetLabelOffset(9999999)
         mg.GetYaxis().SetTitleOffset(9999999)
 
-def getplotname(analysis):
-    return "{}_{}".format(analysis, baseplotname)
-
-
 def PRL_loglinear(**kwargs):
     commondrawlineskwargs = {
                              "logscale": False,  #the lines are in the linear part
@@ -82,7 +79,6 @@ def PRL_loglinear(**kwargs):
     ydivide = 11
     xdivides = -.03, .03
     saveas = None
-    forWIN = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "ydivide":
             ydivide = float(kwarg)
@@ -95,8 +91,6 @@ def PRL_loglinear(**kwargs):
             onlyanalysis = kwarg
         elif kw == "saveas":
             saveas = kwarg
-        elif kw == "forWIN":
-            forWIN = kwarg
         else:
             commondrawlineskwargs[kw] = kwarg
 
@@ -168,16 +162,10 @@ def PRL_loglinear(**kwargs):
         analysis = Analysis(analysis)
         repmap = {"analysis": str(analysis)}
         subdir = ""
-        if biglegend:
-            def run2only(x): return x + ", 2016+2017"
-        else:
-            def run2only(x): return "#splitline{"+x+"}{2016+2017}"
         folders = [
-                   Folder(".oO[analysis]Oo._September7combination", "Observed", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-                   Folder(".oO[analysis]Oo._September7combination", "Expected", 2, analysis, subdir, plotname="limit_lumi77.45_7813_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=2),
-                   Folder(".oO[analysis]Oo._September7combination", run2only("Observed"), 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=1),
-                   Folder(".oO[analysis]Oo._September7combination", run2only("Expected"), 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=-1, repmap=repmap, linestyle=7, linewidth=1),
-                  ]
+          Folder("fa3fa2fL1fL1Zg_CMSfirsttry/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+          Folder("fa3fa2fL1fL1Zg_CMSfirsttry/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+        ]
 
         mg = ROOT.TMultiGraph("limit", "")
         for folder in folders:
@@ -249,17 +237,15 @@ def PRL_loglinear(**kwargs):
         l.Draw()
         c.cd()
         style.applycanvasstyle(c)
-        style.CMS("", lumi=None, lumitext="5.1 fb^{{-1}} (7 TeV) + 19.7 fb^{{-1}} (8 TeV) + {:.1f} fb^{{-1}} (13 TeV)"
-                                                .format(sum(_.dataluminosity for _ in config.productionsforcombine)+config.lumi2015),
+        style.CMS("", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)"
+                      .format(sum(_.dataluminosity for _ in config.productionsforcombine)),
                       x1=0.007, x2=1.01, #???
                       drawCMS=False, extratextsize=.039)
         style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
-        if forWIN:
-            style.CMS("Preliminary", x1=0.12, x2=1.025, y1=.85, y2=.93, drawCMS=False, CMStextsize=.06, extratextsize=.039)
         yaxislabel(folders[0].ytitle).Draw()
 
         try:
-            os.makedirs(saveasdir(forWIN))
+            os.makedirs(saveasdir)
         except OSError:
             pass
         plotname = getplotname(analysis)
@@ -268,8 +254,8 @@ def PRL_loglinear(**kwargs):
             c.SaveAs(saveas)
         else:
             for ext in "png eps root pdf".split():
-                c.SaveAs(os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", ext), repmap)))
-            with plotcopier.open(os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
+                c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
+            with plotcopier.open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
                 f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
                 f.write("\n\n\n\n\n\ngit info:\n\n")
                 f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
@@ -277,11 +263,6 @@ def PRL_loglinear(**kwargs):
                 f.write(subprocess.check_output(["git", "status"]))
                 f.write("\n")
                 f.write(subprocess.check_output(["git", "diff"]))
-            if hasattr(config, "svndir"):
-                shutil.copyfile(
-                                os.path.join(saveasdir(forWIN), replaceByMap(plotname.replace("root", "pdf"), repmap)),
-                                os.path.join(config.svndir, "papers", "HIG-17-011", "trunk", "Figures", "fig3{}.pdf".format(letter))
-                               )
 
 def animations(**kwargs):
     from projections import Projections
@@ -302,7 +283,7 @@ def animations(**kwargs):
                               **kwargs
                              )
 
-            finalplot = os.path.join(saveasdir(forWIN), getplotname(analysis).replace("root", "gif"))
+            finalplot = os.path.join(saveasdir, getplotname(analysis).replace("root", "gif"))
             convertcommand.append(finalplot)
             #http://stackoverflow.com/a/38792806/5228524
             #subprocess.check_call(convertcommand)
@@ -331,8 +312,5 @@ if __name__ == "__main__":
         else:
             args.append(arg)
     function = PRL_loglinear
-    if args and args[0] == "animations":
-        args = args[1:]
-        function = animations
     with PlotCopier() as plotcopier:
         function(*args, **kwargs)
