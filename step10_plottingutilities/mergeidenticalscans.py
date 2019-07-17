@@ -86,6 +86,11 @@ def mergeidenticalscans(outfile, *infiles):
         for j in range(len(yy))
       ])
 
+      if "fixothers" in infile:
+        for x, (y, ywithfais) in itertools.izip_longest(xx, yyswithfais[-1]):
+          assert not any(ywithfais.itervalues())
+          ywithfais["fa1"] = 1 - abs(x)
+
       if xtitle is None and any(othercouplingmg.itervalues()):
         xtitle = mg.GetXaxis().GetTitle()
         ytitle = mg.GetYaxis().GetTitle()
