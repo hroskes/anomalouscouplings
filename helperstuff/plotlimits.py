@@ -22,7 +22,7 @@ from enums import Analysis, Category, channels, EnumItem, MyEnum, ProductionMode
 from samples import ReweightingSample, Sample, samplewithfai
 from extendedcounter import ExtendedCounter
 from samples import samplewithfeLfeR
-from utilities import cache, cd
+from utilities import cache, cacheall, cd
 from yields import YieldValue
 
 filenametemplate = "higgsCombine_{append}{scanrangeappend}.MultiDimFit.mH125.root"
@@ -436,7 +436,7 @@ class XPos(MyEnum):
 
         return ROOT.TPaveText(x1, y1, x2, y2, "NDC")
 
-@cache
+@cacheall
 def drawlines(xpostext="left", xmin=-1, xmax=1, logscale=False, xsize=.1, ysize=.03, yshift=0, yshift68=None, yshift95=None, textsize=None, PRL=False, CLbelow=False, arbitraryparameter=None):
     """
     xpostext: "left", "right", or a float, determines where the text 68% CL and 95% CL goes

@@ -102,6 +102,14 @@ def cache(function):
             return newfunction(*args, **kwargs)
     return newfunction
 
+def cacheall(function):
+    cache = []
+    @wraps(function)
+    def newfunction(*args, **kwargs):
+        cache.append(function(*args, **kwargs))
+        return cache[-1]
+    return newfunction
+
 def cache_instancemethod(function):
     """
     This one can't take arguments.

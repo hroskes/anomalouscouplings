@@ -191,7 +191,6 @@ def PRL_loglinear(**kwargs):
             marker.SetMarkerSize(3)
             if marker.GetY()[0] > 0:
                 mg.Add(marker, "P")
-
         mglog = mg.Clone()
         if markerposition and marker.GetY()[0] <= 0:
             mg.Add(marker, "P")
@@ -220,8 +219,9 @@ def PRL_loglinear(**kwargs):
         for i, (linearpad, mg) in enumerate(izip(linearpads, mgs)):
             linearpad.cd()
             paddrawlineskwargs = drawlineskwargs.copy()
-            paddrawlineskwargs["arbitraryparameter"] = paddrawlineskwargs["arbitraryparameter"] + (i,)
+            paddrawlineskwargs["arbitraryparameter"] = paddrawlineskwargs["arbitraryparameter"] + (i, analysis)
             if i != CLpadindex: paddrawlineskwargs["yshift68"] = paddrawlineskwargs["yshift95"] = 100
+            print paddrawlineskwargs["arbitraryparameter"]
             drawlines(**paddrawlineskwargs)
 
         (c if biglegend else legendpad).cd()
@@ -312,5 +312,7 @@ if __name__ == "__main__":
         else:
             args.append(arg)
     function = PRL_loglinear
+    assert "analysis" not in kwargs
     with PlotCopier() as plotcopier:
-        function(*args, **kwargs)
+        for kwargs["analysis"] in "fa3", "fa2", "fL1", "fL1Zg":
+            function(*args, **kwargs)

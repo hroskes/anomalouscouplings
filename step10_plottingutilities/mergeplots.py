@@ -14,7 +14,7 @@ from helperstuff import config
 from helperstuff.enums import Analysis, Production
 from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
-from helperstuff.utilities import cache, PlotCopier, tfiles
+from helperstuff.utilities import cache, PlotCopier, TFile
 
 from limits import findwhereyequals, Point
 
@@ -43,22 +43,22 @@ class Folder(object):
     @property
     @cache
     def graph(self):
-        f = tfiles[replaceByMap(os.path.join(self.folder, self.plotname), self.repmap)]
-        c = f.c1
-        mg = c.GetListOfPrimitives()[1]
-        graphs = mg.GetListOfGraphs()
-        graphnumber = self.graphnumber
-        if self.graphnumber is None:
-            assert len(graphs) == 1
-            graphnumber = 0
-        graphs[graphnumber].SetLineColor(self.color)
-        if self.linestyle is not None:
-            graphs[graphnumber].SetLineStyle(self.linestyle)
-        if self.linewidth is not None:
-            graphs[graphnumber].SetLineWidth(self.linewidth)
-        self.__xtitle = mg.GetXaxis().GetTitle()
-        self.__ytitle = mg.GetYaxis().GetTitle()
-        return graphs[graphnumber]
+        with TFile(replaceByMap(os.path.join(self.folder, self.plotname), self.repmap)) as f:
+            c = f.c1
+            mg = c.GetListOfPrimitives()[1]
+            graphs = mg.GetListOfGraphs()
+            graphnumber = self.graphnumber
+            if self.graphnumber is None:
+                assert len(graphs) == 1
+                graphnumber = 0
+            graphs[graphnumber].SetLineColor(self.color)
+            if self.linestyle is not None:
+                graphs[graphnumber].SetLineStyle(self.linestyle)
+            if self.linewidth is not None:
+                graphs[graphnumber].SetLineWidth(self.linewidth)
+            self.__xtitle = mg.GetXaxis().GetTitle()
+            self.__ytitle = mg.GetYaxis().GetTitle()
+            return graphs[graphnumber].Clone()
     @property
     def xtitle(self):
         self.graph
@@ -67,7 +67,8 @@ class Folder(object):
     def ytitle(self):
         self.graph
         return self.__ytitle
-    def addtolegend(self, legend):
+    def addtolegend(self, legend, graph=None):
+        if graph is None: graph = self.graph
         legend.AddEntry(self.graph, self.title, "l")
         if self.secondcolumn is not None:
             legend.AddEntry(0, self.secondcolumn, "")
