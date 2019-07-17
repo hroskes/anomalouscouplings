@@ -120,12 +120,15 @@ class TreeWrapperBase(Iterator):
         if self.productionmode == "qqZZ":
             if self.GEN: return 1
             return self.KFactor_EW_qqZZ * self.KFactor_QCD_qqZZ_M
-        if self.productionmode == "ZX":
-            LepPt, LepEta, LepLepId = self.LepPt, self.LepEta, self.LepLepId
-            return ZX.getfakerate(self.year, LepPt[2], LepEta[2], LepLepId[2]) * ZX.getfakerate(self.year, LepPt[3], LepEta[3], LepLepId[3])
         assert False, self
 
     def MC_weight_nominal(self):
+        if self.productionmode == "ZX" or self.productionmode == "data":
+            assert self.overallEventWeight == 1, self.overallEventWeight
+            if self.productionmode == "data": return 1
+            LepPt, LepEta, LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
+            return ZX.normalizeZX(self.year, self.tree.Z1Flav, self.tree.Z2Flav) * ZX.getfakerate(self.year, LepPt[2], LepEta[2], LepLepId[2]) * ZX.getfakerate(self.year, LepPt[3], LepEta[3], LepLepId[3])
+
         pb_to_fb = 1000
         return self.overallEventWeight * self.genxsec * self.genBR * pb_to_fb * self.per_event_scale_factor() / self.nevents
 
@@ -862,9 +865,12 @@ class TreeWrapper(TreeWrapperBase):
             filename = self.definitelyexists.CJLSTfile()
         self.f = TFile(filename, contextmanager=False)
 
-        self.counters = self.f.Get("{}/Counters".format(treesample.TDirectoryname()))
-        if not self.counters:
-            raise ValueError("No Counters in file "+filename)
+        self.counters = None
+
+        if not self.isdata and not self.isZX:
+            self.counters = self.f.Get("{}/Counters".format(treesample.TDirectoryname()))
+            if not self.counters:
+                raise ValueError("No Counters in file "+filename)
 
         self.tree = self.f.Get("{}/candTree".format(treesample.TDirectoryname()))
         self.failedtree = self.f.Get("{}/candTree_failed".format(treesample.TDirectoryname()))
@@ -885,12 +891,10 @@ class TreeWrapper(TreeWrapperBase):
             #========================
 
         self.tree.GetEntry(0)
-        if self.isdata or self.isZX:
-            self.xsec = 0
-        else:
+        if not self.isdata and not self.isZX:
             self.xsec = self.tree.xsec * 1000 #pb to fb
-        self.genxsec = self.tree.genxsec
-        self.genBR = self.tree.genBR
+            self.genxsec = self.tree.genxsec
+            self.genBR = self.tree.genBR
 
     @property
     @cache_instancemethod

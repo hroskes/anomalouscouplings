@@ -206,9 +206,11 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     t.SetBranchStatus("Z*Flav", 1)
     t.SetBranchStatus("ZZMass", 1)
     if any(_.productionmode in ("ggH", "ggZZ", "qqZZ") for _ in fromsamples): t.SetBranchStatus("KFactor_*", 1)
-    t.SetBranchStatus("xsec", 1)
-    t.SetBranchStatus("genxsec", 1)
-    t.SetBranchStatus("genBR", 1)
+    if not all(_.productionmode == "ZX" for _ in fromsamples):
+      t.SetBranchStatus("xsec", 1)
+      t.SetBranchStatus("genxsec", 1)
+      t.SetBranchStatus("genBR", 1)
+      t.SetBranchStatus("LHEweight_*", 1)
     for _ in alternateweights:
       if _ in ("1", "EWcorrUp", "EWcorrDn", "PythiaScaleUp", "PythiaScaleDown"):
         pass
@@ -217,7 +219,6 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     if "PythiaScaleUp" in alternateweights or "PythiaScaleDown" in alternateweights:
       t.SetBranchStatus("PythiaWeight_*sr_muR0p25", 1)
       t.SetBranchStatus("PythiaWeight_*sr_muR4", 1)
-    t.SetBranchStatus("LHEweight_*", 1)
 
     c = ROOT.TCanvas()
 
@@ -232,7 +233,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
             t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "MC_weight_nominal*(ZZMass>{} && ZZMass<{})*{}".format(config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
             h = c.FindObject("htemp")
             t.GetEntry(0)
-            h.Scale(t.xsec / (t.genxsec * t.genBR))
+            if tosample.productionmode != "ZX":
+                h.Scale(t.xsec / (t.genxsec * t.genBR))
             for i in range(h.GetNbinsY()):
                 for channel in channels:
                     binnumber = h.FindBin(channel.ZZFlav, i)

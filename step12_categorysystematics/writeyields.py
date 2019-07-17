@@ -121,12 +121,6 @@ def writeyields(productionmodelist=None, productionlist=None):
         for channel, category in itertools.product(channels, categories):
           if analysis.isdecayonly and category != "Untagged": continue
           yv = YieldValue(channel, category, analysis, productionmode, production)
-          if productionmode == "ZX":
-            yv.value = gettemplate(productionmode, category, channel, production, analysis).Integral()
-            continue
-          if productionmode == "VBF bkg":
-            yv.value = gettemplate(productionmode, category, channel, production, analysis).Integral()
-            continue
 
           yvvalue = 0
           
@@ -147,7 +141,7 @@ def writeyields(productionmodelist=None, productionlist=None):
 
           yv.value = yvvalue
 
-        if production.GEN or deprecate(True, 2019, 7, 17): continue
+        if production.GEN or deprecate(True, 2019, 7, 18): continue
 
         #same for all categories and channels
         for category, channel in itertools.product(categories, channels):

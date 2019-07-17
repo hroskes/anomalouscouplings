@@ -61,15 +61,7 @@ def adddiscriminants(*args):
       try:
         newf = ROOT.TFile.Open(LSF.basename(newfilename), "recreate")
         if isinstance(treewrapper, TreeWrapper):
-          if sample.production == "180721_2016":
-            treewrapper.tree.SetBranchStatus("LHEweight_PDFVariation_*", 0)
           newt = treewrapper.tree.CloneTree(0)
-          if sample.production == "180721_2016":
-            treewrapper.tree.SetBranchStatus("LHEweight_PDFVariation_*", 1)
-            pdfup = array('d', [0])
-            pdfdn = array('d', [0])
-            newt.Branch("LHEweight_PDFVariation_Up", pdfup, "LHEweight_PDFVariation_Up/D")
-            newt.Branch("LHEweight_PDFVariation_Dn", pdfdn, "LHEweight_PDFVariation_Dn/D")
         else:
           newt = ROOT.TTree("candTree", "candTree")
 
@@ -92,9 +84,6 @@ def adddiscriminants(*args):
               except:
                 print "Error while calculating", discriminant
                 raise
-            if sample.production == "180721_2016":
-              pdfup[0] = treewrapper.tree.LHEweight_PDFVariation_Up
-              pdfdn[0] = treewrapper.tree.LHEweight_PDFVariation_Dn
             newt.Fill()
             if i % 50000 == 0 and LSB_JOBID():
               with open(LSF.basename(newfilename)): pass #access it, hopefully preventing tmp from being deleted

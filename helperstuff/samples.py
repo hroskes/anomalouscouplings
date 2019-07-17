@@ -1554,8 +1554,6 @@ class Sample(ReweightingSamplePlus):
         if self.productionmode == "bbH": return "bbH125"
         if self.productionmode == "tqH": return "tqH125"
         if self.productionmode == "ggZZ":
-            if self.production in ("180721", "180722") and self.flavor == "4mu":
-                return "ggTo4mu_ContinDefaultShower_MCFM701"
             return "ggTo{}_Contin_MCFM701".format(self.flavor)
         if self.productionmode == "VBF bkg":
             return "VBFTo{}JJ_Contin_phantom128".format(self.flavor)
@@ -1574,20 +1572,6 @@ class Sample(ReweightingSamplePlus):
     @property
     def LHEfile(self):
         if not self.production.LHE: raise ValueError("Can't get the lhe file when not in LHE mode!")
-        if self.production == "LHE_170509":
-            if self.productionmode == "ggH":
-                folder = "/work-zfs/lhc/heshy/LHEanomalouscouplings/processlhe/fL1fL1Zg"
-                if self.hypothesis == "0+": filename = "ggHa1.lhe"
-                if self.hypothesis == "L1": filename = "ggHL1.lhe"
-                if self.hypothesis == "fL10.5": filename = "ggHa1L1.lhe"
-                if self.hypothesis == "L1Zg": filename = "ggHL1Zg.lhe"
-                if self.hypothesis == "fL1Zg0.5": filename = "ggHa1L1Zg.lhe"
-                if self.hypothesis == "fL10.5fL1Zg0.5": filename = "ggHL1L1Zg.lhe"
-                return os.path.join(folder, filename)
-            if self.productionmode == "qqZZ":
-                return "/work-zfs/lhc/ianderso/hep/LHEFiles/qqZZ/MG/8T/ZZJetsTo4L_TuneZ2_8TeV-madgraph-tauola.lhe"
-            if self.productionmode == "data":
-                return tempfile.mkstemp(suffix=".lhe")
         raise self.ValueError("LHEfile")
 
     def withdiscriminantsfile(self):
@@ -1807,16 +1791,8 @@ class SampleBasis(MultiEnum):
         return invertnumpymatrix(self.matrix)
 
 def allsamples():
-    __xcheck()
+    if deprecate(False, 2019, 7, 20): __xcheck()
     for production in productions:
-        if "Ulascan" in str(production): continue
-
-        if production == "GEN_Meng":
-            yield Sample("qqZZ", production)
-            #yield Sample("ggH", "MINLO", "0+", production)
-            yield Sample("HJJ", "0+", "Hff0+", production)
-            continue
-
         if production.GEN:
             for productionmode in "ggH", "VBF", "ZH", "WH", "bbH":
                 for hypothesis in ProductionMode(productionmode).generatedhypotheses(production):
@@ -1914,6 +1890,7 @@ def __xcheck():
     for sample in allsamples():
         if sample.productionmode == "data": continue
         if sample.copyfromothersample: continue
+        print sample
         try:
             CJ2wd[CJLSTfile(sample)] = sample.withdiscriminantsfile()
             wd2CJ[sample.withdiscriminantsfile()] = CJLSTfile(sample)

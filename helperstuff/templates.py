@@ -247,23 +247,19 @@ class TemplatesFile(MultiEnum):
         if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP"): return discriminant("phistarZ2")
 
         name = "D_bkg"
-        if self.production >= "180416" or self.production == "180224_newdiscriminants":
-            if self.category == "Untagged": pass
-            elif self.category == "VBFtagged": name += "_VBFdecay"
-            elif self.category == "VHHadrtagged": name += "_HadVHdecay"
-            else: assert False
-        elif self.production.year == 2016: pass
+        if self.category == "Untagged": pass
+        elif self.category == "VBFtagged": name += "_VBFdecay"
+        elif self.category == "VHHadrtagged": name += "_HadVHdecay"
         else: assert False
 
         name += self.shapesystematic.Dbkgappendname
 
         if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter") or self.analysis.isSTXS:
             name += "_3bins"
-        elif self.production >= "180416" or self.production in ("180224_newdiscriminants", "180224_10bins"):
-            if self.category == "Untagged":
-                name += "_20bins"
-            else:
-                name += "_10bins"
+        if self.category == "Untagged":
+            name += "_20bins"
+        else:
+            name += "_10bins"
 
         if self.shapesystematic in ("JECUp", "JECDn") and ("VBF" in name or "HadVH" in name):
             name += "_{}".format(self.shapesystematic)
@@ -281,13 +277,10 @@ class TemplatesFile(MultiEnum):
         else:
             JECappend = ""
 
-        if self.production >= "180416" or self.production in ("180224_10bins", "180224_newdiscriminants"):
-            if self.category == "Untagged":
-                binsappend = "_20bins"
-            else:
-                binsappend = "_10bins"
-        elif self.production.year == 2016:
-            binsappend = ""
+        if self.category == "Untagged":
+            binsappend = "_20bins"
+        else:
+            binsappend = "_10bins"
 
         if self.category == "Untagged":
             if self.analysis == "fa3":
@@ -363,16 +356,11 @@ class TemplatesFile(MultiEnum):
     def mixdiscriminant(self):
         from discriminants import discriminant
 
-        if self.production >= "180416" or self.production == "180224_newdiscriminants":
-            if self.category == "Untagged":
-                binsappend = "_new_20bins"
-            else:
-                binsappend = "_new_10bins"
-            if self.analysis in ("fL1", "fL1Zg"): binsappend = binsappend.replace("_new", "")
-        elif self.production == "180224_10bins":
-            binsappend = "_10bins"
-        elif self.production.year == 2016:
-            binsappend = ""
+        if self.category == "Untagged":
+            binsappend = "_new_20bins"
+        else:
+            binsappend = "_new_10bins"
+        if self.analysis in ("fL1", "fL1Zg"): binsappend = binsappend.replace("_new", "")
 
         if self.category == "Untagged":
             if self.analysis == "fa3":
@@ -1319,8 +1307,6 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def copyfromothertemplate(self):
-        if self.productionmode in ("ggZZ", "VBF bkg", "ZX") and self.production in ("180721", "180722"):
-            return type(self)(self.productionmode, self.channel, self.shapesystematic, self.templategroup, self.analysis, str(self.production)+"_Ulascan", self.category)
         return None
 
     def gettemplate(self):

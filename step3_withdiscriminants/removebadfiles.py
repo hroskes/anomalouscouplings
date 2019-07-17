@@ -7,9 +7,7 @@ args = p.parse_args()
 
 import os
 
-import ROOT
-
-from helperstuff.utilities import cd, KeepWhileOpenFile
+from helperstuff.utilities import cd, KeepWhileOpenFile, TFile
 
 delete = []
 
@@ -21,10 +19,10 @@ with cd(os.path.dirname(__file__)):
       filename = os.path.join(directory, filename)
       if not filename.endswith(".root"): continue
       if not KeepWhileOpenFile(filename+".tmp").wouldbevalid: continue
-      f = ROOT.TFile(filename)
       try:
-        if f.candTree.GetEntries() == 0:
-          delete.append(filename)
+        with TFile(filename) as f:
+          if f.candTree.GetEntries() == 0:
+            delete.append(filename)
       except AttributeError:
         delete.append(filename)
 
