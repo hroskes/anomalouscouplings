@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import getpass
 import glob
-from itertools import izip, permutations, product
+from itertools import izip, izip_longest, permutations, product
 import json
 import os
 import pipes
@@ -295,6 +295,7 @@ def runcombine(analysis, foldername, **kwargs):
     usesystematics = True
     runobs = config.unblindscans
     subdirectory = ""
+    subdirectory2 = ""
     defaultscanrange = (101, -1.0, 1.0)
     scanranges = [defaultscanrange]
     defaultusesignalproductionmodes = usesignalproductionmodes = {ProductionMode(p) for p in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH")}
@@ -365,6 +366,8 @@ def runcombine(analysis, foldername, **kwargs):
             usesignalproductionmodes = [ProductionMode(p) for p in sorted(kwarg.split(","))]
         elif kw == "subdirectory":
             subdirectory = kwarg
+        elif kw == "subdirectory2":
+            subdirectory2 = kwarg
         elif kw == "usebkg":
             if kwarg.lower() == "true":
                 usebkg = True
@@ -612,7 +615,7 @@ def runcombine(analysis, foldername, **kwargs):
     analysis = Analysis(analysis)
     fullfoldername = "{}_{}".format(analysis, foldername)
     totallumi = sum(float(Luminosity(p, lumitype)) for p in productions)
-    saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, fullfoldername)
+    saveasdir = os.path.join(config.plotsbasedir, "limits", subdirectory, fullfoldername, subdirectory2)
     try:
         os.makedirs(saveasdir)
     except OSError:
@@ -905,7 +908,7 @@ def runpermutations(analysis, foldername, *args, **kwargs):
     if not kwof: return
     runcombine(analysis, foldername, *args, **newkwargs)
 
-def rungrid(analysis, foldername, npoints, *args, **kwargs):
+def rungrid(analysis, foldername, npoints, minpoint, maxpoint, *args, **kwargs):
   assert "setparametersforgrid" not in kwargs and "plotnuisances" not in kwargs
   analysis = Analysis(analysis)
   fullfoldername = "{}_{}".format(analysis, foldername)
@@ -930,12 +933,18 @@ def rungrid(analysis, foldername, npoints, *args, **kwargs):
 
   otherfais = [_+"_relative" for _ in otherfais]
 
+  if len(npoints) == len(minpoint) == len(maxpoint) == 1:
+    npoints *= len(otherfais)
+    minpoint *= len(otherfais)
+    maxpoint *= len(otherfais)
+  assert len(npoints) == len(minpoint) == len(maxpoint) == len(otherfais)
+
   plotnuisances = ["CMS_zz4l_fai"+str(i) for i in xrange(1, len(analysis.fais)+1)] + ["CMS_zz4l_fa1"]
   del plotnuisances[analysis.fais.index(scanfai)]
   kwargs["plotnuisances"] = ",".join(plotnuisances)
 
-  for indices in product(*(xrange(npoints+1) for _ in otherfais)):
-    otherfaivalues = [-1 + 2.0*index/npoints for index in indices]
+  for indices in product(*(xrange(npointsi+1) for npointsi in npoints)):
+    otherfaivalues = [minpointi + (maxpointi-minpointi)*index/npointsi if npointsi != 0 else minpointi for index, npointsi, minpointi, maxpointi in izip_longest(indices, npoints, minpoint, maxpoint)]
     newkwargs = kwargs.copy()
 
     newkwargs["setparametersforgrid"] = ",".join("{}:{:g}".format(otherfai, otherfaivalue) for otherfai, otherfaivalue in izip(otherfais, otherfaivalues))
@@ -966,9 +975,11 @@ def main():
         function = rungrid
         analysis = Analysis(sys.argv[2])
         foldername = sys.argv[3]
-        npoints = int(sys.argv[4])
-        args = [analysis, foldername, npoints]
-        startkwargsfrom = 5
+        npoints = [int(_) for _ in sys.argv[4].split(",")]
+        minpoint = [float(_) for _ in sys.argv[5].split(",")]
+        maxpoint = [float(_) for _ in sys.argv[6].split(",")]
+        args = [analysis, foldername, npoints, minpoint, maxpoint]
+        startkwargsfrom = 7
     else:
         function = runcombine
         analysis = Analysis(sys.argv[1])
