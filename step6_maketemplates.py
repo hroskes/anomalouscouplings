@@ -33,7 +33,7 @@ from time import sleep
 
 from helperstuff import config
 from helperstuff.discriminants import discriminants
-from helperstuff.enums import TemplateGroup
+from helperstuff.enums import Production, TemplateGroup
 from helperstuff.samples import Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
@@ -43,9 +43,10 @@ def buildtemplates(*args, **kwargs):
   morebuildtemplatesargs = kwargs.pop("morebuildtemplatesargs", [])
   assert not kwargs, kwargs
 
-  if len(args) == 1 and not isinstance(args[0], TemplatesFile):
+  if len(args) == 2:
     tg = TemplateGroup(args[0])
-    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and not os.path.exists(tf.templatesfile().replace(".root", ".done"))]
+    production = Production(args[1])
+    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.production == production and not os.path.exists(tf.templatesfile().replace(".root", ".done"))]
     if not tfs: return
     with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
       if not all(kwofs): return
@@ -56,7 +57,7 @@ def buildtemplates(*args, **kwargs):
   templatesfile = TemplatesFile(*args)
   if "Ulascan" in str(templatesfile.production): return
   if templatesfile.templategroup in ("background", "DATA", "tth", "bbh"):
-    return buildtemplates(templatesfile.templategroup)
+    return buildtemplates(templatesfile.templategroup, templatesfile.production)
   print templatesfile
   if templatesfile.copyfromothertemplatesfile is not None: return
   with KeepWhileOpenFile(templatesfile.templatesfile() + ".tmp") as f:
@@ -166,9 +167,9 @@ def submitjobs(args):
       torun.add(templatesfile)
 
   for tf in frozenset(torun):
-    if tf.templategroup in ("background", "DATA"):
+    if tf.templategroup in ("background", "DATA", "tth", "bbh"):
       torun.remove(tf)
-      torun.add(tf.templategroup)
+      torun.add((tf.templategroup, tf.production))
   njobs = len(torun)
 
   if not njobs: return

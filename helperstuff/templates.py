@@ -256,7 +256,7 @@ class TemplatesFile(MultiEnum):
 
         if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter") or self.analysis.isSTXS:
             name += "_3bins"
-        if self.category == "Untagged":
+        elif self.category == "Untagged":
             name += "_20bins"
         else:
             name += "_10bins"
