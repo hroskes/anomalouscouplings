@@ -183,7 +183,7 @@ class TemplatesFile(MultiEnum):
         elif self.templategroup == "bkg":
             if self.production.LHE or self.production.GEN: return [Template(self, "qqZZ")]
             result = ["qqZZ", "ggZZ", "VBF bkg"]
-            if deprecate(True, 2019, 7, 15):
+            if deprecate(True, 2019, 7, 20):
                 result.remove("VBF bkg")
             if config.usedata:
                 result.append("ZX")

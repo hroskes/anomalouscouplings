@@ -5,6 +5,7 @@ import argparse
 if __name__ == "__main__":
   p = argparse.ArgumentParser()
   p.add_argument("fai", choices="fa3 fa2 fL1 fL1Zg".split())
+  p.add_argument("--decay", action="store_true")
   args = p.parse_args()
 
 import contextlib, itertools, os
@@ -50,8 +51,8 @@ def mergeidenticalscans(outfile, *infiles):
 
   othercouplings = [coupling for coupling in ("fa3", "fa2", "fL1", "fL1Zg", "fa1") if "scan"+coupling+"_" not in outfile]
 
-  for i, infile in enumerate(infiles, start=1):
-    if i % 1 == 0 or i == nfiles: print i, "/", nfiles, os.path.basename(infile)
+  for i, infile in enumerate(infiles):
+    print i, "/", nfiles, os.path.basename(infile)
     othercouplingfile = {
       coupling: infile.replace("limit_", coupling+"_") if "fixothers" not in infile else None
       for coupling in othercouplings
@@ -174,16 +175,30 @@ def mergeidenticalscans(outfile, *infiles):
 if __name__ == "__main__":
   pc = PlotCopier()
 
-  with pc:
-    mergeidenticalscans(
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_CMSfirsttry/limit_lumi137.10_scan"+args.fai+"_101,-1.0,1.0_101,-0.02,0.02_merged"),
-      *sorted(
-        reglob(
-           os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_CMSfirsttry/"),
-           "limit_lumi137.10_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
-        ) + reglob(
-           os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_CMSfirsttry/gridscan/"),
-           "limit_lumi137.10_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
-        )
+  if args.decay:
+    functionargs = [
+      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/limit_lumi300.00_Untagged_scan"+args.fai+"_merged"),
+    ] + sorted(
+      reglob(
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/"),
+         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?.root",
+      ) + reglob(
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_decay_fixsign/gridscan/"),
+         "limit_lumi300.00_Untagged_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?.root",
       )
     )
+  else:
+    functionargs = [
+      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_CMSfirsttry/limit_lumi137.10_scan"+args.fai+"_101,-1.0,1.0_101,-0.02,0.02_merged"),
+    ] + sorted(
+      reglob(
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_CMSfirsttry/"),
+         "limit_lumi137.10_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
+      ) + reglob(
+         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_CMSfirsttry/gridscan/"),
+         "limit_lumi137.10_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
+      )
+    )
+
+  with pc:
+    mergeidenticalscans(*functionargs)
