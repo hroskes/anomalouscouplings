@@ -173,7 +173,6 @@ def PRL_loglinear(**kwargs):
 
         drawlineskwargs = commondrawlineskwargs.copy()
         drawlineskwargs["xpostext"] = CLtextposition
-        drawlineskwargs["arbitraryparameter"] = analysis, markerposition
 
         CLpadindex = 0
         for _ in xdivides:
@@ -219,9 +218,7 @@ def PRL_loglinear(**kwargs):
         for i, (linearpad, mg) in enumerate(izip(linearpads, mgs)):
             linearpad.cd()
             paddrawlineskwargs = drawlineskwargs.copy()
-            paddrawlineskwargs["arbitraryparameter"] = paddrawlineskwargs["arbitraryparameter"] + (i, analysis)
             if i != CLpadindex: paddrawlineskwargs["yshift68"] = paddrawlineskwargs["yshift95"] = 100
-            print paddrawlineskwargs["arbitraryparameter"]
             drawlines(**paddrawlineskwargs)
 
         (c if biglegend else legendpad).cd()

@@ -58,7 +58,7 @@ class Folder(object):
                 graphs[graphnumber].SetLineWidth(self.linewidth)
             self.__xtitle = mg.GetXaxis().GetTitle()
             self.__ytitle = mg.GetYaxis().GetTitle()
-            return graphs[graphnumber].Clone()
+            return graphs[graphnumber].Clone("{analysis}_{filename}_{graphnumber}".format(filename=self.plotname, graphnumber=self.graphnumber, **self.repmap))
     @property
     def xtitle(self):
         self.graph

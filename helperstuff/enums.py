@@ -1021,14 +1021,14 @@ if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBF
     _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
     if config.combinem4lshapesystematics:
         _ += ["ScaleResUp", "ScaleResDown"]
-if config.applyZXshapesystematicsUntagged or config.applyZXshapesystematicsVBFVHtagged:
+if config.applyZXshapesystematics:
     _ += ["ZXUp", "ZXDown"]
 if config.applyJECshapesystematics:
     _ += ["JECUp", "JECDown"]
 if config.applyMINLOsystematics:
     _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
-treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown", "MINLO_SM") + ("ZXUp", "ZXDown")*config.usenewZXsystematics)
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown", "MINLO_SM", "ZXUp", "ZXDown"))
 del _
 
 class MetaclassForMultiEnums(type):

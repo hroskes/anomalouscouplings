@@ -87,11 +87,7 @@ getm4lsystsfromggH = True
 
 combinem4lshapesystematics = False
 
-applyZXshapesystematicsVBFVHtagged = True
-applyZXshapesystematicsUntagged = True
-mergeZXVBFVHsystematics = False
-usenewZXsystematics = True
-
+applyZXshapesystematics = False
 applyJECshapesystematics = False
 applyMINLOsystematics = False
 

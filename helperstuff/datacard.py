@@ -376,40 +376,17 @@ class _Datacard(MultiEnum):
                      )
 
     @MakeSystematicFromEnums(Channel)
-    def CMS_zz4l_smd_zjets_bkg_channel(self, channel):
-        if config.usenewZXsystematics: return None
-        if self.production.LHE or self.production.GEN: return None
-        category = "Untagged"
-        if channel == self.channel and category == self.category:
-            if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
-                return "param 0 1 [-3,3]"
-
-    @MakeSystematicFromEnums(Category)
-    def CMS_zz4l_smd_zjets_bkg_category(self, category):
-        if config.usenewZXsystematics: return None
-        if category == "Untagged": return None
-        if not config.mergeZXVBFVHsystematics: return None
-        if self.production.LHE or self.production.GEN: return None
-        if category == self.category:
-            if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
-                return "param 0 1 [-3,3]"
-
-    @MakeSystematicFromEnums(Category, Channel)
-    def CMS_zz4l_smd_zjets_bkg_category_channel(self, category, channel):
-        if config.usenewZXsystematics: return None
-        if category == "Untagged": return None
-        if config.mergeZXVBFVHsystematics: return None
-        if self.production.LHE or self.production.GEN: return None
-        if category == self.category and channel == self.channel:
-            if config.applyZXshapesystematicsUntagged and self.category == "Untagged" or config.applyZXshapesystematicsVBFVHtagged and self.category != "Untagged":
-                return "param 0 1 [-3,3]"
-
-    @MakeSystematicFromEnums(Channel)
     def CMS_fake_channel(self, channel):
-        if not config.usenewZXsystematics: return None
+        if not config.applyZXshapesystematics: return None
         if self.production.LHE or self.production.GEN: return None
         if channel == self.channel:
-          return "param 0 1 [-3,3]"
+          return " ".join(
+            ["shape1"] +
+            [
+              "1" if self.channel == channel and "bkg" in h and Productionmode(h) == "ZX" else "-"
+              for h in self.histograms
+            ]
+          )
 
     @MakeSystematicFromEnums(ProductionMode, Category, Channel, config.staticmaxbins)
     def binbybin_category_channel_productionmode_index(self, productionmode, category, channel, index):
