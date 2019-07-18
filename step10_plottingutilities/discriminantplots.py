@@ -230,12 +230,13 @@ class HypothesisLine(object):
     )
 
 class Plot(object):
-  def __init__(self, name, xtitle, ytitle, hypothesislines, xformula, cutformula, binning, legendargs, saveasdir, scaleymax, plotcopier=ROOT):
+  def __init__(self, name, xtitle, ytitle, hypothesislines, xformula, cutformula, binning, legendargs, legendcolumns, saveasdir, ymax, plotcopier=ROOT):
     self.__name = name
     self.__xtitle = xtitle
     self.__ytitle = ytitle
-    self.__scaleymax = scaleymax
+    self.__ymax = ymax
     self.__legendargs = legendargs
+    self.__legendcolumns = legendcolumns
     self.__saveasdir = saveasdir
     self.__plotcopier = plotcopier
 
@@ -337,6 +338,7 @@ class Plot(object):
     l = ROOT.TLegend(*self.__legendargs)
     l.SetBorderSize(0)
     l.SetFillStyle(0)
+    l.SetNColumns(self.__legendcolumns)
 
     for h in self.histograms:
       hstack.Add(h.histogram)
@@ -345,8 +347,7 @@ class Plot(object):
     hstack.Draw("hist nostack")
     hstack.GetXaxis().SetTitle(self.__xtitle)
     hstack.GetYaxis().SetTitle(self.__ytitle)
-    ymax = style.ymax((hstack, "nostack"))
-    hstack.SetMaximum(ymax * self.__scaleymax)
+    hstack.SetMaximum(self.__ymax)
     l.Draw()
 
     mkdir_p(self.__saveasdir)
@@ -376,9 +377,10 @@ def makeplots():
         xformula="D_0minus_decay",
         cutformula=untaggedcut,
         binning=np.array([0, 1./3, 2./3, 1]),
-        legendargs=(.2, .4, .5, .9),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "fullrange", "Untagged"),
-        scaleymax=1.5,
+        ymax=40,
         plotcopier=pc,
       )
     ]
