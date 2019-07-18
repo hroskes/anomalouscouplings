@@ -453,6 +453,9 @@ class SampleBase(SumOfSamplesBase):
         if self.productionmode == "WH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWH2e2mu
             return constants.SMXSWH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
+        if self.productionmode == "VH":
+            if isinstance(self, ReweightingSampleWithPdf):
+                return ReweightingSampleWithPdf("ZH", self.hypothesis, self.production).xsec + ReweightingSampleWithPdf("WH", self.hypothesis, self.production).xsec
         if self.productionmode == "WplusH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWpH2e2mu
         if self.productionmode == "WminusH":

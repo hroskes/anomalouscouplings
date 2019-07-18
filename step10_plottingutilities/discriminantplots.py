@@ -11,7 +11,7 @@ from TemplateBuilder.TemplateBuilder.moremath import weightedaverage
 
 from helperstuff import config, style
 from helperstuff.enums import Category
-from helperstuff.samples import Sample
+from helperstuff.samples import ReweightingSampleWithPdf, Sample
 from helperstuff.templates import Template
 from helperstuff.utilities import cache_file, mkdir_p, PlotCopier, TFile
 
@@ -181,17 +181,14 @@ def gettrees(*productionmodesandhypotheses):
   ]
 
 
-@cache_file("weights_tmp.pkl")
-def getweights(*productionmodesandhypotheses):
-  print "Finding weights for", productionmodesandhypotheses
-  return sum(
-    (
-      Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg", *otherargs).weightname()
-      for production in config.productionsforcombine
-      for otherargs in productionmodesandhypotheses
-    ),
-    [],
-  )
+def getweights(*productionmodesandhypotheses, **kwargs):
+  scaleby = kwargs.get("scaleby", 1)
+  return [
+    "({}) * ({})".format(scaleby, weight)
+    for production in config.productionsforcombine
+    for otherargs in productionmodesandhypotheses
+    for weight in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg", *otherargs).weightname()
+  ]
 
 class HypothesisLine(object):
   def __init__(self, hypothesis, ffHlinecolor, ffHlinestyle, VVHlinecolor, VVHlinestyle, legendname):
@@ -203,10 +200,21 @@ class HypothesisLine(object):
     self.legendname = legendname
 
   def getweights(self, *otherargs):
-    return getweights(*(tuple(args) + (self.hypothesis,) for args in otherargs))
+    SMargs = [tuple(args) + ("0+",) for args in otherargs]
+    otherargs = [tuple(args) + (self.hypothesis,) for args in otherargs]
+    scaleby = uncertainties.nominal_value(
+      (
+        sum(ReweightingSampleWithPdf(production, *args).xsec for production in config.productionsforcombine for args in SMargs)
+      ) / (
+        sum(ReweightingSampleWithPdf(production, *args).xsec for production in config.productionsforcombine for args in otherargs)
+      )
+    )
+    print self.hypothesis, scaleby; raw_input()
+    return getweights(*otherargs, scaleby=scaleby)
 
   def gettrees(self, *otherargs):
-    return gettrees(*(tuple(args) + (self.hypothesis,) for args in otherargs))
+    otherargs = (tuple(args) + (self.hypothesis,) for args in otherargs)
+    return gettrees(*otherargs)
 
   @property
   def ffHweights(self):
@@ -287,7 +295,7 @@ class Plot(object):
       addonbottom=[ZXhistogram],
     )
 
-    histograms = [ZXhistogram, ZZhistogram]
+    histograms = [ZZhistogram, ZXhistogram]
 
     for hypothesis in hypothesislines:
       VVH = Histogram(
