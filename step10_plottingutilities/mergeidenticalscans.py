@@ -103,10 +103,12 @@ def mergeidenticalscans(outfile, *infiles):
   if "fa3" in newfais: newfais["fa3"] = abs(newfais["fa3"]) #because sign doesn't matter
   newn = len(newxs)
 
-  fmt = " ".join(["{:>10}"] * (2+len(newfais)))
-  print fmt.format("x", "y", *(k for k, v in sorted(newfais.iteritems())))
-  fmt = " ".join(["{:10.3g}"] * (2+len(newfais)))
-  for xyfais in itertools.izip_longest(newxs, newys, *(v for k, v in sorted(newfais.iteritems()))): print fmt.format(*xyfais)
+  indices = [{i for i, (xx, yy) in enumerate(itertools.izip(xxs, yyswithfais)) for x, (y, fais) in itertools.izip(xx, yy) if x == target and np.isclose(y, miny)} for target, miny in itertools.izip_longest(newxs, newys)]
+
+  fmt = " ".join(["{:>10}"] * (2+len(newfais))) + " {}"
+  print fmt.format("x", "y", *[k for k, v in sorted(newfais.iteritems())] + ["file indices"])
+  fmt = " ".join(["{:10.3g}"] * (2+len(newfais))) + " {}"
+  for xyfaisindices in itertools.izip_longest(newxs, newys, *[v for k, v in sorted(newfais.iteritems())] + [(", ".join(str(idx) for idx in _) for _ in indices)]): print fmt.format(*xyfaisindices)
 
   newg = ROOT.TGraph(newn, newxs, newys)
   faigs = {k: ROOT.TGraph(newn, newxs, faiys) for k, faiys in newfais.iteritems()}
@@ -157,7 +159,6 @@ def mergeidenticalscans(outfile, *infiles):
     c.SaveAs(outfile.replace("limit_", k+"_")+".pdf")
     c.SaveAs(outfile.replace("limit_", k+"_")+".C")
 
-  indices = [{i for i, (xx, yy) in enumerate(itertools.izip(xxs, yyswithfais)) for x, (y, fais) in itertools.izip(xx, yy) if x == target and np.isclose(y, miny)} for target, miny in itertools.izip_longest(newxs, newys)]
   indices.sort(key=lambda x: len(x))
   neededindices = set()
   for indicesatpoint in indices:
