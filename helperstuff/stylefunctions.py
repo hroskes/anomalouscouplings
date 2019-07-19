@@ -186,6 +186,9 @@ def applyaxesstyle(h):
     h.GetYaxis().SetTitleOffset(1.1)
     h.GetYaxis().SetTitleFont(42)
 
+    h.GetXaxis().CenterTitle()
+    h.GetYaxis().CenterTitle()
+
 @cache
 def makecuttext(text, x1=.71, y1=.84, x2=.92, y2=.92):
     pt = ROOT.TPaveText(x1, y1, x2, y2, "brNDC")
