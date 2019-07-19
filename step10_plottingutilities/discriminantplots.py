@@ -179,7 +179,6 @@ class Histogram(object):
 
 @cache
 def gettree(*args, **kwargs):
-  print args, kwargs
   return Tree(*args, **kwargs)
 
 @cache_file("trees_tmp.pkl")
@@ -268,7 +267,25 @@ class HypothesisLine(object):
     )
 
 class Plot(object):
-  def __init__(self, name, xtitle, ytitle, hypothesislines, xformula, cutformula, binning, legendargs, legendcolumns, saveasdir, ymax, plotcopier=ROOT, isDCP=None):
+  def __init__(self, **kwargs):
+    preliminarykwargs = kwargs.copy()
+
+    name = kwargs.pop("name")
+    xtitle = kwargs.pop("xtitle")
+    ytitle = kwargs.pop("ytitle")
+    hypothesislines = kwargs.pop("hypothesislines")
+    xformula = kwargs.pop("xformula")
+    cutformula = kwargs.pop("cutformula")
+    binning = kwargs.pop("binning")
+    legendargs = kwargs.pop("legendargs")
+    legendcolumns = kwargs.pop("legendcolumns")
+    saveasdir = kwargs.pop("saveasdir")
+    ymax = kwargs.pop("ymax")
+    plotcopier = kwargs.pop("plotcopier")
+    CMStext = kwargs.pop("CMStext")
+    isDCP = kwargs.pop("isDCP", None)
+    assert not kwargs, kwargs
+
     self.__name = name
     self.__xtitle = xtitle
     self.__ytitle = ytitle
@@ -372,6 +389,16 @@ class Plot(object):
 
     self.histograms = histograms
 
+    self.__CMStext = CMStext
+
+    if self.__CMStext != "Preliminary":
+      preliminarykwargs["CMStext"] = "Preliminary"
+      preliminarykwargs["saveasdir"] = os.path.join(saveasdir, "preliminary")
+      preliminarykwargs["name"] += "_preliminary"
+      self.__preliminary = type(self)(**preliminarykwargs)
+
+
+
   def makeplot(self):
     c = self.__plotcopier.TCanvas("c", "",  8, 30, 800, 800)
     style.applycanvasstyle(c)
@@ -395,9 +422,16 @@ class Plot(object):
     hstack.SetMaximum(self.__ymax)
     l.Draw()
 
+    lumi = sum(production.dataluminosity for production in config.productionsforcombine)
+
+    style.CMS(self.__CMStext, lumi)
+
     mkdir_p(self.__saveasdir)
     for ext in "png pdf root C".split():
       c.SaveAs(os.path.join(self.__saveasdir, self.__name+"."+ext))
+
+    if self.__CMStext != "Preliminary":
+      self.__preliminary.makeplot()
 
 def makeplots():
   with PlotCopier() as pc:
@@ -444,6 +478,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=500,
         plotcopier=pc,
+        CMStext="",
       ),
       Plot(
         name="D_0hplus_decay",
@@ -458,6 +493,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=500,
         plotcopier=pc,
+        CMStext="",
       ),
       Plot(
         name="D_L1_decay",
@@ -472,6 +508,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=500,
         plotcopier=pc,
+        CMStext="",
       ),
       Plot(
         name="D_L1Zg_decay",
@@ -486,6 +523,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=500,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_CP_decay",
@@ -501,6 +539,7 @@ def makeplots():
         ymax=500,
         plotcopier=pc,
         isDCP="dec",
+        CMStext="",
       ),
       Plot(
         name="D_int_decay",
@@ -515,6 +554,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=500,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_0minus_VBFdecay",
@@ -529,6 +569,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="",
       ),
       Plot(
         name="D_0hplus_VBFdecay",
@@ -543,6 +584,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_L1_VBFdecay",
@@ -557,6 +599,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_L1Zg_VBFdecay",
@@ -571,6 +614,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_CP_VBF",
@@ -586,6 +630,7 @@ def makeplots():
         ymax=50,
         plotcopier=pc,
         isDCP="prod",
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_int_VBF",
@@ -600,6 +645,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_0minus_HadVHdecay",
@@ -614,6 +660,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="",
       ),
       Plot(
         name="D_0hplus_HadVHdecay",
@@ -628,6 +675,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_L1_HadVHdecay",
@@ -642,6 +690,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_L1Zg_HadVHdecay",
@@ -656,6 +705,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_CP_HadVH",
@@ -671,6 +721,7 @@ def makeplots():
         ymax=50,
         plotcopier=pc,
         isDCP="prod",
+        CMStext="Supplementary",
       ),
       Plot(
         name="D_int_HadVH",
@@ -685,6 +736,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="Supplementary",
       ),
 
       Plot(
@@ -700,6 +752,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=500,
         plotcopier=pc,
+        CMStext="",
       ),
       Plot(
         name="D_bkg_VBFdecay",
@@ -714,6 +767,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="",
       ),
       Plot(
         name="D_bkg_HadVHdecay",
@@ -728,6 +782,7 @@ def makeplots():
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=50,
         plotcopier=pc,
+        CMStext="",
       ),
     ]
 
