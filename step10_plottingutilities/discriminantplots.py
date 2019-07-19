@@ -9,8 +9,8 @@ import ROOT
 
 from TemplateBuilder.TemplateBuilder.moremath import weightedaverage
 
-from helperstuff import config, style
-from helperstuff.enums import Category
+from helperstuff import config, stylefunctions as style
+from helperstuff.enums import Category, Hypothesis
 from helperstuff.samples import ReweightingSampleWithPdf, Sample
 from helperstuff.templates import Template
 from helperstuff.utilities import cache, cache_file, mkdir_p, PlotCopier, TFile
@@ -45,7 +45,7 @@ class Tree(object):
       nentries = t.GetEntries()
 
       for i, entry in enumerate(t, start=1):
-        if i % 10000 == 0 or i == nentries: print i, "/", nentries
+        if i % 10000 == 0 or i == nentries: print i, "/", nentries; break
         for hcp in self.__histogramcomponentpieces:
           hcp.fill()
 
@@ -55,13 +55,15 @@ class Tree(object):
     print
 
 class HistogramComponentPiece(object):
-  def __init__(self, name, tree, xformula, weightformula, cutformula, binning):
+  def __init__(self, name, tree, xformula, weightformula, cutformula, binning, mirror=False):
     tree.registerhistogramcomponentpiece(self)
     self.__name = name
     self.__tree = tree
     self.__xformula = xformula
     self.__weightformula = weightformula
     self.__cutformula = cutformula
+    self.__mirror = mirror
+    if mirror: assert len(binning) == 3
 
     self.__histogram = ROOT.TH1F(name, "", len(binning)-1, binning)
 
@@ -85,7 +87,16 @@ class HistogramComponentPiece(object):
 
   def fill(self):
     assert not self.__finalized
-    if self.__cuttreeformula.EvalInstance(): self.histogram.Fill(self.__xtreeformula.EvalInstance(), self.__weighttreeformula.EvalInstance())
+    if self.__cuttreeformula.EvalInstance():
+      x = self.__xtreeformula.EvalInstance()
+      wt = self.__weighttreeformula.EvalInstance()
+
+      if self.__mirror:
+        wt /= 2
+        if x == 0: x += 1e-6
+        self.histogram.Fill(-x, wt)
+
+      self.histogram.Fill(x, wt)
 
   @property
   def histogram(self): return self.__histogram
@@ -101,9 +112,9 @@ class HistogramComponentPiece(object):
     self.__tree.fillall()
 
 class HistogramComponent(object):
-  def __init__(self, name, trees, xformula, weightformula, cutformula, binning):
+  def __init__(self, name, trees, xformula, weightformula, cutformula, binning, mirror=False):
     self.__pieces = [
-      HistogramComponentPiece(name+"_"+str(i), tree, xformula, weightformula, cutformula, binning) for i, tree in enumerate(trees)
+      HistogramComponentPiece(name+"_"+str(i), tree, xformula, weightformula, cutformula, binning, mirror=mirror) for i, tree in enumerate(trees[:1])
     ]
     self.__histogram = self.__pieces[0].histogram.Clone(name)
     self.__finalized = False
@@ -128,11 +139,11 @@ class HistogramComponent(object):
     self.__histogram.SetBinError(x, value.s)
 
 class Histogram(object):
-  def __init__(self, name, trees, xformula, weightformulas, cutformula, binning, linecolor, linestyle, linewidth, fillcolor, fillstyle, legendtitle, legendlpf, addonbottom=[]):
+  def __init__(self, name, trees, xformula, weightformulas, cutformula, binning, linecolor, linestyle, linewidth, fillcolor, fillstyle, legendtitle, legendlpf, addonbottom=[], mirror=False):
     self.__components = [
       HistogramComponent(
-        name+"_"+str(i), componenttrees, xformula, weightformula, cutformula, binning
-      ) for i, (componenttrees, weightformula) in enumerate(itertools.izip_longest(trees, weightformulas))
+        name+"_"+str(i), componenttrees, xformula, weightformula, cutformula, binning, mirror=mirror
+      ) for i, (componenttrees, weightformula) in enumerate(itertools.izip_longest(trees[:1], weightformulas[:1]))
     ]
     self.__histogram = self.__components[0].histogram.Clone(name)
     self.__finalized = False
@@ -168,21 +179,30 @@ class Histogram(object):
 
 @cache
 def gettree(*args, **kwargs):
+  print args, kwargs
   return Tree(*args, **kwargs)
 
 @cache_file("trees_tmp.pkl")
-def gettrees(*productionmodesandhypotheses):
+def getfilenames(*productionmodesandhypotheses):
   print "Finding trees for", productionmodesandhypotheses
   return [
     [
-      gettree(
-        sample.withdiscriminantsfile(),
-        "candTree",
-      ) for sample in sorted(st, key=lambda x: x.withdiscriminantsfile())
+      sample.withdiscriminantsfile()
+      for sample in sorted(st, key=lambda x: x.withdiscriminantsfile())
     ]
     for production in config.productionsforcombine
     for otherargs in productionmodesandhypotheses
     for st in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg", *otherargs).reweightfrom()
+  ]
+
+def gettrees(*productionmodesandhypotheses):
+  return [
+    [
+      gettree(
+        filename,
+        "candTree",
+      ) for filename in lst
+    ] for lst in getfilenames(*productionmodesandhypotheses)
   ]
 
 
@@ -205,6 +225,10 @@ class HypothesisLine(object):
     self.VVHlinestyle = VVHlinestyle
     self.legendname = legendname
 
+  @property
+  def ispure(self):
+    return Hypothesis(self.hypothesis).ispure
+
   def getweights(self, *otherargs):
     SMargs = [tuple(args) + ("0+",) for args in otherargs]
     otherargs = [tuple(args) + (self.hypothesis,) for args in otherargs]
@@ -218,7 +242,8 @@ class HypothesisLine(object):
     return getweights(*otherargs, scaleby=scaleby)
 
   def gettrees(self, *otherargs):
-    otherargs = (tuple(args) + (self.hypothesis,) for args in otherargs)
+    hypothesis = self.hypothesis
+    otherargs = (tuple(args) + (hypothesis,) for args in otherargs)
     return gettrees(*otherargs)
 
   @property
@@ -243,7 +268,7 @@ class HypothesisLine(object):
     )
 
 class Plot(object):
-  def __init__(self, name, xtitle, ytitle, hypothesislines, xformula, cutformula, binning, legendargs, legendcolumns, saveasdir, ymax, plotcopier=ROOT):
+  def __init__(self, name, xtitle, ytitle, hypothesislines, xformula, cutformula, binning, legendargs, legendcolumns, saveasdir, ymax, plotcopier=ROOT, isDCP=None):
     self.__name = name
     self.__xtitle = xtitle
     self.__ytitle = ytitle
@@ -252,6 +277,8 @@ class Plot(object):
     self.__legendcolumns = legendcolumns
     self.__saveasdir = saveasdir
     self.__plotcopier = plotcopier
+
+    assert isDCP in (None, "prod", "dec")
 
     ZXtrees = gettrees(
       ("ZX",),
@@ -281,6 +308,7 @@ class Plot(object):
       legendtitle="Z+X",
       legendlpf="f",
       addonbottom=[],
+      mirror=isDCP is not None,
     )
 
     ZZhistogram = Histogram(
@@ -298,6 +326,7 @@ class Plot(object):
       legendtitle="ZZ",
       legendlpf="f",
       addonbottom=[ZXhistogram],
+      mirror=isDCP is not None,
     )
 
     histograms = [ZZhistogram, ZXhistogram]
@@ -317,7 +346,8 @@ class Plot(object):
         fillstyle=0,
         legendtitle="VBF+VH "+hypothesis.legendname,
         legendlpf="f",
-        addonbottom=[ZZhistogram]
+        addonbottom=[ZZhistogram],
+        mirror=isDCP is not None and hypothesis.ispure,
       )
 
       ffH = Histogram(
@@ -334,7 +364,8 @@ class Plot(object):
         fillstyle=0,
         legendtitle="Total "+hypothesis.legendname,
         legendlpf="l",
-        addonbottom=[VVH]
+        addonbottom=[VVH],
+        mirror=isDCP == "prod" or (isDCP == "dec" and hypothesis.ispure)
       )
 
       histograms += [ffH, VVH]
@@ -342,15 +373,15 @@ class Plot(object):
     self.histograms = histograms
 
   def makeplot(self):
-    c = self.__plotcopier.TCanvas()
+    c = self.__plotcopier.TCanvas("c", "",  8, 30, 800, 800)
+    style.applycanvasstyle(c)
 
     for h in self.histograms:
       h.makefinalhistogram()
 
     hstack = ROOT.THStack(self.__name, "")
     l = ROOT.TLegend(*self.__legendargs)
-    l.SetBorderSize(0)
-    l.SetFillStyle(0)
+    style.applylegendstyle(l)
     l.SetNColumns(self.__legendcolumns)
 
     for h in self.histograms:
@@ -358,6 +389,7 @@ class Plot(object):
       h.addtolegend(l)
 
     hstack.Draw("hist nostack")
+    style.applyaxesstyle(hstack)
     hstack.GetXaxis().SetTitle(self.__xtitle)
     hstack.GetYaxis().SetTitle(self.__ytitle)
     hstack.SetMaximum(self.__ymax)
@@ -387,6 +419,17 @@ def makeplots():
       HypothesisLine("L1",   ROOT.kMagenta+2, 1, ROOT.kMagenta+3, 2, "f_{#Lambda1}=1"),
       HypothesisLine("L1Zg", ROOT.kOrange+2,  1, ROOT.kOrange+2,  2, "f_{#Lambda1}^{Z#gamma}=1"),
     ]
+
+    a3mixdecay = HypothesisLine("fa30.5", ROOT.kAzure+6, 1, ROOT.kAzure+6,   1, "f_{a3}=0.5")
+    a3mixVBF = HypothesisLine("fa3VBF0.5", ROOT.kAzure+6, 1, ROOT.kAzure+6,   1, "f_{a3}^{VBF}=0.5")
+    a3mixVH = HypothesisLine("fa3VH0.5", ROOT.kAzure+6, 1, ROOT.kAzure+6,   1, "f_{a3}^{VH}=0.5")
+
+    a2mixdecay = HypothesisLine("fa2-0.5", ROOT.kSpring-2, 1, ROOT.kSpring-2,   1, "f_{a2}=-0.5")
+    a2mixVBF = HypothesisLine("fa2VBF0.5", ROOT.kSpring-2, 1, ROOT.kSpring-2,   1, "f_{a2}^{VBF}=0.5")
+    a2mixVH = HypothesisLine("fa2VH0.5", ROOT.kSpring-2, 1, ROOT.kSpring-2,   1, "f_{a2}^{VH}=0.5")
+
+    L1mixdecay = HypothesisLine("fL10.5", ROOT.kMagenta-4, 1, ROOT.kMagenta-4,   1, "f_{#Lambda1}=0.5")
+
     plots = [
       Plot(
         name="D_0minus_decay",
@@ -406,7 +449,7 @@ def makeplots():
         name="D_0hplus_decay",
         xtitle="D_{0h+}^{dec}",
         ytitle="Events / bin",
-        hypothesislines=purehypothesislines,
+        hypothesislines=purehypothesislines + [a2mixdecay],
         xformula="D_0hplus_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([0, .5, .7, 1]),
@@ -420,7 +463,7 @@ def makeplots():
         name="D_L1_decay",
         xtitle="D_{#Lambda1}^{dec}",
         ytitle="Events / bin",
-        hypothesislines=purehypothesislines,
+        hypothesislines=purehypothesislines + [L1mixdecay],
         xformula="D_L1_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([0, .55, .8, 1]),
@@ -445,10 +488,25 @@ def makeplots():
         plotcopier=pc,
       ),
       Plot(
+        name="D_CP_decay",
+        xtitle="D_{CP}^{dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines + [a3mixdecay],
+        xformula="D_CP_decay",
+        cutformula=untaggedenrichcut,
+        binning=np.array([-1, 0., 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=500,
+        plotcopier=pc,
+        isDCP="dec",
+      ),
+      Plot(
         name="D_int_decay",
         xtitle="D_{int}^{dec}",
         ytitle="Events / bin",
-        hypothesislines=purehypothesislines,
+        hypothesislines=purehypothesislines + [a2mixdecay],
         xformula="D_int_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([-1, .8, 1]),
@@ -515,10 +573,25 @@ def makeplots():
         plotcopier=pc,
       ),
       Plot(
-        name="D_int_VBFdecay",
+        name="D_CP_VBF",
+        xtitle="D_{CP}^{VBF}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines + [a3mixVBF],
+        xformula="D_CP_VBF",
+        cutformula=VBFtaggedenrichcut,
+        binning=np.array([-1, 0., 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+        isDCP="prod",
+      ),
+      Plot(
+        name="D_int_VBF",
         xtitle="D_{int}^{VBF}",
         ytitle="Events / bin",
-        hypothesislines=purehypothesislines,
+        hypothesislines=purehypothesislines + [a2mixVBF],
         xformula="D_int_VBF",
         cutformula=VBFtaggedenrichcut,
         binning=np.array([-1., 0, 1]),
@@ -585,10 +658,25 @@ def makeplots():
         plotcopier=pc,
       ),
       Plot(
+        name="D_CP_HadVH",
+        xtitle="D_{CP}^{VH}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines + [a3mixVH],
+        xformula="D_CP_HadVH",
+        cutformula=HadVHtaggedenrichcut,
+        binning=np.array([-1, 0., 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+        isDCP="prod",
+      ),
+      Plot(
         name="D_int_HadVH",
         xtitle="D_{int}^{VH}",
         ytitle="Events / bin",
-        hypothesislines=purehypothesislines,
+        hypothesislines=purehypothesislines + [a2mixVH],
         xformula="D_int_HadVH",
         cutformula=HadVHtaggedenrichcut,
         binning=np.array([-1, -.6, 1]),

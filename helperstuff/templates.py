@@ -14,7 +14,7 @@ import numpy
 import ROOT
 
 import config
-from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, prodonlyhypotheses, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
+from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
 from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile, withdiscriminantsfileisvalid
 
@@ -902,9 +902,6 @@ class Template(TemplateBase, MultiEnum):
         elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "VH", "ttH", "bbH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-            if self.reweightingsampleplus not in self.templatesfile.signalsamples():
-                print self.templatesfile.signalsamples()
-                raise ValueError("{} is not used to make templates for {} {}!\n{}".format(self.reweightingsampleplus, self.templategroup, self.analysis, args))
             if self.templategroup != str(self.productionmode).lower():
                 raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.templategroup, args))
 

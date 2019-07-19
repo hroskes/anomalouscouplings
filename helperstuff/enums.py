@@ -211,6 +211,12 @@ class Hypothesis(MyEnum):
                  EnumItem("fL1proddec-0.5"),
                  EnumItem("fL1Zgproddec-0.5"),
                  EnumItem("fa2dec-0.9", "fa2-0.9"),
+                 EnumItem("fa2VBF0.5", "fa2VBF+0.5"),
+                 EnumItem("fa3VBF0.5", "fa3VBF+0.5"),
+                 EnumItem("fL1VBF0.5", "fL1VBF+0.5"),
+                 EnumItem("fa2VH0.5", "fa2VH+0.5"),
+                 EnumItem("fa3VH0.5", "fa3VH+0.5"),
+                 EnumItem("fL1VH0.5", "fL1VH+0.5"),
                 )
     enumitems = enumitems + mixturepermutations_4d(enumitems)
 

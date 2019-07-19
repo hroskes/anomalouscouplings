@@ -900,169 +900,6 @@ class ReweightingSample(MultiEnum, SampleBase):
             return True
         raise self.ValueError("isdata")
 
-    def weightname(self):
-        if self.productionmode in ("ggH", "bbH"):
-            if self.hypothesis == "0+":
-                return "MC_weight_{}_g1".format(self.productionmode)
-            elif self.hypothesis == "a2":
-                return "MC_weight_{}_g2".format(self.productionmode)
-            elif self.hypothesis == "0-":
-                return "MC_weight_{}_g4".format(self.productionmode)
-            elif self.hypothesis == "L1":
-                return "MC_weight_{}_g1prime2".format(self.productionmode)
-            elif self.hypothesis == "L1Zg":
-                return "MC_weight_{}_ghzgs1prime2".format(self.productionmode)
-            elif self.hypothesis == "fa20.5":
-                return "MC_weight_{}_g1g2".format(self.productionmode)
-            elif self.hypothesis == "fa2dec-0.9":
-                return "MC_weight_{}_g1g2_minuspoint9".format(self.productionmode)
-            elif self.hypothesis == "fa30.5":
-                return "MC_weight_{}_g1g4".format(self.productionmode)
-            elif self.hypothesis == "fL10.5":
-                return "MC_weight_{}_g1g1prime2".format(self.productionmode)
-            elif self.hypothesis == "fL1Zg0.5":
-                return "MC_weight_{}_g1ghzgs1prime2".format(self.productionmode)
-            elif self.hypothesis == "fL10.5fL1Zg0.5":
-                return "MC_weight_{}_g1prime2ghzgs1prime2".format(self.productionmode)
-            for a in "fa3", "fa2", "fL1", "fL1Zg":
-                if self.hypothesis == "{}-0.5".format(a):
-                    return ReweightingSample(self.productionmode, "{}0.5".format(a)).weightname()+"_pi"
-            for a, b in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 2):
-                if self.hypothesis == a+"dec0.5"+b+"dec0.5":
-                    return "MC_weight_{}_{}{}".format(self.productionmode, Analysis(a).couplingname, Analysis(b).couplingname)
-
-        elif self.productionmode in ("VBF", "ZH", "WH", "WplusH", "WminusH"):
-            if self.hypothesis == "0+":
-                return "MC_weight_{}_g1".format(self.productionmode)
-            elif self.hypothesis == "a2":
-                return "MC_weight_{}_g2".format(self.productionmode)
-            elif self.hypothesis == "0-":
-                return "MC_weight_{}_g4".format(self.productionmode)
-            elif self.hypothesis == "L1":
-                return "MC_weight_{}_g1prime2".format(self.productionmode)
-            elif self.hypothesis == "L1Zg":
-                return "MC_weight_{}_ghzgs1prime2".format(self.productionmode)
-
-            elif self.hypothesis == "fa2dec0.5":
-                return "MC_weight_{}_g1g2_dec".format(self.productionmode)
-            elif self.hypothesis == "fa3dec0.5":
-                return "MC_weight_{}_g1g4_dec".format(self.productionmode)
-            elif self.hypothesis == "fL1dec0.5":
-                return "MC_weight_{}_g1g1prime2_dec".format(self.productionmode)
-            elif self.hypothesis == "fL1Zgdec0.5":
-                return "MC_weight_{}_g1ghzgs1prime2_dec".format(self.productionmode)
-
-            elif self.hypothesis == "fa2prod0.5":
-                return "MC_weight_{}_g1g2_prod".format(self.productionmode)
-            elif self.hypothesis == "fa3prod0.5":
-                return "MC_weight_{}_g1g4_prod".format(self.productionmode)
-            elif self.hypothesis == "fL1prod0.5":
-                return "MC_weight_{}_g1g1prime2_prod".format(self.productionmode)
-            elif self.hypothesis == "fL1Zgprod0.5":
-                return "MC_weight_{}_g1ghzgs1prime2_prod".format(self.productionmode)
-
-            elif self.hypothesis == "fa2proddec0.5":
-                return "MC_weight_{}_g1g2_proddec".format(self.productionmode)
-            elif self.hypothesis == "fa3proddec0.5":
-                return "MC_weight_{}_g1g4_proddec".format(self.productionmode)
-            elif self.hypothesis == "fL1proddec0.5":
-                return "MC_weight_{}_g1g1prime2_proddec".format(self.productionmode)
-            elif self.hypothesis == "fL1Zgproddec0.5":
-                return "MC_weight_{}_g1ghzgs1prime2_proddec".format(self.productionmode)
-
-            elif self.hypothesis == "fa2dec-0.9":
-                return "MC_weight_{}_g1g2_dec_minuspoint9".format(self.productionmode)
-
-            for a in "fa3", "fa2", "fL1", "fL1Zg":
-                for b in "prod", "dec", "proddec":
-                    if self.hypothesis == "{}{}-0.5".format(a, b):
-                        return ReweightingSample(self.productionmode, "{}{}0.5".format(a, b)).weightname()+"_pi"
-
-            for proddec in "prod", "dec", "proddec":
-                sign = "-" if proddec == "proddec" else ""
-                for a, b in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 2):
-                    hypsuffix = wtsuffix = ""
-                    if sign == "-": wtsuffix += "_pi"
-                    if self.hypothesis == a+proddec+"0.5"+b+proddec+sign+"0.5"+hypsuffix:
-                        return "MC_weight_{}_{}{}_{}".format(
-                          self.productionmode,
-                          Analysis(a).couplingname,
-                          Analysis(b).couplingname,
-                          proddec,
-                        ) + wtsuffix
-                    if self.hypothesis == a+proddec+"0.33"+b+proddec+sign+"0.33"+hypsuffix:
-                        return "MC_weight_{}_g1{}{}_{}".format(
-                          self.productionmode,
-                          Analysis(a).couplingname,
-                          Analysis(b).couplingname,
-                          proddec,
-                        ) + wtsuffix
-                for a, b, c in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 3):
-                    hypsuffix = wtsuffix = ""
-                    if sign == "-": wtsuffix += "_pi"
-                    if self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+sign+"0.33"+hypsuffix:
-                        return "MC_weight_{}_{}{}{}_{}".format(
-                          self.productionmode,
-                          Analysis(a).couplingname,
-                          Analysis(b).couplingname,
-                          Analysis(c).couplingname,
-                          proddec,
-                        ) + wtsuffix
-                    if proddec != "proddec": continue
-                    wtsuffix = hypsuffix
-                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+hypsuffix:
-                        return "MC_weight_{}_g1{}{}{}_{}".format(
-                          self.productionmode,
-                          Analysis(a).couplingname,
-                          Analysis(b).couplingname,
-                          Analysis(c).couplingname,
-                          proddec,
-                        ) + wtsuffix
-                for a, b, c, d in combinations(("fa3", "fa2", "fL1", "fL1Zg"), 4):
-                    suffix = ""
-                    if proddec != "proddec": continue
-                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25"+suffix:
-                        return "MC_weight_{}_{}{}{}{}_{}".format(
-                          self.productionmode,
-                          Analysis(a).couplingname,
-                          Analysis(b).couplingname,
-                          Analysis(c).couplingname,
-                          Analysis(d).couplingname,
-                          proddec,
-                        ) + suffix
-
-        elif self.productionmode in ("HJJ", "ttH"):
-            if self.productionmode == "HJJ":
-                if self.hffhypothesis == "Hff0+":
-                    result = "MC_weight_HJJ_ghg2"
-                elif self.hffhypothesis == "Hff0-":
-                    result = "MC_weight_HJJ_ghg4"
-                elif self.hffhypothesis == "fCP0.5":
-                    result = "MC_weight_HJJ_ghg2ghg4"
-            elif self.productionmode == "ttH":
-                if self.hffhypothesis == "Hff0+":
-                    result = "MC_weight_ttH_kappa"
-                elif self.hffhypothesis == "Hff0-":
-                    result = "MC_weight_ttH_kappatilde"
-                elif self.hffhypothesis == "fCP0.5":
-                    result = "MC_weight_ttH_kappakappatilde"
-            result += ReweightingSample("ggH", self.hypothesis).weightname().replace("MC_weight_ggH", "")
-            return result
-
-        elif self.productionmode == "tqH":
-            if self.hypothesis == "0+" and self.hffhypothesis == "Hff0+":
-                return "MC_weight_tqH_kappa_g1"
-
-        elif self.productionmode == "ggZZ":
-            return "MC_weight_ggZZ"
-        elif self.productionmode == "qqZZ":
-            return "MC_weight_qqZZ"
-        elif self.productionmode == "VBF bkg":
-            return "MC_weight_VBFbkg"
-        elif self.productionmode == "ZX":
-            return "MC_weight_ZX"
-        raise self.ValueError("weightname")
-
     def TDirectoryname(self):
         if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH") or self.productionmode == "ZX" and not config.usedata:
             return "ZZTree"
@@ -1133,6 +970,12 @@ class ReweightingSample(MultiEnum, SampleBase):
                         return 0
 
             if self.hypothesis == "fa2dec-0.9": return 1
+            if self.hypothesis == "fa3VBF0.5": return 1
+            if self.hypothesis == "fa3VH0.5": return 1
+            if self.hypothesis == "fa2VBF0.5": return 1
+            if self.hypothesis == "fa2VH0.5": return 1
+            if self.hypothesis == "fL1VBF0.5": return 1
+            if self.hypothesis == "fL1VH0.5": return 1
 
         raise self.ValueError("g1")
 
@@ -1189,6 +1032,12 @@ class ReweightingSample(MultiEnum, SampleBase):
                         return 0
 
             if self.hypothesis == "fa2dec-0.9": return -constants.g2HZZ * 3
+            if self.hypothesis == "fa3VBF0.5": return 0
+            if self.hypothesis == "fa3VH0.5": return 0
+            if self.hypothesis == "fa2VBF0.5": return constants.g2VBF
+            if self.hypothesis == "fa2VH0.5": return constants.g2VH
+            if self.hypothesis == "fL1VBF0.5": return 0
+            if self.hypothesis == "fL1VH0.5": return 0
 
         raise self.ValueError("g2")
 
@@ -1246,6 +1095,13 @@ class ReweightingSample(MultiEnum, SampleBase):
 
             if self.hypothesis == "fa2dec-0.9": return 0
 
+            if self.hypothesis == "fa3VBF0.5": return constants.g4VBF
+            if self.hypothesis == "fa3VH0.5": return constants.g4VH
+            if self.hypothesis == "fa2VBF0.5": return 0
+            if self.hypothesis == "fa2VH0.5": return 0
+            if self.hypothesis == "fL1VBF0.5": return 0
+            if self.hypothesis == "fL1VH0.5": return 0
+
         raise self.ValueError("g4")
 
     @property
@@ -1302,6 +1158,13 @@ class ReweightingSample(MultiEnum, SampleBase):
 
             if self.hypothesis == "fa2dec-0.9": return 0
 
+            if self.hypothesis == "fa3VBF0.5": return 0
+            if self.hypothesis == "fa3VH0.5": return 0
+            if self.hypothesis == "fa2VBF0.5": return 0
+            if self.hypothesis == "fa2VH0.5": return 0
+            if self.hypothesis == "fL1VBF0.5": return constants.g1prime2VBF
+            if self.hypothesis == "fL1VH0.5": return constants.g1prime2VH
+
         raise self.ValueError("g1prime2")
 
     @property
@@ -1357,6 +1220,13 @@ class ReweightingSample(MultiEnum, SampleBase):
                         return 0
 
             if self.hypothesis == "fa2dec-0.9": return 0
+
+            if self.hypothesis == "fa3VBF0.5": return 0
+            if self.hypothesis == "fa3VH0.5": return 0
+            if self.hypothesis == "fa2VBF0.5": return 0
+            if self.hypothesis == "fa2VH0.5": return 0
+            if self.hypothesis == "fL1VBF0.5": return 0
+            if self.hypothesis == "fL1VH0.5": return 0
 
         raise self.ValueError("ghzgs1prime2")
 
