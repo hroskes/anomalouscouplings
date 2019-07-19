@@ -45,7 +45,7 @@ class Tree(object):
       nentries = t.GetEntries()
 
       for i, entry in enumerate(t, start=1):
-        if i % 10000 == 0 or i == nentries: print i, "/", nentries; break
+        if i % 10000 == 0 or i == nentries: print i, "/", nentries
         for hcp in self.__histogramcomponentpieces:
           hcp.fill()
 
@@ -114,7 +114,7 @@ class HistogramComponentPiece(object):
 class HistogramComponent(object):
   def __init__(self, name, trees, xformula, weightformula, cutformula, binning, mirror=False):
     self.__pieces = [
-      HistogramComponentPiece(name+"_"+str(i), tree, xformula, weightformula, cutformula, binning, mirror=mirror) for i, tree in enumerate(trees[:1])
+      HistogramComponentPiece(name+"_"+str(i), tree, xformula, weightformula, cutformula, binning, mirror=mirror) for i, tree in enumerate(trees)
     ]
     self.__histogram = self.__pieces[0].histogram.Clone(name)
     self.__finalized = False
@@ -143,7 +143,7 @@ class Histogram(object):
     self.__components = [
       HistogramComponent(
         name+"_"+str(i), componenttrees, xformula, weightformula, cutformula, binning, mirror=mirror
-      ) for i, (componenttrees, weightformula) in enumerate(itertools.izip_longest(trees[:1], weightformulas[:1]))
+      ) for i, (componenttrees, weightformula) in enumerate(itertools.izip_longest(trees, weightformulas))
     ]
     self.__histogram = self.__components[0].histogram.Clone(name)
     self.__finalized = False
@@ -428,7 +428,7 @@ class Plot(object):
 
     style.CMS(self.__CMStext, lumi)
 
-    categorytext = ROOT.TPaveText(.75, .5, .95, .6, "brNDC")
+    categorytext = ROOT.TPaveText(.71, .5, .91, .6, "brNDC")
     categorytext.SetBorderSize(0)
     categorytext.SetTextAlign(12)
     categorytext.SetTextSize(0.045)
@@ -453,27 +453,27 @@ def makeplots():
     VBFtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VBFtagged").idnumbers) + ")"
     HadVHtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VHHadrtagged").idnumbers) + ")"
 
-    untaggedenrichcut = masscut + " && D_bkg > 0.5"
-    VBFtaggedenrichcut = masscut + " && D_bkg_VBFdecay > 0.5"
-    HadVHtaggedenrichcut = masscut + " && D_bkg_HadVHdecay > 0.5"
+    untaggedenrichcut = masscut + " && D_bkg > 0.7"
+    VBFtaggedenrichcut = masscut + " && D_bkg_VBFdecay > 0.2"
+    HadVHtaggedenrichcut = masscut + " && D_bkg_HadVHdecay > 0.2"
 
     purehypothesislines = [
       HypothesisLine("0+",   2,               1, 2,               2, "SM"),
       HypothesisLine("0-",   4,               1, 4,               2, "f_{a3}=1"),
       HypothesisLine("a2",   ROOT.kGreen+3,   1, ROOT.kGreen+3,   2, "f_{a2}=1"),
-      HypothesisLine("L1",   ROOT.kMagenta+2, 1, ROOT.kMagenta+3, 2, "f_{#Lambda1}=1"),
+      HypothesisLine("L1",   ROOT.kMagenta+3, 1, ROOT.kMagenta+3, 2, "f_{#Lambda1}=1"),
       HypothesisLine("L1Zg", ROOT.kOrange+2,  1, ROOT.kOrange+2,  2, "f_{#Lambda1}^{Z#gamma}=1"),
     ]
 
-    a3mixdecay = HypothesisLine("fa30.5", ROOT.kAzure+6, 1, ROOT.kAzure+6,   1, "f_{a3}=0.5")
-    a3mixVBF = HypothesisLine("fa3VBF0.5", ROOT.kAzure+6, 1, ROOT.kAzure+6,   1, "f_{a3}^{VBF}=0.5")
-    a3mixVH = HypothesisLine("fa3VH0.5", ROOT.kAzure+6, 1, ROOT.kAzure+6,   1, "f_{a3}^{VH}=0.5")
+    a3mixdecay = HypothesisLine("fa30.5",  ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}=0.5")
+    a3mixVBF = HypothesisLine("fa3VBF0.5", ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}^{VBF}=0.5")
+    a3mixVH = HypothesisLine("fa3VH0.5",   ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}^{VH}=0.5")
 
-    a2mixdecay = HypothesisLine("fa2-0.5", ROOT.kSpring-2, 1, ROOT.kSpring-2,   1, "f_{a2}=-0.5")
-    a2mixVBF = HypothesisLine("fa2VBF0.5", ROOT.kSpring-2, 1, ROOT.kSpring-2,   1, "f_{a2}^{VBF}=0.5")
-    a2mixVH = HypothesisLine("fa2VH0.5", ROOT.kSpring-2, 1, ROOT.kSpring-2,   1, "f_{a2}^{VH}=0.5")
+    a2mixdecay = HypothesisLine("fa2-0.5", ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}=#minus0.5")
+    a2mixVBF = HypothesisLine("fa2VBF0.5", ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}^{VBF}=0.5")
+    a2mixVH = HypothesisLine("fa2VH0.5",   ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}^{VH}=0.5")
 
-    L1mixdecay = HypothesisLine("fL10.5", ROOT.kMagenta-4, 1, ROOT.kMagenta-4,   1, "f_{#Lambda1}=0.5")
+    L1mixdecay = HypothesisLine("fL10.5", ROOT.kMagenta-4, 1, ROOT.kMagenta-4, 2, "f_{#Lambda1}=0.5")
 
     plots = [
       Plot(
