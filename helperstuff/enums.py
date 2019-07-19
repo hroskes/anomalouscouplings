@@ -349,37 +349,37 @@ class ProductionMode(MyEnum):
                 yield Sample(self, h, hff, production)
 
     @property
-    def QCDfacsystematicname(self):
-      if self == "ggH": return "QCDscale_fac_ggH"
-      if self == "qqH": return "QCDscale_fac_qqH"
-      if self in ("ZH", "WH", "VH"): return "QCDscale_fac_VH"
-      if self == "ttH": return "QCDscale_fac_ttH"
-      if self == "bbH": return "QCDscale_fac_bbH"
-      if self == "qqZZ": return "QCDscale_fac_VV"
+    def QCDmuFsystematicname(self):
+      if self == "ggH": return "QCDscale_muF_ggH"
+      if self == "qqH": return "QCDscale_muF_qqH"
+      if self in ("ZH", "WH", "VH"): return "QCDscale_muF_VH"
+      if self == "ttH": return "QCDscale_muF_ttH"
+      if self == "bbH": return "QCDscale_muF_bbH"
+      if self == "qqZZ": return "QCDscale_muF_VV"
       return None
 
     @property
-    def QCDrensystematicname(self):
-      if self == "ggH": return "QCDscale_ren_ggH"
-      if self == "qqH": return "QCDscale_ren_qqH"
-      if self in ("ZH", "WH", "VH"): return "QCDscale_ren_VH"
-      if self == "ttH": return "QCDscale_ren_ttH"
-      if self == "bbH": return "QCDscale_ren_bbH"
-      if self == "qqZZ": return "QCDscale_ren_VV"
+    def QCDmuRsystematicname(self):
+      if self == "ggH": return "QCDscale_muR_ggH"
+      if self == "qqH": return "QCDscale_muR_qqH"
+      if self in ("ZH", "WH", "VH"): return "QCDscale_muR_VH"
+      if self == "ttH": return "QCDscale_muR_ttH"
+      if self == "bbH": return "QCDscale_muR_bbH"
+      if self == "qqZZ": return "QCDscale_muR_VV"
       return None
 
     @property
     def pdfvariationsystematicname(self):
-      if self in ("ggH", "ttH", "bbH"): return "pdf_variation_Higgs_gg"
-      if self in ("qqH", "ZH", "WH", "VH"): return "pdf_variation_Higgs_qqbar"
-      if self == "qqZZ": return "pdf_variation_qqbar"
+      if self in ("ggH", "ttH", "bbH"): return "pdf_Higgs_gg"
+      if self in ("qqH", "ZH", "WH", "VH"): return "pdf_Higgs_qqbar"
+      if self == "qqZZ": return "pdf_qqbar"
       return None
 
     @property
     def pdfasmzsystematicname(self):
-      if self in ("ggH", "ttH", "bbH"): return "pdf_asmz_Higgs_gg"
-      if self in ("qqH", "ZH", "WH", "VH"): return "pdf_asmz_Higgs_qqbar"
-      if self == "qqZZ": return "pdf_asmz_qqbar"
+      if self in ("ggH", "ttH", "bbH"): return "pdf_As_Higgs_gg"
+      if self in ("qqH", "ZH", "WH", "VH"): return "pdf_As_Higgs_qqbar"
+      if self == "qqZZ": return "pdf_As_qqbar"
       return None
 
     def workspaceshapesystematics(self, category):

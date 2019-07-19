@@ -141,73 +141,51 @@ def writeyields(productionmodelist=None, productionlist=None):
 
           yv.value = yvvalue
 
-        if production.GEN or deprecate(True, 2019, 7, 18): continue
+        if production.GEN: continue
 
-        #same for all categories and channels
         for category, channel in itertools.product(categories, channels):
           if analysis.isdecayonly and category != "Untagged": continue
 
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, "BRhiggs_hzz4l", production)
-          if productionmode.issignal:
-            syst.value = 1.02
-          else:
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, "hzz_br", production)
+          if productionmode.isbkg:
             syst.value = None
+          else:
+            syst.value = 1.02
 
           syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_e", production)
-          if productionmode == "ZX" or channel == "4mu":
+          if productionmode == "ZX":
             syst.value = None
-          elif channel == "2e2mu":
-            syst.value = 0.96, 1.039
-          elif channel == "4e":
-            syst.value = 0.914, 1.082
+          else:
 
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_m", production)
-          if productionmode == "ZX" or channel == "4e":
-            syst.value = None
-          elif channel == "2e2mu":
-            syst.value = 1.025
-          elif channel == "4mu":
-            syst.value = 0.953, 1.046
-
-          for systname in "lumi_13TeV_2016", "lumi_13TeV_2017":
+          for systname in "lumi_13TeV_2016", "lumi_13TeV_2017", "lumi_13TeV_2018":
             syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
             if productionmode == "ZX" or str(production.year) not in systname:
               syst.value = None
-            elif production.year == 2016:
-              syst.value = 1.026
-            elif production.year == 2017:
-              syst.value = 1.023
-
-          for systname in "CMS_hzz4l_zz2e2mu_zjets", "CMS_hzz4l_zz4e_zjets", "CMS_hzz4l_zz4mu_zjets":
-            syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-            if productionmode != "ZX" or str(channel) not in systname:
-              syst.value = None
-            elif production.year == 2016:
-              syst.value = {
-                (Channel("2e2mu"), Category(    "Untagged")): (0.746, 1.340),
-                (Channel("2e2mu"), Category(   "VBFtagged")): (0.746, 1.341),
-                (Channel("2e2mu"), Category("VHHadrtagged")): (0.746, 1.341),
-                (Channel("4e"   ), Category(    "Untagged")): (0.758, 1.320),
-                (Channel("4e"   ), Category(   "VBFtagged")): (0.758, 1.321),
-                (Channel("4e"   ), Category("VHHadrtagged")): (0.758, 1.321),
-                (Channel(  "4mu"), Category(    "Untagged")): (0.741, 1.350),
-                (Channel(  "4mu"), Category(   "VBFtagged")): (0.740, 1.351),
-                (Channel(  "4mu"), Category("VHHadrtagged")): (0.740, 1.352),
-              }[channel, category]
-            elif production.year == 2017:
-              syst.value = {
-                (Channel("2e2mu"), Category(    "Untagged")): (0.769, 1.300),
-                (Channel("2e2mu"), Category(   "VBFtagged")): (0.768, 1.301),
-                (Channel("2e2mu"), Category("VHHadrtagged")): (0.768, 1.301),
-                (Channel("4e"   ), Category(    "Untagged")): (0.769, 1.300),
-                (Channel("4e"   ), Category(   "VBFtagged")): (0.768, 1.301),
-                (Channel("4e"   ), Category("VHHadrtagged")): (0.769, 1.301),
-                (Channel(  "4mu"), Category(    "Untagged")): (0.769, 1.300),
-                (Channel(  "4mu"), Category(   "VBFtagged")): (0.768, 1.302),
-                (Channel(  "4mu"), Category("VHHadrtagged")): (0.768, 1.302),
-              }[channel, category]
             else:
-              assert False
+              syst.value = {
+                2016: (1.026, 0.974),
+                2017: (1.023, 0.977),
+                2018: (1.025, 0.975),
+              }[yr, chan]
+
+          for yr in 2016, 2017, 2018:
+            for chan in "2e2mu", "4e", "4mu":
+              systname = "zjet_{}_{}".format(chan, yr).replace("_2016", "")
+              syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
+              if productionmode != "ZX" or chan != channel or yr != production.year:
+                syst.value = None
+              else:
+                syst.value = {
+                  (2016, "2e2mu"): (1.152, 0.868),
+                  (2016, "4e"):    (1.314, 0.728),
+                  (2016, "4mu"):   (1.104, 0.899),
+                  (2017, "2e2mu"): (1.330, 0.670),
+                  (2017, "4e"):    (1.380, 0.640),
+                  (2017, "4mu"):   (1.320, 0.680),
+                  (2018, "2e2mu"): (1.300, 0.700),
+                  (2018, "4e"):    (1.370, 0.630),
+                  (2018, "4mu"):   (1.240, 0.760),
+                }[yr, chan]
 
         #same for all channels
         for category in categories:
@@ -238,8 +216,8 @@ def writeyields(productionmodelist=None, productionlist=None):
           for p in "ggH", "VBF", "ZH", "WH", "ttH", "qqZZ", "bbH":
             p = ProductionMode(p)
             for systname, weight in (
-                                     (p.QCDfacsystematicname, "muF"),
-                                     (p.QCDrensystematicname, "muR"),
+                                     (p.QCDmuFsystematicname, "muF"),
+                                     (p.QCDmuRsystematicname, "muR"),
                                      (p.pdfvariationsystematicname, "PDF"),
                                      (p.pdfasmzsystematicname, "alphaS"),
                                     ):
@@ -263,33 +241,12 @@ def writeyields(productionmodelist=None, productionlist=None):
                   if addfirsts and addseconds:
                     first = sum(_1*_2 for _1, _2 in addfirsts) / sum(_1 for _1, _2 in addfirsts)
                     second = sum(_1*_2 for _1, _2 in addseconds) / sum(_1 for _1, _2 in addseconds)
-                    #maxfirst = max(abs(log(_)) for _ in addfirsts)
-                    #maxsecond = max(abs(log(_)) for _ in addseconds)
-                    #addfirsts = [_ for _ in addfirsts if abs(log(_)) >= maxfirst/5]
-                    #addseconds = [_ for _ in addseconds if abs(log(_)) >= maxsecond/5]
-                    #assert len({sgn(log(_)) for _ in addfirsts}) <= 1, addfirsts
-                    #assert len({sgn(log(_)) for _ in addseconds}) <= 1, addseconds
-                    #first = exp(sqrt(sum(log(_)**2 for _ in addfirsts)))
-                    #if addfirsts[0] < 1: first = 1/first
-                    #second = exp(sqrt(sum(log(_)**2 for _ in addseconds)))
-                    #if addseconds[0] < 1: second = 1/second
-                    #print addfirsts, first
                   else:
                     first = second = 1
                   syst.value = first, second
-              elif systname in (productionmode.QCDfacsystematicname, productionmode.QCDrensystematicname, productionmode.pdfvariationsystematicname, productionmode.pdfasmzsystematicname):
-                if productionmode == "bbH":
-                  dn, up = {
-                    "QCDscale_ren_bbH": (1.128, 0.837),
-                    "QCDscale_fac_bbH": (1.078, 0.96),
-                    "pdf_asmz_Higgs_gg": (0.945, 1.075),
-                    "pdf_variation_Higgs_gg": (1.113, 0.922),
-                  }[systname]
-                elif productionmode == "ttH" and systname == "pdf_asmz_Higgs_gg":
-                  dn, up = 0.98, 1.02
-                else:
-                  up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal
-                  dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal
+              elif systname in (productionmode.QCDmuFsystematicname, productionmode.QCDmuRsystematicname, productionmode.pdfvariationsystematicname, productionmode.pdfasmzsystematicname):
+                up = sum(result[tosample, categorization, AlternateWeight(weight+"Up"), category] for tosample in samples) / nominal
+                dn = sum(result[tosample, categorization, AlternateWeight(weight+"Dn"), category] for tosample in samples) / nominal
                 for channel in channels:
                   syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
                   syst.value = (dn, up)
