@@ -23,7 +23,6 @@ from helperstuff.utilities import cache, cd, mkdtemp, PlotCopier, tfiles
 from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
-preliminary = False
 setmax = 1
 saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_CMSfirsttry")
 def getplotname(analysis):
@@ -190,11 +189,11 @@ def PRL_loglinear(**kwargs):
             marker.SetMarkerSize(3)
             if marker.GetY()[0] > 0:
                 mg.Add(marker, "P")
-        mglog = mg.Clone()
+        mglog = mg.Clone(mg.GetName()+"_log")
         if markerposition and marker.GetY()[0] <= 0:
             mg.Add(marker, "P")
-        mgs = [mg, mg.Clone(), mg.Clone()]
-        mglogs = [mglog, mglog.Clone(), mglog.Clone()]
+        mgs = [mg, mg.Clone(mg.GetName()+"_1"), mg.Clone(mg.GetName()+"_2")]
+        mglogs = [mglog, mglog.Clone(mglog.GetName()+"_1"), mglog.Clone(mglog.GetName()+"_2")]
         for logpad, mglog in izip(logpads, mglogs):
             logpad.cd()
             logpad.SetLogy()
@@ -242,11 +241,12 @@ def PRL_loglinear(**kwargs):
         yaxislabel(folders[0].ytitle).Draw()
 
         try:
-            os.makedirs(saveasdir)
+            os.makedirs(os.path.join(saveasdir, "preliminary"))
         except OSError:
             pass
         plotname = getplotname(analysis)
         assert ".root" in plotname
+
         if saveas is not None:
             c.SaveAs(saveas)
         else:
@@ -261,31 +261,21 @@ def PRL_loglinear(**kwargs):
                 f.write("\n")
                 f.write(subprocess.check_output(["git", "diff"]))
 
-def animations(**kwargs):
-    from projections import Projections
-    forWIN = kwargs.get("forWIN", False)
-    for analysis in analyses:
-        with mkdtemp() as tmpdir:
-            convertcommand = ["gm", "convert", "-loop", "0"]
-            animation = Projections.animationstepsforniceplots(analysis)
-            lastdelay = None
-            for i, step in enumerate(animation):
-                if step.delay != lastdelay:
-                    convertcommand += ["-delay", str(step.delay)]
-                convertcommand += ["-trim", os.path.join(tmpdir, "{}.pdf".format(i))]
-                PRL_loglinear(
-                              analysis=analysis,
-                              saveas=os.path.join(tmpdir, "{}.pdf".format(i)),
-                              markerposition=(step.fai_decay, step.deltaNLL),
-                              **kwargs
-                             )
+        style.CMS("Preliminary", x1=0.12, x2=1.025, y1=.85, y2=.93, drawCMS=False, CMStextsize=.06, extratextsize=.039)
 
-            finalplot = os.path.join(saveasdir, getplotname(analysis).replace("root", "gif"))
-            convertcommand.append(finalplot)
-            #http://stackoverflow.com/a/38792806/5228524
-            #subprocess.check_call(convertcommand)
-            os.system(" ".join(pipes.quote(_) for _ in convertcommand))
-
+        if saveas is not None:
+            assert false
+        else:
+            for ext in "png eps root pdf".split():
+                c.SaveAs(os.path.join(saveasdir, "preliminary", replaceByMap(plotname.replace("root", ext), repmap)))
+            with plotcopier.open(os.path.join(saveasdir, "preliminary", replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
+                f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
+                f.write("\n\n\n\n\n\ngit info:\n\n")
+                f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
+                f.write("\n")
+                f.write(subprocess.check_output(["git", "status"]))
+                f.write("\n")
+                f.write(subprocess.check_output(["git", "diff"]))
 
 @cache
 def yaxislabel(label, textsize=.06):
@@ -309,7 +299,9 @@ if __name__ == "__main__":
         else:
             args.append(arg)
     function = PRL_loglinear
-    assert "analysis" not in kwargs
     with PlotCopier() as plotcopier:
-        for kwargs["analysis"] in "fa3", "fa2", "fL1", "fL1Zg":
+        if "analysis" not in kwargs:
+            for kwargs["analysis"] in "fa3", "fa2", "fL1", "fL1Zg":
+                function(*args, **kwargs)
+        else:
             function(*args, **kwargs)
