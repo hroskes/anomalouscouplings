@@ -13,7 +13,7 @@ from helperstuff import config, style
 from helperstuff.enums import Category
 from helperstuff.samples import ReweightingSampleWithPdf, Sample
 from helperstuff.templates import Template
-from helperstuff.utilities import cache_file, mkdir_p, PlotCopier, TFile
+from helperstuff.utilities import cache, cache_file, mkdir_p, PlotCopier, TFile
 
 class Tree(object):
   def __init__(self, filename, treename):
@@ -23,7 +23,7 @@ class Tree(object):
     self.__filled = False
 
   def __repr__(self):
-    return "Tree({filename!r}, {treename!r})".format(filename=self.__filename, treename=self.__treename)
+    return "gettree({filename!r}, {treename!r})".format(filename=self.__filename, treename=self.__treename)
   def __str__(self):
     return self.__filename+":"+self.__treename
 
@@ -45,7 +45,7 @@ class Tree(object):
       nentries = t.GetEntries()
 
       for i, entry in enumerate(t, start=1):
-        if i % 10000 == 0 or i == nentries: print i, "/", nentries; break
+        if i % 10000 == 0 or i == nentries: print i, "/", nentries
         for hcp in self.__histogramcomponentpieces:
           hcp.fill()
 
@@ -103,7 +103,7 @@ class HistogramComponentPiece(object):
 class HistogramComponent(object):
   def __init__(self, name, trees, xformula, weightformula, cutformula, binning):
     self.__pieces = [
-      HistogramComponentPiece(name+"_"+str(i), tree, xformula, weightformula, cutformula, binning) for i, tree in enumerate(trees[:1])
+      HistogramComponentPiece(name+"_"+str(i), tree, xformula, weightformula, cutformula, binning) for i, tree in enumerate(trees)
     ]
     self.__histogram = self.__pieces[0].histogram.Clone(name)
     self.__finalized = False
@@ -118,7 +118,8 @@ class HistogramComponent(object):
     for x in xrange(1, self.__histogram.GetNbinsX()+1):
       piececontents = [piece.GetBinContentError(x) for piece in self.__pieces]
       piececontents = [piececontent for piececontent in piececontents if piececontent.n or piececontent.s]
-      self.SetBinContentError(x, weightedaverage(piececontents))
+      if piececontents:
+        self.SetBinContentError(x, weightedaverage(piececontents))
     self.__finalized = True
 
   def SetBinContentError(self, x, value):
@@ -131,7 +132,7 @@ class Histogram(object):
     self.__components = [
       HistogramComponent(
         name+"_"+str(i), componenttrees, xformula, weightformula, cutformula, binning
-      ) for i, (componenttrees, weightformula) in enumerate(itertools.izip_longest(trees[1:], weightformulas[1:]))
+      ) for i, (componenttrees, weightformula) in enumerate(itertools.izip_longest(trees, weightformulas))
     ]
     self.__histogram = self.__components[0].histogram.Clone(name)
     self.__finalized = False
@@ -165,12 +166,16 @@ class Histogram(object):
   def addtolegend(self, legend):
     return legend.AddEntry(self.histogram, self.__legendtitle, self.__legendlpf)
 
+@cache
+def gettree(*args, **kwargs):
+  return Tree(*args, **kwargs)
+
 @cache_file("trees_tmp.pkl")
 def gettrees(*productionmodesandhypotheses):
   print "Finding trees for", productionmodesandhypotheses
   return [
     [
-      Tree(
+      gettree(
         sample.withdiscriminantsfile(),
         "candTree",
       ) for sample in sorted(st, key=lambda x: x.withdiscriminantsfile())
@@ -182,9 +187,10 @@ def gettrees(*productionmodesandhypotheses):
 
 
 def getweights(*productionmodesandhypotheses, **kwargs):
-  scaleby = kwargs.get("scaleby", 1)
+  scaleby = kwargs.pop("scaleby", 1)
+  assert not kwargs
   return [
-    "({}) * ({})".format(scaleby, weight)
+    "({}) * ({}) * ({})".format(production.dataluminosity if "ZX" not in otherargs else 1, scaleby, weight)
     for production in config.productionsforcombine
     for otherargs in productionmodesandhypotheses
     for weight in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg", *otherargs).weightname()
@@ -209,7 +215,6 @@ class HypothesisLine(object):
         sum(ReweightingSampleWithPdf(production, *args).xsec for production in config.productionsforcombine for args in otherargs)
       )
     )
-    print self.hypothesis, scaleby; raw_input()
     return getweights(*otherargs, scaleby=scaleby)
 
   def gettrees(self, *otherargs):
@@ -274,7 +279,7 @@ class Plot(object):
       fillcolor=ROOT.TColor.GetColor("#669966"),
       fillstyle=1001,
       legendtitle="Z+X",
-      legendlpf="lf",
+      legendlpf="f",
       addonbottom=[],
     )
 
@@ -291,7 +296,7 @@ class Plot(object):
       fillcolor=ROOT.kAzure-9,
       fillstyle=1001,
       legendtitle="ZZ",
-      legendlpf="lf",
+      legendlpf="f",
       addonbottom=[ZXhistogram],
     )
 
@@ -307,11 +312,11 @@ class Plot(object):
         binning,
         linecolor=hypothesis.VVHlinecolor,
         linestyle=hypothesis.VVHlinestyle,
-        linewidth=4,
+        linewidth=2,
         fillcolor=0,
         fillstyle=0,
         legendtitle="VBF+VH "+hypothesis.legendname,
-        legendlpf="lf",
+        legendlpf="f",
         addonbottom=[ZZhistogram]
       )
 
@@ -366,15 +371,21 @@ def makeplots():
   with PlotCopier() as pc:
     masscut = "ZZMass>{} && ZZMass<{}".format(config.m4lmin, config.m4lmax)
     categoryname = "category_0P_or_0M_or_a2_or_L1_or_L1Zg"
+
     untaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("Untagged").idnumbers) + ")"
     VBFtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VBFtagged").idnumbers) + ")"
-    VHHadrtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VHHadrtagged").idnumbers) + ")"
+    HadVHtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VHHadrtagged").idnumbers) + ")"
+
+    untaggedenrichcut = masscut + " && D_bkg > 0.5"
+    VBFtaggedenrichcut = masscut + " && D_bkg_VBFdecay > 0.5"
+    HadVHtaggedenrichcut = masscut + " && D_bkg_HadVHdecay > 0.5"
+
     purehypothesislines = [
-      HypothesisLine("0+",   ROOT.kRed-7, 1, ROOT.kBlue-7, 1, "SM"),
-      HypothesisLine("0-",   ROOT.kRed+0, 2, ROOT.kBlue+0, 2, "f_{a3}=1"),
-      HypothesisLine("a2",   ROOT.kRed+1, 2, ROOT.kBlue+2, 2, "f_{a2}=1"),
-      HypothesisLine("L1",   ROOT.kRed+2, 2, ROOT.kBlue+3, 2, "f_{#Lambda1}=1"),
-      HypothesisLine("L1Zg", ROOT.kRed+3, 2, ROOT.kBlue+4, 2, "f_{#Lambda1}^{Z#gamma}=1"),
+      HypothesisLine("0+",   2,               1, 2,               2, "SM"),
+      HypothesisLine("0-",   4,               1, 4,               2, "f_{a3}=1"),
+      HypothesisLine("a2",   ROOT.kGreen+3,   1, ROOT.kGreen+3,   2, "f_{a2}=1"),
+      HypothesisLine("L1",   ROOT.kMagenta+2, 1, ROOT.kMagenta+3, 2, "f_{#Lambda1}=1"),
+      HypothesisLine("L1Zg", ROOT.kOrange+2,  1, ROOT.kOrange+2,  2, "f_{#Lambda1}^{Z#gamma}=1"),
     ]
     plots = [
       Plot(
@@ -383,14 +394,253 @@ def makeplots():
         ytitle="Events / bin",
         hypothesislines=purehypothesislines,
         xformula="D_0minus_decay",
-        cutformula=untaggedcut,
+        cutformula=untaggedenrichcut,
         binning=np.array([0, 1./3, 2./3, 1]),
         legendargs=(.2, .5, .8, .9),
         legendcolumns=2,
-        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots", "fullrange", "Untagged"),
-        ymax=40,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=500,
         plotcopier=pc,
-      )
+      ),
+      Plot(
+        name="D_0hplus_decay",
+        xtitle="D_{0h+}^{dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_0hplus_decay",
+        cutformula=untaggedenrichcut,
+        binning=np.array([0, .5, .7, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=500,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_L1_decay",
+        xtitle="D_{#Lambda1}^{dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_L1_decay",
+        cutformula=untaggedenrichcut,
+        binning=np.array([0, .55, .8, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=500,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_L1Zg_decay",
+        xtitle="D_{#Lambda1}^{Z#gamma,dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_L1Zg_decay",
+        cutformula=untaggedenrichcut,
+        binning=np.array([0, .4, .55, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=500,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_int_decay",
+        xtitle="D_{int}^{dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_int_decay",
+        cutformula=untaggedenrichcut,
+        binning=np.array([-1, .8, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=500,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_0minus_VBFdecay",
+        xtitle="D_{0-}^{VBF+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_0minus_VBFdecay",
+        cutformula=VBFtaggedenrichcut,
+        binning=np.array([0, .1, .9, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_0hplus_VBFdecay",
+        xtitle="D_{0h+}^{VBF+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_0hplus_VBFdecay",
+        cutformula=VBFtaggedenrichcut,
+        binning=np.array([0, .1, .9, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_L1_VBFdecay",
+        xtitle="D_{#Lambda1}^{VBF+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_L1_VBFdecay",
+        cutformula=VBFtaggedenrichcut,
+        binning=np.array([0, .1, .9, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_L1Zg_VBFdecay",
+        xtitle="D_{#Lambda1}^{Z#gamma,VBF+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_L1Zg_VBFdecay",
+        cutformula=VBFtaggedenrichcut,
+        binning=np.array([0, .1, .8, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_int_VBFdecay",
+        xtitle="D_{int}^{VBF}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_int_VBF",
+        cutformula=VBFtaggedenrichcut,
+        binning=np.array([-1., 0, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_0minus_HadVHdecay",
+        xtitle="D_{0-}^{VH+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_0minus_HadVHdecay",
+        cutformula=HadVHtaggedenrichcut,
+        binning=np.array([0, .2, .8, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_0hplus_HadVHdecay",
+        xtitle="D_{0h+}^{VH+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_0hplus_HadVHdecay",
+        cutformula=HadVHtaggedenrichcut,
+        binning=np.array([0, 1./3, 2./3, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_L1_HadVHdecay",
+        xtitle="D_{#Lambda1}^{VH+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_L1_HadVHdecay",
+        cutformula=HadVHtaggedenrichcut,
+        binning=np.array([0, 1./3, 2./3, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_L1Zg_HadVHdecay",
+        xtitle="D_{#Lambda1}^{Z#gamma,VH+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_L1Zg_HadVHdecay",
+        cutformula=HadVHtaggedenrichcut,
+        binning=np.array([0, .1, .9, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_int_HadVH",
+        xtitle="D_{int}^{VH}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_int_HadVH",
+        cutformula=HadVHtaggedenrichcut,
+        binning=np.array([-1, -.6, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+
+      Plot(
+        name="D_bkg",
+        xtitle="D_{bkg}^{dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_bkg",
+        cutformula=untaggedcut,
+        binning=np.array([0, .2, .7, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=500,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_bkg_VBFdecay",
+        xtitle="D_{bkg}^{VBF+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_bkg_VBFdecay",
+        cutformula=VBFtaggedcut,
+        binning=np.array([0, .2, .7, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
+      Plot(
+        name="D_bkg_HadVHdecay",
+        xtitle="D_{bkg}^{VH+dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_bkg_HadVHdecay",
+        cutformula=untaggedcut,
+        binning=np.array([0, .2, .8, 1]),
+        legendargs=(.2, .5, .8, .9),
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+      ),
     ]
 
     for plot in plots:
