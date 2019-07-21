@@ -7,6 +7,7 @@ from numbers import Number
 import os
 import yaml
 
+import numpy as np
 import uncertainties
 
 import ROOT
@@ -144,10 +145,17 @@ class YieldSystematicValue(MultiEnum, JsonDict):
           if not all(isinstance(_, Number) for _ in value):
             raise ValueError("value '{!r}' doesn't contain only numbers!".format(origvalue))
 
-          if all(_ == 1 for _ in list(value)):
+          value = list(value)
+          for i, v in enumerate(value[:]):
+            if np.isclose(v, 1):
+              value[i] = 1
+
+          if all(_ == 1 for _ in value):
             value = 1
 
-        elif isinstance(value, Number) or value is None:
+        elif isinstance(value, Number):
+          if np.isclose(value, 1): value = 1
+        elif value is None:
           pass
         else:
           raise ValueError("{!r} value {!r} should be None, a number, or a list (tuple, etc.) of length 2".format(self, origvalue))

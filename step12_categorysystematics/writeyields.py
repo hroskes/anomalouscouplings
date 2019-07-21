@@ -138,8 +138,6 @@ def writeyields(productionmodelist=None, productionlist=None):
 
     assert not result
 
-    print "\n"*10
-
     result = dict(resultbypm)
     del resultbypm
 
