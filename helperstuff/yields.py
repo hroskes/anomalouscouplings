@@ -128,6 +128,8 @@ class YieldSystematicValue(MultiEnum, JsonDict):
                )
 
     def setvalue(self, value):
+        if self.copyfromotheryieldsystematicvalue is not None: return
+
         origvalue = value
         if isinstance(value, basestring):
           try:
@@ -152,6 +154,8 @@ class YieldSystematicValue(MultiEnum, JsonDict):
 
           if all(_ == 1 for _ in value):
             value = 1
+          elif np.isclose(*value):
+            raise ValueError(str(value))
 
         elif isinstance(value, Number):
           if np.isclose(value, 1): value = 1
@@ -165,6 +169,7 @@ class YieldSystematicValue(MultiEnum, JsonDict):
         super(YieldSystematicValue, self).setvalue(value)
 
     def getvalue(self):
+        if self.copyfromotheryieldsystematicvalue is not None: return self.copyfromotheryieldsystematicvalue.getvalue()
         result = super(YieldSystematicValue, self).getvalue()
         if isinstance(result, list) and len(result) == 2:
           result = tuple(result)
@@ -198,6 +203,15 @@ class YieldSystematicValue(MultiEnum, JsonDict):
         if not (isinstance(self.value, Sequence) and len(self.value) == 2):
             raise ValueError("{!r} value '{!r}' should be None, a number, or a list (tuple, etc.) of length 2".format(self, self.value))
         return "{}/{}".format(self.value[0], self.value[1])
+
+    @property
+    def copyfromotheryieldsystematicvalue(self):
+        kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in type(self).needenums}
+        if self.production == "190703_2016" and self.yieldsystematic == "CMS_pythia_scale":
+            kwargs["production"] = "190703_2017"
+        else:
+            return None
+        return type(self)(*kwargs.itervalues())
 
 def count(fromsamples, tosamples, categorizations, alternateweights):
     t = ROOT.TChain("candTree")
