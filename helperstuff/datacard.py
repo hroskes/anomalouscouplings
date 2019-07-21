@@ -177,7 +177,7 @@ class _Datacard(MultiEnum):
         if not config.usedata:
             result.remove("ZX")
         for _ in result[:]:
-            if _ == "VBFbkg": deprecate(result.remove(_), 2019, 7, 20)
+            if _ == "VBFbkg": deprecate(result.remove(_), 2019, 7, 30)
         return result
 
     @property
@@ -375,21 +375,9 @@ class _Datacard(MultiEnum):
                           for p in self.productionmodes]
                      )
 
-    @MakeSystematicFromEnums(Channel)
-    def CMS_fake_channel(self, channel):
-        if not config.applyZXshapesystematics: return None
-        if self.production.LHE or self.production.GEN: return None
-        if channel == self.channel:
-          return " ".join(
-            ["shape1"] +
-            [
-              "1" if self.channel == channel and "bkg" in h and Productionmode(h) == "ZX" else "-"
-              for h in self.histograms
-            ]
-          )
-
     @MakeSystematicFromEnums(ProductionMode, Category, Channel, config.staticmaxbins)
     def binbybin_category_channel_productionmode_index(self, productionmode, category, channel, index):
+        return deprecate(None, 2019, 7, 25)
         if productionmode not in ("qqZZ", "ZX"): return None
         if not self.analysis.usehistogramsforcombine:
           return None
@@ -401,11 +389,6 @@ class _Datacard(MultiEnum):
         return " ".join(["shape1"] + ["1" if productionmode == (h if "bkg_" in h else h.split("_")[0]) else "-" for h in self.histograms])
 
     @property
-    def kbkg_gg(self):
-        if self.production.LHE or self.production.GEN: return None
-        return "param 1 0.1 [0,2]"
-
-    @property
     def everything_but_binbybin(self):
         return "group", lambda systematicname: "binbybin" not in systematicname
 
@@ -413,7 +396,7 @@ class _Datacard(MultiEnum):
     def binbybin(self):
         return "group", lambda systematicname: "binbybin" in systematicname
 
-    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, CMS_zz4l_smd_zjets_bkg_channel, CMS_zz4l_smd_zjets_bkg_category, CMS_zz4l_smd_zjets_bkg_category_channel, binbybin_category_channel_productionmode_index, CMS_fake_channel, "kbkg_gg", "binbybin", "everything_but_binbybin")
+    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, binbybin_category_channel_productionmode_index, "binbybin", "everything_but_binbybin")
 
     divider = "\n------------\n"
 
