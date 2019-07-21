@@ -146,10 +146,6 @@ class YieldSystematicValue(MultiEnum, JsonDict):
 
           if all(_ == 1 for _ in list(value)):
             value = 1
-#          if all(_ >= 1 for _ in list(value)):
-#            value = max(value)
-#          elif all(_ <= 1 for _ in list(value)):
-#            value = min(value)
 
         elif isinstance(value, Number) or value is None:
           pass

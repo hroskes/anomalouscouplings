@@ -1338,16 +1338,16 @@ class ReweightingSamplePlus(ReweightingSample):
 
         super(ReweightingSamplePlus, self).check(*args)
 
-    def weightname(self):
-        result = super(ReweightingSamplePlus, self).weightname()
-        if self.alternategenerator:
-            result += "_" + str(self.alternategenerator)
-        if self.pythiasystematic:
-            result += "_" + str(self.pythiasystematic)
-        return result
+class ReweightingSamplePlusWithFlavor(ReweightingSamplePlus):
+    enumname = "reweightingsamplepluswithflavor"
+    enums = [ReweightingSamplePlus, Flavor]
 
-class Sample(ReweightingSamplePlus):
-    enums = [ReweightingSamplePlus, Flavor, Production]
+    def check(self, *args):
+        self.reweightingsamplewithflavor = ReweightingSampleWithFlavor(self.reweightingsample, self.flavor)
+        super(ReweightingSamplePlusWithFlavor, self).check(*args)
+
+class Sample(ReweightingSamplePlusWithFlavor):
+    enums = [ReweightingSamplePlusWithFlavor, Production]
 
     def check(self, *args):
         if self.production is None:
@@ -1359,7 +1359,6 @@ class Sample(ReweightingSamplePlus):
         if self.productionmode in ("WplusH", "WminusH") and self.alternategenerator != "POWHEG":
             raise ValueError("Separate {} sample is produced with POWHEG.  Maybe you meant to specify POWHEG, or WH?\n{}".format(self.productionmode, args))
 
-        self.reweightingsamplewithflavor = ReweightingSampleWithFlavor(self.reweightingsample, self.flavor)
         self.reweightingsamplewithpdf = ReweightingSampleWithPdf(self.reweightingsample, self.production)
 
         if self.pythiasystematic is not None and self.alternategenerator == "NNLOPS":

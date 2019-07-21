@@ -27,7 +27,7 @@ from helperstuff import config
 from helperstuff.categorization import MultiCategorization, NoCategorization, SingleCategorizationgm4l
 from helperstuff.combinehelpers import gettemplate
 from helperstuff.enums import AlternateWeight, analyses, categories, Category, Channel, channels, flavors, ProductionMode, PythiaSystematic, pythiasystematics
-from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
+from helperstuff.samples import ReweightingSamplePlusWithFlavor as RSPWF, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import deprecate, MultiplyCounter, sgn
 from helperstuff.yields import count, YieldSystematicValue, YieldValue
@@ -38,24 +38,24 @@ SampleCount = namedtuple("SampleCount", "productionmode samples")
 
 def writeyields(productionmodelist=None, productionlist=None):
   for production in sorted({_.productionforrate for _ in config.productionsforcombine if not _.LHE}):
-    print "Finding yields and category systematics for", production
-
-    year = production.year
     if productionlist and production not in productionlist: continue
+    print "Finding yields and category systematics for", production
+    year = production.year
+
     tosamples_foryields = [
-      SampleCount(ProductionMode("VBF"), [[ReweightingSamplePlus("VBF", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("VH"), [[ReweightingSamplePlus("ZH", "0+", "POWHEG")], [ReweightingSamplePlus("WplusH", "0+", "POWHEG")], [ReweightingSamplePlus("WminusH", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("ttH"), [[ReweightingSamplePlus("ttH", "0+", "Hff0+", "POWHEG")]]),
-      SampleCount(ProductionMode("bbH"), [[ReweightingSamplePlus("bbH", "0+")]]),
-      SampleCount(ProductionMode("ggH"), [[ReweightingSamplePlus("ggH", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("qqZZ"), [[ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext")]]),
+      SampleCount(ProductionMode("VBF"), [[RSPWF("VBF", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("VH"), [[RSPWF("ZH", "0+", "POWHEG")], [RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("ttH"), [[RSPWF("ttH", "0+", "Hff0+", "POWHEG")]]),
+      SampleCount(ProductionMode("bbH"), [[RSPWF("bbH", "0+")]]),
+      SampleCount(ProductionMode("ggH"), [[RSPWF("ggH", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("qqZZ"), [[RSPWF("qqZZ"), RSPWF("qqZZ", "ext")]]),
     ] + [
-      SampleCount(ProductionMode("ggZZ"), [[ReweightingSampleWithFlavor("ggZZ", flavor)] for flavor in flavors]),
-      SampleCount(ProductionMode("VBF bkg"), [[ReweightingSampleWithFlavor("VBF bkg", flavor)] for flavor in ("2e2mu", "4e", "4mu")])
+      SampleCount(ProductionMode("ggZZ"), [[RSPWF("ggZZ", flavor)] for flavor in flavors]),
+      SampleCount(ProductionMode("VBF bkg"), [[RSPWF("VBF bkg", flavor)] for flavor in ("2e2mu", "4e", "4mu")])
     ][0:deprecate(1, 2019, 7, 27)] * (not production.GEN)
 
     if config.usedata and not production.GEN:
-      tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[ReweightingSample("ZX")]]))
+      tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[RSPWF("ZX")]]))
 
     categorizations = [_ for _ in TreeWrapper.categorizations if (isinstance(_, (MultiCategorization, NoCategorization)) or isinstance(_, SingleCategorizationgm4l) and _.hypothesis == "0+") and (not production.GEN or not _.issystematic)]
 
@@ -70,19 +70,19 @@ def writeyields(productionmodelist=None, productionlist=None):
       for g in samplegroups:
         if productionmode.issignal and productionmode != "bbH" and not production.GEN:
           g += [
-            ReweightingSamplePlus(s, systematic)
+            RSPWF(s, systematic)
             for s in g
             for systematic in pythiasystematics
             if systematic.hassample(year)
           ]
           if year == 2017:
-            g += [ReweightingSamplePlus(s, "ext") for s in g if s.pythiasystematic is None]
+            g += [RSPWF(s, "ext") for s in g if s.pythiasystematic is None]
             if productionmode == "ggH":
-              g += [ReweightingSamplePlus(s.reweightingsample, "MINLO") for s in g if s.pythiasystematic is None and s.extension is None]
+              g += [RSPWF(s.reweightingsample, "MINLO") for s in g if s.pythiasystematic is None and s.extension is None]
         if productionmode == "qqZZ":
           if year == 2018:
             del g[:]
-            g += [ReweightingSamplePlus("qqZZ", "ext1"), ReweightingSamplePlus("qqZZ", "ext2")]
+            g += [RSPWF("qqZZ", "ext1"), RSPWF("qqZZ", "ext2")]
 
       for usesamples in samplegroups:
         tmpresults = []
@@ -130,12 +130,15 @@ def writeyields(productionmodelist=None, productionlist=None):
                   getattr(sampleforkey, needenum.enumname)
                   for needenum in sampleforkey.needenums
                   if getattr(sampleforkey, needenum.enumname) != getattr(g[0], needenum.enumname)
+                  and getattr(sampleforkey, needenum.enumname) is not None
                 )
                 + key[1:]
               )
               resultbypm[newkey] += result.pop(key)
 
     assert not result
+
+    print "\n"*10
 
     result = dict(resultbypm)
     del resultbypm
@@ -232,7 +235,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                   (2018, "2e2mu"): (1.300, 0.700),
                   (2018, "4e"):    (1.370, 0.630),
                   (2018, "4mu"):   (1.240, 0.760),
-                }[year, channel]
+                }[year, str(channel)]
 
         #same for all channels
         for category in categories:
