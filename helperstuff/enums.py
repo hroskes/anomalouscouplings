@@ -406,17 +406,6 @@ class ProductionMode(MyEnum):
         result += ["CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
-    def alternateweights(self, year):
-      def yearcondition(systematic):
-        if systematic == "PythiaScaleUp" or systematic == "PythiaScaleDown" and year == 2016: return False
-        return True
-
-      if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH"):
-        return AlternateWeight.items(lambda x: x!="EWcorrUp" and x!="EWcorrDn" and yearcondition(x))
-      if self == "qqZZ":
-        return AlternateWeight.items(yearcondition)
-      assert False
-
 class WorkspaceShapeSystematic(MyEnum):
     enumname = "workspaceshapesystematic"
     enumitems = (

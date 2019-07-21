@@ -11,9 +11,9 @@ import ROOT
 
 import config
 import constants
-from enums import AlternateGenerator, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
+from enums import AlternateGenerator, AlternateWeight, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
 from extendedcounter import ExtendedCounter
-from utilities import cache, cache_file, deprecate, product, TFile, tlvfromptetaphim
+from utilities import cache, cache_file, deprecate, generatortolist, product, TFile, tlvfromptetaphim
 from weightshelper import WeightsHelper
 
 class SumOfSamplesBase(object):
@@ -1548,6 +1548,20 @@ class Sample(ReweightingSamplePlus):
 
     @property
     def pdf(self): return self.reweightingsamplewithpdf.pdf
+
+    @property
+    @generatortolist
+    def alternateweights(self):
+      for alternateweight in AlternateWeight.items():
+        if alternateweight != "1" and self.productionmode == "ZX": continue
+        if alternateweight in ("EWcorrUp", "EWcorrDn") and self.productionmode != "qqZZ": continue
+        if (
+          alternateweight == "PythiaScaleUp" or alternateweight == "PythiaScaleDown"
+        ) and (
+          self.production.year == 2016
+          or self.production.year == 2017 and self.extension is None
+        ): continue
+        yield alternateweight
 
 @cache_file(os.path.join(config.repositorydir, "data", "invertedmatrices.pkl"), lambda x: bytes(x.data))
 def invertnumpymatrix(numpymatrix):

@@ -87,17 +87,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       for usesamples in samplegroups:
         tmpresults = []
         for tosample in usesamples:
-          if (productionmode in ("ggZZ", "VBF bkg", "ZX", "bbH")
-               or hasattr(tosample, "pythiasystematic") and tosample.pythiasystematic is not None
-               or hasattr(tosample, "alternategenerator") and tosample.alternategenerator == "MINLO"
-               or production.GEN
-             ):
-            usealternateweights = [AlternateWeight("1")]
-          elif productionmode.issignal and tosample.extension == "ext":
-            usealternateweights = [AlternateWeight("PythiaScaleUp"), AlternateWeight("PythiaScaleDn")]
-          else:
-            usealternateweights = productionmode.alternateweights(year)
-
+          usealternateweights = Sample(tosample, production).alternateweights
           tmpresults.append(count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights))
 
         try:
@@ -311,6 +301,7 @@ def writeyields(productionmodelist=None, productionlist=None):
             if year == 2016:
               scaleup = (result[productionmode, PythiaSystematic("ScaleUp"), categorization, AlternateWeight("1"), category] / nominal).nominal_value
               scaledn = (result[productionmode, PythiaSystematic("ScaleDn"), categorization, AlternateWeight("1"), category] / nominal).nominal_value
+              if productionmode == "ttH": scaleup = scaledn = deprecate(1, 2019, 7, 30)
             elif year == 2017 or year == 2018:
               scaleup = (result[productionmode, categorization, AlternateWeight("PythiaScaleUp"), category] / nominal).nominal_value
               scaledn = (result[productionmode, categorization, AlternateWeight("PythiaScaleDn"), category] / nominal).nominal_value
