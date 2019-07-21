@@ -38,6 +38,7 @@ SampleCount = namedtuple("SampleCount", "productionmode samples")
 
 def writeyields(productionmodelist=None, productionlist=None):
   for production in sorted({_.productionforrate for _ in config.productionsforcombine if not _.LHE}):
+    year = production.year
     if productionlist and production not in productionlist: continue
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), [[ReweightingSamplePlus("VBF", "0+", "POWHEG")]]),
@@ -49,7 +50,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     ] + [
       SampleCount(ProductionMode("ggZZ"), [[ReweightingSampleWithFlavor("ggZZ", flavor)] for flavor in flavors]),
       SampleCount(ProductionMode("VBF bkg"), [[ReweightingSampleWithFlavor("VBF bkg", flavor)] for flavor in ("2e2mu", "4e", "4mu")])
-    ][0:deprecate(1, 2019, 7, 20)] * (not production.GEN)
+    ][0:deprecate(1, 2019, 7, 27)] * (not production.GEN)
 
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[ReweightingSample("ZX")]]))
@@ -66,14 +67,14 @@ def writeyields(productionmodelist=None, productionlist=None):
             ReweightingSamplePlus(s, systematic)
             for s in g
             for systematic in pythiasystematics
-            if systematic.hassample(production.year)
+            if systematic.hassample(year)
           ]
-          if production.year == 2017:
+          if year == 2017:
             g += [ReweightingSamplePlus(s, "ext") for s in g if s.pythiasystematic is None]
             if productionmode == "ggH":
               g += [ReweightingSamplePlus(s.reweightingsample, "MINLO") for s in g if s.pythiasystematic is None and s.extension is None]
         if productionmode == "qqZZ":
-          if production.year == 2018:
+          if year == 2018:
             del g[:]
             g += [ReweightingSamplePlus("qqZZ", "ext1"), ReweightingSamplePlus("qqZZ", "ext2")]
 
@@ -89,7 +90,7 @@ def writeyields(productionmodelist=None, productionlist=None):
           elif productionmode.issignal and tosample.extension == "ext":
             usealternateweights = [AlternateWeight("PythiaScaleUp"), AlternateWeight("PythiaScaleDn")]
           else:
-            usealternateweights = productionmode.alternateweights(production.year)
+            usealternateweights = productionmode.alternateweights(year)
 
           tmpresults.append(count({Sample(tosample, production)}, {tosample}, categorizations, usealternateweights))
 
@@ -156,23 +157,50 @@ def writeyields(productionmodelist=None, productionlist=None):
           if productionmode == "ZX":
             syst.value = None
           else:
+            syst.value = {
+              (2016, "2e2mu"): (1.039, 0.960),
+              (2016, "4e"):    (1.082, 0.914),
+              (2016, "4mu"):   None,
+              (2017, "2e2mu"): (1.058, 0.939),
+              (2017, "4e"):    (1.125, 0.862),
+              (2017, "4mu"):   None,
+              (2018, "2e2mu"): 1.074,
+              (2018, "4e"):    1.161,
+              (2018, "4mu"):   None,
+            }[year, str(channel)]
+
+          syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_m", production)
+          if productionmode == "ZX":
+            syst.value = None
+          else:
+            syst.value = {
+              (2016, "2e2mu"): (1.025, 0.975),
+              (2016, "4e"):    None,
+              (2016, "4mu"):   (1.046, 0.953),
+              (2017, "2e2mu"): (1.030, 0.968),
+              (2017, "4e"):    None,
+              (2017, "4mu"):   (1.056, 0.937),
+              (2018, "2e2mu"): (1.011, 0.992),
+              (2018, "4e"):    None,
+              (2018, "4mu"):   (1.016, 0.978),
+            }[year, str(channel)]
 
           for systname in "lumi_13TeV_2016", "lumi_13TeV_2017", "lumi_13TeV_2018":
             syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-            if productionmode == "ZX" or str(production.year) not in systname:
+            if productionmode == "ZX" or str(year) not in systname:
               syst.value = None
             else:
               syst.value = {
                 2016: (1.026, 0.974),
                 2017: (1.023, 0.977),
                 2018: (1.025, 0.975),
-              }[yr, chan]
+              }[year]
 
           for yr in 2016, 2017, 2018:
             for chan in "2e2mu", "4e", "4mu":
               systname = "zjet_{}_{}".format(chan, yr).replace("_2016", "")
               syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-              if productionmode != "ZX" or chan != channel or yr != production.year:
+              if productionmode != "ZX" or chan != channel or yr != year:
                 syst.value = None
               else:
                 syst.value = {
@@ -185,7 +213,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                   (2018, "2e2mu"): (1.300, 0.700),
                   (2018, "4e"):    (1.370, 0.630),
                   (2018, "4mu"):   (1.240, 0.760),
-                }[yr, chan]
+                }[year, channel]
 
         #same for all channels
         for category in categories:
@@ -203,10 +231,10 @@ def writeyields(productionmodelist=None, productionlist=None):
             btSFDn = sum(result[tosample, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), AlternateWeight("1"), category] for tosample in samples) / nominal
 
           for channel in channels:
-            YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_{}".format(production.year), production).value = (JECDn, JECUp)
-            YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_{}".format(production.year), production).value = (btSFDn, btSFUp)
+            YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_{}".format(year), production).value = (JECDn, JECUp)
+            YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_{}".format(year), production).value = (btSFDn, btSFUp)
             for year in 2016, 2017, 2018:
-              if year == production.year: continue
+              if year == year: continue
               YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j_13TeV_{}".format(year), production).value = None
               YieldSystematicValue(channel, category, analysis, productionmode, "CMS_btag_comb_13TeV_{}".format(year), production).value = None
 
@@ -257,10 +285,10 @@ def writeyields(productionmodelist=None, productionlist=None):
 
           #pythia scale and tune
           if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
-            if production.year == 2016:
+            if year == 2016:
               scaleup = sum(result[ReweightingSamplePlus(tosample, "ScaleUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
               scaledn = sum(result[ReweightingSamplePlus(tosample, "ScaleDn"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
-            elif production.year == 2017 or production.year == 2018:
+            elif year == 2017 or year == 2018:
               scaleup = sum(result[ReweightingSamplePlus(tosample, "ext"), categorization, AlternateWeight("PythiaScaleUp"), category] for tosample in samples) / nominal
               scaledn = sum(result[ReweightingSamplePlus(tosample, "ext"), categorization, AlternateWeight("PythiaScaleDn"), category] for tosample in samples) / nominal
             tuneup = sum(result[ReweightingSamplePlus(tosample, "TuneUp"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
@@ -272,9 +300,9 @@ def writeyields(productionmodelist=None, productionlist=None):
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_tune_pythia", production).value = (tunedn, tuneup)
 
           if productionmode == "ggH":
-            if production.year == 2016:
+            if year == 2016:
               minloup = minlodn = 1
-            elif production.year == 2017:
+            elif year == 2017:
               minloup = sum(result[ReweightingSamplePlus(tosample.reweightingsample, "MINLO"), categorization, AlternateWeight("1"), category] for tosample in samples) / nominal
               minlodn = 1 / minloup
           else:
