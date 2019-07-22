@@ -317,8 +317,13 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
                         if any(np.isclose(fa3, _) for _ in scan.badpoints): continue
 
                         NLL[fa3] = getvaluefromtree(t, nuisance, useNLLandNLL0, analysis=analysis, faiorder=faiorder)
+
                     if 1 not in NLL and -1 in NLL and xaxislimits is None and POI == "CMS_zz4l_fai1":
                         NLL[1] = NLL[-1]
+                    if scanfai == "fa3" and POI == "CMS_zz4l_fai1":
+                        for fa3, NLLval in NLL.items():
+                            if -fa3 not in NLL:
+                                NLL[-fa3] = NLLval
 
                 NLL *= scale
 

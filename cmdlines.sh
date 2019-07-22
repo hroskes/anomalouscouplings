@@ -8,6 +8,7 @@ cmd="sbatch slurm.sh"
 #cmd=python
 
 #found from decay only
+: "
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa3
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa3 floatothers=0
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa3 faiorder=fa3,fL1,fL1Zg,fa1,fa2
@@ -67,5 +68,27 @@ $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:1
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1 faiorder=fL1,fL1Zg,fa2,fa1,fa3
 
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa2 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai3_relative:-0.025,CMS_zz4l_fai4_relative:0.9
-
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa2 faiorder=fa2,fa3,fL1,fa1,fL1Zg setparametersforgrid=CMS_zz4l_fa1_relative:0.18,CMS_zz4l_fai1_relative:0,CMS_zz4l_fai3_relative:0
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa2 setparametersforgrid=CMS_zz4l_fai1_relative:0.1,CMS_zz4l_fai3_relative:0.3,CMS_zz4l_fai4_relative:-1
+
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1Zg faiorder=fL1Zg,fL1,fa1,fa3,fa2 setparametersforgrid=CMS_zz4l_fai2_relative:-1,CMS_zz4l_fai3_relative:0.4
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1Zg faiorder=fL1Zg,fa3,fa2,fa1,fL1 setparametersforgrid=CMS_zz4l_fai2_relative:-0.6,CMS_zz4l_fa1_relative:0
+"
+
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa2 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai3_relative:0.2,CMS_zz4l_fai4_relative:-1
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa2 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai3_relative:0.23,CMS_zz4l_fai4_relative:-1
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa2 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai3_relative:0.26,CMS_zz4l_fai4_relative:-1
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa2 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai3_relative:-0.01,CMS_zz4l_fai4_relative:0.6
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa2 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai3_relative:-0.016,CMS_zz4l_fai4_relative:0.74
+
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:0.006,CMS_zz4l_fai4_relative:0.89
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:0.005,CMS_zz4l_fai4_relative:0.82
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:0.005,CMS_zz4l_fai4_relative:0.80
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:0.004,CMS_zz4l_fai4_relative:0.74
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:0.003,CMS_zz4l_fai4_relative:0.68
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1 setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:0.002,CMS_zz4l_fai4_relative:0.62
+
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai1_relative:0.11,CMS_zz4l_fai2_relative:-0.03,CMS_zz4l_fai3_relative:1
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai1_relative:0.12,CMS_zz4l_fai2_relative:-0.02,CMS_zz4l_fai3_relative:1
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:-0.3,CMS_zz4l_fai3_relative:1
+$cmd ./step9_runcombine.py fa3fa2fL1fL1Zg yieldsystematics scanranges=101,-1,1:101,-0.02,0.02 plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:-0.24,CMS_zz4l_fai3_relative:1
