@@ -25,3 +25,6 @@
 	path = CMSSW_10_2_5/src/CombineHarvester
 	url = git@github.com:hroskes/CombineHarvester
 	branch = master
+[submodule "step15_HCG/HIG-19-009"]
+	path = step15_HCG/HIG-19-009
+	url = ssh://git@gitlab.cern.ch:7999/cms-hcg/cadi/hig-19-009.git

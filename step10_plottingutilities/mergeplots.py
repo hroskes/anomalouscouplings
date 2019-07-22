@@ -82,7 +82,7 @@ def mergeplots(analysis, **kwargs):
     xmin, xmax = -1, 1
     subdir = ""
     lumi = None
-    outdir = "fa3fa2fL1fL1Zg_CMSfirsttry"
+    outdir = "fa3fa2fL1fL1Zg_yieldsystematics"
     plotcopier = ROOT
     for kw, kwarg in kwargs.iteritems():
         if kw == "logscale":
@@ -122,8 +122,8 @@ def mergeplots(analysis, **kwargs):
     repmap = {"analysis": str(analysis)}
     plotname = "limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_compare.root"
     folders = [
-               Folder("fa3fa2fL1fL1Zg_CMSfirsttry/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
-               Folder("fa3fa2fL1fL1Zg_CMSfirsttry/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
               ]
 
     if logscale and config.minimainlegend:

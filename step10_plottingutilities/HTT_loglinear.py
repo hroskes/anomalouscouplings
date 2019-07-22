@@ -24,7 +24,7 @@ from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
-saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_CMSfirsttry")
+saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_yieldsystematics")
 def getplotname(analysis):
     return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
 
@@ -162,8 +162,8 @@ def PRL_loglinear(**kwargs):
         repmap = {"analysis": str(analysis)}
         subdir = ""
         folders = [
-          Folder("fa3fa2fL1fL1Zg_CMSfirsttry/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-          Folder("fa3fa2fL1fL1Zg_CMSfirsttry/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+          Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+          Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
         ]
 
         mg = ROOT.TMultiGraph("limit", "")
