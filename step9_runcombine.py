@@ -576,8 +576,7 @@ def runcombine(analysis, foldername, **kwargs):
         workspacefileappend += "_nobkg"
         turnoff.append("--PO nobkg")
     if not usesystematics:
-        #combine doesn't support -S anymore
-        assert False
+        freeze["allConstrainedNuisances"] = None
         moreappend += "_nosystematics"
     if algo != defaultalgo:
         moreappend += "_algo"+algo
@@ -597,7 +596,8 @@ def runcombine(analysis, foldername, **kwargs):
     if scanfai != analysis:
         workspacefileappend += "_scan{}".format(scanfai)
     for k, v in freeze.iteritems():
-        moreappend += "_{}={}".format(k, v)
+        if v is not None:
+            moreappend += "_{}={}".format(k, v)
     if [str(_) for _ in faiorder] != [str(_) for _ in defaultfaiorder]:
         workspacefileappend += "_"+",".join(str(_) for _ in faiorder)
     if setparametersforgrid:
@@ -639,10 +639,9 @@ def runcombine(analysis, foldername, **kwargs):
                 ",".join([
                   "CMS_zz4l_fai{}=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1)
                 ] + [
-                  "{}={}".format(k, v) for k, v in freeze.iteritems()
+                  "{}={}".format(k, v) for k, v in freeze.iteritems() if v is not None
                 ]),
               "parameterranges": ":".join("{}={}".format(k, v) for k, v in parameterranges.iteritems()),
-              "usesystematics": str(int(usesystematics)),
               "moreappend": moreappend,
               "turnoff": " ".join(turnoff),
               "workspacefileappend": workspacefileappend,
