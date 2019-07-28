@@ -27,10 +27,10 @@ import ROOT
 from helperstuff import config, stylefunctions as style
 from helperstuff.combinehelpers import getrate, Luminosity
 from helperstuff.enums import Analysis, categories, channels, flavors, Production
-from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, Sample
+from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, ReweightingSampleWithPdf, Sample
 from helperstuff.utilities import PlotCopier, TFile
 
-productions = {Production(p) for p in ("180721", "180722")}
+productions = {Production(p) for p in ("190703_2017",)}
 
 class HistAndNormalization(object):
   def __init__(self, h, hnormalization):
@@ -74,8 +74,6 @@ def histogram(analysis, VBForVH, *reweightingsamples, **kwargs):
   finalresult = HistAndNormalization(finalh, finalhnormalization)
 
   for production in productions:
-    if production == "180722" and productionmode == "VBF bkg": continue
-
     filenames = [Sample(sample, production).withdiscriminantsfile() for sample in reweightingsamples]
 
     h = ROOT.TH1F("tmp"+str(production), "", 10, 0, 1)
@@ -103,6 +101,7 @@ def histogram(analysis, VBForVH, *reweightingsamples, **kwargs):
       Analysis("fa2"): "category_0P_or_a2",
       Analysis("fL1"): "category_0P_or_L1",
       Analysis("fL1Zg"): "category_0P_or_L1Zg",
+      Analysis("fa3fa2fL1fL1Zg"): "category_0P_or_0M_or_a2_or_L1_or_L1Zg",
     }[analysis]
     dbkgname = {
       "VBF": "D_bkg_VBFdecay",
@@ -123,13 +122,14 @@ def histogram(analysis, VBForVH, *reweightingsamples, **kwargs):
     if productionmode == "data":
       weightformula = "1"
     elif productionmode == "ZX":
-      weightformula = "MC_weight_ZX"
+      weightformula = "MC_weight_nominal"
     elif reweightto is not None:
       weightformula = reweightto.weightname()
     else:
-      weightformula = "overallEventWeight"
+      weightformula = "MC_weight_nominal"
 
     for filename in filenames:
+      filename = filename.replace("WH0+", "WH0+ext1").replace("VBFa2", "VBFa2ext1")
       with TFile(filename) as f:
         t = f.candTree
 
@@ -163,10 +163,28 @@ def histogram(analysis, VBForVH, *reweightingsamples, **kwargs):
     if hypothesis is None or hypothesis == "SM":
       if productionmode == "data":
         __scalefactors[productionmode, production] = 1
+      elif productionmode in ("ZH", "WH"):
+        print sum(getrate(ch, ca, "VH", "fordata", production, analysis) for ch in channels for ca in categories)
+        print handnormalization.Integral()
+        print ReweightingSampleWithPdf(productionmode, "0+", production).xsec
+        print ReweightingSampleWithPdf("ZH", "0+", production).xsec + ReweightingSampleWithPdf("WH", "0+", production).xsec
+        __scalefactors[productionmode, production] = (
+          sum(getrate(ch, ca, "VH", "fordata", production, analysis) for ch in channels for ca in categories)
+          / handnormalization.Integral()
+          * (
+            ReweightingSampleWithPdf(productionmode, "0+", production).xsec
+            / (
+              ReweightingSampleWithPdf("ZH", "0+", production).xsec
+              + ReweightingSampleWithPdf("WH", "0+", production).xsec
+            )
+          )
+        )
       else:
         __scalefactors[productionmode, production] = sum(getrate(ch, ca, productionmode, "fordata", production, analysis) for ch in channels for ca in categories) / handnormalization.Integral()
 
+    print productionmode, handnormalization.Integral(), __scalefactors[productionmode, production],
     handnormalization.Scale(__scalefactors[productionmode, production])
+    print handnormalization.Integral()
 
     finalresult.Add(handnormalization)
 
@@ -180,9 +198,11 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   data = histogram(analysis, VBForVH, ReweightingSample("data"), whichdbkg=whichdbkg)
 
   ZX = histogram(analysis, VBForVH, ReweightingSample("ZX"), whichdbkg=whichdbkg)
-  qqZZ = histogram(analysis, VBForVH, ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext"), whichdbkg=whichdbkg)
-  ggZZ = histogram(analysis, VBForVH, *(ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors), whichdbkg=whichdbkg)
-  VBFbkg = histogram(analysis, VBForVH, *(ReweightingSampleWithFlavor("VBFbkg", flavor) for flavor in ("2e2mu", "4e", "4mu")), whichdbkg=whichdbkg)
+#  qqZZ = histogram(analysis, VBForVH, ReweightingSample("qqZZ"), ReweightingSamplePlus("qqZZ", "ext"), whichdbkg=whichdbkg)
+  qqZZ = histogram(analysis, VBForVH, ReweightingSamplePlus("qqZZ"), whichdbkg=whichdbkg)
+  ggZZ = histogram(analysis, VBForVH, *(ReweightingSampleWithFlavor("ggZZ", flavor) for flavor in flavors
+if flavor == "4tau"
+  ), whichdbkg=whichdbkg)
 
   SMhypothesis = "0+"
   BSMhypothesis = {
@@ -190,6 +210,7 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
     Analysis("fa2"): "0h+",
     Analysis("fL1"): "L1",
     Analysis("fL1Zg"): "L1Zg",
+    Analysis("fa3fa2fL1fL1Zg"): "0h+",
   }[analysis]
 
   VBFSM  = histogram(analysis, VBForVH, ReweightingSample("VBF", SMhypothesis), whichdbkg=whichdbkg)
@@ -209,8 +230,10 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
     ZHBSM  = histogram(analysis, VBForVH, ReweightingSample("ZH",  BSMhypothesis), whichdbkg=whichdbkg)
     WHBSM  = histogram(analysis, VBForVH, ReweightingSample("WH",  BSMhypothesis), whichdbkg=whichdbkg)
     ggHBSM = histogram(analysis, VBForVH, ReweightingSample("ggH", BSMhypothesis), whichdbkg=whichdbkg)
-  ttHBSM = histogram(analysis, VBForVH, ReweightingSample("ttH", "Hff0+", "0+"), reweightto=ReweightingSample("ttH", "Hff0+", BSMhypothesis), whichdbkg=whichdbkg)
-  bbHBSM = histogram(analysis, VBForVH, ReweightingSample("bbH", "0+"), reweightto=ReweightingSample("bbH", BSMhypothesis), whichdbkg=whichdbkg)
+#  ttHBSM = histogram(analysis, VBForVH, ReweightingSample("ttH", "Hff0+", "0+"), reweightto=ReweightingSample("ttH", "Hff0+", BSMhypothesis), whichdbkg=whichdbkg)
+#  bbHBSM = histogram(analysis, VBForVH, ReweightingSample("bbH", "0+"), reweightto=ReweightingSample("bbH", BSMhypothesis), whichdbkg=whichdbkg)
+  ttHBSM = ttHSM.Clone("ttHBSM")
+  bbHBSM = bbHSM.Clone("bbHBSM")
 
   scaleVVHBSM =  (VBFSM.Integral() + ZHSM.Integral() + WHSM.Integral()) / (VBFBSM.Integral() + ZHBSM.Integral() + WHBSM.Integral())
   VBFBSM.Scale(scaleVVHBSM)
@@ -261,7 +284,6 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
 
   ZZ = qqZZ.Clone("ZZ")
   ZZ.Add(ggZZ)
-  ZZ.Add(VBFbkg)
 
   ZX.SetLineColor(1)
   ZX.SetLineWidth(2)
@@ -273,10 +295,11 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   ZZ.SetFillColor(ROOT.kAzure-9)
   ZZ.SetFillStyle(1001)
 
-  targetSM.SetLineColor(4)
+  targetSM.SetLineColor(2)
   targetSM.SetLineWidth(2)
+  targetSM.SetLineStyle(2)
   targetSM.SetFillStyle(0)
-  othersignalSM.SetLineColor(ROOT.kOrange+10)
+  othersignalSM.SetLineColor(2)
   othersignalSM.SetLineWidth(2)
   othersignalSM.SetFillStyle(0)
 
@@ -284,9 +307,8 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   targetBSM.SetLineWidth(2)
   targetBSM.SetLineStyle(2)
   targetBSM.SetFillStyle(0)
-  othersignalBSM.SetLineColor(ROOT.kOrange+10)
+  othersignalBSM.SetLineColor(4)
   othersignalBSM.SetLineWidth(2)
-  othersignalBSM.SetLineStyle(2)
   othersignalBSM.SetFillStyle(0)
 
   histogramorderintegral = ffHSM, VVHSM, ffHBSM, VVHBSM, ZZ, ZX
@@ -294,12 +316,14 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   normalization = {h: 0 for h in histogramorderintegral+(data,)}
 
   nfiles = 0
-  g = glob.glob(os.path.join(config.plotsbasedir, "templateprojections/niceplots/fullrange", str(analysis), "*tagged", "D_bkg*.root"))
+  g = glob.glob(os.path.join(config.plotsbasedir, "templateprojections/niceplots/", "D_bkg*.root"))
   for filename in g:
     nfiles += 1
     with TFile(filename) as f:
       for i, (hintegral, hstyle) in enumerate(itertools.izip(histogramorderintegral, histogramorderstyle)):
-        proj = f.cprojections.GetListOfPrimitives()[1].GetHists()[i]
+        j = i
+        if j >= 4: j += 6
+        proj = f.GetListOfKeys()[0].ReadObj().GetListOfPrimitives()[1].GetHists()[j]
         try:
           assert proj.GetMarkerColor() == hstyle.GetMarkerColor(), (hstyle.GetMarkerColor(), proj.GetMarkerColor())
           assert proj.GetMarkerStyle() == hstyle.GetMarkerStyle(), (hstyle.GetMarkerStyle(), proj.GetMarkerStyle())
@@ -311,12 +335,13 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
           assert proj.GetFillStyle() == hstyle.GetFillStyle(), (hstyle.GetFillStyle(), proj.GetFillStyle())
         except AssertionError:
           print i
-          f.cprojections.GetListOfPrimitives()[1].ls()
+          f.GetListOfKeys()[0].ReadObj().GetListOfPrimitives()[1].ls()
           raise
         normalization[hintegral] += proj.Integral()
 
-      datagraph = f.cprojections.GetListOfPrimitives()[6]
-      normalization[data] += sum(y for _, y in itertools.izip(xrange(datagraph.GetN()), datagraph.GetY()))
+#      datagraph = f.GetListOfKeys()[0].ReadObj().GetListOfPrimitives()[6]
+#      normalization[data] += sum(y for _, y in itertools.izip(xrange(datagraph.GetN()), datagraph.GetY()))
+      normalization[data] = 0
   assert nfiles == 3, g
 
   normalization[ffHSM] -= normalization[VVHSM]
@@ -325,6 +350,7 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   normalization[VVHBSM] -= normalization[ZZ]
   normalization[ZZ] -= normalization[ZX]
 
+  """
   for h, integral in normalization.iteritems():
     print h.h.GetName(), h.Integral(), integral
     if h == data:
@@ -335,6 +361,9 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
       assert abs(h.Integral() - integral) / (h.Integral() + integral) < 1e-2, (h.Integral(), integral)
     else:
       assert abs(h.Integral() - integral) / (h.Integral() + integral) < 1e-4, (h.Integral(), integral)
+  """
+
+  print targetBSM.Integral()
 
   data = style.asymmerrorsfromhistogram(data.h, showemptyerrors=False)
   data.SetLineColor(1)
@@ -380,6 +409,7 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
     Analysis("fa2"): "0h+",
     Analysis("fL1"): "#Lambda1",
     Analysis("fL1Zg"): "#Lambda1Z#gamma",
+    Analysis("fa3fa2fL1fL1Zg"): "0h+",
   }[analysis]
   discname = {
     "VBF": "max#left(D_{{2jet}}^{{VBF}}, D_{{2jet}}^{{VBF,{BSMname}}}#right)",
@@ -401,6 +431,7 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
         Analysis("fa2"):   (.6, .55, .9, .9),
         Analysis("fL1"):   (.6, .55, .9, .9),
         Analysis("fL1Zg"): (.55, .55, .85, .9),
+        Analysis("fa3fa2fL1fL1Zg"):   (.4, .55, .7, .9),
       }[analysis],
       "VH": (.6, .55, .9, .9),
     }[VBForVH]
@@ -427,11 +458,11 @@ def publiccategorydiscriminants(analysis, VBForVH, plotcopier=ROOT, whichdbkg="d
   l.Draw()
 
   for ext in "png root pdf eps C".split():
-    c.SaveAs(os.path.join(config.plotsbasedir, "templateprojections/niceplots/fullrange", str(analysis), "D_2jet_"+VBForVH+"cut"+whichdbkg+"."+ext))
+    c.SaveAs(os.path.join(config.plotsbasedir, "TEST", "D_2jet_"+VBForVH+"cut"+whichdbkg+"."+ext))
 
 if __name__ == "__main__":
   with PlotCopier() as pc:
-    for analysis in "fa3", "fa2", "fL1", "fL1Zg":
+    for analysis in "fa3fa2fL1fL1Zg",:
       for VBForVH in "VBF", "VH":
         for cut in "decay", "proddec", "bycategory", "m4l":
           if analysis != args.analysis is not None: continue
