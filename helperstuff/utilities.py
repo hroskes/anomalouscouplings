@@ -14,6 +14,7 @@ import operator
 import json
 import os
 import pipes
+import pprint
 import re
 import shutil
 import subprocess
@@ -101,6 +102,27 @@ def cache(function):
             cache[args, tuple(sorted(kwargs.iteritems()))] = function(*args, **kwargs)
             return newfunction(*args, **kwargs)
     return newfunction
+
+def cache_keys(*argkeys, **kwargkeys):
+    def inner_cache_keys(function):
+        cache = {}
+        @wraps(function)
+        def newfunction(*args, **kwargs):
+            argsforcache = tuple(key(arg) for key, arg in itertools.izip_longest(argkeys, args, fillvalue=lambda x: x))
+            kwargsforcache = {kw: kwargkeys.get(kw, lambda x: x)(kwargs[kw]) for kw in kwargs}
+            keyforcache = argsforcache, tuple(sorted(kwargsforcache.iteritems()))
+            try:
+                return cache[keyforcache]
+            except TypeError:
+                pprint.pprint(keyforcache)
+                for _ in keyforcache:
+                  for _2 in _: print _2, hash(_2)
+                raise
+            except KeyError:
+                cache[keyforcache] = result = function(*args, **kwargs)
+                return result
+        return newfunction
+    return inner_cache_keys
 
 def cacheall(function):
     cache = []

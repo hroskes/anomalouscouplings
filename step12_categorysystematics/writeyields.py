@@ -45,6 +45,8 @@ def writeyields(productionmodelist=None, productionlist=None):
     tosamples_foryields = [
       SampleCount(ProductionMode("VBF"), [[RSPWF("VBF", "0+", "POWHEG")]]),
       SampleCount(ProductionMode("VH"), [[RSPWF("ZH", "0+", "POWHEG")], [RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("ZH"), [[RSPWF("ZH", "0+", "POWHEG")]]),
+      SampleCount(ProductionMode("WH"), [[RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
       SampleCount(ProductionMode("ttH"), [[RSPWF("ttH", "0+", "Hff0+", "POWHEG")]]),
       SampleCount(ProductionMode("bbH"), [[RSPWF("bbH", "0+")]]),
       SampleCount(ProductionMode("ggH"), [[RSPWF("ggH", "0+", "POWHEG")]]),
@@ -52,7 +54,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     ] + [
       SampleCount(ProductionMode("ggZZ"), [[RSPWF("ggZZ", flavor)] for flavor in flavors]),
       SampleCount(ProductionMode("VBF bkg"), [[RSPWF("VBF bkg", flavor)] for flavor in ("2e2mu", "4e", "4mu")])
-    ][0:deprecate(1, 2019, 7, 27)] * (not production.GEN)
+    ][0:deprecate(1, 2019, 8, 5)] * (not production.GEN)
 
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[RSPWF("ZX")]]))
