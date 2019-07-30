@@ -528,6 +528,7 @@ class Plot(object):
     self.__categorylabel = categorylabel
     self.__saveasdir = saveasdir
     self.__plotcopier = plotcopier
+    self.__iscategorydiscriminant = iscategorydiscriminant
 
     assert isDCP in (None, "prod", "dec")
     assert iscategorydiscriminant in (None, "VBF", "VH")
@@ -733,6 +734,13 @@ class Plot(object):
       categorytext.SetTextFont(42)
       categorytext.AddText(0.01,0.01,self.__categorylabel)
       categorytext.Draw()
+
+    if self.__iscategorydiscriminant:
+      line = ROOT.TLine(0.5, 0, 0.5, self.__ymax * .4)
+      line.SetLineWidth(4)
+      line.SetLineColor(ROOT.kViolet-1)
+      line.SetLineStyle(9)
+      line.Draw()
 
     mkdir_p(self.__saveasdir)
     for ext in "png pdf root C".split():
@@ -1121,12 +1129,12 @@ def makeplots():
         hypothesislines=purehypothesislines,
         xformula="max(D_2jet_0plus, max(D_2jet_0minus, max(D_2jet_a2, max(D_2jet_L1, D_2jet_L1Zg))))",
         cutformula=dijetenrichcut,
-        binning=np.arange(0, 1.2, .2),
+        binning=np.arange(0, 1+1/8., 1/8.),
         legendargs=(.2, .5, .9, .9),
         categorylabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=50,
+        ymax=30,
         plotcopier=pc,
         CMStext="",
         iscategorydiscriminant="VBF",
@@ -1138,12 +1146,12 @@ def makeplots():
         hypothesislines=purehypothesislines,
         xformula="max(max(D_HadZH_0plus, max(D_HadZH_0minus, max(D_HadZH_a2, max(D_HadZH_L1, D_HadZH_L1Zg)))), max(D_HadWH_0plus, max(D_HadWH_0minus, max(D_HadWH_a2, max(D_HadWH_L1, D_HadWH_L1Zg)))))",
         cutformula=dijetenrichcut,
-        binning=np.arange(0, 1.2, .2),
+        binning=np.arange(0, 1+1/8., 1/8.),
         legendargs=(.2, .5, .9, .9),
         categorylabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=50,
+        ymax=30,
         plotcopier=pc,
         CMStext="",
         iscategorydiscriminant="VH",
