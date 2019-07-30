@@ -163,6 +163,7 @@ def plotfromtree(**kwargs):
     print o.reweightfrom.withdiscriminantsfile()
     print
     raise
+  h.SetTitle(title)
   h.GetXaxis().SetTitle(title)
   if o.disc2 is not None:
     h.GetYaxis().SetTitle(disc2title)

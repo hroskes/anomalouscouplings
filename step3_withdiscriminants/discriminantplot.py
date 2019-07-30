@@ -4,6 +4,7 @@ assert __name__ == "__main__"
 
 from helperstuff import config
 from helperstuff import style
+from helperstuff.CJLSTscripts import *
 from helperstuff.enums import *
 from helperstuff.plotfromtree import plotfromtree
 from helperstuff.samples import *
@@ -13,23 +14,23 @@ import os
 
 #========================
 #inputs
-productionmode = "ZH"
-disc           = "D_4couplings_HadVHdecay"
+productionmode = "VBF"
+disc           = "ZZPt"
 reweightto     = None
-bins           = None
-min            = None
-max            = None
+bins           = 3
+min            = 40
+max            = 280
 
-production     = "GEN_181119"
+production     = "190703_2018"
 
 enrich         = False
 masscut        = True
-normalizeto1   = False
+normalizeto1   = True
 
 channel        = None
 
-category       = "VHHadrtagged"
-analysis       = "fa3_multiparameter_nodbkg"
+category       = "Untagged"
+analysis       = "fa3fa2fL1fL1Zg"
 
 cut            = None
 
@@ -59,6 +60,7 @@ def hypothesestouse():
     return
   if productionmode == "VBF":
     for hypothesis in hypotheses:
+      if not hypothesis.ispure: continue
       if hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "fa3prod0.5", "fa2prod0.5", "fL1Zgprod0.5", "fL1prod0.5"): yield hypothesis
   elif productionmode == "ZH":
     for hypothesis in hypotheses:
@@ -90,8 +92,6 @@ with PlotCopier() as pc:
 
     hname = "h{}".format(hypothesis)
     rwtfrom = hypothesis
-    if hypothesis in ("fa2-0.5", "L1Zg", "fL1Zg0.5", "fL1Zgprod0.5"):
-      rwtfrom = "0+" if productionmode == "ggH" else "a2"
 
     h = hs[hypothesis] = plotfromtree(
       reweightfrom=ReweightingSample(productionmode, rwtfrom, hffhypothesistouse()),
@@ -113,8 +113,9 @@ with PlotCopier() as pc:
       color=color,
       hname=hname,
       cut=cut,
-      production=production,
+      production=production if hypothesis != "0+" else "190703_2016",
     )
+    assert production == "190703_2018", "^^^^^^^^^^^"
     if not logscale: h.SetMinimum(0)
     if setminimum is not None: h.SetMinimum(setminimum)
 
