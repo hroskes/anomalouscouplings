@@ -115,7 +115,7 @@ class TreeWrapperBase(Iterator):
             raise SyntaxError(error)
 
     def per_event_scale_factor(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH"): return 1
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH", "HJJ"): return 1
         if self.productionmode == "ggZZ": return self.KFactor_QCD_ggZZ_Nominal
         if self.productionmode == "qqZZ":
             if self.GEN: return 1

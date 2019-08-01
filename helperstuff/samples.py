@@ -1368,7 +1368,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
 
     def CJLSTmaindir(self):
       if self.alternategenerator is None:
-        if self.productionmode == "ggH":
+        if self.productionmode in ("ggH", "ttH", "HJJ"):
           return self.production.CJLSTdir_anomalous()
         if self.productionmode == "VBF":
           return self.production.CJLSTdir_anomalous_VBF()
