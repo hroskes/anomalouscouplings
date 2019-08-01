@@ -863,9 +863,10 @@ class Category(MyEnum):
     """
     enumname = "category"
     enumitems = (
-                 EnumItem("Untagged", "UntaggedMor18", "VBF1jTaggedMor18", "VHLeptTaggedMor18", "ttHHadrTaggedMor18", "ttHLeptTaggedMor18", "VHMETTaggedMor18", ""),
-                 EnumItem("VHHadrtagged", "VHHadrTaggedMor18"),
-                 EnumItem("VBFtagged", "VBF2jTaggedMor18"),
+                 EnumItem("Untagged", "UntaggedAC19", "VBF1jTaggedAC19", "VHLeptTaggedAC19", "ttHHadrTaggedAC19", "ttHLeptTaggedAC19", "VHMETTaggedAC19", ""),
+                 EnumItem("VHHadrtagged", "VHHadrTaggedAC19"),
+                 EnumItem("VBFtagged", "VBF2jTaggedAC19"),
+                 EnumItem("Boosted", "BoostedAC19"),
                 )
     @property
     def idnumbers(self):
@@ -876,10 +877,6 @@ class Category(MyEnum):
         import CJLSTscripts
         return {getattr(CJLSTscripts, name) for name in self.item.names if "Mor" in name}
 
-    @property
-    def yamlname(self):
-        return str(self).replace("tagged", "Tagged")
-
     def __contains__(self, other):
         self.checkidnumbers()
         return other in self.idnumbers
@@ -889,12 +886,14 @@ class Category(MyEnum):
         if self == "Untagged": return [ProductionMode("ggH")]
         if self == "VBFtagged": return [ProductionMode("VBF")]
         if self == "VHHadrtagged": return [ProductionMode("ZH"), ProductionMode("WH")]
+        assert False, self
 
     @property
     def nameonplot(self):
         if self == "Untagged": return "Untagged"
         if self == "VBFtagged": return "VBF-tagged"
         if self == "VHHadrtagged": return "VH-tagged"
+        if self == "Boosted": return "Boosted"
 
     @classmethod
     def fromid(cls, number):

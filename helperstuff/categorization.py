@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-from CJLSTscripts import categoryMor18, UntaggedMor18, VBF2jTaggedMor18, VHHadrTaggedMor18
+from CJLSTscripts import categoryMor18, categoryAC19, UntaggedAC19, VBF2jTaggedAC19, VHHadrTaggedAC19, BoostedAC19
 import config
 from enums import BTagSystematic, Category, categories, HffHypothesis, Hypothesis, JECSystematic
 from samples import ArbitraryCouplingsSample
@@ -25,15 +25,16 @@ class NoCategorization(BaseCategorization):
     def category_function_name(self): return "category_nocategorization"
     def get_category_function(self_categorization):
         @setname(self_categorization.category_function_name)
-        def function(self_tree): return UntaggedMor18
+        def function(self_tree): return UntaggedAC19
         return function
     @property
     def issystematic(self): return False
 
 class BaseSingleCategorization(BaseCategorization):
-    def __init__(self, JEC, btag):
+    def __init__(self, JEC, btag, useboosted):
         self.JEC = JECSystematic(JEC)
         self.btag = BTagSystematic(btag)
+        self.useboosted = useboosted
         if self.btag != "Nominal" and self.JEC != "Nominal":
             raise ValueError("Can't have systematics on both btag and JEC at the same time! {}, {}".format(self.btag, self.JEC))
     @property
@@ -94,7 +95,7 @@ class BaseSingleCategorization(BaseCategorization):
 
         @setname(self_categorization.category_function_name)
         def function(self_tree):
-            result = self_categorization.lastvalue = categoryMor18(
+            args = [
                 self_tree.nExtraLep,
                 self_tree.nExtraZ,
                   getattr(self_tree, njets_variable_name),
@@ -113,11 +114,21 @@ class BaseSingleCategorization(BaseCategorization):
                   getattr(self_tree, p_HadZH_mavjj_true_variable_name),
                   getattr(self_tree, phi_variable_name),
                 self_tree.ZZMass,
+                self_tree.ZZPt if self.useboosted else None
                 self_tree.PFMET,
                 config.useVHMETTagged,
                 config.useQGTagging,
-            )
+            ]
+
+            if self.useboosted:
+                categoryfunction = categoryAC19
+            else:
+                categoryfunction = categoryMor18
+                args.remove(None)
+
+            result = self_categorization.lastvalue = categoryfunction(*args)
             return result
+
         return function
 
 class BaseSingleCategorizationCouplings(BaseSingleCategorization):
@@ -439,10 +450,10 @@ class MultiCategorization(BaseCategorization):
         @setname(self_categorization.category_function_name)
         def function(self_tree):
             lastvalues = {single.lastvalue for single in singles}
-            if any(_ == VBF2jTaggedMor18 for _ in lastvalues):
-                return VBF2jTaggedMor18
-            if any(_ == VHHadrTaggedMor18 for _ in lastvalues):
-                return VHHadrTaggedMor18
+            if any(_ == VBF2jTaggedAC19 for _ in lastvalues):
+                return VBF2jTaggedAC19
+            if any(_ == VHHadrTaggedAC19 for _ in lastvalues):
+                return VHHadrTaggedAC19
             assert len(lastvalues) == 1
             return lastvalues.pop()
         return function

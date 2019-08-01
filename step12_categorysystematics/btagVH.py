@@ -3,7 +3,7 @@
 import ROOT
 
 from helperstuff import config
-from helperstuff.CJLSTscripts import VHHadrTaggedMor18, VBF2jTaggedMor18
+from helperstuff.CJLSTscripts import VHHadrTaggedAC19, VBF2jTaggedAC19
 from helperstuff.samples import Sample
 from helperstuff.utilities import tfiles
 
@@ -21,8 +21,8 @@ weightparts_total = [
 ]
 weight_total = " && ".join("("+_+")" for _ in weightparts_total)
 weightparts = weightparts_total + [
-  "{} != {}".format(categorization, VHHadrTaggedMor18),
-  "{} != {}".format(categorization, VBF2jTaggedMor18),
+  "{} != {}".format(categorization, VHHadrTaggedAC19),
+  "{} != {}".format(categorization, VBF2jTaggedAC19),
   "nExtraLep==0 && (nCleanedJetsPt30==2||nCleanedJetsPt30==3) && nCleanedJetsPt30BTagged>=2",
 ]
 weight = " && ".join("("+_+")" for _ in weightparts)

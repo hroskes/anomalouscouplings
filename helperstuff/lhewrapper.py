@@ -316,10 +316,12 @@ class TreeWrapperMELA(TreeWrapperBase):
 
   def category_0P_or_0M(self):
     if self.D_2jet_0plus() > 0.5 or self.D_2jet_0minus() > 0.5:
-      return CJLSTscripts.VBF2jTaggedMor18
+      return CJLSTscripts.VBF2jTaggedAC19
     elif self.D_HadZH_0plus() > 0.5 or self.D_HadZH_0minus() > 0.5 or self.D_HadWH_0plus() > 0.5 or self.D_HadWH_0minus() > 0.5:
-      return CJLSTscripts.VHHadrTaggedMor18
-    return CJLSTscripts.UntaggedMor18
+      return CJLSTscripts.VHHadrTaggedAC19
+    elif self.ZZPt > 120:
+      return CJLSTscripts.BoostedAC19
+    return CJLSTscripts.UntaggedAC19
 
 @callclassinitfunctions("initweightfunctions", "initsystematics")
 class TreeWrapperPythia(TreeWrapperMELA):
