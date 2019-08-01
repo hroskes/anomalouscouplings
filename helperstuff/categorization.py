@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
-from CJLSTscripts import categoryMor17, categoryMor18, UntaggedMor17, VBF2jTaggedMor17, VHHadrTaggedMor17
+from CJLSTscripts import categoryMor18, UntaggedMor18, VBF2jTaggedMor18, VHHadrTaggedMor18
 import config
 from enums import BTagSystematic, Category, categories, HffHypothesis, Hypothesis, JECSystematic
 from samples import ArbitraryCouplingsSample
@@ -25,7 +25,7 @@ class NoCategorization(BaseCategorization):
     def category_function_name(self): return "category_nocategorization"
     def get_category_function(self_categorization):
         @setname(self_categorization.category_function_name)
-        def function(self_tree): return UntaggedMor17
+        def function(self_tree): return UntaggedMor18
         return function
     @property
     def issystematic(self): return False
@@ -439,10 +439,10 @@ class MultiCategorization(BaseCategorization):
         @setname(self_categorization.category_function_name)
         def function(self_tree):
             lastvalues = {single.lastvalue for single in singles}
-            if any(_ == VBF2jTaggedMor17 for _ in lastvalues):
-                return VBF2jTaggedMor17
-            if any(_ == VHHadrTaggedMor17 for _ in lastvalues):
-                return VHHadrTaggedMor17
+            if any(_ == VBF2jTaggedMor18 for _ in lastvalues):
+                return VBF2jTaggedMor18
+            if any(_ == VHHadrTaggedMor18 for _ in lastvalues):
+                return VHHadrTaggedMor18
             assert len(lastvalues) == 1
             return lastvalues.pop()
         return function

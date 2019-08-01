@@ -863,9 +863,9 @@ class Category(MyEnum):
     """
     enumname = "category"
     enumitems = (
-                 EnumItem("Untagged", "UntaggedMor17", "VBF1jTaggedMor17", "VHLeptTaggedMor17", "ttHTaggedMor17", "VHMETTaggedMor17", "UntaggedMor18", "VBF1jTaggedMor18", "VHLeptTaggedMor18", "ttHHadrTaggedMor18", "ttHLeptTaggedMor18", "VHMETTaggedMor18", ""),
-                 EnumItem("VHHadrtagged", "VHHadrTaggedMor17", "VHHadrTaggedMor18"),
-                 EnumItem("VBFtagged", "VBF2jTaggedMor17", "VBF2jTaggedMor18"),
+                 EnumItem("Untagged", "UntaggedMor18", "VBF1jTaggedMor18", "VHLeptTaggedMor18", "ttHHadrTaggedMor18", "ttHLeptTaggedMor18", "VHMETTaggedMor18", ""),
+                 EnumItem("VHHadrtagged", "VHHadrTaggedMor18"),
+                 EnumItem("VBFtagged", "VBF2jTaggedMor18"),
                 )
     @property
     def idnumbers(self):

@@ -495,15 +495,15 @@ class Projections(MultiEnum):
     gi_VBFBSM = copysign((ReweightingSample("VBF", SMhypothesis).nominalJHUxsec / ReweightingSample("VBF", BSMhypothesis).nominalJHUxsec)**.25, gi_ggHBSM)
     gi_VHBSM = copysign(((ReweightingSample("WH", SMhypothesis).nominalJHUxsec + ReweightingSample("ZH", SMhypothesis).nominalJHUxsec) / (ReweightingSample("WH", BSMhypothesis).nominalJHUxsec + ReweightingSample("ZH", BSMhypothesis).nominalJHUxsec))**.25, gi_ggHBSM)
     gi_VVHBSM = copysign(((ReweightingSample("VBF", SMhypothesis).nominalJHUxsec + ReweightingSample("WH", SMhypothesis).nominalJHUxsec + ReweightingSample("ZH", SMhypothesis).nominalJHUxsec) / (ReweightingSample("VBF", BSMhypothesis).nominalJHUxsec + ReweightingSample("WH", BSMhypothesis).nominalJHUxsec + ReweightingSample("ZH", BSMhypothesis).nominalJHUxsec))**.25, gi_ggHBSM)
-    if category == "UntaggedMor17":
+    if category == "UntaggedMor18":
         g1_mix = 1/sqrt(2)
         gi_mix = 1/sqrt(2)*gi_ggHBSM
         fainame = self.analysis.title(superscript="dec")
-    elif category == "VBF2jTaggedMor17":
+    elif category == "VBF2jTaggedMor18":
         g1_mix = 1/2**.25
         gi_mix = 1/2**.25 * gi_VBFBSM
         fainame = self.analysis.title(superscript="VBFdec")
-    elif category == "VHHadrTaggedMor17":
+    elif category == "VHHadrTaggedMor18":
         g1_mix = 1/2**.25
         gi_mix = 1/2**.25 * gi_VHBSM
         fainame = self.analysis.title(superscript="VHdec")
