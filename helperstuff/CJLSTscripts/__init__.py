@@ -27,7 +27,7 @@ for script in scripts:
     utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, script+".cc+"))
 utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, "FakeRates.cpp+"))
 
-from ROOT import categoryAC19, UntaggedAC19, VBF1jTaggedAC19, VBF2jTaggedAC19, VHLeptTaggedAC19, VHHadrTaggedAC19, ttHLeptTaggedAC19, ttHHadrTaggedAC19, VHMETTaggedAC19, BoostedAC19
+from ROOT import categoryAC19, UntaggedAC19, VBF1jTaggedAC19, VBF2jTaggedAC19, VHLeptTaggedAC19, VHHadrTaggedAC19, ttHLeptTaggedAC19, ttHHadrTaggedAC19, VHMETTaggedAC19, BoostedAC19, categoryMor18
 
 from ROOT import getDVBF2jetsConstant, getDVBF1jetConstant, getDWHhConstant, getDZHhConstant, getDbkgkinConstant, getDbkgConstant
 from ROOT import getDVBF2jetsWP, getDVBF1jetWP, getDWHhWP, getDZHhWP

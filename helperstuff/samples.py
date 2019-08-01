@@ -1677,7 +1677,7 @@ class SampleBasis(MultiEnum):
         return invertnumpymatrix(self.matrix)
 
 def allsamples():
-    if deprecate(False, 2019, 7, 20): __xcheck()
+    if deprecate(False, 2019, 8, 20): __xcheck()
     for production in productions:
         if production.GEN:
             for productionmode in "ggH", "VBF", "ZH", "WH", "bbH":

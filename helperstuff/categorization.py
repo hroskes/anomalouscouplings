@@ -31,10 +31,9 @@ class NoCategorization(BaseCategorization):
     def issystematic(self): return False
 
 class BaseSingleCategorization(BaseCategorization):
-    def __init__(self, JEC, btag, useboosted):
+    def __init__(self, JEC, btag):
         self.JEC = JECSystematic(JEC)
         self.btag = BTagSystematic(btag)
-        self.useboosted = useboosted
         if self.btag != "Nominal" and self.JEC != "Nominal":
             raise ValueError("Can't have systematics on both btag and JEC at the same time! {}, {}".format(self.btag, self.JEC))
     @property
@@ -95,7 +94,7 @@ class BaseSingleCategorization(BaseCategorization):
 
         @setname(self_categorization.category_function_name)
         def function(self_tree):
-            args = [
+            result = self_categorization.lastvalue = categoryAC19(
                 self_tree.nExtraLep,
                 self_tree.nExtraZ,
                   getattr(self_tree, njets_variable_name),
@@ -114,19 +113,11 @@ class BaseSingleCategorization(BaseCategorization):
                   getattr(self_tree, p_HadZH_mavjj_true_variable_name),
                   getattr(self_tree, phi_variable_name),
                 self_tree.ZZMass,
-                self_tree.ZZPt if self.useboosted else None
+                self_tree.ZZPt,
                 self_tree.PFMET,
                 config.useVHMETTagged,
                 config.useQGTagging,
-            ]
-
-            if self.useboosted:
-                categoryfunction = categoryAC19
-            else:
-                categoryfunction = categoryMor18
-                args.remove(None)
-
-            result = self_categorization.lastvalue = categoryfunction(*args)
+            )
             return result
 
         return function

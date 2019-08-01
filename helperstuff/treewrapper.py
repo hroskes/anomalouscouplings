@@ -1404,15 +1404,12 @@ class TreeWrapper(TreeWrapperBase):
             categorization.SingleCategorizationgm4l("L1Zg", JEC, btag),
         ]
         append += [
-            categorization.MultiCategorization("0P_or_{}".format(other.hypothesisname) + btag.appendname + JEC.appendname, append[0], other)
-               for other in append[1:]
-        ] + [
             categorization.MultiCategorization("0P_or_0M_or_a2_or_L1_or_L1Zg"+btag.appendname+JEC.appendname, *append)
-        ]  #note can't do this with two separate +=, since they both refer to the original append
+        ]
         categorizations += append
     categorizations.append(categorization.NoCategorization())
     assert len({_.category_function_name for _ in categorizations}) == len(categorizations)
-    del append, btag, JEC, other
+    del append, btag, JEC
 
 #############
 #Init things#
