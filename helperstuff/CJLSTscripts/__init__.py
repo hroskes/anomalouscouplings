@@ -8,7 +8,7 @@ CJLSTscriptsfolder = os.path.dirname(os.path.abspath(__file__))
 #have to be in order of who includes whose header file
 scripts = ["cConstants", "Discriminants", "Category", "bitops", "FinalStates"]
 
-downloader = downloadfromCJLST.Downloader("374a6d552e091710ec72a3b1f4b73562972b6bba")
+downloader = downloadfromCJLST.Downloader("f98013bb5cd43f5e8c51f9606a3f39a4bab5072c")
 for script in scripts:
     downloader.add("AnalysisStep/src/{}.cc".format(script))
     downloader.add("AnalysisStep/interface/{}.h".format(script))

@@ -550,6 +550,11 @@ def runcombine(analysis, foldername, **kwargs):
     if faiorder[0] != scanfai:
       raise ValueError("{} should be first in faiorder".format(scanfai))
 
+    if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
+        raise ValueError("For decay only analysis have to specify categories=Untagged")
+    if set(usechannels) != {Channel("2e2mu")} and LHE:
+        raise ValueError("For LHE analysis have to specify channels=2e2mu")
+
     combinecardsappend = "_lumi.oO[totallumi]Oo."
     workspacefileappend = ".oO[combinecardsappend]Oo."
     moreappend = ".oO[workspacefileappend]Oo."
@@ -603,10 +608,9 @@ def runcombine(analysis, foldername, **kwargs):
     if setparametersforgrid:
         moreappend += "_"+setparametersforgrid
 
-    if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
-        raise ValueError("For decay only analysis have to specify categories=Untagged")
-    if set(usechannels) != {Channel("2e2mu")} and LHE:
-        raise ValueError("For LHE analysis have to specify channels=2e2mu")
+    if not analysis.useboosted and "Boosted" in usecategories:
+        usecategories = [c for c in usecategories if c != "Boosted"]
+
     if len(analysis.fais) > 1: assert not fixfai
 
     if sqrts is None:
@@ -686,40 +690,19 @@ def runcombine(analysis, foldername, **kwargs):
         })
         
 
-    if analysis.usehistogramsforcombine:
-        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
-        repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
-        repmap["savemu"] = "--saveSpecifiedFunc=CMS_zz4l_fa1," + ",".join("CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai)
-        repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
-    else:
-        if analysis.dimensions == 2 and analysis.isdecayonly:
-            repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:spinZeroHiggs"
-            repmap["physicsoptions"] = "--PO allowPMF"
-            if scanfai == analysis: repmap["physicsoptions"] += " --PO fai2asPOI"
-            elif scanfai == analysis.fais[0]: pass
-            elif scanfai == analysis.fais[1]: repmap["physicsoptions"] += " --PO fai2asPOI --PO fai1fixed"
-            repmap["savemu"] = ""
-        elif analysis.dimensions == 2 and not analysis.isdecayonly:
-            assert False
-        elif analysis.dimensions != 2 and analysis.isdecayonly:
-            assert False
-        else:
-            repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:multiSignalSpinZeroHiggs"
-            repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF"
-            repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(mu for mu, fix in (("muV", fixmuV), ("muf", fixmuf)) if not fix and mu!=POI and not analysis.isdecayonly)
+    repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
+    repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
+    repmap["savemu"] = "--saveSpecifiedFunc=CMS_zz4l_fa1," + ",".join("CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai)
+    repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
 
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
     mkdir_p(folder)
     with cd(folder):
         with open(".gitignore", "w") as f:
             f.write("*")
-        if analysis.usehistogramsforcombine:
-            for category in usecategories:
-                for channel in usechannels:
-                    makeDCsandWSs(productions, (category,), (channel,), analysis, lumitype)
-        else:
-            #must make it for all categories and channels even if not using them all because of mu definition!
-            makeDCsandWSs(productions, categories, channels, analysis, lumitype)
+        for category in usecategories:
+            for channel in usechannels:
+                makeDCsandWSs(productions, (category,), (channel,), analysis, lumitype)
         for filename in alsocombine:
             for _ in filename, filename.replace(".input.root", ".txt"):
                 if not os.path.exists(_): raise ValueError("{} does not exist!".format(_))

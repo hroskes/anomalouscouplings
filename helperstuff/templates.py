@@ -41,6 +41,10 @@ class TemplatesFile(MultiEnum):
                 raise ValueError("decay only analysis is only done for untagged!\n{}".format(args))
             if self.templategroup in ("vbf", "zh", "wh", "vh", "tth"):
                 raise ValueError("decay only analysis is only done with decay information!\n{}".format(args))
+        if not self.analysis.useboosted:
+            if self.category == "Boosted":
+                raise ValueError("{} doesn't use boosted\n{}".format(self.analysis, args))
+
         if self.production.LHE:
             if self.channel != "2e2mu":
                 raise ValueError("LHE analysis is only done for 2e2mu for now!\n{}".format(args))
@@ -183,7 +187,7 @@ class TemplatesFile(MultiEnum):
         elif self.templategroup == "bkg":
             if self.production.LHE or self.production.GEN: return [Template(self, "qqZZ")]
             result = ["qqZZ", "ggZZ", "VBF bkg"]
-            if deprecate(True, 2019, 7, 20):
+            if deprecate(True, 2019, 8, 20):
                 result.remove("VBF bkg")
             if config.usedata:
                 result.append("ZX")
@@ -244,17 +248,18 @@ class TemplatesFile(MultiEnum):
     def bkgdiscriminant(self):
         from discriminants import discriminant
 
-        if self.analysis in ("fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP"): return discriminant("phistarZ2")
+        if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP"): return discriminant("phistarZ2")
 
         name = "D_bkg"
         if self.category == "Untagged": pass
         elif self.category == "VBFtagged": name += "_VBFdecay"
         elif self.category == "VHHadrtagged": name += "_HadVHdecay"
+        elif self.category == "Boosted": pass
         else: assert False
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter") or self.analysis.isSTXS:
+        if self.analysis == "fa3_multiparameter" or self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isSTXS:
             name += "_3bins"
         elif self.category == "Untagged":
             name += "_20bins"
@@ -307,7 +312,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z2Mass")
             if self.analysis.isSTXS:
                 return discriminant("D_STXS_stage1p1_untagged"+JECappend)
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3_multiparameter"):
                 return discriminant("D_4couplings_decay")
             if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins"):
                 return discriminant("D_0minus_decay_3bins")
@@ -325,7 +330,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis.isSTXS:
                 return discriminant("D_STXS_stage1p1_VBF"+JECappend)
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3_multiparameter"):
                 return discriminant("D_4couplings_VBFdecay"+JECappend)
             if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins"):
                 return discriminant("D_0minus_VBFdecay_3bins")
@@ -343,12 +348,16 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis.isSTXS:
                 return discriminant("D_STXS_stage1p1_HadVH"+JECappend)
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3_multiparameter"):
                 return discriminant("D_4couplings_HadVHdecay"+JECappend)
             if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins"):
                 return discriminant("D_0minus_HadVHdecay_3bins")
             if self.analysis == "fa3_onlyDCP":
                 return discriminant("phistarZ1")
+
+        if self.category == "Boosted":
+            if self.analysis == "fa3fa2fL1fL1Zg_boosted":
+                return discriminant("ZZPt")
 
         assert False
 
@@ -387,7 +396,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg_only6bins"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3_multiparameter"):
                 return discriminant("D_CP_decay_2bins")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
@@ -406,7 +415,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg_only6bins"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3_multiparameter"):
                 return discriminant("D_CP_VBF_2bins"+JECappend)
 
         if self.category == "VHHadrtagged":
@@ -420,8 +429,12 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3_multiparameter_nodbkg", "fa3_multiparameter", "fa3_only6bins", "fa3_onlyDCP", "fa3fa2fL1fL1Zg_only6bins"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3_multiparameter"):
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
+
+        if self.category == "Boosted":
+            if self.analysis == "fa3fa2fL1fL1Zg_boosted":
+                return discriminant("phistarZ2")
 
         assert False, self
 
@@ -611,7 +624,7 @@ class TemplatesFile(MultiEnum):
                         IntTemplate(self, productionmode, "gk1gl1"),
                         Template(self, productionmode, self.analysis.purehypotheses[4]),
                     ]
-                elif self.category in ("VBFtagged", "VHHadrtagged") or self.analysis.isSTXS:
+                elif self.category in ("VBFtagged", "VHHadrtagged", "Boosted") or self.analysis.isSTXS:
                     #leave out fa3, because those interferences are 0
                     constrainttype = "threeparameterggH"
                     templates = [
@@ -700,7 +713,7 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "gk1gl3"),
                     Template(self, productionmode, self.analysis.purehypotheses[4]),
                 ]
-                if self.analysis.isSTXS:
+                if self.analysis.isSTXS or self.category == "Boosted":
                     for i, _ in reversed(list(enumerate(templates[:]))):
                         if isinstance(_, IntTemplate) and _.interferencetype.couplingpowers["i"] in (1, 3):
                             del templates[i]
@@ -774,7 +787,7 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "gk3gl1"),
                     IntTemplate(self, productionmode, "gk2gl2"),
                 ]
-                if self.analysis.isSTXS:
+                if self.analysis.isSTXS or self.category == "Boosted":
                     for i, _ in reversed(list(enumerate(templates[:]))):
                         if isinstance(_, IntTemplate) and _.interferencetype.couplingpowers["i"] in (1, 3):
                             del templates[i]
@@ -798,6 +811,7 @@ def templatesfiles():
             for analysis in analyses:
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
+                    if category == "Boosted" and not analysis.useboosted: continue
                     for templategroup in templategroups:
                         if analysis.isdecayonly and templategroup not in ("bkg", "ggh", "DATA"): continue
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
@@ -1137,7 +1151,7 @@ class Template(TemplateBase, MultiEnum):
     @property
     def domirror(self):
         if "fa3" not in self.analysis.fais: return False
-        if self.analysis.isSTXS: return False #for now... could do DCP later
+        if self.analysis.isSTXS or self.category == "Boosted": return False
         if self.productionmode == "data": return False
 
         assert "D_CP" in self.mixdiscriminant.name, (self, self.mixdiscriminant.name)
@@ -1286,7 +1300,10 @@ class Template(TemplateBase, MultiEnum):
         if not self.production.LHE:
             result.append("Z1Flav*Z2Flav == {}".format(self.ZZFlav))
         if not self.analysis.isdecayonly:
-            result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in self.category.idnumbers) + ")")
+            idnumbers = self.category.idnumbers
+            if not self.analysis.useboosted and self.category == "Untagged":
+                idnumbers |= Category("Boosted").idnumbers
+            result.append("(" + " || ".join("{} == {}".format(self.categoryname, c) for c in idnumbers) + ")")
         if self.productionmode == "data" and not config.showblinddistributions:
             result.insert(0, "0")
         return " && ".join(result)
@@ -1471,16 +1488,16 @@ class IntTemplate(TemplateBase, MultiEnum):
                 #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
                 return {"type":"rescale", "factor":0}
             if self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] == 0:
-                if self.analysis.isSTXS: return None #for now... could do it later
+                if self.analysis.isSTXS or self.category == "Boosted": return None
                 return {"type":"mirror", "antisymmetric":False, "axis":1}
             assert False
 
-        if self.analysis.isSTXS and self.interferencetype.couplingpowers["i"] in (1, 3):
+        if (self.analysis.isSTXS or self.category == "Boosted") and self.interferencetype.couplingpowers["i"] in (1, 3):
             #same (antimirror over D_CP_whatever, which doesn't exist in STXS)
             assert "fa3" == self.analysis.fais[0]
             return {"type":"rescale", "factor":0}
 
-        if self.analysis.isSTXS: return None #for now... could do it later
+        if self.analysis.isSTXS or self.category == "Boosted": return None
 
         #Mirror antisymmetric for VH in VBF category and VBF in VH category
         #the interference templates are 0 to within error bars anyway,
@@ -1665,6 +1682,9 @@ class DataTree(MultiEnum):
         if self.analysis.isdecayonly:
             if self.category != "Untagged":
                 raise ValueError("decayonly analysis is only done for untagged!\n{}".format(args))
+        if not self.analysis.useboosted:
+            if self.category == "Boosted":
+                raise ValueError("{} doesn't use boosted\n{}".format(self.analysis, args))
         if self.production.LHE:
             if self.channel != "2e2mu":
                 raise ValueError("LHE analysis is only done for 2e2mu for now!\n{}".format(args))
@@ -1676,7 +1696,19 @@ class DataTree(MultiEnum):
     def treefile(self):
         return os.path.join(config.repositorydir, "step7_templates", str(self.production), "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
     def passescut(self, t):
-        return abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav and config.m4lmin < t.ZZMass < config.m4lmax and config.unblinddistributions and getattr(t, "category_"+self.analysis.categoryname) in self.category
+        return (
+          abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav
+          and config.m4lmin < t.ZZMass < config.m4lmax
+          and config.unblinddistributions
+          and (
+            getattr(t, "category_"+self.analysis.categoryname) in self.category
+            or (
+              getattr(t, "category_"+self.analysis.categoryname) in Category("Boosted")
+              and not self.analysis.useboosted
+              and self.category == "Untagged"
+            )
+          )
+        )
 
 @listfromiterator
 def datatrees():
@@ -1686,6 +1718,7 @@ def datatrees():
             for category in categories:
                 for analysis in analyses:
                     if category != "Untagged" and analysis.isdecayonly: continue
+                    if category == "Boosted" and not analysis.useboosted: continue
                     yield DataTree(channel, production, category, analysis)
 
 

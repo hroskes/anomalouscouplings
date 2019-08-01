@@ -157,8 +157,7 @@ class _Datacard(MultiEnum):
         return "hzz4l_{}S_{}_{}.lumi{:.2f}.txt".format(self.channel, self.category, self.year, float(self.luminosity))
     @property
     def rootfile(self):
-        if self.analysis.usehistogramsforcombine: return self.rootfile_base
-        return "hzz4l_{}S_{}_{}.lumi{:.2f}.input.root".format(self.channel, self.category, self.year, float(self.luminosity))
+        return self.rootfile_base
     @property
     def rootfile_base(self):
         return "hzz4l_{}S_{}_{}.input.root".format(self.channel, self.category, self.year)
@@ -194,10 +193,7 @@ class _Datacard(MultiEnum):
 
     @property
     def shapes(self):
-        if self.analysis.usehistogramsforcombine:
-            return "* * $CHANNEL.input.root $PROCESS $PROCESS_$SYSTEMATIC"
-        else:
-            return "* * $CHANNEL.input.root w:$PROCESS w:$PROCESS_$SYSTEMATIC"
+        return "* * $CHANNEL.input.root $PROCESS $PROCESS_$SYSTEMATIC"
 
     section2 = Section("shapes")
 
@@ -231,8 +227,6 @@ class _Datacard(MultiEnum):
     @cache
     @generatortolist
     def allhistograms(self):
-        if not self.analysis.usehistogramsforcombine:
-            raise ValueError("Should not be calling this function for {}".format(self.analysis))
         for p in self.productionmodes:
             if p.isbkg:
                 yield p.combinename
@@ -260,51 +254,32 @@ class _Datacard(MultiEnum):
     def getprocesses(self, counter=Counter()):
         counter[self] += 1
 
-        if self.analysis.usehistogramsforcombine:
-            result = {1: [], 2: []}
+        result = {1: [], 2: []}
 
-            nsignal = nbkg = 0
-            for h in self.histograms:
-                if "bkg_" in h:
-                    assert ProductionMode(h).isbkg
-                    result[1].append(h)
-                    result[2].append(1 + nbkg)
-                    nbkg += 1
-                else:
-                    assert ProductionMode(h.split("_")[0]).issignal
-                    result[1].append(h)
-                    result[2].append(-nsignal)
-                    nsignal += 1
-            return [str(_) for _ in result[counter[self]]]
-        else:
-            if counter[self] == 1:
-                return [_.combinename for _ in self.productionmodes]
-
-            if counter[self] == 2:
-                nsignal = sum(_.issignal for _ in self.productionmodes)
-                nbkg = sum(_.isbkg for _ in self.productionmodes)
-                assert nsignal+nbkg == len(self.productionmodes)
-
-                return [str(_) for _ in range(-nsignal+1, nbkg+1)]
-
-        assert False
+        nsignal = nbkg = 0
+        for h in self.histograms:
+            if "bkg_" in h:
+                assert ProductionMode(h).isbkg
+                result[1].append(h)
+                result[2].append(1 + nbkg)
+                nbkg += 1
+            else:
+                assert ProductionMode(h.split("_")[0]).issignal
+                result[1].append(h)
+                result[2].append(-nsignal)
+                nsignal += 1
+        return [str(_) for _ in result[counter[self]]]
 
     @property
     def rate(self):
-        if self.analysis.usehistogramsforcombine:
-            return " ".join(str(self.histogramintegrals[h]) for h in self.histograms)
-        else:
-            return " ".join(str(getrate(p, self.channel, self.category, self.analysis, self.luminosity)) for p in self.productionmodes)
+        return " ".join(str(self.histogramintegrals[h]) for h in self.histograms)
 
     section4 = Section("## mass window [{},{}]".format(config.m4lmin, config.m4lmax),
                        "bin", "process", "process", "rate")
 
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
-        if self.analysis.usehistogramsforcombine:
-            productionmodes = [h if "bkg_" in h else h.split("_")[0] for h in self.histograms]
-        else:
-            productionmodes = self.productionmodes
+        productionmodes = [h if "bkg_" in h else h.split("_")[0] for h in self.histograms]
 
         if self.production.LHE or self.production.GEN:
             if yieldsystematic == "QCDscale_ren_VV":
@@ -336,20 +311,14 @@ class _Datacard(MultiEnum):
       if self.year not in workspaceshapesystematic.years: return None
       if self.production.LHE or self.production.GEN: return None
       if workspaceshapesystematic.isperchannel and channel == self.channel:
-        if self.analysis.usehistogramsforcombine:
-          return " ".join(
-                          ["shape1"] +
-                          ["1" if workspaceshapesystematic in
-                                  ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
-                               else "-"
-                              for h in self.histograms]
-                         )
         return " ".join(
-                        ["shape1"] +
-                        ["1" if workspaceshapesystematic in p.workspaceshapesystematics(self.category)
-                             else "-"
-                            for p in self.productionmodes]
-                       )
+          ["shape1"] + [
+            "1" if workspaceshapesystematic in
+              ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
+            else "-"
+            for h in self.histograms
+          ]
+        )
 
     @MakeSystematicFromEnums(WorkspaceShapeSystematic)
     def workspaceshapesystematic(self, workspaceshapesystematic):
@@ -361,26 +330,19 @@ class _Datacard(MultiEnum):
           pass
       else:
           return None  #in that case shape1? is taken care of in yieldsystematic
-      if self.analysis.usehistogramsforcombine:
-        return " ".join(
-                        ["shape1"] +
-                        ["1" if workspaceshapesystematic in
-                                ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
-                             else "-"
-                            for h in self.histograms]
-                       )
       return " ".join(
-                      ["shape1"] +
-                      ["1" if workspaceshapesystematic in p.workspaceshapesystematics(self.category) else "-"
-                          for p in self.productionmodes]
-                     )
+        ["shape1"] + [
+          "1" if workspaceshapesystematic in
+            ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
+          else "-"
+          for h in self.histograms
+        ]
+      )
 
     @MakeSystematicFromEnums(ProductionMode, Category, Channel, config.staticmaxbins)
     def binbybin_category_channel_productionmode_index(self, productionmode, category, channel, index):
         return deprecate(None, 2019, 7, 25)
         if productionmode not in ("qqZZ", "ZX"): return None
-        if not self.analysis.usehistogramsforcombine:
-          return None
         if category != self.category or channel != self.channel:
           return None
         if "binbybin_{}_{}_{}_{}".format(category, channel, productionmode, index) not in self.binbybinuncertainties:
@@ -426,9 +388,6 @@ class _Datacard(MultiEnum):
         return {}
 
     def makehistograms(self):
-        if not self.analysis.usehistogramsforcombine:
-            raise ValueError("Should not be calling this function for {}".format(self.analysis))
-
         f = ROOT.TFile(self.rootfile_base, "RECREATE")
         cache = {}
         self.binbybinuncertainties = []
@@ -577,6 +536,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
         for dc in dcs:
             if dc.production.LHE and dc.channel != "2e2mu": continue
             if dc.analysis.isdecayonly and dc.category != "Untagged": continue
+            if not dc.analysis.useboosted and dc.category == "Boosted": continue
             dc.makeCardsWorkspaces(**kwargs)
             for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
                 if not os.path.exists(thing):

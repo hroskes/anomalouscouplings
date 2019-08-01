@@ -559,6 +559,7 @@ class Analysis(MyEnum):
                  EnumItem("fa3fa2fL1fL1Zg_decay"),
                  EnumItem("fa3fa2fL1fL1Zg_only6bins"),
                  EnumItem("fa3fa2fL1fL1Zg_STXS"),
+                 EnumItem("fa3fa2fL1fL1Zg_boosted"),
                 )
     def title(self, latex=False, superscript=None):
         if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -676,7 +677,7 @@ class Analysis(MyEnum):
         if self == "fa3_onlyDbkg": return True
         if self == "fa3fa2fL1fL1Zg_STXS": return True
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return False
-        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_only6bins"): return False
+        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted"): return False
         assert False, self
     @property
     def categoryname(self):
@@ -697,6 +698,10 @@ class Analysis(MyEnum):
         if self == "fa3fa2fL1fL1Zg_decay": return True
         return False
     @property
+    def useboosted(self):
+        if self == "fa3fa2fL1fL1Zg_boosted": return True
+        return False
+    @property
     def doanalysis(self):
         if config.name ==  "heshy" : 
             if self == "fa3_multiparameter": return False
@@ -711,6 +716,7 @@ class Analysis(MyEnum):
             if self == "fa3fa2fL1fL1Zg_decay": return True
             if self == "fa3fa2fL1fL1Zg_only6bins": return False
             if self == "fa3fa2fL1fL1Zg_STXS": return True
+            if self == "fa3fa2fL1fL1Zg_boosted": return True
         if config.name ==  "savvas" : 
             if self == "fa3_multiparameter": return True
             if self == "fa3_multiparameter_nodbkg": return False
@@ -724,6 +730,7 @@ class Analysis(MyEnum):
             if self == "fa3fa2fL1fL1Zg_decay": return False
             if self == "fa3fa2fL1fL1Zg_only6bins": return False
             if self == "fa3fa2fL1fL1Zg_STXS": return False
+            if self == "fa3fa2fL1fL1Zg_boosted": return False
         assert False, self
     @property
     def fais(self):
@@ -738,18 +745,6 @@ class Analysis(MyEnum):
     @property
     def isfa3fa2fL1fL1Zg(self):
         return str(self).startswith("fa3fa2fL1fL1Zg")
-
-    @property
-    def usehistogramsforcombine(self):
-        if self == "fa3_multiparameter": return True
-        if self == "fa3_multiparameter_nodbkg": return True
-        if self == "fa3_only6bins": return True
-        if self == "fa3_onlyDCP": return True
-        if self == "fa3_STXS": return True
-        if self == "fa3_onlyDbkg": return True
-        if self.isfa3fa2fL1fL1Zg: return True
-        if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
-        assert False, self
 
 class Production(MyEnum):
     enumname = "production"
@@ -875,7 +870,7 @@ class Category(MyEnum):
         (defined in Category.h)
         """
         import CJLSTscripts
-        return {getattr(CJLSTscripts, name) for name in self.item.names if "Mor" in name}
+        return {getattr(CJLSTscripts, name) for name in self.item.names if "AC" in name}
 
     def __contains__(self, other):
         self.checkidnumbers()

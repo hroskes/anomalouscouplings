@@ -82,6 +82,8 @@ decaydiscriminants = [
     Discriminant("D_L1Zg_decay", "D_{#Lambda1}^{Z#gamma,dec}", 30, 0, 1, identifier="D_L1Zg_decay_30bins"),
     Discriminant("D_CP_decay_new", "D_{CP}^{dec}", 30, -1, 1, identifier="D_CP_decay_new_30bins"),
     Discriminant("D_int_decay_new", "D_{int}^{dec}", 30, -1, 1, identifier="D_int_decay_new_30bins"),
+
+    Discriminant("ZZPt", "p_{T}^{4l}", 6, 100, 700),
 ]
 jetdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),
@@ -210,7 +212,6 @@ del decaydiscriminants, jetdiscriminants, categorydiscriminants
 
 otherplottablethings = {
     d.identifier: d for d in [
-        Discriminant("ZZPt", "p_{T}^{ZZ}", defaultnbins, 0, 500),
         Discriminant("DiJetMass", "m_{JJ}", 50, 0, 150),
     ]
 }

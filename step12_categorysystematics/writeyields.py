@@ -158,6 +158,7 @@ def writeyields(productionmodelist=None, productionlist=None):
 
         for channel, category in itertools.product(channels, categories):
           if analysis.isdecayonly and category != "Untagged": continue
+          if not analysis.useboosted and category == "Boosted": continue
           yv = YieldValue(channel, category, analysis, productionmode, production)
 
           yvvalue = result[productionmode, categorization, AlternateWeight("1"), category, channel].nominal_value
@@ -168,6 +169,7 @@ def writeyields(productionmodelist=None, productionlist=None):
 
         for category, channel in itertools.product(categories, channels):
           if analysis.isdecayonly and category != "Untagged": continue
+          if not analysis.useboosted and category == "Boosted": continue
 
           syst = YieldSystematicValue(channel, category, analysis, productionmode, "hzz_br", production)
           if productionmode.isbkg:
@@ -240,6 +242,8 @@ def writeyields(productionmodelist=None, productionlist=None):
         #same for all channels
         for category in categories:
           if analysis.isdecayonly and category != "Untagged": continue
+          if not analysis.useboosted and category == "Boosted": continue
+
           #variations on category definition: JEC and btagging
           nominal = result[productionmode, categorization, AlternateWeight("1"), category]
           if productionmode == "ZX" or analysis.isdecayonly:
