@@ -111,7 +111,7 @@ class HistogramComponentPiece(object):
   def setformulas(self, tree):
     for formula in self.__xformula, self.__weightformula, self.__cutformula:
       for branch in re.findall(r"\b[a-zA-Z_][a-zA-Z0-9_]+\b", formula):
-        if branch == "max": continue
+        if branch in ("max", "min"): continue
         tree.SetBranchStatus(branch, 1)
 
         try:
@@ -749,38 +749,39 @@ class Plot(object):
     if self.__CMStext != "Preliminary":
       self.__preliminary.makeplot()
 
+categoryname = "category_0P_or_0M_or_a2_or_L1_or_L1Zg"
+
+dijetcut = masscut + " && D_0minus_VBFdecay > -998"
+untaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("Untagged").idnumbers) + ")"
+VBFtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VBFtagged").idnumbers) + ")"
+HadVHtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VHHadrtagged").idnumbers) + ")"
+
+dijetenrichcut = dijetcut + " && D_bkg > 0.7"
+untaggedenrichcut = untaggedcut + " && D_bkg > 0.7"
+VBFtaggedenrichcut = VBFtaggedcut + " && D_bkg_VBFdecay > 0.2"
+HadVHtaggedenrichcut = HadVHtaggedcut + " && D_bkg_HadVHdecay > 0.2"
+
+purehypothesislines = [
+  HypothesisLine("0+",   2,               1, 2,               2, "SM"),
+  HypothesisLine("0-",   4,               1, 4,               2, "f_{a3}=1"),
+  HypothesisLine("a2",   ROOT.kGreen+3,   1, ROOT.kGreen+3,   2, "f_{a2}=1"),
+  HypothesisLine("L1",   ROOT.kMagenta+3, 1, ROOT.kMagenta+3, 2, "f_{#Lambda1}=1"),
+  HypothesisLine("L1Zg", ROOT.kOrange+2,  1, ROOT.kOrange+2,  2, "f_{#Lambda1}^{Z#gamma}=1"),
+]
+
+a3mixdecay = HypothesisLine("fa30.5",  ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}=0.5")
+a3mixVBF = HypothesisLine("fa3VBF0.5", ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}^{VBF}=0.5")
+a3mixVH = HypothesisLine("fa3VH0.5",   ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}^{VH}=0.5")
+
+a2mixdecay = HypothesisLine("fa2-0.5", ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}=#minus0.5")
+a2mixVBF = HypothesisLine("fa2VBF0.5", ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}^{VBF}=0.5")
+a2mixVH = HypothesisLine("fa2VH0.5",   ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}^{VH}=0.5")
+
+L1mixdecay = HypothesisLine("fL10.5", ROOT.kMagenta-4, 1, ROOT.kMagenta-4, 2, "f_{#Lambda1}=0.5")
+
+
 def makeplots():
   with PlotCopier() as pc:
-    categoryname = "category_0P_or_0M_or_a2_or_L1_or_L1Zg"
-
-    dijetcut = masscut + " && D_0minus_VBFdecay > -998"
-    untaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("Untagged").idnumbers) + ")"
-    VBFtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VBFtagged").idnumbers) + ")"
-    HadVHtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VHHadrtagged").idnumbers) + ")"
-
-    dijetenrichcut = dijetcut + " && D_bkg > 0.7"
-    untaggedenrichcut = untaggedcut + " && D_bkg > 0.7"
-    VBFtaggedenrichcut = VBFtaggedcut + " && D_bkg_VBFdecay > 0.2"
-    HadVHtaggedenrichcut = HadVHtaggedcut + " && D_bkg_HadVHdecay > 0.2"
-
-    purehypothesislines = [
-      HypothesisLine("0+",   2,               1, 2,               2, "SM"),
-      HypothesisLine("0-",   4,               1, 4,               2, "f_{a3}=1"),
-      HypothesisLine("a2",   ROOT.kGreen+3,   1, ROOT.kGreen+3,   2, "f_{a2}=1"),
-      HypothesisLine("L1",   ROOT.kMagenta+3, 1, ROOT.kMagenta+3, 2, "f_{#Lambda1}=1"),
-      HypothesisLine("L1Zg", ROOT.kOrange+2,  1, ROOT.kOrange+2,  2, "f_{#Lambda1}^{Z#gamma}=1"),
-    ]
-
-    a3mixdecay = HypothesisLine("fa30.5",  ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}=0.5")
-    a3mixVBF = HypothesisLine("fa3VBF0.5", ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}^{VBF}=0.5")
-    a3mixVH = HypothesisLine("fa3VH0.5",   ROOT.kAzure-4, 1, ROOT.kAzure-4, 2, "f_{a3}^{VH}=0.5")
-
-    a2mixdecay = HypothesisLine("fa2-0.5", ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}=#minus0.5")
-    a2mixVBF = HypothesisLine("fa2VBF0.5", ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}^{VBF}=0.5")
-    a2mixVH = HypothesisLine("fa2VH0.5",   ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a2}^{VH}=0.5")
-
-    L1mixdecay = HypothesisLine("fL10.5", ROOT.kMagenta-4, 1, ROOT.kMagenta-4, 2, "f_{#Lambda1}=0.5")
-
     plots = [
       Plot(
         name="D_0minus_decay",
