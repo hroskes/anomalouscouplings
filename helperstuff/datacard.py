@@ -176,7 +176,7 @@ class _Datacard(MultiEnum):
         if not config.usedata:
             result.remove("ZX")
         for _ in result[:]:
-            if _ == "VBFbkg": deprecate(result.remove(_), 2019, 7, 30)
+            if _ == "VBFbkg": deprecate(result.remove(_), 2019, 8, 20)
         return result
 
     @property

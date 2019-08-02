@@ -86,6 +86,8 @@ def writeyields(productionmodelist=None, productionlist=None):
             del g[:]
             g += [RSPWF("qqZZ", "ext1"), RSPWF("qqZZ", "ext2")]
 
+      if productionmode in ("ZH", "WH") and (not productionmodelist or ProductionMode("VH") in productionmodelist): continue #it's already in the counter from VH
+
       for usesamples in samplegroups:
         tmpresults = []
         for tosample in usesamples:
@@ -113,8 +115,10 @@ def writeyields(productionmodelist=None, productionlist=None):
     print
 
     for productionmode, samples in tosamples_foryields:
-      if productionmodelist and productionmode not in productionmodelist: continue
+      if productionmodelist and productionmode not in productionmodelist and not (productionmode in ("ZH", "WH") and "VH" in productionmodelist): continue
+      if productionmode == "VH": continue
       print productionmode
+      bkpresult = result.copy()
       for g in samples:
         for sample in g:
           sampleforkey = type(sample)(
@@ -136,9 +140,15 @@ def writeyields(productionmodelist=None, productionlist=None):
                 )
                 + key[1:]
               )
-              resultbypm[newkey] += result.pop(key)
+              value = result.pop(key)
+              resultbypm[newkey] += value
+              if productionmode in ("ZH", "WH"):
+                newkey2 = (ProductionMode("VH"),) + newkey[1:]
+                resultbypm[newkey2] += value
 
-    assert not result
+    if result:
+      pprint.pprint(dict(result))
+      assert False
 
     result = dict(resultbypm)
     del resultbypm
@@ -156,103 +166,99 @@ def writeyields(productionmodelist=None, productionlist=None):
         assert len(categorization) == 1, categorization
         categorization = categorization.pop()
 
-        for channel, category in itertools.product(channels, categories):
+        for category in categories:
           if analysis.isdecayonly and category != "Untagged": continue
-          if not analysis.useboosted and category == "Boosted": continue
-          yv = YieldValue(channel, category, analysis, productionmode, production)
+          sumcategories = [category]
+          if not analysis.useboosted and not analysis.isdecayonly:
+            if category == "Boosted": continue
+            if category == "Untagged": sumcategories.append(Category("Boosted"))
 
-          yvvalue = result[productionmode, categorization, AlternateWeight("1"), category, channel].nominal_value
+          for channel in channels:
+            yv = YieldValue(channel, category, analysis, productionmode, production)
 
-          yv.value = yvvalue
+            yvvalue = sum(result[productionmode, categorization, AlternateWeight("1"), cat, channel] for cat in sumcategories).nominal_value
 
-        if production.GEN: continue
+            yv.value = yvvalue
 
-        for category, channel in itertools.product(categories, channels):
-          if analysis.isdecayonly and category != "Untagged": continue
-          if not analysis.useboosted and category == "Boosted": continue
+            if production.GEN: continue
 
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, "hzz_br", production)
-          if productionmode.isbkg:
-            syst.value = None
-          else:
-            syst.value = 1.02
+            syst = YieldSystematicValue(channel, category, analysis, productionmode, "hzz_br", production)
+            if productionmode.isbkg:
+              syst.value = None
+            else:
+              syst.value = 1.02
 
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_e", production)
-          if productionmode == "ZX":
-            syst.value = None
-          else:
-            syst.value = {
-              (2016, "2e2mu"): (1.039, 0.960),
-              (2016, "4e"):    (1.082, 0.914),
-              (2016, "4mu"):   None,
-              (2017, "2e2mu"): (1.058, 0.939),
-              (2017, "4e"):    (1.125, 0.862),
-              (2017, "4mu"):   None,
-              (2018, "2e2mu"): 1.074,
-              (2018, "4e"):    1.161,
-              (2018, "4mu"):   None,
-            }[year, str(channel)]
-
-          syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_m", production)
-          if productionmode == "ZX":
-            syst.value = None
-          else:
-            syst.value = {
-              (2016, "2e2mu"): (1.025, 0.975),
-              (2016, "4e"):    None,
-              (2016, "4mu"):   (1.046, 0.953),
-              (2017, "2e2mu"): (1.030, 0.968),
-              (2017, "4e"):    None,
-              (2017, "4mu"):   (1.056, 0.937),
-              (2018, "2e2mu"): (1.011, 0.992),
-              (2018, "4e"):    None,
-              (2018, "4mu"):   (1.016, 0.978),
-            }[year, str(channel)]
-
-          for systname in "lumi_13TeV_2016", "lumi_13TeV_2017", "lumi_13TeV_2018":
-            syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-            if productionmode == "ZX" or str(year) not in systname:
+            syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_e", production)
+            if productionmode == "ZX":
               syst.value = None
             else:
               syst.value = {
-                2016: (1.026, 0.974),
-                2017: (1.023, 0.977),
-                2018: (1.025, 0.975),
-              }[year]
+                (2016, "2e2mu"): (1.039, 0.960),
+                (2016, "4e"):    (1.082, 0.914),
+                (2016, "4mu"):   None,
+                (2017, "2e2mu"): (1.058, 0.939),
+                (2017, "4e"):    (1.125, 0.862),
+                (2017, "4mu"):   None,
+                (2018, "2e2mu"): 1.074,
+                (2018, "4e"):    1.161,
+                (2018, "4mu"):   None,
+              }[year, str(channel)]
 
-          for yr in 2016, 2017, 2018:
-            for chan in "2e2mu", "4e", "4mu":
-              systname = "zjet_{}_{}".format(chan, yr)
+            syst = YieldSystematicValue(channel, category, analysis, productionmode, "CMS_eff_m", production)
+            if productionmode == "ZX":
+              syst.value = None
+            else:
+              syst.value = {
+                (2016, "2e2mu"): (1.025, 0.975),
+                (2016, "4e"):    None,
+                (2016, "4mu"):   (1.046, 0.953),
+                (2017, "2e2mu"): (1.030, 0.968),
+                (2017, "4e"):    None,
+                (2017, "4mu"):   (1.056, 0.937),
+                (2018, "2e2mu"): (1.011, 0.992),
+                (2018, "4e"):    None,
+                (2018, "4mu"):   (1.016, 0.978),
+              }[year, str(channel)]
+
+            for systname in "lumi_13TeV_2016", "lumi_13TeV_2017", "lumi_13TeV_2018":
               syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
-              if productionmode != "ZX" or chan != channel or yr != year:
+              if productionmode == "ZX" or str(year) not in systname:
                 syst.value = None
               else:
                 syst.value = {
-                  (2016, "2e2mu"): (1.152, 0.868),
-                  (2016, "4e"):    (1.314, 0.728),
-                  (2016, "4mu"):   (1.104, 0.899),
-                  (2017, "2e2mu"): (1.330, 0.670),
-                  (2017, "4e"):    (1.380, 0.640),
-                  (2017, "4mu"):   (1.320, 0.680),
-                  (2018, "2e2mu"): (1.300, 0.700),
-                  (2018, "4e"):    (1.370, 0.630),
-                  (2018, "4mu"):   (1.240, 0.760),
-                }[year, str(channel)]
+                  2016: (1.026, 0.974),
+                  2017: (1.023, 0.977),
+                  2018: (1.025, 0.975),
+                }[year]
 
-        #same for all channels
-        for category in categories:
-          if analysis.isdecayonly and category != "Untagged": continue
-          if not analysis.useboosted and category == "Boosted": continue
+            for yr in 2016, 2017, 2018:
+              for chan in "2e2mu", "4e", "4mu":
+                systname = "zjet_{}_{}".format(chan, yr)
+                syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
+                if productionmode != "ZX" or chan != channel or yr != year:
+                  syst.value = None
+                else:
+                  syst.value = {
+                    (2016, "2e2mu"): (1.152, 0.868),
+                    (2016, "4e"):    (1.314, 0.728),
+                    (2016, "4mu"):   (1.104, 0.899),
+                    (2017, "2e2mu"): (1.330, 0.670),
+                    (2017, "4e"):    (1.380, 0.640),
+                    (2017, "4mu"):   (1.320, 0.680),
+                    (2018, "2e2mu"): (1.300, 0.700),
+                    (2018, "4e"):    (1.370, 0.630),
+                    (2018, "4mu"):   (1.240, 0.760),
+                  }[year, str(channel)]
 
           #variations on category definition: JEC and btagging
-          nominal = result[productionmode, categorization, AlternateWeight("1"), category]
+          nominal = sum(result[productionmode, categorization, AlternateWeight("1"), cat] for cat in sumcategories)
           if productionmode == "ZX" or analysis.isdecayonly:
             JECUp = JECDn = btSFUp = btSFDn = 1
           else:
-            JECUp = (result[productionmode, findsystematic(categorizations, categorization, "JECUp", "Nominal"), AlternateWeight("1"), category] / nominal).nominal_value
-            JECDn = (result[productionmode, findsystematic(categorizations, categorization, "JECDn", "Nominal"), AlternateWeight("1"), category] / nominal).nominal_value
-            btSFUp = (result[productionmode, findsystematic(categorizations, categorization, "Nominal", "bTagSFUp"), AlternateWeight("1"), category] / nominal).nominal_value
-            btSFDn = (result[productionmode, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), AlternateWeight("1"), category] / nominal).nominal_value
+            JECUp = (sum(result[productionmode, findsystematic(categorizations, categorization, "JECUp", "Nominal"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+            JECDn = (sum(result[productionmode, findsystematic(categorizations, categorization, "JECDn", "Nominal"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+            btSFUp = (sum(result[productionmode, findsystematic(categorizations, categorization, "Nominal", "bTagSFUp"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+            btSFDn = (sum(result[productionmode, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
 
           for channel in channels:
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_scale_j", production).value = (JECDn, JECUp)
@@ -293,8 +299,8 @@ def writeyields(productionmodelist=None, productionlist=None):
                     first = second = 1
                   syst.value = first, second
               elif systname in (productionmode.QCDmuFsystematicname, productionmode.QCDmuRsystematicname, productionmode.pdfvariationsystematicname, productionmode.pdfasmzsystematicname):
-                up = (result[productionmode, categorization, AlternateWeight(weight+"Up"), category] / nominal).nominal_value
-                dn = (result[productionmode, categorization, AlternateWeight(weight+"Dn"), category] / nominal).nominal_value
+                up = (sum(result[productionmode, categorization, AlternateWeight(weight+"Up"), cat] for cat in sumcategories) / nominal).nominal_value
+                dn = (sum(result[productionmode, categorization, AlternateWeight(weight+"Dn"), cat] for cat in sumcategories) / nominal).nominal_value
                 for channel in channels:
                   syst = YieldSystematicValue(channel, category, analysis, productionmode, systname, production)
                   syst.value = (dn, up)
@@ -306,14 +312,14 @@ def writeyields(productionmodelist=None, productionlist=None):
           #pythia scale and tune
           if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
             if year == 2016:
-              scaleup = (result[productionmode, PythiaSystematic("ScaleUp"), categorization, AlternateWeight("1"), category] / nominal).nominal_value
-              scaledn = (result[productionmode, PythiaSystematic("ScaleDn"), categorization, AlternateWeight("1"), category] / nominal).nominal_value
-              if productionmode == "ttH": scaleup = scaledn = deprecate(1, 2019, 7, 30)
+              scaleup = (sum(result[productionmode, PythiaSystematic("ScaleUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+              scaledn = (sum(result[productionmode, PythiaSystematic("ScaleDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+              if productionmode == "ttH": scaleup = scaledn = deprecate(1, 2019, 8, 10)
             elif year == 2017 or year == 2018:
-              scaleup = (result[productionmode, categorization, AlternateWeight("PythiaScaleUp"), category] / nominal).nominal_value
-              scaledn = (result[productionmode, categorization, AlternateWeight("PythiaScaleDn"), category] / nominal).nominal_value
-            tuneup = (result[productionmode, PythiaSystematic("TuneUp"), categorization, AlternateWeight("1"), category] / nominal).nominal_value
-            tunedn = (result[productionmode, PythiaSystematic("TuneDn"), categorization, AlternateWeight("1"), category] / nominal).nominal_value
+              scaleup = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleUp"), cat] for cat in sumcategories) / nominal).nominal_value
+              scaledn = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleDn"), cat] for cat in sumcategories) / nominal).nominal_value
+            tuneup = (sum(result[productionmode, PythiaSystematic("TuneUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+            tunedn = (sum(result[productionmode, PythiaSystematic("TuneDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
           else:
             scaleup = scaledn = tuneup = tunedn = 1
           for channel in channels:
@@ -321,8 +327,8 @@ def writeyields(productionmodelist=None, productionlist=None):
             YieldSystematicValue(channel, category, analysis, productionmode, "CMS_pythia_tune", production).value = (tunedn, tuneup)
 
           if productionmode == "qqZZ":
-            EWcorrup = (result[productionmode, categorization, AlternateWeight("EWcorrUp"), category] / nominal).nominal_value
-            EWcorrdn = (result[productionmode, categorization, AlternateWeight("EWcorrDn"), category] / nominal).nominal_value
+            EWcorrup = (sum(result[productionmode, categorization, AlternateWeight("EWcorrUp"), cat] for cat in sumcategories) / nominal).nominal_value
+            EWcorrdn = (sum(result[productionmode, categorization, AlternateWeight("EWcorrDn"), cat] for cat in sumcategories) / nominal).nominal_value
           else:
             EWcorrup = EWcorrdn = 1
           for channel in channels:
