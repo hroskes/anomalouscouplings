@@ -6,6 +6,7 @@ if __name__ == "__main__":
   p = argparse.ArgumentParser()
   p.add_argument("fai", choices="fa3 fa2 fL1 fL1Zg".split())
   p.add_argument("--decay", action="store_true")
+  p.add_argument("--boosted", action="store_true")
   args = p.parse_args()
 
 import contextlib, itertools, os
@@ -188,15 +189,21 @@ if __name__ == "__main__":
       )
     )
   else:
+    folder = "fa3fa2fL1fL1Zg_yieldsystematics"
+    plotname = "limit_lumi137.10_scan"+args.fai
+    if args.boosted:
+      folder = "fa3fa2fL1fL1Zg_boosted_yieldsystematics"
+      plotname = "limit_lumi137.10_scan"+args.fai+"_nosystematics"
+
     functionargs = [
-      os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_yieldsystematics/limit_lumi137.10_scan"+args.fai+"_101,-1.0,1.0_101,-0.02,0.02_merged"),
+      os.path.join(plotsbasedir, "limits", folder, plotname+"_101,-1.0,1.0_101,-0.02,0.02_merged"),
     ] + sorted(
       reglob(
-         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_yieldsystematics/"),
-         "limit_lumi137.10_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
+         os.path.join(plotsbasedir, "limits", folder, ""),
+         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
       ) + reglob(
-         os.path.join(plotsbasedir, "limits/fa3fa2fL1fL1Zg_yieldsystematics/gridscan/"),
-         "limit_lumi137.10_scan"+args.fai+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
+         os.path.join(plotsbasedir, "limits", folder, "gridscan/"),
+         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
       )
     )
 
