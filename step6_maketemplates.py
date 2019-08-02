@@ -46,7 +46,7 @@ def buildtemplates(*args, **kwargs):
   if len(args) == 2:
     tg = TemplateGroup(args[0])
     production = Production(args[1])
-    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.production == production and not os.path.exists(tf.templatesfile().replace(".root", ".done"))]
+    tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.production == production and not (os.path.exists(tf.templatesfile()) and os.path.exists(tf.templatesfile().replace(".root", ".done")))]
     if not tfs: return
     with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
       if not all(kwofs): return

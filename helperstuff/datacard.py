@@ -341,7 +341,7 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(ProductionMode, Category, Channel, config.staticmaxbins)
     def binbybin_category_channel_productionmode_index(self, productionmode, category, channel, index):
-        return deprecate(None, 2019, 7, 25)
+        return deprecate(None, 2019, 8, 6)
         if productionmode not in ("qqZZ", "ZX"): return None
         if category != self.category or channel != self.channel:
           return None

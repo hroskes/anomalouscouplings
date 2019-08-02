@@ -54,7 +54,7 @@ gm convert .oO[saveasdir]Oo./impacts_.oO[append]Oo..oO[moreappend]Oo..oO[scanran
 """
 
 morecombineoptions = {
-    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. --saveSpecifiedNuis everything_but_binbybin --saveInactivePOI=1 .oO[freezeparameters]Oo.",
+    "MultiDimFit": "--algo .oO[algo]Oo. --points .oO[internalnpoints]Oo. --floatOtherPOIs=.oO[floatotherpois]Oo. --alignEdges=1  .oO[savemu]Oo. .oO[savespecifiednuis]Oo. --saveInactivePOI=1 .oO[freezeparameters]Oo.",
     "FitDiagnostics": "",
     "Impacts": ".oO[impactsstep.oO[impactsstep]Oo.]Oo."
 }
@@ -678,6 +678,7 @@ def runcombine(analysis, foldername, **kwargs):
               "freeze": ",".join(freeze),
               "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
               "setparametersforgrid": setparametersforgrid if setparametersforgrid else ".oO[setparameters]Oo.",
+              "savespecifiednuis": "--saveSpecifiedNuis everything_but_binbybin" if usesystematics else "",
              }
 
     if method == "Impacts":
