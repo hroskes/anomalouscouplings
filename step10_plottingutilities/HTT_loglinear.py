@@ -18,13 +18,12 @@ from helperstuff import config
 from helperstuff.enums import Analysis, Production
 from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
-from helperstuff.utilities import cache, cd, mkdtemp, PlotCopier, tfiles
+from helperstuff.utilities import cache, cd, deprecate, mkdtemp, PlotCopier, tfiles
 
 from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
-saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_yieldsystematics")
 def getplotname(analysis):
     return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
 
@@ -73,25 +72,19 @@ def PRL_loglinear(**kwargs):
                              "yshift68": .03,
                              "yshift95": .03,
                             }
-    markerposition = None
-    onlyanalysis = None
-    ydivide = 11
-    xdivides = -.03, .03
-    saveas = None
-    for kw, kwarg in kwargs.iteritems():
-        if kw == "ydivide":
-            ydivide = float(kwarg)
-        elif kw == "xdivides":
-            xdivides = sorted(float(_) for _ in kwarg)
-            assert len(xdivides) == 2, xdivides
-        elif kw == "markerposition":
-            markerposition = kwarg
-        elif kw == "analysis":
-            onlyanalysis = kwarg
-        elif kw == "saveas":
-            saveas = kwarg
-        else:
-            commondrawlineskwargs[kw] = kwarg
+
+    markerposition = kwargs.pop("markerposition", None)
+    onlyanalysis = kwargs.pop("analysis", None)
+    xdivides = sorted(float(_) for _ in kwargs.pop("xdivides", (-.03, .03)))
+    assert len(xdivides) == 2, xdivides
+    ydivide = float(kwargs.pop("ydivide", 11))
+    saveas = kwargs.pop("saveas", None)
+    boosted = bool(int(kwargs.pop("boosted", False)))
+
+    commondrawlineskwargs.update(kwargs)
+
+    saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_yieldsystematics")
+    if boosted: saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_boosted_yieldsystematics")
 
     for k, v in commondrawlineskwargs.items():
         if k == "xpostext":
@@ -161,10 +154,20 @@ def PRL_loglinear(**kwargs):
         analysis = Analysis(analysis)
         repmap = {"analysis": str(analysis)}
         subdir = ""
-        folders = [
-          Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-          Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-        ]
+        if boosted:
+          folders = [
+            Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Float others no boosted", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Fix others no boosted", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_boosted_yieldsystematics/", "Float others w/ boosted", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo."+deprecate("_nosystematics", 2019, 8, 2, 16+6, 0, 0)+"_101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_boosted_yieldsystematics/", "Fix others w/ boosted", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_STXS_yieldsystematics/", "Float others STXS", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_STXS_yieldsystematics/", "Fix others STXS", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
+          ]
+        else:
+          folders = [
+            Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+          ]
 
         mg = ROOT.TMultiGraph("limit", "")
         for folder in folders:
@@ -291,17 +294,19 @@ def yaxislabel(label, textsize=.06):
     return pt
 
 if __name__ == "__main__":
-    args = []
-    kwargs = {}
-    for arg in sys.argv[1:]:
-        if "=" in arg:
-            kwargs[arg.split("=")[0]] = arg.split("=", 1)[1]
-        else:
-            args.append(arg)
+    import argparse
+
+    def f(x): result = x.split("="); assert len(result)==2, x; return result
+
+    p = argparse.ArgumentParser()
+    p.add_argument("kwargs", type=f, nargs="*")
+    p.add_argument("--analysis", choices="fa3 fa2 fL1 fL1Zg".split())
+    args = p.parse_args()
+
+    kwargs = {k: v for k, v in args.kwargs}
+
     function = PRL_loglinear
     with PlotCopier() as plotcopier:
-        if "analysis" not in kwargs:
-            for kwargs["analysis"] in "fa3", "fa2", "fL1", "fL1Zg":
-                function(*args, **kwargs)
-        else:
-            function(*args, **kwargs)
+        for kwargs["analysis"] in "fa3", "fa2", "fL1", "fL1Zg":
+            if kwargs["analysis"] != args.analysis is not None: continue
+            function(**kwargs)

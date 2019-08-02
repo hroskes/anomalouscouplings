@@ -7,6 +7,7 @@ if __name__ == "__main__":
   p.add_argument("fai", choices="fa3 fa2 fL1 fL1Zg".split())
   p.add_argument("--decay", action="store_true")
   p.add_argument("--boosted", action="store_true")
+  p.add_argument("--STXS", action="store_true")
   args = p.parse_args()
 
 import contextlib, itertools, os
@@ -193,7 +194,10 @@ if __name__ == "__main__":
     plotname = "limit_lumi137.10_scan"+args.fai
     if args.boosted:
       folder = "fa3fa2fL1fL1Zg_boosted_yieldsystematics"
-      plotname = "limit_lumi137.10_scan"+args.fai+"_nosystematics"
+      plotname = "limit_lumi137.10_scan"+args.fai
+    if args.STXS:
+      folder = "fa3fa2fL1fL1Zg_STXS_yieldsystematics"
+      plotname = "limit_lumi137.10_scan"+args.fai
 
     functionargs = [
       os.path.join(plotsbasedir, "limits", folder, plotname+"_101,-1.0,1.0_101,-0.02,0.02_merged"),
