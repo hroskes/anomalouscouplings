@@ -62,6 +62,8 @@ class BaseSingleCategorization(BaseCategorization):
     def phi_variable_name(self): return "jetPhi" + self.JEC.njetsappendname
     @property
     def QGL_variable_name(self): return "jetQGLikelihood" + self.JEC.njetsappendname
+    @property
+    def PFMET_variable_name(self): return "PFMET" + self.JEC.njetsappendname.replace("jec", "jes")
 
     @abstractmethod
     def get_pHJJ_function(self): pass
@@ -86,6 +88,8 @@ class BaseSingleCategorization(BaseCategorization):
         nbtagged_variable_name = self_categorization.nbtagged_variable_name
         phi_variable_name = self_categorization.phi_variable_name
         QGL_variable_name = self_categorization.QGL_variable_name
+
+        PFMET_variable_name = self_categorization.PFMET_variable_name
 
         p_HadWH_mavjj_variable_name = self_categorization.p_HadWH_mavjj_variable_name
         p_HadWH_mavjj_true_variable_name = self_categorization.p_HadWH_mavjj_true_variable_name
@@ -114,7 +118,7 @@ class BaseSingleCategorization(BaseCategorization):
                   getattr(self_tree, phi_variable_name),
                 self_tree.ZZMass,
                 self_tree.ZZPt,
-                self_tree.PFMET,
+                  getattr(self_tree, PFMET_variable_name),
                 config.useVHMETTagged,
                 config.useQGTagging,
             )

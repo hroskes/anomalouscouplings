@@ -21,7 +21,7 @@ import STXS
 import xrd
 import ZX
 from gconstants import gconstant
-from makesystematics import MakeJECSystematics, MakeSystematics
+from makesystematics import MakeBtagSystematics, MakeJECSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
 from utilities import cache_instancemethod, callclassinitfunctions, deprecate, Fake_LSF_creating, getmembernames, MultiplyCounter, product, TFile, tlvfromptetaphim
 
@@ -726,9 +726,32 @@ class TreeWrapperBase(Iterator):
 #STXS#
 ######
 
+    @MakeBtagSystematics
     @MakeJECSystematics
     def D_STXS_stage1p1(self):
-        category = self.category_0P()    #don't use anomalous couplings because we want the sensitivity to come from STXS reco bins
+        category = CJLSTscripts.categoryMor18(
+          self.nExtraLep,
+          self.nExtraZ,
+          self.nCleanedJetsPt30,
+          self.nCleanedJetsPt30BTagged_bTagSF,
+          self.jetQGLikelihood,
+          self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal,
+          self.p_JQCD_SIG_ghg2_1_JHUGen_JECNominal,
+          self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal,
+          self.p_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+          self.pAux_JVBF_SIG_ghv1_1_JHUGen_JECNominal,
+          self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal,
+          self.p_HadZH_SIG_ghz1_1_JHUGen_JECNominal,
+          self.p_HadWH_mavjj_JECNominal,
+          self.p_HadWH_mavjj_true_JECNominal,
+          self.p_HadZH_mavjj_JECNominal,
+          self.p_HadZH_mavjj_true_JECNominal,
+          self.jetPhi,
+          self.ZZMass,
+          self.PFMET,
+          config.useVHMETTagged,
+          config.useQGTagging,
+        )
         return STXS.stage1_reco_1p1(self.nCleanedJetsPt30, self.DiJetMass, self.ZZPt, category, self.HjjPt)
 
 #########################
@@ -1226,6 +1249,7 @@ class TreeWrapper(TreeWrapperBase):
         self.pConst_HadWH_BKG_MCFM_JECUp = t.pConst_HadWH_BKG_MCFM_JECUp
         self.pConst_JJQCD_BKG_MCFM_JECUp = t.pConst_JJQCD_BKG_MCFM_JECUp
 
+        self.PFMET_jesUp = t.PFMET_jesUp
         self.nCleanedJetsPt30_jecUp = t.nCleanedJetsPt30_jecUp
         ptUp = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(izip(t.JetPt, t.JetSigma))), reverse=True)
         jecUpIndices = [i for pt, i in ptUp if pt>30]
@@ -1343,6 +1367,7 @@ class TreeWrapper(TreeWrapperBase):
         self.pConst_HadWH_BKG_MCFM_JECDn = t.pConst_HadWH_BKG_MCFM_JECDn
         self.pConst_JJQCD_BKG_MCFM_JECDn = t.pConst_JJQCD_BKG_MCFM_JECDn
 
+        self.PFMET_jesDn = t.PFMET_jesDn
         self.nCleanedJetsPt30_jecDn = t.nCleanedJetsPt30_jecDn
         ptDn = sorted(((pt*(1+sigma), i) for i, (pt, sigma) in enumerate(izip(t.JetPt, t.JetSigma))), reverse=True)
         jecDnIndices = [i for pt, i in ptDn if pt>30]
@@ -1432,10 +1457,12 @@ class TreeWrapper(TreeWrapperBase):
     def initsystematics(cls):
         for name, discriminant in inspect.getmembers(cls, predicate=lambda x: isinstance(x, MakeSystematics)):
             nominal = discriminant.getnominal()
-            up, dn = discriminant.getupdn()
-            setattr(cls, discriminant.name, nominal)
-            setattr(cls, discriminant.upname, up)
-            setattr(cls, discriminant.dnname, dn)
+            alternates = discriminant.getalternates()
+
+            setattr(cls, nominal.__name__, nominal)
+            for alternate in alternates:
+                assert not hasattr(cls, alternate.__name__), alternate.__name__
+                setattr(cls, alternate.__name__, alternate)
 
     def initlists(self):
         self.toaddtotree = [
@@ -1587,6 +1614,8 @@ class TreeWrapper(TreeWrapperBase):
         ]
         STXSdiscriminants = [
             "D_STXS_stage1p1",
+            "D_STXS_stage1p1_bTagSFUp",
+            "D_STXS_stage1p1_bTagSFDn",
             "D_4couplings_VBFdecay_raw",
             "D_4couplings_VBFdecay",
             "D_4couplings_HadVHdecay_raw",
@@ -1596,7 +1625,7 @@ class TreeWrapper(TreeWrapperBase):
         for JEC in "", "_JECUp", "_JECDn":
             for prod in ("VBF", "HadVH"):
                 self.toaddtotree += [_.format(prod=prod)+JEC for _ in proddiscriminants]
-            self.toaddtotree_int += [_+JEC for _ in STXSdiscriminants]
+            self.toaddtotree_int += [_+JEC for _ in STXSdiscriminants if not (JEC and "bTagSF" in _)]
 
         for _ in self.categorizations:
             if self.GEN and _.issystematic:
@@ -1642,7 +1671,7 @@ class TreeWrapper(TreeWrapperBase):
             "nExtraLep",
             "nExtraZ",
             "nCleanedJetsPt30",
-            "nCleanedJetsPt30BTagged",
+            "nCleanedJetsPt30BTagged_bTagSF",
             "jetQGLikelihood",
             "p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal",
             "p_JQCD_SIG_ghg2_1_JHUGen_JECNominal",

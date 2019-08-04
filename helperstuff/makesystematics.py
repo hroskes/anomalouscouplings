@@ -5,22 +5,25 @@ import re
 class MakeSystematics(object):
     __metaclass__ = ABCMeta
     def __init__(self, function):
-        while isinstance(function, MakeSystematics):
-            function = function.function
-        self.function = function
+        if isinstance(function, MakeSystematics):
+            self.otheralternates = function.getalternates()
+            self.nominal = function.getnominal()
+        else:
+            self.otheralternates = []
+            self.nominal = function
 
     @property
-    def name(self): return self.function.__name__
+    def name(self): return self.nominal.__name__
     @abstractproperty
     def upname(self): pass
     @abstractproperty
     def dnname(self): pass
 
-    def getnominal(self): return self.function
+    def getnominal(self): return self.nominal
 
-    def getupdn(self):
+    def getalternates(self):
         #python is magic!
-        sourcelines = inspect.getsourcelines(self.function)[0]
+        sourcelines = inspect.getsourcelines(self.nominal)[0]
         for i, line in enumerate(sourcelines):
             if "@" not in line:
                 break
@@ -42,7 +45,7 @@ class MakeSystematics(object):
         Up.__name__ = self.upname
         Dn.__name__ = self.dnname
 
-        return Up, Dn
+        return self.otheralternates + [Up, Dn]
 
     @abstractmethod
     def doreplacements(self, code):
@@ -60,15 +63,19 @@ class MakeJECSystematics(MakeSystematics):
             r"(self[.]M2(?:(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))|qqZZJJ)\b",
             r"(self[.]notdijet)\b",
             r"(self[.](?:binning_4couplings|D_bkg_kin)_(?:HadVH|VBF|)decay)\b",
-            r"(self[.]category_0P)"
         ):
             code = re.sub(thing, r"\1_JEC{UpDn}", code)
         for thing in (
-            r"(self[.](Hjj|Jet1)Pt)",
-            r"(self[.]DiJet(Mass|DEta))",
-            r"(self[.]nCleanedJetsPt30)",
+            r"(self[.](Hjj|Jet1)Pt)\b",
+            r"(self[.]DiJet(Mass|DEta))\b",
+            r"(self[.]nCleanedJetsPt30(BTagged_bTagSF)?)\b",
+            r"(self[.]jet(QGLikelihood|Phi))\b",
         ):
             code = re.sub(thing, r"\1_jec{UpDn}", code)
+        for thing in (
+            r"(self[.]PFMET)",
+        ):
+            code = re.sub(thing, r"\1_jes{UpDn}", code)
 
         result = re.findall("(self[.][\w]*)[^\w{]", code)
         for variable in result:
@@ -78,10 +85,37 @@ class MakeJECSystematics(MakeSystematics):
                 "|ZZ(?:Eta|Pt|Mass)|D_4couplings_general(?:_raw|)|foldbins_4couplings_(?:VBF|HadVH)decay"
                 "|p_m4l_(?:SIG|BKG)|cconstantforDbkg(?:kin)?|flavor"
                 "|g(?:2|4|1prime2|hzgs1prime2)(?:HZZ|VBF|VH|ZH|WH)_m4l"
+                "|nExtra(?:Lep|Z)"
               ")$",
               variable
             ): continue
-            raise ValueError("Unknown self.variable in function '{}':\n\n{}\n{}".format(self.name, code, variable))
+            raise ValueError("Unknown self.variable for '{}' in function '{}':\n\n{}\n{}".format(type(self).__name__, self.name, code, variable))
+
+        return code
+
+class MakeBtagSystematics(MakeSystematics):
+    @property
+    def upname(self): return self.name+"_bTagSFUp"
+    @property
+    def dnname(self): return self.name+"_bTagSFDn"
+
+    def doreplacements(self, code):
+        for thing in (
+            r"(self[.][\w]*)_bTagSF\b",
+        ):
+            code = re.sub(thing, r"\1_bTagSF{UpDn}", code)
+
+        result = re.findall("(self[.][\w]*)[^\w{]", code)
+        for variable in result:
+            if re.match(
+              "self[.]("
+              "nCleanedJetsPt30|nExtra(Lep|Z)|jet(QGLikelihood|Phi)"
+              "|p(Aux)?_(J+(QCD|VBF)|Had[ZW]H)_(SIG_gh[vzwg][12]_1_JHUGen|mavjj(_true)?)_JECNominal"
+              "|PFMET|ZZ(Mass|Pt)|DiJetMass|HjjPt"
+              ")$",
+              variable
+            ): continue
+            raise ValueError("Unknown self.variable for '{}' in function '{}':\n\n{}\n{}".format(type(self).__name__, self.name, code, variable))
 
         return code
 
@@ -93,5 +127,6 @@ class MakeJECSystematics(MakeSystematics):
 from math import sqrt
 
 import CJLSTscripts
+import config
 import constants
 import STXS
