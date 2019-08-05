@@ -325,7 +325,7 @@ def getscaletos(*productionmodes, **kwargs):
         )
       )
       for ch in channels
-      for ca in categories if ca != "Boosted"
+      for ca in categories if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
     )
     for production in config.productionsforcombine
     for productionmode in productionmodes
@@ -360,7 +360,7 @@ class HypothesisLine(object):
       }[productionmode]
       numerator = sum(
         Template(production, "fa3fa2fL1fL1Zg", ca, ch, "0+", pm).gettemplate().Integral() * production.dataluminosity
-        for ca in categories if ca != "Boosted"
+        for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
         for ch in channels
         for pm in productionmodes
         for production in config.productionsforcombine
@@ -368,7 +368,7 @@ class HypothesisLine(object):
       if Hypothesis(self.hypothesis).ispure:
         denominator = sum(
           Template(production, "fa3fa2fL1fL1Zg", ca, ch, self.hypothesis, pm).gettemplate().Integral() * production.dataluminosity
-          for ca in categories if ca != "Boosted"
+          for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
           for ch in channels
           for pm in productionmodes
           for production in config.productionsforcombine
@@ -403,7 +403,7 @@ class HypothesisLine(object):
             + IntTemplate(production, "fa3fa2fL1fL1Zg", ca, ch, inttype,      pm).gettemplate().Integral() * g1*gi
             +    Template(production, "fa3fa2fL1fL1Zg", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi
             ) * production.dataluminosity
-            for ca in categories if ca != "Boosted"
+            for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
             for ch in channels
             for pm in productionmodes
             for production in config.productionsforcombine
@@ -419,7 +419,7 @@ class HypothesisLine(object):
             + IntTemplate(production, "fa3fa2fL1fL1Zg", ca, ch, inttype(3),   pm).gettemplate().Integral() * g1*gi*gi*gi
             +    Template(production, "fa3fa2fL1fL1Zg", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi*gi*gi
             ) * production.dataluminosity
-            for ca in categories if ca != "Boosted"
+            for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
             for ch in channels
             for pm in productionmodes
             for production in config.productionsforcombine
@@ -755,11 +755,17 @@ dijetcut = masscut + " && D_0minus_VBFdecay > -998"
 untaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("Untagged").idnumbers) + ")"
 VBFtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VBFtagged").idnumbers) + ")"
 HadVHtaggedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VHHadrtagged").idnumbers) + ")"
+boostedcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("Boosted").idnumbers) + ")"
+VBF1jcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VBF1jtagged").idnumbers) + ")"
+LepVHcut = masscut + " && (" + " || ".join("{} == {}".format(categoryname, c) for c in Category("VHLepttagged").idnumbers) + ")"
 
 dijetenrichcut = dijetcut + " && D_bkg > 0.7"
 untaggedenrichcut = untaggedcut + " && D_bkg > 0.7"
 VBFtaggedenrichcut = VBFtaggedcut + " && D_bkg_VBFdecay > 0.2"
 HadVHtaggedenrichcut = HadVHtaggedcut + " && D_bkg_HadVHdecay > 0.2"
+boostedenrichcut = boostedcut + " && D_bkg > 0.7"
+VBF1jenrichcut = VBF1jcut + " && D_bkg > 0.7"
+LepVHenrichcut = LepVHcut + " && D_bkg > 0.7"
 
 purehypothesislines = [
   HypothesisLine("0+",   2,               1, 2,               2, "SM"),

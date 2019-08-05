@@ -560,6 +560,7 @@ class Analysis(MyEnum):
                  EnumItem("fa3fa2fL1fL1Zg_only6bins"),
                  EnumItem("fa3fa2fL1fL1Zg_STXS"),
                  EnumItem("fa3fa2fL1fL1Zg_boosted"),
+                 EnumItem("fa3fa2fL1fL1Zg_morecategories"),
                 )
     def title(self, latex=False, superscript=None):
         if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -677,7 +678,7 @@ class Analysis(MyEnum):
         if self == "fa3_onlyDbkg": return True
         if self == "fa3fa2fL1fL1Zg_STXS": return True
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return False
-        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted"): return False
+        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories"): return False
         assert False, self
     @property
     def categoryname(self):
@@ -700,6 +701,11 @@ class Analysis(MyEnum):
     @property
     def useboosted(self):
         if self == "fa3fa2fL1fL1Zg_boosted": return True
+        if self.usemorecategories: return True
+        return False
+    @property
+    def usemorecategories(self):
+        if self == "fa3fa2fL1fL1Zg_morecategories": return True
         return False
     @property
     def doanalysis(self):
@@ -717,6 +723,7 @@ class Analysis(MyEnum):
             if self == "fa3fa2fL1fL1Zg_only6bins": return False
             if self == "fa3fa2fL1fL1Zg_STXS": return True
             if self == "fa3fa2fL1fL1Zg_boosted": return True
+            if self == "fa3fa2fL1fL1Zg_morecategories": return True
         if config.name ==  "savvas" : 
             if self == "fa3_multiparameter": return True
             if self == "fa3_multiparameter_nodbkg": return False
@@ -731,6 +738,7 @@ class Analysis(MyEnum):
             if self == "fa3fa2fL1fL1Zg_only6bins": return False
             if self == "fa3fa2fL1fL1Zg_STXS": return False
             if self == "fa3fa2fL1fL1Zg_boosted": return False
+            if self == "fa3fa2fL1fL1Zg_morecategories": return False
         assert False, self
     @property
     def fais(self):
@@ -858,9 +866,11 @@ class Category(MyEnum):
     """
     enumname = "category"
     enumitems = (
-                 EnumItem("Untagged", "UntaggedAC19", "VBF1jTaggedAC19", "VHLeptTaggedAC19", "ttHHadrTaggedAC19", "ttHLeptTaggedAC19", "VHMETTaggedAC19", ""),
+                 EnumItem("Untagged", "UntaggedAC19", "ttHHadrTaggedAC19", "ttHLeptTaggedAC19", "VHMETTaggedAC19", ""),
                  EnumItem("VHHadrtagged", "VHHadrTaggedAC19"),
                  EnumItem("VBFtagged", "VBF2jTaggedAC19"),
+                 EnumItem("VBF1jtagged", "VBF1jTaggedAC19"),
+                 EnumItem("VHLepttagged", "VHLeptTaggedAC19"),
                  EnumItem("Boosted", "BoostedAC19"),
                 )
     @property
@@ -889,6 +899,7 @@ class Category(MyEnum):
         if self == "VBFtagged": return "VBF-tagged"
         if self == "VHHadrtagged": return "VH-tagged"
         if self == "Boosted": return "Boosted"
+        assert False, self
 
     @classmethod
     def fromid(cls, number):

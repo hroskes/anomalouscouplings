@@ -537,6 +537,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
             if dc.production.LHE and dc.channel != "2e2mu": continue
             if dc.analysis.isdecayonly and dc.category != "Untagged": continue
             if not dc.analysis.useboosted and dc.category == "Boosted": continue
+            if not dc.analysis.usemorecategories and dc.category in ("VHLeptTagged", "VBF1jtagged"): continue
             dc.makeCardsWorkspaces(**kwargs)
             for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
                 if not os.path.exists(thing):

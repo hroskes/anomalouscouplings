@@ -172,6 +172,9 @@ def writeyields(productionmodelist=None, productionlist=None):
           if not analysis.useboosted and not analysis.isdecayonly:
             if category == "Boosted": continue
             if category == "Untagged": sumcategories.append(Category("Boosted"))
+          if not analysis.usemorecategories and not analysis.isdecayonly:
+            if category in ("VBF1jtagged", "VHLepttagged"): continue
+            if category == "Untagged": sumcategories += [Category("VBF1jtagged"), Category("VHLepttagged")]
 
           for channel in channels:
             yv = YieldValue(channel, category, analysis, productionmode, production)

@@ -83,7 +83,9 @@ decaydiscriminants = [
     Discriminant("D_CP_decay_new", "D_{CP}^{dec}", 30, -1, 1, identifier="D_CP_decay_new_30bins"),
     Discriminant("D_int_decay_new", "D_{int}^{dec}", 30, -1, 1, identifier="D_int_decay_new_30bins"),
 
-    Discriminant("ZZPt", "p_{T}^{4l}", 6, 100, 700),
+    Discriminant("ZZPt", "p_{T}^{4l}", 6, 100, 700, identifier="ZZPt_boosted"),
+    Discriminant("ZZPt", "p_{T}^{4l}", 3, 0, 180, identifier="ZZPt_VBF1jtagged"),
+    Discriminant("ZZPt", "p_{T}^{4l}", 4, 0, 400, identifier="ZZPt_VHLepttagged"),
 ]
 jetdiscriminants = [
     Discriminant("D_0minus_VBF", "D_{0-}^{VBF}", defaultnbins, 0, 1),

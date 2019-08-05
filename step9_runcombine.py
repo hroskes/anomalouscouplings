@@ -608,8 +608,10 @@ def runcombine(analysis, foldername, **kwargs):
     if setparametersforgrid:
         moreappend += "_"+setparametersforgrid
 
-    if not analysis.useboosted and "Boosted" in usecategories:
+    if not analysis.useboosted:
         usecategories = [c for c in usecategories if c != "Boosted"]
+    if not analysis.usemorecategories:
+        usecategories = [c for c in usecategories if c not in ("VBF1jtagged", "VHLepttagged")]
 
     if len(analysis.fais) > 1: assert not fixfai
 

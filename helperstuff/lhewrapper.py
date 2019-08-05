@@ -315,6 +315,7 @@ class TreeWrapperMELA(TreeWrapperBase):
   def ZZFlav(self): pass
 
   def category_0P_or_0M(self):
+    assert False, self
     if self.D_2jet_0plus() > 0.5 or self.D_2jet_0minus() > 0.5:
       return CJLSTscripts.VBF2jTaggedAC19
     elif self.D_HadZH_0plus() > 0.5 or self.D_HadZH_0minus() > 0.5 or self.D_HadWH_0plus() > 0.5 or self.D_HadWH_0minus() > 0.5:
