@@ -1,10 +1,13 @@
 import collections
+import functools
 import inspect
 import multiprocessing
 import numbers
 import os
 import re
+import sys
 import time
+import traceback
 
 from collections import Counter
 from itertools import chain, product
@@ -340,16 +343,14 @@ class _Datacard(MultiEnum):
         ]
       )
 
-    @MakeSystematicFromEnums(ProductionMode, Category, Channel, config.staticmaxbins)
-    def binbybin_category_channel_productionmode_index(self, productionmode, category, channel, index):
-        return deprecate(None, 2019, 8, 6)
-        if productionmode not in ("qqZZ", "ZX"): return None
+    @MakeSystematicFromEnums(Category, Channel, config.staticmaxbins)
+    def binbybin_category_channel_background_index(self, category, channel, index):
         if category != self.category or channel != self.channel:
           return None
-        if "binbybin_{}_{}_{}_{}".format(category, channel, productionmode, index) not in self.binbybinuncertainties:
+        if "binbybin_{}_{}_background_{}".format(category, channel, index) not in self.binbybinuncertainties:
           return None
         result = ["shape1"]
-        return " ".join(["shape1"] + ["1" if productionmode == (h if "bkg_" in h else h.split("_")[0]) else "-" for h in self.histograms])
+        return " ".join(["shape1"] + ["1" if "bkg_" in h else "-" for h in self.histograms])
 
     @property
     def everything_but_binbybin(self):
@@ -359,7 +360,7 @@ class _Datacard(MultiEnum):
     def binbybin(self):
         return "group", lambda systematicname: "binbybin" in systematicname
 
-    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, binbybin_category_channel_productionmode_index, "binbybin", "everything_but_binbybin")
+    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, binbybin_category_channel_background_index, "binbybin", "everything_but_binbybin")
 
     divider = "\n------------\n"
 
@@ -471,7 +472,7 @@ class _Datacard(MultiEnum):
                         if i > config.staticmaxbins:
                             raise ValueError("config.staticmaxbins is not big enough.  If you want to use bin by bin uncertainties, increase it.")
                         xcenter, ycenter, zcenter = binindices[i]
-                        systname = "binbybin_{self.category}_{self.channel}_{}_{}".format(p, i, self=self)
+                        systname = "binbybin_{self.category}_{self.channel}_background_{}".format(i, self=self)
                         newname = name + "_" + systname
                         if domirror:
                             if ycenter<0: continue
@@ -481,11 +482,11 @@ class _Datacard(MultiEnum):
                         dn = t.Clone(newname+"Down")
 
                         up.SetBinContent(i, t.GetBinContent(i) + t.GetBinError(i))
-                        dn.SetBinContent(i, max(t.GetBinContent(i) - t.GetBinError(i), 1e-9))
+                        dn.SetBinContent(i, max(t.GetBinContent(i) - t.GetBinError(i), t.GetBinContent(i)/2))
 
                         if domirror:
                             up.SetBinContent(otheri, t.GetBinContent(otheri) + t.GetBinError(otheri))
-                            dn.SetBinContent(otheri, max(t.GetBinContent(otheri) - t.GetBinError(otheri), 1e-9))
+                            dn.SetBinContent(otheri, max(t.GetBinContent(otheri) - t.GetBinError(otheri), t.GetBinContent(otheri)/2))
 
                         up.SetDirectory(f)
                         cache[up.GetName()] = up
@@ -542,11 +543,15 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
           if not dc.analysis.usemorecategories and dc.category in ("VHLeptTagged", "VBF1jtagged"): continue
           arglist.append(dcargs)
         pool = multiprocessing.Pool(processes=1 if utilities.LSB_JOBID() else 8)
-        mapresult = pool.map(makeDCandWS, arglist)
+        mapresult = pool.map(functools.partial(makeDCandWS, **kwargs), arglist)
+        pool.close()
 
-def makeDCandWS(*dcargs):
-    dc = Datacard(*dcargs)
-    dc.makeCardsWorkspaces(**kwargs)
-    for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
-        if not os.path.exists(thing):
-            raise ValueError("{} was not created.  Something is wrong.".format(thing))
+def makeDCandWS(dcargs, **kwargs):
+    try:
+        dc = Datacard(*dcargs)
+        dc.makeCardsWorkspaces(**kwargs)
+        for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
+            if not os.path.exists(thing):
+                raise ValueError("{} was not created.  Something is wrong.".format(thing))
+    except:
+        raise Exception("".join(traceback.format_exception(*sys.exc_info())))

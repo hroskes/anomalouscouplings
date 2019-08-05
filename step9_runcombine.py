@@ -271,6 +271,7 @@ def runscan(repmap, submitjobs, directory=None):
            utilities.LSF_creating(os.path.join(directory, filename), skipifexists=True), \
            utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
         if not os.path.exists(filename):
+          print replaceByMap(runcombinetemplate, repmap); assert 0
           subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
 
     if repmap["method"] == "Impacts" and repmap["impactsstep"] != "3":
@@ -703,9 +704,7 @@ def runcombine(analysis, foldername, **kwargs):
     with cd(folder):
         with open(".gitignore", "w") as f:
             f.write("*")
-        for category in usecategories:
-            for channel in usechannels:
-                makeDCsandWSs(productions, (category,), (channel,), analysis, lumitype)
+        makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
         for filename in alsocombine:
             for _ in filename, filename.replace(".input.root", ".txt"):
                 if not os.path.exists(_): raise ValueError("{} does not exist!".format(_))
