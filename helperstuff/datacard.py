@@ -1,5 +1,6 @@
 import collections
 import inspect
+import multiprocessing
 import numbers
 import os
 import re
@@ -526,19 +527,26 @@ Datacard = multienumcache(_Datacard)
 
 def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
     with OneAtATime("makeDCsandWSs.tmp", 30):
-        dcs = [
-               Datacard(production, channel, category, *otherargs)
-                       for production, channel, category
-                       in product(productions, channels, categories)
-              ]
-        if all(os.path.exists(thing) for dc in dcs for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)):
-            return
-        for dc in dcs:
-            if dc.production.LHE and dc.channel != "2e2mu": continue
-            if dc.analysis.isdecayonly and dc.category != "Untagged": continue
-            if not dc.analysis.useboosted and dc.category == "Boosted": continue
-            if not dc.analysis.usemorecategories and dc.category in ("VHLeptTagged", "VBF1jtagged"): continue
-            dc.makeCardsWorkspaces(**kwargs)
-            for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
-                if not os.path.exists(thing):
-                    raise ValueError("{} was not created.  Something is wrong.".format(thing))
+        fullarglist = [
+          (production, channel, category) + otherargs
+          for production, channel, category
+          in product(productions, channels, categories)
+        ]
+        arglist = []
+        for dcargs in fullarglist:
+          dc = Datacard(*dcargs)
+          if all(os.path.exists(thing) for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)): continue
+          if dc.production.LHE and dc.channel != "2e2mu": continue
+          if dc.analysis.isdecayonly and dc.category != "Untagged": continue
+          if not dc.analysis.useboosted and dc.category == "Boosted": continue
+          if not dc.analysis.usemorecategories and dc.category in ("VHLeptTagged", "VBF1jtagged"): continue
+          arglist.append(dcargs)
+        pool = multiprocessing.Pool(processes=1 if utilities.LSB_JOBID() else 8)
+        mapresult = pool.map(makeDCandWS, arglist)
+
+def makeDCandWS(*dcargs):
+    dc = Datacard(*dcargs)
+    dc.makeCardsWorkspaces(**kwargs)
+    for thing in dc.rootfile_base, dc.rootfile, dc.txtfile:
+        if not os.path.exists(thing):
+            raise ValueError("{} was not created.  Something is wrong.".format(thing))

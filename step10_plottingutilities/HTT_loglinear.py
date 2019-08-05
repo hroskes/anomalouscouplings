@@ -162,6 +162,8 @@ def PRL_loglinear(**kwargs):
             Folder("fa3fa2fL1fL1Zg_boosted_yieldsystematics/", "Fix others w/ boosted", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
             Folder("fa3fa2fL1fL1Zg_STXS_yieldsystematics/", "Float others STXS", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
             Folder("fa3fa2fL1fL1Zg_STXS_yieldsystematics/", "Fix others STXS", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_yieldsystematics/", "Float others VBF1j+VHlep", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_yieldsystematics/", "Fix others VBF1j+VHlep", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
           ]
         else:
           folders = [
