@@ -21,6 +21,8 @@ import os
 import pprint
 import yaml
 
+import uncertainties
+
 from TemplateBuilder.TemplateBuilder.moremath import weightedaverage
 
 from helperstuff import config
@@ -54,7 +56,7 @@ def writeyields(productionmodelist=None, productionlist=None):
     ] + [
       SampleCount(ProductionMode("ggZZ"), [[RSPWF("ggZZ", flavor)] for flavor in flavors]),
       SampleCount(ProductionMode("VBF bkg"), [[RSPWF("VBF bkg", flavor)] for flavor in ("2e2mu", "4e", "4mu")])
-    ][0:deprecate(1, 2019, 8, 5)] * (not production.GEN)
+    ][0:deprecate(1, 2019, 8, 15)] * (not production.GEN)
 
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[RSPWF("ZX")]]))
@@ -179,9 +181,17 @@ def writeyields(productionmodelist=None, productionlist=None):
           for channel in channels:
             yv = YieldValue(channel, category, analysis, productionmode, production)
 
-            yvvalue = sum(result[productionmode, categorization, AlternateWeight("1"), cat, channel] for cat in sumcategories).nominal_value
+            yvvalue = 0
+            for cat in sumcategories:
+              try:
+                yvvalue += result[productionmode, categorization, AlternateWeight("1"), cat, channel]
+              except KeyError:
+                if result[productionmode, categorization, AlternateWeight("1"), cat] * production.dataluminosity < 0.001:
+                  pass
+                else:
+                  raise
 
-            yv.value = yvvalue
+            yv.value = uncertainties.nominal_value(yvvalue)
 
             if production.GEN: continue
 
@@ -322,7 +332,14 @@ def writeyields(productionmodelist=None, productionlist=None):
               scaleup = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleUp"), cat] for cat in sumcategories) / nominal).nominal_value
               scaledn = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleDn"), cat] for cat in sumcategories) / nominal).nominal_value
             tuneup = (sum(result[productionmode, PythiaSystematic("TuneUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
-            tunedn = (sum(result[productionmode, PythiaSystematic("TuneDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+            try:
+              tunedn = (sum(result[productionmode, PythiaSystematic("TuneDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+            except KeyError:
+              if nominal * production.dataluminosity < 0.5:
+                tunedn = (nominal**2 / tuneup).n
+              else:
+                print nominal
+                raise
           else:
             scaleup = scaledn = tuneup = tunedn = 1
           for channel in channels:
