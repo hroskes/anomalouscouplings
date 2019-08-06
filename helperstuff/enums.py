@@ -920,6 +920,7 @@ class AlternateGenerator(MyEnum):
                  EnumItem("POWHEG"),
                  EnumItem("MINLO"),
                  EnumItem("NNLOPS"),
+                 EnumItem("MCatNLO", "MC@NLO"),
                 )
 
 class Extension(MyEnum):

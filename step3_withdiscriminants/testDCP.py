@@ -102,8 +102,8 @@ with PlotCopier() as pc:
   VBFmixlines = [
     Line(ReweightingSamplePlus("VBF", "0+"), 4, "VBFSM"),
     Line(ReweightingSamplePlus("VBF", "fa3prod0.5"), ROOT.kAzure-4, "VBFmix"),
-    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0+", "ext2"), ROOT.kGreen+3, "ggHSM"),
-    Line(ReweightingSamplePlus("HJJ", "0+", "fCP0.5", "ext2"), ROOT.kGreen-3, "ggHmix"),
+    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0+", "MC@NLO"), ROOT.kGreen+3, "ggHSM"),
+    Line(ReweightingSamplePlus("HJJ", "0+", "fCP0.5", "MC@NLO"), ROOT.kGreen-3, "ggHmix"),
     Line(ReweightingSamplePlus("ttH", "0+", "Hff0+"), ROOT.kMagenta+3, "ttHSM"),
     Line(ReweightingSamplePlus("ttH", "0+", "fCP0.5"), ROOT.kMagenta-4, "ttHmix"),
   ]
@@ -111,17 +111,17 @@ with PlotCopier() as pc:
   VBFpurelines = [
     Line(ReweightingSamplePlus("VBF", "0+"), 4, "VBFSM"),
     Line(ReweightingSamplePlus("VBF", "0-"), ROOT.kAzure-4, "VBFPS", reweightfrom=ReweightingSamplePlus("VBF", "fa3prod0.5")),
-    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0+", "ext2"), ROOT.kGreen+3, "ggHSM"),
-    Line(ReweightingSamplePlus("HJJ", "0+", "fCP0.5", "ext2"), ROOT.kGreen-3, "ggHPS"),
+    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0+", "MC@NLO"), ROOT.kGreen+3, "ggHSM"),
+    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0-", "MC@NLO"), ROOT.kGreen-3, "ggHPS"),
     Line(ReweightingSamplePlus("ttH", "0+", "Hff0+"), ROOT.kMagenta+3, "ttHSM"),
-    Line(ReweightingSamplePlus("ttH", "0+", "fCP0.5"), ROOT.kMagenta-4, "ttHPS"),
+    Line(ReweightingSamplePlus("ttH", "0+", "Hff0-", "ext1"), ROOT.kMagenta-4, "ttHPS"),
   ]
 
   VHmixlines = [
     Line(ReweightingSamplePlus("ZH", "0+", "ext1"), 4, "ZHSM"),
     Line(ReweightingSamplePlus("ZH", "fa3prod0.5"), ROOT.kAzure-4, "ZHmix"),
-    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0+", "ext2"), ROOT.kGreen+3, "ggHSM"),
-    Line(ReweightingSamplePlus("HJJ", "0+", "fCP0.5", "ext2"), ROOT.kGreen-3, "ggHmix"),
+    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0+", "MC@NLO"), ROOT.kGreen+3, "ggHSM"),
+    Line(ReweightingSamplePlus("HJJ", "0+", "fCP0.5", "MC@NLO"), ROOT.kGreen-3, "ggHmix"),
     Line(ReweightingSamplePlus("ttH", "0+", "Hff0+"), ROOT.kMagenta+3, "ttHSM"),
     Line(ReweightingSamplePlus("ttH", "0+", "fCP0.5"), ROOT.kMagenta-4, "ttHmix"),
   ]
@@ -129,8 +129,8 @@ with PlotCopier() as pc:
   VHpurelines = [
     Line(ReweightingSamplePlus("ZH", "0+", "ext1"), 4, "ZHSM"),
     Line(ReweightingSamplePlus("ZH", "0-"), ROOT.kAzure-4, "ZHPS"),
-    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0+", "ext2"), ROOT.kGreen+3, "ggHSM"),
-    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0-", "ext2"), ROOT.kGreen-3, "ggHPS"),
+    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0+", "MC@NLO"), ROOT.kGreen+3, "ggHSM"),
+    Line(ReweightingSamplePlus("HJJ", "0+", "Hff0-", "MC@NLO"), ROOT.kGreen-3, "ggHPS"),
     Line(ReweightingSamplePlus("ttH", "0+", "Hff0+"), ROOT.kMagenta+3, "ttHSM"),
     Line(ReweightingSamplePlus("ttH", "0+", "Hff0-", "ext1"), ROOT.kMagenta-4, "ttHPS"),
   ]

@@ -847,7 +847,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             return [ReweightingSample("qqZZ")]
         if self.productionmode in ("ggZZ", "qqZZ", "ZX"):
             return [self]
-        if self.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.pythiasystematic is not None:
+        if self.alternategenerator in ("POWHEG", "MINLO", "NNLOPS", "MCatNLO") or self.pythiasystematic is not None:
             return [ReweightingSamplePlus(self.reweightingsample, self.alternategenerator, self.pythiasystematic)] #but not self.extension
         if self.productionmode == "VBF bkg":
             return [self, ReweightingSample("qqZZ")]
@@ -1315,6 +1315,11 @@ class ReweightingSamplePlus(ReweightingSample):
                  self.hypothesis != "0+"
                  or self.productionmode != "ggH"
                 )
+           ) or (
+            self.alternategenerator == "MCatNLO"
+            and (
+                 self.productionmode != "HJJ"
+                )
            ):
             raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args))
 
@@ -1367,7 +1372,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
-      if self.alternategenerator is None:
+      if self.alternategenerator is None or self.alternategenerator == "MCatNLO":
         if self.productionmode in ("ggH", "ttH", "HJJ"):
           return self.production.CJLSTdir_anomalous()
         if self.productionmode == "VBF":
@@ -1421,6 +1426,9 @@ class Sample(ReweightingSamplePlusWithFlavor):
             if self.hffhypothesis == "Hff0+": result = "{}0PM_M125".format(s)
             if self.hffhypothesis == "Hff0-": result = "{}0M_M125".format(s)
             if self.hffhypothesis == "fCP0.5": result = "{}0Mf05ph0_M125".format(s)
+            if self.alternategenerator == "MCatNLO":
+                result += "_mcanlo"
+                result = result.replace("ph0", "")
             if self.extension is not None: result += "_" + str(self.extension)
             return result
         if self.productionmode == "bbH": return "bbH125"
@@ -1493,6 +1501,8 @@ class Sample(ReweightingSamplePlusWithFlavor):
         if self == Sample("190703_2016", "WplusH", "0+", "POWHEG"):
             otherproduction = "190703_2017"
         if self == Sample("190703_2016", "WplusH", "0+", "POWHEG"):
+            otherproduction = "190703_2017"
+        if self.productionmode == "HJJ" and self.alternategenerator == "MCatNLO" and self.production in ("190703_2016", "190703_2018"):
             otherproduction = "190703_2017"
         if self.production == "190703_2016" and self.pythiasystematic in ("ScaleUp", "ScaleDown"):
             del kwargs["pythiasystematic"]
@@ -1676,8 +1686,9 @@ class SampleBasis(MultiEnum):
         self.matrix.flags.writeable = False
         return invertnumpymatrix(self.matrix)
 
-def allsamples():
-    if deprecate(False, 2019, 8, 20): __xcheck()
+def allsamples(__doxcheck=True):
+    if __doxcheck: __xcheck(*allsamples(__doxcheck=False))
+
     for production in productions:
         if production.GEN:
             for productionmode in "ggH", "VBF", "ZH", "WH", "bbH":
@@ -1722,6 +1733,7 @@ def allsamples():
             yield Sample("HJJ", hypothesis, "0+", production)
             yield Sample("HJJ", hypothesis, "0+", production, "ext1")
             if production.year == 2017: yield Sample("HJJ", hypothesis, "0+", production, "ext2")
+            yield Sample("HJJ", hypothesis, "0+", production, "MCatNLO")
             yield Sample("ttH", hypothesis, "0+", production)
             if production.year == 2017: yield Sample("ttH", hypothesis, "0+", production, "ext1")
         yield Sample("tqH", "0+", "Hff0+", production)
@@ -1751,9 +1763,10 @@ def allsamples():
         yield Sample("ZX", production)
         yield Sample("data", production)
 
-def __xcheck():
-    global __xcheck
-    def __xcheck(): pass
+@cache_file(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl"))
+def __xcheck(*samples):
+    if os.path.exists(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl")) and not os.path.exists(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl.tmp")):
+        os.remove(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl")) #no need to have >1 list in the cache
 
     class WriteOnceDict(dict):
         def __init__(self, messagefmt="{key} has already been set"):
@@ -1773,7 +1786,7 @@ def __xcheck():
     CJ2wd = WriteOnceDict("Multiple withdiscriminantsfiles:\n  {oldvalue}\n  {newvalue}\nfrom the same CJLST file:\n  {key}")
     wd2CJ = WriteOnceDict("Multiple CJLST files:\n  {oldvalue}\n  {newvalue}\nthat give the same withdiscriminantsfile:\n  {key}")
 
-    for sample in allsamples():
+    for sample in samples:
         if sample.productionmode == "data": continue
         if sample.copyfromothersample: continue
         print sample
