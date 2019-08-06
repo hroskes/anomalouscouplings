@@ -12,26 +12,38 @@ class WeightsHelper(MultiEnum):
         if len(args) == 1 and not kwargs and isinstance(args[0], SampleBase):
             sample = args[0]
             args = sample.productionmode,
-        return super(WeightsHelper, self).__init__(*args, **kwargs)
+            if hasattr(sample, "alternategenerator") and sample.alternategenerator in ("JHUGen", "MCatNLO") and "useHJJ" not in kwargs:
+                kwargs["useHJJ"] = True
+
+        self.__useHJJ = kwargs.pop("useHJJ", False)
+
+        super(WeightsHelper, self).__init__(*args, **kwargs)
+
+        if self.__useHJJ and self.productionmode != "ggH":
+            raise ValueError("useHJJ only makes sense for ggH")
 
     def check(self, *args):
         if self.productionmode in ("WplusH", "WminusH"): self.productionmode = ProductionMode("WH")
-        if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "ttH", "HJJ", "bbH", "tqH"):
+        if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH"):
             raise ValueError("Has to be a signal productionmode, not {}!\n{}".format(self.productionmode, args))
 
     def weightstring(self, prodordec):
         if prodordec == "dec":
-            if self.productionmode == "ggH":
+            if self.productionmode == "ggH" and not self.__useHJJ:
                 return "GG"
-            if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ", "bbH"):
+            if self.productionmode in ("VBF", "ZH", "WH", "ttH", "bbH", "ggH"):
                 return "Dec"
         if prodordec == "prod":
+            if self.productionmode == "ggH" and self.__useHJJ:
+                return "HJJ"
             if self.productionmode in ("ggH", "bbH"):
                 return None
             if self.productionmode == "ttH": #production reweighting for ttH doesn't work unfortunately
                 return None
-            if self.productionmode in ("VBF", "ZH", "WH", "ttH", "HJJ"):
+            if self.productionmode in ("VBF", "ZH", "WH", "ttH"):
                 return str(self.productionmode)
+
+        assert False, (self, prodordec)
 
     def useproddec(self, prodordec):
       return bool(self.weightstring(prodordec))
@@ -50,7 +62,7 @@ class WeightsHelper(MultiEnum):
         return "ghw1", "ghw1prime2", "ghw2", "ghw4"
       if prodordec == "prod" and self.productionmode == "ttH":
         return "kappa", "kappa_tilde"
-      if prodordec == "prod" and self.productionmode == "HJJ":
+      if prodordec == "prod" and self.productionmode == "ggH":
         return "ghg2", "ghg4"
       assert False
 
@@ -98,13 +110,13 @@ class WeightsHelper(MultiEnum):
 
     def weight(self, prodordec):
         result = "p_Gen_{weightstring}_SIG_"
-        if prodordec == "dec" and self.productionmode=="ggH":
+        if prodordec == "dec" and self.productionmode=="ggH" and not self.__useHJJ:
             result += "ghg2_1_"
         result += "{coupling}_{couplingvalue}_JHUGen"
         return result
     def weightmix(self, prodordec):
         result = "p_Gen_{weightstring}_SIG_"
-        if prodordec == "dec" and self.productionmode=="ggH":
+        if prodordec == "dec" and self.productionmode=="ggH" and not self.__useHJJ:
             result += "ghg2_1_"
         result += "{coupling1}_{coupling1value}_{coupling2}_{coupling2value}_JHUGen"
         return result

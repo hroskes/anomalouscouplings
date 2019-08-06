@@ -125,7 +125,14 @@ class SampleBase(SumOfSamplesBase):
         else:
             raise ValueError("Nominal xsec is only defined for samples with no interference")
 
-        if self.productionmode in ("ggH", "bbH", "tqH"):
+        if self.productionmode == "ggH":
+            if self.ghg4 == 0:
+                result *= self.ghg2**2
+            elif self.ghg2 == 0:
+                result *= self.ghg4**2 / constants.ghg4HJJ**2
+            else:
+                raise ValueError("Nominal xsec is only defined for samples with no interference")
+        elif self.productionmode in ("bbH", "tqH"):
             pass
         elif self.productionmode == "VBF":
             result *= constants.NNPDF30_lo_as_0130.JHUXSVBFa1.nominal_value
@@ -167,14 +174,6 @@ class SampleBase(SumOfSamplesBase):
                 result *= self.g1prime2**2 / constants.g1prime2WH**2
             elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
                 result *= 0
-            else:
-                raise ValueError("Nominal xsec is only defined for samples with no interference")
-        elif self.productionmode == "HJJ":
-            result *= constants.NNPDF30_lo_as_0130.JHUXSHJJa2.nominal_value
-            if self.ghg4 == 0:
-                result *= self.ghg2**2
-            elif self.ghg2 == 0:
-                result *= self.ghg4**2 / constants.ghg4HJJ**2
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "ttH":
@@ -225,12 +224,40 @@ class SampleBase(SumOfSamplesBase):
                               JHUXSHJJa2, JHUXSHJJa3, JHUXSHJJa2a3,                                            \
                               JHUXSttHkappa, JHUXSttHkappatilde, JHUXSttHkappakappatilde
             """
-        else:
-            if self.productionmode not in ("ggH", "bbH"):
-                raise ValueError("Can't get xsec for {} with no pdf".format(self.productionmode))
 
-        if self.productionmode in ("ggH", "bbH"):
+        if self.productionmode == "bbH" or self.productionmode == "ggH" and self.ghg2 == 1 and self.ghg4 == 0:
             return (
+                      JHUXSHZZ2e2mua1*self.g1**2
+                    + JHUXSHZZ2e2mua2*self.g2**2
+                    + JHUXSHZZ2e2mua3*self.g4**2
+                    + JHUXSHZZ2e2muL1*self.g1prime2**2
+                    + JHUXSHZZ2e2muL1Zg*self.ghzgs1prime2**2
+
+                    + JHUXSHZZ2e2mua1a2 * self.g1*self.g2
+                    + JHUXSHZZ2e2mua1a3 * self.g1*self.g4
+                    + JHUXSHZZ2e2mua1L1 * self.g1*self.g1prime2
+                    + JHUXSHZZ2e2mua1L1Zg * self.g1*self.ghzgs1prime2
+
+                    + JHUXSHZZ2e2mua2a3 * self.g4*self.g2
+                    + JHUXSHZZ2e2mua2L1 * self.g2*self.g1prime2
+                    + JHUXSHZZ2e2mua2L1Zg * self.g2*self.ghzgs1prime2
+
+                    + JHUXSHZZ2e2mua3L1 * self.g4*self.g1prime2
+                    + JHUXSHZZ2e2mua3L1Zg * self.g4*self.ghzgs1prime2
+
+                    + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
+                   )
+
+        if pdf is None:
+            raise ValueError("Can't get xsec for {} with no pdf".format(self.productionmode))
+
+
+        if self.productionmode == "ggH":
+            return (
+                      JHUXSHJJa2 * self.ghg2**2
+                    + JHUXSHJJa3 * self.ghg4**2
+                    + JHUXSHJJa2a3 * self.ghg2*self.ghg4
+                   ) / JHUXSHJJa2 * (
                       JHUXSHZZ2e2mua1*self.g1**2
                     + JHUXSHZZ2e2mua2*self.g2**2
                     + JHUXSHZZ2e2mua3*self.g4**2
@@ -380,32 +407,6 @@ class SampleBase(SumOfSamplesBase):
 
                     + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
                    )
-        if self.productionmode == "HJJ":
-            return (
-                      JHUXSHJJa2 * self.ghg2**2
-                    + JHUXSHJJa3 * self.ghg4**2
-                    + JHUXSHJJa2a3 * self.ghg2*self.ghg4
-                   ) * (
-                      JHUXSHZZ2e2mua1*self.g1**2
-                    + JHUXSHZZ2e2mua2*self.g2**2
-                    + JHUXSHZZ2e2mua3*self.g4**2
-                    + JHUXSHZZ2e2muL1*self.g1prime2**2
-                    + JHUXSHZZ2e2muL1Zg*self.ghzgs1prime2**2
-
-                    + JHUXSHZZ2e2mua1a2 * self.g1*self.g2
-                    + JHUXSHZZ2e2mua1a3 * self.g1*self.g4
-                    + JHUXSHZZ2e2mua1L1 * self.g1*self.g1prime2
-                    + JHUXSHZZ2e2mua1L1Zg * self.g1*self.ghzgs1prime2
-
-                    + JHUXSHZZ2e2mua2a3 * self.g4*self.g2
-                    + JHUXSHZZ2e2mua2L1 * self.g2*self.g1prime2
-                    + JHUXSHZZ2e2mua2L1Zg * self.g2*self.ghzgs1prime2
-
-                    + JHUXSHZZ2e2mua3L1 * self.g4*self.g1prime2
-                    + JHUXSHZZ2e2mua3L1Zg * self.g4*self.ghzgs1prime2
-
-                    + JHUXSHZZ2e2muL1L1Zg * self.g1prime2*self.ghzgs1prime2
-                   )
         if self.productionmode == "ttH":
             return (
                       JHUXSttHkappa * self.kappa**2
@@ -443,7 +444,7 @@ class SampleBase(SumOfSamplesBase):
     def xsec(self):
         if self.productionmode == "ggH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSggH2e2mu
-            return constants.SMXSggH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
+            return constants.SMXSggH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "VBF":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSVBF2e2mu
             return constants.SMXSVBF2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+").JHUxsec_pdf(self.pdf)
@@ -460,9 +461,6 @@ class SampleBase(SumOfSamplesBase):
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWpH2e2mu
         if self.productionmode == "WminusH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM": return constants.SMXSWmH2e2mu
-        if self.productionmode == "HJJ":
-            if hasattr(self, "hypothesis") and self.hypothesis == "SM": return 1
-            return constants.SMXSHJJ2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
         if self.productionmode == "ttH":
             if hasattr(self, "hypothesis") and self.hypothesis == "SM" and self.hffhypothesis == "Hff0+": return constants.SMXSttH2e2mu
             return constants.SMXSttH2e2mu * self.JHUxsec / ReweightingSample(self.productionmode, "0+", "Hff0+").JHUxsec_pdf(self.pdf)
@@ -488,7 +486,7 @@ class SampleBase(SumOfSamplesBase):
                    self.g1prime2 == other.g1prime2,
                    self.ghzgs1prime2 == other.ghzgs1prime2,
                )) and (
-                   self.productionmode != "HJJ" or all((
+                   self.productionmode != "ggH" or all((
                        self.ghg2 == other.ghg2,
                        self.ghg4 == other.ghg4,
                    ))
@@ -640,22 +638,15 @@ class ArbitraryCouplingsSample(SampleBase):
     def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, pdf=None):
         self.productionmode = ProductionMode(productionmode)
         self.__g1, self.__g2, self.__g4, self.__g1prime2, self.__ghzgs1prime2 = g1, g2, g4, g1prime2, ghzgs1prime2
-        if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "HJJ", "ttH", "bbH"):
+        if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH"):
             raise ValueError("Bad productionmode {}".format(self.productionmode))
 
-        if self.productionmode == "HJJ":
-            self.__ghg2, self.__ghg4 = ghg2, ghg4
-            if ghg2 is None or ghg4 is None:
-                raise ValueError("Have to set ghg2 and ghg4 for HJJ")
-        elif self.productionmode == "ggH":
-            if ghg2 is None:
+        if self.productionmode == "ggH":
+            if ghg2 is ghg4 is None:
                 ghg2 = 1
-            if ghg4 is None:
                 ghg4 = 0
-            if ghg2 != 1:
-                raise ValueError("ghg2 has to = 1 for {}".format(self.productionmode))
-            if ghg4 != 0:
-                raise ValueError("ghg4 has to = 0 for {}".format(self.productionmode))
+            if ghg2 is None or ghg4 is None:
+                raise ValueError("Have to set ghg2 and ghg4 for ggH, or leave both to the defaults of 1 and 0")
         else:
             if ghg2 is not None or ghg4 is not None:
                 raise ValueError("Can't set ghg2 or ghg4 for {}".format(self.productionmode))
@@ -710,7 +701,7 @@ class ArbitraryCouplingsSample(SampleBase):
 
     def __repr__(self):
         kwargs = ()
-        if self.productionmode == "HJJ": kwargs += ("ghg2", "ghg4")
+        if self.productionmode == "ggH": kwargs += ("ghg2", "ghg4")
         if self.productionmode == "ttH": kwargs += ("kappa", "kappa_tilde")
         if self.pdf is not None: kwargs += ("pdf",)
         kwargs += ("g1", "g2", "g4", "g1prime2", "ghzgs1prime2")
@@ -811,14 +802,17 @@ class ReweightingSample(MultiEnum, SampleBase):
     def check(self, *args):
         if self.productionmode is None:
             raise ValueError("No option provided for productionmode\n{}".format(args))
-        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "HJJ", "ttH", "bbH", "tqH", "VH"):
+        elif self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "tqH", "VH"):
             if self.hypothesis is None:
                 raise ValueError("No hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hypothesis not in self.productionmode.validhypotheses:
                 raise ValueError("{} hypothesis can't be {}\n{}".format(self.productionmode, self.hypothesis, args))
-            if self.productionmode in ("HJJ", "ttH", "tqH"):
+            if self.productionmode in ("ggH", "ttH", "tqH"):
                 if self.hffhypothesis is None:
-                    raise ValueError("Hff hypothesis not provided for {} productionmode\n{}".format(self.productionmode, args))
+                    if self.productionmode == "ggH":
+                        self.hffhypothesis == "Hff0+"
+                    else:
+                        raise ValueError("Hff hypothesis not provided for {} productionmode\n{}".format(self.productionmode, args))
                 if self.productionmode == "tqH" and self.hffhypothesis != "Hff0+":
                     raise ValueError("Bad hffhypothesis {} for {} productionmode\n{}".format(self.hffhypothesis, self.productionmode, args))
             else:
@@ -842,43 +836,6 @@ class ReweightingSample(MultiEnum, SampleBase):
         else:
             raise ValueError("Bad productionmode {}\n{}".format(self.productionmode, args))
 
-    def reweightingsamples(self):
-        if self.productionmode == "qqZZ":      #self == ReweightingSample("qqZZ") or ReweightingSamplePlus("qqZZ", "ext")
-            return [ReweightingSample("qqZZ")]
-        if self.productionmode in ("ggZZ", "qqZZ", "ZX"):
-            return [self]
-        if self.alternategenerator in ("POWHEG", "MINLO", "NNLOPS", "MCatNLO") or self.pythiasystematic is not None:
-            return [ReweightingSamplePlus(self.reweightingsample, self.alternategenerator, self.pythiasystematic)] #but not self.extension
-        if self.productionmode == "VBF bkg":
-            return [self, ReweightingSample("qqZZ")]
-        if self.productionmode == "ttH":  #ttH reweighting doesn't work unfortunately
-            return [
-                    ReweightingSample(self.productionmode, hypothesis, hffhypothesis)
-                            for hypothesis in self.productionmode.validhypotheses
-                            for hffhypothesis in hffhypotheses
-                            if hffhypothesis == self.hffhypothesis
-                   ]
-        if self.productionmode in ("ttH", "HJJ"):
-            return [
-                    ReweightingSample(self.productionmode, hypothesis, hffhypothesis)
-                            for hypothesis in self.productionmode.validhypotheses
-                            for hffhypothesis in hffhypotheses
-                   ]
-        if self.productionmode == "ggH" and self.production.LHE:
-            return [self]
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "bbH"):
-            result = [ReweightingSample(self.productionmode, hypothesis) for hypothesis in self.productionmode.validhypotheses]
-            if self.productionmode == "VBF" and not self.hasZZ:
-                result = [_ for _ in result if not _.hasZZ]
-            if self.productionmode == "ZH" and not (self.hasZZ or self.hasZg):
-                result = [_ for _ in result if not (_.hasZZ or _.hasZg)]
-            return result
-        if self.productionmode == "tqH":
-            return [self]
-        if self.productionmode == "data":
-            return []
-        raise self.ValueError("reweightingsamples")
-
     @property
     def isbkg(self):
         return self.productionmode.isbkg
@@ -887,62 +844,29 @@ class ReweightingSample(MultiEnum, SampleBase):
         return not self.isbkg
 
     def isZX(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH"):
             return False
         elif self.productionmode == "ZX":
             return True
         raise self.ValueError("isZX")
 
     def isdata(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH"):
             return False
         elif self.productionmode == "data":
             return True
         raise self.ValueError("isdata")
 
     def TDirectoryname(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH") or self.productionmode == "ZX" and not config.usedata:
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH") or self.productionmode == "ZX" and not config.usedata:
             return "ZZTree"
         if self.productionmode == "ZX":
             return "CRZLLTree"
         raise self.ValueError("TDirectoryname")
 
-    def color(self):
-        if self.productionmode == "ggH":
-            if self.hypothesis == "0+":
-                return 1
-            elif self.hypothesis == "0-":
-                return 2
-            elif self.hypothesis == "fa30.5":
-                return ROOT.kRed+3
-            elif self.hypothesis == "a2":
-                return ROOT.kCyan
-            elif self.hypothesis == "fa20.5":
-                return 4
-            elif self.hypothesis == "L1":
-                return 3
-            elif self.hypothesis == "fL10.5":
-                return ROOT.kGreen+3
-        raise self.ValueError("color")
-
-    def onlyweights(self):
-        """True if this sample is not needed for making templates,
-           and only the weight and ZZMass should be recorded in the tree"""
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "data", "HJJ", "ttH", "WplusH", "WminusH", "bbH", "tqH"):
-            return False
-        if self.productionmode in ():
-            return True
-        raise self.ValueError("onlyweights")
-
-    def weightingredients(self):
-        """only needs to be defined if self.onlyweights() is True.
-           gives a list of variable names that are used to calculate
-           the weight"""
-        raise self.ValueError("weightingredients")
-
     @property
     def g1(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "HJJ", "bbH", "tqH"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "tqH"):
             if self.hypothesis == "0+": return 1
             if self.hypothesis in ("0-", "a2", "L1", "L1Zg"): return 0
             couplings = "fa3", "fa2", "fL1", "fL1Zg"
@@ -981,7 +905,7 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def g2(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis == "a2": return 1
             if self.hypothesis in ("0+", "0-", "L1", "L1Zg"): return 0
 
@@ -1043,7 +967,7 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def g4(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis == "0-": return 1
             if self.hypothesis in ("0+", "a2", "L1", "L1Zg"): return 0
 
@@ -1106,7 +1030,7 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def g1prime2(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis == "L1": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1Zg"): return 0
 
@@ -1169,7 +1093,7 @@ class ReweightingSample(MultiEnum, SampleBase):
 
     @property
     def ghzgs1prime2(self):
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "HJJ"):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis == "L1Zg": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1"): return 0
 
@@ -1233,8 +1157,6 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def ghg2(self):
         if self.productionmode == "ggH":
-            return 1
-        if self.productionmode == "HJJ":
             if self.hffhypothesis in ("Hff0+", "fCP0.5"):
                 return 1
             if self.hffhypothesis == "Hff0-":
@@ -1244,8 +1166,6 @@ class ReweightingSample(MultiEnum, SampleBase):
     @property
     def ghg4(self):
         if self.productionmode == "ggH":
-            return 0
-        if self.productionmode == "HJJ":
             if self.hffhypothesis == "Hff0+":
                 return 0
             if self.hffhypothesis == "Hff0-":
@@ -1303,34 +1223,39 @@ class ReweightingSamplePlus(ReweightingSample):
     enumname = "reweightingsampleplus"
 
     def check(self, *args):
-        if (
-            self.alternategenerator == "POWHEG"
-            and (
-                 self.hypothesis != "0+"
-                 or self.productionmode not in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH")
-                )
-           ) or (
-            self.alternategenerator in ("MINLO", "NNLOPS")
-            and (
-                 self.hypothesis != "0+"
-                 or self.productionmode != "ggH"
-                )
-           ) or (
-            self.alternategenerator == "MCatNLO"
-            and (
-                 self.productionmode != "HJJ"
-                )
-           ):
-            raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hypothesis, self.alternategenerator, args))
+        super(ReweightingSamplePlus, self).check(*args)
 
-        if (
-            self.alternategenerator == "POWHEG"
-            and (
-                 self.hffhypothesis != "Hff0+"
-                 and self.hffhypothesis is not None
-                )
-           ):
-            raise ValueError("No {} {} sample produced with {}\n{}".format(self.productionmode, self.hffhypothesis, self.alternategenerator, args))
+        if self.hffhypothesis is None and self.productionmode == "ggH": self.hffhypothesis = HffHypothesis("Hff0+")
+
+        if {
+          "POWHEG": (
+             self.hypothesis != "0+"
+             or self.productionmode not in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH")
+             or None is not self.hffhypothesis != "Hff0+"
+           ),
+           "MINLO": (
+             self.hypothesis != "0+"
+             or self.productionmode != "ggH"
+             or self.hffhypothesis != "Hff0+"
+           ),
+           "NNLOPS": (
+             self.hypothesis != "0+"
+             or self.productionmode != "ggH"
+             or self.hffhypothesis != "Hff0+"
+           ),
+           "MCatNLO": (
+             self.hypothesis != "0+"
+             or self.productionmode != "ggH"
+           ),
+           "JHUGen": (
+             self.hypothesis != "0+"
+             or self.productionmode != "ggH"
+           ),
+           "None": (
+             self.productionmode == "ggH" and self.hffhypothesis != "Hff0+"
+           )
+        }[str(self.alternategenerator)]:
+            raise ValueError("No {} sample produced with {}\n{}".format(self.reweightingsample, self.alternategenerator, args))
 
         if self.pythiasystematic is not None:
             if (
@@ -1341,7 +1266,12 @@ class ReweightingSamplePlus(ReweightingSample):
             if self.alternategenerator not in ("POWHEG", "MINLO"):
                 raise ValueError("{} sample with pythia {} is produced with POWHEG{}\n{}".format(self.productionmode, self.pythiasystematic, " or MINLO" if self.productionmode == "ggH" else "", args))
 
-        super(ReweightingSamplePlus, self).check(*args)
+        if self.pythiasystematic is not None:
+            if (
+                self.hffhypothesis != "Hff0+"
+                 and self.hffhypothesis is not None
+               ):
+                raise ValueError("No {} {} sample produced with pythia {}\n{}".format(self.productionmode, self.hffhypothesis, self.pythiasystematic, args))
 
 class ReweightingSamplePlusWithFlavor(ReweightingSamplePlus):
     enumname = "reweightingsamplepluswithflavor"
@@ -1372,8 +1302,8 @@ class Sample(ReweightingSamplePlusWithFlavor):
         super(Sample, self).check(*args)
 
     def CJLSTmaindir(self):
-      if self.alternategenerator is None or self.alternategenerator == "MCatNLO":
-        if self.productionmode in ("ggH", "ttH", "HJJ"):
+      if self.alternategenerator is None or self.alternategenerator in ("MCatNLO", "JHUGen"):
+        if self.productionmode in ("ggH", "ttH"):
           return self.production.CJLSTdir_anomalous()
         if self.productionmode == "VBF":
           return self.production.CJLSTdir_anomalous_VBF()
@@ -1386,16 +1316,15 @@ class Sample(ReweightingSamplePlusWithFlavor):
       return self.production.CJLSTdir()
 
     def CJLSTdirname(self):
-        if self.alternategenerator is not None:
-            if self.alternategenerator == "POWHEG":
-                if self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
-                    s = str(self.productionmode)
-                    if self.productionmode == "VBF": s = "VBFH"
-                    if self.hypothesis == "0+": result = "{}125".format(s)
-                if self.pythiasystematic is not None:
-                    result += self.pythiasystematic.appendname
-                if self.extension is not None: result += str(self.extension)
-                return result
+        if self.alternategenerator == "POWHEG":
+            if self.productionmode in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"):
+                s = str(self.productionmode)
+                if self.productionmode == "VBF": s = "VBFH"
+                if self.hypothesis == "0+": result = "{}125".format(s)
+            if self.pythiasystematic is not None:
+                result += self.pythiasystematic.appendname
+            if self.extension is not None: result += str(self.extension)
+            return result
         if self.alternategenerator in ("MINLO", "NNLOPS"):
             if self.productionmode == "ggH":
                 result = "ggH125"
@@ -1407,6 +1336,15 @@ class Sample(ReweightingSamplePlusWithFlavor):
                     result += "_NNLOPS"
                 return result
             raise self.ValueError("CJLSTdirname")
+        if self.alternategenerator in ("JHUGen", "MCatNLO") and self.productionmode == "ggH":
+            if self.hffhypothesis == "Hff0+": result = "HJJ0PM_M125"
+            if self.hffhypothesis == "Hff0-": result = "HJJ0M_M125"
+            if self.hffhypothesis == "fCP0.5": result = "HJJ0Mf05ph0_M125"
+            if self.alternategenerator == "MCatNLO":
+                result += "_mcanlo"
+                result = result.replace("ph0", "")
+            if self.extension is not None: result += "_" + str(self.extension)
+            return result
         if self.productionmode in ("ggH", "VBF", "ZH", "WH"):
             s = str(self.productionmode)
             if self.productionmode == "VBF": s = "VBFH"
@@ -1421,14 +1359,10 @@ class Sample(ReweightingSamplePlusWithFlavor):
             if self.hypothesis in ("fL1Zg0.5", "fL1Zgprod0.5"): result = "{}0L1Zgf05ph0_M125".format(s)
             if self.extension is not None: result += "_" + str(self.extension)
             return result
-        if self.productionmode in ("HJJ", "ttH"):
-            s = str(self.productionmode)
-            if self.hffhypothesis == "Hff0+": result = "{}0PM_M125".format(s)
-            if self.hffhypothesis == "Hff0-": result = "{}0M_M125".format(s)
-            if self.hffhypothesis == "fCP0.5": result = "{}0Mf05ph0_M125".format(s)
-            if self.alternategenerator == "MCatNLO":
-                result += "_mcanlo"
-                result = result.replace("ph0", "")
+        if self.productionmode == "ttH":
+            if self.hffhypothesis == "Hff0+": result = "ttH0PM_M125"
+            if self.hffhypothesis == "Hff0-": result = "ttH0M_M125"
+            if self.hffhypothesis == "fCP0.5": result = "ttH0Mf05ph0_M125"
             if self.extension is not None: result += "_" + str(self.extension)
             return result
         if self.productionmode == "bbH": return "bbH125"
@@ -1502,7 +1436,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
             otherproduction = "190703_2017"
         if self == Sample("190703_2016", "WplusH", "0+", "POWHEG"):
             otherproduction = "190703_2017"
-        if self.productionmode == "HJJ" and self.alternategenerator == "MCatNLO" and self.production in ("190703_2016", "190703_2018"):
+        if self.productionmode == "ggH" and self.alternategenerator == "MCatNLO" and self.production in ("190703_2016", "190703_2018"):
             otherproduction = "190703_2017"
         if self.production == "190703_2016" and self.pythiasystematic in ("ScaleUp", "ScaleDown"):
             del kwargs["pythiasystematic"]
@@ -1695,7 +1629,7 @@ def allsamples(__doxcheck=True):
                 for hypothesis in ProductionMode(productionmode).generatedhypotheses(production):
                     yield Sample(productionmode, hypothesis, production)
             for hypothesis in hffhypotheses:
-                yield Sample("HJJ", hypothesis, "0+", production)
+                yield Sample("ggH", "JHUGen", hypothesis, "0+", production)
                 yield Sample("ttH", hypothesis, "0+", production)
             yield Sample("tqH", "0+", "Hff0+", production)
             yield Sample("ggH", "0+", "MINLO", production)
@@ -1730,10 +1664,10 @@ def allsamples(__doxcheck=True):
                 ):
                     yield Sample(productionmode, hypothesis, production, "ext1")
         for hypothesis in hffhypotheses:
-            yield Sample("HJJ", hypothesis, "0+", production)
-            yield Sample("HJJ", hypothesis, "0+", production, "ext1")
-            if production.year == 2017: yield Sample("HJJ", hypothesis, "0+", production, "ext2")
-            yield Sample("HJJ", hypothesis, "0+", production, "MCatNLO")
+            yield Sample("ggH", "JHUGen", hypothesis, "0+", production)
+            yield Sample("ggH", "JHUGen", hypothesis, "0+", production, "ext1")
+            if production.year == 2017: yield Sample("ggH", "JHUGen", hypothesis, "0+", production, "ext2")
+            yield Sample("ggH", hypothesis, "0+", production, "MCatNLO")
             yield Sample("ttH", hypothesis, "0+", production)
             if production.year == 2017: yield Sample("ttH", hypothesis, "0+", production, "ext1")
         yield Sample("tqH", "0+", "Hff0+", production)

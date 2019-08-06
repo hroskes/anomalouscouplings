@@ -251,7 +251,6 @@ class ProductionMode(MyEnum):
     enumitems = (
                  EnumItem("ggH"),
                  EnumItem("VBF", "qqH"),
-                 EnumItem("HJJ", "H+jj"),
                  EnumItem("ZH"),
                  EnumItem("WH"),
                  EnumItem("ttH"),
@@ -292,7 +291,7 @@ class ProductionMode(MyEnum):
         return str(self)
     @property
     def isbkg(self):
-        if self in ("ggH", "VBF", "ZH", "WH", "VH", "ttH", "HJJ", "WplusH", "WminusH", "bbH", "tqH", "ffH", "VVH"):
+        if self in ("ggH", "VBF", "ZH", "WH", "VH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "ffH", "VVH"):
             return False
         elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
             return True
@@ -305,7 +304,7 @@ class ProductionMode(MyEnum):
     def validhypotheses(self):
         if self == "ggH":
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
-        if self in ("ttH", "HJJ", "bbH"):
+        if self in ("ttH", "bbH"):
             return Hypothesis.items(lambda x: x in decayonlyhypotheses)
         if self == "VBF":
             return Hypothesis.items(lambda x: x in proddechypotheses)
@@ -324,7 +323,7 @@ class ProductionMode(MyEnum):
                 return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5") or production.year >= 2017 and x in ("L1Zg", "fL1Zg0.5"))
             if self in ("VBF", "ZH", "WH"):
                 return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5") or production.year >= 2017 and self != "WH" and x in ("L1Zg", "fL1Zgprod0.5"))
-            if self in ("WplusH", "WminusH", "ttH", "HJJ", "bbH", "tqH"):
+            if self in ("WplusH", "WminusH", "ttH", "bbH", "tqH"):
                 return Hypothesis.items(lambda x: x == "0+")
         else:
             if self == "ggH":
@@ -344,7 +343,7 @@ class ProductionMode(MyEnum):
             yield Sample(self, production)
         else:
             hff = None
-            if self in ("HJJ", "ttH"): hff = "Hff0+"
+            if self == "ttH": hff = "Hff0+"
             for h in self.generatedhypotheses(production):
                 yield Sample(self, h, hff, production)
 
@@ -921,6 +920,7 @@ class AlternateGenerator(MyEnum):
                  EnumItem("MINLO"),
                  EnumItem("NNLOPS"),
                  EnumItem("MCatNLO", "MC@NLO"),
+                 EnumItem("JHUGen"),
                 )
 
 class Extension(MyEnum):

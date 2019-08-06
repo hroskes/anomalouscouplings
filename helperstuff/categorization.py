@@ -164,7 +164,7 @@ class BaseSingleCategorizationCouplings(BaseSingleCategorization):
                  "p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg2*self.ghg4,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=1, ghg4=0, pdf="NNPDF30_lo_as_0130").JHUxsec / ArbitraryCouplingsSample("HJJ", 1, 0, 0, 0, 0, ghg2=self.ghg2, ghg4=self.ghg4, pdf="NNPDF30_lo_as_0130").JHUxsec
+        multiplier = ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, ghg2=1, ghg4=0, pdf="NNPDF30_lo_as_0130").JHUxsec / ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, ghg2=self.ghg2, ghg4=self.ghg4, pdf="NNPDF30_lo_as_0130").JHUxsec
         return self.get_p_function(terms, multiplier.nominal_value, self.pHJJ_function_name)
 
 

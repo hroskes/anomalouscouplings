@@ -30,7 +30,6 @@ import sys
 def adddiscriminants(*args):
 
   sample = Sample(*args)
-  reweightingsamples = sample.reweightingsamples()
 
   newfilename = sample.withdiscriminantsfile()
   print newfilename
