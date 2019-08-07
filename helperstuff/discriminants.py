@@ -114,6 +114,9 @@ jetdiscriminants = [
 
     Discriminant("D_bkg_VBFdecay", "D_{bkg}", 3, -0.3, 1.2, identifier="D_bkg_VBFdecay_3bins"),   #set min and max to have boundaries at 0.2 and 0.7
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.7, 1.7, identifier="D_0minus_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .9
+    Discriminant("D_0hplus_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.7, 1.7, identifier="D_0hplus_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .9
+    Discriminant("D_L1_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.7, 1.7, identifier="D_L1_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .9
+    Discriminant("D_L1Zg_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.6, 1.5, identifier="D_L1Zg_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .8
 
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 10, 0, 1, identifier="D_0minus_VBFdecay_10bins"),
     Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBF+dec}", 10, 0, 1, identifier="D_0hplus_VBFdecay_10bins"),
