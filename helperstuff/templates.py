@@ -608,14 +608,14 @@ class TemplatesFile(MultiEnum):
 
         if self.analysis.dimensions == 1:
             if self.templategroup in ("ggh", "tth", "bbh"):
-                constrainttype = "oneparameterggH"
+                constrainttype = "oneparameterHVV"
                 templates = [
                     Template(self, productionmode, self.analysis.purehypotheses[0]),
                     IntTemplate(self, productionmode, "g11gi1"),
                     Template(self, productionmode, self.analysis.purehypotheses[1]),
                 ]
             if self.templategroup in ("vbf", "zh", "wh", "vh"):
-                constrainttype = "oneparameterVVH"
+                constrainttype = "oneparameterVVHVV"
                 templates = [
                     Template(self, productionmode, self.analysis.purehypotheses[0]),
                     IntTemplate(self, productionmode, "g13gi1"),
@@ -627,7 +627,7 @@ class TemplatesFile(MultiEnum):
             if self.templategroup in ("ggh", "tth", "bbh"):
                 assert self.analysis.isfa3fa2fL1fL1Zg
                 if self.category == "Untagged" and not self.analysis.isSTXS:
-                    constrainttype = "fourparameterggH"
+                    constrainttype = "fourparameterHVV"
                     templates = [
                         Template(self, productionmode, self.analysis.purehypotheses[0]),
                         IntTemplate(self, productionmode, "g11gi1"),
@@ -647,7 +647,7 @@ class TemplatesFile(MultiEnum):
                     ]
                 elif self.category in ("VBFtagged", "VHHadrtagged", "Boosted", "VBF1jtagged", "VHLepttagged") or self.analysis.isSTXS:
                     #leave out fa3, because those interferences are 0
-                    constrainttype = "threeparameterggH"
+                    constrainttype = "threeparameterHVV"
                     templates = [
                         Template(self, productionmode, self.analysis.purehypotheses[0]),
                         IntTemplate(self, productionmode, "g11gj1"),
@@ -661,7 +661,7 @@ class TemplatesFile(MultiEnum):
                         Template(self, productionmode, self.analysis.purehypotheses[4]),
                     ]
             if self.templategroup in ("vbf", "zh", "wh", "vh"):
-                constrainttype = "fourparameterVVH"
+                constrainttype = "fourparameterVVHVV"
                 templates = [
                     Template(self, productionmode, self.analysis.purehypotheses[0]),
                     IntTemplate(self, productionmode, "g13gi1"),
@@ -738,9 +738,9 @@ class TemplatesFile(MultiEnum):
                     for i, _ in reversed(list(enumerate(templates[:]))):
                         if isinstance(_, IntTemplate) and _.interferencetype.couplingpowers["i"] in (1, 3):
                             del templates[i]
-                    constrainttype = "fourparameterVVH_nog4int"
+                    constrainttype = "fourparameterVVHVV_nog4int"
             if self.templategroup == ("wh"):
-                constrainttype = "fourparameterWWH"
+                constrainttype = "fourparameterWWHVV"
                 templates = [
                     Template(self, productionmode, self.analysis.purehypotheses[0]),
                     IntTemplate(self, productionmode, "g13gi1"),
@@ -812,7 +812,7 @@ class TemplatesFile(MultiEnum):
                     for i, _ in reversed(list(enumerate(templates[:]))):
                         if isinstance(_, IntTemplate) and _.interferencetype.couplingpowers["i"] in (1, 3):
                             del templates[i]
-                    constrainttype = "fourparameterWWH_nog4int"
+                    constrainttype = "fourparameterWWHVV_nog4int"
 
         return [
             {
