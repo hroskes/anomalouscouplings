@@ -1160,7 +1160,7 @@ class Template(TemplateBase, MultiEnum):
                 if self.category in ("VBFtagged", "VHHadrtagged"):
                     generators = ["JHUGen"]
                 else:
-                    generators = [None, "POWHEG"]
+                    generators = [None]
                 result=[{
                         Sample(self.production, self.productionmode, hypothesis, ext, generator, hffhypothesis)
                             for hypothesis in self.productionmode.generatedhypotheses(self.production)
@@ -1202,7 +1202,8 @@ class Template(TemplateBase, MultiEnum):
                 del result[1]
         if self.productionmode in ("ttH", "bbH"):
             result=[{
-                    Sample(self.production, self.productionmode, "0+", self.hffhypothesis)
+                    Sample(self.production, self.productionmode, "0+", self.hffhypothesis),
+                    Sample(self.production, self.productionmode, "0+", self.hffhypothesis, "ext1"),
                    }]
         if self.productionmode == "ZX":
             result = [{Sample(self.production, self.productionmode)}]
