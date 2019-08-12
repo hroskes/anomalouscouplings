@@ -11,6 +11,7 @@ if __name__ == "__main__":
     p.add_argument("--subdirectory")
     p.add_argument("--poi", default="CMS_zz4l_fai1")
     p.add_argument("--airatio", action="store_true")
+    p.add_argument("--usemg", action="store_true")
     args = p.parse_args()
 
 import math
@@ -88,10 +89,19 @@ def findwhereyequals(y, p1, p2):
     b =  p1.y - m*p1.x
     return (y-b)/m
 
-def getlimits(filename, poi, domirror=False, airatio=False, analysis=None):
+def getgraphs(legend, mg, usemg):
+  if usemg:
+    for i, g in enumerate(mg.GetListOfGraphs()):
+      yield g, str(i)
+  else:
+    for entry in legend.GetListOfPrimitives():
+      yield entry.GetObject(), entry.GetLabel()
+
+def getlimits(filename, poi, domirror=False, airatio=False, analysis=None, usemg=False):
     f = ROOT.TFile(filename)
     c = f.c1
     legend = c.GetListOfPrimitives()[2]
+    mg = c.GetListOfPrimitives()[1]
 
     poimin, poimax = {
         "CMS_zz4l_fai1": (-float("inf"), float("inf")) if airatio else (-1, 1),
@@ -127,9 +137,8 @@ def getlimits(filename, poi, domirror=False, airatio=False, analysis=None):
     else:
         def transform(fa3): return fa3
 
-    for entry in legend.GetListOfPrimitives():
+    for g, label in getgraphs(legend, mg, usemg):
         minimum = Point(float("nan"), float("infinity"))
-        g, label = entry.GetObject(), entry.GetLabel()
         points = [Point(transform(x), y) for x, y, n in zip(g.GetX(), g.GetY(), range(g.GetN()))]
         if domirror and "Expected" in label:
             def findy(x):
@@ -200,11 +209,13 @@ def printlimits(analysis, foldername, **kwargs):
             fortable = kwarg
         elif kw == "airatio":
             airatio = kwarg
+        elif kw == "usemg":
+            usemg = kwarg
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
     filename = os.path.join(config.plotsbasedir, "limits", subdirectory, foldername, plotname+".root")
-    allresults = getlimits(filename, poi=poi, domirror=(analysis=="fa3"), airatio=airatio, analysis=analysis)
+    allresults = getlimits(filename, poi=poi, domirror=(analysis=="fa3"), airatio=airatio, analysis=analysis, usemg=usemg)
     if fortable:
         assert len(allresults.keys()) == 2 and allresults.keys()[0].startswith("Observed") and allresults.keys()[1].startswith("Expected"), allresults.keys()
 
