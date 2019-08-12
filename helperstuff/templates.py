@@ -14,7 +14,7 @@ import numpy
 import ROOT
 
 import config
-from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
+from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, hffhypotheses, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
 from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile, withdiscriminantsfileisvalid
 
@@ -101,34 +101,46 @@ class TemplatesFile(MultiEnum):
 
         elif self.templategroup in ("ggh", "tth", "bbh"):
             if self.templategroup == "ggh":
-                args = "ggH",
+                commonargs = "ggH",
+                if self.category in ("VBFtagged", "VHHadrtagged"):
+                    otherargslist = [["Hff0+", "JHUGen"], ["Hff0-", "JHUGen"]]
+                else:
+                    otherargslist = [["Hff0+"]]
             elif self.templategroup == "tth":
-                args = "ttH", "Hff0+"
+                commonargs = "ttH",
+                otherargslist = [["Hff0+"]]
+                if self.category in ("VBFtagged", "VHHadrtagged"):
+                    otherargslist.append(["Hff0-"])
             elif self.templategroup == "bbh":
-                args = "bbH",
+                commonargs = "bbH",
+                otherargslist = [[]]
             else:
                 assert False, self.templategroup
 
-            if self.analysis.fais == ("fa3",):
-                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("0-", *args), ReweightingSample("fa30.5", *args)]
-            if self.analysis == "fa2":
-                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("a2", *args), ReweightingSample("fa2-0.5", *args)]
-            if self.analysis == "fL1":
-                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("fL10.5", *args)]
-            if self.analysis == "fL1Zg":
-                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL1Zg-0.5", *args)]
-            if self.analysis.isfL1fL1Zg:
-                reweightingsamples = [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL10.5", *args), ReweightingSample("fL1Zg0.5", *args), ReweightingSample("fL10.5fL1Zg0.5", *args)]
-            if self.analysis.isfa3fa2fL1fL1Zg:
-                hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
-                              "fa30.5", "fa2-0.5", "fL10.5", "fL1Zg-0.5",
-                              "fa30.5fa20.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5",
-                                              "fa20.5fL10.5", "fa20.5fL1Zg0.5",
-                                                              "fL10.5fL1Zg0.5",
-                             ]
-                reweightingsamples = [
-                  ReweightingSample(h, *args) for h in hypotheses
-                ]
+            reweightingsamples = []
+
+            for otherargs in otherargslist:
+                args = commonargs + tuple(otherargs)
+                if self.analysis.fais == ("fa3",):
+                    reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("0-", *args), ReweightingSample("fa30.5", *args)]
+                if self.analysis == "fa2":
+                    reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("a2", *args), ReweightingSample("fa2-0.5", *args)]
+                if self.analysis == "fL1":
+                    reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("fL10.5", *args)]
+                if self.analysis == "fL1Zg":
+                    reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL1Zg-0.5", *args)]
+                if self.analysis.isfL1fL1Zg:
+                    reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL10.5", *args), ReweightingSample("fL1Zg0.5", *args), ReweightingSample("fL10.5fL1Zg0.5", *args)]
+                if self.analysis.isfa3fa2fL1fL1Zg:
+                    hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
+                                  "fa30.5", "fa2-0.5", "fL10.5", "fL1Zg-0.5",
+                                  "fa30.5fa20.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5",
+                                                  "fa20.5fL10.5", "fa20.5fL1Zg0.5",
+                                                                  "fL10.5fL1Zg0.5",
+                                 ]
+                    reweightingsamples += [
+                      ReweightingSamplePlus(h, *args) for h in hypotheses
+                    ]
 
         elif self.templategroup in ("vbf", "zh", "wh", "vh"):
             p = str(self.templategroup).upper()
@@ -203,15 +215,17 @@ class TemplatesFile(MultiEnum):
 
     def inttemplates(self):
         if self.templategroup == "ggh" and self.shapesystematic != "MINLO_SM" or self.templategroup in ("tth", "bbh"):
+            hffhypotheses = [_ for _ in (None, "Hff0+", "Hff0-", "fCP0.5") if any(t.hffhypothesis == _ for t in self.templates())]
             h = str(self.templategroup).replace("h", "H")
             if self.analysis.dimensions == 4:
-                return [IntTemplate(self, h, "g{}1g{}1".format(i1, i2))
+                return [IntTemplate(self, h, "g{}1g{}1".format(i1, i2), hh)
                         for i1, i2 in combinations("1ijkl", 2)
+                        for hh in hffhypotheses
                 ]
             elif self.analysis.dimensions == 2:
-                return [IntTemplate(self, h, _) for _ in ("g11gi1", "g11gj1", "gi1gj1")]
+                return [IntTemplate(self, h, _, hh) for _ in ("g11gi1", "g11gj1", "gi1gj1") for hh in hffhypotheses]
             elif self.analysis.dimensions == 1:
-                return [IntTemplate(self, h, "g11gi1")]
+                return [IntTemplate(self, h, "g11gi1", hh) for hh in self.hffhypotheses]
 
         elif self.templategroup in ("vbf", "zh", "wh", "vh"):
             h = str(self.templategroup).upper()
@@ -467,7 +481,7 @@ class TemplatesFile(MultiEnum):
     @cache
     def invertedmatrix(self):
         productionmode = str(self.templategroup).upper().replace("GGH", "ggH").replace("TTH", "ttH").replace("BBH", "bbH")
-        basis = SampleBasis([template.hypothesis for template in self.templates()], productionmode, self.analysis)
+        basis = SampleBasis([template.hypothesis for template in self.templates() if template.hffhypothesis in (None, "Hff0+")], productionmode, self.analysis)
         invertedmatrix = basis.invertedmatrix
         try:
             if self.templategroup in ("vbf", "zh", "wh", "vh"):
@@ -551,6 +565,10 @@ class TemplatesFile(MultiEnum):
         return invertedmatrix
 
     def getjson(self):
+        c = Counter(t.templatename() for t in self.templates()+self.inttemplates())
+        for k, v in c.iteritems():
+            if v>1:
+                raise ValueError("Multiple templates in {} with name {}".format(self, k))
         result = {
           "outputFile": self.templatesfile(firststep=False),
           "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
@@ -605,6 +623,7 @@ class TemplatesFile(MultiEnum):
         productionmode = {_.productionmode for _ in self.signalsamples()}
         assert len(productionmode) == 1
         productionmode = productionmode.pop()
+        templates2 = []
 
         if self.analysis.dimensions == 1:
             if self.templategroup in ("ggh", "tth", "bbh"):
@@ -648,18 +667,46 @@ class TemplatesFile(MultiEnum):
                 elif self.category in ("VBFtagged", "VHHadrtagged", "Boosted", "VBF1jtagged", "VHLepttagged") or self.analysis.isSTXS:
                     #leave out fa3, because those interferences are 0
                     constrainttype = "threeparameterHVV"
-                    templates = [
-                        Template(self, productionmode, self.analysis.purehypotheses[0]),
-                        IntTemplate(self, productionmode, "g11gj1"),
-                        IntTemplate(self, productionmode, "g11gk1"),
-                        IntTemplate(self, productionmode, "g11gl1"),
-                        Template(self, productionmode, self.analysis.purehypotheses[2]),
-                        IntTemplate(self, productionmode, "gj1gk1"),
-                        IntTemplate(self, productionmode, "gj1gl1"),
-                        Template(self, productionmode, self.analysis.purehypotheses[3]),
-                        IntTemplate(self, productionmode, "gk1gl1"),
-                        Template(self, productionmode, self.analysis.purehypotheses[4]),
-                    ]
+                    if self.category in ("VBFtagged", "VHHadrtagged") and self.templategroup in ("ggh", "tth"):
+                        generator = None
+                        if self.templategroup == "ggh": generator = "JHUGen"
+                        templates = [
+                            Template(self, productionmode, self.analysis.purehypotheses[0], "Hff0+", generator),
+                            IntTemplate(self, productionmode, "g11gj1", "Hff0+"),
+                            IntTemplate(self, productionmode, "g11gk1", "Hff0+"),
+                            IntTemplate(self, productionmode, "g11gl1", "Hff0+"),
+                            Template(self, productionmode, self.analysis.purehypotheses[2], "Hff0+", generator),
+                            IntTemplate(self, productionmode, "gj1gk1", "Hff0+"),
+                            IntTemplate(self, productionmode, "gj1gl1", "Hff0+"),
+                            Template(self, productionmode, self.analysis.purehypotheses[3], "Hff0+", generator),
+                            IntTemplate(self, productionmode, "gk1gl1", "Hff0+"),
+                            Template(self, productionmode, self.analysis.purehypotheses[4], "Hff0+", generator),
+                        ]
+                        templates2 = [
+                            Template(self, productionmode, self.analysis.purehypotheses[0], "Hff0-", generator),
+                            IntTemplate(self, productionmode, "g11gj1", "Hff0-"),
+                            IntTemplate(self, productionmode, "g11gk1", "Hff0-"),
+                            IntTemplate(self, productionmode, "g11gl1", "Hff0-"),
+                            Template(self, productionmode, self.analysis.purehypotheses[2], "Hff0-", generator),
+                            IntTemplate(self, productionmode, "gj1gk1", "Hff0-"),
+                            IntTemplate(self, productionmode, "gj1gl1", "Hff0-"),
+                            Template(self, productionmode, self.analysis.purehypotheses[3], "Hff0-", generator),
+                            IntTemplate(self, productionmode, "gk1gl1", "Hff0-"),
+                            Template(self, productionmode, self.analysis.purehypotheses[4], "Hff0-", generator),
+                        ]
+                    else:
+                        templates = [
+                            Template(self, productionmode, self.analysis.purehypotheses[0]),
+                            IntTemplate(self, productionmode, "g11gj1"),
+                            IntTemplate(self, productionmode, "g11gk1"),
+                            IntTemplate(self, productionmode, "g11gl1"),
+                            Template(self, productionmode, self.analysis.purehypotheses[2]),
+                            IntTemplate(self, productionmode, "gj1gk1"),
+                            IntTemplate(self, productionmode, "gj1gl1"),
+                            Template(self, productionmode, self.analysis.purehypotheses[3]),
+                            IntTemplate(self, productionmode, "gk1gl1"),
+                            Template(self, productionmode, self.analysis.purehypotheses[4]),
+                        ]
             if self.templategroup in ("vbf", "zh", "wh", "vh"):
                 constrainttype = "fourparameterVVHVV"
                 templates = [
@@ -814,11 +861,14 @@ class TemplatesFile(MultiEnum):
                             del templates[i]
                     constrainttype = "fourparameterWWHVV_nog4int"
 
+        for _ in templates+templates2:
+            if _ not in {Template: self.templates(), IntTemplate: self.inttemplates()}[type(_)]:
+                raise ValueError("{} is not a template in {}. Templates:\n  {}".format(_, self, "\n  ".join(str(t) for t in self.templates() + self.inttemplates())))
         return [
             {
                 "type": constrainttype,
-                "templates": [_.templatename() for _ in templates],
-            }
+                "templates": [_.templatename() for _ in templateslist],
+            } for templateslist in (templates, templates2) if templateslist
         ]
 
 def listfromiterator(function):
@@ -874,7 +924,7 @@ class TemplateBase(object):
                 assert False
 
         if enumsdict[HffHypothesis] is None:
-            if enumsdict[ProductionMode] == "ttH":
+            if enumsdict[ProductionMode] in ("ggH", "ttH"):
                 enumsdict[HffHypothesis] = "Hff0+"
 
         super(TemplateBase, self).applysynonyms(enumsdict)
@@ -956,9 +1006,9 @@ class Template(TemplateBase, MultiEnum):
         else:
             raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
 
-        if self.productionmode == "ttH":
-            if self.hffhypothesis != "Hff0+":
-                raise ValueError("{} is not used to make templates {}!\n{}".format(self.hffhypothesis, args))
+        if self.productionmode in ("ggH", "ttH"):
+            if self.hffhypothesis != "Hff0+" and self.category not in ("VBFtagged", "VHHadrtagged"):
+                raise ValueError("{} is not used to make templates for {}!\n{}".format(self.hffhypothesis, self.category, args))
         else:
             if self.hffhypothesis is not None:
                raise ValueError("HffHypothesis {} provided for {}!\n{}".format(self.hffhypothesis, self.productionmode, args))
@@ -968,21 +1018,23 @@ class Template(TemplateBase, MultiEnum):
             match1 = re.match("^f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5$", str(self.hypothesis))
             match2 = re.match("^f(a2|a3|L1|L1Zg)(?:dec)?0.5f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5$", str(self.hypothesis))
             if self.hypothesis == "0+":
-                name = "template0PlusAdapSmooth"
+                name = "template0Plus"
             elif self.hypothesis == "0-":
-                name = "template0MinusAdapSmooth"
+                name = "template0Minus"
             elif self.hypothesis == "a2":
-                name = "template0HPlusAdapSmooth"
+                name = "template0HPlus"
             elif self.hypothesis == "L1":
-                name = "template0L1AdapSmooth"
+                name = "template0L1"
             elif self.hypothesis == "L1Zg":
-                name = "template0L1ZgAdapSmooth"
+                name = "template0L1Zg"
             elif match1:
-                name = "templateMixa1{}{}AdapSmooth".format(match1.group(1), "Pi" if match1.group(2) else "")
+                name = "templateMixa1{}{}".format(match1.group(1), "Pi" if match1.group(2) else "")
             elif match2:
-                name = "templateMix{}{}{}AdapSmooth".format(match2.group(1), match2.group(2), "Pi" if match2.group(3) else "")
+                name = "templateMix{}{}{}".format(match2.group(1), match2.group(2), "Pi" if match2.group(3) else "")
             else:
                 print self.hypothesis
+            if self.hffhypothesis == "Hff0-":
+                name = name.replace("template", "templateHff0MinusHVV")
         elif self.productionmode in ("VBF", "ZH", "WH", "VH"):
             match1 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)(?P<sign>-?)0[.]5$", str(self.hypothesis))
             match2 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]5f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]5$", str(self.hypothesis))
@@ -992,37 +1044,37 @@ class Template(TemplateBase, MultiEnum):
             match6 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]25f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)0[.]25f(?P<ak>a2|a3|L1|L1Zg)(?P=proddec)0[.]25f(?P<al>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]25$", str(self.hypothesis))
             pddict = {"prod": "Prod", "dec": "Decay", "": "Decay", "proddec": "ProdDec"}
             if self.hypothesis == "0+":
-                name = "template0PlusAdapSmooth"
+                name = "template0Plus"
             elif self.hypothesis == "0-":
-                name = "template0MinusAdapSmooth"
+                name = "template0Minus"
             elif self.hypothesis == "a2":
-                name = "template0HPlusAdapSmooth"
+                name = "template0HPlus"
             elif self.hypothesis == "L1":
-                name = "template0L1AdapSmooth"
+                name = "template0L1"
             elif self.hypothesis == "L1Zg":
-                name = "template0L1ZgAdapSmooth"
+                name = "template0L1Zg"
             elif match1:
-                name = "templateMixa1{}{}{}AdapSmooth".format(
+                name = "templateMixa1{}{}{}".format(
                     match1.group("ai"),
                     pddict[match1.group("proddec")],
                     "Pi" if match1.group("sign") else ""
                 )
             elif match2:
-                name = "templateMix{}{}{}{}AdapSmooth".format(
+                name = "templateMix{}{}{}{}".format(
                     match2.group("ai"),
                     match2.group("aj"),
                     pddict[match2.group("proddec")],
                     "Pi" if match2.group("sign") else ""
                 )
             elif match3:
-                name = "templateMixa1{}{}{}{}AdapSmooth".format(
+                name = "templateMixa1{}{}{}{}".format(
                     match3.group("ai"),
                     match3.group("aj"),
                     pddict[match3.group("proddec")],
                     "Pi" if match3.group("sign") else ""
                 )
             elif match4:
-                name = "templateMix{}{}{}{}{}AdapSmooth".format(
+                name = "templateMix{}{}{}{}{}".format(
                     match4.group("ai"),
                     match4.group("aj"),
                     match4.group("ak"),
@@ -1030,7 +1082,7 @@ class Template(TemplateBase, MultiEnum):
                     "Pi" if match4.group("sign") else ""
                 )
             elif match5:
-                name = "templateMixa1{}{}{}{}{}AdapSmooth".format(
+                name = "templateMixa1{}{}{}{}{}".format(
                     match5.group("ai"),
                     match5.group("aj"),
                     match5.group("ak"),
@@ -1038,7 +1090,7 @@ class Template(TemplateBase, MultiEnum):
                     "Pi" if match5.group("sign") else ""
                 )
             elif match6:
-                name = "templateMix{}{}{}{}{}{}AdapSmooth".format(
+                name = "templateMix{}{}{}{}{}{}".format(
                     match6.group("ai"),
                     match6.group("aj"),
                     match6.group("ak"),
@@ -1047,9 +1099,9 @@ class Template(TemplateBase, MultiEnum):
                     "Pi" if match6.group("sign") else ""
                 )
         elif self.productionmode == "ZX" and not config.usedata:
-            name = "templateqqZZAdapSmooth"
+            name = "templateqqZZ"
         elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
-            name = "template{}AdapSmooth".format(self.productionmode)
+            name = "template{}".format(self.productionmode)
         elif self.productionmode == "data":
             name = "datatemplate"
 
@@ -1105,10 +1157,18 @@ class Template(TemplateBase, MultiEnum):
             elif self.shapesystematic == "MINLO_SM":
                 result = [{Sample(self.production, self.productionmode, self.hypothesis, "MINLO")}]
             else:
+                if self.category in ("VBFtagged", "VHHadrtagged"):
+                    generators = ["JHUGen"]
+                else:
+                    generators = [None, "POWHEG"]
                 result=[{
-                        Sample(self.production, self.productionmode, hypothesis, ext)
+                        Sample(self.production, self.productionmode, hypothesis, ext, generator, hffhypothesis)
                             for hypothesis in self.productionmode.generatedhypotheses(self.production)
+                            for hffhypothesis in hffhypotheses
                             for ext in (None, "ext1")
+                            for generator in generators
+                            if (hypothesis == "0+" or generator == None)
+                            and (hffhypothesis == "Hff0+" or generator == "JHUGen")
                        }]
         if self.productionmode in ["VBF", "ZH"]:
             result=[{
@@ -1439,9 +1499,9 @@ class IntTemplate(TemplateBase, MultiEnum):
 
         dontcheck = []
 
-        if self.productionmode == "ttH":
-            if self.hffhypothesis != "Hff0+":
-                raise ValueError("{} is not used to make templates {}!\n{}".format(self.hffhypothesis, args))
+        if self.productionmode in ("ggH", "ttH"):
+            if self.hffhypothesis != "Hff0+" and self.category not in ("VBFtagged", "VHHadrtagged"):
+                raise ValueError("{} is not used to make templates for {}!\n{}".format(self.hffhypothesis, self.category, args))
         else:
             if self.hffhypothesis is not None:
                raise ValueError("HffHypothesis {} provided for {}!\n{}".format(self.hffhypothesis, self.productionmode, args))
@@ -1465,7 +1525,7 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     def templatename(self, final=True):
         if self.analysis.dimensions == 4:
-            result = "template"+str(self.interferencetype)+"IntAdapSmooth"
+            result = "template"+str(self.interferencetype)+"Int"
             result = result.replace("gi", self.analysis.couplingnames[0])
             result = result.replace("gj", self.analysis.couplingnames[1])
             result = result.replace("gk", self.analysis.couplingnames[2])
@@ -1473,28 +1533,31 @@ class IntTemplate(TemplateBase, MultiEnum):
         elif self.productionmode in ("ggH", "ttH", "bbH"):
             if self.interferencetype == "g11gi1":
                 if self.analysis.fais == ("fa3",):
-                    result = "templatea1a3IntAdapSmooth"
+                    result = "templatea1a3Int"
                 elif self.analysis == "fa2":
-                    result = "templatea1a2IntAdapSmooth"
+                    result = "templatea1a2Int"
                 elif self.analysis == "fL1" or self.analysis.isfL1fL1Zg:
-                    result = "templatea1L1IntAdapSmooth"
+                    result = "templatea1L1Int"
                 elif self.analysis == "fL1Zg":
-                    result = "templatea1L1ZgIntAdapSmooth"
+                    result = "templatea1L1ZgInt"
                 else:
                     assert False
             elif self.interferencetype == "g11gj1":
                 if self.analysis.isfL1fL1Zg:
-                    result = "templatea1L1ZgIntAdapSmooth"
+                    result = "templatea1L1ZgInt"
             elif self.interferencetype == "gi1gj1":
                 if self.analysis.isfL1fL1Zg:
-                    result = "templateL1L1ZgIntAdapSmooth"
+                    result = "templateL1L1ZgInt"
         elif self.productionmode in ("VBF", "ZH", "WH", "VH"):
             if self.interferencetype == "g11gi3":
-                result = "templateg11{}3AdapSmooth".format(self.analysis.couplingname)
+                result = "templateg11{}3".format(self.analysis.couplingname)
             if self.interferencetype == "g12gi2":
-                result = "templateg12{}2AdapSmooth".format(self.analysis.couplingname)
+                result = "templateg12{}2".format(self.analysis.couplingname)
             if self.interferencetype == "g13gi1":
-                result = "templateg13{}1AdapSmooth".format(self.analysis.couplingname)
+                result = "templateg13{}1".format(self.analysis.couplingname)
+
+        if self.hffhypothesis == "Hff0-":
+            result = result.replace("template", "templateHff0MinusHVV")
 
         if self.domirror:
             result += "Mirror"
@@ -1610,7 +1673,7 @@ class IntTemplate(TemplateBase, MultiEnum):
                 assert False, analysis.dimensions
 
         invertedmatrix = self.templatesfile.invertedmatrix
-        vectoroftemplates = self.templatesfile.templates()  #ok technically it's a list not a vector
+        vectoroftemplates = [t for t in self.templatesfile.templates() if t.hffhypothesis == self.hffhypothesis]  #ok technically it's a list not a vector
         templatesandfactors = []
 
         for j, template in enumerate(vectoroftemplates):
@@ -1659,16 +1722,16 @@ class IntTemplate(TemplateBase, MultiEnum):
             kwargs["productionmode"] = "ZH"
             kwargs["templategroup"] = "zh"
             ZHtemplate = type(self)(*kwargs.itervalues())
-            result.append(sum((t.reweightingsample*factor for t, factor in ZHtemplate.templatesandfactors), SumOfSamples()))
+            result.append(sum((t.reweightingsampleplus*factor for t, factor in ZHtemplate.templatesandfactors), SumOfSamples()))
             
             if not self.analysis.isfa3fa2fL1fL1Zg: assert False
             if self.interferencetype.couplingpowers["l"] < 3:
                 kwargs["productionmode"] = "WH"
                 kwargs["templategroup"] = "wh"
                 WHtemplate = type(self)(*kwargs.itervalues())
-                result.append(sum((t.reweightingsample*factor for t, factor in WHtemplate.templatesandfactors), SumOfSamples()))
+                result.append(sum((t.reweightingsampleplus*factor for t, factor in WHtemplate.templatesandfactors), SumOfSamples()))
             return result
-        return [sum((t.reweightingsample*factor for t, factor in self.templatesandfactors), SumOfSamples())]
+        return [sum((t.reweightingsampleplus*factor for t, factor in self.templatesandfactors), SumOfSamples())]
 
     def weightname(self):
         return ["MC_weight_nominal * (" + sumofsamples.MC_weight + ")" for sumofsamples in self.sumsofsamples]

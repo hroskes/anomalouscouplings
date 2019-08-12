@@ -810,7 +810,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.productionmode in ("ggH", "ttH", "tqH"):
                 if self.hffhypothesis is None:
                     if self.productionmode == "ggH":
-                        self.hffhypothesis == "Hff0+"
+                        self.hffhypothesis = "Hff0+"
                     else:
                         raise ValueError("Hff hypothesis not provided for {} productionmode\n{}".format(self.productionmode, args))
                 if self.productionmode == "tqH" and self.hffhypothesis != "Hff0+":
@@ -1227,36 +1227,6 @@ class ReweightingSamplePlus(ReweightingSample):
 
         if self.hffhypothesis is None and self.productionmode == "ggH": self.hffhypothesis = HffHypothesis("Hff0+")
 
-        if {
-          "POWHEG": (
-             self.hypothesis != "0+"
-             or self.productionmode not in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH")
-             or None is not self.hffhypothesis != "Hff0+"
-           ),
-           "MINLO": (
-             self.hypothesis != "0+"
-             or self.productionmode != "ggH"
-             or self.hffhypothesis != "Hff0+"
-           ),
-           "NNLOPS": (
-             self.hypothesis != "0+"
-             or self.productionmode != "ggH"
-             or self.hffhypothesis != "Hff0+"
-           ),
-           "MCatNLO": (
-             self.hypothesis != "0+"
-             or self.productionmode != "ggH"
-           ),
-           "JHUGen": (
-             self.hypothesis != "0+"
-             or self.productionmode != "ggH"
-           ),
-           "None": (
-             self.productionmode == "ggH" and self.hffhypothesis != "Hff0+"
-           )
-        }[str(self.alternategenerator)]:
-            raise ValueError("No {} sample produced with {}\n{}".format(self.reweightingsample, self.alternategenerator, args))
-
         if self.pythiasystematic is not None:
             if (
                 self.hypothesis != "0+"
@@ -1300,6 +1270,36 @@ class Sample(ReweightingSamplePlusWithFlavor):
             raise ValueError("No NNLOPS samples with systematics!\n{}".format(args))
 
         super(Sample, self).check(*args)
+
+        if {
+          "POWHEG": (
+             self.hypothesis != "0+"
+             or self.productionmode not in ("ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH")
+             or None is not self.hffhypothesis != "Hff0+"
+           ),
+           "MINLO": (
+             self.hypothesis != "0+"
+             or self.productionmode != "ggH"
+             or self.hffhypothesis != "Hff0+"
+           ),
+           "NNLOPS": (
+             self.hypothesis != "0+"
+             or self.productionmode != "ggH"
+             or self.hffhypothesis != "Hff0+"
+           ),
+           "MCatNLO": (
+             self.hypothesis != "0+"
+             or self.productionmode != "ggH"
+           ),
+           "JHUGen": (
+             self.hypothesis != "0+"
+             or self.productionmode != "ggH"
+           ),
+           "None": (
+             self.productionmode == "ggH" and self.hffhypothesis != "Hff0+"
+           )
+        }[str(self.alternategenerator)]:
+            raise ValueError("No {} sample produced with {}\n{}".format(self.reweightingsample, self.alternategenerator, args))
 
     def CJLSTmaindir(self):
       if self.alternategenerator is None or self.alternategenerator in ("MCatNLO", "JHUGen"):

@@ -243,10 +243,10 @@ class _Datacard(MultiEnum):
                 for t in templatesfile.inttemplates():
                     for sign in "positive", "negative":
                         templatenamepart = (
-                          t.templatename().replace("template", "").replace("AdapSmooth", "").replace("Mirror", "").replace("Int", "")
+                          t.templatename().replace("template", "").replace("Mirror", "").replace("Int", "")
                                           .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
                         )
-                        if t.templatename().startswith("templateIntAdapSmooth"): templatenamepart = "g11"+self.analysis.couplingname+"1"
+                        if t.templatename().startswith("templateInt"): templatenamepart = "g11"+self.analysis.couplingname+"1"
 
                         yield (p.combinename+"_"+templatenamepart+"_"+sign)
             else:
