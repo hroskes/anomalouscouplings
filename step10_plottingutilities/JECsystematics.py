@@ -9,29 +9,34 @@ from helperstuff.CJLSTscripts import getDZHhWP, getDWHhWP, getDVBF2jetsWP
 from helperstuff.discriminants import discriminant
 from helperstuff.enums import analyses, Analysis, Production, ProductionMode
 from helperstuff.plotfromtree import Line, plotfromtree
-from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample
+from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample, ReweightingSamplePlus
 from helperstuff.templates import TemplatesFile
 from helperstuff.utilities import PlotCopier
 
 def makeplot(productionmode, analysis, category, production, disc):
+  if productionmode == "VBF" and category == "VHLepttagged": return
+  print productionmode, category, production, disc
+
   analysis = Analysis(analysis)
   production = Production(production)
   productionmode = ProductionMode(productionmode)
-  if analysis == "fL1Zg" and "L1Zg" in disc and "HadWH" in disc: return
 
   fainame = analysis.title(superscript=productionmode if productionmode != "ggH" else "dec")
   hff = "Hff0+" if productionmode == "ttH" else None
 
   if productionmode.issignal:
     hypothesis = "0+"
-    SM, BSM = (ReweightingSample(productionmode, _, hff) for _ in analysis.purehypotheses)
+    SM, _, _, _, _ = (ReweightingSample(productionmode, _, hff) for _ in analysis.purehypotheses)
     if hypothesis: title = str(productionmode) + " SM"
   else:
     title = str(productionmode)
     hypothesis = None
     SM = ReweightingSample(productionmode)
 
-  sample, _, _, reweightfrom = Line(SM, title, 1, bkpreweightfrom=ReweightingSample(productionmode, hypothesis, hff), production=production)
+  bkpreweightfrom = None
+  if productionmode in ("VBF", "ZH", "WH"): bkpreweightfrom = ReweightingSample(productionmode, "fa3prod0.5", hff)
+  if productionmode == "qqZZ": bkpreweightfrom = ReweightingSamplePlus(productionmode, "ext1")
+  sample, _, _, reweightfrom = Line(SM, title, 1, bkpreweightfrom=bkpreweightfrom, production=production)
 
   hs = {}
   hstack = ROOT.THStack(disc, "")
@@ -80,9 +85,9 @@ def makeplot(productionmode, analysis, category, production, disc):
 
 if __name__ == "__main__":
   with PlotCopier() as pc:
-    for analysis in analyses:
+    for analysis in "fa3fa2fL1fL1Zg_morecategories",:
       for category in "VBFtagged", "VHHadrtagged":
-        for disc in TemplatesFile("ggh", "2e2mu", analysis, category, "180530").discriminants:
+        for disc in TemplatesFile("ggh", "2e2mu", analysis, category, "190703_2016").discriminants:
           for p in "ggH", "VBF", "ZH", "WH", "ttH", "qqZZ":
             for production in config.productionsforcombine:
               makeplot(p, analysis, category, production, disc.identifier)

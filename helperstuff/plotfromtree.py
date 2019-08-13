@@ -10,6 +10,7 @@ from helperstuff.discriminants import discriminant
 from helperstuff.enums import Analysis, Category, Channel
 import helperstuff.rootoverloads.histogramfloor
 from helperstuff.samples import ReweightingSample, Sample, SampleBase
+from helperstuff.utilities import TFile
 
 mandatory = object()
 
@@ -190,7 +191,11 @@ class Line(namedtuple("Line", "sample title color reweightfrom")):
         production = config.productionsforcombine[0]
       try:
         reweightfrom = Sample(reweightfrom, production)
+        with TFile(reweightfrom.withdiscriminantsfile()) as f:
+          if f.candTree.GetEntries() == 0: raise ValueError("No events in the tree: "+reweightfrom.withdiscriminantsfile())
       except ValueError:
         if bkpreweightfrom is None: raise
         reweightfrom = Sample(bkpreweightfrom, production)
+      with TFile(reweightfrom.withdiscriminantsfile()) as f:
+        if f.candTree.GetEntries() == 0: raise ValueError("No events in the tree: "+reweightfrom.withdiscriminantsfile())
     return super(Line, cls).__new__(cls, sample, title, color, reweightfrom)
