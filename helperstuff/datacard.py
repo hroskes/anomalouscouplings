@@ -239,16 +239,30 @@ class _Datacard(MultiEnum):
                 templatesfile = TemplatesFile(templategroup, self.analysis, self.production, self.channel, self.category)
                 for t in templatesfile.templates():
                     if not t.hypothesis.ispure: continue
-                    yield p.combinename+"_"+t.hypothesis.combinename
+                    name = p.combinename
+                    if t.productionmode in ("ggH", "ttH"):
+                        if t.category in ("VBFtagged", "VHHadrtagged"):
+                            name += "_" + t.hffhypothesis.combinename
+                        else:
+                            assert t.hffhypothesis == "Hff0+", t
+                    name += "_"+t.hypothesis.combinename
+                    yield name
                 for t in templatesfile.inttemplates():
                     for sign in "positive", "negative":
                         templatenamepart = (
-                          t.templatename().replace("template", "").replace("Mirror", "").replace("Int", "")
+                          t.templatename().replace("template", "").replace("Mirror", "").replace("Int", "").replace("Hff0MinusHVV", "")
                                           .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
                         )
                         if t.templatename().startswith("templateInt"): templatenamepart = "g11"+self.analysis.couplingname+"1"
 
-                        yield (p.combinename+"_"+templatenamepart+"_"+sign)
+                        name = p.combinename
+                        if t.productionmode in ("ggH", "ttH"):
+                            if t.category in ("VBFtagged", "VHHadrtagged"):
+                                name += "_" + t.hffhypothesis.combinename
+                            else:
+                                assert t.hffhypothesis == "Hff0+", t
+                        name += "_"+templatenamepart+"_"+sign
+                        yield name
             else:
                 assert False
 
@@ -399,15 +413,22 @@ class _Datacard(MultiEnum):
             if "bkg_" in h or h == "data":
                 p = h
                 hypothesis = None
+                hffhypothesis = None
                 sign = None
             elif "positive" in h or "negative" in h:
-                p, inttype, sign = h.split("_")
+                if "ff" in h:
+                    p, hffhypothesis, inttype, sign = h.split("_")
+                else:
+                    p, inttype, sign = h.split("_")
                 for letter, name in zip("ijkl", self.analysis.couplingnames):
                     inttype = inttype.replace(name, "g"+letter)
                 hypothesis = inttype
+            elif "ff" in h:
+                p, hffhypothesis, hypothesis = h.split("_")
+                sign = None
             else:
                 p, hypothesis = h.split("_")
-                sign = None
+                hffhypothesis = sign = None
 
             p = ProductionMode(p)
 
@@ -427,11 +448,11 @@ class _Datacard(MultiEnum):
                     scaleby = (
                                 getrate(p, self.channel, self.category, self.analysis, self.production, 1)
                               /
-                                gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, self.channel).Integral()
+                                gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, "Hff0+" if hffhypothesis else None, self.channel).Integral()
                               ) * float(self.luminosity)
                 assert scaleby >= 0, scaleby
 
-                originaltemplate = gettemplate(p, self.analysis, self.production, self.category, hypothesis, self.channel, systematic)
+                originaltemplate = gettemplate(p, self.analysis, self.production, self.category, hypothesis, hffhypothesis, self.channel, systematic)
                 t3D = originaltemplate.Clone(name+"_3D")
                 if sign is not None:
                     if sign == "positive": pass
@@ -542,7 +563,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
           if not dc.analysis.useboosted and dc.category == "Boosted": continue
           if not dc.analysis.usemorecategories and dc.category in ("VHLeptTagged", "VBF1jtagged"): continue
           arglist.append(dcargs)
-        pool = multiprocessing.Pool(processes=1 if utilities.LSB_JOBID() else 8)
+        pool = multiprocessing.Pool(processes=8 if utilities.LSB_JOBID() else 1)
         mapresult = pool.map(functools.partial(makeDCandWS, **kwargs), arglist)
         pool.close()
 

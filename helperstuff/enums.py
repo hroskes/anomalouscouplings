@@ -241,10 +241,16 @@ class Hypothesis(MyEnum):
 class HffHypothesis(MyEnum):
     enumname = "hffhypothesis"
     enumitems = (
-                 EnumItem("Hff0+"),
-                 EnumItem("Hff0-"),
+                 EnumItem("Hff0+", "0PMff"),
+                 EnumItem("Hff0-", "0Mff"),
                  EnumItem("fCP0.5"),
                 )
+    @property
+    def combinename(self):
+        for _ in "0PMff", "0Mff":
+            if self == _:
+                return _
+        assert False, self
 
 class ProductionMode(MyEnum):
     enumname = "productionmode"

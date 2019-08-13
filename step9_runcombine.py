@@ -271,7 +271,6 @@ def runscan(repmap, submitjobs, directory=None):
            utilities.LSF_creating(os.path.join(directory, filename), skipifexists=True), \
            utilities.LSF_creating(os.path.join(directory, logfile), skipifexists=True):
         if not os.path.exists(filename):
-          print replaceByMap(runcombinetemplate, repmap); assert 0
           subprocess.check_call(replaceByMap(runcombinetemplate, repmap), shell=True)
 
     if repmap["method"] == "Impacts" and repmap["impactsstep"] != "3":
@@ -676,7 +675,7 @@ def runcombine(analysis, foldername, **kwargs):
                 + " "
                 + " ".join("--PO {}asPOI{}".format(_, "" if str(_) == str(scanfai) else "relative") for _ in faiorder[:-1])
                 + (" --PO {}asPOI".format(faiorder[-1]) if str(faiorder[-1]) != "fa1" else "")
-                + " --PO scalegL1by10000"
+                + " --PO separateggHttH"
               ),
               "freeze": ",".join(freeze),
               "freezeparameters": "--freezeParameters=.oO[freeze]Oo." if freeze else "",
@@ -696,7 +695,7 @@ def runcombine(analysis, foldername, **kwargs):
 
     repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
     repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
-    repmap["savemu"] = "--saveSpecifiedFunc=CMS_zz4l_fa1," + ",".join("CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai)
+    repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(["CMS_zz4l_fa1"] + ["CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai] + ["fa3_ggH", "fCP_ttH", "RV", "Rg", "Rt"])
     repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
 
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))

@@ -91,7 +91,7 @@ applyZXshapesystematics = False
 applyJECshapesystematics = False
 applyMINLOsystematics = False
 
-usebinbybin = True
+usebinbybin = False
 staticmaxbins = 1000
 
 assert getm4lsystsfromggHUntagged <= getm4lsystsfromggH
