@@ -397,7 +397,7 @@ class ProductionMode(MyEnum):
             result += ["Scale", "Res"]
       if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH", "qqZZ", "ggZZ"):
         if category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
-          result += ["CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"]
+          result += ["CMS_scale_j"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
 class WorkspaceShapeSystematic(MyEnum):
@@ -406,35 +406,28 @@ class WorkspaceShapeSystematic(MyEnum):
                  EnumItem("CMS_res", "Res"),
                  EnumItem("CMS_scale", "Scale"),
                  EnumItem("CMS_scaleres", "ScaleRes"),
-                 EnumItem("CMS_scale_j_13TeV_2016"),
-                 EnumItem("CMS_scale_j_13TeV_2017"),
-                 EnumItem("CMS_scale_j_13TeV_2018"),
+                 EnumItem("CMS_scale_j", "JEC"),
                 )
     @property
     def isperchannel(self):
         if self in ("Res", "Scale", "ScaleRes"): return True
-        if self in ("CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"): return False
+        if self in ("CMS_scale_j",): return False
         assert False, self
 
     @property
     def years(self):
-        if self == "CMS_scale_j_13TeV_2016": return 2016,
-        if self == "CMS_scale_j_13TeV_2017": return 2017,
-        if self == "CMS_scale_j_13TeV_2018": return 2018,
-        if self in ("Res", "Scale", "ScaleRes"): return 2016, 2017, 2018
+        if self in ("Res", "Scale", "ScaleRes", "JEC"): return 2016, 2017, 2018
         assert False, self
 
     @property
     def nickname(self):
-      for _ in "Res", "Scale", "ScaleRes":
+      for _ in "Res", "Scale", "ScaleRes", "JEC":
         if self == _:
           return _
-      if self in ("CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"):
-        return "JEC"
       assert False, self
 
     def combinename(self, channel):
-      for _ in "CMS_res", "CMS_scale", "CMS_scaleres", "CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018":
+      for _ in "CMS_res", "CMS_scale", "CMS_scaleres", "CMS_scale_j":
         if self == _:
           result = _
           break

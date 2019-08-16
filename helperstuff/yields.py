@@ -22,7 +22,7 @@ class YieldSystematic(MyEnum):
     enumname = "yieldsystematic"
     enumitems = (
                  EnumItem("CMS_btag_comb"),
-                 EnumItem("CMS_scale_j"),
+                 EnumItem("CMS_scale_j", "JEC"),
                  EnumItem("QCDscale_muF_ggH"),
                  EnumItem("QCDscale_muF_qqH"),
                  EnumItem("QCDscale_muF_VH"),

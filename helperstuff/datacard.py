@@ -298,7 +298,7 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
-        productionmodes = [h if "bkg_" in h else h.split("_")[0] for h in self.histograms]
+        productionmodes = [ProductionMode(h if "bkg_" in h else h.split("_")[0]) for h in self.histograms]
 
         if self.production.LHE or self.production.GEN:
             if yieldsystematic == "QCDscale_ren_VV":
@@ -316,7 +316,7 @@ class _Datacard(MultiEnum):
                 pass
             else:
                 if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
-                    if (yieldsystematic in ("QCDscale_ggH2in", "CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017") and p == "ggH" and self.category in ("VBFtagged", "VHHadrtagged")):
+                    if (yieldsystematic == "JEC" and self.category in ("VBFtagged", "VHHadrtagged")):
                         ysv = "1"
                         lst[0] = "shape1?"
                     else:
