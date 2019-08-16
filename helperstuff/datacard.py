@@ -11,7 +11,7 @@ import time
 import traceback
 
 from collections import Counter
-from itertools import chain, product
+from itertools import chain, izip, product
 from math import pi
 
 import ROOT
@@ -528,18 +528,32 @@ class _Datacard(MultiEnum):
 
                         self.binbybinuncertainties.append(systname)
 
-        for k in sorted(cache):
-            v = cache[k]
-            newname = None
-            if newname is not None:
-                if newname in cache:
-                    cache[newname].Add(v)
-                else:
-                    cache[newname] = v.Clone(newname)
-                    cache[newname].SetDirectory(f)
+        for namepositive in sorted(cache):
+            if "_positive" not in namepositive: continue
+            if namepositive.endswith("Up") or namepositive.endswith("Down") or namepositive.endswith("_3D"): continue
 
-                if "_3D" not in newname:
-                    self.histogramintegrals[newname] = cache[newname].Integral()
+            namenegative = namepositive.replace("_positive", "_negative")
+
+            systematicnamespositive = sorted([k for k in cache if k.startswith(namepositive) and (k.endswith("Up") or k.endswith("Down"))])
+            systematicnamesnegative = sorted([k for k in cache if k.startswith(namenegative) and (k.endswith("Up") or k.endswith("Down"))])
+
+            assert all(neg == pos.replace("_positive", "_negative") for pos, neg in izip(systematicnamespositive, systematicnamesnegative)), (systematicnamespositive, systematicnamesnegative)
+
+            histogramspositive = [cache[namepositive]] + [cache[_] for _ in systematicnamespositive]
+            histogramsnegative = [cache[namenegative]] + [cache[_] for _ in systematicnamesnegative]
+
+            integralspositive = [self.histogramintegrals[namepositive]] + [self.histogramintegrals[_] for _ in systematicnamespositive]
+            integralsnegative = [self.histogramintegrals[namenegative]] + [self.histogramintegrals[_] for _ in systematicnamesnegative]
+
+            if any(integralspositive) and not all(integralspositive) or any(integralsnegative) and not all(integralsnegative):
+                for hpos, hneg, intpos, intneg in izip(histogramspositive, histogramsnegative, integralspositive, integralsnegative):
+                    if not intpos or not intneg:
+                        hpos.Fill(1, 1e-10)
+                        hneg.Fill(1, 1e-10)
+                        self.histogramintegrals[hpos.GetName()] = hpos.Integral()
+                        self.histogramintegrals[hneg.GetName()] = hneg.Integral()
+
+                        print hpos.GetName()
 
         f.Write()
         f.Close()
