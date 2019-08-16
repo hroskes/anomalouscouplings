@@ -61,34 +61,6 @@ class YieldSystematic(MyEnum):
                  EnumItem("zjet_4mu_2018"),
                 )
 
-    def yamlfilename(self, channel=None):
-      raise ValueError("{} is not from yaml!".format(self))
-
-    def getfromyaml(self, channel=None):
-      systname = str(self)
-      filename = self.yamlfilename(channel=channel)
-      with open(filename) as f:
-        y = yaml.load(f)
-      if systname not in y: raise ValueError("{} not in {}!".format(systname, filename))
-      if "Any" in y[systname]:
-        values = y[systname]["Any"]
-      elif "UnTagged" in y[systname] and all(y[systname][k] == y[systname]["UnTagged"] for k in y[systname]):
-        values = y[systname]["UnTagged"]
-      else:
-        raise ValueError("Any not in {} in {}, and not all categories are the same!".format(systname, filename))
-      return values
-
-    def valuefromyaml(self, productionmode, channel=None):
-      dct = self.getfromyaml(channel=channel)
-      if productionmode in ("WH", "ZH"):
-        if "{}_lep".format(productionmode) not in dct and "{}_had".format(productionmode) not in dct: return None
-        lep = dct["{}_lep".format(productionmode)]
-        had = dct["{}_had".format(productionmode)]
-        if lep == had: return lep
-        assert False, (lep, had)
-      else:
-        return dct.get(productionmode.yamlsystname, None)
-
 class YieldValue(MultiEnum, JsonDict):
     __metaclass__ = MultiEnumABCMeta
     enumname = "yieldvalue"
@@ -174,6 +146,22 @@ class YieldSystematicValue(MultiEnum, JsonDict):
         if isinstance(result, list) and len(result) == 2:
           result = tuple(result)
         return result
+
+    @property
+    def downvalue(self):
+      value = self.value
+      if value is None: return 1
+      if isinstance(value, Number): return 1./value
+      assert len(value) == 2
+      return value[0]
+
+    @property
+    def upvalue(self):
+      value = self.value
+      if value is None: return 1
+      if isinstance(value, Number): return value
+      assert len(value) == 2
+      return value[1]
 
     @property
     def latexstr(self):

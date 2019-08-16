@@ -448,11 +448,18 @@ class _Datacard(MultiEnum):
                 if p == "data":
                     scaleby = 1 if config.unblindscans else 0
                 else:
-                    scaleby = (
-                                getrate(p, self.channel, self.category, self.analysis, self.production, 1)
-                              /
-                                gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, "Hff0+" if hffhypothesis else None, self.channel).Integral()
-                              ) * float(self.luminosity)
+                    numerator = getrate(p, self.channel, self.category, self.analysis, self.production, 1)
+                    denominator = gettemplate(p, self.analysis, self.production, self.category, "0+" if hypothesis else None, "Hff0+" if hffhypothesis else None, self.channel, systematic).Integral()
+                    if systematic:
+                        try:
+                            yieldsystematic = YieldSystematic(str(shapesystematic))
+                        except ValueError:
+                            pass
+                        else:
+                            ysv = YieldSystematicValue(p, yieldsystematic, self.analysis, self.production, self.category, self.channel)
+                            numerator *= {"Up": ysv.upvalue, "Down": ysv.downvalue}[direction]
+                    scaleby = numerator / denominator * float(self.luminosity)
+
                 assert scaleby >= 0, scaleby
 
                 originaltemplate = gettemplate(p, self.analysis, self.production, self.category, hypothesis, hffhypothesis, self.channel, systematic)
