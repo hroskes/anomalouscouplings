@@ -76,25 +76,16 @@ except NameError:
 useQGTagging = False
 useVHMETTagged = False
 
-applym4lshapesystematicsUntagged = False
-applym4lshapesystematicsVBFVHtagged = False
-applym4lshapesystematicsggH = False
-applym4lshapesystematicsggHUntagged = False
-applym4lshapesystematicsdiagonal = False #VBF in VBFtagged, VH in VHHadrtagged
-
-getm4lsystsfromggHUntagged = False
-getm4lsystsfromggH = True
+applym4lshapesystematics = True
 
 combinem4lshapesystematics = False
 
 applyZXshapesystematics = False
-applyJECshapesystematics = False
+applyJECshapesystematics = True
 applyMINLOsystematics = False
 
 usebinbybin = False
 staticmaxbins = 1000
-
-assert getm4lsystsfromggHUntagged <= getm4lsystsfromggH
 
 lumi2015 = 2.7
 

@@ -28,10 +28,7 @@ class TemplatesFile(MultiEnum):
         super(TemplatesFile, self).applysynonyms(enumsdict)
 
     def check(self, *args):
-        dontcheck = []
-
-        if self.shapesystematic is None:
-            self.shapesystematic = ShapeSystematic("")
+        dontcheck = [ShapeSystematic]
 
         if self.category is None:
             self.category = Category("Untagged")
@@ -54,7 +51,7 @@ class TemplatesFile(MultiEnum):
 
         super(TemplatesFile, self).check(*args, dontcheck=dontcheck)
 
-        if self.shapesystematic not in self.allshapesystematics:
+        if None is not self.shapesystematic not in self.allshapesystematics:
             raise ValueError("ShapeSystematic {} does not apply to {!r}\n{}".format(self.shapesystematic, self.nominal, args))
 
     def jsonfile(self, iteration=None):
@@ -108,9 +105,7 @@ class TemplatesFile(MultiEnum):
                     otherargslist = [["Hff0+"]]
             elif self.templategroup == "tth":
                 commonargs = "ttH",
-                otherargslist = [["Hff0+"]]
-                if self.category in ("VBFtagged", "VHHadrtagged"):
-                    otherargslist.append(["Hff0-"])
+                otherargslist = [["Hff0+"], ["Hff0-"]]
             elif self.templategroup == "bbh":
                 commonargs = "bbH",
                 otherargslist = [[]]
@@ -206,8 +201,16 @@ class TemplatesFile(MultiEnum):
                 result.remove("VBF bkg")
             if config.usedata:
                 result.append("ZX")
-            if self.shapesystematic in ("ZXUp", "ZXDown"):
+
+            if self.shapesystematic is None:
+                pass
+            elif self.shapesystematic in ("ZXUp", "ZXDown"):
                 result = [_ for _ in result if _ == "ZX"]
+            elif self.shapesystematic in ("JECUp", "JECDown"):
+                result = [_ for _ in result if _ != "ZX"]
+            else:
+                assert False, self.shapesystematic
+
             return [Template(self, productionmode) for productionmode in result]
         elif self.templategroup == "DATA":
             return [Template(self, "data")]
@@ -594,8 +597,6 @@ class TemplatesFile(MultiEnum):
     def treeshapesystematics(self):
         for _ in self.allshapesystematics:
             if _ not in treeshapesystematics: continue
-            if _ in ("ResUp", "ResDown", "ScaleUp", "ScaleDown") and self.templategroup != "ggh" and config.getm4lsystsfromggH: continue
-            if config.getm4lsystsfromggHUntagged and self.category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
             yield _
 
     @property
@@ -604,9 +605,7 @@ class TemplatesFile(MultiEnum):
             if not _.appliesto(self.templategroup): continue
 
             if _ in ("JECUp", "JECDn"):
-                if self.templategroup not in ("ggh", "zh", "wh", "vh"): continue
-                if self.templategroup in ("zh", "wh", "vh") and self.category == "VBFtagged": continue
-                if self.category == "Untagged": continue
+                if self.category not in ("VBFtagged", "VHHadrtagged"): continue
 
             yield _
 
@@ -667,7 +666,7 @@ class TemplatesFile(MultiEnum):
                 elif self.category in ("VBFtagged", "VHHadrtagged", "Boosted", "VBF1jtagged", "VHLepttagged") or self.analysis.isSTXS:
                     #leave out fa3, because those interferences are 0
                     constrainttype = "threeparameterHVV"
-                    if self.category in ("VBFtagged", "VHHadrtagged") and self.templategroup in ("ggh", "tth"):
+                    if self.templategroup == "tth" or self.category in ("VBFtagged", "VHHadrtagged") and self.templategroup == "ggh":
                         generator = None
                         if self.templategroup == "ggh": generator = "JHUGen"
                         templates = [
@@ -888,9 +887,8 @@ def templatesfiles():
                         if analysis.isdecayonly and templategroup not in ("bkg", "ggh", "DATA"): continue
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
-                            if config.getm4lsystsfromggHUntagged and category != "Untagged" and shapesystematic in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"): continue
                             if (production.LHE or production.GEN) and shapesystematic != "": continue
-                            if category == "Untagged" and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
+                            if category not in ("VBFtagged", "VHHadrtagged") and shapesystematic in ("JECUp", "JECDn", "MINLO_SM"): continue
 
                             yield TemplatesFile(channel, shapesystematic, templategroup, analysis, production, category)
 
@@ -1007,8 +1005,10 @@ class Template(TemplateBase, MultiEnum):
             raise ValueError("No templates for {}\n{}".format(self.productionmode, args))
 
         if self.productionmode in ("ggH", "ttH"):
-            if self.hffhypothesis != "Hff0+" and self.category not in ("VBFtagged", "VHHadrtagged"):
-                raise ValueError("{} is not used to make templates for {}!\n{}".format(self.hffhypothesis, self.category, args))
+            if self.hffhypothesis == "Hff0-" and self.category not in ("VBFtagged", "VHHadrtagged") and self.productionmode != "ttH":
+                raise ValueError("{} {} is not used to make templates for {}!\n{}".format(self.productionmode, self.hffhypothesis, self.category, args))
+            if self.hffhypothesis not in ("Hff0+", "Hff0-"):
+                raise ValueError("{} {} is not used to make templates!\n{}".format(self.productionmode, self.hffhypothesis, args))
         else:
             if self.hffhypothesis is not None:
                raise ValueError("HffHypothesis {} provided for {}!\n{}".format(self.hffhypothesis, self.productionmode, args))
@@ -1142,7 +1142,7 @@ class Template(TemplateBase, MultiEnum):
     def categoryname(self):
         result = "category_"
         result += self.analysis.categoryname
-        result += self.shapesystematic.categoryappendname
+        if self.shapesystematic is not None: result += self.shapesystematic.categoryappendname
 
         from treewrapper import TreeWrapper
         for categorization in TreeWrapper.categorizations:
@@ -1501,8 +1501,10 @@ class IntTemplate(TemplateBase, MultiEnum):
         dontcheck = []
 
         if self.productionmode in ("ggH", "ttH"):
-            if self.hffhypothesis != "Hff0+" and self.category not in ("VBFtagged", "VHHadrtagged"):
-                raise ValueError("{} is not used to make templates for {}!\n{}".format(self.hffhypothesis, self.category, args))
+            if self.hffhypothesis == "Hff0-" and self.category not in ("VBFtagged", "VHHadrtagged") and self.productionmode != "ttH":
+                raise ValueError("{} {} is not used to make templates for {}!\n{}".format(self.productionmode, self.hffhypothesis, self.category, args))
+            if self.hffhypothesis not in ("Hff0+", "Hff0-"):
+                raise ValueError("{} {} is not used to make templates!\n{}".format(self.productionmode, self.hffhypothesis, args))
         else:
             if self.hffhypothesis is not None:
                raise ValueError("HffHypothesis {} provided for {}!\n{}".format(self.hffhypothesis, self.productionmode, args))

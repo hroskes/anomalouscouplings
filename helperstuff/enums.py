@@ -390,34 +390,22 @@ class ProductionMode(MyEnum):
     def workspaceshapesystematics(self, category):
       result = []
       if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH"):
-        if (
-            config.applym4lshapesystematicsUntagged and category == "Untagged"
-            or config.applym4lshapesystematicsVBFVHtagged and category != "Untagged"
-            or config.applym4lshapesystematicsggH and self == "ggH"
-            or config.applym4lshapesystematicsggHUntagged and self == "ggH" and category == "Untagged"
-            or config.applym4lshapesystematicsdiagonal and (
-                                                            self == "ggH" and category == "Untagged"
-                                                            or self == "VBF" and category == "VBFtagged"
-                                                            or self in ("ZH", "WH") and category == "VHHadrtagged"
-                                                           )
-           ):
+        if config.applym4lshapesystematics:
           if config.combinem4lshapesystematics:
             result += ["ScaleRes"]
           else:
             result += ["Scale", "Res"]
-      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyMINLOsystematics:
-        result += ["MINLO"]
-      if self == "ggH" and category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
-        result += ["CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"]
+      if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH", "qqZZ", "ggZZ"):
+        if category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
+          result += ["CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
 class WorkspaceShapeSystematic(MyEnum):
     enumname = "workspaceshapesystematic"
     enumitems = (
-                 EnumItem("CMS_res_", "Res"),
-                 EnumItem("CMS_scale_", "Scale"),
-                 EnumItem("CMS_scaleres_", "ScaleRes"),
-                 EnumItem("QCDscale_ggH2in", "MINLO"),
+                 EnumItem("CMS_res", "Res"),
+                 EnumItem("CMS_scale", "Scale"),
+                 EnumItem("CMS_scaleres", "ScaleRes"),
                  EnumItem("CMS_scale_j_13TeV_2016"),
                  EnumItem("CMS_scale_j_13TeV_2017"),
                  EnumItem("CMS_scale_j_13TeV_2018"),
@@ -425,24 +413,33 @@ class WorkspaceShapeSystematic(MyEnum):
     @property
     def isperchannel(self):
         if self in ("Res", "Scale", "ScaleRes"): return True
-        if self in ("MINLO", "CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"): return False
+        if self in ("CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"): return False
         assert False, self
 
     @property
     def years(self):
         if self == "CMS_scale_j_13TeV_2016": return 2016,
         if self == "CMS_scale_j_13TeV_2017": return 2017,
-        if self == "CMS_scale_j_13TeV_2018": return 2017,
-        if self in ("Res", "Scale", "ScaleRes", "MINLO"): return 2016, 2017, 2018
+        if self == "CMS_scale_j_13TeV_2018": return 2018,
+        if self in ("Res", "Scale", "ScaleRes"): return 2016, 2017, 2018
         assert False, self
 
     @property
     def nickname(self):
-      for _ in "Res", "Scale", "ScaleRes", "MINLO":
+      for _ in "Res", "Scale", "ScaleRes":
         if self == _:
           return _
-      if self in ("CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"): return "JEC"
-      return str(self)
+      if self in ("CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018"):
+        return "JEC"
+      assert False, self
+
+    def combinename(self, channel):
+      for _ in "CMS_res", "CMS_scale", "CMS_scaleres", "CMS_scale_j_13TeV_2016", "CMS_scale_j_13TeV_2017", "CMS_scale_j_13TeV_2018":
+        if self == _:
+          result = _
+          break
+      if self.isperchannel: result += "_"+str(channel)
+      return result
 
 class SystematicDirection(MyEnum):
     enumname = "systematicdirection"
@@ -487,9 +484,9 @@ class ShapeSystematic(MyEnum):
         if self == "":
             return True
         if self in ("JECUp", "JECDn"):
-            return templategroup in ("ggh", "zh", "wh")
+            return templategroup in ("ggh", "vbf", "vh", "zh", "wh", "tth", "bbh", "background")
         if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"):
-            return templategroup in ("ggh", "vbf", "zh", "wh", "tth", "bbh")
+            return templategroup in ("ggh", "vbf", "vh", "zh", "wh", "tth", "bbh")
         if self in ("ZXUp", "ZXDown"):
             return templategroup == "bkg"
         if self in ("MINLO_SM", "MINLOUp", "MINLODn"):
@@ -1024,7 +1021,7 @@ categories = Category.items()
 templategroups = TemplateGroup.items(lambda x: x not in ("zh", "wh"))
 
 _ = [""]
-if config.applym4lshapesystematicsUntagged or config.applym4lshapesystematicsVBFVHtagged:
+if config.applym4lshapesystematics:
     _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
     if config.combinem4lshapesystematics:
         _ += ["ScaleResUp", "ScaleResDown"]

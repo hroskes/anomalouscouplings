@@ -4,6 +4,7 @@ import inspect
 import multiprocessing
 import numbers
 import os
+import pprint
 import re
 import sys
 import time
@@ -24,7 +25,7 @@ from combinehelpers import discriminants, getdatatree, gettemplate, getnobserved
 from enums import Analysis, categories, Category, Channel, channels, EnumItem, Hypothesis, MultiEnum, MyEnum, Production, ProductionMode, ShapeSystematic, SystematicDirection, WorkspaceShapeSystematic
 from samples import ReweightingSample
 from templates import TemplatesFile
-from utilities import cache, callclassinitfunctions, cd, deprecate, generatortolist, mkdir_p, multienumcache, OneAtATime, Tee
+from utilities import cache, callclassinitfunctions, cd, deprecate, generatortolist, mkdir_p, multienumcache, OneAtATime, Tee, WriteOnceDict
 from yields import YieldSystematic, YieldSystematicValue
 
 names = set()
@@ -241,7 +242,7 @@ class _Datacard(MultiEnum):
                     if not t.hypothesis.ispure: continue
                     name = p.combinename
                     if t.productionmode in ("ggH", "ttH"):
-                        if t.category in ("VBFtagged", "VHHadrtagged"):
+                        if t.productionmode == "ttH" or t.category in ("VBFtagged", "VHHadrtagged"):
                             name += "_" + t.hffhypothesis.combinename
                         else:
                             assert t.hffhypothesis == "Hff0+", t
@@ -257,7 +258,7 @@ class _Datacard(MultiEnum):
 
                         name = p.combinename
                         if t.productionmode in ("ggH", "ttH"):
-                            if t.category in ("VBFtagged", "VHHadrtagged"):
+                            if t.productionmode == "ttH" or t.category in ("VBFtagged", "VHHadrtagged"):
                                 name += "_" + t.hffhypothesis.combinename
                             else:
                                 assert t.hffhypothesis == "Hff0+", t
@@ -325,7 +326,7 @@ class _Datacard(MultiEnum):
         return " ".join(lst)
 
     @MakeSystematicFromEnums(WorkspaceShapeSystematic, Channel)
-    def workspaceshapesystematicchannel(self, workspaceshapesystematic, channel):
+    def workspaceshapesystematic_channel(self, workspaceshapesystematic, channel):
       if self.year not in workspaceshapesystematic.years: return None
       if self.production.LHE or self.production.GEN: return None
       if workspaceshapesystematic.isperchannel and channel == self.channel:
@@ -374,7 +375,7 @@ class _Datacard(MultiEnum):
     def binbybin(self):
         return "group", lambda systematicname: "binbybin" in systematicname
 
-    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematicchannel, workspaceshapesystematic, binbybin_category_channel_background_index, "binbybin", "everything_but_binbybin")
+    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematic_channel, workspaceshapesystematic, binbybin_category_channel_background_index, "binbybin", "everything_but_binbybin")
 
     divider = "\n------------\n"
 
@@ -405,7 +406,7 @@ class _Datacard(MultiEnum):
 
     def makehistograms(self):
         f = ROOT.TFile(self.rootfile_base, "RECREATE")
-        cache = {}
+        cache = WriteOnceDict()
         self.binbybinuncertainties = []
         print self
         domirror = False  #will be set to true
@@ -432,14 +433,16 @@ class _Datacard(MultiEnum):
 
             p = ProductionMode(p)
 
-            for systematic, direction in chain(product(p.workspaceshapesystematics(self.category), ("Up", "Down")), [(None, None)]):
-                if systematic is not None is not direction:
+            for shapesystematic, direction in chain(product(p.workspaceshapesystematics(self.category), ("Up", "Down")), [(None, None)]):
+                if shapesystematic is None is direction:
+                    systematic = None
+                else:
                     if self.production.GEN: continue
                     if p == "data": continue
-                    systematic = ShapeSystematic(str(systematic)+direction)
+                    systematic = ShapeSystematic(shapesystematic.nickname+direction)
 
                 name = h
-                if systematic: name += "_"+str(systematic)
+                if systematic: name += "_"+shapesystematic.combinename(self.channel)+direction
                 if p == "data": name = "data_obs"
 
                 if p == "data":
@@ -481,8 +484,10 @@ class _Datacard(MultiEnum):
                     xyz += 1
 
                 t3D.SetDirectory(f)
+                assert t3D.GetName() not in cache, t3D.GetName()
                 cache[t3D.GetName()] = t3D
                 t.SetDirectory(f)
+                assert t.GetName() not in cache, t.GetName()
                 cache[t.GetName()] = t
 
                 assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
@@ -528,13 +533,6 @@ class _Datacard(MultiEnum):
 
                 if "_3D" not in newname:
                     self.histogramintegrals[newname] = cache[newname].Integral()
-
-        nominalnames = set(t.GetName() for t in cache.itervalues() if "binbybin" not in t.GetName())
-        assert len(nominalnames) + 2*len(self.binbybinuncertainties) == len(cache)
-
-        expectedhistnames = set(self.allhistograms) | {"data_obs"}
-        expectedhistnames |= {_+"_3D" for _ in expectedhistnames}
-        assert nominalnames == expectedhistnames, (nominalnames, expectedhistnames, nominalnames ^ expectedhistnames)
 
         f.Write()
         f.Close()

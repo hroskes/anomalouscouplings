@@ -1435,6 +1435,23 @@ class TreeWrapper(TreeWrapperBase):
     assert len({_.category_function_name for _ in categorizations}) == len(categorizations)
     del append, btag, JEC
 
+    def p_Gen_ttH_SIG_kappa_1_JHUGen(self):
+      h = self.treesample.hffhypothesis
+      if h == "Hff0+": return 1
+      if h == "fCP0.5": return 0
+      assert False
+    def p_Gen_ttH_SIG_kappa_tilde_1_JHUGen(self):
+      h = self.treesample.hffhypothesis
+      if h == "Hff0-": return 1/1.6**2
+      if h == "fCP0.5": return 0
+      assert False
+    def p_Gen_ttH_SIG_kappa_1_kappa_tilde_1_JHUGen(self):
+      h = self.treesample.hffhypothesis
+      if h == "Hff0+": return 0
+      if h == "Hff0-": return 0
+      if h == "fCP0.5": return 1/1.6
+      assert False
+
 #############
 #Init things#
 #############
@@ -1658,6 +1675,26 @@ class TreeWrapper(TreeWrapperBase):
         if not self.GEN:
             if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
             if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
+
+        if self.treesample.productionmode == "ttH" and getattr(self.treesample, "alternategenerator", None) == None:
+            if self.treesample.hffhypothesis == "Hff0+":
+                self.toaddtotree.append("p_Gen_ttH_SIG_kappa_1_JHUGen")
+                self.exceptions.append("p_Gen_ttH_SIG_kappa_tilde_1_JHUGen")
+                self.exceptions.append("p_Gen_ttH_SIG_kappa_1_kappa_tilde_1_JHUGen")
+            elif self.treesample.hffhypothesis == "Hff0-":
+                self.exceptions.append("p_Gen_ttH_SIG_kappa_1_JHUGen")
+                self.toaddtotree.append("p_Gen_ttH_SIG_kappa_tilde_1_JHUGen")
+                self.exceptions.append("p_Gen_ttH_SIG_kappa_1_kappa_tilde_1_JHUGen")
+            elif self.treesample.hffhypothesis == "fCP0.5":
+                self.toaddtotree.append("p_Gen_ttH_SIG_kappa_1_JHUGen")
+                self.toaddtotree.append("p_Gen_ttH_SIG_kappa_tilde_1_JHUGen")
+                self.toaddtotree.append("p_Gen_ttH_SIG_kappa_1_kappa_tilde_1_JHUGen")
+            else:
+                assert False
+        else:
+            self.exceptions.append("p_Gen_ttH_SIG_kappa_1_JHUGen")
+            self.exceptions.append("p_Gen_ttH_SIG_kappa_tilde_1_JHUGen")
+            self.exceptions.append("p_Gen_ttH_SIG_kappa_1_kappa_tilde_1_JHUGen")
 
     passesblindcut = config.blindcut
 

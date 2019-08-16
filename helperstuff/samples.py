@@ -13,7 +13,7 @@ import config
 import constants
 from enums import AlternateGenerator, AlternateWeight, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
 from extendedcounter import ExtendedCounter
-from utilities import cache, cache_file, deprecate, generatortolist, product, TFile, tlvfromptetaphim
+from utilities import cache, cache_file, deprecate, generatortolist, product, TFile, tlvfromptetaphim, WriteOnceDict
 from weightshelper import WeightsHelper
 
 class SumOfSamplesBase(object):
@@ -1701,15 +1701,6 @@ def allsamples(__doxcheck=True):
 def __xcheck(*samples):
     if os.path.exists(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl")) and not os.path.exists(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl.tmp")):
         os.remove(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl")) #no need to have >1 list in the cache
-
-    class WriteOnceDict(dict):
-        def __init__(self, messagefmt="{key} has already been set"):
-            self.messagefmt = messagefmt
-        def __setitem__(self, key, value):
-            if key in self:
-                if value == self[key]: return
-                raise KeyError(self.messagefmt.format(key=key, newvalue=value, oldvalue=self[key]))
-            super(WriteOnceDict, self).__setitem__(key, value)
 
     def CJLSTfile(sample):
         if sample.production.LHE:

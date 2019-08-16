@@ -1053,3 +1053,12 @@ def withdiscriminantsfileisvalid(filename):
     if (not f) or (f.candTree.GetEntries() == 0):
       return False
   return True
+
+class WriteOnceDict(dict):
+    def __init__(self, messagefmt="{key} has already been set"):
+        self.messagefmt = messagefmt
+    def __setitem__(self, key, value):
+        if key in self:
+            if value == self[key]: return
+            raise KeyError(self.messagefmt.format(key=key, newvalue=value, oldvalue=self[key]))
+        super(WriteOnceDict, self).__setitem__(key, value)
