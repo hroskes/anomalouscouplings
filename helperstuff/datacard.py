@@ -552,8 +552,8 @@ class _Datacard(MultiEnum):
                         print namepositive, x
                         for hpos, hneg, pos, neg in izip(histogramspositive, histogramsnegative, bincontentpositive, bincontentnegative):
                             if not pos or not neg:
-                                hpos.Fill(hpos.GetBinCenter(x), 1e-10)
-                                hneg.Fill(hneg.GetBinCenter(x), 1e-10)
+                                hpos.Fill(hpos.GetBinCenter(x), 1e-7)
+                                hneg.Fill(hneg.GetBinCenter(x), 1e-7)
 
                 self.histogramintegrals[namepositive] = cache[namepositive].Integral()
                 self.histogramintegrals[namenegative] = cache[namenegative].Integral()
