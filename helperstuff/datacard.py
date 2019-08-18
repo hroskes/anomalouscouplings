@@ -498,7 +498,7 @@ class _Datacard(MultiEnum):
                 cache[t.GetName()] = t
 
                 assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
-                self.histogramintegrals[name] = t.Integral()
+                if systematic is not None: self.histogramintegrals[name] = t.Integral()
 
                 if systematic is None and config.usebinbybin and p != "data" and p.isbkg:
                     for i in xrange(1, t.GetNbinsX()+1):
@@ -528,32 +528,49 @@ class _Datacard(MultiEnum):
 
                         self.binbybinuncertainties.append(systname)
 
-        for namepositive in sorted(cache):
-            if "_positive" not in namepositive: continue
-            if namepositive.endswith("Up") or namepositive.endswith("Down") or namepositive.endswith("_3D"): continue
+        for name in sorted(cache):
+            if name == "data_obs" or name.endswith("Up") or name.endswith("Down") or name.endswith("_3D"): continue
+            if "_negative" in name: continue  #handled by positive
 
-            namenegative = namepositive.replace("_positive", "_negative")
+            if "_positive" in name:
+                namepositive = name
+                namenegative = namepositive.replace("_positive", "_negative")
 
-            systematicnamespositive = sorted([k for k in cache if k.startswith(namepositive) and (k.endswith("Up") or k.endswith("Down"))])
-            systematicnamesnegative = sorted([k for k in cache if k.startswith(namenegative) and (k.endswith("Up") or k.endswith("Down"))])
+                systematicnamespositive = sorted([k for k in cache if k.startswith(namepositive) and (k.endswith("Up") or k.endswith("Down"))])
+                systematicnamesnegative = sorted([k for k in cache if k.startswith(namenegative) and (k.endswith("Up") or k.endswith("Down"))])
 
-            assert all(neg == pos.replace("_positive", "_negative") for pos, neg in izip(systematicnamespositive, systematicnamesnegative)), (systematicnamespositive, systematicnamesnegative)
+                assert all(neg == pos.replace("_positive", "_negative") for pos, neg in izip(systematicnamespositive, systematicnamesnegative)), (systematicnamespositive, systematicnamesnegative)
 
-            histogramspositive = [cache[namepositive]] + [cache[_] for _ in systematicnamespositive]
-            histogramsnegative = [cache[namenegative]] + [cache[_] for _ in systematicnamesnegative]
+                histogramspositive = [cache[namepositive]] + [cache[_] for _ in systematicnamespositive]
+                histogramsnegative = [cache[namenegative]] + [cache[_] for _ in systematicnamesnegative]
 
-            integralspositive = [self.histogramintegrals[namepositive]] + [self.histogramintegrals[_] for _ in systematicnamespositive]
-            integralsnegative = [self.histogramintegrals[namenegative]] + [self.histogramintegrals[_] for _ in systematicnamesnegative]
+                for x in xrange(1, histogramspositive[0].GetNbinsX()+1):
+                    bincontentpositive = [_.GetBinContent(x) for _ in histogramspositive]
+                    bincontentnegative = [_.GetBinContent(x) for _ in histogramsnegative]
 
-            if any(integralspositive) and not all(integralspositive) or any(integralsnegative) and not all(integralsnegative):
-                for hpos, hneg, intpos, intneg in izip(histogramspositive, histogramsnegative, integralspositive, integralsnegative):
-                    if not intpos or not intneg:
-                        hpos.Fill(1, 1e-10)
-                        hneg.Fill(1, 1e-10)
-                        self.histogramintegrals[hpos.GetName()] = hpos.Integral()
-                        self.histogramintegrals[hneg.GetName()] = hneg.Integral()
+                    if any(bincontentpositive) and not all(bincontentpositive) or any(bincontentnegative) and not all(bincontentnegative):
+                        print namepositive, x
+                        for hpos, hneg, pos, neg in izip(histogramspositive, histogramsnegative, bincontentpositive, bincontentnegative):
+                            if not pos or not neg:
+                                hpos.Fill(hpos.GetBinCenter(x), 1e-10)
+                                hneg.Fill(hneg.GetBinCenter(x), 1e-10)
 
-                        print hpos.GetName()
+                self.histogramintegrals[namepositive] = cache[namepositive].Integral()
+                self.histogramintegrals[namenegative] = cache[namenegative].Integral()
+
+            else:
+                systematicnames = sorted([k for k in cache if k.startswith(name) and (k.endswith("Up") or k.endswith("Down"))])
+                histograms = [cache[name]] + [cache[_] for _ in systematicnames]
+
+                for x in xrange(1, histograms[0].GetNbinsX()+1):
+                    bincontent = [_.GetBinContent(x) for _ in histograms]
+                    if any(bincontent) and not all(bincontent):
+                        print namepositive, x
+                        for h, val in izip(histograms, bincontent):
+                            if not val:
+                                h.Fill(x, 1e-10)
+
+                self.histogramintegrals[name] = cache[name].Integral()
 
         f.Write()
         f.Close()
