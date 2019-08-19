@@ -5,6 +5,7 @@ from itertools import izip, izip_longest, permutations, product
 import json
 import os
 import pipes
+import re
 import shutil
 import subprocess
 import sys
@@ -724,6 +725,8 @@ def runcombine(analysis, foldername, **kwargs):
             for line in f:
                 if line.startswith("shapesystematics group = "):
                     repmap["linearsystematics"] = "--PO linearsystematic:" + ",".join(line.split("=")[1].split())
+                if re.match("CMS_scale_j *param", line):
+                    repmap["parameterranges"] += ":CMS_scale_j=-1.0,1.0"
 
         with utilities.OneAtATime(replaceByMap(".oO[workspacefile]Oo..tmp", repmap), 5, task="running text2workspace"):
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):

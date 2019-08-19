@@ -389,7 +389,7 @@ class ProductionMode(MyEnum):
 
     def workspaceshapesystematics(self, category):
       result = []
-      if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH"):
+      if self == "ggH":
         if config.applym4lshapesystematics:
           if config.combinem4lshapesystematics:
             result += ["ScaleRes"]
@@ -413,6 +413,12 @@ class WorkspaceShapeSystematic(MyEnum):
         if self in ("Res", "Scale", "ScaleRes"): return True
         if self in ("CMS_scale_j",): return False
         assert False, self
+
+    @property
+    def paramrange(self):
+      if self == "JEC":
+        return "[-1.0, 1.0]"
+      return ""
 
     @property
     def years(self):

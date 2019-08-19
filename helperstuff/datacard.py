@@ -333,7 +333,7 @@ class _Datacard(MultiEnum):
                 if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
                     if (yieldsystematic == "JEC" and self.category in ("VBFtagged", "VHHadrtagged")):
                         self.__shapesystematics.append(str(wss))
-                        if self.useaslinear(wss): return "param 0.0 1.0"
+                        if self.useaslinear(wss): return "param 0.0 1.0 " + wss.paramrange
                         ysv = "1"
                         lst[0] = "shape1?"
                     else:
@@ -349,7 +349,7 @@ class _Datacard(MultiEnum):
       if not any(workspaceshapesystematic in p.workspaceshapesystematics(self.category) for p in self.productionmodes): return None
       if workspaceshapesystematic.isperchannel and channel == self.channel:
         self.__shapesystematics.append("{}_{}".format(workspaceshapesystematic, channel))
-        if self.useaslinear(workspaceshapesystematic): return "param 0.0 1.0"
+        if self.useaslinear(workspaceshapesystematic): return "param 0.0 1.0 " + workspaceshapesystematic.paramrange
         return " ".join(
           ["shape1"] + [
             "1" if workspaceshapesystematic in
@@ -371,7 +371,7 @@ class _Datacard(MultiEnum):
       else:
           return None  #in that case shape1? is taken care of in yieldsystematic
       self.__shapesystematics.append(str(workspaceshapesystematic))
-      if self.useaslinear(workspaceshapesystematic): return "param 0.0 1.0"
+      if self.useaslinear(workspaceshapesystematic): return "param 0.0 1.0 " + workspaceshapesystematic.paramrange
       return " ".join(
         ["shape1"] + [
           "1" if workspaceshapesystematic in
