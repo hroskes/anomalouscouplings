@@ -693,7 +693,7 @@ def runcombine(analysis, foldername, **kwargs):
         
 
     repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
-    repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo."
+    repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo. .oO[linearsystematics]Oo."
     repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(["CMS_zz4l_fa1"] + ["CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai] + ["fa3_ggH", "fCP_Htt", "RV", "RF"])
     repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
 
@@ -702,7 +702,7 @@ def runcombine(analysis, foldername, **kwargs):
     with cd(folder):
         with open(".gitignore", "w") as f:
             f.write("*")
-        makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
+        datacards = makeDCsandWSs(productions, usecategories, usechannels, analysis, lumitype)
         for filename in alsocombine:
             for _ in filename, filename.replace(".input.root", ".txt"):
                 if not os.path.exists(_): raise ValueError("{} does not exist!".format(_))
@@ -719,6 +719,12 @@ def runcombine(analysis, foldername, **kwargs):
                             os.remove(replaceByMap(".oO[combinecardsfile]Oo.", repmap))
                         except subprocess.CalledProcessError:
                             pass
+
+        with open(replaceByMap(".oO[combinecardsfile]Oo.", repmap)) as f:
+            for line in f:
+                if line.startswith("shapesystematics group = "):
+                    repmap["linearsystematics"] = "--PO linearsystematic:" + ",".join(line.split("=")[1].split())
+
         with utilities.OneAtATime(replaceByMap(".oO[workspacefile]Oo..tmp", repmap), 5, task="running text2workspace"):
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)

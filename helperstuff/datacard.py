@@ -154,6 +154,7 @@ class _Datacard(MultiEnum):
     def __init__(self, *args):
         super(_Datacard, self).__init__(*args)
         self.pdfs = None
+        self.__shapesystematics = []
     @property
     def year(self):
         return self.production.year
@@ -225,7 +226,7 @@ class _Datacard(MultiEnum):
     @generatortolist
     def histograms(self):
         for histogramname in self.allhistograms:
-            if self.histogramintegrals[histogramname] == 0: continue
+            if self.histogramintegrals[histogramname] == 0: print histogramname; continue
             yield histogramname
 
     @property
@@ -235,6 +236,11 @@ class _Datacard(MultiEnum):
         for p in self.productionmodes:
             if p.isbkg:
                 yield p.combinename
+
+                for shapesystematic, direction in product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
+                    if self.useaslinear(shapesystematic) and shapesystematic in p.workspaceshapesystematics(self.category):
+                        yield p.combinename+"_"+shapesystematic.combinename(self.channel)+direction
+
             elif p.issignal:
                 templategroup = str(p).lower()
                 templatesfile = TemplatesFile(templategroup, self.analysis, self.production, self.channel, self.category)
@@ -248,6 +254,11 @@ class _Datacard(MultiEnum):
                             assert t.hffhypothesis == "Hff0+", t
                     name += "_"+t.hypothesis.combinename
                     yield name
+
+                    for shapesystematic, direction in product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
+                        if self.useaslinear(shapesystematic) and shapesystematic in p.workspaceshapesystematics(self.category):
+                            yield name+"_"+shapesystematic.combinename(self.channel)+direction
+
                 for t in templatesfile.inttemplates():
                     for sign in "positive", "negative":
                         templatenamepart = (
@@ -264,6 +275,10 @@ class _Datacard(MultiEnum):
                                 assert t.hffhypothesis == "Hff0+", t
                         name += "_"+templatenamepart+"_"+sign
                         yield name
+
+                        for shapesystematic, direction in product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
+                            if self.useaslinear(shapesystematic) and shapesystematic in p.workspaceshapesystematics(self.category):
+                                yield name+"_"+shapesystematic.combinename(self.channel)+direction
             else:
                 assert False
 
@@ -278,7 +293,7 @@ class _Datacard(MultiEnum):
         nsignal = nbkg = 0
         for h in self.histograms:
             if "bkg_" in h:
-                assert ProductionMode(h).isbkg
+                assert ProductionMode("_".join(h.split("_")[:2])).isbkg
                 result[1].append(h)
                 result[2].append(1 + nbkg)
                 nbkg += 1
@@ -298,7 +313,7 @@ class _Datacard(MultiEnum):
 
     @MakeSystematicFromEnums(YieldSystematic)
     def yieldsystematic(self, yieldsystematic):
-        productionmodes = [ProductionMode(h if "bkg_" in h else h.split("_")[0]) for h in self.histograms]
+        productionmodes = [ProductionMode("_".join(h.split("_")[0:2 if "bkg_" in h else 1])) for h in self.histograms]
 
         if self.production.LHE or self.production.GEN:
             if yieldsystematic == "QCDscale_ren_VV":
@@ -317,6 +332,8 @@ class _Datacard(MultiEnum):
             else:
                 if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
                     if (yieldsystematic == "JEC" and self.category in ("VBFtagged", "VHHadrtagged")):
+                        self.__shapesystematics.append(str(wss))
+                        if self.useaslinear(wss): return "param 0.0 1.0"
                         ysv = "1"
                         lst[0] = "shape1?"
                     else:
@@ -329,11 +346,14 @@ class _Datacard(MultiEnum):
     def workspaceshapesystematic_channel(self, workspaceshapesystematic, channel):
       if self.year not in workspaceshapesystematic.years: return None
       if self.production.LHE or self.production.GEN: return None
+      if not any(workspaceshapesystematic in p.workspaceshapesystematics(self.category) for p in self.productionmodes): return None
       if workspaceshapesystematic.isperchannel and channel == self.channel:
+        self.__shapesystematics.append("{}_{}".format(workspaceshapesystematic, channel))
+        if self.useaslinear(workspaceshapesystematic): return "param 0.0 1.0"
         return " ".join(
           ["shape1"] + [
             "1" if workspaceshapesystematic in
-              ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
+              ProductionMode("_".join(h.split("_")[0:2 if "bkg_" in h else 1])).workspaceshapesystematics(self.category)
             else "-"
             for h in self.histograms
           ]
@@ -343,16 +363,19 @@ class _Datacard(MultiEnum):
     def workspaceshapesystematic(self, workspaceshapesystematic):
       if self.year not in workspaceshapesystematic.years: return None
       if workspaceshapesystematic.isperchannel: return None
+      if not any(workspaceshapesystematic in p.workspaceshapesystematics(self.category) for p in self.productionmodes): return None
       try:
           YieldSystematic(str(workspaceshapesystematic))
       except ValueError:
           pass
       else:
           return None  #in that case shape1? is taken care of in yieldsystematic
+      self.__shapesystematics.append(str(workspaceshapesystematic))
+      if self.useaslinear(workspaceshapesystematic): return "param 0.0 1.0"
       return " ".join(
         ["shape1"] + [
           "1" if workspaceshapesystematic in
-            ProductionMode(h if "bkg_" in h else h.split("_")[0]).workspaceshapesystematics(self.category)
+            ProductionMode("_".join(h.split("_")[0:2 if "bkg_" in h else 1])).workspaceshapesystematics(self.category)
           else "-"
           for h in self.histograms
         ]
@@ -375,7 +398,11 @@ class _Datacard(MultiEnum):
     def binbybin(self):
         return "group", lambda systematicname: "binbybin" in systematicname
 
-    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematic_channel, workspaceshapesystematic, binbybin_category_channel_background_index, "binbybin", "everything_but_binbybin")
+    @property
+    def shapesystematics(self):
+        return "group", lambda x: x in self.__shapesystematics
+
+    systematicssection = section5 = SystematicsSection(yieldsystematic, workspaceshapesystematic_channel, workspaceshapesystematic, binbybin_category_channel_background_index, "binbybin", "everything_but_binbybin", "shapesystematics")
 
     divider = "\n------------\n"
 
@@ -411,6 +438,8 @@ class _Datacard(MultiEnum):
         print self
         domirror = False  #will be set to true
         for h in chain(self.allhistograms, ["data"]):
+            if h.endswith("Up") or h.endswith("Down"): continue #systematics are handled in this function
+
             if "bkg_" in h or h == "data":
                 p = h
                 hypothesis = None
@@ -498,7 +527,6 @@ class _Datacard(MultiEnum):
                 cache[t.GetName()] = t
 
                 assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
-                if systematic is not None: self.histogramintegrals[name] = t.Integral()
 
                 if systematic is None and config.usebinbybin and p != "data" and p.isbkg:
                     for i in xrange(1, t.GetNbinsX()+1):
@@ -549,14 +577,13 @@ class _Datacard(MultiEnum):
                     bincontentnegative = [_.GetBinContent(x) for _ in histogramsnegative]
 
                     if any(bincontentpositive) and not all(bincontentpositive) or any(bincontentnegative) and not all(bincontentnegative):
-                        print namepositive, x
                         for hpos, hneg, pos, neg in izip(histogramspositive, histogramsnegative, bincontentpositive, bincontentnegative):
                             if not pos or not neg:
                                 hpos.Fill(hpos.GetBinCenter(x), 1e-7)
                                 hneg.Fill(hneg.GetBinCenter(x), 1e-7)
 
-                self.histogramintegrals[namepositive] = cache[namepositive].Integral()
-                self.histogramintegrals[namenegative] = cache[namenegative].Integral()
+                for _ in [namepositive, namenegative] + systematicnamespositive + systematicnamesnegative:
+                    self.histogramintegrals[_] = cache[_].Integral()
 
             else:
                 systematicnames = sorted([k for k in cache if k.startswith(name) and (k.endswith("Up") or k.endswith("Down"))])
@@ -565,12 +592,12 @@ class _Datacard(MultiEnum):
                 for x in xrange(1, histograms[0].GetNbinsX()+1):
                     bincontent = [_.GetBinContent(x) for _ in histograms]
                     if any(bincontent) and not all(bincontent):
-                        print namepositive, x
                         for h, val in izip(histograms, bincontent):
                             if not val:
                                 h.Fill(x, 1e-10)
 
-                self.histogramintegrals[name] = cache[name].Integral()
+                for _ in [name] + systematicnames:
+                    self.histogramintegrals[_] = cache[_].Integral()
 
         f.Write()
         f.Close()
@@ -581,9 +608,15 @@ class _Datacard(MultiEnum):
             Datacard(self.channel, self.category, self.analysis, self.luminosity).makehistograms()
             self.writedatacard()
 
+    def useaslinear(self, workspaceshapesystematic):
+        if self.analysis.isfa3fa2fL1fL1Zg:
+            if workspaceshapesystematic in ("CMS_scale", "CMS_res", "JEC"): return True
+        assert False, (self, workspaceshapesystematic)
+
 Datacard = multienumcache(_Datacard)
 
 def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
+    dcs = []
     with OneAtATime("makeDCsandWSs.tmp", 30):
         fullarglist = [
           (production, channel, category) + otherargs
@@ -593,6 +626,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
         arglist = []
         for dcargs in fullarglist:
           dc = Datacard(*dcargs)
+          dcs.append(dc)
           if all(os.path.exists(thing) for thing in (dc.rootfile_base, dc.rootfile, dc.txtfile)): continue
           if dc.production.LHE and dc.channel != "2e2mu": continue
           if dc.analysis.isdecayonly and dc.category != "Untagged": continue
@@ -602,6 +636,8 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
         pool = multiprocessing.Pool(processes=8 if utilities.LSB_JOBID() else 1)
         mapresult = pool.map(functools.partial(makeDCandWS, **kwargs), arglist)
         pool.close()
+
+    return dcs
 
 def makeDCandWS(dcargs, **kwargs):
     try:
