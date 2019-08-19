@@ -810,7 +810,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.productionmode in ("ggH", "ttH", "tqH"):
                 if self.hffhypothesis is None:
                     if self.productionmode == "ggH":
-                        self.hffhypothesis = "Hff0+"
+                        self.hffhypothesis = HffHypothesis("Hff0+")
                     else:
                         raise ValueError("Hff hypothesis not provided for {} productionmode\n{}".format(self.productionmode, args))
                 if self.productionmode == "tqH" and self.hffhypothesis != "Hff0+":

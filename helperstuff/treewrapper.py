@@ -83,7 +83,7 @@ class TreeWrapperBase(Iterator):
     def isZX(self): return self.treesample.isZX()
     @property
     @cache_instancemethod
-    def isalternate(self): return self.treesample.alternategenerator in ("POWHEG", "MINLO", "NNLOPS") or self.treesample.pythiasystematic is not None
+    def useNNLOPSweight(self): return self.productionmode == "ggH" and self.treesample.alternategenerator in (None, "POWHEG", "MINLO", "NNLOPS")
 
 
     def checkfunctions(self):
@@ -114,6 +114,7 @@ class TreeWrapperBase(Iterator):
             raise SyntaxError(error)
 
     def per_event_scale_factor(self):
+        if self.productionmode == "ggH" and self.useNNLOPSweight: return self.ggH_NNLOPS_weight
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH"): return 1
         if self.productionmode == "ggZZ": return self.KFactor_QCD_ggZZ_Nominal
         if self.productionmode == "qqZZ":
@@ -1576,7 +1577,6 @@ class TreeWrapper(TreeWrapperBase):
             "initcategoryfunctions",
             "initlists",
             "initsystematics",
-            "isalternate",
             "isbkg",
             "isdata",
             "isdummy",
@@ -1598,6 +1598,7 @@ class TreeWrapper(TreeWrapperBase):
             "treesample",
             "Show",
             "unblind",
+            "useNNLOPSweight",
             "xsec",
             "year",
         ]
@@ -1675,6 +1676,8 @@ class TreeWrapper(TreeWrapperBase):
         if not self.GEN:
             if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
             if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
+        if self.treesample.productionmode == "ggH" and self.useNNLOPSweight:
+            self.kfactors.append("ggH_NNLOPS_weight")
 
         if self.treesample.productionmode == "ttH" and getattr(self.treesample, "alternategenerator", None) == None:
             if self.treesample.hffhypothesis == "Hff0+":
