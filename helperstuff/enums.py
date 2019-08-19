@@ -967,6 +967,8 @@ class AlternateWeight(MyEnum):
                  EnumItem("EWcorrDn", "EWcorrDown"),
                  EnumItem("PythiaScaleUp"),
                  EnumItem("PythiaScaleDn", "PythiaScaleDown"),
+                 EnumItem("NNLOPSUp"),
+                 EnumItem("NNLOPSDn", "NNLOPSDown"),
                 )
     @property
     def issystematic(self): return self != "1"
@@ -985,6 +987,8 @@ class AlternateWeight(MyEnum):
       if self == "EWcorrDn": return "(1 - KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
       if self == "PythiaScaleUp": return "(PythiaWeight_isr_muR4 * PythiaWeight_fsr_muR4)"
       if self == "PythiaScaleDn": return "(PythiaWeight_isr_muR0p25 * PythiaWeight_fsr_muR0p25)"
+      if self == "NNLOPSUp": return "(1 + ggH_NNLOPS_weight_unc/ggH_NNLOPS_weight)"
+      if self == "NNLOPSDn": return "(1 - ggH_NNLOPS_weight_unc/ggH_NNLOPS_weight)"
       assert False
     @property
     def kfactorname(self):

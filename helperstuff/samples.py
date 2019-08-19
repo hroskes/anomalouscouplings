@@ -1497,6 +1497,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
     def alternateweights(self):
       for alternateweight in AlternateWeight.items():
         if alternateweight != "1" and self.productionmode == "ZX": continue
+        if alternateweight in ("NNLOPSUp", "NNLOPSDn") and self.productionmode != "ggH": continue
         if alternateweight in ("EWcorrUp", "EWcorrDn") and self.productionmode != "qqZZ": continue
         if (
           alternateweight == "PythiaScaleUp" or alternateweight == "PythiaScaleDown"

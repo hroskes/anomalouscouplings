@@ -226,6 +226,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     if "PythiaScaleUp" in alternateweights or "PythiaScaleDown" in alternateweights:
       t.SetBranchStatus("PythiaWeight_*sr_muR0p25", 1)
       t.SetBranchStatus("PythiaWeight_*sr_muR4", 1)
+    if "NNLOPSUp" in alternateweights or "NNLOPSDn" in alternateweights:
+      t.SetBranchStatus("*NNLOPS*", 1)
 
     c = ROOT.TCanvas()
 
