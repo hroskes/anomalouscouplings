@@ -59,6 +59,15 @@ class YieldSystematic(MyEnum):
                  EnumItem("zjet_2e2mu_2018"),
                  EnumItem("zjet_4e_2018"),
                  EnumItem("zjet_4mu_2018"),
+                 EnumItem("THU_ggH_Mu"),
+                 EnumItem("THU_ggH_Res"),
+                 EnumItem("THU_ggH_Mig01"),
+                 EnumItem("THU_ggH_Mig12"),
+                 EnumItem("THU_ggH_VBF2j"),
+                 EnumItem("THU_ggH_VBF3j"),
+                 EnumItem("THU_ggH_PT60"),
+                 EnumItem("THU_ggH_PT120"),
+                 EnumItem("THU_ggH_qmtop"),
                 )
 
 class YieldValue(MultiEnum, JsonDict):
@@ -226,8 +235,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     if "PythiaScaleUp" in alternateweights or "PythiaScaleDown" in alternateweights:
       t.SetBranchStatus("PythiaWeight_*sr_muR0p25", 1)
       t.SetBranchStatus("PythiaWeight_*sr_muR4", 1)
-    if "NNLOPSUp" in alternateweights or "NNLOPSDn" in alternateweights:
-      t.SetBranchStatus("*NNLOPS*", 1)
+    if any(_.isTHUggH for _ in alternateweights):
+      t.SetBranchStatus("qcd_ggF_uncertSF", 1)
 
     c = ROOT.TCanvas()
 

@@ -352,14 +352,14 @@ def writeyields(productionmodelist=None, productionlist=None):
           for channel in channels:
             YieldSystematicValue(channel, category, analysis, productionmode, "EWcorr_qqZZ", production).value = (EWcorrdn, EWcorrup)
 
-          if productionmode == "ggH":
-            raise ValueError("waiting for Meng+Toni's response")
-            NNLOPSup = (sum(result[productionmode, categorization, AlternateWeight("NNLOPSUp"), cat] for cat in sumcategories) / nominal).nominal_value
-            NNLOPSdn = (sum(result[productionmode, categorization, AlternateWeight("NNLOPSDn"), cat] for cat in sumcategories) / nominal).nominal_value
-          else:
-            NNLOPSup = NNLOPSdn = 1
-          for channel in channels:
-            YieldSystematicValue(channel, category, analysis, productionmode, "???", production).value = (NNLOPSdn, NNLOPSup)
+          for THU in "Mu", "Res", "Mig01", "Mig12", "VBF2j", "VBF3j", "PT60", "PT120", "qmtop":
+            if productionmode == "ggH":
+              THUup = (sum(result[productionmode, categorization, AlternateWeight("THU_ggH_"+THU+"Up"), cat] for cat in sumcategories) / nominal).nominal_value
+              THUdn = (sum(result[productionmode, categorization, AlternateWeight("THU_ggH_"+THU+"Dn"), cat] for cat in sumcategories) / nominal).nominal_value
+            else:
+              THUup = THUdn = 1
+            for channel in channels:
+              YieldSystematicValue(channel, category, analysis, productionmode, "THU_ggH_"+THU, production).value = (THUdn, THUup)
 
       YieldValue.writedict()
       YieldSystematicValue.writedict()

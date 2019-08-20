@@ -967,8 +967,24 @@ class AlternateWeight(MyEnum):
                  EnumItem("EWcorrDn", "EWcorrDown"),
                  EnumItem("PythiaScaleUp"),
                  EnumItem("PythiaScaleDn", "PythiaScaleDown"),
-                 EnumItem("NNLOPSUp"),
-                 EnumItem("NNLOPSDn", "NNLOPSDown"),
+                 EnumItem("THU_ggH_MuUp"),
+                 EnumItem("THU_ggH_MuDn", "THU_ggH_MuDown"),
+                 EnumItem("THU_ggH_ResUp"),
+                 EnumItem("THU_ggH_ResDn", "THU_ggH_ResDown"),
+                 EnumItem("THU_ggH_Mig01Up"),
+                 EnumItem("THU_ggH_Mig01Dn", "THU_ggH_Mig01Down"),
+                 EnumItem("THU_ggH_Mig12Up"),
+                 EnumItem("THU_ggH_Mig12Dn", "THU_ggH_Mig12Down"),
+                 EnumItem("THU_ggH_VBF2jUp"),
+                 EnumItem("THU_ggH_VBF2jDn", "THU_ggH_VBF2jDown"),
+                 EnumItem("THU_ggH_VBF3jUp"),
+                 EnumItem("THU_ggH_VBF3jDn", "THU_ggH_VBF3jDown"),
+                 EnumItem("THU_ggH_PT60Up"),
+                 EnumItem("THU_ggH_PT60Dn", "THU_ggH_PT60Down"),
+                 EnumItem("THU_ggH_PT120Up"),
+                 EnumItem("THU_ggH_PT120Dn", "THU_ggH_PT120Down"),
+                 EnumItem("THU_ggH_qmtopUp"),
+                 EnumItem("THU_ggH_qmtopDn", "THU_ggH_qmtopDown"),
                 )
     @property
     def issystematic(self): return self != "1"
@@ -987,9 +1003,13 @@ class AlternateWeight(MyEnum):
       if self == "EWcorrDn": return "(1 - KFactor_EW_qqZZ_unc/KFactor_EW_qqZZ)"
       if self == "PythiaScaleUp": return "(PythiaWeight_isr_muR4 * PythiaWeight_fsr_muR4)"
       if self == "PythiaScaleDn": return "(PythiaWeight_isr_muR0p25 * PythiaWeight_fsr_muR0p25)"
-      if self == "NNLOPSUp": return "(1 + ggH_NNLOPS_weight_unc/ggH_NNLOPS_weight)"
-      if self == "NNLOPSDn": return "(1 - ggH_NNLOPS_weight_unc/ggH_NNLOPS_weight)"
-      assert False
+      for i, THU in enumerate(("Mu", "Res", "Mig01", "Mig12", "VBF2j", "VBF3j", "PT60", "PT120", "qmtop")):
+        if self == "THU_ggH_"+THU+"Up": return "qcd_ggF_uncertSF[{}]".format(i)
+        if self == "THU_ggH_"+THU+"Dn": return "(2-qcd_ggF_uncertSF[{}])".format(i)
+      assert False, self
+    @property
+    def isTHUggH(self):
+      return str(self).startswith("THU_ggH_")
     @property
     def kfactorname(self):
       if self in ("1", "PythiaScaleUp", "PythiaScaleDn"): return "KFactor_QCD_ggZZ_Nominal"
