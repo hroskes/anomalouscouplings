@@ -828,43 +828,53 @@ def recursivesubclasses(cls):
     return result
 
 class TFile(object):
-    def __init__(self, filename, *args, **kwargs):
-        import xrd
-        if filename.startswith("/eos/cms"):# and LSB_JOBID():
-            filename = "root://eoscms/"+filename
+  def __init__(self, filename, *args, **kwargs):
+    self.__filename = filename
+    self.__args = args
+    self.__deleteifbad = kwargs.pop("deleteifbad", False)
+    self.__entered = False
+  def __enter__(self):
+    import ROOT
+    self.__bkpdirectory = ROOT.gDirectory.GetDirectory(ROOT.gDirectory.GetPath())
+    self.__f = ROOT.TFile.Open(self.__filename, *self.__args)
+    self.__entered = True
+    if not self.__f:
+      raise IOError(self.__filename+" is a null pointer, see above for details.")
+    if self.IsZombie():
+      self.__exit__()
+      raise IOError(self.__filename+" is a zombie, see above for details.")
 
-        self.__filename = filename
-        self.__write = kwargs.pop("write", False)
-        self.__contextmanager = kwargs.pop("contextmanager", True)
-        self.__entered = False
+    try:
+      openoption = self.__args[0].upper()
+    except IndexError:
+      openoption = ""
 
-        if not self.__write and not xrd.exists(self.__filename):
-            raise IOError(filename+" does not exist!")
+    self.__write = {
+      "": False,
+      "READ": False,
+      "NEW": True,
+      "CREATE": True,
+      "RECREATE": True,
+      "UPDATE": True,
+    }[openoption]
 
-        self.__args = args
-        self.__kwargs = kwargs
+    return self.__f
 
-        if not self.__contextmanager: self.__enter__()
+  def __exit__(self, *errorstuff):
+    if self.__write and (not any(errorstuff) or not self.__deleteifbad):
+      self.Write()
+    self.Close()
+    self.__bkpdirectory.cd()
+    if self.__write and self.__deleteifbad and any(errorstuff):
+      os.remove(self.__filename)
 
-    def __enter__(self):
-        if self.__entered: raise ValueError("Already entered {!r}".format(self))
-        self.__entered = True
-        self.__f = ROOT.TFile.Open(self.__filename, *self.__args, **self.__kwargs)
-        return self.__f
-    def __exit__(self, *exc_info):
-        if self.__f and any(exc_info):
-            self.__f.ls()
-        try:
-            if self.__f and self.__write: self.__f.Write()
-        finally:
-            if self.__f: self.__f.Close()
-    def __repr__(self):
-        return "{.__name__}('{}', write={}, contextmanager={})".format(type(self), self.__filename, self.__write, self.__contextmanager)
+  def __repr__(self):
+    return "{.__name__}('{}', write={}, contextmanager={})".format(type(self), self.__filename, self.__write, self.__contextmanager)
 
-    def __getattr__(self, attr):
-        if not self.__entered:
-            raise AttributeError("Trying to get {} from {!r} before entering it".format(attr, self))
-        return getattr(self.__f, attr)
+  def __getattr__(self, attr):
+    if not self.__entered:
+      raise AttributeError("Trying to get {} from {!r} before entering it".format(attr, self))
+    return getattr(self.__f, attr)
 
 def setname(name):
     def decorator(function):

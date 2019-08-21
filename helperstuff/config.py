@@ -77,9 +77,6 @@ useQGTagging = False
 useVHMETTagged = False
 
 applym4lshapesystematics = True
-
-combinem4lshapesystematics = False
-
 applyZXshapesystematics = False
 applyJECshapesystematics = True
 applyMINLOsystematics = False

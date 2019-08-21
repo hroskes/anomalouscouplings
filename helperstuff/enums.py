@@ -391,10 +391,7 @@ class ProductionMode(MyEnum):
       result = []
       if self == "ggH":
         if config.applym4lshapesystematics:
-          if config.combinem4lshapesystematics:
-            result += ["ScaleRes"]
-          else:
-            result += ["Scale", "Res"]
+          result += ["Scale", "Res"]
       if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH", "qqZZ", "ggZZ"):
         if category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
           result += ["CMS_scale_j"]
@@ -405,12 +402,11 @@ class WorkspaceShapeSystematic(MyEnum):
     enumitems = (
                  EnumItem("CMS_res", "Res"),
                  EnumItem("CMS_scale", "Scale"),
-                 EnumItem("CMS_scaleres", "ScaleRes"),
                  EnumItem("CMS_scale_j", "JEC"),
                 )
     @property
     def isperchannel(self):
-        if self in ("Res", "Scale", "ScaleRes"): return True
+        if self in ("Res", "Scale"): return True
         if self in ("CMS_scale_j",): return False
         assert False, self
 
@@ -422,18 +418,18 @@ class WorkspaceShapeSystematic(MyEnum):
 
     @property
     def years(self):
-        if self in ("Res", "Scale", "ScaleRes", "JEC"): return 2016, 2017, 2018
+        if self in ("Res", "Scale", "JEC"): return 2016, 2017, 2018
         assert False, self
 
     @property
     def nickname(self):
-      for _ in "Res", "Scale", "ScaleRes", "JEC":
+      for _ in "Res", "Scale", "JEC":
         if self == _:
           return _
       assert False, self
 
     def combinename(self, channel):
-      for _ in "CMS_res", "CMS_scale", "CMS_scaleres", "CMS_scale_j":
+      for _ in "CMS_res", "CMS_scale", "CMS_scale_j":
         if self == _:
           result = _
           break
@@ -452,13 +448,25 @@ class ShapeSystematic(MyEnum):
     enumitems = (
                  EnumItem(""),
                  EnumItem("ResUp"),
-                 EnumItem("ResDown"),
+                 EnumItem("ResDown", "ResDn"),
                  EnumItem("ScaleUp"),
-                 EnumItem("ScaleDown"),
-                 EnumItem("ScaleResUp", "ResScaleUp"),
-                 EnumItem("ScaleResDown", "ResScaleDown"),
+                 EnumItem("ScaleDown", "ScaleDn"),
+                 EnumItem("Res0PMUp"),
+                 EnumItem("Res0PMDown", "Res0PMDn"),
+                 EnumItem("Scale0PMUp"),
+                 EnumItem("Scale0PMDown", "Scale0PMDn"),
                  EnumItem("JECUp"),
                  EnumItem("JECDn", "JECDown"),
+                 EnumItem("JEC0PMUp"),
+                 EnumItem("JEC0PMDn", "JEC0PMDown"),
+                 EnumItem("JEC0MUp"),
+                 EnumItem("JEC0MDn", "JEC0MDown"),
+                 EnumItem("JEC0PHUp"),
+                 EnumItem("JEC0PHDn", "JEC0PHDown"),
+                 EnumItem("JEC0L1Up"),
+                 EnumItem("JEC0L1Dn", "JEC0L1Down"),
+                 EnumItem("JEC0L1ZgUp"),
+                 EnumItem("JEC0L1ZgDn", "JEC0L1ZgDown"),
                  EnumItem("ZXUp"),
                  EnumItem("ZXDown", "ZXDn"),
                  EnumItem("MINLO_SM"),
@@ -484,13 +492,17 @@ class ShapeSystematic(MyEnum):
             return True
         if self in ("JECUp", "JECDn"):
             return templategroup in ("ggh", "vbf", "vh", "zh", "wh", "tth", "bbh", "background")
-        if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "ScaleResUp", "ScaleResDown"):
+        if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "Res0PMUp", "Res0PMDown", "Scale0PMUp", "Scale0PMDown"):
             return templategroup in ("ggh", "vbf", "vh", "zh", "wh", "tth", "bbh")
         if self in ("ZXUp", "ZXDown"):
             return templategroup == "bkg"
         if self in ("MINLO_SM", "MINLOUp", "MINLODn"):
             return templategroup == "ggh"
-        assert False
+        assert False, self
+    @property
+    def hypothesesforratio(self):
+        if self in ("ScaleUp", "ResUp", "ScaleDn", "ResDn"): return Hypothesis("0+"),
+        if self in ("JECUp", "JECDn"): return Hypothesis("0+"), Hypothesis("0-"), Hypothesis("a2"), Hypothesis("L1"), Hypothesis("L1Zg")
 
 class JECSystematic(MyEnum):
     enumname = "jecsystematic"
@@ -1045,9 +1057,7 @@ templategroups = TemplateGroup.items(lambda x: x not in ("zh", "wh"))
 
 _ = [""]
 if config.applym4lshapesystematics:
-    _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown"]
-    if config.combinem4lshapesystematics:
-        _ += ["ScaleResUp", "ScaleResDown"]
+    _ += ["ResUp", "ResDown", "ScaleUp", "ScaleDown", "Res0PMUp", "Res0PMDown", "Scale0PMUp", "Scale0PMDown"]
 if config.applyZXshapesystematics:
     _ += ["ZXUp", "ZXDown"]
 if config.applyJECshapesystematics:

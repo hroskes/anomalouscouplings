@@ -237,10 +237,6 @@ class _Datacard(MultiEnum):
             if p.isbkg:
                 yield p.combinename
 
-                for shapesystematic, direction in product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
-                    if self.useaslinear(shapesystematic) and shapesystematic in p.workspaceshapesystematics(self.category):
-                        yield p.combinename+"_"+shapesystematic.combinename(self.channel)+direction
-
             elif p.issignal:
                 templategroup = str(p).lower()
                 templatesfile = TemplatesFile(templategroup, self.analysis, self.production, self.channel, self.category)
@@ -254,10 +250,6 @@ class _Datacard(MultiEnum):
                             assert t.hffhypothesis == "Hff0+", t
                     name += "_"+t.hypothesis.combinename
                     yield name
-
-                    for shapesystematic, direction in product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
-                        if self.useaslinear(shapesystematic) and shapesystematic in p.workspaceshapesystematics(self.category):
-                            yield name+"_"+shapesystematic.combinename(self.channel)+direction
 
                 for t in templatesfile.inttemplates():
                     for sign in "positive", "negative":
@@ -276,9 +268,6 @@ class _Datacard(MultiEnum):
                         name += "_"+templatenamepart+"_"+sign
                         yield name
 
-                        for shapesystematic, direction in product(p.workspaceshapesystematics(self.category), ("Up", "Down")):
-                            if self.useaslinear(shapesystematic) and shapesystematic in p.workspaceshapesystematics(self.category):
-                                yield name+"_"+shapesystematic.combinename(self.channel)+direction
             else:
                 assert False
 
@@ -333,7 +322,6 @@ class _Datacard(MultiEnum):
                 if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
                     if (yieldsystematic == "JEC" and self.category in ("VBFtagged", "VHHadrtagged")):
                         self.__shapesystematics.append(str(wss))
-                        if self.useaslinear(wss): return "param 0.0 1.0 " + wss.paramrange
                         ysv = "1"
                         lst[0] = "shape1?"
                     else:
@@ -349,7 +337,6 @@ class _Datacard(MultiEnum):
       if not any(workspaceshapesystematic in p.workspaceshapesystematics(self.category) for p in self.productionmodes): return None
       if workspaceshapesystematic.isperchannel and channel == self.channel:
         self.__shapesystematics.append("{}_{}".format(workspaceshapesystematic, channel))
-        if self.useaslinear(workspaceshapesystematic): return "param 0.0 1.0 " + workspaceshapesystematic.paramrange
         return " ".join(
           ["shape1"] + [
             "1" if workspaceshapesystematic in
@@ -371,7 +358,6 @@ class _Datacard(MultiEnum):
       else:
           return None  #in that case shape1? is taken care of in yieldsystematic
       self.__shapesystematics.append(str(workspaceshapesystematic))
-      if self.useaslinear(workspaceshapesystematic): return "param 0.0 1.0 " + workspaceshapesystematic.paramrange
       return " ".join(
         ["shape1"] + [
           "1" if workspaceshapesystematic in
@@ -438,8 +424,6 @@ class _Datacard(MultiEnum):
         print self
         domirror = False  #will be set to true
         for h in chain(self.allhistograms, ["data"]):
-            if h.endswith("Up") or h.endswith("Down"): continue #systematics are handled in this function
-
             if "bkg_" in h or h == "data":
                 p = h
                 hypothesis = None
@@ -527,6 +511,7 @@ class _Datacard(MultiEnum):
                 cache[t.GetName()] = t
 
                 assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
+                if systematic is not None: self.histogramintegrals[name] = t.Integral()
 
                 if systematic is None and config.usebinbybin and p != "data" and p.isbkg:
                     for i in xrange(1, t.GetNbinsX()+1):
@@ -556,49 +541,6 @@ class _Datacard(MultiEnum):
 
                         self.binbybinuncertainties.append(systname)
 
-        for name in sorted(cache):
-            if name == "data_obs" or name.endswith("Up") or name.endswith("Down") or name.endswith("_3D"): continue
-            if "_negative" in name: continue  #handled by positive
-
-            if "_positive" in name:
-                namepositive = name
-                namenegative = namepositive.replace("_positive", "_negative")
-
-                systematicnamespositive = sorted([k for k in cache if k.startswith(namepositive) and (k.endswith("Up") or k.endswith("Down"))])
-                systematicnamesnegative = sorted([k for k in cache if k.startswith(namenegative) and (k.endswith("Up") or k.endswith("Down"))])
-
-                assert all(neg == pos.replace("_positive", "_negative") for pos, neg in izip(systematicnamespositive, systematicnamesnegative)), (systematicnamespositive, systematicnamesnegative)
-
-                histogramspositive = [cache[namepositive]] + [cache[_] for _ in systematicnamespositive]
-                histogramsnegative = [cache[namenegative]] + [cache[_] for _ in systematicnamesnegative]
-
-                for x in xrange(1, histogramspositive[0].GetNbinsX()+1):
-                    bincontentpositive = [_.GetBinContent(x) for _ in histogramspositive]
-                    bincontentnegative = [_.GetBinContent(x) for _ in histogramsnegative]
-
-                    if any(bincontentpositive) and not all(bincontentpositive) or any(bincontentnegative) and not all(bincontentnegative):
-                        for hpos, hneg, pos, neg in izip(histogramspositive, histogramsnegative, bincontentpositive, bincontentnegative):
-                            if not pos or not neg:
-                                hpos.Fill(hpos.GetBinCenter(x), 1e-7)
-                                hneg.Fill(hneg.GetBinCenter(x), 1e-7)
-
-                for _ in [namepositive, namenegative] + systematicnamespositive + systematicnamesnegative:
-                    self.histogramintegrals[_] = cache[_].Integral()
-
-            else:
-                systematicnames = sorted([k for k in cache if k.startswith(name) and (k.endswith("Up") or k.endswith("Down"))])
-                histograms = [cache[name]] + [cache[_] for _ in systematicnames]
-
-                for x in xrange(1, histograms[0].GetNbinsX()+1):
-                    bincontent = [_.GetBinContent(x) for _ in histograms]
-                    if any(bincontent) and not all(bincontent):
-                        for h, val in izip(histograms, bincontent):
-                            if not val:
-                                h.Fill(x, 1e-10)
-
-                for _ in [name] + systematicnames:
-                    self.histogramintegrals[_] = cache[_].Integral()
-
         f.Write()
         f.Close()
 
@@ -607,11 +549,6 @@ class _Datacard(MultiEnum):
         with cd(outdir):
             Datacard(self.channel, self.category, self.analysis, self.luminosity).makehistograms()
             self.writedatacard()
-
-    def useaslinear(self, workspaceshapesystematic):
-        if self.analysis.isfa3fa2fL1fL1Zg:
-            if workspaceshapesystematic in ("CMS_scale", "CMS_res", "JEC"): return True
-        assert False, (self, workspaceshapesystematic)
 
 Datacard = multienumcache(_Datacard)
 
