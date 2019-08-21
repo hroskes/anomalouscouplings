@@ -9,6 +9,8 @@ class Discriminant(namedtuple("Discriminant", "name title bins min max identifie
     def __new__(cls, name, title, bins, min, max, identifier=None, formula=None):
         if identifier is None: identifier = name
         if formula is None: formula = name
+        min = float(min)
+        max = float(max)
         return super(Discriminant, cls).__new__(cls, name=name, title=title, bins=bins, min=min, max=max, identifier=identifier, formula=formula)
 
 decaydiscriminants = [
@@ -127,6 +129,8 @@ jetdiscriminants = [
     Discriminant("D_0hplus_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.7, 1.7, identifier="D_0hplus_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .9
     Discriminant("D_L1_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.7, 1.7, identifier="D_L1_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .9
     Discriminant("D_L1Zg_VBFdecay", "D_{0-}^{VBF+dec}", 3, -0.6, 1.5, identifier="D_L1Zg_VBFdecay_3bins"),  #set min and max to have boundaries at .1 and .8
+    Discriminant("D_CP_VBF_new", "D_{CP}^{VBF}", 2, -1, 1, identifier="D_CP_VBF_new_2bins"),
+    Discriminant("D_int_VBF_new", "D_{int}^{VBF}", 2, -1, 1, identifier="D_int_VBF_new_2bins"),
 
     Discriminant("D_0minus_VBFdecay", "D_{0-}^{VBF+dec}", 10, 0, 1, identifier="D_0minus_VBFdecay_10bins"),
     Discriminant("D_0hplus_VBFdecay", "D_{0h+}^{VBF+dec}", 10, 0, 1, identifier="D_0hplus_VBFdecay_10bins"),
@@ -176,6 +180,10 @@ jetdiscriminants = [
     Discriminant("D_bkg_HadVHdecay_ScaleDown", "D_{bkg}^{ScaleDown}", 3, -0.4, 1.4, identifier="D_bkg_HadVHdecay_ScaleDown_3bins"),
 
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 3, -0.4, 1.4, identifier="D_0minus_HadVHdecay_3bins"),   #min and max to have boundaries at .2 and .8
+    Discriminant("D_0hplus_HadVHdecay", "D_{0h+}^{VH+dec}", 3, 0, 1, identifier="D_0hplus_HadVHdecay_3bins"),
+    Discriminant("D_L1_HadVHdecay", "D_{#Lambda1}^{VH+dec}", 3, 0, 1, identifier="D_L1_HadVHdecay_3bins"),
+    Discriminant("D_L1Zg_HadVHdecay", "D_{#Lambda1}^{Z#gamma,VH+dec}", 3, -0.7, 1.7, identifier="D_L1Zg_HadVHdecay_3bins"),  #set min and max to have boundaries at .1 and .9
+    Discriminant("D_int_HadVH_new", "D_{int}^{VH+dec}", 2, -2.2, 1, identifier="D_int_HadVH_new_2bins"),  #set min and max to have the boundary at -0.6
 
     Discriminant("D_0minus_HadVHdecay", "D_{0-}^{VH+dec}", 10, 0, 1, identifier="D_0minus_HadVHdecay_10bins"),
     Discriminant("D_0hplus_HadVHdecay", "D_{0h+}^{VH+dec}", 10, 0, 1, identifier="D_0hplus_HadVHdecay_10bins"),
