@@ -490,7 +490,7 @@ class ShapeSystematic(MyEnum):
     def appliesto(self, templategroup):
         if self == "":
             return True
-        if self in ("JECUp", "JECDn"):
+        if self in ("JECUp", "JECDn", "JEC0PMUp", "JEC0PMDn", "JEC0MUp", "JEC0MDn", "JEC0PHUp", "JEC0PHDn", "JEC0L1Up", "JEC0L1Dn", "JEC0L1ZgUp", "JEC0L1ZgDn"):
             return templategroup in ("ggh", "vbf", "vh", "zh", "wh", "tth", "bbh", "background")
         if self in ("ResUp", "ResDown", "ScaleUp", "ScaleDown", "Res0PMUp", "Res0PMDown", "Scale0PMUp", "Scale0PMDown"):
             return templategroup in ("ggh", "vbf", "vh", "zh", "wh", "tth", "bbh")
@@ -1061,7 +1061,7 @@ if config.applym4lshapesystematics:
 if config.applyZXshapesystematics:
     _ += ["ZXUp", "ZXDown"]
 if config.applyJECshapesystematics:
-    _ += ["JECUp", "JECDown"]
+    _ += ["JECUp", "JECDown", "JEC0PMUp", "JEC0PMDn", "JEC0MUp", "JEC0MDn", "JEC0PHUp", "JEC0PHDn", "JEC0L1Up", "JEC0L1Dn", "JEC0L1ZgUp", "JEC0L1ZgDn"]
 if config.applyMINLOsystematics:
     _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)

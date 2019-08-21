@@ -24,7 +24,12 @@ def combinesystematics(channel, analysis, production, category, productionmode):
   tfnominal = TemplatesFile(channel, analysis, production, category, templategroup)
 
   with TFile(tfnominal.templatesfile()) as fnominal:
-    for syst in "ScaleUp", "ScaleDn", "ResUp", "ResDn":
+    for syst in "ScaleUp", "ScaleDn", "ResUp", "ResDn", "JECUp", "JECDn":
+      if syst in ("ScaleUp", "ScaleDn", "ResUp", "ResDn") and not config.applym4lshapesystematics: continue
+      if syst in ("JECUp", "JECDn") and not config.applyJECshapesystematics: continue
+
+      if syst in ("JECUp", "JECDn") and category not in ("VBFtagged", "VHHadrtagged"): continue
+
       tfsyst = TemplatesFile(channel, analysis, production, category, templategroup, syst)
       with TFile(tfsyst.templatesfile()) as fsyst:
         for hypothesis in ShapeSystematic(syst).hypothesesforratio:
@@ -37,7 +42,7 @@ def combinesystematics(channel, analysis, production, category, productionmode):
           for x, y, z in itertools.product(xrange(1, ratio.GetNbinsX()+1), xrange(1, ratio.GetNbinsY()+1), xrange(1, ratio.GetNbinsZ()+1)):
             if np.isclose(denominator.GetBinContent(x, y, z), 1e-10):
               ratio.SetBinContent(x, y, z, 1)
-            if ratio.GetBinContent(x, y, z) > 100:
+            if ratio.GetBinContent(x, y, z) > 1000:
               raise ValueError("Huge ratio for ({}) / ({}) bin {} {} {}: {} / {} = {}".format(Template(tfsyst, productionmode, hypothesis), Template(tfnominal, productionmode, hypothesis), x, y, z, numerator.GetBinContent(x, y, z), denominator.GetBinContent(x, y, z), ratio.GetBinContent(x, y, z)))
 
 

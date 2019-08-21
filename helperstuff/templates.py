@@ -604,7 +604,7 @@ class TemplatesFile(MultiEnum):
         for _ in shapesystematics:
             if not _.appliesto(self.templategroup): continue
 
-            if _ in ("JECUp", "JECDn"):
+            if _ in ("JECUp", "JECDn", "JEC0PMUp", "JEC0PMDn", "JEC0MUp", "JEC0MDn", "JEC0PHUp", "JEC0PHDn", "JEC0L1Up", "JEC0L1Dn", "JEC0L1ZgUp", "JEC0L1ZgDn"):
                 if self.category not in ("VBFtagged", "VHHadrtagged"): continue
 
             yield _

@@ -78,7 +78,7 @@ useVHMETTagged = False
 
 applym4lshapesystematics = True
 applyZXshapesystematics = False
-applyJECshapesystematics = False
+applyJECshapesystematics = True
 applyMINLOsystematics = False
 
 usebinbybin = False
