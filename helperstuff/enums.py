@@ -389,9 +389,9 @@ class ProductionMode(MyEnum):
 
     def workspaceshapesystematics(self, category):
       result = []
-      if self == "ggH":
+      if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH"):
         if config.applym4lshapesystematics:
-          result += ["Scale", "Res"]
+          result += ["Scale0PM", "Res0PM"]
       if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH", "qqZZ", "ggZZ"):
         if category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
           result += ["CMS_scale_j"]
@@ -400,13 +400,13 @@ class ProductionMode(MyEnum):
 class WorkspaceShapeSystematic(MyEnum):
     enumname = "workspaceshapesystematic"
     enumitems = (
-                 EnumItem("CMS_res", "Res"),
-                 EnumItem("CMS_scale", "Scale"),
+                 EnumItem("CMS_res", "Res0PM"),
+                 EnumItem("CMS_scale", "Scale0PM"),
                  EnumItem("CMS_scale_j", "JEC"),
                 )
     @property
     def isperchannel(self):
-        if self in ("Res", "Scale"): return True
+        if self in ("Res0PM", "Scale0PM"): return True
         if self in ("CMS_scale_j",): return False
         assert False, self
 
@@ -418,12 +418,12 @@ class WorkspaceShapeSystematic(MyEnum):
 
     @property
     def years(self):
-        if self in ("Res", "Scale", "JEC"): return 2016, 2017, 2018
+        if self in ("Res0PM", "Scale0PM", "JEC"): return 2016, 2017, 2018
         assert False, self
 
     @property
     def nickname(self):
-      for _ in "Res", "Scale", "JEC":
+      for _ in "Res0PM", "Scale0PM", "JEC":
         if self == _:
           return _
       assert False, self

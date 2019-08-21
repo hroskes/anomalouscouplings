@@ -11,6 +11,8 @@ if __name__ == "__main__":
 
 import itertools, os
 
+import numpy as np
+
 from helperstuff import config
 
 from helperstuff.enums import analyses, categories, channels, ProductionMode, productions, ShapeSystematic
@@ -28,8 +30,16 @@ def combinesystematics(channel, analysis, production, category, productionmode):
         for hypothesis in ShapeSystematic(syst).hypothesesforratio:
           numerator = getattr(fsyst, Template(tfsyst, productionmode, hypothesis).templatename())
           denominator = getattr(fnominal, Template(tfnominal, productionmode, hypothesis).templatename())
+
           ratio = numerator.Clone("ratio")
           ratio.Divide(denominator)
+
+          for x, y, z in itertools.product(xrange(1, ratio.GetNbinsX()+1), xrange(1, ratio.GetNbinsY()+1), xrange(1, ratio.GetNbinsZ()+1)):
+            if np.isclose(denominator.GetBinContent(x, y, z), 1e-10):
+              ratio.SetBinContent(x, y, z, 1)
+            if ratio.GetBinContent(x, y, z) > 100:
+              raise ValueError("Huge ratio for ({}) / ({}) bin {} {} {}: {} / {} = {}".format(Template(tfsyst, productionmode, hypothesis), Template(tfnominal, productionmode, hypothesis), x, y, z, numerator.GetBinContent(x, y, z), denominator.GetBinContent(x, y, z), ratio.GetBinContent(x, y, z)))
+
 
           newsyst = ShapeSystematic(syst.replace("Up", hypothesis.combinename+"Up").replace("Dn", hypothesis.combinename+"Dn"))
           newtfsyst = TemplatesFile(channel, analysis, production, category, templategroup, newsyst)
@@ -41,12 +51,15 @@ def combinesystematics(channel, analysis, production, category, productionmode):
             if os.path.exists(newfilename): continue
 
             print production, analysis, channel, category, productionmode, newsyst
+            cache = []
             with TFile(newfilename, "CREATE", deleteifbad=True) as newfsyst:
               for template in itertools.chain(tfnominal.templates(), tfnominal.inttemplates()):
                 if isinstance(template, Template) and not template.hypothesis.ispure: continue
                 newtemplate = getattr(fnominal, template.templatename()).Clone()
                 newtemplate.Multiply(ratio)
                 newtemplate.SetDirectory(newfsyst)
+                cache.append(newtemplate)
+            del cache
 
 if __name__ == "__main__":
   for production in productions:

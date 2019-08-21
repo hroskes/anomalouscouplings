@@ -182,7 +182,7 @@ class _Datacard(MultiEnum):
         if not config.usedata:
             result.remove("ZX")
         for _ in result[:]:
-            if _ == "VBFbkg": deprecate(result.remove(_), 2019, 8, 20)
+            if _ == "VBFbkg": result.remove(_)
         return result
 
     @property
@@ -226,7 +226,11 @@ class _Datacard(MultiEnum):
     @generatortolist
     def histograms(self):
         for histogramname in self.allhistograms:
-            if self.histogramintegrals[histogramname] == 0: print histogramname; continue
+            try:
+              if self.histogramintegrals[histogramname] == 0: continue
+            except KeyError:
+              pprint.pprint(self.histogramintegrals)
+              raise
             yield histogramname
 
     @property
@@ -511,7 +515,7 @@ class _Datacard(MultiEnum):
                 cache[t.GetName()] = t
 
                 assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
-                if systematic is not None: self.histogramintegrals[name] = t.Integral()
+                if systematic is None: self.histogramintegrals[name] = t.Integral()
 
                 if systematic is None and config.usebinbybin and p != "data" and p.isbkg:
                     for i in xrange(1, t.GetNbinsX()+1):
