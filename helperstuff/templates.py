@@ -14,7 +14,7 @@ import numpy
 import ROOT
 
 import config
-from enums import Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, hffhypotheses, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
+from enums import AlternateWeight, Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, hffhypotheses, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
 from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile, withdiscriminantsfileisvalid
 
@@ -614,6 +614,24 @@ class TemplatesFile(MultiEnum):
             if _ in ("JECUp", "JECDn", "JEC0PMUp", "JEC0PMDn", "JEC0MUp", "JEC0MDn", "JEC0PHUp", "JEC0PHDn", "JEC0L1Up", "JEC0L1Dn", "JEC0L1ZgUp", "JEC0L1ZgDn"):
                 if self.category not in ("VBFtagged", "VHHadrtagged"): continue
 
+            if _.isTHUggH:
+                STXSuncertainties = "Mu", "Res", "Mig01", "Mig12", "VBF2j", "VBF3j", "PT60", "PT120", "qmtop"
+                if self.category == "VBFtagged":
+                    indices = 1, 3, 4, 5, 6, 7, 8
+                elif self.category == "VHHadrtagged":
+                    indices = 3, 6, 7, 8
+                elif self.category == "VBF1jtagged":
+                    indices = 2, 3, 6, 7
+                elif self.category == "VHLepttagged":
+                    indices = 1, 2, 3, 6, 7, 8
+                elif self.category == "Boosted":
+                    indices = 3, 7, 8
+                elif self.category == "Untagged":
+                    indices = ()
+                else:
+                    assert False, self
+                if not any(_ == "THU_ggH_" + STXSuncertainties[index] + direction for index in indices for direction in ("Up", "Dn")):
+                    continue
             yield _
 
     @property
@@ -625,6 +643,7 @@ class TemplatesFile(MultiEnum):
           and self.category in ("VBFtagged", "VHHadrtagged")
           and self.analysis.fais == Analysis("fa3").fais
         ): return []
+        if self.shapesystematic is not None: return []
 
         productionmode = {_.productionmode for _ in self.signalsamples()}
         assert len(productionmode) == 1
@@ -1143,7 +1162,20 @@ class Template(TemplateBase, MultiEnum):
             samples = [self.reweightingsampleplus]*6
         else:
             samples = [self.reweightingsampleplus]
-        return ["MC_weight_nominal * (" + sample.MC_weight + ")" for sample in samples]
+
+        multiplyweight = ""
+        if self.multiplyweight is not None:
+            multiplyweight = " * (" + self.multiplyweight + ")"
+
+        return ["MC_weight_nominal * (" + sample.MC_weight + ")" + multiplyweight for sample in samples]
+
+    @property
+    def multiplyweight(self):
+        if self.shapesystematic in ("", "JECUp", "JECDn", "ScaleUp", "ScaleDn", "ResUp", "ResDn"):
+            return None
+        if self.shapesystematic.isTHUggH:
+            return AlternateWeight(str(self.shapesystematic)).weightname
+        assert False, self
 
     @property
     def categoryname(self):
@@ -1363,6 +1395,14 @@ class Template(TemplateBase, MultiEnum):
         import datetime; print "   ", self, datetime.datetime.now()
         if self.copyfromothertemplate: return []
         if self.hypothesis is not None and not self.hypothesis.ispure: return []
+        if self.shapesystematic is None:
+            pass
+        elif self.shapesystematic in ("JECUp", "JECDn"):
+            pass
+        elif self.shapesystematic in ("ScaleUp", "ScaleDn", "ResUp", "ResDn") or self.shapesystematic.isTHUggH:
+            if self.hypothesis != "0+" or None is not self.hffhypothesis != "Hff0+": return []
+        else:
+            assert False, self
         jsn = [
                {
                 "name": self.templatename(final=True),
@@ -1695,6 +1735,7 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     def getjson(self):
         import datetime; print "   ", self, datetime.datetime.now()
+        if self.shapesystematic != "": return []
         intjsn = [
           {
             "name": self.templatename(final=True),

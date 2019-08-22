@@ -395,6 +395,21 @@ class ProductionMode(MyEnum):
       if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH", "qqZZ", "ggZZ"):
         if category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
           result += ["JEC0PM", "JEC0M", "JEC0PH", "JEC0L1", "JEC0L1Zg"]
+      if self == "ggH":
+        STXSuncertainties = "Mu", "Res", "Mig01", "Mig12", "VBF2j", "VBF3j", "PT60", "PT120", "qmtop"
+        if category == "VBFtagged":
+          indices = 1, 3, 4, 5, 6, 7, 8
+        elif category == "VHHadrtagged":
+          indices = 3, 6, 7, 8
+        elif category == "VBF1jtagged":
+          indices = 2, 3, 6, 7
+        elif category == "VHLepttagged":
+          indices = 1, 2, 3, 6, 7, 8
+        elif category == "Boosted":
+          indices = 3, 7, 8
+        elif category == "Untagged":
+          indices = ()
+        result += ["THU_ggH_" + STXSuncertainties[index] for index in indices]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
 class WorkspaceShapeSystematic(MyEnum):
@@ -407,27 +422,38 @@ class WorkspaceShapeSystematic(MyEnum):
                  EnumItem("CMS_scale_j_0PH", "JEC0PH"),
                  EnumItem("CMS_scale_j_0L1", "JEC0L1"),
                  EnumItem("CMS_scale_j_0L1Zg", "JEC0L1Zg"),
+                 EnumItem("THU_ggH_Mu", "THU_ggH_Mu_0PM"),
+                 EnumItem("THU_ggH_Res", "THU_ggH_Res_0PM"),
+                 EnumItem("THU_ggH_Mig01", "THU_ggH_Mig01_0PM"),
+                 EnumItem("THU_ggH_Mig12", "THU_ggH_Mig12_0PM"),
+                 EnumItem("THU_ggH_VBF2j", "THU_ggH_VBF2j_0PM"),
+                 EnumItem("THU_ggH_VBF3j", "THU_ggH_VBF3j_0PM"),
+                 EnumItem("THU_ggH_PT60", "THU_ggH_PT60_0PM"),
+                 EnumItem("THU_ggH_PT120", "THU_ggH_PT120_0PM"),
+                 EnumItem("THU_ggH_qmtop", "THU_ggH_qmtop_0PM"),
                 )
     @property
     def isperchannel(self):
         if self in ("Res0PM", "Scale0PM"): return True
         if self in ("CMS_scale_j", "CMS_scale_j_0M", "CMS_scale_j_0PH", "CMS_scale_j_0L1", "CMS_scale_j_0L1Zg"): return False
+        if self in ("THU_ggH_Mu", "THU_ggH_Res", "THU_ggH_Mig01", "THU_ggH_Mig12", "THU_ggH_VBF2j", "THU_ggH_VBF3j", "THU_ggH_PT60", "THU_ggH_PT120", "THU_ggH_qmtop"): return False
         assert False, self
 
     @property
     def years(self):
         if self in ("Res0PM", "Scale0PM", "JEC0PM", "JEC0M", "JEC0PH", "JEC0L1", "JEC0L1Zg"): return 2016, 2017, 2018
+        if self in ("THU_ggH_Mu", "THU_ggH_Res", "THU_ggH_Mig01", "THU_ggH_Mig12", "THU_ggH_VBF2j", "THU_ggH_VBF3j", "THU_ggH_PT60", "THU_ggH_PT120", "THU_ggH_qmtop"): return 2016, 2017, 2018
         assert False, self
 
     @property
     def nickname(self):
-      for _ in "Res0PM", "Scale0PM", "JEC0PM", "JEC0M", "JEC0PH", "JEC0L1", "JEC0L1Zg":
+      for _ in "Res0PM", "Scale0PM", "JEC0PM", "JEC0M", "JEC0PH", "JEC0L1", "JEC0L1Zg", "THU_ggH_Mu_0PM", "THU_ggH_Res_0PM", "THU_ggH_Mig01_0PM", "THU_ggH_Mig12_0PM", "THU_ggH_VBF2j_0PM", "THU_ggH_VBF3j_0PM", "THU_ggH_PT60_0PM", "THU_ggH_PT120_0PM", "THU_ggH_qmtop_0PM":
         if self == _:
           return _
       assert False, self
 
     def combinename(self, channel):
-      for _ in "CMS_res", "CMS_scale", "CMS_scale_j", "CMS_scale_j_0M", "CMS_scale_j_0PH", "CMS_scale_j_0L1", "CMS_scale_j_0L1Zg":
+      for _ in "CMS_res", "CMS_scale", "CMS_scale_j", "CMS_scale_j_0M", "CMS_scale_j_0PH", "CMS_scale_j_0L1", "CMS_scale_j_0L1Zg", "THU_ggH_Mu", "THU_ggH_Res", "THU_ggH_Mig01", "THU_ggH_Mig12", "THU_ggH_VBF2j", "THU_ggH_VBF3j", "THU_ggH_PT60", "THU_ggH_PT120", "THU_ggH_qmtop":
         if self == _:
           result = _
           break
@@ -470,7 +496,46 @@ class ShapeSystematic(MyEnum):
                  EnumItem("MINLO_SM"),
                  EnumItem("MINLOUp"),
                  EnumItem("MINLODn", "MINLODown"),
+                 EnumItem("THU_ggH_MuUp"),
+                 EnumItem("THU_ggH_MuDn", "THU_ggH_MuDown"),
+                 EnumItem("THU_ggH_ResUp"),
+                 EnumItem("THU_ggH_ResDn", "THU_ggH_ResDown"),
+                 EnumItem("THU_ggH_Mig01Up"),
+                 EnumItem("THU_ggH_Mig01Dn", "THU_ggH_Mig01Down"),
+                 EnumItem("THU_ggH_Mig12Up"),
+                 EnumItem("THU_ggH_Mig12Dn", "THU_ggH_Mig12Down"),
+                 EnumItem("THU_ggH_VBF2jUp"),
+                 EnumItem("THU_ggH_VBF2jDn", "THU_ggH_VBF2jDown"),
+                 EnumItem("THU_ggH_VBF3jUp"),
+                 EnumItem("THU_ggH_VBF3jDn", "THU_ggH_VBF3jDown"),
+                 EnumItem("THU_ggH_PT60Up"),
+                 EnumItem("THU_ggH_PT60Dn", "THU_ggH_PT60Down"),
+                 EnumItem("THU_ggH_PT120Up"),
+                 EnumItem("THU_ggH_PT120Dn", "THU_ggH_PT120Down"),
+                 EnumItem("THU_ggH_qmtopUp"),
+                 EnumItem("THU_ggH_qmtopDn", "THU_ggH_qmtopDown"),
+                 EnumItem("THU_ggH_Mu_0PMUp"),
+                 EnumItem("THU_ggH_Mu_0PMDn", "THU_ggH_Mu_0PMDown"),
+                 EnumItem("THU_ggH_Res_0PMUp"),
+                 EnumItem("THU_ggH_Res_0PMDn", "THU_ggH_Res_0PMDown"),
+                 EnumItem("THU_ggH_Mig01_0PMUp"),
+                 EnumItem("THU_ggH_Mig01_0PMDn", "THU_ggH_Mig01_0PMDown"),
+                 EnumItem("THU_ggH_Mig12_0PMUp"),
+                 EnumItem("THU_ggH_Mig12_0PMDn", "THU_ggH_Mig12_0PMDown"),
+                 EnumItem("THU_ggH_VBF2j_0PMUp"),
+                 EnumItem("THU_ggH_VBF2j_0PMDn", "THU_ggH_VBF2j_0PMDown"),
+                 EnumItem("THU_ggH_VBF3j_0PMUp"),
+                 EnumItem("THU_ggH_VBF3j_0PMDn", "THU_ggH_VBF3j_0PMDown"),
+                 EnumItem("THU_ggH_PT60_0PMUp"),
+                 EnumItem("THU_ggH_PT60_0PMDn", "THU_ggH_PT60_0PMDown"),
+                 EnumItem("THU_ggH_PT120_0PMUp"),
+                 EnumItem("THU_ggH_PT120_0PMDn", "THU_ggH_PT120_0PMDown"),
+                 EnumItem("THU_ggH_qmtop_0PMUp"),
+                 EnumItem("THU_ggH_qmtop_0PMDn", "THU_ggH_qmtop_0PMDown"),
                 )
+    @property
+    def isTHUggH(self):
+      return str(self).startswith("THU_ggH_")
     @property
     def Dbkgappendname(self):
         for _ in ("ScaleUp", "ScaleDown", "ResUp", "ResDown"):
@@ -482,7 +547,7 @@ class ShapeSystematic(MyEnum):
         for _ in ("JECUp", "JECDn"):
             if self == _:
                 return "_" + _
-        if self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "MINLO_SM", "ZXUp", "ZXDn"):
+        if self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "MINLO_SM", "ZXUp", "ZXDn") or self.isTHUggH:
             return ""
         assert False, self
     def appliesto(self, templategroup):
@@ -496,11 +561,15 @@ class ShapeSystematic(MyEnum):
             return templategroup == "bkg"
         if self in ("MINLO_SM", "MINLOUp", "MINLODn"):
             return templategroup == "ggh"
+        if self in ("THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn", "THU_ggH_Mu_0PMUp", "THU_ggH_Res_0PMUp", "THU_ggH_Mig01_0PMUp", "THU_ggH_Mig12_0PMUp", "THU_ggH_VBF2j_0PMUp", "THU_ggH_VBF3j_0PMUp", "THU_ggH_PT60_0PMUp", "THU_ggH_PT120_0PMUp", "THU_ggH_qmtop_0PMUp", "THU_ggH_Mu_0PMDn", "THU_ggH_Res_0PMDn", "THU_ggH_Mig01_0PMDn", "THU_ggH_Mig12_0PMDn", "THU_ggH_VBF2j_0PMDn", "THU_ggH_VBF3j_0PMDn", "THU_ggH_PT60_0PMDn", "THU_ggH_PT120_0PMDn", "THU_ggH_qmtop_0PMDn"):
+            return templategroup == "ggh"
         assert False, self
     @property
     def hypothesesforratio(self):
         if self in ("ScaleUp", "ResUp", "ScaleDn", "ResDn"): return Hypothesis("0+"),
         if self in ("JECUp", "JECDn"): return Hypothesis("0+"), Hypothesis("0-"), Hypothesis("a2"), Hypothesis("L1"), Hypothesis("L1Zg")
+        if self in ("THU_ggH_Mu", "THU_ggH_Res", "THU_ggH_Mig01", "THU_ggH_Mig12", "THU_ggH_VBF2j", "THU_ggH_VBF3j", "THU_ggH_PT60", "THU_ggH_PT120", "THU_ggH_qmtop"): return Hypothesis("0+"),
+        assert False, self
 
 class JECSystematic(MyEnum):
     enumname = "jecsystematic"
@@ -1062,8 +1131,10 @@ if config.applyJECshapesystematics:
     _ += ["JECUp", "JECDown", "JEC0PMUp", "JEC0PMDn", "JEC0MUp", "JEC0MDn", "JEC0PHUp", "JEC0PHDn", "JEC0L1Up", "JEC0L1Dn", "JEC0L1ZgUp", "JEC0L1ZgDn"]
 if config.applyMINLOsystematics:
     _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
+if config.applySTXSsystematics:
+    _ += ["THU_ggH_Mu_0PMUp", "THU_ggH_Res_0PMUp", "THU_ggH_Mig01_0PMUp", "THU_ggH_Mig12_0PMUp", "THU_ggH_VBF2j_0PMUp", "THU_ggH_VBF3j_0PMUp", "THU_ggH_PT60_0PMUp", "THU_ggH_PT120_0PMUp", "THU_ggH_qmtop_0PMUp", "THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_Mu_0PMDn", "THU_ggH_Res_0PMDn", "THU_ggH_Mig01_0PMDn", "THU_ggH_Mig12_0PMDn", "THU_ggH_VBF2j_0PMDn", "THU_ggH_VBF3j_0PMDn", "THU_ggH_PT60_0PMDn", "THU_ggH_PT120_0PMDn", "THU_ggH_qmtop_0PMDn", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
-treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown", "MINLO_SM", "ZXUp", "ZXDown"))
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown", "MINLO_SM", "ZXUp", "ZXDown", "THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn"))
 del _
 
 class MetaclassForMultiEnums(type):

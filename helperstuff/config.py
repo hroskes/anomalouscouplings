@@ -80,6 +80,7 @@ applym4lshapesystematics = True
 applyZXshapesystematics = False
 applyJECshapesystematics = True
 applyMINLOsystematics = False
+applySTXSsystematics = True
 
 usebinbybin = False
 staticmaxbins = 1000
