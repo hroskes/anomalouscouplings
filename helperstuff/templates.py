@@ -582,7 +582,14 @@ class TemplatesFile(MultiEnum):
 
     @property
     def copyfromothertemplatesfile(self):
-        return None
+        kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in type(self).needenums}
+        if self.templategroup == "bkg" and self.shapesystematic in ("JEC0PMUp", "JEC0MUp", "JEC0PHUp", "JEC0L1Up", "JEC0L1ZgUp"):
+            kwargs["shapesystematic"] = "JECUp"
+        elif self.templategroup == "bkg" and self.shapesystematic in ("JEC0PMDn", "JEC0MDn", "JEC0PHDn", "JEC0L1Dn", "JEC0L1ZgDn"):
+            kwargs["shapesystematic"] = "JECDn"
+        else:
+            return None
+        return type(self)(*kwargs.itervalues())
 
     @property
     def actualtemplatesfile(self):

@@ -394,7 +394,7 @@ class ProductionMode(MyEnum):
           result += ["Scale0PM", "Res0PM"]
       if self in ("ggH", "qqH", "ZH", "WH", "VH", "ttH", "bbH", "qqZZ", "ggZZ"):
         if category in ("VBFtagged", "VHHadrtagged") and config.applyJECshapesystematics:
-          result += ["CMS_scale_j"]
+          result += ["JEC0PM", "JEC0M", "JEC0PH", "JEC0L1", "JEC0L1Zg"]
       return [WorkspaceShapeSystematic(_) for _ in result]
 
 class WorkspaceShapeSystematic(MyEnum):
@@ -402,34 +402,32 @@ class WorkspaceShapeSystematic(MyEnum):
     enumitems = (
                  EnumItem("CMS_res", "Res0PM"),
                  EnumItem("CMS_scale", "Scale0PM"),
-                 EnumItem("CMS_scale_j", "JEC"),
+                 EnumItem("CMS_scale_j", "CMS_scale_j_0PM", "JEC0PM"),
+                 EnumItem("CMS_scale_j_0M", "JEC0M"),
+                 EnumItem("CMS_scale_j_0PH", "JEC0PH"),
+                 EnumItem("CMS_scale_j_0L1", "JEC0L1"),
+                 EnumItem("CMS_scale_j_0L1Zg", "JEC0L1Zg"),
                 )
     @property
     def isperchannel(self):
         if self in ("Res0PM", "Scale0PM"): return True
-        if self in ("CMS_scale_j",): return False
+        if self in ("CMS_scale_j", "CMS_scale_j_0M", "CMS_scale_j_0PH", "CMS_scale_j_0L1", "CMS_scale_j_0L1Zg"): return False
         assert False, self
 
     @property
-    def paramrange(self):
-      if self == "JEC":
-        return "[-1.0, 1.0]"
-      return ""
-
-    @property
     def years(self):
-        if self in ("Res0PM", "Scale0PM", "JEC"): return 2016, 2017, 2018
+        if self in ("Res0PM", "Scale0PM", "JEC0PM", "JEC0M", "JEC0PH", "JEC0L1", "JEC0L1Zg"): return 2016, 2017, 2018
         assert False, self
 
     @property
     def nickname(self):
-      for _ in "Res0PM", "Scale0PM", "JEC":
+      for _ in "Res0PM", "Scale0PM", "JEC0PM", "JEC0M", "JEC0PH", "JEC0L1", "JEC0L1Zg":
         if self == _:
           return _
       assert False, self
 
     def combinename(self, channel):
-      for _ in "CMS_res", "CMS_scale", "CMS_scale_j":
+      for _ in "CMS_res", "CMS_scale", "CMS_scale_j", "CMS_scale_j_0M", "CMS_scale_j_0PH", "CMS_scale_j_0L1", "CMS_scale_j_0L1Zg":
         if self == _:
           result = _
           break

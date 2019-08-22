@@ -22,7 +22,11 @@ class YieldSystematic(MyEnum):
     enumname = "yieldsystematic"
     enumitems = (
                  EnumItem("CMS_btag_comb"),
-                 EnumItem("CMS_scale_j", "JEC"),
+                 EnumItem("CMS_scale_j", "CMS_scale_j_0PM", "JEC0PM"),
+                 EnumItem("CMS_scale_j_0M", "JEC0M"),
+                 EnumItem("CMS_scale_j_0PH", "JEC0PH"),
+                 EnumItem("CMS_scale_j_0L1", "JEC0L1"),
+                 EnumItem("CMS_scale_j_0L1Zg", "JEC0L1Zg"),
                  EnumItem("QCDscale_muF_ggH"),
                  EnumItem("QCDscale_muF_qqH"),
                  EnumItem("QCDscale_muF_VH"),
@@ -206,6 +210,8 @@ class YieldSystematicValue(MultiEnum, JsonDict):
         kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in type(self).needenums}
         if self.production == "190703_2016" and self.yieldsystematic == "CMS_pythia_scale":
             kwargs["production"] = "190703_2017"
+        elif self.yieldsystematic in ("JEC0PH", "JEC0M", "JEC0L1", "JEC0L1Zg"):
+            kwargs["yieldsystematic"] = "JEC0PM"
         else:
             return None
         return type(self)(*kwargs.itervalues())

@@ -324,7 +324,7 @@ class _Datacard(MultiEnum):
                 pass
             else:
                 if wss in p.workspaceshapesystematics(self.category) and ysv != "-":
-                    if (yieldsystematic == "JEC" and self.category in ("VBFtagged", "VHHadrtagged")):
+                    if (yieldsystematic in ("JEC0PM", "JEC0M", "JEC0PH", "JEC0L1", "JEC0L1Zg") and self.category in ("VBFtagged", "VHHadrtagged")):
                         self.__shapesystematics.append(str(wss))
                         ysv = "1"
                         lst[0] = "shape1?"
