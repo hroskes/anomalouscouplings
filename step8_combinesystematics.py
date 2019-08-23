@@ -20,13 +20,16 @@ from helperstuff.enums import analyses, categories, channels, ProductionMode, pr
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import KeepWhileOpenFile, TFile
 
-threshold = 100.
-
 STXSuncertainties = "Mu", "Res", "Mig01", "Mig12", "VBF2j", "VBF3j", "PT60", "PT120", "qmtop"
 
 def combinesystematics(channel, analysis, production, category, productionmode):
   templategroup = str(productionmode).lower()
   tfnominal = TemplatesFile(channel, analysis, production, category, templategroup)
+
+  threshold = 2.
+  expectedeventsthreshold = 6e-3
+  if analysis == "fa3fa2fL1fL1Zg_STXS" and channel == "4mu" and category == "VBFtagged" and productionmode == "VH":
+    expectedeventsthreshold = 2e-2
 
   with TFile(tfnominal.templatesfile()) as fnominal:
     for systname in "ScaleUp", "ScaleDn", "ResUp", "ResDn", "JECUp", "JECDn", "THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn":
@@ -53,10 +56,11 @@ def combinesystematics(channel, analysis, production, category, productionmode):
             if np.isclose(denominator.GetBinContent(x, y, z), 1e-10) or np.isclose(numerator.GetBinContent(x, y, z), 1e-10):
               ratio.SetBinContent(x, y, z, 1)
             if ratio.GetBinContent(x, y, z) > threshold or ratio.GetBinContent(x, y, z) < 1/threshold:
-              if getrate(channel, analysis, production, category, productionmode, "fordata") * denominator.GetBinContent(x, y, z) / denominator.Integral() < 1e-3:
+              expectednevents = getrate(channel, analysis, production, category, productionmode, "fordata") * denominator.GetBinContent(x, y, z) / denominator.Integral()
+              if expectednevents < expectedeventsthreshold:
                 ratio.SetBinContent(x, y, z, 1)
               else:
-                raise ValueError("Huge or tiny ratio for ({}) / ({}) bin {} {} {}: {} / {} = {}".format(Template(tfsyst, productionmode, hypothesis), Template(tfnominal, productionmode, hypothesis), x, y, z, numerator.GetBinContent(x, y, z), denominator.GetBinContent(x, y, z), ratio.GetBinContent(x, y, z)))
+                raise ValueError("Huge or tiny ratio for ({}) / ({}) bin {} {} {}:\n{} / {} = {}\nexpected yield: {}".format(Template(tfsyst, productionmode, hypothesis), Template(tfnominal, productionmode, hypothesis), x, y, z, numerator.GetBinContent(x, y, z), denominator.GetBinContent(x, y, z), ratio.GetBinContent(x, y, z), expectednevents))
 
 
           newsyst = ShapeSystematic(str(syst).replace("Up", hypothesis.combinename+"Up").replace("Dn", hypothesis.combinename+"Dn").replace("Down", hypothesis.combinename+"Down"))
