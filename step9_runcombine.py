@@ -324,6 +324,7 @@ def runcombine(analysis, foldername, **kwargs):
     faiorder = None
     floatothers = True
     setparametersforgrid = None
+    onlyworkspace = False
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -484,6 +485,8 @@ def runcombine(analysis, foldername, **kwargs):
             floatothers = bool(int(kwarg))
         elif kw == "setparametersforgrid":
             setparametersforgrid = kwarg.replace(":", "=")
+        elif kw == "onlyworkspace":
+            onlyworkspace = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
@@ -731,6 +734,8 @@ def runcombine(analysis, foldername, **kwargs):
         with utilities.OneAtATime(replaceByMap(".oO[workspacefile]Oo..tmp", repmap), 5, task="running text2workspace"):
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):
                 subprocess.check_call(replaceByMap(createworkspacetemplate, repmap), shell=True)
+
+        if onlyworkspace: return
 
         jobids = set()
         finalfiles = []
