@@ -15,24 +15,34 @@ import numpy as np
 
 from helperstuff import config
 
+from helperstuff.combinehelpers import getrate
 from helperstuff.enums import analyses, categories, channels, ProductionMode, productions, ShapeSystematic
 from helperstuff.templates import IntTemplate, Template, TemplatesFile
 from helperstuff.utilities import KeepWhileOpenFile, TFile
+
+threshold = 100.
+
+STXSuncertainties = "Mu", "Res", "Mig01", "Mig12", "VBF2j", "VBF3j", "PT60", "PT120", "qmtop"
 
 def combinesystematics(channel, analysis, production, category, productionmode):
   templategroup = str(productionmode).lower()
   tfnominal = TemplatesFile(channel, analysis, production, category, templategroup)
 
   with TFile(tfnominal.templatesfile()) as fnominal:
-    for syst in "ScaleUp", "ScaleDn", "ResUp", "ResDn", "JECUp", "JECDn":
+    for systname in "ScaleUp", "ScaleDn", "ResUp", "ResDn", "JECUp", "JECDn", "THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn":
+      syst = ShapeSystematic(systname)
       if syst in ("ScaleUp", "ScaleDn", "ResUp", "ResDn") and not config.applym4lshapesystematics: continue
       if syst in ("JECUp", "JECDn") and not config.applyJECshapesystematics: continue
+      if syst.isTHUggH and not config.applySTXSsystematics: continue
 
       if syst in ("JECUp", "JECDn") and category not in ("VBFtagged", "VHHadrtagged"): continue
+      if syst.isTHUggH and not syst.applySTXStocategory(category): continue
+
+      if syst.isTHUggH and productionmode != "ggH": continue
 
       tfsyst = TemplatesFile(channel, analysis, production, category, templategroup, syst)
       with TFile(tfsyst.templatesfile()) as fsyst:
-        for hypothesis in ShapeSystematic(syst).hypothesesforratio:
+        for hypothesis in syst.hypothesesforratio:
           numerator = getattr(fsyst, Template(tfsyst, productionmode, hypothesis).templatename())
           denominator = getattr(fnominal, Template(tfnominal, productionmode, hypothesis).templatename())
 
@@ -40,13 +50,17 @@ def combinesystematics(channel, analysis, production, category, productionmode):
           ratio.Divide(denominator)
 
           for x, y, z in itertools.product(xrange(1, ratio.GetNbinsX()+1), xrange(1, ratio.GetNbinsY()+1), xrange(1, ratio.GetNbinsZ()+1)):
-            if np.isclose(denominator.GetBinContent(x, y, z), 1e-10):
+            if np.isclose(denominator.GetBinContent(x, y, z), 1e-10) or np.isclose(numerator.GetBinContent(x, y, z), 1e-10):
               ratio.SetBinContent(x, y, z, 1)
-            if ratio.GetBinContent(x, y, z) > 1000:
-              raise ValueError("Huge ratio for ({}) / ({}) bin {} {} {}: {} / {} = {}".format(Template(tfsyst, productionmode, hypothesis), Template(tfnominal, productionmode, hypothesis), x, y, z, numerator.GetBinContent(x, y, z), denominator.GetBinContent(x, y, z), ratio.GetBinContent(x, y, z)))
+            if ratio.GetBinContent(x, y, z) > threshold or ratio.GetBinContent(x, y, z) < 1/threshold:
+              if getrate(channel, analysis, production, category, productionmode, "fordata") * denominator.GetBinContent(x, y, z) / denominator.Integral() < 1e-3:
+                ratio.SetBinContent(x, y, z, 1)
+              else:
+                raise ValueError("Huge or tiny ratio for ({}) / ({}) bin {} {} {}: {} / {} = {}".format(Template(tfsyst, productionmode, hypothesis), Template(tfnominal, productionmode, hypothesis), x, y, z, numerator.GetBinContent(x, y, z), denominator.GetBinContent(x, y, z), ratio.GetBinContent(x, y, z)))
 
 
-          newsyst = ShapeSystematic(syst.replace("Up", hypothesis.combinename+"Up").replace("Dn", hypothesis.combinename+"Dn"))
+          newsyst = ShapeSystematic(str(syst).replace("Up", hypothesis.combinename+"Up").replace("Dn", hypothesis.combinename+"Dn").replace("Down", hypothesis.combinename+"Down"))
+          assert newsyst != syst, (syst, newsyst)
           newtfsyst = TemplatesFile(channel, analysis, production, category, templategroup, newsyst)
 
           newfilename = newtfsyst.templatesfile()

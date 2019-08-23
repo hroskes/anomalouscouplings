@@ -630,7 +630,7 @@ class TemplatesFile(MultiEnum):
                     indices = ()
                 else:
                     assert False, self
-                if not any(_ == "THU_ggH_" + STXSuncertainties[index] + direction for index in indices for direction in ("Up", "Dn")):
+                if not any(_ == "THU_ggH_" + STXSuncertainties[index] + direction for index in indices for direction in ("Up", "Dn", "0PMUp", "0PMDn")):
                     continue
             yield _
 

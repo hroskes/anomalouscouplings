@@ -739,6 +739,6 @@ def findbadpoints(*combinelogs):
                     currentpoint = float(match.group(1))
                 if "VariableMetricBuilder: matrix not pos.def" in line and currentpoint is not None:
                     result.add(currentpoint)
-                if "WARNING: underflow to " in line and currentpoint is not None:
-                    result.add(currentpoint)
+#                if "WARNING: underflow to " in line and currentpoint is not None:
+#                    result.add(currentpoint)
     return result
