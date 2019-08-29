@@ -39,6 +39,8 @@ class TreeWrapperBase(Iterator):
 
         self.year = treesample.production.year
 
+        if self.treesample.production not in ("190821_2016", "190821_2017", "190821_2018"): raise ValueError("Figure out about L1prefiringWeight!")
+
         if self.isdata:
             self.unblind = config.unblinddistributions
         else:
@@ -115,12 +117,13 @@ class TreeWrapperBase(Iterator):
             raise SyntaxError(error)
 
     def per_event_scale_factor(self):
-        if self.productionmode == "ggH" and self.useNNLOPSweight: return self.ggH_NNLOPS_weight
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH"): return 1
-        if self.productionmode == "ggZZ": return self.KFactor_QCD_ggZZ_Nominal
+        result = self.L1prefiringWeight
+        if self.productionmode == "ggH" and self.useNNLOPSweight: return result * self.ggH_NNLOPS_weight
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH"): return result
+        if self.productionmode == "ggZZ": return result * self.KFactor_QCD_ggZZ_Nominal
         if self.productionmode == "qqZZ":
-            if self.GEN: return 1
-            return self.KFactor_EW_qqZZ * self.KFactor_QCD_qqZZ_M
+            if self.GEN: return result
+            return result * self.KFactor_EW_qqZZ * self.KFactor_QCD_qqZZ_M
         assert False, self
 
     def MC_weight_nominal(self):
@@ -1674,7 +1677,7 @@ class TreeWrapper(TreeWrapperBase):
                         lst.remove(_)
                         self.exceptions.append(_)
 
-        self.kfactors = []
+        self.kfactors = ["L1prefiringWeight"]
         if not self.GEN:
             if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
             if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
