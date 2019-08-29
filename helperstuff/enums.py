@@ -982,6 +982,11 @@ class Production(MyEnum):
         if self == "190821_2018": return 2018
         assert False
     @property
+    def uselegacyobjects(self):
+        if self in ("190821_2016", "190821_2017", "190821_2018"): return True
+        if self in ("190703_2016", "190703_2017", "190703_2018"): return False
+        assert False, self
+    @property
     def productionforrate(self):
         return self
     @property
