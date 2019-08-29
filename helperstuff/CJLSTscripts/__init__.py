@@ -8,17 +8,19 @@ CJLSTscriptsfolder = os.path.dirname(os.path.abspath(__file__))
 #have to be in order of who includes whose header file
 scripts = ["cConstants", "Discriminants", "Category", "bitops", "FinalStates"]
 
-downloader = downloadfromCJLST.Downloader("be0f6c572277fe62b3b6194163fa959294afc402")
+downloader = downloadfromCJLST.Downloader("15ba428aef070653bb720673b2f250c589258565")
 for script in scripts:
     downloader.add("AnalysisStep/src/{}.cc".format(script))
     downloader.add("AnalysisStep/interface/{}.h".format(script))
 
 downloader.add("AnalysisStep/test/ZpXEstimation/include/FakeRates.h")
 downloader.add("AnalysisStep/test/ZpXEstimation/src/FakeRates.cpp")
-for rootfile in "FakeRate_SS_Moriond368.root", "FakeRates_SS_Moriond18.root", "FakeRates_SS_Moriond19.root":
-    downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile))
 for cconstant in "Dbkgkin_2e2mu", "Dbkgkin_4e", "Dbkgkin_4mu", "DjVBF", "DjjVBF", "DjjWH", "DjjZH", "DbkgjjEWQCD_4l_HadVHTagged_", "DbkgjjEWQCD_4l_JJVBFTagged_", "DbkgjjEWQCD_2l2l_HadVHTagged_", "DbkgjjEWQCD_2l2l_JJVBFTagged_":
     downloader.add("AnalysisStep/data/cconstants/SmoothKDConstant_m4l_{}13TeV.root".format(cconstant))
+for rootfile in "FakeRates_SS_2016_Legacy.root", "FakeRates_SS_2017_Legacy.root", "FakeRates_SS_2018_Legacy.root":
+    downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile))
+for rootfile in "FakeRate_SS_Moriond368.root", "FakeRates_SS_Moriond18.root", "FakeRates_SS_Moriond19.root":
+    downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile), sha1="e280b6b44d768d52602b7475f0bf724d3aca8531^")
 
 with utilities.cd(CJLSTscriptsfolder):
     downloader.download()

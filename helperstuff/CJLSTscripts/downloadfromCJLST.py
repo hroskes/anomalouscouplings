@@ -112,16 +112,17 @@ def CJLSTScript(*args, **kwargs):
     return result[0]
 
 class Downloader(object):
-    downloadinfofilename = "download_info.txt"
-
-    def __init__(self, SHA1, *thingstodownload):
+    def __init__(self, SHA1, *thingstodownload, **kwargs):
+        self.SHA1 = SHA1
         self.thingstodownload = []
         for _ in thingstodownload:
             self.add(_)
-        self.SHA1 = SHA1
+        self.downloadinfofilename = kwargs.pop("downloadinfofilename", "download_info.txt")
+        assert not kwargs, kwargs
 
-    def add(self, thingtodownload):
-        self.thingstodownload.append(CJLSTScript(thingtodownload))
+    def add(self, thingtodownload, sha1=None):
+        if sha1 is None: sha1 = self.SHA1
+        self.thingstodownload.append((CJLSTScript(thingtodownload), sha1))
 
     def downloadinfocorrect(self):
         try:
@@ -133,8 +134,9 @@ class Downloader(object):
             return True
 
         #download info is wrong: remove old files
-        filenames = contents.split("\n")[1:]
-        for filename in filenames:
+        lines = contents.split("\n")
+        for line in lines:
+            filename, sha1 = line.split()
             if os.path.exists(os.path.basename(filename)):
                 os.remove(os.path.basename(filename))
         return False
@@ -145,10 +147,10 @@ class Downloader(object):
 
     def download(self):
         force = not self.downloadinfocorrect()
-        for _ in self.thingstodownload:
-            _.download(self.SHA1, force=force)
+        for _, sha1 in self.thingstodownload:
+            _.download(sha1, force=force)
         self.writedownloadinfo()
 
     @property
     def downloadinfo(self):
-        return "\n".join([self.SHA1] + sorted(str(thing) for thing in self.thingstodownload))
+        return "\n".join(sorted(str(thing) + " " + sha1 for thing, sha1 in self.thingstodownload))
