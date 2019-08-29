@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from itertools import combinations
 
-import helperstuff.config
+from helperstuff import config
 from helperstuff.enums import Analysis, MultiEnum, ProductionMode
 
 class WeightsHelper(MultiEnum):

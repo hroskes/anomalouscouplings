@@ -1395,7 +1395,7 @@ class Template(TemplateBase, MultiEnum):
         import datetime; print "   ", self, datetime.datetime.now()
         if self.copyfromothertemplate: return []
         if self.hypothesis is not None and not self.hypothesis.ispure: return []
-        if self.shapesystematic is None:
+        if self.shapesystematic == "":
             pass
         elif self.shapesystematic in ("JECUp", "JECDn"):
             pass
