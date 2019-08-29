@@ -322,7 +322,9 @@ def writeyields(productionmodelist=None, productionlist=None):
 
           #pythia scale and tune
           if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
-            if year == 2016:
+            if productionmode == "ggH" and production in ("190821_2016", "190821_2017"):
+              scaleup = scaledn = 1
+            elif year == 2016:
               scaleup = (sum(result[productionmode, PythiaSystematic("ScaleUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
               scaledn = (sum(result[productionmode, PythiaSystematic("ScaleDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
               if productionmode == "ttH": scaleup = scaledn = deprecate(1, 2019, 8, 30)

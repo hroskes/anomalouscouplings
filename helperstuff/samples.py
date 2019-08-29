@@ -1434,8 +1434,6 @@ class Sample(ReweightingSamplePlusWithFlavor):
 
         if self == Sample("190703_2016", "WplusH", "0+", "POWHEG"):
             otherproduction = "190703_2017"
-        if self == Sample("190703_2016", "WplusH", "0+", "POWHEG"):
-            otherproduction = "190703_2017"
         if self.productionmode == "ggH" and self.alternategenerator == "MCatNLO" and self.production in ("190703_2016", "190703_2018"):
             otherproduction = "190703_2017"
         if self.production == "190703_2016" and self.pythiasystematic in ("ScaleUp", "ScaleDown"):
@@ -1483,6 +1481,33 @@ class Sample(ReweightingSamplePlusWithFlavor):
             otherproduction = "190703_2017"
         if self.productionmode == "ggZZ" and self.production == "190703_2018":
             otherproduction = "190703_2017"
+
+        if self.production == "190821_2016" and self.pythiasystematic in ("ScaleUp", "ScaleDown"):
+            del kwargs["pythiasystematic"]
+            kwargs["extension"] = "ext"
+            otherproduction = "190821_2017"
+        if self == Sample("190821_2017", "WplusH", "0+", "POWHEG", "ext"):
+            otherproduction = "190821_2018"
+            del kwargs["extension"]
+        if self == Sample("190821_2017", "ggH", "0+", "POWHEG", "ext"):
+            otherproduction = "190821_2018"
+            del kwargs["extension"]
+        if self == Sample("190821_2017", "ggH", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190821_2016"
+        if self == Sample("190821_2017", "ggH", "0+", "POWHEG", "TuneDown"):
+            otherproduction = "190821_2016"
+        if self == Sample("190821_2018", "ggH", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190821_2017"
+        if self == Sample("190821_2018", "ggH", "0+", "POWHEG", "TuneDown"):
+            otherproduction = "190821_2017"
+        if self == Sample("190821_2017", "ZH", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190821_2018"
+        if self == Sample("190821_2017", "ZH", "0+", "POWHEG", "TuneDown"):
+            otherproduction = "190821_2018"
+        if self == Sample("190821_2017", "WplusH", "0+", "POWHEG", "TuneUp"):
+            otherproduction = "190821_2018"
+        if self.productionmode == "ggZZ" and self.production == "190821_2018" and self.flavor == "2mu2tau":
+            otherproduction = "190821_2017"
 
         if otherproduction is None: return None
 
