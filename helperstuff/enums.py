@@ -861,12 +861,14 @@ class Production(MyEnum):
                  EnumItem("190703_2016"),
                  EnumItem("190703_2017"),
                  EnumItem("190703_2018"),
+                 EnumItem("190821_2016"),
+                 EnumItem("190821_2017"),
+                 EnumItem("190821_2018"),
                  EnumItem("GEN_181119"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
     def CJLSTdir(self):
-        if "_" in str(self) and "LHE" not in str(self) and "GEN" not in str(self) and "190703" not in str(self): return type(self)(str(self).split("_")[0]).CJLSTdir()
         if self == "GEN_181119":
             if config.host == "lxplus":
                 assert False
@@ -887,7 +889,16 @@ class Production(MyEnum):
                 return "/eos/user/a/amapane/CJLST-backup/190708_MC2018"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190708_MC2018"
-        assert False
+        if self == "190821_2016":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2016"
+        if self == "190821_2017":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2017"
+        if self == "190821_2018":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2018"
+        assert False, (self, config.host)
     def CJLSTdir_anomalous(self):
         if self == "190703_2016":
             if config.host == "lxplus":
@@ -904,6 +915,15 @@ class Production(MyEnum):
                 assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190703_2018anomalous"
+        if self == "190821_2016":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2016_anomalous"
+        if self == "190821_2017":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2017_anomalous"
+        if self == "190821_2018":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2018_anomalous"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
         if self == "190703_2016":
@@ -921,6 +941,15 @@ class Production(MyEnum):
                 return "/eos/user/a/amapane/CJLST-backup/190617/Data_2018"
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190617/Data_2018"
+        if self == "190821_2016":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/Data_2016"
+        if self == "190821_2017":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/Data_2017"
+        if self == "190821_2018":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/Data_2018"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
         return self.CJLSTdir_anomalous()
@@ -936,6 +965,10 @@ class Production(MyEnum):
         if self == "190703_2017": return 41.5
         if self == "190703_2018": return 59.7
 
+        if self == "190821_2016": return 35.9
+        if self == "190821_2017": return 41.5
+        if self == "190821_2018": return 59.7
+
         assert False
     def __int__(self):
         return int(str(self))
@@ -944,6 +977,9 @@ class Production(MyEnum):
         if self == "190703_2016": return 2016
         if self == "190703_2017": return 2017
         if self == "190703_2018": return 2018
+        if self == "190821_2016": return 2016
+        if self == "190821_2017": return 2017
+        if self == "190821_2018": return 2018
         assert False
     @property
     def productionforrate(self):

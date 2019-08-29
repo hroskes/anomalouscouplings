@@ -107,7 +107,7 @@ usedata = True
 showblinddistributions = False
 unblinddistributions = False
 unblindscans = False
-productionsforcombine = ["190703_2016", "190703_2017", "190703_2018"]
+productionsforcombine = ["190821_2016", "190821_2017", "190821_2018"]
 separateZZWWVBFweights = True
 
 assert unblindscans <= unblinddistributions <= showblinddistributions <= usedata

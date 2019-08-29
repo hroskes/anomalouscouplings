@@ -41,7 +41,7 @@ def submitjobs(filesperjob):
         if not kwof.wouldbevalid:
             jobid = kwof.runningjobid
             if jobid: yield jobid
-        if not i%filesperjob: yield submitjob("unbuffer "+os.path.join(config.repositorydir, "step4_makejson.py"), jobname="json"+str(i/filesperjob), jobtime="10:0:0", docd=True)
+        if not i%filesperjob: yield submitjob("unbuffer "+os.path.join(config.repositorydir, "step4_makejson.py"), jobname="json"+str(i/filesperjob), jobtime="10:0:0", docd=True, queue="skylake")
         i += 1
 
 if __name__ == "__main__":

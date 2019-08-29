@@ -833,7 +833,13 @@ class TFile(object):
     self.__args = args
     self.__deleteifbad = kwargs.pop("deleteifbad", False)
     self.__entered = False
+    self.__contextmanager = kwargs.pop("contextmanager", True)
+    assert not kwargs
+    
+    if not self.__contextmanager: self.__enter__()
+
   def __enter__(self):
+    if self.__entered: raise ValueError("Trying to enter {} twice!".format(self))
     import ROOT
     self.__bkpdirectory = ROOT.gDirectory.GetDirectory(ROOT.gDirectory.GetPath())
     self.__f = ROOT.TFile.Open(self.__filename, *self.__args)
@@ -869,7 +875,7 @@ class TFile(object):
       os.remove(self.__filename)
 
   def __repr__(self):
-    return "{.__name__}('{}', write={}, contextmanager={})".format(type(self), self.__filename, self.__write, self.__contextmanager)
+    return "{.__name__}('{}', deleteifbad={}, contextmanager={})".format(type(self), self.__filename, deleeteifbad, self.__contextmanager)
 
   def __getattr__(self, attr):
     if not self.__entered:
