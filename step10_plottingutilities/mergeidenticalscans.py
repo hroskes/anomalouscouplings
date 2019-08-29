@@ -5,11 +5,12 @@ import argparse
 if __name__ == "__main__":
   p = argparse.ArgumentParser()
   p.add_argument("fai", choices="fa3 fa2 fL1 fL1Zg".split())
-  g = p.add_mutually_exclusive_group()
+  g = p.add_mutually_exclusive_group(required=True)
   g.add_argument("--decay", action="store_true")
   g.add_argument("--boosted", action="store_true")
   g.add_argument("--STXS", action="store_true")
   g.add_argument("--morecategories", action="store_true")
+  g.add_argument("--shapesystematics", action="store_true")
   args = p.parse_args()
 
 import contextlib, itertools, os
@@ -192,8 +193,9 @@ if __name__ == "__main__":
       )
     )
   else:
-    folder = "fa3fa2fL1fL1Zg_yieldsystematics"
-    plotname = "limit_lumi137.10_scan"+args.fai
+    if args.decay:
+      folder = "fa3fa2fL1fL1Zg_yieldsystematics"
+      plotname = "limit_lumi137.10_scan"+args.fai
     if args.boosted:
       folder = "fa3fa2fL1fL1Zg_boosted_yieldsystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
@@ -202,6 +204,9 @@ if __name__ == "__main__":
       plotname = "limit_lumi137.10_scan"+args.fai
     if args.morecategories:
       folder = "fa3fa2fL1fL1Zg_morecategories_yieldsystematics"
+      plotname = "limit_lumi137.10_scan"+args.fai
+    if args.shapesystematics:
+      folder = "fa3fa2fL1fL1Zg_morecategories_shapesystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
 
     functionargs = [

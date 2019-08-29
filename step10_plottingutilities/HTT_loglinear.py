@@ -85,7 +85,7 @@ def PRL_loglinear(**kwargs):
 
     commondrawlineskwargs.update(kwargs)
 
-    saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_morecategories_yieldsystematics")
+    saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_morecategories_shapesystematics")
 
     for k, v in commondrawlineskwargs.items():
         if k == "xpostext":
@@ -157,19 +157,19 @@ def PRL_loglinear(**kwargs):
         subdir = ""
         if comparecategories:
           folders = [
-            Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Float others 3 categories", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-            Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Fix others 3 categories", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-#            Folder("fa3fa2fL1fL1Zg_boosted_yieldsystematics/", "Float others w/ boosted", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-#            Folder("fa3fa2fL1fL1Zg_boosted_yieldsystematics/", "Fix others w/ boosted", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-#            Folder("fa3fa2fL1fL1Zg_STXS_yieldsystematics/", "Float others STXS", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
-#            Folder("fa3fa2fL1fL1Zg_STXS_yieldsystematics/", "Fix others STXS", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
-            Folder("fa3fa2fL1fL1Zg_morecategories_yieldsystematics/", "Float others 6 categories", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
-            Folder("fa3fa2fL1fL1Zg_morecategories_yieldsystematics/", "Fix others 6 categories", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_shapesystematics/", "Float others 3 categories", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_shapesystematics/", "Fix others 3 categories", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+#            Folder("fa3fa2fL1fL1Zg_boosted_shapesystematics/", "Float others w/ boosted", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+#            Folder("fa3fa2fL1fL1Zg_boosted_shapesystematics/", "Fix others w/ boosted", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+#            Folder("fa3fa2fL1fL1Zg_STXS_shapesystematics/", "Float others STXS", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
+#            Folder("fa3fa2fL1fL1Zg_STXS_shapesystematics/", "Fix others STXS", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_shapesystematics/", "Float others 6 categories", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_shapesystematics/", "Fix others 6 categories", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
           ]
         else:
           folders = [
-            Folder("fa3fa2fL1fL1Zg_morecategories_yieldsystematics/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-            Folder("fa3fa2fL1fL1Zg_morecategories_yieldsystematics/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_shapesystematics/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_shapesystematics/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
           ]
 
         mg = ROOT.TMultiGraph("limit", "")
