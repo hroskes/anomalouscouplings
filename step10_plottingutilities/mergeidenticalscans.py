@@ -122,6 +122,7 @@ def mergeidenticalscans(outfile, *infiles):
     newys = np.concatenate((newys[newxs < 0], [0], newys[newxs > 0]))
     newfais = {k: np.concatenate((v[newxs < 0], [0], v[newxs > 0])) for k, v in newfais.iteritems()}
     newxs = np.concatenate((newxs[newxs < 0], [0], newxs[newxs > 0]))
+    newn += 1
 
   newg = ROOT.TGraph(newn, newxs, newys)
   faigs = {k: ROOT.TGraph(newn, newxs, faiys) for k, faiys in newfais.iteritems()}
