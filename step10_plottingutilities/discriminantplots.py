@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+if __name__ == "__main__":
+  import argparse
+  p = argparse.ArgumentParser()
+  p.add_argument("--filter", type=eval, default="lambda kwargs: True")
+  args = p.parse_args()
+
 import functools, itertools, os, pprint, re
 
 import numpy as np
@@ -209,7 +215,7 @@ class Normalization(HistogramComponent):
 def makenormalization(**kwargs): return Normalization(**kwargs)
 
 class Histogram(object):
-  def __init__(self, name, trees, xformula, weightformulas, scaletos, cutformula, binning, linecolor, linestyle, linewidth, fillcolor, fillstyle, legendname, legendlpf, addonbottom, mirror, normalizationtrees=None, normalizationweightformulas=None):
+  def __init__(self, name, trees, xformula, weightformulas, scaletos, cutformula, binning, linecolor, linestyle, linewidth, fillcolor, fillstyle, legendname, legendlpf, addonbottom, mirror, normalizationtrees=None, normalizationweightformulas=None, makegraph=False, markercolor=None, markerstyle=None, markersize=None):
     if normalizationweightformulas is None: normalizationweightformulas = weightformulas
     if normalizationtrees is None: normalizationtrees = trees
     if scaletos is None:
@@ -237,6 +243,11 @@ class Histogram(object):
     self.__legendname = legendname
     self.__legendlpf = legendlpf
 
+    self.__makegraph = makegraph
+    if self.__makegraph:
+      self.__markerstyle = {"color": markercolor, "style": markerstyle, "size": markersize}
+      assert all(_ is not None for _ in self.__markerstyle.itervalues()), self.__markerstyle
+
   def makefinalhistogram(self):
     if self.__finalized: return
     for component in self.__components:
@@ -250,7 +261,22 @@ class Histogram(object):
     self.__finalized = True
 
   @property
-  def histogram(self): return self.__histogram
+  @cache
+  def __graph(self):
+    assert self.__finalized
+    g = style.asymmerrorsfromhistogram(self.__histogram, showemptyerrors=False)
+    g.SetMarkerColor(self.__markerstyle["color"])
+    g.SetMarkerStyle(self.__markerstyle["style"])
+    g.SetMarkerSize(self.__markerstyle["size"])
+    g.SetLineColor(self.__histogram.GetLineColor())
+    g.SetLineStyle(self.__histogram.GetLineStyle())
+    g.SetLineSize(self.__histogram.GetLineSize())
+    return g
+
+  @property
+  def histogram(self):
+    if self.__makegraph: return self.__graph
+    return self.__histogram
 
   def addtolegend(self, legend):
     return legend.AddEntry(self.histogram, self.__legendname, self.__legendlpf)
@@ -533,6 +559,9 @@ class Plot(object):
     assert isDCP in (None, "prod", "dec")
     assert iscategorydiscriminant in (None, "VBF", "VH")
 
+    datatrees = gettrees(
+      ("data",),
+    )
     ZXtrees = gettrees(
       ("ZX",),
     )
@@ -547,6 +576,30 @@ class Plot(object):
     )
 
     self.histograms = histograms = []
+    self.graphs = graphs = []
+
+    datahistogram = makehistogram(
+      name=name+"_data",
+      trees=datatrees,
+      xformula=xformula,
+      weightformulas=["1" for production in config.productionsforcombine],
+      cutformula=cutformula,
+      binning=binning,
+      linecolor=1,
+      linestyle=1,
+      linewidth=2,
+      fillcolor=ROOT.TColor.GetColor("#669966"),
+      fillstyle=1001,
+      markercolor=1,
+      markerstyle=20,
+      markersize=1.2,
+      legendname="data",
+      legendlpf="lp",
+      addonbottom=[],
+      mirror=False,
+      scaletos=None,
+      makegraph=True,
+    )
 
     ZXhistogram = makehistogram(
       name=name+"_ZX",
@@ -688,6 +741,8 @@ class Plot(object):
 
     histograms += [ZZhistogram, ZXhistogram]
 
+    graphs = [datahistogram]
+
     self.__CMStext = CMStext
 
     if self.__CMStext != "Preliminary":
@@ -702,7 +757,7 @@ class Plot(object):
     c = self.__plotcopier.TCanvas("c_"+self.__name, "",  8, 30, 800, 800)
     style.applycanvasstyle(c)
 
-    for h in self.histograms:
+    for h in self.histograms+self.graphs:
       h.makefinalhistogram()
 
     hstack = ROOT.THStack(self.__name, "")
@@ -719,6 +774,11 @@ class Plot(object):
     hstack.GetXaxis().SetTitle(self.__xtitle)
     hstack.GetYaxis().SetTitle(self.__ytitle)
     hstack.SetMaximum(self.__ymax)
+
+    for g in self.graphs:
+      g.addtolegend(l)
+      g.Draw("PE")
+
     l.Draw()
 
     lumi = sum(production.dataluminosity for production in config.productionsforcombine)
@@ -786,10 +846,10 @@ a2mixVH = HypothesisLine("fa2VH0.5",   ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a
 L1mixdecay = HypothesisLine("fL10.5", ROOT.kMagenta-4, 1, ROOT.kMagenta-4, 2, "f_{#Lambda1}=0.5")
 
 
-def makeplots():
+def makeplots(filter):
   with PlotCopier() as pc:
-    plots = [
-      Plot(
+    plotkwargses = [
+      dict(
         name="D_0minus_decay",
         xtitle="D_{0-}^{dec}",
         ytitle="Events / bin",
@@ -805,7 +865,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_0hplus_decay",
         xtitle="D_{0h+}^{dec}",
         ytitle="Events / bin",
@@ -821,7 +881,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_L1_decay",
         xtitle="D_{#Lambda1}^{dec}",
         ytitle="Events / bin",
@@ -837,7 +897,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_L1Zg_decay",
         xtitle="D_{#Lambda1}^{Z#gamma,dec}",
         ytitle="Events / bin",
@@ -853,7 +913,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_CP_decay",
         xtitle="D_{CP}^{dec}",
         ytitle="Events / bin",
@@ -870,7 +930,7 @@ def makeplots():
         isDCP="dec",
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_int_decay",
         xtitle="D_{int}^{dec}",
         ytitle="Events / bin",
@@ -886,7 +946,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_0minus_VBFdecay",
         xtitle="D_{0-}^{VBF+dec}",
         ytitle="Events / bin",
@@ -902,7 +962,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_0hplus_VBFdecay",
         xtitle="D_{0h+}^{VBF+dec}",
         ytitle="Events / bin",
@@ -918,7 +978,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_L1_VBFdecay",
         xtitle="D_{#Lambda1}^{VBF+dec}",
         ytitle="Events / bin",
@@ -934,7 +994,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_L1Zg_VBFdecay",
         xtitle="D_{#Lambda1}^{Z#gamma,VBF+dec}",
         ytitle="Events / bin",
@@ -950,7 +1010,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_CP_VBF",
         xtitle="D_{CP}^{VBF}",
         ytitle="Events / bin",
@@ -967,7 +1027,7 @@ def makeplots():
         isDCP="prod",
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_int_VBF",
         xtitle="D_{int}^{VBF}",
         ytitle="Events / bin",
@@ -983,7 +1043,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_0minus_HadVHdecay",
         xtitle="D_{0-}^{VH+dec}",
         ytitle="Events / bin",
@@ -999,7 +1059,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_0hplus_HadVHdecay",
         xtitle="D_{0h+}^{VH+dec}",
         ytitle="Events / bin",
@@ -1015,7 +1075,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_L1_HadVHdecay",
         xtitle="D_{#Lambda1}^{VH+dec}",
         ytitle="Events / bin",
@@ -1031,7 +1091,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_L1Zg_HadVHdecay",
         xtitle="D_{#Lambda1}^{Z#gamma,VH+dec}",
         ytitle="Events / bin",
@@ -1047,7 +1107,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_CP_HadVH",
         xtitle="D_{CP}^{VH}",
         ytitle="Events / bin",
@@ -1064,7 +1124,7 @@ def makeplots():
         isDCP="prod",
         CMStext="Supplementary",
       ),
-      Plot(
+      dict(
         name="D_int_HadVH",
         xtitle="D_{int}^{VH}",
         ytitle="Events / bin",
@@ -1081,7 +1141,7 @@ def makeplots():
         CMStext="Supplementary",
       ),
 
-      Plot(
+      dict(
         name="D_bkg",
         xtitle="D_{bkg}^{dec}",
         ytitle="Events / bin",
@@ -1097,7 +1157,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_bkg_VBFdecay",
         xtitle="D_{bkg}^{VBF+dec}",
         ytitle="Events / bin",
@@ -1113,7 +1173,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_bkg_HadVHdecay",
         xtitle="D_{bkg}^{VH+dec}",
         ytitle="Events / bin",
@@ -1129,7 +1189,7 @@ def makeplots():
         plotcopier=pc,
         CMStext="",
       ),
-      Plot(
+      dict(
         name="D_2jet_VBF",
         xtitle="max#left(D_{2jet}^{VBF}, #vec{D}_{2jet}^{VBF, BSM}#right)",
         ytitle="Events / bin",
@@ -1146,7 +1206,7 @@ def makeplots():
         CMStext="",
         iscategorydiscriminant="VBF",
       ),
-      Plot(
+      dict(
         name="D_2jet_VH",
         xtitle="max#left(D_{2jet}^{WH}, #vec{D}_{2jet}^{WH, BSM}, D_{2jet}^{ZH}, #vec{D}_{2jet}^{ZH, BSM}#right)",
         ytitle="Events / bin",
@@ -1163,10 +1223,111 @@ def makeplots():
         CMStext="",
         iscategorydiscriminant="VH",
       ),
+
+      dict(
+        name="ZZPt_boosted",
+        xtitle="p_{T}^{4l}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="min(ZZPt, 650)",
+        cutformula=boostedenrichcut,
+        binning = np.array([120, 200., 300, 400, 500, 600, 700]),
+        legendargs=(.2, .5, .9, .9),
+        categorylabel="Boosted",
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=25,
+        plotcopier=pc,
+        CMStext="",
+      ),
+      dict(
+        name="ZZPt_VBF1j",
+        xtitle="p_{T}^{4l}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="min(ZZPt, 170)",
+        cutformula=VBF1jenrichcut,
+        binning = np.array([0., 60, 120., 180]),
+        legendargs=(.2, .5, .9, .9),
+        categorylabel="VBF-1jet-tagged",
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=32,
+        plotcopier=pc,
+        CMStext="Supplementary",
+      ),
+      dict(
+        name="ZZPt_VHLep",
+        xtitle="p_{T}^{4l}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="min(ZZPt, 350)",
+        cutformula=LepVHenrichcut,
+        binning = np.array([0, 100, 200., 300, 400]),
+        legendargs=(.2, .5, .9, .9),
+        categorylabel="VH-leptonic-tagged",
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=10,
+        plotcopier=pc,
+        CMStext="Supplementary",
+      ),
+      dict(
+        name="D_bkg_boosted",
+        xtitle="D_{bkg}^{dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_bkg",
+        cutformula=boostedcut,
+        binning=np.array([0, .2, .7, 1]),
+        legendargs=(.2, .5, .9, .9),
+        categorylabel="Boosted",
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+        CMStext="Supplementary",
+      ),
+      dict(
+        name="D_bkg_VBF1j",
+        xtitle="D_{bkg}^{dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_bkg",
+        cutformula=VBF1jcut,
+        binning=np.array([0, .2, .7, 1]),
+        legendargs=(.2, .5, .9, .9),
+        categorylabel="VBF-1jet-tagged",
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=50,
+        plotcopier=pc,
+        CMStext="Supplementary",
+      ),
+      dict(
+        name="D_bkg_VHLep",
+        xtitle="D_{bkg}^{dec}",
+        ytitle="Events / bin",
+        hypothesislines=purehypothesislines,
+        xformula="D_bkg",
+        cutformula=LepVHcut,
+        binning=np.array([0, .2, .7, 1]),
+        legendargs=(.2, .5, .9, .9),
+        categorylabel="VH-leptonic-tagged",
+        legendcolumns=2,
+        saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
+        ymax=25,
+        plotcopier=pc,
+        CMStext="Supplementary",
+      ),
+    ]
+
+    plots = [
+      Plot(**kwargs) for kwargs in plotkwargses if filter(kwargs)
     ]
 
     for plot in plots:
       plot.makeplot()
 
 if __name__ == "__main__":
-  makeplots()
+  makeplots(**args.__dict__)

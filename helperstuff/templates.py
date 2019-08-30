@@ -950,6 +950,9 @@ class TemplateBase(object):
             if enumsdict[ProductionMode] in ("ggH", "ttH"):
                 enumsdict[HffHypothesis] = "Hff0+"
 
+        if enumsdict[ShapeSystematic] is None:
+            enumsdict[ShapeSystematic] = ""
+
         super(TemplateBase, self).applysynonyms(enumsdict)
 
     def templatefile(self, *args, **kwargs):

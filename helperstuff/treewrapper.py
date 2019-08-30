@@ -1679,7 +1679,7 @@ class TreeWrapper(TreeWrapperBase):
 
         self.kfactors = []
         if not self.isdata and not self.isZX:
-            kfactors.append("L1prefiringWeight")
+            self.kfactors.append("L1prefiringWeight")
         if not self.GEN:
             if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
             if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
