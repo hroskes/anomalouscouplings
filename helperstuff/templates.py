@@ -197,12 +197,11 @@ class TemplatesFile(MultiEnum):
         elif self.templategroup == "bkg":
             if self.production.LHE or self.production.GEN: return [Template(self, "qqZZ")]
             result = ["qqZZ", "ggZZ", "VBF bkg"]
-            if deprecate(True, 2019, 8, 20):
-                result.remove("VBF bkg")
+            result.remove("VBF bkg")
             if config.usedata:
                 result.append("ZX")
 
-            if self.shapesystematic is None:
+            if self.shapesystematic == "":
                 pass
             elif self.shapesystematic in ("ZXUp", "ZXDown"):
                 result = [_ for _ in result if _ == "ZX"]
@@ -587,12 +586,6 @@ class TemplatesFile(MultiEnum):
             kwargs["shapesystematic"] = "JECUp"
         elif self.templategroup == "bkg" and self.shapesystematic in ("JEC0PMDn", "JEC0MDn", "JEC0PHDn", "JEC0L1Dn", "JEC0L1ZgDn"):
             kwargs["shapesystematic"] = "JECDn"
-        elif self.production == "190821_2016":
-            kwargs["production"] = "190703_2016"
-        elif self.production == "190821_2017":
-            kwargs["production"] = "190703_2017"
-        elif self.production == "190821_2018":
-            kwargs["production"] = "190703_2018"
         else:
             return None
         return type(self)(*kwargs.itervalues())

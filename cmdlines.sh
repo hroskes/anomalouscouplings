@@ -4,11 +4,11 @@ set -euo pipefail
 
 cd $(dirname $0)
 
-cmd="sbatch --mem 12G slurm.sh"; moreargs=
-#cmd=python; moreargs=
+#cmd="sbatch --mem 12G slurm.sh"; moreargs=
+cmd=python; moreargs=
 #cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1"
 
-for scanrange in 26,-1,1 26,-0.02,0.02; do
+for scanrange in 26,-1,1:26,-0.02,0.02; do
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories newyields scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa3 $moreargs
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories newyields scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa3 floatothers=0 $moreargs
 $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories newyields scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fa3 faiorder=fa3,fL1,fL1Zg,fa1,fa2 $moreargs

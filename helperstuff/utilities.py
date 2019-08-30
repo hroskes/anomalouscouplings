@@ -1043,7 +1043,7 @@ def debugfunction(function):
     return result
   return newfunction
 
-def reiglob(path, exp, invert=False, verbose=False):
+def reiglob(path, exp, invert=False, verbose=False, hastomatch=False):
   "https://stackoverflow.com/a/17197678/5228524"
 
   if verbose: print "reiglobbing "+os.path.join(path, exp)
@@ -1057,6 +1057,9 @@ def reiglob(path, exp, invert=False, verbose=False):
       n += 1
       if verbose and n % 100 == 0: print "Found {} files so far".format(n)
       yield os.path.join(path, f)
+
+  if hastomatch and n == 0:
+    raise ValueError(exp + " didn't match anything in " + path)
 
 def reglob(*args, **kwargs):
   return list(reiglob(*args, **kwargs))

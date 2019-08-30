@@ -11,6 +11,7 @@ if __name__ == "__main__":
   g.add_argument("--STXS", action="store_true")
   g.add_argument("--morecategories", action="store_true")
   g.add_argument("--shapesystematics", action="store_true")
+  g.add_argument("--newyields", action="store_true")
   args = p.parse_args()
 
 import contextlib, itertools, os
@@ -116,6 +117,12 @@ def mergeidenticalscans(outfile, *infiles):
   fmt = " ".join(["{:10.3g}"] * (2+len(newfais))) + " {}"
   for xyfaisindices in itertools.izip_longest(newxs, newys, *[v for k, v in sorted(newfais.iteritems())] + [(", ".join(str(idx) for idx in _) for _ in indices)]): print fmt.format(*xyfaisindices)
 
+  if 0 not in newxs:
+    assert args.newyields
+    newys = np.concatenate((newys[newxs < 0], [0], newys[newxs > 0]))
+    newfais = {k: np.concatenate((v[newxs < 0], [0], v[newxs > 0])) for k, v in newfais.iteritems()}
+    newxs = np.concatenate((newxs[newxs < 0], [0], newxs[newxs > 0]))
+
   newg = ROOT.TGraph(newn, newxs, newys)
   faigs = {k: ROOT.TGraph(newn, newxs, faiys) for k, faiys in newfais.iteritems()}
 
@@ -196,28 +203,38 @@ if __name__ == "__main__":
     if args.decay:
       folder = "fa3fa2fL1fL1Zg_yieldsystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
+      scanrange = ""
     if args.boosted:
       folder = "fa3fa2fL1fL1Zg_boosted_yieldsystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
+      scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
     if args.STXS:
       folder = "fa3fa2fL1fL1Zg_STXS_yieldsystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
+      scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
     if args.morecategories:
       folder = "fa3fa2fL1fL1Zg_morecategories_yieldsystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
+      scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
     if args.shapesystematics:
       folder = "fa3fa2fL1fL1Zg_morecategories_shapesystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
+      scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
+    if args.newyields:
+      folder = "fa3fa2fL1fL1Zg_morecategories_newyields"
+      plotname = "limit_lumi137.10_scan"+args.fai
+      scanrange = "_26,-1.0,1.0_26,-0.02,0.02"
 
     functionargs = [
-      os.path.join(plotsbasedir, "limits", folder, plotname+"_101,-1.0,1.0_101,-0.02,0.02_merged"),
+      os.path.join(plotsbasedir, "limits", folder, plotname+scanrange+"_merged"),
     ] + sorted(
       reglob(
          os.path.join(plotsbasedir, "limits", folder, ""),
-         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
+         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanrange+".root",
+         hastomatch=True,
       ) + reglob(
          os.path.join(plotsbasedir, "limits", folder, "gridscan/"),
-         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?_101,-1.0,1.0_101,-0.02,0.02.root",
+         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanrange+".root",
       )
     )
 
