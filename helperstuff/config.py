@@ -104,8 +104,8 @@ LHEsmearptmuon = 2.169/6
 LHEsmearptjet = 18./6
 
 usedata = True
-showblinddistributions = False
-unblinddistributions = False
+showblinddistributions = True
+unblinddistributions = True
 unblindscans = False
 productionsforcombine = ["190821_2016", "190821_2017", "190821_2018"]
 separateZZWWVBFweights = True
