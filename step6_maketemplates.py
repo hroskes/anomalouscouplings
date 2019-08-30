@@ -47,7 +47,11 @@ def buildtemplates(*args, **kwargs):
     tg = TemplateGroup(args[0])
     production = Production(args[1])
     tfs = [tf for tf in templatesfiles if tf.templategroup == tg and tf.production == production and not (os.path.exists(tf.templatesfile()) and os.path.exists(tf.templatesfile().replace(".root", ".done")))]
+    if tg in ("ggh", "vbf", "zh", "wh", "vh"):
+      tfs = [tf for tf in tfs if tf.shapesystematic != ""]
     if not tfs: return
+    tfs = tfs[:100]
+    sys.setrecursionlimit(max(sys.getrecursionlimit(), 5000))
     with KeepWhileOpenFiles(*(_.templatesfile()+".tmp" for _ in tfs)) as kwofs:
       if not all(kwofs): return
       subprocess.check_call(["buildTemplates.py", "--use-existing-templates"] + [_.jsonfile() for _ in tfs] + morebuildtemplatesargs)
@@ -56,7 +60,7 @@ def buildtemplates(*args, **kwargs):
 
   templatesfile = TemplatesFile(*args)
   if "Ulascan" in str(templatesfile.production): return
-  if templatesfile.templategroup in ("background", "DATA", "tth", "bbh"):
+  if templatesfile.templategroup in ("background", "DATA", "tth", "bbh") or templatesfile.shapesystematic != "":
     return buildtemplates(templatesfile.templategroup, templatesfile.production)
   print templatesfile
   if templatesfile.copyfromothertemplatesfile is not None: return
