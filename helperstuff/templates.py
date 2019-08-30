@@ -586,6 +586,12 @@ class TemplatesFile(MultiEnum):
             kwargs["shapesystematic"] = "JECUp"
         elif self.templategroup == "bkg" and self.shapesystematic in ("JEC0PMDn", "JEC0MDn", "JEC0PHDn", "JEC0L1Dn", "JEC0L1ZgDn"):
             kwargs["shapesystematic"] = "JECDn"
+#        elif self.production == "190821_2016":
+#            kwargs["production"] = "190703_2016"
+#        elif self.production == "190821_2017":
+#            kwargs["production"] = "190703_2017"
+#        elif self.production == "190821_2018":
+#            kwargs["production"] = "190703_2018"
         else:
             return None
         return type(self)(*kwargs.itervalues())

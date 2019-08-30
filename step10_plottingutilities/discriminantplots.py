@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 
+debug = False
+
 if __name__ == "__main__":
   import argparse
   p = argparse.ArgumentParser()
   p.add_argument("--filter", type=eval, default="lambda kwargs: True")
+  p.add_argument("--debug", action="store_true")
   args = p.parse_args()
+  debug = args.debug
+  del args.debug
 
 import functools, itertools, os, pprint, re
 
@@ -52,7 +57,9 @@ class TTree(object):
   def __iter__(self):
     nentries = self.GetEntries()
     for i, entry in enumerate(self.__ttree, start=1):
-      if i % 10000 == 0 or i == nentries: print i, "/", nentries
+      if i % 10000 == 0 or i == nentries:
+        print i, "/", nentries
+        if debug: break
       self.nextevent()
       yield entry
 
@@ -262,7 +269,8 @@ class Histogram(object):
 
   @property
   @cache
-  def __graph(self):
+  def graph(self):
+    if not self.__makegraph: raise ValueError("Call histogram, not graph")
     assert self.__finalized
     g = style.asymmerrorsfromhistogram(self.__histogram, showemptyerrors=False)
     g.SetMarkerColor(self.__markerstyle["color"])
@@ -270,16 +278,16 @@ class Histogram(object):
     g.SetMarkerSize(self.__markerstyle["size"])
     g.SetLineColor(self.__histogram.GetLineColor())
     g.SetLineStyle(self.__histogram.GetLineStyle())
-    g.SetLineSize(self.__histogram.GetLineSize())
+    g.SetLineWidth(self.__histogram.GetLineWidth())
     return g
 
   @property
   def histogram(self):
-    if self.__makegraph: return self.__graph
+    if self.__makegraph: raise ValueError("Call graph, not histogram")
     return self.__histogram
 
   def addtolegend(self, legend):
-    return legend.AddEntry(self.histogram, self.__legendname, self.__legendlpf)
+    return legend.AddEntry(self.graph if self.__makegraph else self.histogram, self.__legendname, self.__legendlpf)
 
 @cache_keys(
   name=lambda name: None,
@@ -307,18 +315,20 @@ def getfilenames(*productionmodesandhypotheses):
     ]
     for production in config.productionsforcombine
     for otherargs in productionmodesandhypotheses
-    for st in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg", *otherargs).reweightfrom()
+    for st in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg_morecategories", *otherargs).reweightfrom()
   ]
 
-def gettrees(*productionmodesandhypotheses):
-  return [
+def gettrees(*productionmodesandhypotheses, **kwargs):
+  result = [
     [
       gettree(
         filename,
         "candTree",
       ) for filename in lst
-    ] for lst in getfilenames(*productionmodesandhypotheses)
+    ] for lst in getfilenames(*productionmodesandhypotheses, **kwargs)
   ]
+  if debug: result = [[_[0]] for _ in result]
+  return result
 
 
 def getweights(*productionmodesandhypotheses, **kwargs):
@@ -329,7 +339,7 @@ def getweights(*productionmodesandhypotheses, **kwargs):
     "({}) * ({}) * ({})".format(weight, scaleby, production.dataluminosity if uselumi else 1)
     for production in config.productionsforcombine
     for otherargs, scaleby in itertools.izip_longest(productionmodesandhypotheses, scalebys)
-    for weight in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg", *otherargs).weightname()
+    for weight in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg_morecategories", *otherargs).weightname()
   ]
 
 def getscaletos(*productionmodes, **kwargs):
@@ -343,7 +353,7 @@ def getscaletos(*productionmodes, **kwargs):
         ca,
         "fordata",
         production,
-        "fa3fa2fL1fL1Zg",
+        "fa3fa2fL1fL1Zg_morecategories",
         (
           productionmode
           if productionmode != "VH"
@@ -355,7 +365,7 @@ def getscaletos(*productionmodes, **kwargs):
     )
     for production in config.productionsforcombine
     for productionmode in productionmodes
-    for weight in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg", productionmode, "0+", "Hff0+" if productionmode == "ttH" else None).weightname()
+    for weight in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg_morecategories", productionmode, "0+", "Hff0+" if productionmode == "ttH" else None).weightname()
   ]
 
 class HypothesisLine(object):
@@ -385,7 +395,7 @@ class HypothesisLine(object):
         "ZH": ("VBF", "VH"),
       }[productionmode]
       numerator = sum(
-        Template(production, "fa3fa2fL1fL1Zg", ca, ch, "0+", pm).gettemplate().Integral() * production.dataluminosity
+        Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+", pm).gettemplate().Integral() * production.dataluminosity
         for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
         for ch in channels
         for pm in productionmodes
@@ -393,7 +403,7 @@ class HypothesisLine(object):
       )
       if Hypothesis(self.hypothesis).ispure:
         denominator = sum(
-          Template(production, "fa3fa2fL1fL1Zg", ca, ch, self.hypothesis, pm).gettemplate().Integral() * production.dataluminosity
+          Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, self.hypothesis, pm).gettemplate().Integral() * production.dataluminosity
           for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
           for ch in channels
           for pm in productionmodes
@@ -425,9 +435,9 @@ class HypothesisLine(object):
           inttype = "g11g{}1".format(intletter)
           denominator = sum(
             (
-                 Template(production, "fa3fa2fL1fL1Zg", ca, ch, "0+",         pm).gettemplate().Integral() * g1*g1
-            + IntTemplate(production, "fa3fa2fL1fL1Zg", ca, ch, inttype,      pm).gettemplate().Integral() * g1*gi
-            +    Template(production, "fa3fa2fL1fL1Zg", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi
+                 Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+",         pm).gettemplate().Integral() * g1*g1
+            + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype,      pm).gettemplate().Integral() * g1*gi
+            +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi
             ) * production.dataluminosity
             for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
             for ch in channels
@@ -439,11 +449,11 @@ class HypothesisLine(object):
           def inttype(i): return "g1{}g{}{}".format(4-i, intletter, i)
           denominator = sum(
             (
-                 Template(production, "fa3fa2fL1fL1Zg", ca, ch, "0+",         pm).gettemplate().Integral() * g1*g1*g1*g1
-            + IntTemplate(production, "fa3fa2fL1fL1Zg", ca, ch, inttype(1),   pm).gettemplate().Integral() * g1*g1*g1*gi
-            + IntTemplate(production, "fa3fa2fL1fL1Zg", ca, ch, inttype(2),   pm).gettemplate().Integral() * g1*g1*gi*gi
-            + IntTemplate(production, "fa3fa2fL1fL1Zg", ca, ch, inttype(3),   pm).gettemplate().Integral() * g1*gi*gi*gi
-            +    Template(production, "fa3fa2fL1fL1Zg", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi*gi*gi
+                 Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+",         pm).gettemplate().Integral() * g1*g1*g1*g1
+            + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(1),   pm).gettemplate().Integral() * g1*g1*g1*gi
+            + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(2),   pm).gettemplate().Integral() * g1*g1*gi*gi
+            + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(3),   pm).gettemplate().Integral() * g1*gi*gi*gi
+            +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi*gi*gi
             ) * production.dataluminosity
             for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
             for ch in channels
@@ -456,10 +466,10 @@ class HypothesisLine(object):
     assert len(otherargs) == len(scalebys)
     return getweights(*otherargs, scalebys=scalebys)
 
-  def gettrees(self, *otherargs):
+  def gettrees(self, *otherargs, **kwargs):
     hypothesis = self.hypothesis
     otherargs = (tuple(args) + (hypothesis,) for args in otherargs)
-    return gettrees(*otherargs)
+    return gettrees(*otherargs, **kwargs)
 
   def ffHweights(self, isL1Zg=False):
     return self.getweights(
@@ -473,49 +483,56 @@ class HypothesisLine(object):
       ("VBF",),
       ("VH" if not isL1Zg else "ZH",),
     )
-  def VVHtrees(self, isL1Zg=False):
+  def VVHtrees(self, isL1Zg=False, **kwargs):
     return self.gettrees(
       ("VBF",),
       ("VH" if not isL1Zg else "ZH",),
+      **kwargs
     )
-  def VBFweights(self, isL1Zg=False):
+  def VBFweights(self, isL1Zg=False, **kwargs):
     return self.getweights(
       ("VBF",),
     )
-  def VBFtrees(self, isL1Zg=False):
+  def VBFtrees(self, isL1Zg=False, **kwargs):
     return self.gettrees(
       ("VBF",),
+      **kwargs
     )
-  def notVBFweights(self, isL1Zg=False):
+  def notVBFweights(self, isL1Zg=False, **kwargs):
     return self.getweights(
       ("VH" if not isL1Zg else "ZH",),
       ("ggH",),
       ("bbH",),
       ("ttH", "Hff0+"),
+      **kwargs
     )
-  def notVBFtrees(self, isL1Zg=False):
+  def notVBFtrees(self, isL1Zg=False, **kwargs):
     return self.gettrees(
       ("VH" if not isL1Zg else "ZH",),
       ("ggH",),
       ("bbH",),
       ("ttH", "Hff0+"),
+      **kwargs
     )
-  def VHweights(self, isL1Zg=False):
+  def VHweights(self, isL1Zg=False, **kwargs):
     return self.getweights(
       ("VH" if not isL1Zg else "ZH",),
+      **kwargs
     )
-  def VHtrees(self, isL1Zg=False):
+  def VHtrees(self, isL1Zg=False, **kwargs):
     return self.gettrees(
       ("VH" if not isL1Zg else "ZH",),
+      **kwargs
     )
-  def notVHweights(self, isL1Zg=False):
+  def notVHweights(self, isL1Zg=False, **kwargs):
     return self.getweights(
       ("VBF",),
       ("ggH",),
       ("bbH",),
       ("ttH", "Hff0+"),
+      **kwargs
     )
-  def notVHtrees(self, isL1Zg=False):
+  def notVHtrees(self, isL1Zg=False, **kwargs):
     return self.gettrees(
       ("VBF",),
       ("ggH",),
@@ -741,7 +758,7 @@ class Plot(object):
 
     histograms += [ZZhistogram, ZXhistogram]
 
-    graphs = [datahistogram]
+    graphs.append(datahistogram)
 
     self.__CMStext = CMStext
 
@@ -777,7 +794,7 @@ class Plot(object):
 
     for g in self.graphs:
       g.addtolegend(l)
-      g.Draw("PE")
+      g.graph.Draw("PE")
 
     l.Draw()
 
@@ -1201,7 +1218,7 @@ def makeplots(filter):
         categorylabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=30,
+        ymax=40,
         plotcopier=pc,
         CMStext="",
         iscategorydiscriminant="VBF",
@@ -1218,7 +1235,7 @@ def makeplots(filter):
         categorylabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=30,
+        ymax=40,
         plotcopier=pc,
         CMStext="",
         iscategorydiscriminant="VH",
