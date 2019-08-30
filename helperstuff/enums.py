@@ -897,7 +897,7 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2017"
         if self == "190821_2018":
             if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2018"
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid_removeJER/MC_2018"
         assert False, (self, config.host)
     def CJLSTdir_anomalous(self):
         if self == "190703_2016":
@@ -923,7 +923,7 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2017_anomalous"
         if self == "190821_2018":
             if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2018_anomalous"
+                return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid_removeJER/MC_2018_anomalous"
         return self.CJLSTdir()
     def CJLSTdir_data(self):
         if self == "190703_2016":
