@@ -174,6 +174,9 @@ def submitjobs(args):
     if tf.templategroup in ("background", "DATA", "tth", "bbh"):
       torun.remove(tf)
       torun.add((tf.templategroup, tf.production))
+    elif tf.shapesystematic != "":
+      torun.remove(tf)
+      torun.add((tf.templategroup, tf.production, "systematic"))
   njobs = len(torun)
 
   if not njobs: return

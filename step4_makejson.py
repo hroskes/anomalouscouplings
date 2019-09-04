@@ -36,7 +36,7 @@ def makejson(*args):
         with open(filename, "w") as f:
             f.write(jsonstring)
 
-def submitjobs(filesperjob, filter):
+def submitjobs(filesperjob, filter=stringandlambda("lambda x: True")):
     i = 0
     for templatesfile in templatesfiles:
         if filter and not filter.function(templatesfile): continue

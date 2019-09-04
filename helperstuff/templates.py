@@ -648,7 +648,7 @@ class TemplatesFile(MultiEnum):
           and self.category in ("VBFtagged", "VHHadrtagged")
           and self.analysis.fais == Analysis("fa3").fais
         ): return []
-        if self.shapesystematic is not None: return []
+        if "" != self.shapesystematic is not None: return []
 
         productionmode = {_.productionmode for _ in self.signalsamples()}
         assert len(productionmode) == 1
