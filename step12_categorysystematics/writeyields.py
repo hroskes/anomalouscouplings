@@ -237,7 +237,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                 syst.value = None
               else:
                 syst.value = {
-                  2016: (1.026, 0.974),
+                  2016: (1.025, 0.975),
                   2017: (1.023, 0.977),
                   2018: (1.025, 0.975),
                 }[year]
@@ -327,7 +327,7 @@ def writeyields(productionmodelist=None, productionlist=None):
             elif year == 2016:
               scaleup = (sum(result[productionmode, PythiaSystematic("ScaleUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
               scaledn = (sum(result[productionmode, PythiaSystematic("ScaleDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
-              if productionmode == "ttH": scaleup = scaledn = deprecate(1, 2019, 8, 30)
+              if productionmode == "ttH": scaleup = scaledn = deprecate(1, 2019, 9, 30)
             elif year == 2017 or year == 2018:
               scaleup = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleUp"), cat] for cat in sumcategories) / nominal).nominal_value
               scaledn = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleDn"), cat] for cat in sumcategories) / nominal).nominal_value
