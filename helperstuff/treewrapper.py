@@ -39,7 +39,7 @@ class TreeWrapperBase(Iterator):
 
         self.year = treesample.production.year
 
-        if self.treesample.production not in ("190821_2016", "190821_2017", "190821_2018"): raise ValueError("Figure out about L1prefiringWeight!")
+        if self.treesample.production not in ("190821_2016", "190821_2017", "190821_2018"): raise ValueError("Figure out about L1prefiringWeight and LepSIP!")
 
         if self.isdata:
             self.unblind = config.unblinddistributions
@@ -960,6 +960,8 @@ class TreeWrapper(TreeWrapperBase):
                     self.overallEventWeight = 0
             else:
                 self.overallEventWeight = t.overallEventWeight
+
+            if max(t.LepSIP) > 4: self.overallEventWeight = 0
 
             self.flavor = abs(t.Z1Flav*t.Z2Flav)
 
