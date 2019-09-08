@@ -134,7 +134,7 @@ class YieldSystematicValue(MultiEnum, JsonDict):
 
           value = list(value)
           for i, v in enumerate(value[:]):
-            if np.isclose(v, 1):
+            if np.isclose(v, 1, rtol=3e-4):
               value[i] = 1
 
           if all(_ == 1 for _ in value):
