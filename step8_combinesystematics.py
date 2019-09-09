@@ -26,7 +26,7 @@ def combinesystematics(channel, analysis, production, category, productionmode):
   templategroup = str(productionmode).lower()
   tfnominal = TemplatesFile(channel, analysis, production, category, templategroup)
 
-  threshold = 2.
+  threshold = 2.1
   expectedeventsthreshold = 6e-3
   if analysis == "fa3fa2fL1fL1Zg_STXS" and channel == "4mu" and category == "VBFtagged" and productionmode == "VH":
     expectedeventsthreshold = 2e-2

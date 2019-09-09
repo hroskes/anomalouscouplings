@@ -149,7 +149,7 @@ def getsubtractdatatree(*args):
     return tfiles[SubtractDataTree(*args).treefile].candTree
 
 def getnobserved(*args):
-    return getdatatree(*args).GetEntries()
+    return gettemplate("data", *args).Integral()
 
 def discriminants(*args):
     theset = set()

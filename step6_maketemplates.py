@@ -37,7 +37,7 @@ from helperstuff.enums import Production, TemplateGroup
 from helperstuff.samples import Sample
 from helperstuff.submitjob import submitjob
 from helperstuff.templates import DataTree, datatrees, TemplatesFile, templatesfiles
-from helperstuff.utilities import cd, KeepWhileOpenFile, KeepWhileOpenFiles, LSB_JOBID, mkdir_p
+from helperstuff.utilities import cd, KeepWhileOpenFile, KeepWhileOpenFiles, LSB_JOBID, mkdir_p, TFile
 
 def buildtemplates(*args, **kwargs):
   morebuildtemplatesargs = kwargs.pop("morebuildtemplatesargs", [])
@@ -100,33 +100,35 @@ def copydata(*args):
     datatree = args[0]
   else:
     datatree = DataTree(*args)
-  if "Ulascan" in str(datatree.production): return
-  f = ROOT.TFile(datatree.originaltreefile)
-  t = f.candTree
-
-  discriminants_forcerange = {d: array('d', [0]) for d in discriminants.values() if hasattr(t, d.name)}
-  epsilon = float("inf")
-  for (dname, dtitle, dbins, dmin, dmax, didentifier, dformula), branchaddress in discriminants_forcerange.iteritems():
-    t.SetBranchAddress(dname, branchaddress)
-    epsilon = min(epsilon, (dmax-dmin)/dbins/1000)
 
   newfilename = datatree.treefile
-  if os.path.exists(newfilename): f.Close(); return
-  mkdir_p(os.path.dirname(newfilename))
+  with KeepWhileOpenFile(newfilename + ".tmp") as kwof:
+    if not kwof: return
+    if os.path.exists(newfilename): return
 
-  newf = ROOT.TFile(newfilename, "recreate")
-  newt = t.CloneTree(0)
-  for entry in t:
-    for (dname, dtitle, dbins, dmin, dmax, didentifier), branchaddress in discriminants_forcerange.iteritems():
-      branchaddress[0] = min(branchaddress[0], dmax-epsilon)
-      branchaddress[0] = max(branchaddress[0], dmin)
-      assert dmin <= branchaddress[0] <= dmax-epsilon
-    if datatree.passescut(t):
-      newt.Fill()
-  print newt.GetEntries()
-  newf.Write()
-  f.Close()
-  newf.Close()
+    with TFile(datatree.originaltreefile) as f, TFile(newfilename, "recreate", deleteifbad=True) as newf:
+      t = f.candTree
+
+      discriminants_forcerange = {d: array('d', [0]) for d in discriminants.values() if hasattr(t, d.name)}
+      epsilon = float("inf")
+      for (dname, dtitle, dbins, dmin, dmax, didentifier, dformula), branchaddress in discriminants_forcerange.iteritems():
+        t.SetBranchAddress(dname, branchaddress)
+        epsilon = min(epsilon, (dmax-dmin)/dbins/1000)
+
+      mkdir_p(os.path.dirname(newfilename))
+
+      newt = t.CloneTree(0)
+      for entry in t:
+        for (dname, dtitle, dbins, dmin, dmax, didentifier, dformula), branchaddress in discriminants_forcerange.iteritems():
+          branchaddress[0] = min(branchaddress[0], dmax-epsilon)
+          branchaddress[0] = max(branchaddress[0], dmin)
+          assert dmin <= branchaddress[0] <= dmax-epsilon
+        if datatree.passescut(t):
+          newt.Fill()
+      print newt.GetEntries()
+      newf.Write()
+      f.Close()
+      newf.Close()
 
 def submitjobs(args):
   remove = {}
@@ -210,5 +212,5 @@ if __name__ == "__main__":
       with cd(config.repositorydir):
         buildtemplates(templatesfile, morebuildtemplatesargs=morebuildtemplatesargs)
       #and copy data
-    for datatree in datatrees:
-      copydata(datatree)
+#    for datatree in datatrees:
+#      copydata(datatree)
