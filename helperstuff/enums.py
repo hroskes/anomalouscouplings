@@ -865,6 +865,7 @@ class Production(MyEnum):
                  EnumItem("190821_2017"),
                  EnumItem("190821_2018"),
                  EnumItem("GEN_181119"),
+                 EnumItem("GEN_190908"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -874,6 +875,11 @@ class Production(MyEnum):
                 assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/GENtrees/181119_2017MC"
+        if self == "GEN_190908":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/GENtrees/190908_2018MC"
         if self == "190703_2016":
             if config.host == "lxplus":
                 return "/eos/user/a/amapane/CJLST-backup/190617/MC_2016"
@@ -959,7 +965,7 @@ class Production(MyEnum):
         return self.CJLSTdir()
     @property
     def dataluminosity(self):
-        if self.LHE or self.GEN: return 300
+        if self.LHE or self.GEN: return 3000
 
         if self == "190703_2016": return 35.9
         if self == "190703_2017": return 41.5
@@ -980,6 +986,7 @@ class Production(MyEnum):
         if self == "190821_2016": return 2016
         if self == "190821_2017": return 2017
         if self == "190821_2018": return 2018
+        if self == "GEN_190908": return 2018
         assert False
     @property
     def uselegacyobjects(self):

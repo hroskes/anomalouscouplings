@@ -2,7 +2,7 @@
 import argparse
 
 p = argparse.ArgumentParser()
-p.add_argument("directory", nargs="*")
+p.add_argument("directory", nargs="*", type=lambda x: x.rstrip("/"))
 args = p.parse_args()
 
 import os

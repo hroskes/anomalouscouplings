@@ -38,8 +38,9 @@ class TreeWrapperBase(Iterator):
         self.hypothesis = str(treesample.hypothesis)
 
         self.year = treesample.production.year
+        self.GEN = self.treesample.production.GEN
 
-        if self.treesample.production not in ("190821_2016", "190821_2017", "190821_2018"): raise ValueError("Figure out about L1prefiringWeight and LepSIP!")
+        if self.treesample.production not in ("190821_2016", "190821_2017", "190821_2018") and not self.GEN: raise ValueError("Figure out about L1prefiringWeight and LepSIP!")
 
         if self.isdata:
             self.unblind = config.unblinddistributions
@@ -55,8 +56,6 @@ class TreeWrapperBase(Iterator):
 
         self.minevent = minevent
         self.maxevent = maxevent
-
-        self.GEN = self.treesample.production.GEN
 
         self.initlists()
         self.checkfunctions()
@@ -86,7 +85,7 @@ class TreeWrapperBase(Iterator):
     def isZX(self): return self.treesample.isZX()
     @property
     @cache_instancemethod
-    def useNNLOPSweight(self): return self.productionmode == "ggH" and self.treesample.alternategenerator in (None, "POWHEG", "MINLO", "NNLOPS")
+    def useNNLOPSweight(self): return self.productionmode == "ggH" and self.treesample.alternategenerator in (None, "POWHEG", "MINLO", "NNLOPS") and not self.GEN
 
 
     def checkfunctions(self):
@@ -117,7 +116,9 @@ class TreeWrapperBase(Iterator):
             raise SyntaxError(error)
 
     def per_event_scale_factor(self):
-        result = self.L1prefiringWeight
+        result = 1
+        if not self.GEN:
+            result *= self.L1prefiringWeight
         if self.productionmode == "ggH" and self.useNNLOPSweight: return result * self.ggH_NNLOPS_weight
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH"): return result
         if self.productionmode == "ggZZ": return result * self.KFactor_QCD_ggZZ_Nominal
@@ -910,12 +911,6 @@ class TreeWrapper(TreeWrapperBase):
 
         if self.counters is not None:
             self.nevents = self.counters.GetBinContent(40)
-            #========================
-            if "GEN" in str(self.treesample.production): assert self.treesample.production == "GEN_181119", "remove this section"
-            if self.nevents == 0:
-                self.nevents = self.counters.GetBinContent(41)
-            assert self.nevents != 0
-            #========================
 
         self.tree.GetEntry(0)
         if not self.isdata and not self.isZX:
@@ -961,7 +956,7 @@ class TreeWrapper(TreeWrapperBase):
             else:
                 self.overallEventWeight = t.overallEventWeight
 
-            if max(t.LepSIP) > 4: self.overallEventWeight = 0
+            if not self.GEN and max(t.LepSIP) > 4: self.overallEventWeight = 0
 
             self.flavor = abs(t.Z1Flav*t.Z2Flav)
 
@@ -1636,13 +1631,22 @@ class TreeWrapper(TreeWrapperBase):
         ]
         STXSdiscriminants = [
             "D_STXS_stage1p1",
-            "D_STXS_stage1p1_bTagSFUp",
-            "D_STXS_stage1p1_bTagSFDn",
             "D_4couplings_VBFdecay_raw",
             "D_4couplings_VBFdecay",
             "D_4couplings_HadVHdecay_raw",
             "D_4couplings_HadVHdecay",
         ]
+        if not self.GEN:
+            STXSdiscriminants += [
+                "D_STXS_stage1p1_bTagSFUp",
+                "D_STXS_stage1p1_bTagSFDn",
+            ]
+        else:
+            self.exceptions += [
+                "D_STXS_stage1p1_bTagSFUp",
+                "D_STXS_stage1p1_bTagSFDn",
+            ]
+
 
         for JEC in "", "_JECUp", "_JECDn":
             for prod in ("VBF", "HadVH"):
@@ -1680,9 +1684,8 @@ class TreeWrapper(TreeWrapperBase):
                         self.exceptions.append(_)
 
         self.kfactors = []
-        if not self.isdata and not self.isZX:
-            self.kfactors.append("L1prefiringWeight")
         if not self.GEN:
+            if not self.isdata and not self.isZX: self.kfactors.append("L1prefiringWeight")
             if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
             if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
         if self.treesample.productionmode == "ggH" and self.useNNLOPSweight:
