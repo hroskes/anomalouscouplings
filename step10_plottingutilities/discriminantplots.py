@@ -305,7 +305,7 @@ def makehistogram(**kwargs): return Histogram(**kwargs)
 def gettree(*args, **kwargs):
   return Tree(*args, **kwargs)
 
-@cache_file("trees_tmp.pkl")
+@cache_file(os.path.join(config.repositorydir, "data", "trees.pkl"))
 def getfilenames(*productionmodesandhypotheses):
   print "Finding trees for", productionmodesandhypotheses
   return [
@@ -330,7 +330,7 @@ def gettrees(*productionmodesandhypotheses, **kwargs):
   if debug: result = [[_[0]] for _ in result]
   return result
 
-
+@cache_file(os.path.join(config.repositorydir, "data", "weights.pkl"))
 def getweights(*productionmodesandhypotheses, **kwargs):
   scalebys = kwargs.pop("scalebys", [1 for _ in productionmodesandhypotheses])
   uselumi = kwargs.pop("uselumi", False)
@@ -361,7 +361,7 @@ def getscaletos(*productionmodes, **kwargs):
         )
       )
       for ch in channels
-      for ca in categories if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
+      for ca in categories
     )
     for production in config.productionsforcombine
     for productionmode in productionmodes
@@ -396,7 +396,7 @@ class HypothesisLine(object):
       }[productionmode]
       numerator = sum(
         Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+", pm).gettemplate().Integral() * production.dataluminosity
-        for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
+        for ca in categories
         for ch in channels
         for pm in productionmodes
         for production in config.productionsforcombine
@@ -404,7 +404,7 @@ class HypothesisLine(object):
       if Hypothesis(self.hypothesis).ispure:
         denominator = sum(
           Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, self.hypothesis, pm).gettemplate().Integral() * production.dataluminosity
-          for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
+          for ca in categories
           for ch in channels
           for pm in productionmodes
           for production in config.productionsforcombine
@@ -439,7 +439,7 @@ class HypothesisLine(object):
             + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype,      pm).gettemplate().Integral() * g1*gi
             +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi
             ) * production.dataluminosity
-            for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
+            for ca in categories
             for ch in channels
             for pm in productionmodes
             for production in config.productionsforcombine
@@ -455,7 +455,7 @@ class HypothesisLine(object):
             + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(3),   pm).gettemplate().Integral() * g1*gi*gi*gi
             +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi*gi*gi
             ) * production.dataluminosity
-            for ca in categories if ca if ca in ("Untagged", "VBFtagged", "VHHadrtagged")
+            for ca in categories
             for ch in channels
             for pm in productionmodes
             for production in config.productionsforcombine
