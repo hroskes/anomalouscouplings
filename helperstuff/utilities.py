@@ -1043,7 +1043,7 @@ def debugfunction(function):
     return result
   return newfunction
 
-def reiglob(path, exp, invert=False, verbose=False, hastomatch=False):
+def reiglob(path, exp, invert=False, verbose=False, hastomatch=False, okifnofolder=False):
   "https://stackoverflow.com/a/17197678/5228524"
 
   if verbose: print "reiglobbing "+os.path.join(path, exp)
@@ -1052,11 +1052,14 @@ def reiglob(path, exp, invert=False, verbose=False, hastomatch=False):
 
   n = 0
 
-  for f in os.listdir(path):
-    if bool(m.match(f)) != bool(invert):
-      n += 1
-      if verbose and n % 100 == 0: print "Found {} files so far".format(n)
-      yield os.path.join(path, f)
+  try:
+    for f in os.listdir(path):
+      if bool(m.match(f)) != bool(invert):
+        n += 1
+        if verbose and n % 100 == 0: print "Found {} files so far".format(n)
+        yield os.path.join(path, f)
+  except OSError:
+    if not okifnofolder: raise
 
   if hastomatch and n == 0:
     raise ValueError(exp + " didn't match anything in " + path)

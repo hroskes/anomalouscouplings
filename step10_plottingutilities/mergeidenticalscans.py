@@ -12,6 +12,7 @@ if __name__ == "__main__":
   g.add_argument("--morecategories", action="store_true")
   g.add_argument("--shapesystematics", action="store_true")
   g.add_argument("--newyields", action="store_true")
+  g.add_argument("--applySIPcut", action="store_true")
   args = p.parse_args()
 
 import contextlib, itertools, os
@@ -201,6 +202,7 @@ if __name__ == "__main__":
       )
     )
   else:
+    scanranges = None
     if args.decay:
       folder = "fa3fa2fL1fL1Zg_yieldsystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
@@ -225,17 +227,24 @@ if __name__ == "__main__":
       folder = "fa3fa2fL1fL1Zg_morecategories_newyields"
       plotname = "limit_lumi137.10_scan"+args.fai
       scanrange = "_26,-1.0,1.0_26,-0.02,0.02"
+    if args.applySIPcut:
+      folder = "fa3fa2fL1fL1Zg_morecategories_applySIPcut"
+      plotname = "limit_lumi137.10_scan"+args.fai
+      scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
+      scanranges = "(_101,-0.02,0.02)?"
+    if scanranges is None: scanranges = scanrange
 
     functionargs = [
       os.path.join(plotsbasedir, "limits", folder, plotname+scanrange+"_merged"),
     ] + sorted(
       reglob(
          os.path.join(plotsbasedir, "limits", folder, ""),
-         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanrange+".root",
+         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanranges+".root",
          hastomatch=True,
       ) + reglob(
          os.path.join(plotsbasedir, "limits", folder, "gridscan/"),
-         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanrange+".root",
+         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanranges+".root",
+         okifnofolder=True,
       )
     )
 
