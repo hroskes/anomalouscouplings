@@ -4,9 +4,9 @@ set -euo pipefail
 
 cd $(dirname $0)
 
-cmd="sbatch --mem 12G --time 2-0:0:0 slurm.sh"
+cmd="sbatch --mem 12G --time 2-0:0:0 slurm.sh"; moreargs=
 #cmd=python; moreargs=runobs=0
-#cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1 runobs=0"
+#cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1"
 
 for scanrange in 101,-1,1 101,-0.02,0.02; do
 
@@ -110,6 +110,7 @@ for scanrange in 101,-1,1 101,-0.02,0.02; do
     $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:-0.3,CMS_zz4l_fai3_relative:1 $moreargs
     $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 useNLLandNLL0=0 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:-0.24,CMS_zz4l_fai3_relative:1 $moreargs
   elif [ $scanrange == 101,-0.02,0.02 ]; then
+    true
   else
     echo "Bad scanrange $scanrange"
     exit 1
