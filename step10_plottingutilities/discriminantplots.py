@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-debug = False
+debug = True
 
 if __name__ == "__main__":
   import argparse
@@ -332,6 +332,7 @@ def gettrees(*productionmodesandhypotheses, **kwargs):
 
 @cache_file(os.path.join(config.repositorydir, "data", "weights.pkl"))
 def getweights(*productionmodesandhypotheses, **kwargs):
+  print "Finding weights for", productionmodesandhypotheses
   scalebys = kwargs.pop("scalebys", [1 for _ in productionmodesandhypotheses])
   uselumi = kwargs.pop("uselumi", False)
   assert not kwargs
@@ -464,7 +465,7 @@ class HypothesisLine(object):
 
     otherargs = [tuple(args) + (self.hypothesis,) for args in otherargs]
     assert len(otherargs) == len(scalebys)
-    return getweights(*otherargs, scalebys=scalebys)
+    return getweights(*otherargs, scalebys=tuple(scalebys))
 
   def gettrees(self, *otherargs, **kwargs):
     hypothesis = self.hypothesis
