@@ -1,0 +1,1110 @@
+string = """
+SMVVHnormalization_0_0, SMVVHnormalization_0_normalization_0, 0+VVHnormalization_0_0, dummy_VBF_0+_VBFtagged_0_0, dummy_VBF_0+_VHHadrtagged_0_0, dummy_VBF_0+_VHLepttagged_0_0, dummy_VBF_0+_VBF1jtagged_0_0, dummy_VBF_0+_Boosted_0_0, dummy_VBF_0+_Untagged_0_0, 0-VVHnormalization_0_0, dummy_VBF_0-_VBFtagged_0_0, dummy_VBF_0-_VHHadrtagged_0_0, dummy_VBF_0-_VHLepttagged_0_0, dummy_VBF_0-_VBF1jtagged_0_0, dummy_VBF_0-_Boosted_0_0, dummy_VBF_0-_Untagged_0_0, a2VVHnormalization_0_0, dummy_VBF_a2_VBFtagged_0_0, dummy_VBF_a2_VHHadrtagged_0_0, dummy_VBF_a2_VHLepttagged_0_0, dummy_VBF_a2_VBF1jtagged_0_0, dummy_VBF_a2_Boosted_0_0, dummy_VBF_a2_Untagged_0_0, L1VVHnormalization_0_0, dummy_VBF_L1_VBFtagged_0_0, dummy_VBF_L1_VHHadrtagged_0_0, dummy_VBF_L1_VHLepttagged_0_0, dummy_VBF_L1_VBF1jtagged_0_0, dummy_VBF_L1_Boosted_0_0, dummy_VBF_L1_Untagged_0_0, L1ZgVVHnormalization_0_0, dummy_VBF_L1Zg_VBFtagged_0_0, dummy_VBF_L1Zg_VHHadrtagged_0_0, dummy_VBF_L1Zg_VHLepttagged_0_0, dummy_VBF_L1Zg_VBF1jtagged_0_0, dummy_VBF_L1Zg_Boosted_0_0, dummy_VBF_L1Zg_Untagged_0_0
+
+/work-zfs/lhc/heshy/anomalouscouplings/step12_categorysystematics/discriminantplots.py:39: RuntimeWarning: creating converter for unknown type "const char*[]"
+  if self.__value is None: self.__value = self.__ttreeformula.EvalInstance()
+10000 / 67621
+
+SMVVHnormalization_0_normalization 0.018842626363 0.018842626363 0.018842626363
+SMVVHnormalization_0 0.018842626363 4.67115831375 4.67115831375
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ZH0+190821_2016.root:candTree
+Filling 37 histograms:
+SMVVHnormalization_1_0, SMVVHnormalization_1_normalization_0, 0+VVHnormalization_1_0, 0-VVHnormalization_1_0, a2VVHnormalization_1_0, L1VVHnormalization_1_0, L1ZgVVHnormalization_1_0, dummy_VH_0+_VBFtagged_0_0, dummy_VH_0+_VHHadrtagged_0_0, dummy_VH_0+_VHLepttagged_0_0, dummy_VH_0+_VBF1jtagged_0_0, dummy_VH_0+_Boosted_0_0, dummy_VH_0+_Untagged_0_0, dummy_VH_0-_VBFtagged_0_0, dummy_VH_0-_VHHadrtagged_0_0, dummy_VH_0-_VHLepttagged_0_0, dummy_VH_0-_VBF1jtagged_0_0, dummy_VH_0-_Boosted_0_0, dummy_VH_0-_Untagged_0_0, dummy_VH_a2_VBFtagged_0_0, dummy_VH_a2_VHHadrtagged_0_0, dummy_VH_a2_VHLepttagged_0_0, dummy_VH_a2_VBF1jtagged_0_0, dummy_VH_a2_Boosted_0_0, dummy_VH_a2_Untagged_0_0, dummy_VH_L1_VBFtagged_0_0, dummy_VH_L1_VHHadrtagged_0_0, dummy_VH_L1_VHLepttagged_0_0, dummy_VH_L1_VBF1jtagged_0_0, dummy_VH_L1_Boosted_0_0, dummy_VH_L1_Untagged_0_0, dummy_VH_L1Zg_VBFtagged_0_0, dummy_VH_L1Zg_VHHadrtagged_0_0, dummy_VH_L1Zg_VHLepttagged_0_0, dummy_VH_L1Zg_VBF1jtagged_0_0, dummy_VH_L1Zg_Boosted_0_0, dummy_VH_L1Zg_Untagged_0_0
+
+10000 / 93941
+
+SMVVHnormalization_1_normalization 0.00294847832993 0.00294847832993 0.00294847832993
+SMVVHnormalization_1 0.00294847832993 1.15477216244 1.15477216244
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/WH0+190821_2016.root:candTree
+Filling 30 histograms:
+SMVVHnormalization_2_0, SMVVHnormalization_2_normalization_0, 0+VVHnormalization_2_0, 0-VVHnormalization_2_0, a2VVHnormalization_2_0, L1VVHnormalization_2_0, dummy_VH_0+_VBFtagged_1_0, dummy_VH_0+_VHHadrtagged_1_0, dummy_VH_0+_VHLepttagged_1_0, dummy_VH_0+_VBF1jtagged_1_0, dummy_VH_0+_Boosted_1_0, dummy_VH_0+_Untagged_1_0, dummy_VH_0-_VBFtagged_1_0, dummy_VH_0-_VHHadrtagged_1_0, dummy_VH_0-_VHLepttagged_1_0, dummy_VH_0-_VBF1jtagged_1_0, dummy_VH_0-_Boosted_1_0, dummy_VH_0-_Untagged_1_0, dummy_VH_a2_VBFtagged_1_0, dummy_VH_a2_VHHadrtagged_1_0, dummy_VH_a2_VHLepttagged_1_0, dummy_VH_a2_VBF1jtagged_1_0, dummy_VH_a2_Boosted_1_0, dummy_VH_a2_Untagged_1_0, dummy_VH_L1_VBFtagged_1_0, dummy_VH_L1_VHHadrtagged_1_0, dummy_VH_L1_VHLepttagged_1_0, dummy_VH_L1_VBF1jtagged_1_0, dummy_VH_L1_Boosted_1_0, dummy_VH_L1_Untagged_1_0
+
+10000 / 57948
+
+SMVVHnormalization_2_normalization 0.00672705471516 0.00672705471516 0.00672705471516
+SMVVHnormalization_2 0.00672705471516 1.39545845985 1.39545845985
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/VBF0+190821_2017.root:candTree
+Filling 37 histograms:
+SMVVHnormalization_3_0, SMVVHnormalization_3_normalization_0, 0+VVHnormalization_3_0, dummy_VBF_0+_VBFtagged_1_0, dummy_VBF_0+_VHHadrtagged_1_0, dummy_VBF_0+_VHLepttagged_1_0, dummy_VBF_0+_VBF1jtagged_1_0, dummy_VBF_0+_Boosted_1_0, dummy_VBF_0+_Untagged_1_0, 0-VVHnormalization_3_0, dummy_VBF_0-_VBFtagged_1_0, dummy_VBF_0-_VHHadrtagged_1_0, dummy_VBF_0-_VHLepttagged_1_0, dummy_VBF_0-_VBF1jtagged_1_0, dummy_VBF_0-_Boosted_1_0, dummy_VBF_0-_Untagged_1_0, a2VVHnormalization_3_0, dummy_VBF_a2_VBFtagged_1_0, dummy_VBF_a2_VHHadrtagged_1_0, dummy_VBF_a2_VHLepttagged_1_0, dummy_VBF_a2_VBF1jtagged_1_0, dummy_VBF_a2_Boosted_1_0, dummy_VBF_a2_Untagged_1_0, L1VVHnormalization_3_0, dummy_VBF_L1_VBFtagged_1_0, dummy_VBF_L1_VHHadrtagged_1_0, dummy_VBF_L1_VHLepttagged_1_0, dummy_VBF_L1_VBF1jtagged_1_0, dummy_VBF_L1_Boosted_1_0, dummy_VBF_L1_Untagged_1_0, L1ZgVVHnormalization_2_0, dummy_VBF_L1Zg_VBFtagged_1_0, dummy_VBF_L1Zg_VHHadrtagged_1_0, dummy_VBF_L1Zg_VHLepttagged_1_0, dummy_VBF_L1Zg_VBF1jtagged_1_0, dummy_VBF_L1Zg_Boosted_1_0, dummy_VBF_L1Zg_Untagged_1_0
+
+10000 / 65336
+
+SMVVHnormalization_3_normalization 0.019552314654 0.019552314654 0.019552314654
+SMVVHnormalization_3 0.019552314654 5.34568500519 5.34568500519
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ZH0+190821_2017.root:candTree
+Filling 37 histograms:
+SMVVHnormalization_4_0, SMVVHnormalization_4_normalization_0, 0+VVHnormalization_4_0, 0-VVHnormalization_4_0, a2VVHnormalization_4_0, L1VVHnormalization_4_0, L1ZgVVHnormalization_3_0, dummy_VH_0+_VBFtagged_2_0, dummy_VH_0+_VHHadrtagged_2_0, dummy_VH_0+_VHLepttagged_2_0, dummy_VH_0+_VBF1jtagged_2_0, dummy_VH_0+_Boosted_2_0, dummy_VH_0+_Untagged_2_0, dummy_VH_0-_VBFtagged_2_0, dummy_VH_0-_VHHadrtagged_2_0, dummy_VH_0-_VHLepttagged_2_0, dummy_VH_0-_VBF1jtagged_2_0, dummy_VH_0-_Boosted_2_0, dummy_VH_0-_Untagged_2_0, dummy_VH_a2_VBFtagged_2_0, dummy_VH_a2_VHHadrtagged_2_0, dummy_VH_a2_VHLepttagged_2_0, dummy_VH_a2_VBF1jtagged_2_0, dummy_VH_a2_Boosted_2_0, dummy_VH_a2_Untagged_2_0, dummy_VH_L1_VBFtagged_2_0, dummy_VH_L1_VHHadrtagged_2_0, dummy_VH_L1_VHLepttagged_2_0, dummy_VH_L1_VBF1jtagged_2_0, dummy_VH_L1_Boosted_2_0, dummy_VH_L1_Untagged_2_0, dummy_VH_L1Zg_VBFtagged_1_0, dummy_VH_L1Zg_VHHadrtagged_1_0, dummy_VH_L1Zg_VHLepttagged_1_0, dummy_VH_L1Zg_VBF1jtagged_1_0, dummy_VH_L1Zg_Boosted_1_0, dummy_VH_L1Zg_Untagged_1_0
+
+10000 / 73839
+
+SMVVHnormalization_4_normalization 0.00385352689773 0.00385352689773 0.00385352689773
+SMVVHnormalization_4 0.00385352689773 1.38254082203 1.38254082203
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/WH0+190821_2017.root:candTree
+Filling 30 histograms:
+SMVVHnormalization_5_0, SMVVHnormalization_5_normalization_0, 0+VVHnormalization_5_0, 0-VVHnormalization_5_0, a2VVHnormalization_5_0, L1VVHnormalization_5_0, dummy_VH_0+_VBFtagged_3_0, dummy_VH_0+_VHHadrtagged_3_0, dummy_VH_0+_VHLepttagged_3_0, dummy_VH_0+_VBF1jtagged_3_0, dummy_VH_0+_Boosted_3_0, dummy_VH_0+_Untagged_3_0, dummy_VH_0-_VBFtagged_3_0, dummy_VH_0-_VHHadrtagged_3_0, dummy_VH_0-_VHLepttagged_3_0, dummy_VH_0-_VBF1jtagged_3_0, dummy_VH_0-_Boosted_3_0, dummy_VH_0-_Untagged_3_0, dummy_VH_a2_VBFtagged_3_0, dummy_VH_a2_VHHadrtagged_3_0, dummy_VH_a2_VHLepttagged_3_0, dummy_VH_a2_VBF1jtagged_3_0, dummy_VH_a2_Boosted_3_0, dummy_VH_a2_Untagged_3_0, dummy_VH_L1_VBFtagged_3_0, dummy_VH_L1_VHHadrtagged_3_0, dummy_VH_L1_VHLepttagged_3_0, dummy_VH_L1_VBF1jtagged_3_0, dummy_VH_L1_Boosted_3_0, dummy_VH_L1_Untagged_3_0
+
+10000 / 43533
+
+SMVVHnormalization_5_normalization 0.00921901781112 0.00921901781112 0.00921901781112
+SMVVHnormalization_5 0.00921901781112 1.656686306 1.656686306
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/VBF0+190821_2018.root:candTree
+Filling 37 histograms:
+SMVVHnormalization_6_0, SMVVHnormalization_6_normalization_0, 0+VVHnormalization_6_0, dummy_VBF_0+_VBFtagged_2_0, dummy_VBF_0+_VHHadrtagged_2_0, dummy_VBF_0+_VHLepttagged_2_0, dummy_VBF_0+_VBF1jtagged_2_0, dummy_VBF_0+_Boosted_2_0, dummy_VBF_0+_Untagged_2_0, 0-VVHnormalization_6_0, dummy_VBF_0-_VBFtagged_2_0, dummy_VBF_0-_VHHadrtagged_2_0, dummy_VBF_0-_VHLepttagged_2_0, dummy_VBF_0-_VBF1jtagged_2_0, dummy_VBF_0-_Boosted_2_0, dummy_VBF_0-_Untagged_2_0, a2VVHnormalization_6_0, dummy_VBF_a2_VBFtagged_2_0, dummy_VBF_a2_VHHadrtagged_2_0, dummy_VBF_a2_VHLepttagged_2_0, dummy_VBF_a2_VBF1jtagged_2_0, dummy_VBF_a2_Boosted_2_0, dummy_VBF_a2_Untagged_2_0, L1VVHnormalization_6_0, dummy_VBF_L1_VBFtagged_2_0, dummy_VBF_L1_VHHadrtagged_2_0, dummy_VBF_L1_VHLepttagged_2_0, dummy_VBF_L1_VBF1jtagged_2_0, dummy_VBF_L1_Boosted_2_0, dummy_VBF_L1_Untagged_2_0, L1ZgVVHnormalization_4_0, dummy_VBF_L1Zg_VBFtagged_2_0, dummy_VBF_L1Zg_VHHadrtagged_2_0, dummy_VBF_L1Zg_VHLepttagged_2_0, dummy_VBF_L1Zg_VBF1jtagged_2_0, dummy_VBF_L1Zg_Boosted_2_0, dummy_VBF_L1Zg_Untagged_2_0
+
+10000 / 60893
+
+SMVVHnormalization_6_normalization 0.0220281817019 0.0220281817019 0.0220281817019
+SMVVHnormalization_6 0.0220281817019 8.07410049438 8.07410049438
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ZH0+190821_2018.root:candTree
+Filling 37 histograms:
+SMVVHnormalization_7_0, SMVVHnormalization_7_normalization_0, 0+VVHnormalization_7_0, 0-VVHnormalization_7_0, a2VVHnormalization_7_0, L1VVHnormalization_7_0, L1ZgVVHnormalization_5_0, dummy_VH_0+_VBFtagged_4_0, dummy_VH_0+_VHHadrtagged_4_0, dummy_VH_0+_VHLepttagged_4_0, dummy_VH_0+_VBF1jtagged_4_0, dummy_VH_0+_Boosted_4_0, dummy_VH_0+_Untagged_4_0, dummy_VH_0-_VBFtagged_4_0, dummy_VH_0-_VHHadrtagged_4_0, dummy_VH_0-_VHLepttagged_4_0, dummy_VH_0-_VBF1jtagged_4_0, dummy_VH_0-_Boosted_4_0, dummy_VH_0-_Untagged_4_0, dummy_VH_a2_VBFtagged_4_0, dummy_VH_a2_VHHadrtagged_4_0, dummy_VH_a2_VHLepttagged_4_0, dummy_VH_a2_VBF1jtagged_4_0, dummy_VH_a2_Boosted_4_0, dummy_VH_a2_Untagged_4_0, dummy_VH_L1_VBFtagged_4_0, dummy_VH_L1_VHHadrtagged_4_0, dummy_VH_L1_VHLepttagged_4_0, dummy_VH_L1_VBF1jtagged_4_0, dummy_VH_L1_Boosted_4_0, dummy_VH_L1_Untagged_4_0, dummy_VH_L1Zg_VBFtagged_2_0, dummy_VH_L1Zg_VHHadrtagged_2_0, dummy_VH_L1Zg_VHLepttagged_2_0, dummy_VH_L1Zg_VBF1jtagged_2_0, dummy_VH_L1Zg_Boosted_2_0, dummy_VH_L1Zg_Untagged_2_0
+
+10000 / 97979
+
+SMVVHnormalization_7_normalization 0.00288459006697 0.00288459006697 0.00288459006697
+SMVVHnormalization_7 0.00288459006697 1.99092447758 1.99092447758
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/WH0+190821_2018.root:candTree
+Filling 30 histograms:
+SMVVHnormalization_8_0, SMVVHnormalization_8_normalization_0, 0+VVHnormalization_8_0, 0-VVHnormalization_8_0, a2VVHnormalization_8_0, L1VVHnormalization_8_0, dummy_VH_0+_VBFtagged_5_0, dummy_VH_0+_VHHadrtagged_5_0, dummy_VH_0+_VHLepttagged_5_0, dummy_VH_0+_VBF1jtagged_5_0, dummy_VH_0+_Boosted_5_0, dummy_VH_0+_Untagged_5_0, dummy_VH_0-_VBFtagged_5_0, dummy_VH_0-_VHHadrtagged_5_0, dummy_VH_0-_VHLepttagged_5_0, dummy_VH_0-_VBF1jtagged_5_0, dummy_VH_0-_Boosted_5_0, dummy_VH_0-_Untagged_5_0, dummy_VH_a2_VBFtagged_5_0, dummy_VH_a2_VHHadrtagged_5_0, dummy_VH_a2_VHLepttagged_5_0, dummy_VH_a2_VBF1jtagged_5_0, dummy_VH_a2_Boosted_5_0, dummy_VH_a2_Untagged_5_0, dummy_VH_L1_VBFtagged_5_0, dummy_VH_L1_VHHadrtagged_5_0, dummy_VH_L1_VHLepttagged_5_0, dummy_VH_L1_VBF1jtagged_5_0, dummy_VH_L1_Boosted_5_0, dummy_VH_L1_Untagged_5_0
+
+10000 / 60967
+
+SMVVHnormalization_8_normalization 0.00666955951601 0.00666955951601 0.00666955951601
+SMVVHnormalization_8 0.00666955951601 2.41249918938 2.41249918938
+0+VVHnormalization_0 0.018842626363 4.67115831375 4.67115831375
+0+VVHnormalization_1 0.00294847832993 1.15477216244 1.15477216244
+0+VVHnormalization_2 0.00672705471516 1.39545845985 1.39545845985
+0+VVHnormalization_3 0.019552314654 5.34568500519 5.34568500519
+0+VVHnormalization_4 0.00385352689773 1.38254082203 1.38254082203
+0+VVHnormalization_5 0.00921901781112 1.656686306 1.656686306
+0+VVHnormalization_6 0.0220281817019 8.07410049438 8.07410049438
+0+VVHnormalization_7 0.00288459006697 1.99092447758 1.99092447758
+0+VVHnormalization_8 0.00666955951601 2.41249918938 2.41249918938
+dummy_VBF_0+_VBF1jtagged_0 0.0028141408693 0.697636187077 0.697636187077
+dummy_VBF_0+_VBF1jtagged_1 0.00279493094422 0.764145851135 0.764145851135
+dummy_VBF_0+_VBF1jtagged_2 0.00336093339138 1.23189985752 1.23189985752
+dummy_VBF_0+_Boosted_0 0.0015451364452 0.383045166731 0.383045166731
+dummy_VBF_0+_Boosted_1 0.00141950324178 0.388098150492 0.388098150492
+dummy_VBF_0+_Boosted_2 0.0018099672161 0.663416445255 0.663416445255
+dummy_VBF_0+_Untagged_0 0.00580737413839 1.4396699667 1.4396699667
+dummy_VBF_0+_Untagged_1 0.00617199297994 1.68744874001 1.68744874001
+dummy_VBF_0+_Untagged_2 0.00683692563325 2.50597286224 2.50597286224
+dummy_VBF_0+_VHHadrtagged_0 0.000607965688687 0.150716990232 0.150716990232
+dummy_VBF_0+_VHHadrtagged_1 0.000609924027231 0.166755795479 0.166755795479
+dummy_VBF_0+_VHHadrtagged_2 0.000593187927734 0.217424169183 0.217424169183
+dummy_VBF_0+_VBFtagged_0 0.00797390472144 1.97676110268 1.97676110268
+dummy_VBF_0+_VBFtagged_1 0.00849461834878 2.32246422768 2.32246422768
+dummy_VBF_0+_VBFtagged_2 0.00935026444495 3.42719960213 3.42719960213
+dummy_VBF_0+_VHLepttagged_0 9.40504542086e-05 0.0233154632151 0.0233154632151
+dummy_VBF_0+_VHLepttagged_1 6.13821321167e-05 0.0167821329087 0.0167821329087
+dummy_VBF_0+_VHLepttagged_2 7.69542166381e-05 0.0282064173371 0.0282064173371
+0-VVHnormalization_0 0.00689363945276 1.70895934105 1.70895934105
+0-VVHnormalization_1 0.00439775874838 1.72238326073 1.72238326073
+0-VVHnormalization_2 0.0174410119653 3.6179587841 3.6179587841
+0-VVHnormalization_3 0.0067082606256 1.83406662941 1.83406662941
+0-VVHnormalization_4 0.00559668056667 2.00793719292 2.00793719292
+0-VVHnormalization_5 0.022605702281 4.06231546402 4.06231546402
+0-VVHnormalization_6 0.00827472284436 3.03297591209 3.03297591209
+0-VVHnormalization_7 0.0042479922995 2.93193554878 2.93193554878
+0-VVHnormalization_8 0.016257584095 5.88065910339 5.88065910339
+dummy_VBF_0-_VBF1jtagged_0 0.000148958701175 0.0369274243712 0.0386975593865
+dummy_VBF_0-_VBF1jtagged_1 9.45766296354e-05 0.0258576478809 0.0270971469581
+dummy_VBF_0-_VBF1jtagged_2 0.000130502710817 0.0478338189423 0.0501267537475
+dummy_VBF_0-_Boosted_0 0.00137277529575 0.340316176414 0.356629401445
+dummy_VBF_0-_Boosted_1 0.000799899629783 0.218695908785 0.22917920351
+dummy_VBF_0-_Boosted_2 0.0012079157168 0.442743450403 0.463966548443
+dummy_VBF_0-_Untagged_0 0.000345042411936 0.0855373218656 0.0896375924349
+dummy_VBF_0-_Untagged_1 0.000493494677357 0.134923517704 0.141391143203
+dummy_VBF_0-_Untagged_2 0.000459604489151 0.168461158872 0.176536425948
+dummy_VBF_0-_VHHadrtagged_0 0.000245250441367 0.0607985109091 0.0637129172683
+dummy_VBF_0-_VHHadrtagged_1 0.000148258259287 0.0405344292521 0.042477466166
+dummy_VBF_0-_VHHadrtagged_2 0.000176340457983 0.0646349564195 0.0677332654595
+dummy_VBF_0-_VBFtagged_0 0.00448775384575 1.11253118515 1.16586089134
+dummy_VBF_0-_VBFtagged_1 0.0051388964057 1.40499579906 1.47234487534
+dummy_VBF_0-_VBFtagged_2 0.00614686589688 2.25304174423 2.36104226112
+dummy_VBF_0-_VHLepttagged_0 0.000293878925731 0.0728536993265 0.0763459727168
+dummy_VBF_0-_VHLepttagged_1 3.31565242959e-05 0.00906513258815 0.00949967373163
+dummy_VBF_0-_VHLepttagged_2 0.000153505563503 0.056265167892 0.0589622631669
+a2VVHnormalization_0 0.0062021384947 1.53753364086 1.53753364086
+a2VVHnormalization_1 0.0051773940213 2.02772760391 2.02772760391
+a2VVHnormalization_2 0.0183232482523 3.80096960068 3.80096960068
+a2VVHnormalization_3 0.00461950991303 1.26299333572 1.26299333572
+a2VVHnormalization_4 0.00647325441241 2.32242798805 2.32242798805
+a2VVHnormalization_5 0.0256264712662 4.6051568985 4.6051568985
+a2VVHnormalization_6 0.00719720777124 2.63802886009 2.63802886009
+a2VVHnormalization_7 0.00502833956853 3.47052598 3.47052598
+a2VVHnormalization_8 0.0173105448484 6.26153421402 6.26153421402
+dummy_VBF_a2_VBF1jtagged_0 0.000120302604046 0.0298234708607 0.0299910549074
+dummy_VBF_a2_VBF1jtagged_1 7.4846422649e-05 0.0204633250833 0.0205783136189
+dummy_VBF_a2_VBF1jtagged_2 0.000117106406833 0.0429236032069 0.0431648008525
+dummy_VBF_a2_Boosted_0 0.000791155733168 0.196130499244 0.197232604027
+dummy_VBF_a2_Boosted_1 0.000508361379616 0.138988137245 0.139769136906
+dummy_VBF_a2_Boosted_2 0.000701413839124 0.257092744112 0.25853741169
+dummy_VBF_a2_Untagged_0 0.000408936553868 0.101376920938 0.10194657743
+dummy_VBF_a2_Untagged_1 0.000496771070175 0.135819301009 0.136582493782
+dummy_VBF_a2_Untagged_2 0.000482007715618 0.17667272687 0.177665486932
+dummy_VBF_a2_VHHadrtagged_0 0.000341900275089 0.0847583711147 0.0852346494794
+dummy_VBF_a2_VHHadrtagged_1 0.000132455024868 0.0362137593329 0.0364172533154
+dummy_VBF_a2_VHHadrtagged_2 0.000115685004857 0.0424026101828 0.0426408797503
+dummy_VBF_a2_VBFtagged_0 0.00425520353019 1.05488109589 1.0608086586
+dummy_VBF_a2_VBFtagged_1 0.00337648205459 0.923144340515 0.928331673145
+dummy_VBF_a2_VBFtagged_2 0.00573059404269 2.10046362877 2.11226654053
+dummy_VBF_a2_VHLepttagged_0 0.000284633861156 0.0705618113279 0.0709583163261
+dummy_VBF_a2_VHLepttagged_1 3.05915928038e-05 0.00836386997253 0.00841086823493
+dummy_VBF_a2_VHLepttagged_2 5.04264862684e-05 0.0184830743819 0.0185869354755
+L1VVHnormalization_0 0.00254991860129 0.632134437561 0.632134437561
+L1VVHnormalization_1 0.00819210615009 3.2084403038 3.2084403038
+L1VVHnormalization_2 0.027154231444 5.6328663826 5.6328663826
+L1VVHnormalization_3 0.00187507050578 0.512652158737 0.512652158737
+L1VVHnormalization_4 0.00970127806067 3.48055529594 3.48055529594
+L1VVHnormalization_5 0.0217342618853 3.90571475029 3.90571475029
+L1VVHnormalization_6 0.002779368544 1.01873600483 1.01873600483
+L1VVHnormalization_7 0.00705761555582 4.87111854553 4.87111854553
+L1VVHnormalization_8 0.0157183501869 5.68560886383 5.68560886383
+dummy_VBF_L1_VBF1jtagged_0 3.14245153277e-05 0.00779025629163 0.00755774136633
+dummy_VBF_L1_VBF1jtagged_1 2.91832238872e-05 0.00797881558537 0.00774067267776
+dummy_VBF_L1_VBF1jtagged_2 4.46114063379e-05 0.0163516439497 0.0158635992557
+dummy_VBF_L1_Boosted_0 0.00100277189631 0.248590946198 0.24117128551
+dummy_VBF_L1_Boosted_1 0.000586663722061 0.160396322608 0.155608996749
+dummy_VBF_L1_Boosted_2 0.000639730424155 0.234483614564 0.227485015988
+dummy_VBF_L1_Untagged_0 6.09195085417e-05 0.015102176927 0.0146514242515
+dummy_VBF_L1_Untagged_1 7.23210760043e-05 0.0197728853673 0.0191827267408
+dummy_VBF_L1_Untagged_2 7.91859056335e-05 0.0290244091302 0.028158120811
+dummy_VBF_L1_VHHadrtagged_0 9.74335926003e-05 0.0241541564465 0.0234332308173
+dummy_VBF_L1_VHHadrtagged_1 4.78090587421e-05 0.0130711970851 0.0126810623333
+dummy_VBF_L1_VHHadrtagged_2 4.90890997753e-05 0.0179928746074 0.0174558442086
+dummy_VBF_L1_VBFtagged_0 0.00130741717294 0.324113667011 0.314439892769
+dummy_VBF_L1_VBFtagged_1 0.00113576767035 0.310523658991 0.301255494356
+dummy_VBF_L1_VBFtagged_2 0.00196215440519 0.719198346138 0.697732508183
+dummy_VBF_L1_VHLepttagged_0 4.99493253301e-05 0.0123826265335 0.0120130442083
+dummy_VBF_L1_VHLepttagged_1 3.32529521074e-06 0.000909149646759 0.000882014341187
+dummy_VBF_L1_VHLepttagged_2 4.58337763121e-06 0.00167996855453 0.00162982672919
+L1ZgVVHnormalization_0 0.0024742896203 0.613385736942 0.613385736942
+L1ZgVVHnormalization_1 0.025671126321 10.0541028976 10.0541028976
+L1ZgVVHnormalization_2 0.00153315765783 0.419171750546 0.419171750546
+L1ZgVVHnormalization_3 0.0213352702558 7.65451574326 7.65451574326
+L1ZgVVHnormalization_4 0.0027264400851 0.999335825443 0.999335825443
+L1ZgVVHnormalization_5 0.0132933435962 9.1749753952 9.1749753952
+dummy_VBF_L1Zg_VBF1jtagged_0 5.088215039e-05 0.0126138776541 0.0122510781512
+dummy_VBF_L1Zg_VBF1jtagged_1 5.84981171414e-05 0.0159936305135 0.0155336232856
+dummy_VBF_L1Zg_VBF1jtagged_2 7.04673511791e-05 0.0258287545294 0.0250858701766
+dummy_VBF_L1Zg_Boosted_0 0.000546600145753 0.135504245758 0.13160687685
+dummy_VBF_L1Zg_Boosted_1 0.000324990134686 0.0888536646962 0.0862980633974
+dummy_VBF_L1Zg_Boosted_2 0.000799041299615 0.292876631021 0.284452944994
+dummy_VBF_L1Zg_Untagged_0 0.000108188411104 0.0268203169107 0.0260489135981
+dummy_VBF_L1Zg_Untagged_1 0.000116228846309 0.0317774526775 0.0308634713292
+dummy_VBF_L1Zg_Untagged_2 0.000120837481518 0.0442911721766 0.0430172719061
+dummy_VBF_L1Zg_VHHadrtagged_0 6.63348691887e-05 0.0164446644485 0.0159716848284
+dummy_VBF_L1Zg_VHHadrtagged_1 3.19020982715e-05 0.00872216746211 0.00847130082548
+dummy_VBF_L1Zg_VHHadrtagged_2 5.06549549755e-05 0.0185668170452 0.0180328004062
+dummy_VBF_L1Zg_VBFtagged_0 0.00169370986987 0.419877082109 0.407800614834
+dummy_VBF_L1Zg_VBFtagged_1 0.000998145784251 0.2728972435 0.265048205853
+dummy_VBF_L1Zg_VBFtagged_2 0.0016796408454 0.615647256374 0.597940087318
+dummy_VBF_L1Zg_VHLepttagged_0 8.58506882651e-06 0.00212827092037 0.00206705764867
+dummy_VBF_L1Zg_VHLepttagged_1 3.39814505423e-06 0.00092906714417 0.000902345404029
+dummy_VBF_L1Zg_VHLepttagged_2 5.80744926992e-06 0.00212863367051 0.00206741015427
+dummy_VH_0+_VBF1jtagged_0 0.000120919910842 0.0473583117127 0.0473583117127
+dummy_VH_0+_VBF1jtagged_1 0.000342898973031 0.0711308717728 0.0711308717728
+dummy_VH_0+_VBF1jtagged_2 0.000159861621796 0.0573540106416 0.0573540106416
+dummy_VH_0+_VBF1jtagged_3 0.000410978624132 0.0738541409373 0.0738541409373
+dummy_VH_0+_VBF1jtagged_4 0.000132268469315 0.0912908017635 0.0912908017635
+dummy_VH_0+_VBF1jtagged_5 0.000355015363311 0.128415420651 0.128415420651
+dummy_VH_0+_Boosted_0 0.000316139601637 0.123816147447 0.123816147447
+dummy_VH_0+_Boosted_1 0.00058998161694 0.122385628521 0.122385628521
+dummy_VH_0+_Boosted_2 0.000379865028663 0.13628526032 0.13628526032
+dummy_VH_0+_Boosted_3 0.000797878659796 0.143381282687 0.143381282687
+dummy_VH_0+_Boosted_4 0.000280509178992 0.193605527282 0.193605527282
+dummy_VH_0+_Boosted_5 0.000589218863752 0.213131010532 0.213131010532
+dummy_VH_0+_Untagged_0 0.00158662174363 0.621400773525 0.621400773525
+dummy_VH_0+_Untagged_1 0.0028151110746 0.58396589756 0.58396589756
+dummy_VH_0+_Untagged_2 0.00206767488271 0.741825640202 0.741825640202
+dummy_VH_0+_Untagged_3 0.00382715719752 0.687752127647 0.687752127647
+dummy_VH_0+_Untagged_4 0.00154153176118 1.06395483017 1.06395483017
+dummy_VH_0+_Untagged_5 0.00278326869011 1.00675809383 1.00675809383
+dummy_VH_0+_VHHadrtagged_0 0.00058596546296 0.229493513703 0.229493513703
+dummy_VH_0+_VHHadrtagged_1 0.00134487217292 0.278979927301 0.278979927301
+dummy_VH_0+_VHHadrtagged_2 0.000798949797172 0.286641508341 0.286641508341
+dummy_VH_0+_VHHadrtagged_3 0.00193014356773 0.346852838993 0.346852838993
+dummy_VH_0+_VHHadrtagged_4 0.000625606568065 0.431789398193 0.431789398193
+dummy_VH_0+_VHHadrtagged_5 0.00137002195697 0.495561480522 0.495561480522
+dummy_VH_0+_VBFtagged_0 0.000108975727926 0.0426803678274 0.0426803678274
+dummy_VH_0+_VBFtagged_1 0.000236263324041 0.049010399729 0.049010399729
+dummy_VH_0+_VBFtagged_2 0.000151002343046 0.0541755408049 0.0541755408049
+dummy_VH_0+_VBFtagged_3 0.000322376989061 0.0579321533442 0.0579321533442
+dummy_VH_0+_VBFtagged_4 0.000101824858575 0.0702788308263 0.0702788308263
+dummy_VH_0+_VBFtagged_5 0.000217440057895 0.0786519646645 0.0786519646645
+dummy_VH_0+_VHLepttagged_0 0.000229860073887 0.0900247469544 0.0900247469544
+dummy_VH_0+_VHLepttagged_1 0.00139792612754 0.28998541832 0.28998541832
+dummy_VH_0+_VHLepttagged_2 0.000296177109703 0.106260307133 0.106260307133
+dummy_VH_0+_VHLepttagged_3 0.00193047127686 0.346911728382 0.346911728382
+dummy_VH_0+_VHLepttagged_4 0.000202849987545 0.14000569284 0.14000569284
+dummy_VH_0+_VHLepttagged_5 0.00135460461024 0.489984750748 0.489984750748
+dummy_VH_0-_VBF1jtagged_0 0.000169231410837 0.0662795230746 0.0694566592574
+dummy_VH_0-_VBF1jtagged_1 0.00117826147471 0.244418248534 0.256134539843
+dummy_VH_0-_VBF1jtagged_2 0.00021355242643 0.0766168162227 0.0802894756198
+dummy_VH_0-_VBF1jtagged_3 0.000897161429748 0.161222711205 0.168950989842
+dummy_VH_0-_VBF1jtagged_4 0.000276415492408 0.190780103207 0.199925228953
+dummy_VH_0-_VBF1jtagged_5 0.00102595123462 0.371104925871 0.388894021511
+dummy_VH_0-_Boosted_0 0.00147298513912 0.576894938946 0.604548692703
+dummy_VH_0-_Boosted_1 0.00497878761962 1.03279840946 1.08230602741
+dummy_VH_0-_Boosted_2 0.00175104034133 0.628225743771 0.658340036869
+dummy_VH_0-_Boosted_3 0.00527869910002 0.948598742485 0.994070291519
+dummy_VH_0-_Boosted_4 0.00110881892033 0.765299320221 0.80198431015
+dummy_VH_0-_Boosted_5 0.00372623186558 1.3478448391 1.41245436668
+dummy_VH_0-_Untagged_0 0.000910585164092 0.356630891562 0.373726159334
+dummy_VH_0-_Untagged_1 0.00227824295871 0.472598105669 0.49525231123
+dummy_VH_0-_Untagged_2 0.00106814713217 0.383222192526 0.401592135429
+dummy_VH_0-_Untagged_3 0.00332772894762 0.598003268242 0.626668810844
+dummy_VH_0-_Untagged_4 0.000909101974685 0.627456009388 0.657533407211
+dummy_VH_0-_Untagged_5 0.00255712121725 0.924956560135 0.969294786453
+dummy_VH_0-_VHHadrtagged_0 0.00117370812222 0.459683060646 0.481718182564
+dummy_VH_0-_VHHadrtagged_1 0.00411062641069 0.852707266808 0.893582165241
+dummy_VH_0-_VHHadrtagged_2 0.00146737950854 0.526455938816 0.551691830158
+dummy_VH_0-_VHHadrtagged_3 0.00528344605118 0.949451804161 0.994964241982
+dummy_VH_0-_VHHadrtagged_4 0.00102419918403 0.70689535141 0.740780711174
+dummy_VH_0-_VHHadrtagged_5 0.00413179583848 1.49454450607 1.56618618965
+dummy_VH_0-_VBFtagged_0 0.000326918176142 0.128037571907 0.134175106883
+dummy_VH_0-_VBFtagged_1 0.0012129949173 0.2516233325 0.263685017824
+dummy_VH_0-_VBFtagged_2 0.000695378519595 0.249482944608 0.261442035437
+dummy_VH_0-_VBFtagged_3 0.00298013724387 0.535539984703 0.56121134758
+dummy_VH_0-_VBFtagged_4 0.000450242398074 0.310754239559 0.325650393963
+dummy_VH_0-_VBFtagged_5 0.00127413112205 0.460876047611 0.482968360186
+dummy_VH_0-_VHLepttagged_0 0.000344340369338 0.13486097753 0.141325607896
+dummy_VH_0-_VHLepttagged_1 0.00368212512694 0.763819038868 0.800433039665
+dummy_VH_0-_VHLepttagged_2 0.000401190569391 0.143936291337 0.150835946202
+dummy_VH_0-_VHLepttagged_3 0.00483856862411 0.869505882263 0.911186039448
+dummy_VH_0-_VHLepttagged_4 0.000479215377709 0.330751210451 0.346605926752
+dummy_VH_0-_VHLepttagged_5 0.0035423298832 1.28132414818 1.34274506569
+dummy_VH_a2_VBF1jtagged_0 0.000231672893278 0.0907347425818 0.0912446007133
+dummy_VH_a2_VBF1jtagged_1 0.00127717026044 0.264935851097 0.266424566507
+dummy_VH_a2_VBF1jtagged_2 0.000281411834294 0.100962929428 0.101530261338
+dummy_VH_a2_VBF1jtagged_3 0.00121632230002 0.218576923013 0.219805151224
+dummy_VH_a2_VBF1jtagged_4 0.00025668827584 0.177164509892 0.178160041571
+dummy_VH_a2_VBF1jtagged_5 0.00109374371823 0.395626693964 0.397849798203
+dummy_VH_a2_Boosted_0 0.00128541165031 0.503431737423 0.506260633469
+dummy_VH_a2_Boosted_1 0.0044742631726 0.928139925003 0.933355331421
+dummy_VH_a2_Boosted_2 0.00167751556728 0.601847052574 0.605228960514
+dummy_VH_a2_Boosted_3 0.00531747518107 0.955566942692 0.960936486721
+dummy_VH_a2_Boosted_4 0.00114564376418 0.790715575218 0.795158743858
+dummy_VH_a2_Boosted_5 0.0036660048645 1.32605957985 1.33351099491
+dummy_VH_a2_Untagged_0 0.00166049285326 0.650332391262 0.653986752033
+dummy_VH_a2_Untagged_1 0.00399340316653 0.828390479088 0.833045363426
+dummy_VH_a2_Untagged_2 0.00207858276553 0.745739102364 0.74992954731
+dummy_VH_a2_Untagged_3 0.0056508355774 1.01547276974 1.0211789608
+dummy_VH_a2_Untagged_4 0.0016133353347 1.11351311207 1.11977016926
+dummy_VH_a2_Untagged_5 0.00393688725308 1.42404258251 1.43204462528
+dummy_VH_a2_VHHadrtagged_0 0.00126511033159 0.495480746031 0.498264968395
+dummy_VH_a2_VHHadrtagged_1 0.00390560156666 0.810176968575 0.814729511738
+dummy_VH_a2_VHHadrtagged_2 0.00153258349746 0.549849390984 0.552939116955
+dummy_VH_a2_VHHadrtagged_3 0.00579878361896 1.04205954075 1.04791510105
+dummy_VH_a2_VHHadrtagged_4 0.00124837702606 0.861621379852 0.866463005543
+dummy_VH_a2_VHHadrtagged_5 0.00393285555765 1.42258429527 1.4305781126
+dummy_VH_a2_VBFtagged_0 0.000295655976515 0.115793727338 0.116444393992
+dummy_VH_a2_VBFtagged_1 0.00101848004851 0.211273223162 0.212460413575
+dummy_VH_a2_VBFtagged_2 0.000430810556281 0.154563128948 0.15543165803
+dummy_VH_a2_VBFtagged_3 0.00250914506614 0.450901210308 0.453434914351
+dummy_VH_a2_VBFtagged_4 0.000309887429466 0.21388220787 0.215084061027
+dummy_VH_a2_VBFtagged_5 0.00115367362741 0.417304396629 0.419649302959
+dummy_VH_a2_VHLepttagged_0 0.000439056369942 0.171956524253 0.172922790051
+dummy_VH_a2_VHLepttagged_1 0.00365433096886 0.758053421974 0.762313067913
+dummy_VH_a2_VHLepttagged_2 0.000472350366181 0.169466495514 0.170418769121
+dummy_VH_a2_VHLepttagged_3 0.00513386540115 0.922571659088 0.927755773067
+dummy_VH_a2_VHLepttagged_4 0.00045441678958 0.313635379076 0.315397769213
+dummy_VH_a2_VHLepttagged_5 0.00352739635855 1.27592241764 1.28309214115
+dummy_VH_L1_VBF1jtagged_0 8.26718460303e-05 0.0323784463108 0.031412050128
+dummy_VH_L1_VBF1jtagged_1 0.000294345605653 0.0610589720309 0.0592365525663
+dummy_VH_L1_VBF1jtagged_2 0.000138560746564 0.0497118346393 0.0482280924916
+dummy_VH_L1_VBF1jtagged_3 0.000308652437525 0.0554658062756 0.0538103245199
+dummy_VH_L1_VBF1jtagged_4 0.000122983838082 0.0848826095462 0.0823491290212
+dummy_VH_L1_VBF1jtagged_5 0.00028657875373 0.103660665452 0.100566715002
+dummy_VH_L1_Boosted_0 0.00478813471273 1.87527406216 1.81930303574
+dummy_VH_L1_Boosted_1 0.00796252768487 1.65174460411 1.60244524479
+dummy_VH_L1_Boosted_2 0.00432215537876 1.55067205429 1.50438928604
+dummy_VH_L1_Boosted_3 0.00727007351816 1.30645489693 1.2674612999
+dummy_VH_L1_Boosted_4 0.00284285238013 1.96211743355 1.90355432034
+dummy_VH_L1_Boosted_5 0.00698687369004 2.52727723122 2.45184588432
+dummy_VH_L1_Untagged_0 0.000582793669309 0.2282512784 0.22143869102
+dummy_VH_L1_Untagged_1 0.000920480000786 0.190944120288 0.185245037079
+dummy_VH_L1_Untagged_2 0.000786336022429 0.282116025686 0.273695737123
+dummy_VH_L1_Untagged_3 0.00133058789652 0.239110812545 0.231974095106
+dummy_VH_L1_Untagged_4 0.000582098960876 0.401760756969 0.389769464731
+dummy_VH_L1_Untagged_5 0.000922947539948 0.333846658468 0.323882371187
+dummy_VH_L1_VHHadrtagged_0 0.00140655494761 0.550877571106 0.53443557024
+dummy_VH_L1_VHHadrtagged_1 0.00334511674009 0.693910121918 0.673199057579
+dummy_VH_L1_VHHadrtagged_2 0.00280853104778 1.00762474537 0.977550268173
+dummy_VH_L1_VHHadrtagged_3 0.00479557644576 0.861780107021 0.836058676243
+dummy_VH_L1_VHHadrtagged_4 0.00178622105159 1.232837677 1.1960413456
+dummy_VH_L1_VHHadrtagged_5 0.00316271535121 1.14401078224 1.10986566544
+dummy_VH_L1_VBFtagged_0 0.00077818747377 0.304777294397 0.295680642128
+dummy_VH_L1_VBFtagged_1 0.00171576347202 0.355917513371 0.345294475555
+dummy_VH_L1_VBFtagged_2 0.00118105660658 0.423731058836 0.411083996296
+dummy_VH_L1_VBFtagged_3 0.00350881577469 0.630545139313 0.611725330353
+dummy_VH_L1_VBFtagged_4 0.00130024913233 0.897423148155 0.870637893677
+dummy_VH_L1_VBFtagged_5 0.00136103108525 0.492309302092 0.47761541605
+dummy_VH_L1_VHLepttagged_0 0.000553763529751 0.216881617904 0.210408374667
+dummy_VH_L1_VHLepttagged_1 0.0129160080105 2.67929315567 2.59932470322
+dummy_VH_L1_VHLepttagged_2 0.00046465502237 0.166705608368 0.161729961634
+dummy_VH_L1_VHLepttagged_3 0.00452055875212 0.812358558178 0.788112163544
+dummy_VH_L1_VHLepttagged_4 0.000423207471613 0.292094916105 0.283376783133
+dummy_VH_L1_VHLepttagged_5 0.00299823889509 1.08451664448 1.05214715004
+dummy_VH_L1Zg_VBF1jtagged_0 0.000148567254655 0.0581864006817 0.0565128475428
+dummy_VH_L1Zg_VBF1jtagged_1 0.000251835037488 0.0903515741229 0.0877528861165
+dummy_VH_L1Zg_VBF1jtagged_2 0.000317982572597 0.219469413161 0.213157057762
+dummy_VH_L1Zg_Boosted_0 0.017457710579 6.83731651306 6.6406621933
+dummy_VH_L1Zg_Boosted_1 0.0115707786754 4.15128135681 4.03188276291
+dummy_VH_L1Zg_Boosted_2 0.00491367746145 3.39138698578 3.29384422302
+dummy_VH_L1Zg_Untagged_0 0.000966007530224 0.378337055445 0.367455363274
+dummy_VH_L1Zg_Untagged_1 0.00141146173701 0.506394147873 0.491829276085
+dummy_VH_L1Zg_Untagged_2 0.00109528051689 0.755955159664 0.734212458134
+dummy_VH_L1Zg_VHHadrtagged_0 0.00390964094549 1.53121173382 1.4871711731
+dummy_VH_L1Zg_VHHadrtagged_1 0.00538067379966 1.93043971062 1.8749165535
+dummy_VH_L1Zg_VHHadrtagged_2 0.00394012825564 2.71944975853 2.6412332058
+dummy_VH_L1Zg_VBFtagged_0 0.00205252319574 0.803871154785 0.780750274658
+dummy_VH_L1Zg_VBFtagged_1 0.00190996949095 0.685245215893 0.665536224842
+dummy_VH_L1Zg_VBFtagged_2 0.00192722713109 1.33015906811 1.2919011116
+dummy_VH_L1Zg_VHLepttagged_0 0.00113669212442 0.445185720921 0.432381331921
+dummy_VH_L1Zg_VHLepttagged_1 0.000810588069726 0.290816992521 0.282452523708
+dummy_VH_L1Zg_VHLepttagged_2 0.00109907938167 0.758577167988 0.736759006977
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ggH0+Hff0+190821_2016.root:candTree
+Filling 37 histograms:
+SMffHnormalization_0_0, SMffHnormalization_0_normalization_0, 0+ffHnormalization_0_0, dummy_ggH_0+_VBFtagged_0_0, dummy_ggH_0+_VHHadrtagged_0_0, dummy_ggH_0+_VHLepttagged_0_0, dummy_ggH_0+_VBF1jtagged_0_0, dummy_ggH_0+_Boosted_0_0, dummy_ggH_0+_Untagged_0_0, 0-ffHnormalization_0_0, dummy_ggH_0-_VBFtagged_0_0, dummy_ggH_0-_VHHadrtagged_0_0, dummy_ggH_0-_VHLepttagged_0_0, dummy_ggH_0-_VBF1jtagged_0_0, dummy_ggH_0-_Boosted_0_0, dummy_ggH_0-_Untagged_0_0, a2ffHnormalization_0_0, dummy_ggH_a2_VBFtagged_0_0, dummy_ggH_a2_VHHadrtagged_0_0, dummy_ggH_a2_VHLepttagged_0_0, dummy_ggH_a2_VBF1jtagged_0_0, dummy_ggH_a2_Boosted_0_0, dummy_ggH_a2_Untagged_0_0, L1ffHnormalization_0_0, dummy_ggH_L1_VBFtagged_0_0, dummy_ggH_L1_VHHadrtagged_0_0, dummy_ggH_L1_VHLepttagged_0_0, dummy_ggH_L1_VBF1jtagged_0_0, dummy_ggH_L1_Boosted_0_0, dummy_ggH_L1_Untagged_0_0, L1ZgffHnormalization_0_0, dummy_ggH_L1Zg_VBFtagged_0_0, dummy_ggH_L1Zg_VHHadrtagged_0_0, dummy_ggH_L1Zg_VHLepttagged_0_0, dummy_ggH_L1Zg_VBF1jtagged_0_0, dummy_ggH_L1Zg_Boosted_0_0, dummy_ggH_L1Zg_Untagged_0_0
+
+10000 / 182718
+
+SMffHnormalization_0_normalization 0.0634551867843 0.0634551867843 0.0634551867843
+SMffHnormalization_0 0.0634551867843 54.2360572815 54.2360572815
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/bbH0+190821_2016.root:candTree
+Filling 37 histograms:
+SMffHnormalization_1_0, SMffHnormalization_1_normalization_0, 0+ffHnormalization_1_0, 0-ffHnormalization_1_0, a2ffHnormalization_1_0, L1ffHnormalization_1_0, L1ZgffHnormalization_1_0, dummy_bbH_0+_VBFtagged_0_0, dummy_bbH_0+_VHHadrtagged_0_0, dummy_bbH_0+_VHLepttagged_0_0, dummy_bbH_0+_VBF1jtagged_0_0, dummy_bbH_0+_Boosted_0_0, dummy_bbH_0+_Untagged_0_0, dummy_bbH_0-_VBFtagged_0_0, dummy_bbH_0-_VHHadrtagged_0_0, dummy_bbH_0-_VHLepttagged_0_0, dummy_bbH_0-_VBF1jtagged_0_0, dummy_bbH_0-_Boosted_0_0, dummy_bbH_0-_Untagged_0_0, dummy_bbH_a2_VBFtagged_0_0, dummy_bbH_a2_VHHadrtagged_0_0, dummy_bbH_a2_VHLepttagged_0_0, dummy_bbH_a2_VBF1jtagged_0_0, dummy_bbH_a2_Boosted_0_0, dummy_bbH_a2_Untagged_0_0, dummy_bbH_L1_VBFtagged_0_0, dummy_bbH_L1_VHHadrtagged_0_0, dummy_bbH_L1_VHLepttagged_0_0, dummy_bbH_L1_VBF1jtagged_0_0, dummy_bbH_L1_Boosted_0_0, dummy_bbH_L1_Untagged_0_0, dummy_bbH_L1Zg_VBFtagged_0_0, dummy_bbH_L1Zg_VHHadrtagged_0_0, dummy_bbH_L1Zg_VHLepttagged_0_0, dummy_bbH_L1Zg_VBF1jtagged_0_0, dummy_bbH_L1Zg_Boosted_0_0, dummy_bbH_L1Zg_Untagged_0_0
+
+10000 / 129292
+
+SMffHnormalization_1_normalization 0.00124873872846 0.00124873872846 0.00124873872846
+SMffHnormalization_1 0.00124873872846 0.581315398216 0.581315398216
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ttH0+Hff0+190821_2016.root:candTree
+Filling 37 histograms:
+SMffHnormalization_2_0, SMffHnormalization_2_normalization_0, 0+ffHnormalization_2_0, 0-ffHnormalization_2_0, a2ffHnormalization_2_0, L1ffHnormalization_2_0, L1ZgffHnormalization_2_0, dummy_ttH_0+_VBFtagged_0_0, dummy_ttH_0+_VHHadrtagged_0_0, dummy_ttH_0+_VHLepttagged_0_0, dummy_ttH_0+_VBF1jtagged_0_0, dummy_ttH_0+_Boosted_0_0, dummy_ttH_0+_Untagged_0_0, dummy_ttH_0-_VBFtagged_0_0, dummy_ttH_0-_VHHadrtagged_0_0, dummy_ttH_0-_VHLepttagged_0_0, dummy_ttH_0-_VBF1jtagged_0_0, dummy_ttH_0-_Boosted_0_0, dummy_ttH_0-_Untagged_0_0, dummy_ttH_a2_VBFtagged_0_0, dummy_ttH_a2_VHHadrtagged_0_0, dummy_ttH_a2_VHLepttagged_0_0, dummy_ttH_a2_VBF1jtagged_0_0, dummy_ttH_a2_Boosted_0_0, dummy_ttH_a2_Untagged_0_0, dummy_ttH_L1_VBFtagged_0_0, dummy_ttH_L1_VHHadrtagged_0_0, dummy_ttH_L1_VHLepttagged_0_0, dummy_ttH_L1_VBF1jtagged_0_0, dummy_ttH_L1_Boosted_0_0, dummy_ttH_L1_Untagged_0_0, dummy_ttH_L1Zg_VBFtagged_0_0, dummy_ttH_L1Zg_VHHadrtagged_0_0, dummy_ttH_L1Zg_VHLepttagged_0_0, dummy_ttH_L1Zg_VBF1jtagged_0_0, dummy_ttH_L1Zg_Boosted_0_0, dummy_ttH_L1Zg_Untagged_0_0
+
+10000 / 23236
+
+SMffHnormalization_2_normalization 0.00765939801931 0.00765939801931 0.00765939801931
+SMffHnormalization_2 0.00765939801931 0.63240891695 0.63240891695
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ggH0+Hff0+190821_2017.root:candTree
+Filling 37 histograms:
+SMffHnormalization_3_0, SMffHnormalization_3_normalization_0, 0+ffHnormalization_3_0, dummy_ggH_0+_VBFtagged_1_0, dummy_ggH_0+_VHHadrtagged_1_0, dummy_ggH_0+_VHLepttagged_1_0, dummy_ggH_0+_VBF1jtagged_1_0, dummy_ggH_0+_Boosted_1_0, dummy_ggH_0+_Untagged_1_0, 0-ffHnormalization_3_0, dummy_ggH_0-_VBFtagged_1_0, dummy_ggH_0-_VHHadrtagged_1_0, dummy_ggH_0-_VHLepttagged_1_0, dummy_ggH_0-_VBF1jtagged_1_0, dummy_ggH_0-_Boosted_1_0, dummy_ggH_0-_Untagged_1_0, a2ffHnormalization_3_0, dummy_ggH_a2_VBFtagged_1_0, dummy_ggH_a2_VHHadrtagged_1_0, dummy_ggH_a2_VHLepttagged_1_0, dummy_ggH_a2_VBF1jtagged_1_0, dummy_ggH_a2_Boosted_1_0, dummy_ggH_a2_Untagged_1_0, L1ffHnormalization_3_0, dummy_ggH_L1_VBFtagged_1_0, dummy_ggH_L1_VHHadrtagged_1_0, dummy_ggH_L1_VHLepttagged_1_0, dummy_ggH_L1_VBF1jtagged_1_0, dummy_ggH_L1_Boosted_1_0, dummy_ggH_L1_Untagged_1_0, L1ZgffHnormalization_3_0, dummy_ggH_L1Zg_VBFtagged_1_0, dummy_ggH_L1Zg_VHHadrtagged_1_0, dummy_ggH_L1Zg_VHLepttagged_1_0, dummy_ggH_L1Zg_VBF1jtagged_1_0, dummy_ggH_L1Zg_Boosted_1_0, dummy_ggH_L1Zg_Untagged_1_0
+
+10000 / 58759
+
+SMffHnormalization_3_normalization 0.165330156684 0.165330156684 0.165330156684
+SMffHnormalization_3 0.165330156684 64.8150939941 64.8150939941
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/bbH0+190821_2017.root:candTree
+Filling 37 histograms:
+SMffHnormalization_4_0, SMffHnormalization_4_normalization_0, 0+ffHnormalization_4_0, 0-ffHnormalization_4_0, a2ffHnormalization_4_0, L1ffHnormalization_4_0, L1ZgffHnormalization_4_0, dummy_bbH_0+_VBFtagged_1_0, dummy_bbH_0+_VHHadrtagged_1_0, dummy_bbH_0+_VHLepttagged_1_0, dummy_bbH_0+_VBF1jtagged_1_0, dummy_bbH_0+_Boosted_1_0, dummy_bbH_0+_Untagged_1_0, dummy_bbH_0-_VBFtagged_1_0, dummy_bbH_0-_VHHadrtagged_1_0, dummy_bbH_0-_VHLepttagged_1_0, dummy_bbH_0-_VBF1jtagged_1_0, dummy_bbH_0-_Boosted_1_0, dummy_bbH_0-_Untagged_1_0, dummy_bbH_a2_VBFtagged_1_0, dummy_bbH_a2_VHHadrtagged_1_0, dummy_bbH_a2_VHLepttagged_1_0, dummy_bbH_a2_VBF1jtagged_1_0, dummy_bbH_a2_Boosted_1_0, dummy_bbH_a2_Untagged_1_0, dummy_bbH_L1_VBFtagged_1_0, dummy_bbH_L1_VHHadrtagged_1_0, dummy_bbH_L1_VHLepttagged_1_0, dummy_bbH_L1_VBF1jtagged_1_0, dummy_bbH_L1_Boosted_1_0, dummy_bbH_L1_Untagged_1_0, dummy_bbH_L1Zg_VBFtagged_1_0, dummy_bbH_L1Zg_VHHadrtagged_1_0, dummy_bbH_L1Zg_VHLepttagged_1_0, dummy_bbH_L1Zg_VBF1jtagged_1_0, dummy_bbH_L1Zg_Boosted_1_0, dummy_bbH_L1Zg_Untagged_1_0
+
+10000 / 63938
+
+SMffHnormalization_4_normalization 0.00252165156417 0.00252165156417 0.00252165156417
+SMffHnormalization_4 0.00252165156417 0.689905941486 0.689905941486
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ttH0+Hff0+190821_2017.root:candTree
+Filling 37 histograms:
+SMffHnormalization_5_0, SMffHnormalization_5_normalization_0, 0+ffHnormalization_5_0, 0-ffHnormalization_5_0, a2ffHnormalization_5_0, L1ffHnormalization_5_0, L1ZgffHnormalization_5_0, dummy_ttH_0+_VBFtagged_1_0, dummy_ttH_0+_VHHadrtagged_1_0, dummy_ttH_0+_VHLepttagged_1_0, dummy_ttH_0+_VBF1jtagged_1_0, dummy_ttH_0+_Boosted_1_0, dummy_ttH_0+_Untagged_1_0, dummy_ttH_0-_VBFtagged_1_0, dummy_ttH_0-_VHHadrtagged_1_0, dummy_ttH_0-_VHLepttagged_1_0, dummy_ttH_0-_VBF1jtagged_1_0, dummy_ttH_0-_Boosted_1_0, dummy_ttH_0-_Untagged_1_0, dummy_ttH_a2_VBFtagged_1_0, dummy_ttH_a2_VHHadrtagged_1_0, dummy_ttH_a2_VHLepttagged_1_0, dummy_ttH_a2_VBF1jtagged_1_0, dummy_ttH_a2_Boosted_1_0, dummy_ttH_a2_Untagged_1_0, dummy_ttH_L1_VBFtagged_1_0, dummy_ttH_L1_VHHadrtagged_1_0, dummy_ttH_L1_VHLepttagged_1_0, dummy_ttH_L1_VBF1jtagged_1_0, dummy_ttH_L1_Boosted_1_0, dummy_ttH_L1_Untagged_1_0, dummy_ttH_L1Zg_VBFtagged_1_0, dummy_ttH_L1Zg_VHHadrtagged_1_0, dummy_ttH_L1Zg_VHLepttagged_1_0, dummy_ttH_L1Zg_VBF1jtagged_1_0, dummy_ttH_L1Zg_Boosted_1_0, dummy_ttH_L1Zg_Untagged_1_0
+
+10000 / 22861
+
+SMffHnormalization_5_normalization 0.00789611972868 0.00789611972868 0.00789611972868
+SMffHnormalization_5 0.00789611972868 0.750806212425 0.750806212425
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ggH0+Hff0+190821_2018.root:candTree
+Filling 37 histograms:
+SMffHnormalization_6_0, SMffHnormalization_6_normalization_0, 0+ffHnormalization_6_0, dummy_ggH_0+_VBFtagged_2_0, dummy_ggH_0+_VHHadrtagged_2_0, dummy_ggH_0+_VHLepttagged_2_0, dummy_ggH_0+_VBF1jtagged_2_0, dummy_ggH_0+_Boosted_2_0, dummy_ggH_0+_Untagged_2_0, 0-ffHnormalization_6_0, dummy_ggH_0-_VBFtagged_2_0, dummy_ggH_0-_VHHadrtagged_2_0, dummy_ggH_0-_VHLepttagged_2_0, dummy_ggH_0-_VBF1jtagged_2_0, dummy_ggH_0-_Boosted_2_0, dummy_ggH_0-_Untagged_2_0, a2ffHnormalization_6_0, dummy_ggH_a2_VBFtagged_2_0, dummy_ggH_a2_VHHadrtagged_2_0, dummy_ggH_a2_VHLepttagged_2_0, dummy_ggH_a2_VBF1jtagged_2_0, dummy_ggH_a2_Boosted_2_0, dummy_ggH_a2_Untagged_2_0, L1ffHnormalization_6_0, dummy_ggH_L1_VBFtagged_2_0, dummy_ggH_L1_VHHadrtagged_2_0, dummy_ggH_L1_VHLepttagged_2_0, dummy_ggH_L1_VBF1jtagged_2_0, dummy_ggH_L1_Boosted_2_0, dummy_ggH_L1_Untagged_2_0, L1ZgffHnormalization_6_0, dummy_ggH_L1Zg_VBFtagged_2_0, dummy_ggH_L1Zg_VHHadrtagged_2_0, dummy_ggH_L1Zg_VHLepttagged_2_0, dummy_ggH_L1Zg_VBF1jtagged_2_0, dummy_ggH_L1Zg_Boosted_2_0, dummy_ggH_L1Zg_Untagged_2_0
+
+10000 / 63561
+
+SMffHnormalization_6_normalization 0.152517676353 0.152517676353 0.152517676353
+SMffHnormalization_6 0.152517676353 93.1152572632 93.1152572632
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/bbH0+190821_2018.root:candTree
+Filling 37 histograms:
+SMffHnormalization_7_0, SMffHnormalization_7_normalization_0, 0+ffHnormalization_7_0, 0-ffHnormalization_7_0, a2ffHnormalization_7_0, L1ffHnormalization_7_0, L1ZgffHnormalization_7_0, dummy_bbH_0+_VBFtagged_2_0, dummy_bbH_0+_VHHadrtagged_2_0, dummy_bbH_0+_VHLepttagged_2_0, dummy_bbH_0+_VBF1jtagged_2_0, dummy_bbH_0+_Boosted_2_0, dummy_bbH_0+_Untagged_2_0, dummy_bbH_0-_VBFtagged_2_0, dummy_bbH_0-_VHHadrtagged_2_0, dummy_bbH_0-_VHLepttagged_2_0, dummy_bbH_0-_VBF1jtagged_2_0, dummy_bbH_0-_Boosted_2_0, dummy_bbH_0-_Untagged_2_0, dummy_bbH_a2_VBFtagged_2_0, dummy_bbH_a2_VHHadrtagged_2_0, dummy_bbH_a2_VHLepttagged_2_0, dummy_bbH_a2_VBF1jtagged_2_0, dummy_bbH_a2_Boosted_2_0, dummy_bbH_a2_Untagged_2_0, dummy_bbH_L1_VBFtagged_2_0, dummy_bbH_L1_VHHadrtagged_2_0, dummy_bbH_L1_VHLepttagged_2_0, dummy_bbH_L1_VBF1jtagged_2_0, dummy_bbH_L1_Boosted_2_0, dummy_bbH_L1_Untagged_2_0, dummy_bbH_L1Zg_VBFtagged_2_0, dummy_bbH_L1Zg_VHHadrtagged_2_0, dummy_bbH_L1Zg_VHLepttagged_2_0, dummy_bbH_L1Zg_VBF1jtagged_2_0, dummy_bbH_L1Zg_Boosted_2_0, dummy_bbH_L1Zg_Untagged_2_0
+
+10000 / 66605
+
+SMffHnormalization_7_normalization 0.0024959302973 0.0024959302973 0.0024959302973
+SMffHnormalization_7 0.0024959302973 0.991082310677 0.991082310677
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ttH0+Hff0+190821_2018.root:candTree
+Filling 37 histograms:
+SMffHnormalization_8_0, SMffHnormalization_8_normalization_0, 0+ffHnormalization_8_0, 0-ffHnormalization_8_0, a2ffHnormalization_8_0, L1ffHnormalization_8_0, L1ZgffHnormalization_8_0, dummy_ttH_0+_VBFtagged_2_0, dummy_ttH_0+_VHHadrtagged_2_0, dummy_ttH_0+_VHLepttagged_2_0, dummy_ttH_0+_VBF1jtagged_2_0, dummy_ttH_0+_Boosted_2_0, dummy_ttH_0+_Untagged_2_0, dummy_ttH_0-_VBFtagged_2_0, dummy_ttH_0-_VHHadrtagged_2_0, dummy_ttH_0-_VHLepttagged_2_0, dummy_ttH_0-_VBF1jtagged_2_0, dummy_ttH_0-_Boosted_2_0, dummy_ttH_0-_Untagged_2_0, dummy_ttH_a2_VBFtagged_2_0, dummy_ttH_a2_VHHadrtagged_2_0, dummy_ttH_a2_VHLepttagged_2_0, dummy_ttH_a2_VBF1jtagged_2_0, dummy_ttH_a2_Boosted_2_0, dummy_ttH_a2_Untagged_2_0, dummy_ttH_L1_VBFtagged_2_0, dummy_ttH_L1_VHHadrtagged_2_0, dummy_ttH_L1_VHLepttagged_2_0, dummy_ttH_L1_VBF1jtagged_2_0, dummy_ttH_L1_Boosted_2_0, dummy_ttH_L1_Untagged_2_0, dummy_ttH_L1Zg_VBFtagged_2_0, dummy_ttH_L1Zg_VHHadrtagged_2_0, dummy_ttH_L1Zg_VHLepttagged_2_0, dummy_ttH_L1Zg_VBF1jtagged_2_0, dummy_ttH_L1Zg_Boosted_2_0, dummy_ttH_L1Zg_Untagged_2_0
+
+10000 / 24743
+
+SMffHnormalization_8_normalization 0.00754418922588 0.00754418922588 0.00754418922588
+SMffHnormalization_8 0.00754418922588 1.09742259979 1.09742259979
+0+ffHnormalization_0 0.0634551867843 54.2360572815 54.2360572815
+0+ffHnormalization_1 0.00124873872846 0.581315398216 0.581315398216
+0+ffHnormalization_2 0.00765939801931 0.63240891695 0.63240891695
+0+ffHnormalization_3 0.165330156684 64.8150939941 64.8150939941
+0+ffHnormalization_4 0.00252165156417 0.689905941486 0.689905941486
+0+ffHnormalization_5 0.00789611972868 0.750806212425 0.750806212425
+0+ffHnormalization_6 0.152517676353 93.1152572632 93.1152572632
+0+ffHnormalization_7 0.0024959302973 0.991082310677 0.991082310677
+0+ffHnormalization_8 0.00754418922588 1.09742259979 1.09742259979
+dummy_ggH_0+_VBF1jtagged_0 0.00401722686365 3.43358135223 3.43358135223
+dummy_ggH_0+_VBF1jtagged_1 0.0117766549811 4.61685276031 4.61685276031
+dummy_ggH_0+_VBF1jtagged_2 0.0115621229634 7.05891990662 7.05891990662
+dummy_ggH_0+_Boosted_0 0.00172439671587 1.47386658192 1.47386658192
+dummy_ggH_0+_Boosted_1 0.0057265739888 2.24501347542 2.24501347542
+dummy_ggH_0+_Boosted_2 0.00486017391086 2.96723866463 2.96723866463
+dummy_ggH_0+_Untagged_0 0.0528494566679 45.1711883545 45.1711883545
+dummy_ggH_0+_Untagged_1 0.136402279139 53.4743728638 53.4743728638
+dummy_ggH_0+_Untagged_2 0.125333800912 76.5189285278 76.5189285278
+dummy_ggH_0+_VHHadrtagged_0 0.00160350871738 1.3705419302 1.3705419302
+dummy_ggH_0+_VHHadrtagged_1 0.00394447799772 1.54637074471 1.54637074471
+dummy_ggH_0+_VHHadrtagged_2 0.00377342873253 2.30375766754 2.30375766754
+dummy_ggH_0+_VBFtagged_0 0.00312019139528 2.66687226295 2.66687226295
+dummy_ggH_0+_VBFtagged_1 0.00716754514724 2.80992364883 2.80992364883
+dummy_ggH_0+_VBFtagged_2 0.00669766496867 4.08906555176 4.08906555176
+dummy_ggH_0+_VHLepttagged_0 0.000140309042763 0.119924150407 0.119924150407
+dummy_ggH_0+_VHLepttagged_1 0.000312992749969 0.122703894973 0.122703894973
+dummy_ggH_0+_VHLepttagged_2 0.000290463940473 0.177334353328 0.177334353328
+0-ffHnormalization_0 0.0624593272805 53.3848838806 53.3848838806
+0-ffHnormalization_1 0.00124201166909 0.578183829784 0.578183829784
+0-ffHnormalization_2 0.00799549743533 0.660159409046 0.660159409046
+0-ffHnormalization_3 0.165773794055 64.9890136719 64.9890136719
+0-ffHnormalization_4 0.0024839786347 0.679598927498 0.679598927498
+0-ffHnormalization_5 0.00849910825491 0.808141648769 0.808141648769
+0-ffHnormalization_6 0.151352256536 92.4037399292 92.4037399292
+0-ffHnormalization_7 0.00245690648444 0.975586771965 0.975586771965
+0-ffHnormalization_8 0.00769953522831 1.12002015114 1.12002015114
+dummy_ggH_0-_VBF1jtagged_0 0.00361160282046 3.08688879013 3.10564541817
+dummy_ggH_0-_VBF1jtagged_1 0.0121832964942 4.77627038956 4.80529212952
+dummy_ggH_0-_VBF1jtagged_2 0.0118205137551 7.21667289734 7.26052284241
+dummy_ggH_0-_Boosted_0 0.00180517544504 1.54290938377 1.55228447914
+dummy_ggH_0-_Boosted_1 0.00621568737552 2.43676280975 2.45156908035
+dummy_ggH_0-_Boosted_2 0.0047370553948 2.89207220078 2.90964508057
+dummy_ggH_0-_Untagged_0 0.0520554296672 44.4925231934 44.7628707886
+dummy_ggH_0-_Untagged_1 0.135024532676 52.9342498779 53.2558898926
+dummy_ggH_0-_Untagged_2 0.123960636556 75.6805801392 76.1404342651
+dummy_ggH_0-_VHHadrtagged_0 0.00168337218929 1.43880236149 1.44754481316
+dummy_ggH_0-_VHHadrtagged_1 0.00464215502143 1.81988406181 1.83094203472
+dummy_ggH_0-_VHHadrtagged_2 0.00337811862119 2.06241250038 2.07494425774
+dummy_ggH_0-_VBFtagged_0 0.00318491691723 2.72219419479 2.73873472214
+dummy_ggH_0-_VBFtagged_1 0.00743502844125 2.91478633881 2.93249726295
+dummy_ggH_0-_VBFtagged_2 0.00707960501313 4.32224798203 4.34851074219
+dummy_ggH_0-_VHLepttagged_0 0.000118845258839 0.101578749716 0.102195963264
+dummy_ggH_0-_VHLepttagged_1 0.000273420475423 0.107190206647 0.107841514051
+dummy_ggH_0-_VHLepttagged_2 0.000376130366931 0.229635506868 0.2310308218
+a2ffHnormalization_0 0.0629712343216 53.8224182129 53.8224182129
+a2ffHnormalization_1 0.00125627603848 0.584824204445 0.584824204445
+a2ffHnormalization_2 0.00776226539165 0.640902280807 0.640902280807
+a2ffHnormalization_3 0.166530296206 65.2855911255 65.2855911255
+a2ffHnormalization_4 0.00251080212183 0.686937630177 0.686937630177
+a2ffHnormalization_5 0.00797122810036 0.757947921753 0.757947921753
+a2ffHnormalization_6 0.153440222144 93.6784896851 93.6784896851
+a2ffHnormalization_7 0.00249779690057 0.991823494434 0.991823494434
+a2ffHnormalization_8 0.00751967169344 1.09385621548 1.09385621548
+dummy_ggH_a2_VBF1jtagged_0 0.00381088303402 3.25721645355 3.24773216248
+dummy_ggH_a2_VBF1jtagged_1 0.011553616263 4.52941417694 4.51622533798
+dummy_ggH_a2_VBF1jtagged_2 0.011540367268 7.04563713074 7.02512168884
+dummy_ggH_a2_Boosted_0 0.00161562755238 1.38090002537 1.37687909603
+dummy_ggH_a2_Boosted_1 0.00574482278898 2.25216770172 2.24560976028
+dummy_ggH_a2_Boosted_2 0.0047553172335 2.90322136879 2.89476776123
+dummy_ggH_a2_Untagged_0 0.0527652539313 45.0992202759 44.9678993225
+dummy_ggH_a2_Untagged_1 0.137718722224 53.9904632568 53.8332557678
+dummy_ggH_a2_Untagged_2 0.126588284969 77.2848129272 77.0597763062
+dummy_ggH_a2_VHHadrtagged_0 0.00167533918284 1.43193638325 1.42776691914
+dummy_ggH_a2_VHHadrtagged_1 0.00418725982308 1.64154946804 1.63676965237
+dummy_ggH_a2_VHHadrtagged_2 0.00354154454544 2.16218757629 2.15589165688
+dummy_ggH_a2_VBFtagged_0 0.00297420891002 2.54209899902 2.53469705582
+dummy_ggH_a2_VBFtagged_1 0.00696231331676 2.72946572304 2.7215180397
+dummy_ggH_a2_VBFtagged_2 0.00670040911064 4.09074115753 4.07882976532
+dummy_ggH_a2_VHLepttagged_0 0.000129948239191 0.111068621278 0.110745213926
+dummy_ggH_a2_VHLepttagged_1 0.000363603845472 0.142545178533 0.142130121589
+dummy_ggH_a2_VHLepttagged_2 0.000314678502036 0.192117854953 0.19155845046
+L1ffHnormalization_0 0.0634432807565 54.2258834839 54.2258834839
+L1ffHnormalization_1 0.00125414971262 0.583834350109 0.583834350109
+L1ffHnormalization_2 0.00762636261061 0.629681289196 0.629681289196
+L1ffHnormalization_3 0.165642231703 64.9374389648 64.9374389648
+L1ffHnormalization_4 0.00252144900151 0.689850568771 0.689850568771
+L1ffHnormalization_5 0.00785846821964 0.747226119041 0.747226119041
+L1ffHnormalization_6 0.15337356925 93.6377944946 93.6377944946
+L1ffHnormalization_7 0.00250319903716 0.993968546391 0.993968546391
+L1ffHnormalization_8 0.0075469953008 1.0978307724 1.0978307724
+dummy_ggH_L1_VBF1jtagged_0 0.0039368015714 3.36484074593 3.35503220558
+dummy_ggH_L1_VBF1jtagged_1 0.0118546662852 4.64743566513 4.63388824463
+dummy_ggH_L1_VBF1jtagged_2 0.0115499226376 7.05147123337 7.03091621399
+dummy_ggH_L1_Boosted_0 0.00177024095319 1.51305031776 1.50863981247
+dummy_ggH_L1_Boosted_1 0.00583142321557 2.28611803055 2.27945399284
+dummy_ggH_L1_Boosted_2 0.00479117967188 2.92511606216 2.9165892601
+dummy_ggH_L1_Untagged_0 0.0528531745076 45.1743659973 45.0426826477
+dummy_ggH_L1_Untagged_1 0.136291220784 53.4308357239 53.2750854492
+dummy_ggH_L1_Untagged_2 0.125956892967 76.8993377686 76.6751785278
+dummy_ggH_L1_VHHadrtagged_0 0.00157466658857 1.34589016438 1.34196686745
+dummy_ggH_L1_VHHadrtagged_1 0.00403407448903 1.58149564266 1.57688558102
+dummy_ggH_L1_VHHadrtagged_2 0.00379800260998 2.31876063347 2.31200146675
+dummy_ggH_L1_VBFtagged_0 0.00317762582563 2.71596240997 2.70804548264
+dummy_ggH_L1_VBFtagged_1 0.0072830375284 2.8552005291 2.84687757492
+dummy_ggH_L1_VBFtagged_2 0.00696261646226 4.25082397461 4.23843288422
+dummy_ggH_L1_VHLepttagged_0 0.000130695436383 0.111707262695 0.11138163507
+dummy_ggH_L1_VHLepttagged_1 0.000347259832779 0.136137768626 0.135740920901
+dummy_ggH_L1_VHLepttagged_2 0.000314786593663 0.192183852196 0.191623643041
+L1ZgffHnormalization_0 0.0637603923678 54.4969215393 54.4969215393
+L1ZgffHnormalization_1 0.001247603097 0.580786764622 0.580786764622
+L1ZgffHnormalization_2 0.00755031732842 0.623402535915 0.623402535915
+L1ZgffHnormalization_3 0.165795356035 64.997467041 64.997467041
+L1ZgffHnormalization_4 0.00251736468635 0.688733100891 0.688733100891
+L1ZgffHnormalization_5 0.00771634047851 0.733711838722 0.733711838722
+L1ZgffHnormalization_6 0.152838632464 93.3112030029 93.3112030029
+L1ZgffHnormalization_7 0.00250368588604 0.994161903858 0.994161903858
+L1ZgffHnormalization_8 0.00734088243917 1.06784844398 1.06784844398
+dummy_ggH_L1Zg_VBF1jtagged_0 0.0041026044637 3.506554842 3.49712538719
+dummy_ggH_L1Zg_VBF1jtagged_1 0.0118254162371 4.63596868515 4.62350177765
+dummy_ggH_L1Zg_VBF1jtagged_2 0.0115184606984 7.03226280212 7.0133523941
+dummy_ggH_L1Zg_Boosted_0 0.00174762750976 1.4937223196 1.48970556259
+dummy_ggH_L1Zg_Boosted_1 0.0058284108527 2.28493690491 2.27879238129
+dummy_ggH_L1Zg_Boosted_2 0.00512809120119 3.13080763817 3.1223886013
+dummy_ggH_L1Zg_Untagged_0 0.0530514977872 45.343875885 45.2219390869
+dummy_ggH_L1Zg_Untagged_1 0.136740237474 53.6068649292 53.4627075195
+dummy_ggH_L1Zg_Untagged_2 0.125385656953 76.5505828857 76.3447265625
+dummy_ggH_L1Zg_VHHadrtagged_0 0.0016011496773 1.36852562428 1.3648455143
+dummy_ggH_L1Zg_VHHadrtagged_1 0.00394950807095 1.54834270477 1.54417896271
+dummy_ggH_L1Zg_VHHadrtagged_2 0.00381238549016 2.32754158974 2.3212826252
+dummy_ggH_L1Zg_VBFtagged_0 0.00311663467437 2.66383242607 2.65666913986
+dummy_ggH_L1Zg_VBFtagged_1 0.00718933762982 2.81846690178 2.81088757515
+dummy_ggH_L1Zg_VBFtagged_2 0.00671980623156 4.10258340836 4.09155082703
+dummy_ggH_L1Zg_VHLepttagged_0 0.000140896212542 0.120426014066 0.12010217458
+dummy_ggH_L1Zg_VHLepttagged_1 0.000262625690084 0.102958284318 0.102681413293
+dummy_ggH_L1Zg_VHLepttagged_2 0.000274333549896 0.167486414313 0.167036026716
+dummy_ttH_0+_VBF1jtagged_0 1.29633281176e-05 0.00107033527456 0.00107033527456
+dummy_ttH_0+_VBF1jtagged_1 7.20567868484e-06 0.000685155333485 0.000685155333485
+dummy_ttH_0+_VBF1jtagged_2 4.52534914075e-06 0.000658284174278 0.000658284174278
+dummy_ttH_0+_Boosted_0 0.000163472854183 0.0134973647073 0.0134973647073
+dummy_ttH_0+_Boosted_1 0.000120732504001 0.0114799067378 0.0114799067378
+dummy_ttH_0+_Boosted_2 0.000131720094942 0.0191607885063 0.0191607885063
+dummy_ttH_0+_Untagged_0 0.0017288888339 0.142748117447 0.142748117447
+dummy_ttH_0+_Untagged_1 0.00544903520495 0.518124043941 0.518124043941
+dummy_ttH_0+_Untagged_2 0.00528160110116 0.768293082714 0.768293082714
+dummy_ttH_0+_VHHadrtagged_0 0.000898726226296 0.0742045864463 0.0742045864463
+dummy_ttH_0+_VHHadrtagged_1 0.000677984033246 0.0644664317369 0.0644664317369
+dummy_ttH_0+_VHHadrtagged_2 0.000661320111249 0.0961995571852 0.0961995571852
+dummy_ttH_0+_VBFtagged_0 0.0033534031827 0.276878416538 0.276878416538
+dummy_ttH_0+_VBFtagged_1 0.00113575300202 0.107993602753 0.107993602753
+dummy_ttH_0+_VBFtagged_2 0.00102115003392 0.148542553186 0.148542553186
+dummy_ttH_0+_VHLepttagged_0 0.00150194764137 0.124010406435 0.124010406435
+dummy_ttH_0+_VHLepttagged_1 0.000505397038069 0.0480559132993 0.0480559132993
+dummy_ttH_0+_VHLepttagged_2 0.000443868426373 0.0645677372813 0.0645677372813
+dummy_ttH_0-_VBF1jtagged_0 8.55438975123e-06 0.000706305145286 0.000710596796125
+dummy_ttH_0-_VBF1jtagged_1 5.00296982864e-06 0.000475709734019 0.000478600239148
+dummy_ttH_0-_VBF1jtagged_2 3.57980889021e-06 0.000520740286447 0.000523904396687
+dummy_ttH_0-_Boosted_0 0.000182036339538 0.0150300851092 0.0151214115322
+dummy_ttH_0-_Boosted_1 0.000166111247381 0.0157947652042 0.0158907379955
+dummy_ttH_0-_Boosted_2 0.00014554731024 0.0211721770465 0.0213008243591
+dummy_ttH_0-_Untagged_0 0.00177604670171 0.146641775966 0.1475328058
+dummy_ttH_0-_Untagged_1 0.00580986542627 0.552433788776 0.555790483952
+dummy_ttH_0-_Untagged_2 0.00538167124614 0.782849907875 0.787606656551
+dummy_ttH_0-_VHHadrtagged_0 0.000963921716902 0.0795875415206 0.0800711289048
+dummy_ttH_0-_VHHadrtagged_1 0.000815214007162 0.0775150060654 0.0779860019684
+dummy_ttH_0-_VHHadrtagged_2 0.000695056573022 0.101107060909 0.101721405983
+dummy_ttH_0-_VBFtagged_0 0.00346733583137 0.286285430193 0.288024961948
+dummy_ttH_0-_VBFtagged_1 0.00113728572614 0.10813934356 0.108796425164
+dummy_ttH_0-_VBFtagged_2 0.0010318326531 0.150096520782 0.151008546352
+dummy_ttH_0-_VHLepttagged_0 0.00159760005772 0.131908088923 0.132709592581
+dummy_ttH_0-_VHLepttagged_1 0.000565626716707 0.0537828803062 0.0541096776724
+dummy_ttH_0-_VHLepttagged_2 0.000441841373686 0.0642728731036 0.0646634101868
+dummy_ttH_a2_VBF1jtagged_0 1.25512669911e-05 0.00103631289676 0.00103329541162
+dummy_ttH_a2_VBF1jtagged_1 7.30801093596e-06 0.000694885617122 0.000692862260621
+dummy_ttH_a2_VBF1jtagged_2 5.53639711143e-06 0.000805357238278 0.000803012226243
+dummy_ttH_a2_Boosted_0 0.000158963783178 0.0131250666454 0.0130868488923
+dummy_ttH_a2_Boosted_1 0.000135959271574 0.0129277510568 0.0128901079297
+dummy_ttH_a2_Boosted_2 0.000129549356643 0.0188450198621 0.018790146336
+dummy_ttH_a2_Untagged_0 0.00173129828181 0.14294706285 0.142530828714
+dummy_ttH_a2_Untagged_1 0.00547301070765 0.520403802395 0.518888473511
+dummy_ttH_a2_Untagged_2 0.00525970337912 0.765107750893 0.762879908085
+dummy_ttH_a2_VHHadrtagged_0 0.000908584566787 0.0750185549259 0.074800118804
+dummy_ttH_a2_VHHadrtagged_1 0.000721530639566 0.0686070770025 0.068407304585
+dummy_ttH_a2_VHHadrtagged_2 0.00064413464861 0.0936996564269 0.093426823616
+dummy_ttH_a2_VBFtagged_0 0.00342661864124 0.282923549414 0.282099723816
+dummy_ttH_a2_VBFtagged_1 0.00112304254435 0.106785021722 0.106474086642
+dummy_ttH_a2_VBFtagged_2 0.00103141460568 0.150035709143 0.149598836899
+dummy_ttH_a2_VHLepttagged_0 0.00152424804401 0.125851675868 0.125485226512
+dummy_ttH_a2_VHLepttagged_1 0.000510378100444 0.0485295392573 0.0483882315457
+dummy_ttH_a2_VHLepttagged_2 0.000449343206128 0.0653641372919 0.0651738122106
+dummy_ttH_L1_VBF1jtagged_0 1.17988420243e-05 0.000974187918473 0.00097134814132
+dummy_ttH_L1_VBF1jtagged_1 7.0050573413e-06 0.000666079169605 0.00066413753666
+dummy_ttH_L1_VBF1jtagged_2 5.97780990574e-06 0.000869567797054 0.000867033028044
+dummy_ttH_L1_Boosted_0 0.000158926995937 0.0131220296025 0.0130837792531
+dummy_ttH_L1_Boosted_1 0.000120566583064 0.0114641301334 0.0114307124168
+dummy_ttH_L1_Boosted_2 0.000135884707561 0.0197665970773 0.0197089780122
+dummy_ttH_L1_Untagged_0 0.00171161512844 0.141321897507 0.140909940004
+dummy_ttH_L1_Untagged_1 0.00542422337458 0.515764832497 0.514261364937
+dummy_ttH_L1_Untagged_2 0.00528854830191 0.769303679466 0.767061173916
+dummy_ttH_L1_VHHadrtagged_0 0.00089278240921 0.0737138316035 0.0734989568591
+dummy_ttH_L1_VHHadrtagged_1 0.00065378373256 0.0621653310955 0.0619841180742
+dummy_ttH_L1_VHHadrtagged_2 0.000649360881653 0.0944598987699 0.0941845476627
+dummy_ttH_L1_VBFtagged_0 0.00336665543728 0.277972608805 0.277162313461
+dummy_ttH_L1_VBFtagged_1 0.00115637062117 0.109954036772 0.109633520246
+dummy_ttH_L1_VBFtagged_2 0.00102581130341 0.149220615625 0.148785635829
+dummy_ttH_L1_VHLepttagged_0 0.00148458278272 0.122576653957 0.122219339013
+dummy_ttH_L1_VHLepttagged_1 0.000496510474477 0.047210931778 0.0470733121037
+dummy_ttH_L1_VHLepttagged_2 0.000441414333181 0.0642107501626 0.0640235766768
+dummy_ttH_L1Zg_VBF1jtagged_0 1.20744271044e-05 0.000996941933408 0.000994261004962
+dummy_ttH_L1Zg_VBF1jtagged_1 6.21014442004e-06 0.000590494484641 0.000588906579651
+dummy_ttH_L1Zg_VBF1jtagged_2 3.97985786549e-06 0.000578933802899 0.0005773769808
+dummy_ttH_L1Zg_Boosted_0 0.000157138332725 0.0129743460566 0.0129394568503
+dummy_ttH_L1Zg_Boosted_1 0.000106133200461 0.0100917248055 0.010064586997
+dummy_ttH_L1Zg_Boosted_2 0.000120525655802 0.0175323784351 0.0174852311611
+dummy_ttH_L1Zg_Untagged_0 0.00170186033938 0.140516474843 0.140138611197
+dummy_ttH_L1Zg_Untagged_1 0.00538972532377 0.512484550476 0.511106431484
+dummy_ttH_L1Zg_Untagged_2 0.00515738129616 0.750223338604 0.748205900192
+dummy_ttH_L1Zg_VHHadrtagged_0 0.000862713670358 0.0712311640382 0.0710396170616
+dummy_ttH_L1Zg_VHHadrtagged_1 0.000627487257589 0.0596649199724 0.0595044717193
+dummy_ttH_L1Zg_VHHadrtagged_2 0.000637908291537 0.0927939340472 0.0925443992019
+dummy_ttH_L1Zg_VBFtagged_0 0.0032990812324 0.272393256426 0.271660745144
+dummy_ttH_L1Zg_VBFtagged_1 0.00108727184124 0.103383749723 0.103105738759
+dummy_ttH_L1Zg_VBFtagged_2 0.000977194518782 0.142148524523 0.141766265035
+dummy_ttH_L1Zg_VHLepttagged_0 0.0015174507862 0.125290453434 0.124953530729
+dummy_ttH_L1Zg_VHLepttagged_1 0.000499511079397 0.0474962443113 0.0473685227334
+dummy_ttH_L1Zg_VHLepttagged_2 0.000443889410235 0.0645707920194 0.0643971562386
+dummy_bbH_0+_VBF1jtagged_0 7.36011861591e-05 0.0342629738152 0.0342629738152
+dummy_bbH_0+_VBF1jtagged_1 0.000140172676765 0.038350250572 0.038350250572
+dummy_bbH_0+_VBF1jtagged_2 0.000135461363243 0.0537889041007 0.0537889041007
+dummy_bbH_0+_Boosted_0 1.85288809007e-05 0.00862560234964 0.00862560234964
+dummy_bbH_0+_Boosted_1 3.91787398257e-05 0.0107190255076 0.0107190255076
+dummy_bbH_0+_Boosted_2 4.10578941228e-05 0.0163032412529 0.0163032412529
+dummy_bbH_0+_Untagged_0 0.00103453721385 0.481599867344 0.481599867344
+dummy_bbH_0+_Untagged_1 0.00212096166797 0.580280065536 0.580280065536
+dummy_bbH_0+_Untagged_2 0.00210375082679 0.835355937481 0.835355937481
+dummy_bbH_0+_VHHadrtagged_0 4.68090911454e-05 0.0217906627804 0.0217906627804
+dummy_bbH_0+_VHHadrtagged_1 9.4770512078e-05 0.0259285401553 0.0259285401553
+dummy_bbH_0+_VHHadrtagged_2 9.09974332899e-05 0.0361331999302 0.0361331999302
+dummy_bbH_0+_VBFtagged_0 5.20855064678e-05 0.0242469515651 0.0242469515651
+dummy_bbH_0+_VBFtagged_1 9.03062100406e-05 0.0247071385384 0.0247071385384
+dummy_bbH_0+_VBFtagged_2 7.96032545622e-05 0.0316088050604 0.0316088050604
+dummy_bbH_0+_VHLepttagged_0 2.31763460761e-05 0.0107891000807 0.0107891000807
+dummy_bbH_0+_VHLepttagged_1 3.62613100151e-05 0.00992083735764 0.00992083735764
+dummy_bbH_0+_VHLepttagged_2 4.50602710771e-05 0.0178925022483 0.0178925022483
+dummy_bbH_0-_VBF1jtagged_0 7.10047097527e-05 0.0330542586744 0.0332551039755
+dummy_bbH_0-_VBF1jtagged_1 0.000134948146297 0.0369208566844 0.0371451973915
+dummy_bbH_0-_VBF1jtagged_2 0.0001368742669 0.0543499402702 0.0546801835299
+dummy_bbH_0-_Boosted_0 1.96255441551e-05 0.00913612358272 0.00919163692743
+dummy_bbH_0-_Boosted_1 4.24306927016e-05 0.0116087365896 0.01167927403
+dummy_bbH_0-_Boosted_2 5.074996443e-05 0.0201517604291 0.020274206996
+dummy_bbH_0-_Untagged_0 0.00103564711753 0.482116550207 0.485045999289
+dummy_bbH_0-_Untagged_1 0.00209267972969 0.572542309761 0.576021194458
+dummy_bbH_0-_Untagged_2 0.00206649769098 0.820563495159 0.825549423695
+dummy_bbH_0-_VHHadrtagged_0 4.36006775999e-05 0.0202970765531 0.0204204060137
+dummy_bbH_0-_VHHadrtagged_1 9.53589988058e-05 0.0260895453393 0.0262480713427
+dummy_bbH_0-_VHHadrtagged_2 8.81812811713e-05 0.0350149646401 0.0352277234197
+dummy_bbH_0-_VBFtagged_0 4.93321713293e-05 0.0229652132839 0.0231047552079
+dummy_bbH_0-_VBFtagged_1 8.76741542015e-05 0.0239870268852 0.0241327770054
+dummy_bbH_0-_VBFtagged_2 7.46895675547e-05 0.0296576824039 0.0298378895968
+dummy_bbH_0-_VHLepttagged_0 2.28024964599e-05 0.0106150647625 0.0106795644388
+dummy_bbH_0-_VHLepttagged_1 3.08872768073e-05 0.00845053978264 0.00850188732147
+dummy_bbH_0-_VHLepttagged_2 3.99138734792e-05 0.015848973766 0.0159452762455
+dummy_bbH_a2_VBF1jtagged_0 7.2462753451e-05 0.0337330102921 0.0336347855628
+dummy_bbH_a2_VBF1jtagged_1 0.000135560563649 0.0370884090662 0.0369804166257
+dummy_bbH_a2_VBF1jtagged_2 0.000134394387715 0.0533652305603 0.0532098412514
+dummy_bbH_a2_Boosted_0 1.86639172171e-05 0.00868846476078 0.00866316538304
+dummy_bbH_a2_Boosted_1 3.89219203498e-05 0.0106487609446 0.0106177544221
+dummy_bbH_a2_Boosted_2 4.34002358816e-05 0.0172333363444 0.017183156684
+dummy_bbH_a2_Untagged_0 0.00104290363379 0.48549464345 0.48408100009
+dummy_bbH_a2_Untagged_1 0.00211491505615 0.578625738621 0.576940894127
+dummy_bbH_a2_Untagged_2 0.00210807169788 0.837071657181 0.834634304047
+dummy_bbH_a2_VHHadrtagged_0 4.77569956274e-05 0.0222319345921 0.0221672002226
+dummy_bbH_a2_VHHadrtagged_1 9.85546139418e-05 0.0269638430327 0.026885330677
+dummy_bbH_a2_VHHadrtagged_2 9.10625094548e-05 0.0361590385437 0.036053750664
+dummy_bbH_a2_VBFtagged_0 5.24415954715e-05 0.0244127195328 0.024341635406
+dummy_bbH_a2_VBFtagged_1 8.82587628439e-05 0.0241469703615 0.0240766592324
+dummy_bbH_a2_VBFtagged_2 7.80715054134e-05 0.0310005806386 0.0309103131294
+dummy_bbH_a2_VHLepttagged_0 2.20480960706e-05 0.0102638751268 0.0102339889854
+dummy_bbH_a2_VHLepttagged_1 3.45870503224e-05 0.00946277193725 0.00943521875888
+dummy_bbH_a2_VHLepttagged_2 4.27906998084e-05 0.016991302371 0.0169418267906
+dummy_bbH_L1_VBF1jtagged_0 7.55483124522e-05 0.035169404 0.035066884011
+dummy_bbH_L1_VBF1jtagged_1 0.00014038477093 0.0384082756937 0.038296315819
+dummy_bbH_L1_VBF1jtagged_2 0.000132582805236 0.0526458919048 0.052492428571
+dummy_bbH_L1_Boosted_0 1.8731554519e-05 0.00871995184571 0.00869453325868
+dummy_bbH_L1_Boosted_1 4.17392184318e-05 0.011419554241 0.0113862659782
+dummy_bbH_L1_Boosted_2 4.1167721065e-05 0.0163468513638 0.0162991993129
+dummy_bbH_L1_Untagged_0 0.00103577168193 0.482174545527 0.480769008398
+dummy_bbH_L1_Untagged_1 0.00211974629201 0.579947531223 0.578256964684
+dummy_bbH_L1_Untagged_2 0.00211204285733 0.838648557663 0.836203873158
+dummy_bbH_L1_VHHadrtagged_0 4.87881079607e-05 0.0227119401097 0.0226457342505
+dummy_bbH_L1_VHHadrtagged_1 9.3316717539e-05 0.0255307909101 0.0254563689232
+dummy_bbH_L1_VHHadrtagged_2 9.08994697966e-05 0.0360943004489 0.035989087075
+dummy_bbH_L1_VBFtagged_0 5.25717441633e-05 0.0244733057916 0.0244019664824
+dummy_bbH_L1_VBFtagged_1 9.00960076251e-05 0.0246496275067 0.0245777741075
+dummy_bbH_L1_VBFtagged_2 8.00490743131e-05 0.0317858308554 0.0316931754351
+dummy_bbH_L1_VHLepttagged_0 2.27364507737e-05 0.0105843190104 0.0105534652248
+dummy_bbH_L1_VHLepttagged_1 3.61726779374e-05 0.00989658758044 0.00986773893237
+dummy_bbH_L1_VHLepttagged_2 4.64553559141e-05 0.0184464603662 0.0183926895261
+dummy_bbH_L1Zg_VBF1jtagged_0 7.19679228496e-05 0.0335026532412 0.0334125608206
+dummy_bbH_L1Zg_VBF1jtagged_1 0.000141308322782 0.038660954684 0.0385569892824
+dummy_bbH_L1Zg_VBF1jtagged_2 0.000136218121042 0.054089397192 0.0539439432323
+dummy_bbH_L1Zg_Boosted_0 1.87535515579e-05 0.00873019173741 0.00870671495795
+dummy_bbH_L1Zg_Boosted_1 3.81115314667e-05 0.0104270447046 0.0103990053758
+dummy_bbH_L1Zg_Boosted_2 4.07921615988e-05 0.0161977242678 0.016154166311
+dummy_bbH_L1Zg_Untagged_0 0.00103698018938 0.482737123966 0.481438994408
+dummy_bbH_L1Zg_Untagged_1 0.00211614300497 0.578961730003 0.577404856682
+dummy_bbH_L1Zg_Untagged_2 0.00211116531864 0.83830010891 0.83604580164
+dummy_bbH_L1Zg_VHHadrtagged_0 4.60821138404e-05 0.0214522406459 0.021394552663
+dummy_bbH_L1Zg_VHHadrtagged_1 9.37237855396e-05 0.0256421621889 0.0255732070655
+dummy_bbH_L1Zg_VHHadrtagged_2 9.00736704352e-05 0.0357663929462 0.0356702134013
+dummy_bbH_L1Zg_VBFtagged_0 5.08149605594e-05 0.0236554834992 0.023591870442
+dummy_bbH_L1Zg_VBFtagged_1 9.32166949497e-05 0.0255034267902 0.0254348441958
+dummy_bbH_L1Zg_VBFtagged_2 8.19374836283e-05 0.0325356796384 0.0324481874704
+dummy_bbH_L1Zg_VHLepttagged_0 2.30076402659e-05 0.0107105635107 0.0106817614287
+dummy_bbH_L1Zg_VHLepttagged_1 3.48610228684e-05 0.00953772850335 0.00951208081096
+dummy_bbH_L1Zg_VHLepttagged_2 4.34999055869e-05 0.0172729138285 0.0172264650464
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ggZZ2e2mu190821_2016.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_0_0, dummy_ggZZ_None_VHHadrtagged_0_0, dummy_ggZZ_None_VHLepttagged_0_0, dummy_ggZZ_None_VBF1jtagged_0_0, dummy_ggZZ_None_Boosted_0_0, dummy_ggZZ_None_Untagged_0_0
+
+10000 / 621765
+
+dummy_ggZZ_None_VBF1jtagged_0 0.00147792778444 0.00147792778444 0.00147792778444
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ggZZ4mu190821_2016.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_1_0, dummy_ggZZ_None_VHHadrtagged_1_0, dummy_ggZZ_None_VHLepttagged_1_0, dummy_ggZZ_None_VBF1jtagged_1_0, dummy_ggZZ_None_Boosted_1_0, dummy_ggZZ_None_Untagged_1_0
+
+10000 / 533172
+
+dummy_ggZZ_None_VBF1jtagged_1 0.00304824672639 0.00304824672639 0.00304824672639
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ggZZ4e190821_2016.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_2_0, dummy_ggZZ_None_VHHadrtagged_2_0, dummy_ggZZ_None_VHLepttagged_2_0, dummy_ggZZ_None_VBF1jtagged_2_0, dummy_ggZZ_None_Boosted_2_0, dummy_ggZZ_None_Untagged_2_0
+
+10000 / 355870
+
+dummy_ggZZ_None_VBF1jtagged_2 0.00158942653798 0.00158942653798 0.00158942653798
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ggZZ4tau190821_2016.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_3_0, dummy_ggZZ_None_VHHadrtagged_3_0, dummy_ggZZ_None_VHLepttagged_3_0, dummy_ggZZ_None_VBF1jtagged_3_0, dummy_ggZZ_None_Boosted_3_0, dummy_ggZZ_None_Untagged_3_0
+
+69 / 69
+
+dummy_ggZZ_None_VBF1jtagged_3 0.0 0.0 0.0
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ggZZ2mu2tau190821_2016.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_4_0, dummy_ggZZ_None_VHHadrtagged_4_0, dummy_ggZZ_None_VHLepttagged_4_0, dummy_ggZZ_None_VBF1jtagged_4_0, dummy_ggZZ_None_Boosted_4_0, dummy_ggZZ_None_Untagged_4_0
+
+4436 / 4436
+
+dummy_ggZZ_None_VBF1jtagged_4 0.0291692763567 0.0291692763567 0.0291692763567
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ggZZ2e2tau190821_2016.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_5_0, dummy_ggZZ_None_VHHadrtagged_5_0, dummy_ggZZ_None_VHLepttagged_5_0, dummy_ggZZ_None_VBF1jtagged_5_0, dummy_ggZZ_None_Boosted_5_0, dummy_ggZZ_None_Untagged_5_0
+
+3643 / 3643
+
+dummy_ggZZ_None_VBF1jtagged_5 0.0314751602709 0.0314751602709 0.0314751602709
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ggZZ2e2mu190821_2017.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_6_0, dummy_ggZZ_None_VHHadrtagged_6_0, dummy_ggZZ_None_VHLepttagged_6_0, dummy_ggZZ_None_VBF1jtagged_6_0, dummy_ggZZ_None_Boosted_6_0, dummy_ggZZ_None_Untagged_6_0
+
+10000 / 183888
+
+dummy_ggZZ_None_VBF1jtagged_6 0.00470152404159 0.00470152404159 0.00470152404159
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ggZZ4mu190821_2017.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_7_0, dummy_ggZZ_None_VHHadrtagged_7_0, dummy_ggZZ_None_VHLepttagged_7_0, dummy_ggZZ_None_VBF1jtagged_7_0, dummy_ggZZ_None_Boosted_7_0, dummy_ggZZ_None_Untagged_7_0
+
+10000 / 521099
+
+dummy_ggZZ_None_VBF1jtagged_7 0.00191566371359 0.00191566371359 0.00191566371359
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ggZZ4e190821_2017.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_8_0, dummy_ggZZ_None_VHHadrtagged_8_0, dummy_ggZZ_None_VHLepttagged_8_0, dummy_ggZZ_None_VBF1jtagged_8_0, dummy_ggZZ_None_Boosted_8_0, dummy_ggZZ_None_Untagged_8_0
+
+10000 / 280820
+
+dummy_ggZZ_None_VBF1jtagged_8 0.00192358146887 0.00192358146887 0.00192358146887
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ggZZ4tau190821_2017.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_9_0, dummy_ggZZ_None_VHHadrtagged_9_0, dummy_ggZZ_None_VHLepttagged_9_0, dummy_ggZZ_None_VBF1jtagged_9_0, dummy_ggZZ_None_Boosted_9_0, dummy_ggZZ_None_Untagged_9_0
+
+51 / 51
+
+dummy_ggZZ_None_VBF1jtagged_9 0.000669014989398 0.000669014989398 0.000669014989398
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ggZZ2mu2tau190821_2017.root:candTree
+Filling 12 histograms:
+dummy_ggZZ_None_VBFtagged_10_0, dummy_ggZZ_None_VBFtagged_16_0, dummy_ggZZ_None_VHHadrtagged_10_0, dummy_ggZZ_None_VHHadrtagged_16_0, dummy_ggZZ_None_VHLepttagged_10_0, dummy_ggZZ_None_VHLepttagged_16_0, dummy_ggZZ_None_VBF1jtagged_10_0, dummy_ggZZ_None_VBF1jtagged_16_0, dummy_ggZZ_None_Boosted_10_0, dummy_ggZZ_None_Boosted_16_0, dummy_ggZZ_None_Untagged_10_0, dummy_ggZZ_None_Untagged_16_0
+
+3398 / 3398
+
+dummy_ggZZ_None_VBF1jtagged_10 0.0307956561446 0.0307956561446 0.0307956561446
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ggZZ2e2tau190821_2017.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_11_0, dummy_ggZZ_None_VHHadrtagged_11_0, dummy_ggZZ_None_VHLepttagged_11_0, dummy_ggZZ_None_VBF1jtagged_11_0, dummy_ggZZ_None_Boosted_11_0, dummy_ggZZ_None_Untagged_11_0
+
+3016 / 3016
+
+dummy_ggZZ_None_VBF1jtagged_11 0.0209844857454 0.0209844857454 0.0209844857454
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ggZZ2e2mu190821_2018.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_12_0, dummy_ggZZ_None_VHHadrtagged_12_0, dummy_ggZZ_None_VHLepttagged_12_0, dummy_ggZZ_None_VBF1jtagged_12_0, dummy_ggZZ_None_Boosted_12_0, dummy_ggZZ_None_Untagged_12_0
+
+10000 / 225268
+
+dummy_ggZZ_None_VBF1jtagged_12 0.00832648295909 0.00832648295909 0.00832648295909
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ggZZ4mu190821_2018.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_13_0, dummy_ggZZ_None_VHHadrtagged_13_0, dummy_ggZZ_None_VHLepttagged_13_0, dummy_ggZZ_None_VBF1jtagged_13_0, dummy_ggZZ_None_Boosted_13_0, dummy_ggZZ_None_Untagged_13_0
+
+10000 / 562305
+
+dummy_ggZZ_None_VBF1jtagged_13 0.00258664693683 0.00258664693683 0.00258664693683
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ggZZ4e190821_2018.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_14_0, dummy_ggZZ_None_VHHadrtagged_14_0, dummy_ggZZ_None_VHLepttagged_14_0, dummy_ggZZ_None_VBF1jtagged_14_0, dummy_ggZZ_None_Boosted_14_0, dummy_ggZZ_None_Untagged_14_0
+
+10000 / 392400
+
+dummy_ggZZ_None_VBF1jtagged_14 0.00163883587811 0.00163883587811 0.00163883587811
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ggZZ4tau190821_2018.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_15_0, dummy_ggZZ_None_VHHadrtagged_15_0, dummy_ggZZ_None_VHLepttagged_15_0, dummy_ggZZ_None_VBF1jtagged_15_0, dummy_ggZZ_None_Boosted_15_0, dummy_ggZZ_None_Untagged_15_0
+
+68 / 68
+
+dummy_ggZZ_None_VBF1jtagged_15 0.000441258045612 0.000441258045612 0.000441258045612
+dummy_ggZZ_None_VBF1jtagged_16 0.0443012304604 0.0443012304604 0.0443012304604
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ggZZ2e2tau190821_2018.root:candTree
+Filling 6 histograms:
+dummy_ggZZ_None_VBFtagged_17_0, dummy_ggZZ_None_VHHadrtagged_17_0, dummy_ggZZ_None_VHLepttagged_17_0, dummy_ggZZ_None_VBF1jtagged_17_0, dummy_ggZZ_None_Boosted_17_0, dummy_ggZZ_None_Untagged_17_0
+
+3752 / 3752
+
+dummy_ggZZ_None_VBF1jtagged_17 0.0332006216049 0.0332006216049 0.0332006216049
+dummy_ggZZ_None_Boosted_0 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_1 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_2 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_3 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_4 0.00160070043057 0.00160070043057 0.00160070043057
+dummy_ggZZ_None_Boosted_5 0.000941539299674 0.000941539299674 0.000941539299674
+dummy_ggZZ_None_Boosted_6 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_7 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_8 0.000253084581345 0.000253084581345 0.000253084581345
+dummy_ggZZ_None_Boosted_9 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_10 0.0026089544408 0.0026089544408 0.0026089544408
+dummy_ggZZ_None_Boosted_11 0.000755381013732 0.000755381013732 0.000755381013732
+dummy_ggZZ_None_Boosted_12 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_13 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_14 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_15 0.0 0.0 0.0
+dummy_ggZZ_None_Boosted_16 0.00375312194228 0.00375312194228 0.00375312194228
+dummy_ggZZ_None_Boosted_17 0.00280952337198 0.00280952337198 0.00280952337198
+dummy_ggZZ_None_Untagged_0 0.0256357118487 0.0256357118487 0.0256357118487
+dummy_ggZZ_None_Untagged_1 0.0410205461085 0.0410205461085 0.0410205461085
+dummy_ggZZ_None_Untagged_2 0.0277609955519 0.0277609955519 0.0277609955519
+dummy_ggZZ_None_Untagged_3 0.00373917561956 0.00373917561956 0.00373917561956
+dummy_ggZZ_None_Untagged_4 0.397882074118 0.397882074118 0.397882074118
+dummy_ggZZ_None_Untagged_5 0.336606055498 0.336606055498 0.336606055498
+dummy_ggZZ_None_Untagged_6 0.0911344662309 0.0911344662309 0.0911344662309
+dummy_ggZZ_None_Untagged_7 0.0477891340852 0.0477891340852 0.0477891340852
+dummy_ggZZ_None_Untagged_8 0.0270027220249 0.0270027220249 0.0270027220249
+dummy_ggZZ_None_Untagged_9 0.00583835644647 0.00583835644647 0.00583835644647
+dummy_ggZZ_None_Untagged_10 0.357775002718 0.357775002718 0.357775002718
+dummy_ggZZ_None_Untagged_11 0.330376029015 0.330376029015 0.330376029015
+dummy_ggZZ_None_Untagged_12 0.128802061081 0.128802061081 0.128802061081
+dummy_ggZZ_None_Untagged_13 0.0639984980226 0.0639984980226 0.0639984980226
+dummy_ggZZ_None_Untagged_14 0.032542064786 0.032542064786 0.032542064786
+dummy_ggZZ_None_Untagged_15 0.00937783811241 0.00937783811241 0.00937783811241
+dummy_ggZZ_None_Untagged_16 0.514678776264 0.514678776264 0.514678776264
+dummy_ggZZ_None_Untagged_17 0.555912494659 0.555912494659 0.555912494659
+dummy_ggZZ_None_VHHadrtagged_0 0.0 0.0 0.0
+dummy_ggZZ_None_VHHadrtagged_1 0.000263275258476 0.000263275258476 0.000263275258476
+dummy_ggZZ_None_VHHadrtagged_2 0.000145994737977 0.000145994737977 0.000145994737977
+dummy_ggZZ_None_VHHadrtagged_3 0.0 0.0 0.0
+dummy_ggZZ_None_VHHadrtagged_4 0.00546109769493 0.00546109769493 0.00546109769493
+dummy_ggZZ_None_VHHadrtagged_5 0.00454563787207 0.00454563787207 0.00454563787207
+dummy_ggZZ_None_VHHadrtagged_6 0.0 0.0 0.0
+dummy_ggZZ_None_VHHadrtagged_7 0.000471561215818 0.000471561215818 0.000471561215818
+dummy_ggZZ_None_VHHadrtagged_8 0.000415136310039 0.000415136310039 0.000415136310039
+dummy_ggZZ_None_VHHadrtagged_9 0.0 0.0 0.0
+dummy_ggZZ_None_VHHadrtagged_10 0.00435654865578 0.00435654865578 0.00435654865578
+dummy_ggZZ_None_VHHadrtagged_11 0.00576453329995 0.00576453329995 0.00576453329995
+dummy_ggZZ_None_VHHadrtagged_12 0.0 0.0 0.0
+dummy_ggZZ_None_VHHadrtagged_13 0.000175542445504 0.000175542445504 0.000175542445504
+dummy_ggZZ_None_VHHadrtagged_14 0.000218624743866 0.000218624743866 0.000218624743866
+dummy_ggZZ_None_VHHadrtagged_15 0.00036065565655 0.00036065565655 0.00036065565655
+dummy_ggZZ_None_VHHadrtagged_16 0.00626713130623 0.00626713130623 0.00626713130623
+dummy_ggZZ_None_VHHadrtagged_17 0.00536975590512 0.00536975590512 0.00536975590512
+dummy_ggZZ_None_VBFtagged_0 0.00033660029294 0.00033660029294 0.00033660029294
+dummy_ggZZ_None_VBFtagged_1 0.000657734519336 0.000657734519336 0.000657734519336
+dummy_ggZZ_None_VBFtagged_2 0.000516386178788 0.000516386178788 0.000516386178788
+dummy_ggZZ_None_VBFtagged_3 0.000674800132401 0.000674800132401 0.000674800132401
+dummy_ggZZ_None_VBFtagged_4 0.0175357311964 0.0175357311964 0.0175357311964
+dummy_ggZZ_None_VBFtagged_5 0.0126189664006 0.0126189664006 0.0126189664006
+dummy_ggZZ_None_VBFtagged_6 0.0 0.0 0.0
+dummy_ggZZ_None_VBFtagged_7 0.000447659811471 0.000447659811471 0.000447659811471
+dummy_ggZZ_None_VBFtagged_8 0.000185422060895 0.000185422060895 0.000185422060895
+dummy_ggZZ_None_VBFtagged_9 0.0 0.0 0.0
+dummy_ggZZ_None_VBFtagged_10 0.0122279906645 0.0122279906645 0.0122279906645
+dummy_ggZZ_None_VBFtagged_11 0.0037872439716 0.0037872439716 0.0037872439716
+dummy_ggZZ_None_VBFtagged_12 0.000839328276925 0.000839328276925 0.000839328276925
+dummy_ggZZ_None_VBFtagged_13 0.00107649317943 0.00107649317943 0.00107649317943
+dummy_ggZZ_None_VBFtagged_14 0.0 0.0 0.0
+dummy_ggZZ_None_VBFtagged_15 0.0 0.0 0.0
+dummy_ggZZ_None_VBFtagged_16 0.0175906289369 0.0175906289369 0.0175906289369
+dummy_ggZZ_None_VBFtagged_17 0.0200871452689 0.0200871452689 0.0200871452689
+dummy_ggZZ_None_VHLepttagged_0 0.00143251894042 0.00143251894042 0.00143251894042
+dummy_ggZZ_None_VHLepttagged_1 0.00012905546464 0.00012905546464 0.00012905546464
+dummy_ggZZ_None_VHLepttagged_2 0.000748985854443 0.000748985854443 0.000748985854443
+dummy_ggZZ_None_VHLepttagged_3 0.0 0.0 0.0
+dummy_ggZZ_None_VHLepttagged_4 0.00145867234096 0.00145867234096 0.00145867234096
+dummy_ggZZ_None_VHLepttagged_5 0.00150685780682 0.00150685780682 0.00150685780682
+dummy_ggZZ_None_VHLepttagged_6 0.00197260826826 0.00197260826826 0.00197260826826
+dummy_ggZZ_None_VHLepttagged_7 0.000726041966118 0.000726041966118 0.000726041966118
+dummy_ggZZ_None_VHLepttagged_8 0.000864504661877 0.000864504661877 0.000864504661877
+dummy_ggZZ_None_VHLepttagged_9 0.0 0.0 0.0
+dummy_ggZZ_None_VHLepttagged_10 0.00472318893299 0.00472318893299 0.00472318893299
+dummy_ggZZ_None_VHLepttagged_11 0.00235990597866 0.00235990597866 0.00235990597866
+dummy_ggZZ_None_VHLepttagged_12 0.00169507879764 0.00169507879764 0.00169507879764
+dummy_ggZZ_None_VHLepttagged_13 0.000791793107055 0.000791793107055 0.000791793107055
+dummy_ggZZ_None_VHLepttagged_14 0.000929837115109 0.000929837115109 0.000929837115109
+dummy_ggZZ_None_VHLepttagged_15 0.00040691049071 0.00040691049071 0.00040691049071
+dummy_ggZZ_None_VHLepttagged_16 0.00679456349462 0.00679456349462 0.00679456349462
+dummy_ggZZ_None_VHLepttagged_17 0.00417687324807 0.00417687324807 0.00417687324807
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/qqZZ190821_2016.root:candTree
+Filling 6 histograms:
+dummy_qqZZ_None_VBFtagged_0_0, dummy_qqZZ_None_VHHadrtagged_0_0, dummy_qqZZ_None_VHLepttagged_0_0, dummy_qqZZ_None_VBF1jtagged_0_0, dummy_qqZZ_None_Boosted_0_0, dummy_qqZZ_None_Untagged_0_0
+
+10000 / 149166
+
+dummy_qqZZ_None_VBF1jtagged_0 0.0787163972855 0.0787163972855 0.0787163972855
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/qqZZ190821_2017.root:candTree
+Filling 6 histograms:
+dummy_qqZZ_None_VBFtagged_1_0, dummy_qqZZ_None_VHHadrtagged_1_0, dummy_qqZZ_None_VHLepttagged_1_0, dummy_qqZZ_None_VBF1jtagged_1_0, dummy_qqZZ_None_Boosted_1_0, dummy_qqZZ_None_Untagged_1_0
+
+10000 / 356704
+
+dummy_qqZZ_None_VBF1jtagged_1 0.0337427705526 0.0337427705526 0.0337427705526
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/qqZZext1190821_2018.root:candTree
+Filling 6 histograms:
+dummy_qqZZ_None_VBFtagged_2_0, dummy_qqZZ_None_VHHadrtagged_2_0, dummy_qqZZ_None_VHLepttagged_2_0, dummy_qqZZ_None_VBF1jtagged_2_0, dummy_qqZZ_None_Boosted_2_0, dummy_qqZZ_None_Untagged_2_0
+
+10000 / 162215
+
+dummy_qqZZ_None_VBF1jtagged_2 0.186201244593 0.186201244593 0.186201244593
+dummy_qqZZ_None_Boosted_0 0.0494620501995 0.0494620501995 0.0494620501995
+dummy_qqZZ_None_Boosted_1 0.016885606572 0.016885606572 0.016885606572
+dummy_qqZZ_None_Boosted_2 0.0332714542747 0.0332714542747 0.0332714542747
+dummy_qqZZ_None_Untagged_0 3.61485385895 3.61485385895 3.61485385895
+dummy_qqZZ_None_Untagged_1 1.74307978153 1.74307978153 1.74307978153
+dummy_qqZZ_None_Untagged_2 5.59543466568 5.59543466568 5.59543466568
+dummy_qqZZ_None_VHHadrtagged_0 0.0252455249429 0.0252455249429 0.0252455249429
+dummy_qqZZ_None_VHHadrtagged_1 0.0298329982907 0.0298329982907 0.0298329982907
+dummy_qqZZ_None_VHHadrtagged_2 0.051647618413 0.051647618413 0.051647618413
+dummy_qqZZ_None_VBFtagged_0 0.0433352105319 0.0433352105319 0.0433352105319
+dummy_qqZZ_None_VBFtagged_1 0.0234962366521 0.0234962366521 0.0234962366521
+dummy_qqZZ_None_VBFtagged_2 0.0193000528961 0.0193000528961 0.0193000528961
+dummy_qqZZ_None_VHLepttagged_0 0.058248065412 0.058248065412 0.058248065412
+dummy_qqZZ_None_VHLepttagged_1 0.0184537824243 0.0184537824243 0.0184537824243
+dummy_qqZZ_None_VHLepttagged_2 0.0730353444815 0.0730353444815 0.0730353444815
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/ZX190821_2016.root:candTree
+Filling 6 histograms:
+dummy_ZX_None_VBFtagged_0_0, dummy_ZX_None_VHHadrtagged_0_0, dummy_ZX_None_VHLepttagged_0_0, dummy_ZX_None_VBF1jtagged_0_0, dummy_ZX_None_Boosted_0_0, dummy_ZX_None_Untagged_0_0
+
+10000 / 36200
+
+dummy_ZX_None_VBF1jtagged_0 0.148235321045 0.148235321045 0.148235321045
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/ZX190821_2017.root:candTree
+Filling 6 histograms:
+dummy_ZX_None_VBFtagged_1_0, dummy_ZX_None_VHHadrtagged_1_0, dummy_ZX_None_VHLepttagged_1_0, dummy_ZX_None_VBF1jtagged_1_0, dummy_ZX_None_Boosted_1_0, dummy_ZX_None_Untagged_1_0
+
+10000 / 30247
+
+dummy_ZX_None_VBF1jtagged_1 0.0938690304756 0.0938690304756 0.0938690304756
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/ZX190821_2018.root:candTree
+Filling 6 histograms:
+dummy_ZX_None_VBFtagged_2_0, dummy_ZX_None_VHHadrtagged_2_0, dummy_ZX_None_VHLepttagged_2_0, dummy_ZX_None_VBF1jtagged_2_0, dummy_ZX_None_Boosted_2_0, dummy_ZX_None_Untagged_2_0
+
+10000 / 46721
+
+dummy_ZX_None_VBF1jtagged_2 0.245989173651 0.245989173651 0.245989173651
+dummy_ZX_None_Boosted_0 0.149018451571 0.149018451571 0.149018451571
+dummy_ZX_None_Boosted_1 0.200608476996 0.200608476996 0.200608476996
+dummy_ZX_None_Boosted_2 0.296155333519 0.296155333519 0.296155333519
+dummy_ZX_None_Untagged_0 3.7816426754 3.7816426754 3.7816426754
+dummy_ZX_None_Untagged_1 5.01684141159 5.01684141159 5.01684141159
+dummy_ZX_None_Untagged_2 5.93633460999 5.93633460999 5.93633460999
+dummy_ZX_None_VHHadrtagged_0 0.14471565187 0.14471565187 0.14471565187
+dummy_ZX_None_VHHadrtagged_1 0.321060568094 0.321060568094 0.321060568094
+dummy_ZX_None_VHHadrtagged_2 0.342099219561 0.342099219561 0.342099219561
+dummy_ZX_None_VBFtagged_0 0.433829009533 0.433829009533 0.433829009533
+dummy_ZX_None_VBFtagged_1 0.536182880402 0.536182880402 0.536182880402
+dummy_ZX_None_VBFtagged_2 0.554527163506 0.554527163506 0.554527163506
+dummy_ZX_None_VHLepttagged_0 0.0369221195579 0.0369221195579 0.0369221195579
+dummy_ZX_None_VHLepttagged_1 0.0797174945474 0.0797174945474 0.0797174945474
+dummy_ZX_None_VHLepttagged_2 0.0944992154837 0.0944992154837 0.0944992154837
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2016/data190821_2016.root:candTree
+Filling 6 histograms:
+dummy_data_None_VBFtagged_0_0, dummy_data_None_VHHadrtagged_0_0, dummy_data_None_VHLepttagged_0_0, dummy_data_None_VBF1jtagged_0_0, dummy_data_None_Boosted_0_0, dummy_data_None_Untagged_0_0
+
+1427 / 1427
+
+dummy_data_None_VBF1jtagged_0 7.0 7.0 7.0
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2017/data190821_2017.root:candTree
+Filling 6 histograms:
+dummy_data_None_VBFtagged_1_0, dummy_data_None_VHHadrtagged_1_0, dummy_data_None_VHLepttagged_1_0, dummy_data_None_VBF1jtagged_1_0, dummy_data_None_Boosted_1_0, dummy_data_None_Untagged_1_0
+
+1639 / 1639
+
+dummy_data_None_VBF1jtagged_1 7.0 7.0 7.0
+Iterating through /work-zfs/lhc/heshy/anomalouscouplings/step3_withdiscriminants/190821_2018/data190821_2018.root:candTree
+Filling 6 histograms:
+dummy_data_None_VBFtagged_2_0, dummy_data_None_VHHadrtagged_2_0, dummy_data_None_VHLepttagged_2_0, dummy_data_None_VBF1jtagged_2_0, dummy_data_None_Boosted_2_0, dummy_data_None_Untagged_2_0
+
+2350 / 2350
+
+dummy_data_None_VBF1jtagged_2 12.0 12.0 12.0
+dummy_data_None_Boosted_0 3.0 3.0 3.0
+dummy_data_None_Boosted_1 10.0 10.0 10.0
+dummy_data_None_Boosted_2 4.0 4.0 4.0
+dummy_data_None_Untagged_0 137.0 137.0 137.0
+dummy_data_None_Untagged_1 160.0 160.0 160.0
+dummy_data_None_Untagged_2 206.0 206.0 206.0
+dummy_data_None_VHHadrtagged_0 1.0 1.0 1.0
+dummy_data_None_VHHadrtagged_1 6.0 6.0 6.0
+dummy_data_None_VHHadrtagged_2 7.0 7.0 7.0
+dummy_data_None_VBFtagged_0 7.0 7.0 7.0
+dummy_data_None_VBFtagged_1 7.0 7.0 7.0
+dummy_data_None_VBFtagged_2 7.0 7.0 7.0
+dummy_data_None_VHLepttagged_0 2.0 2.0 2.0
+dummy_data_None_VHLepttagged_1 4.0 4.0 4.0
+dummy_data_None_VHLepttagged_2 2.0 2.0 2.0
+"""
+
+lines1 = [
+  line for line in string.split("\n") if (
+    "_normalization" not in line and (
+      "dummy_ggH_0+" in line or "dummy_ttH_0+" in line or "dummy_bbH_0+" in line
+    )
+  )
+]
+
+lines2 = [
+  line for line in string.split("\n") if (
+    "_normalization" not in line and (
+      "SMffHnorm" in line
+    )
+  )
+]
+
+lines3 = [
+  line for line in string.split("\n") if (
+    "_normalization" not in line and (
+      "dummy_ggH_0-" in line or "dummy_ttH_0-" in line or "dummy_bbH_0-" in line
+    )
+  )
+]
+
+lines4 = [
+  line for line in string.split("\n") if (
+    "_normalization" not in line and (
+      "0-ffHnorm" in line
+    )
+  )
+]
+
+print sum(float(line.split()[3]) for line in lines1)
+print sum(float(line.split()[3]) for line in lines2)
+print sum(float(line.split()[3]) for line in lines3)
+print sum(float(line.split()[3]) for line in lines4)

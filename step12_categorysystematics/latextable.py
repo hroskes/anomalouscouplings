@@ -22,7 +22,7 @@ from helperstuff.enums import Category, Channel, EnumItem, flavors, Hypothesis, 
 from helperstuff.samples import ReweightingSample, ReweightingSampleWithPdf, Sample
 from helperstuff.utilities import KeyDefaultDict, MultiplyCounter, tfiles
 
-from discriminantplots import getscaletos, gettrees, getweights, makehistogram, HypothesisLine, masscut
+from discriminantplots import getscaletos, gettrees, getweights, makehistogram, makehistogramnormalization, makehistogramrescaling, HypothesisLine, masscut
 
 categories = list(Category(_) for _ in ("VBFtagged", "VHHadrtagged", "VHLepttagged", "VBF1jtagged", "Boosted", "Untagged"))
 channels = list(Channel(_) for _ in ("4e", "4mu", "2e2mu"))
@@ -64,12 +64,8 @@ class RowBase(RowBaseBase):
     result = "{}".format(self.title)
     for category in list(categories):
       result += " & "
-      total = 0
-      for channel in channels:
-        channel = Channel(channel)
-        amount = self.categorydistribution[category]
-        total += amount
-      result += self.fmt.format(total)
+      amount = self.categorydistribution[category]
+      result += self.fmt.format(amount)
     return result
 
 class Row(RowBase, MultiEnum):
@@ -113,12 +109,65 @@ class Row(RowBase, MultiEnum):
       else:
         otherargs = ((str(self.productionmode),),)
 
+      if self.productionmode in ("ggH", "ttH", "bbH"):
+        trees = gettrees(
+          ("ggH", "0+"),
+          ("bbH", "0+"),
+          ("ttH", "0+", "Hff0+"),
+        )
+        SMweights = SMhypothesisline.ffHweights()
+        weights = hypothesisline.ffHweights()
+        SMhistogramnormalization = makehistogramnormalization(
+          name="SMffHnormalization",
+          trees=trees,
+          weightformulas=SMweights,
+          scaletos=getscaletos("ggH", "bbH", "ttH"),
+        )
+        histogramnormalization = makehistogramnormalization(
+          name=str(self.hypothesis)+"ffHnormalization",
+          trees=trees,
+          weightformulas=weights,
+          scaletos=getscaletos("ggH", "bbH", "ttH"),
+          normalizationweightformulas=SMweights,
+        )
+      elif self.productionmode in ("VBF", "VH", "ZH", "WH"):
+        SMargs = args = (
+          ("VBF",),
+          ("VH",),
+        )
+        if isL1Zg:
+          args = (
+            ("VBF",),
+            ("ZH",),
+          )
+        SMweights = SMhypothesisline.getweights(*SMargs)
+        SMtrees = SMhypothesisline.gettrees(*SMargs)
+        weights = hypothesisline.getweights(*args)
+        trees = hypothesisline.gettrees(*args)
+        SMhistogramnormalization = makehistogramnormalization(
+          name="SMVVHnormalization",
+          trees=SMtrees,
+          weightformulas=SMweights,
+          scaletos=getscaletos(*[_[0] for _ in SMargs]),
+        )
+        histogramnormalization = makehistogramnormalization(
+          name=str(self.hypothesis)+"VVHnormalization",
+          trees=trees,
+          weightformulas=weights,
+          normalizationweightformulas=SMhypothesisline.getweights(*args),
+          normalizationtrees=SMhypothesisline.gettrees(*args),
+          scaletos=getscaletos(*[_[0] for _ in args], isL1Zg=isL1Zg),
+        )
+      rescaling = makehistogramrescaling(numerator=SMhistogramnormalization, denominator=histogramnormalization)
+
+
       kwargs.update(
         trees=hypothesisline.gettrees(*otherargs),
         weightformulas=hypothesisline.getweights(*otherargs),
         normalizationweightformulas=SMhypothesisline.getweights(*otherargs),
         normalizationtrees=SMhypothesisline.gettrees(*otherargs),
         scaletos=getscaletos(self.productionmode, isL1Zg=isL1Zg),
+        rescalings=[rescaling for _ in hypothesisline.gettrees(*otherargs)]
       )
     else:
       assert False, self.productionmode

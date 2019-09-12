@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-debug = True
+debug = False
 
 if __name__ == "__main__":
   import argparse
@@ -73,6 +73,12 @@ class Tree(object):
     self.__treename = treename
     self.__histogramcomponentpieces = []
     self.__filled = False
+
+  @property
+  def isVVH(self):
+    if "VBF" in self.filename or "ZH" in self.filename or "WH" in self.filename: return True
+    if "ggH" in self.filename or "ttH" in self.filename or "bbH" in self.filename: return False
+    assert False, self.filename
 
   def __repr__(self):
     return "gettree({filename!r}, {treename!r})".format(filename=self.__filename, treename=self.__treename)
@@ -165,7 +171,7 @@ class HistogramComponentPiece(object):
     self.__tree.fillall()
 
 class HistogramComponent(object):
-  def __init__(self, name, trees, xformula, weightformula, cutformula, binning, scaleto, mirror=False, normalizationtrees=None, normalizationweightformula=None):
+  def __init__(self, name, trees, xformula, weightformula, cutformula, binning, scaleto, mirror=False, normalizationtrees=None, normalizationweightformula=None, rescaling=None):
     self.__pieces = [
       HistogramComponentPiece(name+"_"+str(i), tree, xformula, weightformula, cutformula, binning, mirror=mirror) for i, tree in enumerate(trees)
     ]
@@ -176,7 +182,8 @@ class HistogramComponent(object):
     if scaleto is None:
       self.__normalization = None
     else:
-      self.__normalization = makenormalization(name=name+"_normalization", trees=normalizationtrees, weightformula=normalizationweightformula, scaleto=scaleto)
+      self.__normalization = makehistogramcomponentnormalization(name=name+"_normalization", trees=normalizationtrees, weightformula=normalizationweightformula, scaleto=scaleto)
+    self.__rescaling = rescaling
 
   @property
   def histogram(self): return self.__histogram
@@ -191,19 +198,25 @@ class HistogramComponent(object):
       if piececontents:
         self.SetBinContentError(x, weightedaverage(piececontents))
     self.__finalized = True
-    print self.__histogram.GetName(), self.__histogram.Integral(),
+
+    toprint = [self.__histogram.GetName(), self.__histogram.Integral()]
     if self.__normalization is not None:
       self.__histogram.Scale(self.__normalization.scaleby)
-    print self.__histogram.Integral()
+    toprint += [self.__histogram.Integral()]
+    if self.__rescaling is not None:
+      self.__histogram.Scale(self.__rescaling.scaleby)
+    toprint += [self.__histogram.Integral()]
+    for _ in toprint: print _,
+    print
 
   def SetBinContentError(self, x, value):
     assert not self.__finalized
     self.__histogram.SetBinContent(x, value.n)
     self.__histogram.SetBinError(x, value.s)
 
-class Normalization(HistogramComponent):
+class HistogramComponentNormalization(HistogramComponent):
   def __init__(self, name, trees, weightformula, scaleto):
-    super(Normalization, self).__init__(
+    super(HistogramComponentNormalization, self).__init__(
       name=name, trees=trees, weightformula=weightformula,
       xformula="1", cutformula=masscut, binning=np.array([0., 2.]), mirror=False, scaleto=None
     )
@@ -219,22 +232,22 @@ class Normalization(HistogramComponent):
   name=lambda name: None,
   trees=tuple,
 )
-def makenormalization(**kwargs): return Normalization(**kwargs)
+def makehistogramcomponentnormalization(**kwargs): return HistogramComponentNormalization(**kwargs)
 
 class Histogram(object):
-  def __init__(self, name, trees, xformula, weightformulas, scaletos, cutformula, binning, linecolor, linestyle, linewidth, fillcolor, fillstyle, legendname, legendlpf, addonbottom, mirror, normalizationtrees=None, normalizationweightformulas=None, makegraph=False, markercolor=None, markerstyle=None, markersize=None):
+  def __init__(self, name, trees, xformula, weightformulas, scaletos, cutformula, binning, linecolor, linestyle, linewidth, fillcolor, fillstyle, legendname, legendlpf, addonbottom, mirror, normalizationtrees=None, normalizationweightformulas=None, makegraph=False, markercolor=None, markerstyle=None, markersize=None, rescalings=None):
     if normalizationweightformulas is None: normalizationweightformulas = weightformulas
     if normalizationtrees is None: normalizationtrees = trees
-    if scaletos is None:
-      scaletos = []
-    else:
-      assert len(scaletos) == len(weightformulas) == len(trees) == len(normalizationtrees) == len(normalizationweightformulas), (name, len(scaletos), len(weightformulas), len(trees), len(normalizationtrees), len(normalizationweightformulas))
+    if rescalings is None: rescalings = [None for _ in trees]
+    if scaletos is None: scaletos = [None for _ in trees]
+    assert len(scaletos) == len(weightformulas) == len(trees) == len(normalizationtrees) == len(normalizationweightformulas) == len(rescalings), (name, len(scaletos), len(weightformulas), len(trees), len(normalizationtrees), len(normalizationweightformulas), len(rescalings))
     self.__components = [
       HistogramComponent(
         name=name+"_"+str(i), trees=componenttrees, xformula=xformula, weightformula=weightformula,
         cutformula=cutformula, binning=binning, mirror=mirror, scaleto=scaleto,
         normalizationtrees=componentnormalizationtrees, normalizationweightformula=normalizationweightformula,
-      ) for i, (componenttrees, weightformula, scaleto, componentnormalizationtrees, normalizationweightformula) in enumerate(itertools.izip_longest(trees, weightformulas, scaletos, normalizationtrees, normalizationweightformulas))
+        rescaling=rescaling,
+      ) for i, (componenttrees, weightformula, scaleto, componentnormalizationtrees, normalizationweightformula, rescaling) in enumerate(itertools.izip_longest(trees, weightformulas, scaletos, normalizationtrees, normalizationweightformulas, rescalings))
     ]
     self.__histogram = self.__components[0].histogram.Clone(name)
     self.__finalized = False
@@ -298,8 +311,41 @@ class Histogram(object):
   normalizationtrees=lambda normalizationtrees: tuple(tuple(_) for _ in normalizationtrees),
   normalizationweightformulas=tuple,
   scaletos=lambda scaletos: tuple(scaletos) if scaletos is not None else scaletos,
+  rescalings=tuple,
 )
 def makehistogram(**kwargs): return Histogram(**kwargs)
+
+class HistogramNormalization(Histogram):
+  def __init__(self, name, trees, weightformulas, scaletos, normalizationtrees=None, normalizationweightformulas=None):
+    super(HistogramNormalization, self).__init__(
+      name=name, trees=trees, xformula="1", weightformulas=weightformulas,
+      scaletos=scaletos, cutformula=masscut, binning=np.array([0., 2.]),
+      linecolor=0, linestyle=0, linewidth=0, fillcolor=0, fillstyle=0, legendname="", legendlpf="", addonbottom=[], mirror=None,
+      normalizationtrees=normalizationtrees, normalizationweightformulas=normalizationweightformulas,
+    )
+
+@cache_keys(
+  name=lambda name: None,
+  trees=lambda trees: tuple(tuple(_) for _ in trees),
+  weightformulas=tuple,
+  normalizationtrees=lambda normalizationtrees: tuple(tuple(_) for _ in normalizationtrees),
+  normalizationweightformulas=tuple,
+  scaletos=lambda scaletos: tuple(scaletos) if scaletos is not None else scaletos,
+)
+def makehistogramnormalization(**kwargs): return HistogramNormalization(**kwargs)
+
+class HistogramRescaling(object):
+  def __init__(self, numerator, denominator):
+    self.__numerator = numerator
+    self.__denominator = denominator
+  @property
+  def scaleby(self):
+    self.__numerator.makefinalhistogram()
+    self.__denominator.makefinalhistogram()
+    return self.__numerator.histogram.Integral() / self.__denominator.histogram.Integral()
+
+@cache
+def makehistogramrescaling(**kwargs): return HistogramRescaling(**kwargs)
 
 @cache
 def gettree(*args, **kwargs):
@@ -679,8 +725,40 @@ class Plot(object):
     VHscaletos = functools.partial(getscaletos, "VH")
     notVHscaletos = functools.partial(getscaletos, "VBF", "ggH", "bbH", "ttH")
 
+    SMffHhistogramnormalization = makehistogramnormalization(
+      name="SMffHnormalization",
+      trees=ffHtrees,
+      weightformulas=SMffHweights(),
+      scaletos=ffHscaletos(),
+    )
+    SMVVHhistogramnormalization = makehistogramnormalization(
+      name="SMVVHnormalization",
+      trees=SMVVHtrees(),
+      weightformulas=SMVVHweights(),
+      scaletos=VVHscaletos(),
+    )
+
     for hypothesis in hypothesislines:
       isL1Zg = Hypothesis(hypothesis.hypothesis) == "L1Zg"
+
+      ffHhistogramnormalization = makehistogramnormalization(
+        name=str(hypothesis)+"ffHnormalization",
+        trees=ffHtrees,
+        weightformulas=hypothesis.ffHweights(isL1Zg=isL1Zg),
+        scaletos=ffHscaletos(isL1Zg=isL1Zg),
+        normalizationweightformulas=SMffHweights(isL1Zg=isL1Zg),
+      )
+      VVHhistogramnormalization = makehistogramnormalization(
+        name=str(hypothesis)+"VVHnormalization",
+        trees=hypothesis.VVHtrees(isL1Zg=isL1Zg),
+        weightformulas=hypothesis.VVHweights(isL1Zg=isL1Zg),
+        normalizationweightformulas=SMVVHweights(isL1Zg=isL1Zg),
+        normalizationtrees=SMVVHtrees(isL1Zg=isL1Zg),
+        scaletos=VVHscaletos(isL1Zg=isL1Zg),
+      )
+
+      ffHrescaling = makehistogramrescaling(numerator=SMffHhistogramnormalization, denominator=ffHhistogramnormalization)
+      VVHrescaling = makehistogramrescaling(numerator=SMVVHhistogramnormalization, denominator=VVHhistogramnormalization)
 
       VVHkwargs = dict(
         name=name+"_VVH_"+str(hypothesis.hypothesis),
@@ -701,6 +779,7 @@ class Plot(object):
         legendlpf="f",
         addonbottom=[ZZhistogram],
         mirror=isDCP is not None and hypothesis.ispure,
+        rescalings=[VVHrescaling for _ in hypothesis.VVHtrees()],
       )
 
       ffHkwargs = dict(
@@ -719,7 +798,8 @@ class Plot(object):
         fillstyle=0,
         legendname="Total "+hypothesis.legendname,
         legendlpf="l",
-        mirror=isDCP == "prod" or (isDCP == "dec" and hypothesis.ispure)
+        mirror=isDCP == "prod" or (isDCP == "dec" and hypothesis.ispure),
+        rescalings=[ffHrescaling for _ in ffHtrees],
       )
 
       if iscategorydiscriminant is None:
@@ -736,6 +816,8 @@ class Plot(object):
         VVHkwargs["normalizationweightformulas"] = SMVBFweights(isL1Zg=isL1Zg)
         ffHkwargs["normalizationweightformulas"] = SMnotVBFweights(isL1Zg=isL1Zg)
         VVHkwargs["legendname"] = VVHkwargs["legendname"].replace("VBF+VH", "VBF")
+        VVHkwargs["rescalings"] = [VVHrescaling if trees[0].isVVH else ffHrescaling for trees in hypothesis.VBFtrees()]
+        ffHkwargs["rescalings"] = [VVHrescaling if trees[0].isVVH else ffHrescaling for trees in hypothesis.notVBFtrees()]
       elif iscategorydiscriminant == "VH":
         VVHkwargs["trees"] = hypothesis.VHtrees()
         ffHkwargs["trees"] = hypothesis.notVHtrees()
@@ -748,6 +830,8 @@ class Plot(object):
         VVHkwargs["normalizationweightformulas"] = SMVHweights(isL1Zg=isL1Zg)
         ffHkwargs["normalizationweightformulas"] = SMnotVHweights(isL1Zg=isL1Zg)
         VVHkwargs["legendname"] = VVHkwargs["legendname"].replace("VBF+VH", "VH")
+        VVHkwargs["rescalings"] = [VVHrescaling if trees[0].isVVH else ffHrescaling for trees in hypothesis.VHtrees()]
+        ffHkwargs["rescalings"] = [VVHrescaling if trees[0].isVVH else ffHrescaling for trees in hypothesis.notVHtrees()]
       else:
         assert False
 
