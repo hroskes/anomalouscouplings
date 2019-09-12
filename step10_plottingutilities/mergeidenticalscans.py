@@ -14,6 +14,7 @@ if __name__ == "__main__":
   g.add_argument("--newyields", action="store_true")
   g.add_argument("--applySIPcut", action="store_true")
   g.add_argument("--applySIPcut-untaggednosysts", action="store_true")
+  p.add_argument("--zoom", action="store_true")
   args = p.parse_args()
 
 import contextlib, itertools, os
@@ -50,6 +51,7 @@ def RootFilesOrDummies(*filenames, **kwargs):
 
 def mergeidenticalscans(outfile, *infiles, **kwargs):
   ngraphs = kwargs.pop("ngraphs", 1)
+  zoom = kwargs.pop("zoom", False)
   assert not kwargs, kwargs
 
   nfiles = len(infiles)
@@ -166,7 +168,10 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
 
   newmg.Draw("AL")
   style.applyaxesstyle(newmg)
-  newmg.GetXaxis().SetRangeUser(-1, 1)
+  if zoom:
+    newmg.GetXaxis().SetRangeUser(-0.02, 0.02)
+  else:
+    newmg.GetXaxis().SetRangeUser(-1, 1)
   newmg.GetXaxis().SetTitle(xtitle)
   newmg.GetYaxis().SetTitle(ytitle)
   newmg.SetMinimum(0)
@@ -174,6 +179,7 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
   style.CMS("Preliminary", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)".format(137.1))
   drawlines()
 
+  if zoom: outfile = outfile.replace("_101,-1.0,1.0", "")
   c.SaveAs(outfile+".png")
   c.SaveAs(outfile+".root")
   c.SaveAs(outfile+".pdf")
@@ -210,7 +216,7 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
 
 if __name__ == "__main__":
   pc = PlotCopier()
-  functionkwargs = {}
+  functionkwargs = {"zoom": args.zoom}
 
   if args.decay:
     functionargs = [
