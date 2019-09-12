@@ -13,6 +13,7 @@ if __name__ == "__main__":
   g.add_argument("--shapesystematics", action="store_true")
   g.add_argument("--newyields", action="store_true")
   g.add_argument("--applySIPcut", action="store_true")
+  g.add_argument("--applySIPcut-untaggednosysts", action="store_true")
   args = p.parse_args()
 
 import contextlib, itertools, os
@@ -69,7 +70,7 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
     yyswithfais = []
 
     for i, infile in enumerate(infiles):
-      print i, "/", nfiles, os.path.basename(infile)
+      print i+1, "/", nfiles, os.path.basename(infile)
       othercouplingfile = {
         coupling: infile.replace("limit_", coupling+"_") if "fixothers" not in infile else None
         for coupling in othercouplings
@@ -136,9 +137,11 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
       newxs = np.concatenate((newxs[newxs < 0], [0], newxs[newxs > 0]))
       newn += 1
   
+    newys -= min(newys)
+  
     newg = ROOT.TGraph(newn, newxs, newys)
     faigs = {k: ROOT.TGraph(newn, newxs, faiys) for k, faiys in newfais.iteritems()}
-  
+
     for _ in [newg] + faigs.values():
       _.SetLineStyle(g.GetLineStyle())
       _.SetLineColor(g.GetLineColor())
@@ -222,7 +225,9 @@ if __name__ == "__main__":
       )
     )
   else:
-    scanranges = None
+    scanrangeformatch = None
+    plotnameformatch = None
+    insertinmiddle = ""
     if args.decay:
       folder = "fa3fa2fL1fL1Zg_yieldsystematics"
       plotname = "limit_lumi137.10_scan"+args.fai
@@ -251,20 +256,30 @@ if __name__ == "__main__":
       folder = "fa3fa2fL1fL1Zg_morecategories_applySIPcut"
       plotname = "limit_lumi137.10_scan"+args.fai
       scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
-      scanranges = "(_101,-0.02,0.02)?"
+      scanrangeformatch = "(_101,-0.02,0.02)?"
       functionkwargs["ngraphs"] = 2
-    if scanranges is None: scanranges = scanrange
+    if args.applySIPcut_untaggednosysts:
+      folder = "fa3fa2fL1fL1Zg_morecategories_applySIPcut"
+      plotname = "limit_lumi137.10_Untagged_scan"+args.fai+"_nosystematics"
+      plotnameformatch = "limit_lumi137.10_Untagged_scan"+args.fai+"(?=.*_nosystematics)(_nosystematics)?"
+      scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
+      scanrangeformatch = "(_nosystematics)?(_101,-0.02,0.02)?"
+      insertinmiddle = "(_nosystematics)?"
+      functionkwargs["ngraphs"] = 2
+    if scanrangeformatch is None: scanrangeformatch = scanrange
+    if plotnameformatch is None: plotnameformatch = plotname
+    if insertinmiddle is None: insertinmiddle = ""
 
     functionargs = [
       os.path.join(plotsbasedir, "limits", folder, plotname+scanrange+"_merged"),
     ] + sorted(
       reglob(
          os.path.join(plotsbasedir, "limits", folder, ""),
-         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanranges+".root",
+         plotnameformatch+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)"+insertinmiddle+"(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanrangeformatch+".root",
          hastomatch=True,
       ) + reglob(
          os.path.join(plotsbasedir, "limits", folder, "gridscan/"),
-         plotname+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanranges+".root",
+         plotnameformatch+"(_(f(a1|a3|a2|L1|L1Zg),){4}(f(a1|a3|a2|L1|L1Zg))|_fixothers|)"+insertinmiddle+"(_(CMS_zz4l_fai?[0-9]_relative=[0-9.-]*,?)*)?"+scanrangeformatch+".root",
          okifnofolder=True,
       )
     )

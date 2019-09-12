@@ -1045,6 +1045,7 @@ def debugfunction(function):
 
 def reiglob(path, exp, invert=False, verbose=False, hastomatch=False, okifnofolder=False):
   "https://stackoverflow.com/a/17197678/5228524"
+  print path, exp
 
   if verbose: print "reiglobbing "+os.path.join(path, exp)
 
