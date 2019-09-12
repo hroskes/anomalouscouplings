@@ -301,37 +301,37 @@ def maketable():
         title="VBF signal",
       ),
       SlashRow(
-        Row("VH", "0+", title="VH signal"),
-        Row("VH", "0-", title="VH signal"),
-        Row("VH", "a2", title="VH signal"),
-        Row("VH", "L1", title="VH signal"),
-        Row("VH", "L1Zg", title="VH signal"),
-        title=r"$\V\PH$ signal",
+        Row("VH", "0+", title=r"$\VH$ signal"),
+        Row("VH", "0-", title=r"$\VH$ signal"),
+        Row("VH", "a2", title=r"$\VH$ signal"),
+        Row("VH", "L1", title=r"$\VH$ signal"),
+        Row("VH", "L1Zg", title=r"$\VH$ signal"),
+        title=r"$\VH$ signal",
       ),
-      SlashRow(
-        Row("ggH", "0+", title="ggH signal"),
-        Row("ggH", "0-", title="ggH signal"),
-        Row("ggH", "a2", title="ggH signal"),
-        Row("ggH", "L1", title="ggH signal"),
-        Row("ggH", "L1Zg", title="ggH signal"),
-        title=r"$\Pg\Pg\to\PH$ signal"
-      ),
-      SlashRow(
-        Row("ttH", "0+", title="ttH signal"),
-        Row("ttH", "0-", title="ttH signal"),
-        Row("ttH", "a2", title="ttH signal"),
-        Row("ttH", "L1", title="ttH signal"),
-        Row("ttH", "L1Zg", title="ttH signal"),
-        title=r"$\ttH$ signal"
-      ),
-      SlashRow(
-        Row("bbH", "0+", title="bbH signal"),
-        Row("bbH", "0-", title="bbH signal"),
-        Row("bbH", "a2", title="bbH signal"),
-        Row("bbH", "L1", title="bbH signal"),
-        Row("bbH", "L1Zg", title="bbH signal"),
-        title=r"$\bbH$ signal"
-      ),
+#      SlashRow(
+        Row("ggH", "0+", title=r"$\ggH$ signal"),
+#        Row("ggH", "0-", title=r"$\ggH$ signal"),
+#        Row("ggH", "a2", title=r"$\ggH$ signal"),
+#        Row("ggH", "L1", title=r"$\ggH$ signal"),
+#        Row("ggH", "L1Zg", title=r"$\ggH$ signal"),
+#        title=r"$\ggH$ signal"
+#      ),
+#      SlashRow(
+        Row("ttH", "0+", title=r"$\ttH$ signal"),
+#        Row("ttH", "0-", title=r"$\ttH$ signal"),
+#        Row("ttH", "a2", title=r"$\ttH$ signal"),
+#        Row("ttH", "L1", title=r"$\ttH$ signal"),
+#        Row("ttH", "L1Zg", title=r"$\ttH$ signal"),
+#        title=r"$\ttH$ signal"
+#      ),
+#      SlashRow(
+        Row("bbH", "0+", title=r"$\bbH$ signal"),
+#        Row("bbH", "0-", title=r"$\bbH$ signal"),
+#        Row("bbH", "a2", title=r"$\bbH$ signal"),
+#        Row("bbH", "L1", title=r"$\bbH$ signal"),
+#        Row("bbH", "L1Zg", title=r"$\bbH$ signal"),
+#        title=r"$\bbH$ signal"
+#      ),
     ),
     Section("bkg",
       Row("ggZZ", title=r"\Pg\Pg\to4\ell bkg."),
@@ -342,11 +342,11 @@ def maketable():
   sections.append(
     Section("Total",
       SlashRow(
-        TotalRow(*chain((_.rows[0] for _ in sections[0].rows), sections[1].rows), title="Total expected"),
-        TotalRow(*chain((_.rows[1] for _ in sections[0].rows), sections[1].rows), title="Total expected"),
-        TotalRow(*chain((_.rows[2] for _ in sections[0].rows), sections[1].rows), title="Total expected"),
-        TotalRow(*chain((_.rows[3] for _ in sections[0].rows), sections[1].rows), title="Total expected"),
-        TotalRow(*chain((_.rows[4] for _ in sections[0].rows), sections[1].rows), title="Total expected"),
+        TotalRow(*chain((_.rows[0] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
+        TotalRow(*chain((_.rows[1] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
+        TotalRow(*chain((_.rows[2] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
+        TotalRow(*chain((_.rows[3] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
+        TotalRow(*chain((_.rows[4] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
         title="Total expected",
       ),
       Row("data", title="Total observed"),

@@ -58,7 +58,7 @@ class normalizeZX(object):
       if line.startswith(str(year)): break
     for line in lines:
       if line.startswith("201"): assert False
-      if line.startswith({-el*el: "4e", -mu*mu: "4mu", -el*mu: "2e2mu_Combined"}[flavor]):
+      if line.startswith({-cls.el*cls.el: "4e", -cls.mu*cls.mu: "4mu", -cls.el*cls.mu: "2e2mu_Combined"}[flavor]):
         SS = float(line.split()[1])
         break
     for line in lines:
@@ -66,7 +66,7 @@ class normalizeZX(object):
       if line.startswith("SS-OS Combination"): break
     for line in lines:
       if line.startswith("201"): assert False
-      if line.startswith({-el*el: "4e", -mu*mu: "4mu", -el*mu: "2e2mu"}[flavor]):
+      if line.startswith({-cls.el*cls.el: "4e", -cls.mu*cls.mu: "4mu", -cls.el*cls.mu: "2e2mu"}[flavor]):
         combination = float(line.split()[1])
         break
     return combination / SS
