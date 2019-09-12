@@ -76,9 +76,9 @@ class Tree(object):
 
   @property
   def isVVH(self):
-    if "VBF" in self.filename or "ZH" in self.filename or "WH" in self.filename: return True
-    if "ggH" in self.filename or "ttH" in self.filename or "bbH" in self.filename: return False
-    assert False, self.filename
+    if "VBF" in self.__filename or "ZH" in self.__filename or "WH" in self.__filename: return True
+    if "ggH" in self.__filename or "ttH" in self.__filename or "bbH" in self.__filename: return False
+    assert False, self.__filename
 
   def __repr__(self):
     return "gettree({filename!r}, {treename!r})".format(filename=self.__filename, treename=self.__treename)
