@@ -47,99 +47,116 @@ def RootFilesOrDummies(*filenames, **kwargs):
     with RootFile(filenames[0], *commonargs) as f, RootFilesOrDummies(*filenames[1:], commonargs=commonargs) as morefs:
       yield [f]+morefs
 
-def mergeidenticalscans(outfile, *infiles):
+def mergeidenticalscans(outfile, *infiles, **kwargs):
+  ngraphs = kwargs.pop("ngraphs", 1)
+  assert not kwargs, kwargs
+
   nfiles = len(infiles)
 
-  xxs = []
-  yyswithfais = []
   xtitle = None
   ytitle = None
   othercouplingytitle = None
 
   othercouplings = [coupling for coupling in ("fa3", "fa2", "fL1", "fL1Zg", "fa1") if "scan"+coupling+"_" not in outfile]
 
-  for i, infile in enumerate(infiles):
-    print i, "/", nfiles, os.path.basename(infile)
-    othercouplingfile = {
-      coupling: infile.replace("limit_", coupling+"_") if "fixothers" not in infile else None
-      for coupling in othercouplings
-    }
-    othercouplingf = {}
-    with RootFilesOrDummies(infile, *(othercouplingfile.get(coupling, None) for coupling in ("fa3", "fa2", "fL1", "fL1Zg", "fa1"))) as (
-      f, othercouplingf["fa3"], othercouplingf["fa2"], othercouplingf["fL1"], othercouplingf["fL1Zg"], othercouplingf["fa1"],
-    ):
-      c = f.c1
-      mg = c.GetListOfPrimitives()[1]
+  newgs = []
+  faigss = []
+  indices = []
+  badfiles = []
 
-      listofgraphs = mg.GetListOfGraphs()
-      assert len(listofgraphs) == 1
-      g = listofgraphs[0]
-      _, xx, yy = itertools.izip(*itertools.izip(xrange(g.GetN()), g.GetX(), g.GetY()))
+  for graphindex in range(ngraphs):
+    xxs = []
+    yyswithfais = []
 
-      othercouplingc = {k: v.c1 if v else None for k, v in othercouplingf.iteritems()}
-      othercouplingmg = {k: v.GetListOfPrimitives()[1] if v else None for k, v in othercouplingc.iteritems()}
-      othercouplinglistofgraphs = {k: v.GetListOfGraphs() if v else None for k, v in othercouplingmg.iteritems()}
-      assert all(len(v) == 1 for v in othercouplinglistofgraphs.itervalues() if v is not None)
-      othercouplingg = {k: v[0] if v else None for k, v in othercouplinglistofgraphs.iteritems()}
-      othercouplingxx = {k: zip(*itertools.izip(xrange(v.GetN()), v.GetX()))[1] if v else None for k, v in othercouplingg.iteritems()}
-      othercouplingyy = {k: zip(*itertools.izip(xrange(v.GetN()), v.GetY()))[1] if v else None for k, v in othercouplingg.iteritems()}
+    for i, infile in enumerate(infiles):
+      print i, "/", nfiles, os.path.basename(infile)
+      othercouplingfile = {
+        coupling: infile.replace("limit_", coupling+"_") if "fixothers" not in infile else None
+        for coupling in othercouplings
+      }
+      othercouplingf = {}
+      with RootFilesOrDummies(infile, *(othercouplingfile.get(coupling, None) for coupling in ("fa3", "fa2", "fL1", "fL1Zg", "fa1"))) as (
+        f, othercouplingf["fa3"], othercouplingf["fa2"], othercouplingf["fL1"], othercouplingf["fL1Zg"], othercouplingf["fa1"],
+      ):
+        c = f.c1
+        mg = c.GetListOfPrimitives()[1]
+  
+        listofgraphs = mg.GetListOfGraphs()
+        assert len(listofgraphs) == ngraphs, (len(listofgraphs), ngraphs)
 
-      for fai, faixx in othercouplingxx.iteritems():
-        if xx != faixx is not None:
-          raise ValueError("Not the same:\n{}\n{}".format(xx, faixx))
+        g = listofgraphs[graphindex]
+        _, xx, yy = itertools.izip(*itertools.izip(xrange(g.GetN()), g.GetX(), g.GetY()))
+  
+        othercouplingc = {k: v.c1 if v else None for k, v in othercouplingf.iteritems()}
+        othercouplingmg = {k: v.GetListOfPrimitives()[1] if v else None for k, v in othercouplingc.iteritems()}
+        othercouplinglistofgraphs = {k: v.GetListOfGraphs() if v else None for k, v in othercouplingmg.iteritems()}
+        assert all(len(v) == ngraphs for v in othercouplinglistofgraphs.itervalues() if v is not None)
+        othercouplingg = {k: v[graphindex] if v else None for k, v in othercouplinglistofgraphs.iteritems()}
+        othercouplingxx = {k: zip(*itertools.izip(xrange(v.GetN()), v.GetX()))[1] if v else None for k, v in othercouplingg.iteritems()}
+        othercouplingyy = {k: zip(*itertools.izip(xrange(v.GetN()), v.GetY()))[1] if v else None for k, v in othercouplingg.iteritems()}
+  
+        for fai, faixx in othercouplingxx.iteritems():
+          if xx != faixx is not None:
+            raise ValueError("Not the same:\n{}\n{}".format(xx, faixx))
+  
+        xxs.append(xx)
+        yyswithfais.append([
+          (yy[j], {k: othercouplingyy[k][j] if othercouplingyy[k] else 0 for k in othercouplingyy})
+          for j in range(len(yy))
+        ])
+  
+        if "fixothers" in infile:
+          for x, (y, ywithfais) in itertools.izip_longest(xx, yyswithfais[-1]):
+            assert not any(ywithfais.itervalues())
+            ywithfais["fa1"] = 1 - abs(x)
+  
+        if xtitle is None and any(othercouplingmg.itervalues()):
+          xtitle = mg.GetXaxis().GetTitle()
+          ytitle = mg.GetYaxis().GetTitle()
+          othercouplingytitle = {k: v.GetYaxis().GetTitle() for k, v in othercouplingmg.iteritems() if v is not None}
+  
+    newxs = np.array(sorted(set.union(*(set(_) for _ in xxs))))
+    newyswithfais = [min(y for xx, yy in itertools.izip(xxs, yyswithfais) for x, y in itertools.izip(xx, yy) if x == target) for target in newxs]
+    newys = np.array([y[0] for y in newyswithfais])
+    newfais = {k: np.array([y[1][k] for y in newyswithfais]) for k in othercouplings}
+    if "fa3" in newfais: newfais["fa3"] = abs(newfais["fa3"]) #because sign doesn't matter
+    newn = len(newxs)
+  
+    indices.append([{i for i, (xx, yy) in enumerate(itertools.izip(xxs, yyswithfais)) for x, (y, fais) in itertools.izip(xx, yy) if x == target and np.isclose(y, miny)} for target, miny in itertools.izip_longest(newxs, newys)])
+  
+    fmt = " ".join(["{:>10}"] * (2+len(newfais))) + " {}"
+    print fmt.format("x", "y", *[k for k, v in sorted(newfais.iteritems())] + ["file indices"])
+    fmt = " ".join(["{:10.3g}"] * (2+len(newfais))) + " {}"
+    for xyfaisindices in itertools.izip_longest(newxs, newys, *[v for k, v in sorted(newfais.iteritems())] + [(", ".join(str(idx) for idx in _) for _ in indices[-1])]): print fmt.format(*xyfaisindices)
+  
+    if 0 not in newxs:
+      assert args.newyields
+      newys = np.concatenate((newys[newxs < 0], [0], newys[newxs > 0]))
+      newfais = {k: np.concatenate((v[newxs < 0], [0], v[newxs > 0])) for k, v in newfais.iteritems()}
+      newxs = np.concatenate((newxs[newxs < 0], [0], newxs[newxs > 0]))
+      newn += 1
+  
+    newg = ROOT.TGraph(newn, newxs, newys)
+    faigs = {k: ROOT.TGraph(newn, newxs, faiys) for k, faiys in newfais.iteritems()}
+  
+    for _ in [newg] + faigs.values():
+      _.SetLineStyle(g.GetLineStyle())
+      _.SetLineColor(g.GetLineColor())
+      _.SetLineWidth(g.GetLineWidth())
+      _.SetMarkerStyle(g.GetMarkerStyle())
+      _.SetMarkerColor(g.GetMarkerColor())
 
-      xxs.append(xx)
-      yyswithfais.append([
-        (yy[j], {k: othercouplingyy[k][j] if othercouplingyy[k] else 0 for k in othercouplingyy})
-        for j in range(len(yy))
-      ])
-
-      if "fixothers" in infile:
-        for x, (y, ywithfais) in itertools.izip_longest(xx, yyswithfais[-1]):
-          assert not any(ywithfais.itervalues())
-          ywithfais["fa1"] = 1 - abs(x)
-
-      if xtitle is None and any(othercouplingmg.itervalues()):
-        xtitle = mg.GetXaxis().GetTitle()
-        ytitle = mg.GetYaxis().GetTitle()
-        othercouplingytitle = {k: v.GetYaxis().GetTitle() for k, v in othercouplingmg.iteritems() if v is not None}
-
-  newxs = np.array(sorted(set.union(*(set(_) for _ in xxs))))
-  newyswithfais = [min(y for xx, yy in itertools.izip(xxs, yyswithfais) for x, y in itertools.izip(xx, yy) if x == target) for target in newxs]
-  newys = np.array([y[0] for y in newyswithfais])
-  newfais = {k: np.array([y[1][k] for y in newyswithfais]) for k in othercouplings}
-  if "fa3" in newfais: newfais["fa3"] = abs(newfais["fa3"]) #because sign doesn't matter
-  newn = len(newxs)
-
-  indices = [{i for i, (xx, yy) in enumerate(itertools.izip(xxs, yyswithfais)) for x, (y, fais) in itertools.izip(xx, yy) if x == target and np.isclose(y, miny)} for target, miny in itertools.izip_longest(newxs, newys)]
-
-  fmt = " ".join(["{:>10}"] * (2+len(newfais))) + " {}"
-  print fmt.format("x", "y", *[k for k, v in sorted(newfais.iteritems())] + ["file indices"])
-  fmt = " ".join(["{:10.3g}"] * (2+len(newfais))) + " {}"
-  for xyfaisindices in itertools.izip_longest(newxs, newys, *[v for k, v in sorted(newfais.iteritems())] + [(", ".join(str(idx) for idx in _) for _ in indices)]): print fmt.format(*xyfaisindices)
-
-  if 0 not in newxs:
-    assert args.newyields
-    newys = np.concatenate((newys[newxs < 0], [0], newys[newxs > 0]))
-    newfais = {k: np.concatenate((v[newxs < 0], [0], v[newxs > 0])) for k, v in newfais.iteritems()}
-    newxs = np.concatenate((newxs[newxs < 0], [0], newxs[newxs > 0]))
-    newn += 1
-
-  newg = ROOT.TGraph(newn, newxs, newys)
-  faigs = {k: ROOT.TGraph(newn, newxs, faiys) for k, faiys in newfais.iteritems()}
-
-  for _ in [newg] + faigs.values():
-    _.SetLineStyle(g.GetLineStyle())
-    _.SetLineColor(g.GetLineColor())
-    _.SetLineWidth(g.GetLineWidth())
-    _.SetMarkerStyle(g.GetMarkerStyle())
-    _.SetMarkerColor(g.GetMarkerColor())
+    newgs.append(newg)
+    faigss.append(faigs)
 
   newmg = ROOT.TMultiGraph()
   faimgs = {k: ROOT.TMultiGraph() for k in faigs}
-  newmg.Add(newg)
-  for k in faigs:
-    faimgs[k].Add(faigs[k])
+
+  for newg in newgs:
+    newmg.Add(newg)
+  for faigs in faigss:
+    for k in faigs:
+      faimgs[k].Add(faigs[k])
 
   c = pc.TCanvas("c1", "", 8, 30, 800, 800)
   style.applycanvasstyle(c)
@@ -174,13 +191,15 @@ def mergeidenticalscans(outfile, *infiles):
     c.SaveAs(outfile.replace("limit_", k+"_")+".pdf")
     c.SaveAs(outfile.replace("limit_", k+"_")+".C")
 
-  indices.sort(key=lambda x: len(x))
+  allindices = sum(indices, [])
+  allindices.sort(key=lambda x: len(x))
   neededindices = set()
-  for indicesatpoint in indices:
+  for indicesatpoint in allindices:
     if not indicesatpoint.intersection(neededindices):
       neededindices.add(indicesatpoint.pop())
   print
   print "The following scans are needed for the final result:"
+  print neededindices
   neededfiles = sorted(infiles[idx] for idx in neededindices)
   for _ in neededfiles:
     print "  ", _
@@ -188,6 +207,7 @@ def mergeidenticalscans(outfile, *infiles):
 
 if __name__ == "__main__":
   pc = PlotCopier()
+  functionkwargs = {}
 
   if args.decay:
     functionargs = [
@@ -232,6 +252,7 @@ if __name__ == "__main__":
       plotname = "limit_lumi137.10_scan"+args.fai
       scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
       scanranges = "(_101,-0.02,0.02)?"
+      functionkwargs["ngraphs"] = 2
     if scanranges is None: scanranges = scanrange
 
     functionargs = [
@@ -249,4 +270,4 @@ if __name__ == "__main__":
     )
 
   with pc:
-    mergeidenticalscans(*functionargs)
+    mergeidenticalscans(*functionargs, **functionkwargs)

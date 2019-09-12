@@ -168,8 +168,10 @@ def PRL_loglinear(**kwargs):
           ]
         else:
           folders = [
-            Folder("fa3fa2fL1fL1Zg_morecategories_applySIPcut/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-            Folder("fa3fa2fL1fL1Zg_morecategories_applySIPcut/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_applySIPcut/", "Observed, float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_applySIPcut/", "Expected, float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_applySIPcut/", "Observed, fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_applySIPcut/", "Expected, fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
           ]
 
         mg = ROOT.TMultiGraph("limit", "")
