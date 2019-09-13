@@ -5,7 +5,7 @@ set -euo pipefail
 cd $(dirname $0)
 
 cmd="sbatch --mem 12G --time 2-0:0:0 slurm.sh"; moreargs="categories=Untagged usesystematics=0"
-#export SLURM_JOBID=123456; cmd="python" moreargs=""
+#export SLURM_JOBID=123456; cmd="python"; moreargs=""
 #cmd=python; moreargs=runobs=0
 #cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1"
 
