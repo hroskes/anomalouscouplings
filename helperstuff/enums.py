@@ -987,7 +987,7 @@ class Production(MyEnum):
         if self == "190821_2017": return 2017
         if self == "190821_2018": return 2018
         if self == "GEN_190908": return 2018
-        assert False
+        assert False, self
     @property
     def uselegacyobjects(self):
         if self in ("190821_2016", "190821_2017", "190821_2018"): return True
@@ -1187,7 +1187,7 @@ analyses = Analysis.items(lambda x: x.doanalysis)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine)
+productions = Production.items(lambda x: x in config.productionsforcombine or x == "GEN_190908")
 categories = Category.items()
 templategroups = TemplateGroup.items(lambda x: x not in ("zh", "wh"))
 
