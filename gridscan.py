@@ -30,13 +30,36 @@ for scanrange in scanranges:
         for otherfL1 in (otherfais["fL1"] if fai != "fL1" else [0]):
           for otherfL1Zg in (otherfais["fL1Zg"] if fai != "fL1Zg" else [0]):
             if abs(otherfa3) + abs(otherfa2) + abs(otherfL1) + abs(otherfL1Zg) > 1: continue
-            #print otherfa3, otherfa2, otherfL1, otherfL1Zg,
+            print otherfa3, otherfa2, otherfL1, otherfL1Zg
 
             setparametersforgrid = []
-            if otherfa3: setparametersforgrid.append("CMS_zz4l_fai1_relative:"+str(otherfa3))
-            if otherfa2: setparametersforgrid.append("CMS_zz4l_fai2_relative:"+str(otherfa2))
-            if otherfL1: setparametersforgrid.append("CMS_zz4l_fai3_relative:"+str(otherfL1))
-            if otherfL1Zg: setparametersforgrid.append("CMS_zz4l_fai4_relative:"+str(otherfL1Zg))
+            whatsleft = 1
+            if otherfa3:
+              otherfa3rel = float("{:.1e}".format(otherfa3 / whatsleft))
+              if otherfa3rel: otherfa3 = otherfa3rel * whatsleft
+              whatsleft -= abs(otherfa3)
+              print "fa3", otherfa3rel,
+              setparametersforgrid.append("CMS_zz4l_fai1_relative:{}".format(otherfa3rel))
+            if otherfa2:
+              otherfa2rel = float("{:.1e}".format(otherfa2 / whatsleft))
+              if otherfa2rel: otherfa2 = otherfa2rel * whatsleft
+              whatsleft -= abs(otherfa2)
+              print "fa2", otherfa2rel,
+              setparametersforgrid.append("CMS_zz4l_fai2_relative:{}".format(otherfa2rel))
+            if otherfL1:
+              otherfL1rel = float("{:.1e}".format(otherfL1 / whatsleft))
+              if otherfL1rel: otherfL1 = otherfL1rel * whatsleft
+              whatsleft -= abs(otherfL1)
+              print "fL1", otherfL1rel,
+              setparametersforgrid.append("CMS_zz4l_fai3_relative:{}".format(otherfL1rel))
+            if otherfL1Zg:
+              otherfL1Zgrel = float("{:.1e}".format(otherfL1Zg / whatsleft))
+              if otherfL1Zgrel: otherfL1Zg = otherfL1Zgrel * whatsleft
+              whatsleft -= abs(otherfL1Zg)
+              print "fL1Zg", otherfL1Zgrel,
+              setparametersforgrid.append("CMS_zz4l_fai4_relative:{}".format(otherfL1Zgrel))
+
+            print
 
             priority = 0
             if fai != "fa3": priority += otherfa3**2
@@ -46,9 +69,9 @@ for scanrange in scanranges:
             #print priority
 
             jobs.append((priority, [
-              "sbatch", "--mem", "12G", "--time", "6:0:0", "slurm.sh",
+              "sbatch", "--mem", "12G", "--time", "1:0:0", "slurm.sh",
               "./step9_runcombine.py", "fa3fa2fL1fL1Zg_morecategories", "applySIPcut", "scanranges="+scanrange, "plotnuisances="+plotnuisances,
-              "useNLLandNLL0=0", "scanfai="+fai,
+              "scanfai="+fai,
               "setparametersforgrid="+",".join(setparametersforgrid),
               "categories=Untagged", "usesystematics=0", "expectvalues="
             ]))
@@ -60,8 +83,7 @@ with open("data/alreadyrun") as f:
   alreadyrun = set(f.read().split("\n"))
 
 try:
-  for priority, job in jobs:
-    print priority
+  for i, (priority, job) in enumerate(jobs):
     if " ".join(job) in alreadyrun: continue
     alreadyrun.add(" ".join(job))
     print job

@@ -17,7 +17,7 @@ if __name__ == "__main__":
   p.add_argument("--zoom", action="store_true")
   args = p.parse_args()
 
-import contextlib, itertools, os
+import collections, contextlib, itertools, os
 import numpy as np
 
 import ROOT
@@ -50,9 +50,14 @@ def RootFilesOrDummies(*filenames, **kwargs):
       yield [f]+morefs
 
 def mergeidenticalscans(outfile, *infiles, **kwargs):
-  ngraphs = kwargs.pop("ngraphs", 1)
+  ngraphs = kwargs.pop("ngraphs", None)
+  graphstyles = kwargs.pop("graphstyles", None)
   zoom = kwargs.pop("zoom", False)
   assert not kwargs, kwargs
+
+  if ngraphs is None is graphstyles: ngraphs = 1
+  if ngraphs is not None is not graphstyles: raise TypeError("Can't provide both ngraphs and graphstyles")
+  if graphstyles is not None: ngraphs = len(graphstyles)
 
   nfiles = len(infiles)
 
@@ -67,12 +72,12 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
   indices = []
   badfiles = []
 
-  for graphindex in range(ngraphs):
+  for idx in range(ngraphs):
     xxs = []
     yyswithfais = []
 
     for i, infile in enumerate(infiles):
-      print i+1, "/", nfiles, os.path.basename(infile)
+      print i, "/", nfiles, os.path.basename(infile)
       othercouplingfile = {
         coupling: infile.replace("limit_", coupling+"_") if "fixothers" not in infile else None
         for coupling in othercouplings
@@ -85,15 +90,28 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
         mg = c.GetListOfPrimitives()[1]
   
         listofgraphs = mg.GetListOfGraphs()
-        assert len(listofgraphs) == ngraphs, (len(listofgraphs), ngraphs)
+        if graphstyles is None:
+          assert len(listofgraphs) == ngraphs, (len(listofgraphs), ngraphs)
+          graphindex = idx
+        else:
+          graphstyle = graphstyles[idx]
+          for graphindex, g in enumerate(listofgraphs):
+            gstyle = g.GetLineColor(), g.GetLineStyle(), g.GetLineWidth()
+            if gstyle == graphstyle:
+              break
+            if gstyle not in graphstyles:
+              raise ValueError("Unknown graphstyle: {} {} {}".format(*gstyle))
+          else:
+            continue  #move to the next file
 
         g = listofgraphs[graphindex]
+
         _, xx, yy = itertools.izip(*itertools.izip(xrange(g.GetN()), g.GetX(), g.GetY()))
   
         othercouplingc = {k: v.c1 if v else None for k, v in othercouplingf.iteritems()}
         othercouplingmg = {k: v.GetListOfPrimitives()[1] if v else None for k, v in othercouplingc.iteritems()}
         othercouplinglistofgraphs = {k: v.GetListOfGraphs() if v else None for k, v in othercouplingmg.iteritems()}
-        assert all(len(v) == ngraphs for v in othercouplinglistofgraphs.itervalues() if v is not None)
+        assert all(len(v) == len(listofgraphs) for v in othercouplinglistofgraphs.itervalues() if v is not None)
         othercouplingg = {k: v[graphindex] if v else None for k, v in othercouplinglistofgraphs.iteritems()}
         othercouplingxx = {k: zip(*itertools.izip(xrange(v.GetN()), v.GetX()))[1] if v else None for k, v in othercouplingg.iteritems()}
         othercouplingyy = {k: zip(*itertools.izip(xrange(v.GetN()), v.GetY()))[1] if v else None for k, v in othercouplingg.iteritems()}
@@ -188,7 +206,10 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
   for k, faimg in faimgs.iteritems():
     faimg.Draw("AL")
     style.applyaxesstyle(faimg)
-    faimg.GetXaxis().SetRangeUser(-1, 1)
+    if zoom:
+      faimg.GetXaxis().SetRangeUser(-0.02, 0.02)
+    else:
+      faimg.GetXaxis().SetRangeUser(-1, 1)
     faimg.GetXaxis().SetTitle(xtitle)
     print othercouplingytitle
     faimg.GetYaxis().SetTitle(othercouplingytitle[k])
@@ -271,7 +292,7 @@ if __name__ == "__main__":
       scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
       scanrangeformatch = "(_nosystematics)?(_101,-0.02,0.02)?"
       insertinmiddle = "(_nosystematics)?"
-      functionkwargs["ngraphs"] = 2
+      functionkwargs["graphstyles"] = ((1, 1, 2), (1, 2, 2))
     if scanrangeformatch is None: scanrangeformatch = scanrange
     if plotnameformatch is None: plotnameformatch = plotname
     if insertinmiddle is None: insertinmiddle = ""
