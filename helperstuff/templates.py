@@ -1261,10 +1261,10 @@ class Template(TemplateBase, MultiEnum):
         if self.productionmode == "VBF bkg":
             result = [{Sample(self.production, self.productionmode, flavor)} for flavor in flavors if not flavor.hastaus]
         if self.productionmode == "data":
-            if config.showblinddistributions:
+            if self.production.GEN or self.production.LHE:
+                result = [{Sample("WH", self.production, "0+")}]
+            elif config.showblinddistributions:
                 result = [{Sample(self.production, self.productionmode)}]
-            elif self.production.GEN or self.production.LHE:
-                result = [{Sample("WplusH", "POWHEG", "ext", self.production, "0+")}]
             else:
                 result = [{Sample("ggZZ", self.production, "4tau")}]
 
