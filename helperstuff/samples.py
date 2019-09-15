@@ -1665,7 +1665,7 @@ def allsamples(__doxcheck=True):
             yield Sample("ttH", "Hff0+", "0+", "POWHEG", production)
             yield Sample("ttH", "Hff0+", "0+", "POWHEG", "ext", production)
             yield Sample("qqZZ", production)
-            yield Sample("qqZZ", production, "ext")
+            yield Sample("qqZZ", production, "ext2")
             yield Sample("data", production)  #(not real data, just an empty dummy file)
             continue
 
