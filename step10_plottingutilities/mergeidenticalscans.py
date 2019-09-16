@@ -284,7 +284,7 @@ if __name__ == "__main__":
       plotname = "limit_lumi137.10_scan"+args.fai
       scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
       scanrangeformatch = "(_101,-0.02,0.02)?"
-      functionkwargs["ngraphs"] = 2
+      functionkwargs["graphstyles"] = ((1, 1, 2), (1, 2, 2))
     if args.applySIPcut_untaggednosysts:
       folder = "fa3fa2fL1fL1Zg_morecategories_applySIPcut"
       plotname = "limit_lumi137.10_Untagged_scan"+args.fai+"_nosystematics"
