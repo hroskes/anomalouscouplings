@@ -4,13 +4,14 @@ set -euo pipefail
 
 cd $(dirname $0)
 
-cmd="sbatch --mem 12G --time 2-0:0:0 slurm.sh"; moreargs=""
-#export SLURM_JOBID=123456; cmd="python"; moreargs=""
+#cmd="sbatch --mem 12G --time 2-0:0:0 slurm.sh"; moreargs=""
+export SLURM_JOBID=123456; cmd="python"; moreargs=""
 #cmd=python; moreargs=runobs=0
 #cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1"
 
 for scanrange in 101,-1,1 101,-0.02,0.02; do
- for which in expectvalues= runobs=0; do
+ for which in expectvalues= runobs=0 ""; do
+# for which in ""; do
   #default configuration
   $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa3 $which $moreargs
   $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa2 $which $moreargs
@@ -110,7 +111,7 @@ for scanrange in 101,-1,1 101,-0.02,0.02; do
     $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:-0.3,CMS_zz4l_fai3_relative:1 $which $moreargs
     $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai1_relative:0,CMS_zz4l_fai2_relative:-0.24,CMS_zz4l_fai3_relative:1 $which $moreargs
     #obs only
-    if [ $which == expectvalues= ]; then
+    if [ "$which" == expectvalues= ]; then
 
       #fa3
 
@@ -272,7 +273,9 @@ for scanrange in 101,-1,1 101,-0.02,0.02; do
       $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai2_relative:0.2,CMS_zz4l_fai3_relative:0.75 $which $moreargs
       $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai3_relative:0.4 $which $moreargs
     #exp only
-    elif [ $which == runobs=0 ]; then
+    elif [ "$which" == runobs=0 ]; then
+      true
+    elif [ "$which" == "" ]; then
       true
     else
       echo "unknown which $which"; exit 1
@@ -280,7 +283,7 @@ for scanrange in 101,-1,1 101,-0.02,0.02; do
 
   elif [ $scanrange == 101,-0.02,0.02 ]; then
     #obs only
-    if [ $which == expectvalues= ]; then
+    if [ "$which" == expectvalues= ]; then
 
       #fa3
 
@@ -409,11 +412,15 @@ for scanrange in 101,-1,1 101,-0.02,0.02; do
       $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories applySIPcut scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg setparametersforgrid=CMS_zz4l_fai3_relative:0.05 $which $moreargs
 
     #exp only
-    elif [ $which == runobs=0 ]; then
+    elif [ "$which" == runobs=0 ]; then
+      true
+    elif [ "$which" == "" ]; then
       true
     else
       echo "unknown which $which"; exit 1
     fi
+  elif [ $scanrange == 101,-1,1:101,-0.02,0.02 ]; then
+    true
   else
     echo "Bad scanrange $scanrange"
     exit 1

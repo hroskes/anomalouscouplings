@@ -6,6 +6,8 @@ import pipes
 import subprocess
 import sys
 
+import numpy as np
+
 import ROOT
 
 from Alignment.OfflineValidation.TkAlAllInOneTool.helperFunctions import replaceByMap
@@ -51,14 +53,20 @@ class Folder(object):
             if self.graphnumber is None:
                 assert len(graphs) == 1
                 graphnumber = 0
-            graphs[graphnumber].SetLineColor(self.color)
-            if self.linestyle is not None:
-                graphs[graphnumber].SetLineStyle(self.linestyle)
-            if self.linewidth is not None:
-                graphs[graphnumber].SetLineWidth(self.linewidth)
             self.__xtitle = mg.GetXaxis().GetTitle()
             self.__ytitle = mg.GetYaxis().GetTitle()
-            return graphs[graphnumber].Clone("{analysis}_{filename}_{graphnumber}".format(filename=self.plotname, graphnumber=self.graphnumber, **self.repmap))
+            g = graphs[graphnumber]
+            n = g.GetN()
+            x = np.array([g.GetX()[i] for i in xrange(n)])
+            y = np.array([g.GetY()[i] for i in xrange(n)])
+            y -= min(y)
+            newg = ROOT.TGraph(n, x, y)
+            newg.SetLineColor(self.color)
+            if self.linestyle is not None:
+                newg.SetLineStyle(self.linestyle)
+            if self.linewidth is not None:
+                newg.SetLineWidth(self.linewidth)
+            return newg
     @property
     def xtitle(self):
         self.graph
