@@ -24,7 +24,12 @@ import ROOT
 from helperstuff import config
 from helperstuff.enums import Analysis, EnumItem, MyEnum
 
-Point = namedtuple("Point", "x y")
+class Point(object):
+  def __init__(self, x, y):
+    self.x = x
+    self.y = y
+  def __isub__(self, other):
+    self.y -= other.y
 
 class PrintFormat(MyEnum):
     enumitems = (
@@ -150,6 +155,13 @@ def getlimits(filename, poi, domirror=False, airatio=False, analysis=None, usemg
         isabove = {threshold: points[0].y > threshold for threshold in thresholds}
         results = {threshold: [[poimin]] if not isabove[threshold] else [] for threshold in thresholds}
         for point in points:
+            if point.y < minimum.y: minimum = point
+
+        for point in sorted(points, key=lambda x: x is minimum):
+          point -= minimum
+        assert minimum.y == 0
+
+        for point in points:
             for threshold in thresholds:
                 if isabove[threshold] and point.y < threshold:
                     results[threshold].append([findwhereyequals(threshold, point, lastpoint)])
@@ -157,8 +169,6 @@ def getlimits(filename, poi, domirror=False, airatio=False, analysis=None, usemg
                 if not isabove[threshold] and point.y > threshold:
                     results[threshold][-1].append(findwhereyequals(threshold, point, lastpoint))
                     isabove[threshold]=True
-
-            if point.y < minimum.y: minimum = point
 
             NLL[point.x] = point.y
 
