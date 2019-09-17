@@ -114,6 +114,7 @@ class Tree(object):
 
 class HistogramComponentPiece(object):
   def __init__(self, name, tree, xformula, weightformula, cutformula, binning, mirror=False):
+    print "   ", name
     tree.registerhistogramcomponentpiece(self)
     self.__name = name
     self.__tree = tree
@@ -172,6 +173,7 @@ class HistogramComponentPiece(object):
 
 class HistogramComponent(object):
   def __init__(self, name, trees, xformula, weightformula, cutformula, binning, scaleto, mirror=False, normalizationtrees=None, normalizationweightformula=None, rescaling=None):
+    print " ", name
     self.__pieces = [
       HistogramComponentPiece(name+"_"+str(i), tree, xformula, weightformula, cutformula, binning, mirror=mirror) for i, tree in enumerate(trees)
     ]
@@ -236,6 +238,7 @@ def makehistogramcomponentnormalization(**kwargs): return HistogramComponentNorm
 
 class Histogram(object):
   def __init__(self, name, trees, xformula, weightformulas, scaletos, cutformula, binning, linecolor, linestyle, linewidth, fillcolor, fillstyle, legendname, legendlpf, addonbottom, mirror, normalizationtrees=None, normalizationweightformulas=None, makegraph=False, markercolor=None, markerstyle=None, markersize=None, rescalings=None):
+    print "initing", name
     if normalizationweightformulas is None: normalizationweightformulas = weightformulas
     if normalizationtrees is None: normalizationtrees = trees
     if rescalings is None: rescalings = [None for _ in trees]
