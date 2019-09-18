@@ -659,7 +659,7 @@ class SampleBase(SumOfSamplesBase):
 
     @property
     def hasZZ(self):
-        return not self.g1 == self.g2 == self.g4 == self.g1prime2 == 0
+        return not self.ghz1 == self.ghz2 == self.ghz4 == self.ghz1prime2 == 0
     @property
     def hasZg(self):
         return not self.ghzgs1prime2 == 0
@@ -997,7 +997,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                     doplushalf = (not EFT) or proddec != "proddec"
                     dominushalf = (not EFT) or proddec == "proddec"
                     for a in couplings:
-                        if doplushalf or self.hypothesis == a+EFT+proddec+"0.5":
+                        if doplushalf and self.hypothesis == a+EFT+proddec+"0.5":
                             return 1
                         if dominushalf and self.hypothesis == a+EFT+proddec+"-0.5":
                             return 1

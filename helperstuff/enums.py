@@ -298,7 +298,7 @@ class Hypothesis(MyEnum):
 
     @property
     def ispure(self):
-        return self in ("0+", "0-", "0h+", "L1", "L1Zg")
+        return self in ("0+", "0-", "0h+", "L1", "L1Zg", "a3EFT", "a2EFT", "L1EFT")
     @property
     def couplingname(self):
         if self == "0+": return "g1"
