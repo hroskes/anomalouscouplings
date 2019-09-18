@@ -136,6 +136,15 @@ class TemplatesFile(MultiEnum):
                     reweightingsamples += [
                       ReweightingSamplePlus(h, *args) for h in hypotheses
                     ]
+                if self.analysis.isEFT:
+                    hypotheses = ["0+", "a3EFT", "a2EFT", "L1EFT",
+                                  "fa3EFT0.5", "fa2EFT0.5", "fL1EFT0.5",
+                                  "fa3EFT0.5fa2EFT0.5", "fa3EFT0.5fL1EFT0.5",
+                                                  "fa2EFT0.5fL1EFT0.5",
+                                 ]
+                    reweightingsamples += [
+                      ReweightingSamplePlus(h, *args) for h in hypotheses
+                    ]
 
         elif self.templategroup in ("vbf", "zh", "wh", "vh"):
             p = str(self.templategroup).upper()
@@ -188,6 +197,47 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [
                   ReweightingSamplePlus(h, p) for h in hypotheses
                 ]
+            if self.analysis.isEFT:
+                hypotheses = ["0+", "a3EFT", "a2EFT", "L1EFT",
+                              "fa3EFT0.5",         "fa2EFT0.5",        "fL1EFT0.5",
+                              "fa3EFTprod0.5",     "fa2EFTprod0.5",     "fL1EFTprod0.5",
+                              "fa3EFTproddec-0.5", "fa2EFTproddec-0.5", "fL1EFTproddec-0.5",
+
+                              "fa3EFT0.5fa2EFT0.5",                  "fa3EFT0.5fL1EFT0.5",
+                                                               "fa2EFT0.5fL1EFT0.5",
+
+                              "fa3EFTprod0.5fa2EFTprod0.5",          "fa3EFTprod0.5fL1EFTprod0.5",
+                                                               "fa2EFTprod0.5fL1EFTprod0.5",
+
+                              "fa3EFTproddec0.5fa2EFTproddec-0.5",   "fa3EFTproddec0.5fL1EFTproddec-0.5",
+                                                               "fa2EFTproddec0.5fL1EFTproddec-0.5",
+
+
+                              "fa3EFT0.33fa2EFT0.33",                "fa3EFT0.33fL1EFT0.33",
+                                                               "fa2EFT0.33fL1EFT0.33",
+
+                              "fa3EFTprod0.33fa2EFTprod0.33",        "fa3EFTprod0.33fL1EFTprod0.33",
+                                                               "fa2EFTprod0.33fL1EFTprod0.33",
+
+                              "fa3EFTproddec0.33fa2EFTproddec-0.33", "fa3EFTproddec0.33fL1EFTproddec-0.33",
+                                                               "fa2EFTproddec0.33fL1EFTproddec-0.33",
+
+
+                              "fa3EFT0.33fa2EFT0.33fL1EFT0.33",
+
+                              "fa3EFTprod0.33fa2EFTprod0.33fL1EFTprod0.33",
+
+                              "fa3EFTproddec0.33fa2EFTproddec0.33fL1EFTproddec-0.33",
+
+
+                              "fa3EFTproddec0.25fa2EFTproddec0.25fL1EFTproddec0.25",
+
+
+
+                             ]
+                reweightingsamples = [
+                  ReweightingSamplePlus(h, p) for h in hypotheses
+                ]
 
         return reweightingsamples
 
@@ -224,6 +274,11 @@ class TemplatesFile(MultiEnum):
                         for i1, i2 in combinations("1ijkl", 2)
                         for hh in hffhypotheses
                 ]
+            elif self.analysis.dimensions == 3:
+                return [IntTemplate(self, h, "g{}1g{}1".format(i1, i2), hh)
+                        for i1, i2 in combinations("1ijk", 2)
+                        for hh in hffhypotheses
+                ]
             elif self.analysis.dimensions == 2:
                 return [IntTemplate(self, h, _, hh) for _ in ("g11gi1", "g11gj1", "gi1gj1") for hh in hffhypotheses]
             elif self.analysis.dimensions == 1:
@@ -254,6 +309,29 @@ class TemplatesFile(MultiEnum):
                     "g{}1g{}1g{}1g{}1".format(*indices)
                         for indices in combinations("1ijkl", 4)
                 ] if not ("gl3" in _ and self.templategroup == "wh")]
+            elif self.analysis.dimensions == 3:
+                return [IntTemplate(self, h, _) for _ in [
+                    "g{}3g{}1".format(*indices)
+                        for indices in combinations("1ijk", 2)
+                ] + [
+                    "g{}2g{}2".format(*indices)
+                        for indices in combinations("1ijk", 2)
+                ] + [
+                    "g{}1g{}3".format(*indices)
+                        for indices in combinations("1ijk", 2)
+                ] + [
+                    "g{}2g{}1g{}1".format(*indices)
+                        for indices in combinations("1ijk", 3)
+                ] + [
+                    "g{}1g{}2g{}1".format(*indices)
+                        for indices in combinations("1ijk", 3)
+                ] + [
+                    "g{}1g{}1g{}2".format(*indices)
+                        for indices in combinations("1ijk", 3)
+                ] + [
+                    "g{}1g{}1g{}1g{}1".format(*indices)
+                        for indices in combinations("1ijk", 4)
+                ] if not ("gl3" in _ and self.templategroup == "wh")]
             elif self.analysis.dimensions == 2:
                 assert False
             elif self.analysis.dimensions == 1:
@@ -280,7 +358,7 @@ class TemplatesFile(MultiEnum):
 
         name += self.shapesystematic.Dbkgappendname
 
-        if self.analysis == "fa3_multiparameter" or self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isSTXS:
+        if self.analysis == "fa3_multiparameter" or self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isSTXS or self.analysis.isEFT:
             name += "_3bins"
         elif self.category == "Untagged":
             name += "_20bins"
@@ -333,7 +411,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Z2Mass")
             if self.analysis.isSTXS:
                 return discriminant("D_STXS_stage1p1_untagged"+JECappend)
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_4couplings_decay")
             if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins"):
                 return discriminant("D_0minus_decay_3bins")
@@ -351,7 +429,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_VBFdecay"+binsappend+JECappend)
             if self.analysis.isSTXS:
                 return discriminant("D_STXS_stage1p1_VBF"+JECappend)
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_4couplings_VBFdecay"+JECappend)
             if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins"):
                 return discriminant("D_0minus_VBFdecay_3bins")
@@ -369,7 +447,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_L1Zg_HadVHdecay"+binsappend+JECappend)
             if self.analysis.isSTXS:
                 return discriminant("D_STXS_stage1p1_HadVH"+JECappend)
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_4couplings_HadVHdecay"+JECappend)
             if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins"):
                 return discriminant("D_0minus_HadVHdecay_3bins")
@@ -377,15 +455,15 @@ class TemplatesFile(MultiEnum):
                 return discriminant("phistarZ1")
 
         if self.category == "Boosted":
-            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
                 return discriminant("ZZPt_boosted")
 
         if self.category == "VBF1jtagged":
-            if self.analysis == "fa3fa2fL1fL1Zg_morecategories":
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
                 return discriminant("ZZPt_VBF1jtagged")
 
         if self.category == "VHLepttagged":
-            if self.analysis == "fa3fa2fL1fL1Zg_morecategories":
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
                 return discriminant("ZZPt_VHLepttagged")
 
         assert False
@@ -425,7 +503,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_CP_decay_2bins")
 
         if self.shapesystematic in ("JECUp", "JECDn"):
@@ -444,7 +522,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_CP_VBF_2bins"+JECappend)
 
         if self.category == "VHHadrtagged":
@@ -458,19 +536,19 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis.isSTXS:
                 return discriminant("phistarZ2")
-            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter"):
+            if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
 
         if self.category == "Boosted":
-            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
                 return discriminant("phistarZ2")
 
         if self.category == "VBF1jtagged":
-            if self.analysis == "fa3fa2fL1fL1Zg_morecategories":
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
                 return discriminant("phistarZ2")
 
         if self.category == "VHLepttagged":
-            if self.analysis == "fa3fa2fL1fL1Zg_morecategories":
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
                 return discriminant("phistarZ2")
 
         assert False, self
@@ -527,6 +605,27 @@ class TemplatesFile(MultiEnum):
                     assert invertedmatrix[14,2] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 2)+range(3, 70))
                     assert invertedmatrix[34,3] == 1 and all(invertedmatrix[34,i] == 0 for i in range(0, 3)+range(4, 70))
                     assert invertedmatrix[69,4] == 1 and all(invertedmatrix[69,i] == 0 for i in range(0, 4)+range(5, 70))
+                elif self.analysis.dimensions == 3:
+                    def rows():
+                        for matrixreturns in self.inttemplates():
+                            j = matrixreturns.rowofinvertedmatrix
+                            hypothesispowers = Counter({self.analysis.purehypotheses["1ijk".index(k)]: v for k, v in matrixreturns.interferencetype.couplingpowers.iteritems()})
+                            yield j, matrixreturns, hypothesispowers
+                        for index, h in izip((0, 4, 14, 34), self.analysis.purehypotheses):
+                            yield index, h, Counter({h: 4})
+
+                    for j, matrixreturns, hypothesispowers in rows():
+                        divideby = 1
+                        for i, matrixmultiplies in enumerate(self.signalsamples()):
+                            multiplyby = 1
+                            threshold = 1e-10 * multiplyby / divideby
+                            if abs(invertedmatrix[j,i]) < threshold: invertedmatrix[j,i] = 0
+                            if abs(invertedmatrix[j,i] - 1) < 1e-10: invertedmatrix[j,i] = 1
+
+                    assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 35))
+                    assert invertedmatrix[4, 1] == 1 and all(invertedmatrix[4, i] == 0 for i in range(0, 1)+range(2, 35))
+                    assert invertedmatrix[14,2] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 2)+range(3, 35))
+                    assert invertedmatrix[34,3] == 1 and all(invertedmatrix[34,i] == 0 for i in range(0, 3)+range(4, 35))
                 else:
                     assert False
 
@@ -545,6 +644,19 @@ class TemplatesFile(MultiEnum):
                     assert invertedmatrix[5, 2] == 1 and all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 15))
                     assert invertedmatrix[9, 3] == 1 and all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 15))
                     assert invertedmatrix[14, 4] == 1 and all(invertedmatrix[14,i] == 0 for i in range(0, 4)+range(5, 15))
+                elif self.analysis.dimensions == 3:
+                    for j in xrange(invertedmatrix.shape[0]):
+                        divideby = 1
+                        for i in xrange(invertedmatrix.shape[0]):
+                            multiplyby = 1
+                            threshold = 1e-10 * multiplyby / divideby
+                            if abs(invertedmatrix[j,i]) < threshold: invertedmatrix[j,i] = 0
+                            if abs(invertedmatrix[j,i] - 1) < 1e-10: invertedmatrix[j,i] = 1
+
+                    assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 10))
+                    assert invertedmatrix[2, 1] == 1 and all(invertedmatrix[2, i] == 0 for i in range(0, 1)+range(2, 10))
+                    assert invertedmatrix[5, 2] == 1 and all(invertedmatrix[5, i] == 0 for i in range(0, 2)+range(3, 10))
+                    assert invertedmatrix[9, 3] == 1 and all(invertedmatrix[9, i] == 0 for i in range(0, 3)+range(4, 10))
                 elif self.analysis.dimensions == 2:
                     assert invertedmatrix[0,0] == 1 and all(invertedmatrix[0,i] == 0 for i in range(1,6))
                     assert all(invertedmatrix[1,i] == 0 for i in (2, 4, 5))
@@ -567,15 +679,15 @@ class TemplatesFile(MultiEnum):
         return invertedmatrix
 
     def getjson(self):
-        c = Counter(t.templatename() for t in self.templates()+self.inttemplates())
-        for k, v in c.iteritems():
-            if v>1:
-                raise ValueError("Multiple templates in {} with name {}".format(self, k))
         result = {
           "outputFile": self.templatesfile(firststep=False),
           "templates": sum((_.getjson() for _ in self.templates()+self.inttemplates()), []),
           "constraints": self.constraints,
         }
+        c = Counter(t["name"] for t in result["templates"])
+        for k, v in c.iteritems():
+            if v>1:
+                raise ValueError("Multiple templates in {} with name {}".format(self, k))
         if any(sum(len(filelist) for filelist in template["files"]) > 15 for template in result["templates"]): result["maxthreads"] = 1
         return result
 
@@ -672,6 +784,98 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "g11gi3"),
                     Template(self, productionmode, self.analysis.purehypotheses[1]),
                 ]
+        elif self.analysis.dimensions == 3:
+            if self.templategroup in ("ggh", "tth", "bbh"):
+                assert self.analysis.isEFT
+                if self.category == "Untagged" and not self.analysis.isSTXS:
+                    constrainttype = "threeparameterHVV"
+                    templates = [
+                        Template(self, productionmode, self.analysis.purehypotheses[0]),
+                        IntTemplate(self, productionmode, "g11gi1"),
+                        IntTemplate(self, productionmode, "g11gj1"),
+                        IntTemplate(self, productionmode, "g11gk1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[1]),
+                        IntTemplate(self, productionmode, "gi1gj1"),
+                        IntTemplate(self, productionmode, "gi1gk1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[2]),
+                        IntTemplate(self, productionmode, "gj1gk1"),
+                        Template(self, productionmode, self.analysis.purehypotheses[3]),
+                    ]
+                elif self.category in ("VBFtagged", "VHHadrtagged", "Boosted", "VBF1jtagged", "VHLepttagged") or self.analysis.isSTXS:
+                    #leave out fa3, because those interferences are 0
+                    constrainttype = "twoparameterHVV"
+                    if self.templategroup == "tth" or self.category in ("VBFtagged", "VHHadrtagged") and self.templategroup == "ggh":
+                        generator = None
+                        if self.templategroup == "ggh": generator = "JHUGen"
+                        templates = [
+                            Template(self, productionmode, self.analysis.purehypotheses[0], "Hff0+", generator),
+                            IntTemplate(self, productionmode, "g11gj1", "Hff0+"),
+                            IntTemplate(self, productionmode, "g11gk1", "Hff0+"),
+                            Template(self, productionmode, self.analysis.purehypotheses[2], "Hff0+", generator),
+                            IntTemplate(self, productionmode, "gj1gk1", "Hff0+"),
+                            Template(self, productionmode, self.analysis.purehypotheses[3], "Hff0+", generator),
+                        ]
+                        templates2 = [
+                            Template(self, productionmode, self.analysis.purehypotheses[0], "Hff0-", generator),
+                            IntTemplate(self, productionmode, "g11gj1", "Hff0-"),
+                            IntTemplate(self, productionmode, "g11gk1", "Hff0-"),
+                            Template(self, productionmode, self.analysis.purehypotheses[2], "Hff0-", generator),
+                            IntTemplate(self, productionmode, "gj1gk1", "Hff0-"),
+                            Template(self, productionmode, self.analysis.purehypotheses[3], "Hff0-", generator),
+                        ]
+                    else:
+                        templates = [
+                            Template(self, productionmode, self.analysis.purehypotheses[0]),
+                            IntTemplate(self, productionmode, "g11gj1"),
+                            IntTemplate(self, productionmode, "g11gk1"),
+                            Template(self, productionmode, self.analysis.purehypotheses[2]),
+                            IntTemplate(self, productionmode, "gj1gk1"),
+                            Template(self, productionmode, self.analysis.purehypotheses[3]),
+                        ]
+            if self.templategroup in ("vbf", "zh", "wh", "vh"):
+                constrainttype = "threeparameterVVHVV"
+                templates = [
+                    Template(self, productionmode, self.analysis.purehypotheses[0]),
+                    IntTemplate(self, productionmode, "g13gi1"),
+                    IntTemplate(self, productionmode, "g13gj1"),
+                    IntTemplate(self, productionmode, "g13gk1"),
+                    IntTemplate(self, productionmode, "g12gi2"),
+                    IntTemplate(self, productionmode, "g12gi1gj1"),
+                    IntTemplate(self, productionmode, "g12gi1gk1"),
+                    IntTemplate(self, productionmode, "g12gj2"),
+                    IntTemplate(self, productionmode, "g12gj1gk1"),
+                    IntTemplate(self, productionmode, "g12gk2"),
+                    IntTemplate(self, productionmode, "g11gi3"),
+                    IntTemplate(self, productionmode, "g11gi2gj1"),
+                    IntTemplate(self, productionmode, "g11gi2gk1"),
+                    IntTemplate(self, productionmode, "g11gi1gj2"),
+                    IntTemplate(self, productionmode, "g11gi1gj1gk1"),
+                    IntTemplate(self, productionmode, "g11gi1gk2"),
+                    IntTemplate(self, productionmode, "g11gj3"),
+                    IntTemplate(self, productionmode, "g11gj2gk1"),
+                    IntTemplate(self, productionmode, "g11gj1gk2"),
+                    IntTemplate(self, productionmode, "g11gk3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[1]),
+                    IntTemplate(self, productionmode, "gi3gj1"),
+                    IntTemplate(self, productionmode, "gi3gk1"),
+                    IntTemplate(self, productionmode, "gi2gj2"),
+                    IntTemplate(self, productionmode, "gi2gj1gk1"),
+                    IntTemplate(self, productionmode, "gi2gk2"),
+                    IntTemplate(self, productionmode, "gi1gj3"),
+                    IntTemplate(self, productionmode, "gi1gj2gk1"),
+                    IntTemplate(self, productionmode, "gi1gj1gk2"),
+                    IntTemplate(self, productionmode, "gi1gk3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[2]),
+                    IntTemplate(self, productionmode, "gj3gk1"),
+                    IntTemplate(self, productionmode, "gj2gk2"),
+                    IntTemplate(self, productionmode, "gj1gk3"),
+                    Template(self, productionmode, self.analysis.purehypotheses[3]),
+                ]
+                if self.analysis.isSTXS or self.category in ("Boosted", "VBF1jtagged", "VHLepttagged"):
+                    for i, _ in reversed(list(enumerate(templates[:]))):
+                        if isinstance(_, IntTemplate) and _.interferencetype.couplingpowers["i"] in (1, 3):
+                            del templates[i]
+                    constrainttype = "threeparameterVVHVV_nog4int"
         elif self.analysis.dimensions == 4:
             if self.templategroup in ("ggh", "tth", "bbh"):
                 assert self.analysis.isfa3fa2fL1fL1Zg
@@ -910,6 +1114,7 @@ def templatesfiles():
         for production in productions:
             if channel != "2e2mu" and production.LHE: continue
             for analysis in analyses:
+                if analysis != "fa3fa2fL1fL1Zg_morecategories" and not production.GEN: continue
                 for category in categories:
                     if category != "Untagged" and analysis.isdecayonly: continue
                     if category == "Boosted" and not analysis.useboosted: continue
@@ -1050,15 +1255,15 @@ class Template(TemplateBase, MultiEnum):
 
     def templatename(self, final=True):
         if self.productionmode in ("ggH", "ttH", "bbH"):
-            match1 = re.match("^f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5$", str(self.hypothesis))
-            match2 = re.match("^f(a2|a3|L1|L1Zg)(?:dec)?0.5f(a2|a3|L1|L1Zg)(?:dec)?(-?)0.5$", str(self.hypothesis))
+            match1 = re.match("^f(a2|a3|L1|L1Zg)(?:EFT)?(?:dec)?(-?)0.5$", str(self.hypothesis))
+            match2 = re.match("^f(a2|a3|L1|L1Zg)(?:EFT)?(?:dec)?0.5f(a2|a3|L1|L1Zg)(?:EFT)?(?:dec)?(-?)0.5$", str(self.hypothesis))
             if self.hypothesis == "0+":
                 name = "template0Plus"
-            elif self.hypothesis == "0-":
+            elif self.hypothesis in ("0-", "a3EFT"):
                 name = "template0Minus"
-            elif self.hypothesis == "a2":
+            elif self.hypothesis in ("a2", "a2EFT"):
                 name = "template0HPlus"
-            elif self.hypothesis == "L1":
+            elif self.hypothesis in ("L1", "L1EFT"):
                 name = "template0L1"
             elif self.hypothesis == "L1Zg":
                 name = "template0L1Zg"
@@ -1071,20 +1276,20 @@ class Template(TemplateBase, MultiEnum):
             if self.hffhypothesis == "Hff0-":
                 name = name.replace("template", "templateHff0MinusHVV")
         elif self.productionmode in ("VBF", "ZH", "WH", "VH"):
-            match1 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)(?P<sign>-?)0[.]5$", str(self.hypothesis))
-            match2 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]5f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]5$", str(self.hypothesis))
-            match3 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]33f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]33$", str(self.hypothesis))
-            match4 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]33f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)0[.]33f(?P<ak>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]33$", str(self.hypothesis))
-            match5 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]25f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)0[.]25f(?P<ak>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]25$", str(self.hypothesis))
-            match6 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?P<proddec>(?:prod|dec|proddec)?)0[.]25f(?P<aj>a2|a3|L1|L1Zg)(?P=proddec)0[.]25f(?P<ak>a2|a3|L1|L1Zg)(?P=proddec)0[.]25f(?P<al>a2|a3|L1|L1Zg)(?P=proddec)(?P<sign>-?)0[.]25$", str(self.hypothesis))
+            match1 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?:EFT)?(?P<proddec>(?:prod|dec|proddec)?)(?P<sign>-?)0[.]5$", str(self.hypothesis))
+            match2 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?:EFT)?(?P<proddec>(?:prod|dec|proddec)?)0[.]5f(?P<aj>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)(?P<sign>-?)0[.]5$", str(self.hypothesis))
+            match3 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?:EFT)?(?P<proddec>(?:prod|dec|proddec)?)0[.]33f(?P<aj>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)(?P<sign>-?)0[.]33$", str(self.hypothesis))
+            match4 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?:EFT)?(?P<proddec>(?:prod|dec|proddec)?)0[.]33f(?P<aj>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)0[.]33f(?P<ak>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)(?P<sign>-?)0[.]33$", str(self.hypothesis))
+            match5 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?:EFT)?(?P<proddec>(?:prod|dec|proddec)?)0[.]25f(?P<aj>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)0[.]25f(?P<ak>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)(?P<sign>-?)0[.]25$", str(self.hypothesis))
+            match6 = re.match("^f(?P<ai>a2|a3|L1|L1Zg)(?:EFT)?(?P<proddec>(?:prod|dec|proddec)?)0[.]25f(?P<aj>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)0[.]25f(?P<ak>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)0[.]25f(?P<al>a2|a3|L1|L1Zg)(?:EFT)?(?P=proddec)(?P<sign>-?)0[.]25$", str(self.hypothesis))
             pddict = {"prod": "Prod", "dec": "Decay", "": "Decay", "proddec": "ProdDec"}
             if self.hypothesis == "0+":
                 name = "template0Plus"
-            elif self.hypothesis == "0-":
+            elif self.hypothesis in ("0-", "a3EFT"):
                 name = "template0Minus"
-            elif self.hypothesis == "a2":
+            elif self.hypothesis in ("a2", "a2EFT"):
                 name = "template0HPlus"
-            elif self.hypothesis == "L1":
+            elif self.hypothesis in ("L1", "L1EFT"):
                 name = "template0L1"
             elif self.hypothesis == "L1Zg":
                 name = "template0L1Zg"
@@ -1140,7 +1345,10 @@ class Template(TemplateBase, MultiEnum):
         elif self.productionmode == "data":
             name = "datatemplate"
 
-        name
+        try:
+            name
+        except NameError:
+            print self; raise
 
         if self.domirror and final:
             name += "Mirror"
@@ -1288,7 +1496,7 @@ class Template(TemplateBase, MultiEnum):
         assert "D_CP" in self.mixdiscriminant.name, (self, self.mixdiscriminant.name)
 
         if self.hypothesis in ("fa30.5", "fa3prod0.5", "fa3proddec-0.5"): return False
-        if self.hypothesis in ("0+", "0-", "a2", "L1", "L1Zg"): return True
+        if self.hypothesis in ("0+", "0-", "a2", "L1", "L1Zg", "a3EFT", "a2EFT", "L1EFT"): return True
 
         if self.hypothesis in ("fa20.5", "fa2-0.5", "fL10.5", "fL1Zg0.5", "fL1Zg-0.5"): return True
         if self.hypothesis in ("fa2prod0.5", "fa2prod-0.5", "fL1prod0.5", "fL1Zgprod0.5", "fL1Zgprod-0.5"): return True
@@ -1583,12 +1791,13 @@ class IntTemplate(TemplateBase, MultiEnum):
             raise ValueError("Invalid productionmode {}!\n{}".format(self.productionmode, args))
 
     def templatename(self, final=True):
-        if self.analysis.dimensions == 4:
+        if self.analysis.dimensions in (3, 4):
             result = "template"+str(self.interferencetype)+"Int"
             result = result.replace("gi", self.analysis.couplingnames[0])
             result = result.replace("gj", self.analysis.couplingnames[1])
             result = result.replace("gk", self.analysis.couplingnames[2])
-            result = result.replace("gl", self.analysis.couplingnames[3])
+            if self.analysis.dimensions == 4:
+                result = result.replace("gl", self.analysis.couplingnames[3])
         elif self.productionmode in ("ggH", "ttH", "bbH"):
             if self.interferencetype == "g11gi1":
                 if self.analysis.fais == ("fa3",):
@@ -1629,12 +1838,12 @@ class IntTemplate(TemplateBase, MultiEnum):
         #cross talk - production discriminants for the wrong category don't make sense
         if self.category in ("VBFtagged", "VHHadrtagged") and self.productionmode in ("ggH", "ttH", "bbH"):
             if (self.interferencetype == "g11gi1"
-                or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] == 1):
+                or (self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isEFT) and self.interferencetype.couplingpowers["i"] == 1):
                 #ggH has no production information, and only using SM ttH, so mirror antisymmetric
                 #over the (pretend) D_CP_decay axis, which sets the whole thing to 0
                 #note for ttH this is an approximation, since we could have H(0-)->2l2q tt->bbllnunu
                 return {"type":"rescale", "factor":0}
-            if self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] == 0:
+            if (self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isEFT) and self.interferencetype.couplingpowers["i"] == 0:
                 if self.analysis.isSTXS or self.category in ("Boosted", "VBF1jtagged", "VHLepttagged"): return None
                 return {"type":"mirror", "antisymmetric":False, "axis":1}
             assert False
@@ -1653,10 +1862,10 @@ class IntTemplate(TemplateBase, MultiEnum):
         #cross talk to the untagged category is exactly correct, since the decay is the same
 
         if (self.interferencetype in ("g11gi1", "g11gi3", "g13gi1")
-            or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] in (1, 3)):
+            or (self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isEFT) and self.interferencetype.couplingpowers["i"] in (1, 3)):
             return {"type":"mirror", "antisymmetric":True, "axis":1}
         elif (self.interferencetype == "g12gi2"
-              or self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["i"] in (0, 2, 4)):
+              or (self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isEFT) and self.interferencetype.couplingpowers["i"] in (0, 2, 4)):
             return {"type":"mirror", "antisymmetric":False, "axis":1}
         assert False
 
@@ -1666,13 +1875,30 @@ class IntTemplate(TemplateBase, MultiEnum):
 
     @property
     def rowofinvertedmatrix(self):
-        index = 0
-        maxpower = self.interferencetype.totalpower
-        for l in range(maxpower+1):
-            for k in range(maxpower+1-l):
-                for j in range(maxpower+1-k-l):
-                    for i in range(maxpower+1-j-k-l):
-                        dct = Counter({"i": i, "j": j, "k": k, "l": l})
+        if self.analysis.dimensions == 4:
+            index = 0
+            maxpower = self.interferencetype.totalpower
+            for l in range(maxpower+1):
+                for k in range(maxpower+1-l):
+                    for j in range(maxpower+1-k-l):
+                        for i in range(maxpower+1-j-k-l):
+                            dct = Counter({"i": i, "j": j, "k": k, "l": l})
+                            dct["1"] = maxpower - sum(dct.values())
+                            for key, val in dct.items():
+                                if not val:
+                                    del dct[key]
+                            if dct == self.interferencetype.couplingpowers:
+                                return index
+                            index += 1
+            assert False, self.interferencetype.couplingpowers
+
+        if self.analysis.dimensions == 3:
+            index = 0
+            maxpower = self.interferencetype.totalpower
+            for k in range(maxpower+1):
+                for j in range(maxpower+1-k):
+                    for i in range(maxpower+1-j-k):
+                        dct = Counter({"i": i, "j": j, "k": k})
                         dct["1"] = maxpower - sum(dct.values())
                         for key, val in dct.items():
                             if not val:
@@ -1680,12 +1906,14 @@ class IntTemplate(TemplateBase, MultiEnum):
                         if dct == self.interferencetype.couplingpowers:
                             return index
                         index += 1
-        assert False, self.interferencetype.couplingpowers
+            assert False, self.interferencetype.couplingpowers
+
+        assert False, self.analysis.dimensions
 
     @property
     @cache
     def templatesandfactors(self):
-        if self.analysis.dimensions == 4:
+        if self.analysis.dimensions in (3, 4):
             rowofinvertedmatrix = self.rowofinvertedmatrix
             hffhypothesis = "Hff0+" if self.productionmode == "ttH" else None
             multiplyby = 1
@@ -1784,8 +2012,8 @@ class IntTemplate(TemplateBase, MultiEnum):
             ZHtemplate = type(self)(*kwargs.itervalues())
             result.append(sum((t.reweightingsampleplus*factor for t, factor in ZHtemplate.templatesandfactors), SumOfSamples()))
             
-            if not self.analysis.isfa3fa2fL1fL1Zg: assert False
-            if self.interferencetype.couplingpowers["l"] < 3:
+            if not self.analysis.isfa3fa2fL1fL1Zg and not self.analysis.isEFT: assert False
+            if self.analysis.isEFT or self.interferencetype.couplingpowers["l"] < 3:
                 kwargs["productionmode"] = "WH"
                 kwargs["templategroup"] = "wh"
                 WHtemplate = type(self)(*kwargs.itervalues())
@@ -1799,11 +2027,11 @@ class IntTemplate(TemplateBase, MultiEnum):
     @cache
     def reweightfrom(self):
         if self.productionmode == "VH":
-            if not self.analysis.isfa3fa2fL1fL1Zg: assert False
+            if not self.analysis.isfa3fa2fL1fL1Zg and not self.analysis.isEFT: assert False
             kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
             del kwargs["interferencetype"]; kwargs["hypothesis"] = "0+"
             result = Template(*kwargs.itervalues()).reweightfrom()[:]
-            if self.interferencetype.couplingpowers["l"] >= 3:
+            if not self.analysis.isEFT and self.interferencetype.couplingpowers["l"] >= 3:
                 del result[1]
         else:
             others = [t.reweightfrom() for t, factor in self.templatesandfactors]

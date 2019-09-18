@@ -742,6 +742,8 @@ class Analysis(MyEnum):
                  EnumItem("fa3fa2fL1fL1Zg_STXS"),
                  EnumItem("fa3fa2fL1fL1Zg_boosted"),
                  EnumItem("fa3fa2fL1fL1Zg_morecategories"),
+                 EnumItem("fa3fa2fL1_EFT"),
+                 EnumItem("fa3fa2fL1_EFT_STXS"),
                 )
     def title(self, latex=False, superscript=None):
         if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -797,6 +799,7 @@ class Analysis(MyEnum):
     def couplingnames(self):
         if self.isfL1fL1Zg: return "g1prime2", "ghzgs1prime2"
         if self.isfa3fa2fL1fL1Zg: return "g4", "g2", "g1prime2", "ghzgs1prime2"
+        if self.isEFT: return "ghz4", "ghz2", "ghz1prime2"
         if self.dimensions == 1: return self.couplingname,
         assert False, self
     @property
@@ -830,6 +833,8 @@ class Analysis(MyEnum):
             return Hypothesis("0+"), Hypothesis("L1"), Hypothesis("L1Zg")
         if self.isfa3fa2fL1fL1Zg:
             return Hypothesis("0+"), Hypothesis("a3"), Hypothesis("a2"), Hypothesis("L1"), Hypothesis("L1Zg")
+        if self.isEFT:
+            return Hypothesis("0+"), Hypothesis("a3EFT"), Hypothesis("a2EFT"), Hypothesis("L1EFT")
         assert False, self
     @property
     def mixdecayhypothesis(self):
@@ -858,9 +863,13 @@ class Analysis(MyEnum):
         if self == "fa3_STXS": return True
         if self == "fa3_onlyDbkg": return True
         if self == "fa3fa2fL1fL1Zg_STXS": return True
+        if self == "fa3fa2fL1_EFT_STXS": return True
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return False
-        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories"): return False
+        if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"): return False
         assert False, self
+    @property
+    def isEFT(self):
+        return "EFT" in str(self)
     @property
     def categoryname(self):
         if self.isdecayonly: return "nocategorization"
@@ -869,7 +878,7 @@ class Analysis(MyEnum):
         if self == "fa2": return "0P_or_a2"
         if self == "fL1": return "0P_or_L1"
         if self == "fL1Zg": return "0P_or_L1Zg"
-        if self.isfa3fa2fL1fL1Zg: return "0P_or_0M_or_a2_or_L1_or_L1Zg"
+        if self.isfa3fa2fL1fL1Zg or self.isEFT: return "0P_or_0M_or_a2_or_L1_or_L1Zg"
         assert False, self
     @property
     def dimensions(self):
@@ -905,6 +914,8 @@ class Analysis(MyEnum):
             if self == "fa3fa2fL1fL1Zg_STXS": return True
             if self == "fa3fa2fL1fL1Zg_boosted": return False
             if self == "fa3fa2fL1fL1Zg_morecategories": return True
+            if self == "fa3fa2fL1_EFT": return True
+            if self == "fa3fa2fL1_EFT_STXS": return True
         if config.name ==  "savvas" : 
             if self == "fa3_multiparameter": return True
             if self == "fa3_multiparameter_nodbkg": return False
@@ -927,6 +938,7 @@ class Analysis(MyEnum):
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
         if self.isfa3fa2fL1fL1Zg: return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
+        if self.isEFT: return Analysis("fa3"), Analysis("fa2"), Analysis("fL1")
         assert False, self
     @property
     def isfL1fL1Zg(self):

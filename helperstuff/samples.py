@@ -1703,6 +1703,8 @@ class SampleBasis(MultiEnum):
         if self.productionmode in ("ggH", "ttH", "bbH"):
             if self.analysis.dimensions == 4:
                 dimension = 15
+            elif self.analysis.dimensions == 3:
+                dimension = 10
             elif self.analysis.dimensions == 2:
                 dimension = 6
             else:
@@ -1710,6 +1712,8 @@ class SampleBasis(MultiEnum):
         elif self.productionmode in ("VBF", "WH", "ZH"):
             if self.analysis.dimensions == 4:
                 dimension = 70
+            elif self.analysis.dimensions == 3:
+                dimension = 35
             elif self.analysis.dimensions == 2:
                 assert False  #have to figure this out
             else:
@@ -1759,6 +1763,29 @@ class SampleBasis(MultiEnum):
                                      for k in range(maxpower+1-l)
                                      for j in range(maxpower+1-k-l)
                                      for i in range(maxpower+1-j-k-l)
+                                 ]
+                                    for sample in samples
+                                ]
+                               )
+
+        elif self.analysis.dimensions == 3:
+            if dimension == 10:
+                maxpower = 2
+            elif dimension == 35:
+                maxpower = 4
+            else:
+                assert False, dimension
+            assert len(self.analysis.couplingnames) == 3
+            return numpy.matrix(
+                                [
+                                 [
+                                  sample.g1**(maxpower-i-j-k)
+                                  * (getattr(sample, self.analysis.couplingnames[0]) * self.scaleby(0))**i
+                                  * (getattr(sample, self.analysis.couplingnames[1]) * self.scaleby(1))**j
+                                  * (getattr(sample, self.analysis.couplingnames[2]) * self.scaleby(2))**k
+                                     for k in range(maxpower+1)
+                                     for j in range(maxpower+1-k)
+                                     for i in range(maxpower+1-j-k)
                                  ]
                                     for sample in samples
                                 ]
