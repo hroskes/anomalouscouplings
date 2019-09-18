@@ -178,6 +178,82 @@ def mixturepermutations_4d(enumitemsalreadythere):
   assert allofthem == len(list(combinations(range(8), 4))), (allofthem, len(list(combinations(range(8), 4))))
   return tuple(result)
 
+def mixturepermutationsEFT(enumitemsalreadythere):
+  def inner():
+    pures = "a3EFT", "a2EFT", "L1EFT"
+
+    #pure hypotheses
+    yield "0+",
+    for _ in pures:
+      yield _,
+
+    for proddec in "dec", "prod", "proddec":
+      kwargs = {"proddec": proddec, "sign": "-" if proddec == "proddec" else ""}
+      #mixtures with SM
+      for kwargs["ai"] in pures:
+        yield "f{ai}{proddec}{sign}0.5".format(**kwargs),
+      #mixtures with each other
+      for kwargs["ai"], kwargs["aj"] in combinations(pures, 2):
+        yield (
+          "f{ai}{proddec}0.5f{aj}{proddec}{sign}0.5".format(**kwargs),
+          "f{aj}{proddec}{sign}0.5f{ai}{proddec}0.5".format(**kwargs),
+        )
+
+      if proddec == "dec": yield None, "decay is done"
+
+      #to get the terms with 3 unique couplings:
+      #  there are 3 different new terms for each set of 3 couplings,
+      #  since exactly one of the couplings is squared
+      #  so we need 3 more mixtures
+      #  prod, dec, proddec (with a minus sign somewhere for variety) will work
+      for kwargs["ai"], kwargs["aj"] in combinations(pures, 2):
+        yield (
+          "f{ai}{proddec}0.33f{aj}{proddec}{sign}0.33".format(**kwargs),
+          "f{aj}{proddec}{sign}0.33f{ai}{proddec}0.33".format(**kwargs),
+        )
+
+      for kwargs["ai"], kwargs["aj"], kwargs["ak"] in combinations(pures, 3):
+        yield tuple(
+          "".join(permutation).format(**kwargs)
+            for permutation
+            in permutations(("f{ai}{proddec}0.33", "f{aj}{proddec}0.33", "f{ak}{proddec}{sign}0.33"))
+        )
+
+    #for each set of 4 couplings, there's only one possible new term
+    #proddec is the way to go, since it includes both
+    #I'll keep it general using combinations, just in case that ever becomes necessary
+    #it's not clear that a minus sign would help, so I'll leave it out
+    kwargs = {}
+    for kwargs["ai"], kwargs["aj"], kwargs["ak"] in combinations(pures, 3):
+      yield tuple(
+        "".join(permutation).format(**kwargs)
+          for permutation
+          in permutations(("f{ai}proddec0.25", "f{aj}proddec0.25", "f{ak}proddec0.25"))
+      )
+    for kwargs["ai"], kwargs["aj"], kwargs["ak"], kwargs["al"] in combinations(pures, 4):
+      yield tuple(
+        "".join(permutation).format(**kwargs)
+          for permutation
+          in permutations(("f{ai}proddec0.25", "f{aj}proddec0.25", "f{ak}proddec0.25", "f{al}proddec0.25"))
+      )
+
+  result = []
+  allofthem = 0
+  for enumitemnames in inner():
+    if enumitemnames == (None, "decay is done"):
+      assert allofthem == len(list(combinations(range(5), 2))), (allofthem, len(list(combinations(range(5), 2))))
+      continue
+
+    allofthem += 1
+    enumitemnames_modified = [_ for _ in enumitemnames]
+    enumitemnames_modified += [re.sub("(?<!prod)dec", "", _) for _ in enumitemnames_modified]
+    if any(_ in enumitemsalreadythere for _ in enumitemnames_modified):
+      continue
+    result.append(EnumItem(*enumitemnames_modified))
+
+  assert allofthem == len(list(combinations(range(7), 4))), (allofthem, len(list(combinations(range(7), 4))))
+  return tuple(result)
+
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
     enumitems = (
