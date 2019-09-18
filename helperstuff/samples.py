@@ -11,6 +11,7 @@ import ROOT
 
 import config
 import constants
+import eft
 from enums import AlternateGenerator, AlternateWeight, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
 from extendedcounter import ExtendedCounter
 from utilities import cache, cache_file, deprecate, generatortolist, product, TFile, tlvfromptetaphim, WriteOnceDict
@@ -985,33 +986,36 @@ class ReweightingSample(MultiEnum, SampleBase):
         raise self.ValueError("TDirectoryname")
 
     @property
+    @cache
     def ghz1(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "tqH"):
             if self.hypothesis == "0+": return 1
-            if self.hypothesis in ("0-", "a2", "L1", "L1Zg"): return 0
-            couplings = "fa3", "fa2", "fL1", "fL1Zg"
-            for proddec in "prod", "dec", "proddec":
-                minus = "-" if proddec == "proddec" else ""
-                for a in couplings:
-                    if self.hypothesis == a+proddec+"0.5":
-                        return 1
-                    if self.hypothesis == a+proddec+"-0.5":
-                        return 1
-                for a, b in combinations(couplings, 2):
-                    if self.hypothesis == a+proddec+"0.5"+b+proddec+minus+"0.5":
-                        return 0
-                    if self.hypothesis == a+proddec+"0.33"+b+proddec+minus+"0.33":
-                        return 1
-                for a, b, c in combinations(couplings, 3):
-                    if self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33":
-                        return 0
+            if self.hypothesis in ("0-", "a2", "L1", "L1Zg", "a3EFT", "a2EFT", "L1EFT"): return 0
+            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg")), ("EFT", ("fa3", "fa2", "fL1")):
+                for proddec in "prod", "dec", "proddec":
+                    minus = "-" if proddec == "proddec" else ""
+                    doplushalf = (not EFT) or proddec != "proddec"
+                    dominushalf = (not EFT) or proddec == "proddec"
+                    for a in couplings:
+                        if doplushalf or self.hypothesis == a+EFT+proddec+"0.5":
+                            return 1
+                        if dominushalf and self.hypothesis == a+EFT+proddec+"-0.5":
+                            return 1
+                    for a, b in combinations(couplings, 2):
+                        if self.hypothesis == a+EFT+proddec+"0.5"+b+EFT+proddec+minus+"0.5":
+                            return 0
+                        if self.hypothesis == a+EFT+proddec+"0.33"+b+EFT+proddec+minus+"0.33":
+                            return 1
+                    for a, b, c in combinations(couplings, 3):
+                        if self.hypothesis == a+EFT+proddec+"0.33"+b+EFT+proddec+"0.33"+c+EFT+proddec+minus+"0.33":
+                            return 0
+                        if proddec != "proddec": continue
+                        if self.hypothesis == a+EFT+proddec+"0.25"+b+EFT+proddec+"0.25"+c+EFT+proddec+"0.25":
+                            return 1
                     if proddec != "proddec": continue
-                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25":
-                        return 1
-                if proddec != "proddec": continue
-                for a, b, c, d in combinations(couplings, 4):
-                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
-                        return 0
+                    for a, b, c, d in combinations(couplings, 4):
+                        if self.hypothesis == a+EFT+proddec+"0.25"+b+EFT+proddec+"0.25"+c+EFT+proddec+"0.25"+d+EFT+proddec+"0.25":
+                            return 0
 
             if self.hypothesis == "fa2dec-0.9": return 1
             if self.hypothesis == "fa3VBF0.5": return 1
@@ -1024,10 +1028,11 @@ class ReweightingSample(MultiEnum, SampleBase):
         raise self.ValueError("ghz1")
 
     @property
+    @cache
     def ghz2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
-            if self.hypothesis == "a2": return 1
-            if self.hypothesis in ("0+", "0-", "L1", "L1Zg"): return 0
+            if self.hypothesis in ("a2", "a2EFT"): return 1
+            if self.hypothesis in ("0+", "0-", "L1", "L1Zg", "a3EFT", "L1EFT"): return 0
 
             ghz2 = {"dec": constants.g2HZZ}
             if self.productionmode == "VBF": ghz2["prod"] = constants.g2VBF
@@ -1036,44 +1041,46 @@ class ReweightingSample(MultiEnum, SampleBase):
             else: ghz2["prod"] = None
             ghz2["proddec"] = None if ghz2["prod"] is None else sqrt(ghz2["prod"]*ghz2["dec"])
 
-            couplings = "fa3", "fa2", "fL1", "fL1Zg"
-            for proddec in "prod", "dec", "proddec":
-                for a in couplings:
-                    if self.hypothesis == a+proddec+"0.5":
-                        if a == "fa2":
-                            return ghz2[proddec]
-                        return 0
-                    if self.hypothesis == a+proddec+"-0.5":
-                        if a == "fa2":
-                            return -ghz2[proddec]
-                        return 0
+            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg")), ("EFT", ("fa3", "fa2", "fL1")):
+                for proddec in "prod", "dec", "proddec":
+                    doplushalf = (not EFT) or proddec != "proddec"
+                    dominushalf = (not EFT) or proddec == "proddec"
+                    for a in couplings:
+                        if doplushalf and self.hypothesis == a+EFT+proddec+"0.5":
+                            if a == "fa2":
+                                return ghz2[proddec]
+                            return 0
+                        if dominushalf and self.hypothesis == a+EFT+proddec+"-0.5":
+                            if a == "fa2":
+                                return -ghz2[proddec]
+                            return 0
 
-                minus = "-" if proddec == "proddec" else ""
-                for a, b in combinations(couplings, 2):
-                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
-                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
-                        if a == "fa2":
-                            return ghz2[proddec]
-                        if b == "fa2":
-                            return float(minus+"1") * ghz2[proddec]
-                        return 0
-                for a, b, c in combinations(couplings, 3):
-                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
-                          or proddec=="proddec"
-                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
-                    ):
-                        if a == "fa2" or b == "fa2" or "0.25" in str(self.hypothesis) and c == "fa2":
-                            return ghz2[proddec]
-                        if c == "fa2":
-                            return float(minus+"1") * ghz2[proddec]
-                        return 0
+                    minus = "-" if proddec == "proddec" else ""
+                    for a, b in combinations(couplings, 2):
+                        if self.hypothesis in (a+EFT+proddec+"0.5"+b+EFT+proddec+minus+"0.5",
+                                               a+EFT+proddec+"0.33"+b+EFT+proddec+minus+"0.33"):
+                            if a == "fa2":
+                                return ghz2[proddec]
+                            if b == "fa2":
+                                return float(minus+"1") * ghz2[proddec]
+                            return 0
+                    for a, b, c in combinations(couplings, 3):
+                        if (self.hypothesis == a+EFT+proddec+"0.33"+b+EFT+proddec+"0.33"+c+EFT+proddec+minus+"0.33"
+                              or proddec=="proddec"
+                              and self.hypothesis == a+EFT+proddec+"0.25"+b+EFT+proddec+"0.25"+c+EFT+proddec+"0.25"
+                        ):
+                            if a == "fa2" or b == "fa2" or "0.25" in str(self.hypothesis) and c == "fa2":
+                                return ghz2[proddec]
+                            if c == "fa2":
+                                return float(minus+"1") * ghz2[proddec]
+                            return 0
 
-                if proddec != "proddec": continue
-                for a, b, c, d in combinations(couplings, 4):
-                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
-                        if a == "fa2" or b == "fa2" or c == "fa2" or d == "fa2":
-                            return ghz2[proddec]
-                        return 0
+                    if proddec != "proddec": continue
+                    for a, b, c, d in combinations(couplings, 4):
+                        if self.hypothesis == a+EFT+proddec+"0.25"+b+EFT+proddec+"0.25"+c+EFT+proddec+"0.25"+d+EFT+proddec+"0.25":
+                            if a == "fa2" or b == "fa2" or c == "fa2" or d == "fa2":
+                                return ghz2[proddec]
+                            return 0
 
             if self.hypothesis == "fa2dec-0.9": return -constants.g2HZZ * 3
             if self.hypothesis == "fa3VBF0.5": return 0
@@ -1086,10 +1093,11 @@ class ReweightingSample(MultiEnum, SampleBase):
         raise self.ValueError("ghz2")
 
     @property
+    @cache
     def ghz4(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
-            if self.hypothesis == "0-": return 1
-            if self.hypothesis in ("0+", "a2", "L1", "L1Zg"): return 0
+            if self.hypothesis in ("0-", "a3EFT"): return 1
+            if self.hypothesis in ("0+", "a2", "L1", "L1Zg", "a2EFT", "L1EFT"): return 0
 
             ghz4 = {"dec": constants.g4HZZ}
             if self.productionmode == "VBF": ghz4["prod"] = constants.g4VBF
@@ -1098,44 +1106,46 @@ class ReweightingSample(MultiEnum, SampleBase):
             else: ghz4["prod"] = None
             ghz4["proddec"] = None if ghz4["prod"] is None else sqrt(ghz4["prod"]*ghz4["dec"])
 
-            couplings = "fa3", "fa2", "fL1", "fL1Zg"
-            for proddec in "prod", "dec", "proddec":
-                for a in couplings:
-                    if self.hypothesis == a+proddec+"0.5":
-                        if a == "fa3":
-                            return ghz4[proddec]
-                        return 0
-                    if self.hypothesis == a+proddec+"-0.5":
-                        if a == "fa3":
-                            return -ghz4[proddec]
-                        return 0
+            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg")), ("EFT", ("fa3", "fa2", "fL1")):
+                for proddec in "prod", "dec", "proddec":
+                    doplushalf = (not EFT) or proddec != "proddec"
+                    dominushalf = (not EFT) or proddec == "proddec"
+                    for a in couplings:
+                        if doplushalf and self.hypothesis == a+EFT+proddec+"0.5":
+                            if a == "fa3":
+                                return ghz4[proddec]
+                            return 0
+                        if dominushalf and self.hypothesis == a+EFT+proddec+"-0.5":
+                            if a == "fa3":
+                                return -ghz4[proddec]
+                            return 0
 
-                minus = "-" if proddec == "proddec" else ""
-                for a, b in combinations(couplings, 2):
-                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
-                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
-                        if a == "fa3":
-                            return ghz4[proddec]
-                        if b == "fa3":
-                            return float(minus+"1") * ghz4[proddec]
-                        return 0
-                for a, b, c in combinations(couplings, 3):
-                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
-                          or proddec=="proddec"
-                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
-                    ):
-                        if a == "fa3" or b == "fa3" or "0.25" in str(self.hypothesis) and c == "fa3":
-                            return ghz4[proddec]
-                        if c == "fa3":
-                            return float(minus+"1") * ghz4[proddec]
-                        return 0
+                    minus = "-" if proddec == "proddec" else ""
+                    for a, b in combinations(couplings, 2):
+                        if self.hypothesis in (a+EFT+proddec+"0.5"+b+EFT+proddec+minus+"0.5",
+                                               a+EFT+proddec+"0.33"+b+EFT+proddec+minus+"0.33"):
+                            if a == "fa3":
+                                return ghz4[proddec]
+                            if b == "fa3":
+                                return float(minus+"1") * ghz4[proddec]
+                            return 0
+                    for a, b, c in combinations(couplings, 3):
+                        if (self.hypothesis == a+EFT+proddec+"0.33"+b+EFT+proddec+"0.33"+c+EFT+proddec+minus+"0.33"
+                              or proddec=="proddec"
+                              and self.hypothesis == a+EFT+proddec+"0.25"+b+EFT+proddec+"0.25"+c+EFT+proddec+"0.25"
+                        ):
+                            if a == "fa3" or b == "fa3" or "0.25" in str(self.hypothesis) and c == "fa3":
+                                return ghz4[proddec]
+                            if c == "fa3":
+                                return float(minus+"1") * ghz4[proddec]
+                            return 0
 
-                if proddec != "proddec": continue
-                for a, b, c, d in combinations(couplings, 4):
-                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
-                        if a == "fa3" or b == "fa3" or c == "fa3" or d == "fa3":
-                            return ghz4[proddec]
-                        return 0
+                    if proddec != "proddec": continue
+                    for a, b, c, d in combinations(couplings, 4):
+                        if self.hypothesis == a+EFT+proddec+"0.25"+b+EFT+proddec+"0.25"+c+EFT+proddec+"0.25"+d+EFT+proddec+"0.25":
+                            if a == "fa3" or b == "fa3" or c == "fa3" or d == "fa3":
+                                return ghz4[proddec]
+                            return 0
 
             if self.hypothesis == "fa2dec-0.9": return 0
 
@@ -1149,10 +1159,11 @@ class ReweightingSample(MultiEnum, SampleBase):
         raise self.ValueError("ghz4")
 
     @property
+    @cache
     def ghz1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
-            if self.hypothesis == "L1": return 1e4
-            if self.hypothesis in ("0+", "a2", "0-", "L1Zg"): return 0
+            if self.hypothesis in ("L1", "L1EFT"): return 1e4
+            if self.hypothesis in ("0+", "a2", "0-", "L1Zg", "a2EFT", "a3EFT"): return 0
 
             ghz1prime2 = {"dec": constants.g1prime2HZZ}
             if self.productionmode == "VBF": ghz1prime2["prod"] = constants.g1prime2VBF
@@ -1161,44 +1172,46 @@ class ReweightingSample(MultiEnum, SampleBase):
             else: ghz1prime2["prod"] = None
             ghz1prime2["proddec"] = None if ghz1prime2["prod"] is None else -sqrt(ghz1prime2["prod"]*ghz1prime2["dec"])
 
-            couplings = "fa3", "fa2", "fL1", "fL1Zg"
-            for proddec in "prod", "dec", "proddec":
-                for a in couplings:
-                    if self.hypothesis == a+proddec+"0.5":
-                        if a == "fL1":
-                            return ghz1prime2[proddec]
-                        return 0
-                    if self.hypothesis == a+proddec+"-0.5":
-                        if a == "fL1":
-                            return -ghz1prime2[proddec]
-                        return 0
+            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg")), ("EFT", ("fa3", "fa2", "fL1")):
+                for proddec in "prod", "dec", "proddec":
+                    doplushalf = (not EFT) or proddec != "proddec"
+                    dominushalf = (not EFT) or proddec == "proddec"
+                    for a in couplings:
+                        if doplushalf and self.hypothesis == a+EFT+proddec+"0.5":
+                            if a == "fL1":
+                                return ghz1prime2[proddec]
+                            return 0
+                        if dominushalf and self.hypothesis == a+EFT+proddec+"-0.5":
+                            if a == "fL1":
+                                return -ghz1prime2[proddec]
+                            return 0
 
-                minus = "-" if proddec == "proddec" else ""
-                for a, b in combinations(couplings, 2):
-                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
-                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
-                        if a == "fL1":
-                            return ghz1prime2[proddec]
-                        if b == "fL1":
-                            return float(minus+"1") * ghz1prime2[proddec]
-                        return 0
-                for a, b, c in combinations(couplings, 3):
-                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
-                          or proddec=="proddec"
-                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
-                    ):
-                        if a == "fL1" or b == "fL1" or "0.25" in str(self.hypothesis) and c == "fL1":
-                            return ghz1prime2[proddec]
-                        if c == "fL1":
-                            return float(minus+"1") * ghz1prime2[proddec]
-                        return 0
+                    minus = "-" if proddec == "proddec" else ""
+                    for a, b in combinations(couplings, 2):
+                        if self.hypothesis in (a+EFT+proddec+"0.5"+b+EFT+proddec+minus+"0.5",
+                                               a+EFT+proddec+"0.33"+b+EFT+proddec+minus+"0.33"):
+                            if a == "fL1":
+                                return ghz1prime2[proddec]
+                            if b == "fL1":
+                                return float(minus+"1") * ghz1prime2[proddec]
+                            return 0
+                    for a, b, c in combinations(couplings, 3):
+                        if (self.hypothesis == a+EFT+proddec+"0.33"+b+EFT+proddec+"0.33"+c+EFT+proddec+minus+"0.33"
+                              or proddec=="proddec"
+                              and self.hypothesis == a+EFT+proddec+"0.25"+b+EFT+proddec+"0.25"+c+EFT+proddec+"0.25"
+                        ):
+                            if a == "fL1" or b == "fL1" or "0.25" in str(self.hypothesis) and c == "fL1":
+                                return ghz1prime2[proddec]
+                            if c == "fL1":
+                                return float(minus+"1") * ghz1prime2[proddec]
+                            return 0
 
-                if proddec != "proddec": continue
-                for a, b, c, d in combinations(couplings, 4):
-                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
-                        if a == "fL1" or b == "fL1" or c == "fL1" or d == "fL1":
-                            return ghz1prime2[proddec]
-                        return 0
+                    if proddec != "proddec": continue
+                    for a, b, c, d in combinations(couplings, 4):
+                        if self.hypothesis == a+EFT+proddec+"0.25"+b+EFT+proddec+"0.25"+c+EFT+proddec+"0.25"+d+EFT+proddec+"0.25":
+                            if a == "fL1" or b == "fL1" or c == "fL1" or d == "fL1":
+                                return ghz1prime2[proddec]
+                            return 0
 
             if self.hypothesis == "fa2dec-0.9": return 0
 
@@ -1215,17 +1228,22 @@ class ReweightingSample(MultiEnum, SampleBase):
     def ghw1(self): return self.ghz1
     @property
     def ghw2(self):
+        if self.hypothesis.isEFT: return eft.ghw2(ghz1=self.ghz1, ghz2=self.ghz2, ghz4=self.ghz4, ghz1prime2=self.ghz1prime2)
         return self.ghz2
     @property
     def ghw4(self):
+        if self.hypothesis.isEFT: return eft.ghw4(ghz1=self.ghz1, ghz2=self.ghz2, ghz4=self.ghz4, ghz1prime2=self.ghz1prime2)
         return self.ghz4
     @property
     def ghw1prime2(self):
+        if self.hypothesis.isEFT: return eft.ghw1prime2(ghz1=self.ghz1, ghz2=self.ghz2, ghz4=self.ghz4, ghz1prime2=self.ghz1prime2)
         return self.ghz1prime2
 
     @property
+    @cache
     def ghzgs1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
+            if self.hypothesis.isEFT: return eft.ghzgs1prime2(ghz1=self.ghz1, ghz2=self.ghz2, ghz4=self.ghz4, ghz1prime2=self.ghz1prime2)
             if self.hypothesis == "L1Zg": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1"): return 0
 

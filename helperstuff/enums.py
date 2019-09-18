@@ -294,7 +294,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fa3VH0.5", "fa3VH+0.5"),
                  EnumItem("fL1VH0.5", "fL1VH+0.5"),
                 )
-    enumitems = enumitems + mixturepermutations_4d(enumitems)
+    enumitems = enumitems + mixturepermutations_4d(enumitems) + mixturepermutationsEFT(enumitems)
 
     @property
     def ispure(self):
@@ -313,6 +313,10 @@ class Hypothesis(MyEnum):
             if self == _:
                 return _
         assert False, self
+
+    @property
+    def isEFT(self):
+        return "EFT" in str(self)
 
 class HffHypothesis(MyEnum):
     enumname = "hffhypothesis"
