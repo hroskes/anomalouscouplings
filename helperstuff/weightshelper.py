@@ -69,7 +69,7 @@ class WeightsHelper(MultiEnum):
     @staticmethod
     def couplingname(coupling):
       if coupling == "ghza1prime2": return "ghzgs1prime2"
-      return coupling.replace("ghv", "g").replace("ghw", "g").replace("ghz", "g")
+      return coupling.replace("ghv", "g")
 
     @staticmethod
     def couplingvalue(coupling):
