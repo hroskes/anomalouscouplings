@@ -164,7 +164,7 @@ class BaseSingleCategorizationCouplings(BaseSingleCategorization):
                  "p_JJQCD_SIG_ghg2_1_ghg4_1_JHUGen_{}".format(self.JEC): self.ghg2*self.ghg4,
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
-        multiplier = ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, ghg2=1, ghg4=0, pdf="NNPDF30_lo_as_0130").JHUxsec / ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, ghg2=self.ghg2, ghg4=self.ghg4, pdf="NNPDF30_lo_as_0130").JHUxsec
+        multiplier = ArbitraryCouplingsSample("ggH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, ghg2=1, ghg4=0, pdf="NNPDF30_lo_as_0130").JHUxsec / ArbitraryCouplingsSample("ggH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, ghg2=self.ghg2, ghg4=self.ghg4, pdf="NNPDF30_lo_as_0130").JHUxsec
         return self.get_p_function(terms, multiplier.nominal_value, self.pHJJ_function_name)
 
 
@@ -182,9 +182,9 @@ class BaseSingleCategorizationCouplings(BaseSingleCategorization):
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = (
-                      (ArbitraryCouplingsSample("VBF", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("VBF", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                      (ArbitraryCouplingsSample("VBF", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("VBF", g1=self.g1, g2=self.g2, g4=self.g4, g1prime2=self.g1prime2, ghzgs1prime2=self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
                      /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                      (ArbitraryCouplingsSample("ggH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", g1=self.g1, g2=self.g2, g4=self.g4, g1prime2=self.g1prime2, ghzgs1prime2=self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
                      )
         return self.get_p_function(terms, multiplier.nominal_value, self.pVBF_function_name)
 
@@ -202,9 +202,9 @@ class BaseSingleCategorizationCouplings(BaseSingleCategorization):
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = (
-                      (ArbitraryCouplingsSample("ZH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ZH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                      (ArbitraryCouplingsSample("ZH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ZH", g1=self.g1, g2=self.g2, g4=self.g4, g1prime2=self.g1prime2, ghzgs1prime2=self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
                      /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                      (ArbitraryCouplingsSample("ggH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", g1=self.g1, g2=self.g2, g4=self.g4, g1prime2=self.g1prime2, ghzgs1prime2=self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
                      )
         return self.get_p_function(terms, multiplier.nominal_value, self.pZH_function_name)
 
@@ -224,9 +224,9 @@ class BaseSingleCategorizationCouplings(BaseSingleCategorization):
                 }
         terms = tuple((k, v) for k, v in terms.iteritems() if v)
         multiplier = (
-                      (ArbitraryCouplingsSample("WH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("WH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                      (ArbitraryCouplingsSample("WH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("WH", g1=self.g1, g2=self.g2, g4=self.g4, g1prime2=self.g1prime2, ghzgs1prime2=self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
                      /
-                      (ArbitraryCouplingsSample("ggH", 1, 0, 0, 0, 0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", self.g1, self.g2, self.g4, self.g1prime2, self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
+                      (ArbitraryCouplingsSample("ggH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, pdf="NNPDF30_lo_as_0130").xsec / ArbitraryCouplingsSample("ggH", g1=self.g1, g2=self.g2, g4=self.g4, g1prime2=self.g1prime2, ghzgs1prime2=self.ghzgs1prime2, pdf="NNPDF30_lo_as_0130").xsec)
                      )
         return self.get_p_function(terms, multiplier.nominal_value, self.pWH_function_name)
 

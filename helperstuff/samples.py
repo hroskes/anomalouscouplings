@@ -76,20 +76,52 @@ class SampleBase(SumOfSamplesBase):
     @property
     def samplesandfactors(self): return ExtendedCounter({self: 1})
     @abstractproperty
-    def g1(self):
+    def ghz1(self):
         pass
     @abstractproperty
-    def g2(self):
+    def ghz2(self):
         pass
     @abstractproperty
-    def g4(self):
+    def ghz4(self):
         pass
     @abstractproperty
-    def g1prime2(self):
+    def ghz1prime2(self):
         pass
+
+    @abstractproperty
+    def ghw1(self):
+        pass
+    @abstractproperty
+    def ghw2(self):
+        pass
+    @abstractproperty
+    def ghw4(self):
+        pass
+    @abstractproperty
+    def ghw1prime2(self):
+        pass
+
     @abstractproperty
     def ghzgs1prime2(self):
         pass
+
+    @property
+    def g1(self):
+      if self.ghz1 != self.ghw1: raise ValueError("ghz1 = {self.ghz1}, ghw1 = {self.ghw1}".format(self=self))
+      return self.ghz1
+    @property
+    def g2(self):
+      if self.ghz2 != self.ghw2: raise ValueError("ghz2 = {self.ghz2}, ghw2 = {self.ghw2}".format(self=self))
+      return self.ghz2
+    @property
+    def g4(self):
+      if self.ghz4 != self.ghw4: raise ValueError("ghz4 = {self.ghz4}, ghw4 = {self.ghw4}".format(self=self))
+      return self.ghz4
+    @property
+    def g1prime2(self):
+      if self.ghz1prime2 != self.ghw1prime2: raise ValueError("ghz1prime2 = {self.ghz1prime2}, ghw1prime2 = {self.ghw1prime2}".format(self=self))
+      return self.ghz1prime2
+
     @abstractproperty
     def ghg2(self):
         pass
@@ -635,11 +667,79 @@ class SampleBase(SumOfSamplesBase):
         return False
 
 class ArbitraryCouplingsSample(SampleBase):
-    def __init__(self, productionmode, g1, g2, g4, g1prime2, ghzgs1prime2, ghg2=None, ghg4=None, kappa=None, kappa_tilde=None, pdf=None):
+    def __init__(self, productionmode, **kwargs):
+        g1 = kwargs.pop("g1", None)
+        g2 = kwargs.pop("g2", None)
+        g4 = kwargs.pop("g4", None)
+        g1prime2 = kwargs.pop("g1prime2", None)
+
+        ghz1 = kwargs.pop("ghz1", None)
+        ghz2 = kwargs.pop("ghz2", None)
+        ghz4 = kwargs.pop("ghz4", None)
+        ghz1prime2 = kwargs.pop("ghz1prime2", None)
+
+        ghw1 = kwargs.pop("ghw1", None)
+        ghw2 = kwargs.pop("ghw2", None)
+        ghw4 = kwargs.pop("ghw4", None)
+        ghw1prime2 = kwargs.pop("ghw1prime2", None)
+
+        ghzgs1prime2 = kwargs.pop("ghzgs1prime2", None)
+
+        ghg2 = kwargs.pop("ghg2", None)
+        ghg4 = kwargs.pop("ghg4", None)
+
+        kappa = kwargs.pop("kappa", None)
+        kappa_tilde = kwargs.pop("kappa_tilde", None)
+
+        pdf = kwargs.pop("pdf", None)
+
+        if kwargs: raise TypeError("Extra kwargs: "+str(kwargs))
+
         self.productionmode = ProductionMode(productionmode)
-        self.__g1, self.__g2, self.__g4, self.__g1prime2, self.__ghzgs1prime2 = g1, g2, g4, g1prime2, ghzgs1prime2
         if self.productionmode not in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH"):
             raise ValueError("Bad productionmode {}".format(self.productionmode))
+
+        if self.productionmode in ("ggH", "ZH", "ttH", "bbH"):
+            if not (ghw1 is ghw2 is ghw4 is ghw1prime2 is None):
+                raise ValueError("Don't provide WW couplings for {}".format(self.productionmode))
+            if g1 is None: g1, ghz1 = ghz1, None
+            if g2 is None: g2, ghz2 = ghz2, None
+            if g4 is None: g4, ghz4 = ghz4, None
+            if g1prime2 is None: g1prime2, ghz1prime2 = ghz1prime2, None
+
+        if ghz1 is ghw1 is None: ghz1 = ghw1 = g1; g1 = None
+        if ghz2 is ghw2 is None: ghz2 = ghw2 = g2; g2 = None
+        if ghz4 is ghw4 is None: ghz4 = ghw4 = g4; g4 = None
+        if ghz1prime2 is ghw1prime2 is None: ghz1prime2 = ghw1prime2 = g1prime2; g1prime2 = None
+
+        if g1 is not None: raise TypeError("Provided both g1 and ghz1/ghw1")
+        if g2 is not None: raise TypeError("Provided both g2 and ghz2/ghw2")
+        if g4 is not None: raise TypeError("Provided both g4 and ghz4/ghw4")
+        if g1prime2 is not None: raise TypeError("Provided both g1prime2 and ghz1prime2/ghw1prime2")
+
+        if ghz1 is None: raise TypeError("Have to provide ghz1 or g1")
+        if ghz2 is None: raise TypeError("Have to provide ghz2 or g2")
+        if ghz4 is None: raise TypeError("Have to provide ghz4 or g4")
+        if ghz1prime2 is None: raise TypeError("Have to provide ghz1prime2 or g1prime2")
+
+        if ghw1 is None: raise TypeError("Have to provide ghw1 or g1")
+        if ghw2 is None: raise TypeError("Have to provide ghw2 or g2")
+        if ghw4 is None: raise TypeError("Have to provide ghw4 or g4")
+        if ghw1prime2 is None: raise TypeError("Have to provide ghw1prime2 or g1prime2")
+
+        if ghzgs1prime2 is None: raise TypeError("Have to provide ghzgs1prime2")
+
+        self.__ghz1 = ghz1
+        self.__ghz2 = ghz2
+        self.__ghz4 = ghz4
+        self.__ghz1prime2 = ghz1prime2
+
+        self.__ghw1 = ghw1
+        self.__ghw2 = ghw2
+        self.__ghw4 = ghw4
+        self.__ghw1prime2 = ghw1prime2
+
+        self.__ghzgs1prime2 = ghzgs1prime2
 
         if self.productionmode == "ggH":
             if ghg2 is ghg4 is None:
@@ -651,6 +751,9 @@ class ArbitraryCouplingsSample(SampleBase):
             if ghg2 is not None or ghg4 is not None:
                 raise ValueError("Can't set ghg2 or ghg4 for {}".format(self.productionmode))
 
+        self.__ghg2 = ghg2
+        self.__ghg4 = ghg4
+
         if self.productionmode == "ttH":
             self.__kappa, self.__kappa_tilde = kappa, kappa_tilde
             if kappa is None or kappa_tilde is None:
@@ -658,6 +761,9 @@ class ArbitraryCouplingsSample(SampleBase):
         else:
             if kappa is not None or kappa_tilde is not None:
                 raise ValueError("Can't set kappa or kappa_tilde for {}".format(self.productionmode))
+
+        self.__kappa = kappa
+        self.__kappa_tilde = kappa_tilde
 
         self.__pdf = pdf
         if pdf is not None:
@@ -667,17 +773,29 @@ class ArbitraryCouplingsSample(SampleBase):
                 raise ValueError("Unknown pdf "+pdf)
 
     @property
-    def g1(self):
-        return self.__g1
+    def ghz1(self):
+        return self.__ghz1
     @property
-    def g2(self):
-        return self.__g2
+    def ghz2(self):
+        return self.__ghz2
     @property
-    def g4(self):
-        return self.__g4
+    def ghz4(self):
+        return self.__ghz4
     @property
-    def g1prime2(self):
-        return self.__g1prime2
+    def ghz1prime2(self):
+        return self.__ghz1prime2
+    @property
+    def ghw1(self):
+        return self.__ghw1
+    @property
+    def ghw2(self):
+        return self.__ghw2
+    @property
+    def ghw4(self):
+        return self.__ghw4
+    @property
+    def ghw1prime2(self):
+        return self.__ghw1prime2
     @property
     def ghzgs1prime2(self):
         return self.__ghzgs1prime2
@@ -704,7 +822,9 @@ class ArbitraryCouplingsSample(SampleBase):
         if self.productionmode == "ggH": kwargs += ("ghg2", "ghg4")
         if self.productionmode == "ttH": kwargs += ("kappa", "kappa_tilde")
         if self.pdf is not None: kwargs += ("pdf",)
-        kwargs += ("g1", "g2", "g4", "g1prime2", "ghzgs1prime2")
+        kwargs += ("ghz1", "ghz2", "ghz4", "ghz1prime2", "ghzgs1prime2")
+        if self.productionmode in ("VBF", "WH"):
+            kwargs += ("ghw1", "ghw2", "ghw4", "ghw1prime2")
         return "{}({}, {})".format(
                                    type(self).__name__,
                                    repr(self.productionmode.item.name),
@@ -865,7 +985,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         raise self.ValueError("TDirectoryname")
 
     @property
-    def g1(self):
+    def ghz1(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "tqH"):
             if self.hypothesis == "0+": return 1
             if self.hypothesis in ("0-", "a2", "L1", "L1Zg"): return 0
@@ -901,31 +1021,31 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fL1VBF0.5": return 1
             if self.hypothesis == "fL1VH0.5": return 1
 
-        raise self.ValueError("g1")
+        raise self.ValueError("ghz1")
 
     @property
-    def g2(self):
+    def ghz2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis == "a2": return 1
             if self.hypothesis in ("0+", "0-", "L1", "L1Zg"): return 0
 
-            g2 = {"dec": constants.g2HZZ}
-            if self.productionmode == "VBF": g2["prod"] = constants.g2VBF
-            elif self.productionmode == "ZH":  g2["prod"] = constants.g2ZH
-            elif self.productionmode == "WH":  g2["prod"] = constants.g2WH
-            else: g2["prod"] = None
-            g2["proddec"] = None if g2["prod"] is None else sqrt(g2["prod"]*g2["dec"])
+            ghz2 = {"dec": constants.g2HZZ}
+            if self.productionmode == "VBF": ghz2["prod"] = constants.g2VBF
+            elif self.productionmode == "ZH":  ghz2["prod"] = constants.g2ZH
+            elif self.productionmode == "WH":  ghz2["prod"] = constants.g2WH
+            else: ghz2["prod"] = None
+            ghz2["proddec"] = None if ghz2["prod"] is None else sqrt(ghz2["prod"]*ghz2["dec"])
 
             couplings = "fa3", "fa2", "fL1", "fL1Zg"
             for proddec in "prod", "dec", "proddec":
                 for a in couplings:
                     if self.hypothesis == a+proddec+"0.5":
                         if a == "fa2":
-                            return g2[proddec]
+                            return ghz2[proddec]
                         return 0
                     if self.hypothesis == a+proddec+"-0.5":
                         if a == "fa2":
-                            return -g2[proddec]
+                            return -ghz2[proddec]
                         return 0
 
                 minus = "-" if proddec == "proddec" else ""
@@ -933,9 +1053,9 @@ class ReweightingSample(MultiEnum, SampleBase):
                     if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
                                            a+proddec+"0.33"+b+proddec+minus+"0.33"):
                         if a == "fa2":
-                            return g2[proddec]
+                            return ghz2[proddec]
                         if b == "fa2":
-                            return float(minus+"1") * g2[proddec]
+                            return float(minus+"1") * ghz2[proddec]
                         return 0
                 for a, b, c in combinations(couplings, 3):
                     if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
@@ -943,16 +1063,16 @@ class ReweightingSample(MultiEnum, SampleBase):
                           and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
                     ):
                         if a == "fa2" or b == "fa2" or "0.25" in str(self.hypothesis) and c == "fa2":
-                            return g2[proddec]
+                            return ghz2[proddec]
                         if c == "fa2":
-                            return float(minus+"1") * g2[proddec]
+                            return float(minus+"1") * ghz2[proddec]
                         return 0
 
                 if proddec != "proddec": continue
                 for a, b, c, d in combinations(couplings, 4):
                     if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
                         if a == "fa2" or b == "fa2" or c == "fa2" or d == "fa2":
-                            return g2[proddec]
+                            return ghz2[proddec]
                         return 0
 
             if self.hypothesis == "fa2dec-0.9": return -constants.g2HZZ * 3
@@ -963,31 +1083,31 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fL1VBF0.5": return 0
             if self.hypothesis == "fL1VH0.5": return 0
 
-        raise self.ValueError("g2")
+        raise self.ValueError("ghz2")
 
     @property
-    def g4(self):
+    def ghz4(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis == "0-": return 1
             if self.hypothesis in ("0+", "a2", "L1", "L1Zg"): return 0
 
-            g4 = {"dec": constants.g4HZZ}
-            if self.productionmode == "VBF": g4["prod"] = constants.g4VBF
-            elif self.productionmode == "ZH":  g4["prod"] = constants.g4ZH
-            elif self.productionmode == "WH":  g4["prod"] = constants.g4WH
-            else: g4["prod"] = None
-            g4["proddec"] = None if g4["prod"] is None else sqrt(g4["prod"]*g4["dec"])
+            ghz4 = {"dec": constants.g4HZZ}
+            if self.productionmode == "VBF": ghz4["prod"] = constants.g4VBF
+            elif self.productionmode == "ZH":  ghz4["prod"] = constants.g4ZH
+            elif self.productionmode == "WH":  ghz4["prod"] = constants.g4WH
+            else: ghz4["prod"] = None
+            ghz4["proddec"] = None if ghz4["prod"] is None else sqrt(ghz4["prod"]*ghz4["dec"])
 
             couplings = "fa3", "fa2", "fL1", "fL1Zg"
             for proddec in "prod", "dec", "proddec":
                 for a in couplings:
                     if self.hypothesis == a+proddec+"0.5":
                         if a == "fa3":
-                            return g4[proddec]
+                            return ghz4[proddec]
                         return 0
                     if self.hypothesis == a+proddec+"-0.5":
                         if a == "fa3":
-                            return -g4[proddec]
+                            return -ghz4[proddec]
                         return 0
 
                 minus = "-" if proddec == "proddec" else ""
@@ -995,9 +1115,9 @@ class ReweightingSample(MultiEnum, SampleBase):
                     if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
                                            a+proddec+"0.33"+b+proddec+minus+"0.33"):
                         if a == "fa3":
-                            return g4[proddec]
+                            return ghz4[proddec]
                         if b == "fa3":
-                            return float(minus+"1") * g4[proddec]
+                            return float(minus+"1") * ghz4[proddec]
                         return 0
                 for a, b, c in combinations(couplings, 3):
                     if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
@@ -1005,16 +1125,16 @@ class ReweightingSample(MultiEnum, SampleBase):
                           and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
                     ):
                         if a == "fa3" or b == "fa3" or "0.25" in str(self.hypothesis) and c == "fa3":
-                            return g4[proddec]
+                            return ghz4[proddec]
                         if c == "fa3":
-                            return float(minus+"1") * g4[proddec]
+                            return float(minus+"1") * ghz4[proddec]
                         return 0
 
                 if proddec != "proddec": continue
                 for a, b, c, d in combinations(couplings, 4):
                     if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
                         if a == "fa3" or b == "fa3" or c == "fa3" or d == "fa3":
-                            return g4[proddec]
+                            return ghz4[proddec]
                         return 0
 
             if self.hypothesis == "fa2dec-0.9": return 0
@@ -1026,31 +1146,31 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fL1VBF0.5": return 0
             if self.hypothesis == "fL1VH0.5": return 0
 
-        raise self.ValueError("g4")
+        raise self.ValueError("ghz4")
 
     @property
-    def g1prime2(self):
+    def ghz1prime2(self):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis == "L1": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1Zg"): return 0
 
-            g1prime2 = {"dec": constants.g1prime2HZZ}
-            if self.productionmode == "VBF": g1prime2["prod"] = constants.g1prime2VBF
-            elif self.productionmode == "ZH":  g1prime2["prod"] = constants.g1prime2ZH
-            elif self.productionmode == "WH":  g1prime2["prod"] = constants.g1prime2WH
-            else: g1prime2["prod"] = None
-            g1prime2["proddec"] = None if g1prime2["prod"] is None else -sqrt(g1prime2["prod"]*g1prime2["dec"])
+            ghz1prime2 = {"dec": constants.g1prime2HZZ}
+            if self.productionmode == "VBF": ghz1prime2["prod"] = constants.g1prime2VBF
+            elif self.productionmode == "ZH":  ghz1prime2["prod"] = constants.g1prime2ZH
+            elif self.productionmode == "WH":  ghz1prime2["prod"] = constants.g1prime2WH
+            else: ghz1prime2["prod"] = None
+            ghz1prime2["proddec"] = None if ghz1prime2["prod"] is None else -sqrt(ghz1prime2["prod"]*ghz1prime2["dec"])
 
             couplings = "fa3", "fa2", "fL1", "fL1Zg"
             for proddec in "prod", "dec", "proddec":
                 for a in couplings:
                     if self.hypothesis == a+proddec+"0.5":
                         if a == "fL1":
-                            return g1prime2[proddec]
+                            return ghz1prime2[proddec]
                         return 0
                     if self.hypothesis == a+proddec+"-0.5":
                         if a == "fL1":
-                            return -g1prime2[proddec]
+                            return -ghz1prime2[proddec]
                         return 0
 
                 minus = "-" if proddec == "proddec" else ""
@@ -1058,9 +1178,9 @@ class ReweightingSample(MultiEnum, SampleBase):
                     if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
                                            a+proddec+"0.33"+b+proddec+minus+"0.33"):
                         if a == "fL1":
-                            return g1prime2[proddec]
+                            return ghz1prime2[proddec]
                         if b == "fL1":
-                            return float(minus+"1") * g1prime2[proddec]
+                            return float(minus+"1") * ghz1prime2[proddec]
                         return 0
                 for a, b, c in combinations(couplings, 3):
                     if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
@@ -1068,16 +1188,16 @@ class ReweightingSample(MultiEnum, SampleBase):
                           and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
                     ):
                         if a == "fL1" or b == "fL1" or "0.25" in str(self.hypothesis) and c == "fL1":
-                            return g1prime2[proddec]
+                            return ghz1prime2[proddec]
                         if c == "fL1":
-                            return float(minus+"1") * g1prime2[proddec]
+                            return float(minus+"1") * ghz1prime2[proddec]
                         return 0
 
                 if proddec != "proddec": continue
                 for a, b, c, d in combinations(couplings, 4):
                     if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
                         if a == "fL1" or b == "fL1" or c == "fL1" or d == "fL1":
-                            return g1prime2[proddec]
+                            return ghz1prime2[proddec]
                         return 0
 
             if self.hypothesis == "fa2dec-0.9": return 0
@@ -1089,7 +1209,19 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fL1VBF0.5": return constants.g1prime2VBF
             if self.hypothesis == "fL1VH0.5": return constants.g1prime2VH
 
-        raise self.ValueError("g1prime2")
+        raise self.ValueError("ghz1prime2")
+
+    @property
+    def ghw1(self): return self.ghz1
+    @property
+    def ghw2(self):
+        return self.ghz2
+    @property
+    def ghw4(self):
+        return self.ghz4
+    @property
+    def ghw1prime2(self):
+        return self.ghz1prime2
 
     @property
     def ghzgs1prime2(self):

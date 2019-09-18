@@ -33,7 +33,7 @@ def makeplot(productionmode, disc, disc2=None):
     fainame = "f_{#Lambda1Z#gamma}^{dec}"
     mixplus = ReweightingSample(productionmode, analysis.mixdecayhypothesis)
 
-  mixminus = ArbitraryCouplingsSample(productionmode, mixplus.g1, -mixplus.g2, -mixplus.g4, -mixplus.g1prime2, -mixplus.ghzgs1prime2, pdf="NNPDF30_lo_as_0130")
+  mixminus = ArbitraryCouplingsSample(productionmode, g1=mixplus.g1, g2=-mixplus.g2, g4=-mixplus.g4, g1prime2=-mixplus.g1prime2, ghzgs1prime2=-mixplus.ghzgs1prime2, pdf="NNPDF30_lo_as_0130")
 
   SM = ReweightingSample(productionmode, "0+")
 
