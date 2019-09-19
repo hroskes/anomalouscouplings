@@ -18,7 +18,7 @@ from helperstuff import config
 from helperstuff.enums import Analysis, Production
 from helperstuff.plotlimits import arrowatminimum, drawlines, xaxisrange
 import helperstuff.stylefunctions as style
-from helperstuff.utilities import cache, cd, deprecate, mkdtemp, PlotCopier, tfiles
+from helperstuff.utilities import cache, cd, deprecate, mkdir_p, mkdtemp, PlotCopier, tfiles
 
 from mergeplots import Folder
 
@@ -248,10 +248,8 @@ def PRL_loglinear(**kwargs):
         style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
         yaxislabel(folders[0].ytitle).Draw()
 
-        try:
-            os.makedirs(os.path.join(saveasdir, "preliminary"))
-        except OSError:
-            pass
+        mkdir_p(os.path.join(saveasdir, "preliminary"))
+        mkdir_p(os.path.join(saveasdir, "workinprogress"))
         plotname = getplotname(analysis, comparecategories)
         assert ".root" in plotname
 
@@ -277,6 +275,23 @@ def PRL_loglinear(**kwargs):
             for ext in "png eps root pdf".split():
                 c.SaveAs(os.path.join(saveasdir, "preliminary", replaceByMap(plotname.replace("root", ext), repmap)))
             with plotcopier.open(os.path.join(saveasdir, "preliminary", replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
+                f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
+                f.write("\n\n\n\n\n\ngit info:\n\n")
+                f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))
+                f.write("\n")
+                f.write(subprocess.check_output(["git", "status"]))
+                f.write("\n")
+                f.write(subprocess.check_output(["git", "diff"]))
+
+        del c.GetListOfPrimitives()[-1]  #delete Preliminary
+        style.CMS("Work in progress", x1=0.12, x2=1.025, y1=.85, y2=.93, drawCMS=False, CMStextsize=.06, extratextsize=.039)
+
+        if saveas is not None:
+            assert false
+        else:
+            for ext in "png eps root pdf".split():
+                c.SaveAs(os.path.join(saveasdir, "workinprogress", replaceByMap(plotname.replace("root", ext), repmap)))
+            with plotcopier.open(os.path.join(saveasdir, "workinprogress", replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
                 f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
                 f.write("\n\n\n\n\n\ngit info:\n\n")
                 f.write(subprocess.check_output(["git", "rev-parse", "HEAD"]))

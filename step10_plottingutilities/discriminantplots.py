@@ -748,14 +748,14 @@ class Plot(object):
       isL1Zg = Hypothesis(hypothesis.hypothesis) == "L1Zg"
 
       ffHhistogramnormalization = makehistogramnormalization(
-        name=str(hypothesis)+"ffHnormalization",
+        name=str(hypothesis.hypothesis)+"ffHnormalization",
         trees=ffHtrees,
         weightformulas=hypothesis.ffHweights(isL1Zg=isL1Zg),
         scaletos=ffHscaletos(isL1Zg=isL1Zg),
         normalizationweightformulas=SMffHweights(isL1Zg=isL1Zg),
       )
       VVHhistogramnormalization = makehistogramnormalization(
-        name=str(hypothesis)+"VVHnormalization",
+        name=str(hypothesis.hypothesis)+"VVHnormalization",
         trees=hypothesis.VVHtrees(isL1Zg=isL1Zg),
         weightformulas=hypothesis.VVHweights(isL1Zg=isL1Zg),
         normalizationweightformulas=SMVVHweights(isL1Zg=isL1Zg),
