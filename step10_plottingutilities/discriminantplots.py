@@ -593,6 +593,7 @@ class HypothesisLine(object):
 class Plot(object):
   def __init__(self, **kwargs):
     preliminarykwargs = kwargs.copy()
+    workinprogresskwargs = kwargs.copy()
 
     name = kwargs.pop("name")
     xtitle = kwargs.pop("xtitle")
@@ -852,12 +853,16 @@ class Plot(object):
 
     self.__CMStext = CMStext
 
-    if self.__CMStext != "Preliminary":
+    if self.__CMStext not in ("Preliminary", "Work in progress"):
       preliminarykwargs["CMStext"] = "Preliminary"
       preliminarykwargs["saveasdir"] = os.path.join(saveasdir, "preliminary")
       preliminarykwargs["name"] += "_preliminary"
       self.__preliminary = type(self)(**preliminarykwargs)
 
+      workinprogresskwargs["CMStext"] = "Work in progress"
+      workinprogresskwargs["saveasdir"] = os.path.join(saveasdir, "workinprogress")
+      workinprogresskwargs["name"] += "_workinprogress"
+      self.__workinprogress = type(self)(**workinprogresskwargs)
 
 
   def makeplot(self):
@@ -924,8 +929,9 @@ class Plot(object):
     for ext in "png pdf root C".split():
       c.SaveAs(os.path.join(self.__saveasdir, self.__name+"."+ext))
 
-    if self.__CMStext != "Preliminary":
+    if self.__CMStext not in ("Preliminary", "Work in progress"):
       self.__preliminary.makeplot()
+      self.__workinprogress.makeplot()
 
 categoryname = "category_0P_or_0M_or_a2_or_L1_or_L1Zg"
 
