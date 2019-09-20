@@ -14,6 +14,7 @@ if __name__ == "__main__":
   g.add_argument("--newyields", action="store_true")
   g.add_argument("--applySIPcut", action="store_true")
   g.add_argument("--applySIPcut-untaggednosysts", action="store_true")
+  g.add_argument("--finalforthesis", action="store_true")
   p.add_argument("--zoom", action="store_true")
   args = p.parse_args()
 
@@ -292,6 +293,12 @@ if __name__ == "__main__":
       scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
       scanrangeformatch = "(_nosystematics)?(_101,-0.02,0.02)?"
       insertinmiddle = "(_nosystematics)?"
+      functionkwargs["graphstyles"] = ((1, 1, 2), (1, 2, 2))
+    if args.finalforthesis:
+      folder = "fa3fa2fL1fL1Zg_morecategories_finalforthesis"
+      plotname = "limit_lumi137.10_scan"+args.fai
+      scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
+      scanrangeformatch = "(_101,-0.02,0.02)?"
       functionkwargs["graphstyles"] = ((1, 1, 2), (1, 2, 2))
     if scanrangeformatch is None: scanrangeformatch = scanrange
     if plotnameformatch is None: plotnameformatch = plotname
