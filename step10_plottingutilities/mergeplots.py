@@ -21,8 +21,8 @@ from helperstuff.utilities import cache, PlotCopier, TFile
 from limits import findwhereyequals, Point
 
 class Folder(object):
-    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None, secondcolumn=None):
-        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth, self.secondcolumn = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth, secondcolumn
+    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None, secondcolumn=None, removepoints=None):
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth, self.secondcolumn, self.removepoints = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth, secondcolumn, removepoints
         self.repmap = {
                        "analysis": str(self.analysis),
                       }
@@ -57,10 +57,11 @@ class Folder(object):
             self.__ytitle = mg.GetYaxis().GetTitle()
             g = graphs[graphnumber]
             n = g.GetN()
-            x = np.array([g.GetX()[i] for i in xrange(n)])
-            y = np.array([g.GetY()[i] for i in xrange(n)])
+            x = np.array([g.GetX()[i] for i in xrange(n) if not any(np.isclose(g.GetX()[i], _) for _ in self.removepoints)])
+            y = np.array([g.GetY()[i] for i in xrange(n) if not any(np.isclose(g.GetX()[i], _) for _ in self.removepoints)])
+            print self.removepoints, g.GetN(), len(x)
             y -= min(y)
-            newg = ROOT.TGraph(n, x, y)
+            newg = ROOT.TGraph(len(x), x, y)
             newg.SetLineColor(self.color)
             if self.linestyle is not None:
                 newg.SetLineStyle(self.linestyle)
