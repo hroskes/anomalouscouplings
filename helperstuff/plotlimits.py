@@ -320,7 +320,7 @@ def plotlimits(outputfilename, analysis, *args, **kwargs):
 
                     if 1 not in NLL and -1 in NLL and xaxislimits is None and POI == "CMS_zz4l_fai1":
                         NLL[1] = NLL[-1]
-                    if scanfai == "fa3" and POI == "CMS_zz4l_fai1":
+                    if scanfai == "fa3" and POI == "CMS_zz4l_fai1" and "Expected" in scan.title:
                         for fa3, NLLval in NLL.items():
                             if -fa3 not in NLL:
                                 NLL[-fa3] = NLLval

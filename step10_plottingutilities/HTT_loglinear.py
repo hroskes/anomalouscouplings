@@ -155,6 +155,11 @@ def PRL_loglinear(**kwargs):
         analysis = Analysis(analysis)
         repmap = {"analysis": str(analysis)}
         subdir = ""
+
+        assert "finalforthesis" in saveasdir
+        if analysis == "fa3":
+          removepoints1 = 
+
         if comparecategories:
           folders = [
             Folder("fa3fa2fL1fL1Zg_finalforthesis/", "Float others 3 categories", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
