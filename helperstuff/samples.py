@@ -618,8 +618,9 @@ class SampleBase(SumOfSamplesBase):
         numerator = None
         denominator = 0
         for h in purehypotheses:
+            if h.isEFT: continue
             if not getattr(self, h.couplingname) and h != hypothesis: continue
-            kwargs = {_.couplingname: 0 for _ in purehypotheses}
+            kwargs = {_.couplingname: 0 for _ in purehypotheses if not _.isEFT}
             kwargs["pdf"] = "NNPDF30_lo_as_0130"
             kwargs[h.couplingname] = 1
             term = 0
@@ -1024,6 +1025,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fa2VH0.5": return 1
             if self.hypothesis == "fL1VBF0.5": return 1
             if self.hypothesis == "fL1VH0.5": return 1
+            if self.hypothesis == "BestFit19009": return 1
 
         raise self.ValueError("ghz1")
 
@@ -1089,6 +1091,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fa2VH0.5": return constants.g2VH
             if self.hypothesis == "fL1VBF0.5": return 0
             if self.hypothesis == "fL1VH0.5": return 0
+            if self.hypothesis == "BestFit19009": return constants.g2HZZ * -(0.289103 / 0.504778)**0.5
 
         raise self.ValueError("ghz2")
 
@@ -1155,6 +1158,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fa2VH0.5": return 0
             if self.hypothesis == "fL1VBF0.5": return 0
             if self.hypothesis == "fL1VH0.5": return 0
+            if self.hypothesis == "BestFit19009": return constants.g4HZZ * -(0.01 / 0.504778)**0.5
 
         raise self.ValueError("ghz4")
 
@@ -1221,6 +1225,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fa2VH0.5": return 0
             if self.hypothesis == "fL1VBF0.5": return constants.g1prime2VBF
             if self.hypothesis == "fL1VH0.5": return constants.g1prime2VH
+            if self.hypothesis == "BestFit19009": return constants.g1prime2HZZ * (0.133879 / 0.504778)**0.5
 
         raise self.ValueError("ghz1prime2")
 
@@ -1301,6 +1306,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "fa2VH0.5": return 0
             if self.hypothesis == "fL1VBF0.5": return 0
             if self.hypothesis == "fL1VH0.5": return 0
+            if self.hypothesis == "BestFit19009": return constants.ghzgs1prime2HZZ * -(0.0622403 / 0.504778)**0.5
 
         raise self.ValueError("ghzgs1prime2")
 

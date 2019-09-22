@@ -293,6 +293,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fa2VH0.5", "fa2VH+0.5"),
                  EnumItem("fa3VH0.5", "fa3VH+0.5"),
                  EnumItem("fL1VH0.5", "fL1VH+0.5"),
+                 EnumItem("BestFit19009"),
                 )
     enumitems = enumitems + mixturepermutations_4d(enumitems) + mixturepermutationsEFT(enumitems)
 
