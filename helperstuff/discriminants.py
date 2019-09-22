@@ -58,6 +58,10 @@ decaydiscriminants = [
     Discriminant("D_bkg_ScaleDown", "D_{bkg}^{ScaleDown}", 3, -0.3, 1.2, identifier="D_bkg_ScaleDown_3bins"),
 
     Discriminant("D_0minus_decay", "D_{0-}^{dec}", 3, 0, 1, identifier="D_0minus_decay_3bins"),
+    Discriminant("D_0hplus_decay", "D_{0h+}^{dec}", 3, .3, .9, identifier="D_0hplus_decay_3bins", formula="max(min(D_0hplus_decay, .8), .4)"),
+    Discriminant("D_L1_decay", "D_{#Lambda1}^{dec}", 3, .3, 1.05, identifier="D_L1_decay_3bins", formula="max(D_L1_decay, .4)"),
+    Discriminant("D_L1Zg_decay", "D_{#Lambda1}^{Z#gamma,dec}", 3, .25, .7, identifier="D_L1Zg_decay_3bins", formula="max(min(D_L1Zg_decay, .6), .3)"),
+    Discriminant("D_int_decay", "D_{int}^{dec}", 2, 0, 1.6, identifier="D_int_decay_2bins"),
 
     Discriminant("D_bkg", "D_{bkg}", 10, 0, 1, identifier="D_bkg_10bins"),
     Discriminant("D_0minus_decay", "D_{0-}^{dec}", 10, 0, 1, identifier="D_0minus_decay_10bins"),
