@@ -14,7 +14,7 @@ import ROOT
 
 from combinehelpers import Luminosity
 import config
-from enums import Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode
+from enums import AlternateWeight, Analysis, Category, categories, Channel, channels, EnumItem, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
 from utilities import cache, deprecate, JsonDict, MultiplyCounter, TFile
 
@@ -219,9 +219,14 @@ class YieldSystematicValue(MultiEnum, JsonDict):
         return type(self)(*kwargs.itervalues())
 
 def count(fromsamples, tosamples, categorizations, alternateweights):
+    assert len(tosamples) == 1
     GEN = {_.production.GEN for _ in fromsamples}
     assert len(GEN) == 1
     GEN = GEN.pop()
+    productionmode = {_.productionmode for _ in fromsamples}
+    assert len(productionmode) == 1
+    productionmode = productionmode.pop()
+
     t = ROOT.TChain("candTree")
     for fromsample in fromsamples:
         t.Add(fromsample.withdiscriminantsfile())
@@ -232,8 +237,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
     t.SetBranchStatus("MC_weight_*", 1)
     t.SetBranchStatus("Z*Flav", 1)
     t.SetBranchStatus("ZZMass", 1)
-    if any(_.productionmode in ("ggH", "ggZZ", "qqZZ") for _ in fromsamples): t.SetBranchStatus("KFactor_*", 1)
-    if not all(_.productionmode == "ZX" for _ in fromsamples):
+    if productionmode in ("ggH", "ggZZ", "qqZZ"): t.SetBranchStatus("KFactor_*", 1)
+    if productionmode != "ZX":
       t.SetBranchStatus("xsec", 1)
       t.SetBranchStatus("genxsec", 1)
       t.SetBranchStatus("genBR", 1)
@@ -257,12 +262,12 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
             kwargs["extension"] = None
             tosample = type(tosample)(*kwargs.itervalues())
         try:
-            if tosample.productionmode == "WH" and tosample.hypothesis == "L1Zg": continue
+            if productionmode == "WH" and tosample.hypothesis == "L1Zg": continue
             if alternateweight.issystematic and categorization.issystematic: continue
             t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "MC_weight_nominal*(ZZMass>{} && ZZMass<{})*{}".format(config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
             h = c.FindObject("htemp")
             t.GetEntry(0)
-            if tosample.productionmode != "ZX":
+            if productionmode != "ZX":
                 h.Scale(t.xsec / (t.genxsec * t.genBR))
             for i in range(h.GetNbinsY()):
                 for channel in channels:
@@ -282,5 +287,25 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
             for fromsample in fromsamples:
               print fromsample.withdiscriminantsfile()
             raise
+
+    if GEN: #scale to numbers from 18-002 https://arxiv.org/pdf/1901.00174.pdf
+        if productionmode == "VBF":
+            scaleto = 4.7 + 0.3 + 5.7
+        elif productionmode == "WplusH":
+            scaleto = (.3 + .7 + 2.1) * 8.400E-01 / (8.400E-01 + 5.328E-01)  #ratio from YR4
+        elif productionmode == "WminusH":
+            scaleto = (.3 + .7 + 2.1) * 5.328E-01 / (8.400E-01 + 5.328E-01)  #ratio from YR4
+        elif productionmode == "ZH":
+            scaleto = .2 + .5 + 1.5
+        elif productionmode == "ggH":
+            scaleto = 5.5 + 3.2 + 98.9 + .2 + .1 + 1.1 + .1 + .1 + 1.1 #include ttH and bbH
+        elif productionmode == "qqZZ":
+            scaleto = 1.6 + 1.5 + 120.3 + 5.2 + 3.0 + 46.3 + .8 + .3 + 12.7 + .2 + .1 + 1.5  #include Z+X, gg, VV backgrounds
+        else:
+            raise ValueError(productionmode)
+        scaleto /= 77.5
+        scaleby = scaleto / result[tosample,categorization,AlternateWeight("1")]
+        print tosample, scaleby
+        result *= scaleby
 
     return result
