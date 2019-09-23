@@ -4,7 +4,7 @@ import argparse
 
 if __name__ == "__main__":
   p = argparse.ArgumentParser()
-  p.add_argument("fai", choices="fa3 fa2 fL1 fL1Zg".split())
+  p.add_argument("fai", choices="fa3 fa2 fL1 fL1Zg all".split())
   g = p.add_mutually_exclusive_group(required=True)
   g.add_argument("--decay", action="store_true")
   g.add_argument("--boosted", action="store_true")
@@ -15,6 +15,10 @@ if __name__ == "__main__":
   g.add_argument("--applySIPcut", action="store_true")
   g.add_argument("--applySIPcut-untaggednosysts", action="store_true")
   g.add_argument("--finalforthesis", action="store_true")
+  g.add_argument("--writeup-decay", action="store_true")
+  g.add_argument("--writeup-production", action="store_true")
+  g.add_argument("--writeup-STXS", action="store_true")
+  g.add_argument("--writeup-all", action="store_true")
   p.add_argument("--zoom", action="store_true")
   args = p.parse_args()
 
@@ -236,8 +240,23 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
     print "  ", _
   print
 
-if __name__ == "__main__":
-  pc = PlotCopier()
+def main(args, pc):
+  if args.fai == "all":
+    for _ in "fa3", "fa2", "fL1", "fL1Zg":
+      args.fai = _
+      main(args, pc)
+    args.fai = "all"
+    return
+
+  if args.writeup_all:
+    args.writeup_all = False
+    for _ in "writeup_decay", "writeup_production", "writeup_STXS":
+      setattr(args, _, True)
+      main(args, pc)
+      setattr(args, _, False)
+    args.writeup_all = True
+    return
+
   functionkwargs = {"zoom": args.zoom}
 
   if args.decay:
@@ -300,6 +319,21 @@ if __name__ == "__main__":
       scanrange = "_101,-1.0,1.0_101,-0.02,0.02"
       scanrangeformatch = "(_101,-0.02,0.02)?"
       functionkwargs["graphstyles"] = ((1, 1, 2), (1, 2, 2))
+    if args.writeup_decay:
+      folder = "fa3fa2fL1fL1Zg_decay_writeup"
+      plotname = "limit_lumi3000.00_scan"+args.fai
+      scanrange = ""
+      scanrangeformatch = ""
+    if args.writeup_production:
+      folder = "fa3fa2fL1fL1Zg_morecategories_writeup"
+      plotname = "limit_lumi3000.00_scan"+args.fai
+      scanrange = "_101,-0.02,0.02"
+      scanrangeformatch = "_101,-0.02,0.02"
+    if args.writeup_STXS:
+      folder = "fa3fa2fL1fL1Zg_STXS_writeup"
+      plotname = "limit_lumi3000.00_scan"+args.fai
+      scanrange = "_101,-0.02,0.02"
+      scanrangeformatch = "_101,-0.02,0.02"
     if scanrangeformatch is None: scanrangeformatch = scanrange
     if plotnameformatch is None: plotnameformatch = plotname
     if insertinmiddle is None: insertinmiddle = ""
@@ -318,5 +352,8 @@ if __name__ == "__main__":
       )
     )
 
-  with pc:
-    mergeidenticalscans(*functionargs, **functionkwargs)
+  mergeidenticalscans(*functionargs, **functionkwargs)
+
+if __name__ == "__main__":
+  with PlotCopier() as pc:
+    main(args, pc)

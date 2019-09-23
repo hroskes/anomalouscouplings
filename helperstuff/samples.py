@@ -1677,6 +1677,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
     @generatortolist
     def alternateweights(self):
       for alternateweight in AlternateWeight.items():
+        if alternateweight != "1" and self.production.GEN: continue
         if alternateweight != "1" and self.productionmode == "ZX": continue
         if alternateweight.isTHUggH and self.productionmode != "ggH": continue
         if alternateweight in ("EWcorrUp", "EWcorrDn") and self.productionmode != "qqZZ": continue

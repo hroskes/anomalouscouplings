@@ -897,6 +897,7 @@ class Analysis(MyEnum):
     @property
     def usemorecategories(self):
         if self == "fa3fa2fL1fL1Zg_morecategories": return True
+        if self == "fa3fa2fL1_EFT": return True
         return False
     @property
     def doanalysis(self):

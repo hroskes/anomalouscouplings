@@ -174,12 +174,13 @@ class _Datacard(MultiEnum):
         if self.analysis.isdecayonly:
             result.remove("VBF")
             result.remove("VH")
+        if self.analysis.isdecayonly or self.production.GEN:
             result.remove("ttH")
             result.remove("bbH")
         if self.production.LHE or self.production.GEN:
             result.remove("ggZZ")
             result.remove("VBFbkg")
-        if not config.usedata:
+        if not config.usedata or self.production.GEN:
             result.remove("ZX")
         for _ in result[:]:
             if _ == "VBFbkg": result.remove(_)
@@ -309,7 +310,7 @@ class _Datacard(MultiEnum):
         productionmodes = [ProductionMode("_".join(h.split("_")[0:2 if "bkg_" in h else 1])) for h in self.histograms]
 
         if self.production.LHE or self.production.GEN:
-            if yieldsystematic == "QCDscale_ren_VV":
+            if yieldsystematic == "QCDscale_muR_VV":
                 result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in productionmodes])
                 return result
             else: return None
@@ -593,7 +594,7 @@ def makeDCsandWSs(productions, channels, categories, *otherargs, **kwargs):
           if dc.production.LHE and dc.channel != "2e2mu": continue
           if dc.analysis.isdecayonly and dc.category != "Untagged": continue
           if not dc.analysis.useboosted and dc.category == "Boosted": continue
-          if not dc.analysis.usemorecategories and dc.category in ("VHLeptTagged", "VBF1jtagged"): continue
+          if not dc.analysis.usemorecategories and dc.category in ("VHLepttagged", "VBF1jtagged"): continue
           arglist.append(dcargs)
         pool = multiprocessing.Pool(processes=8 if utilities.LSB_JOBID() else 1)
         mapresult = pool.map(functools.partial(makeDCandWS, **kwargs), arglist)

@@ -542,10 +542,10 @@ def runcombine(analysis, foldername, **kwargs):
     if len(set(years)) != len(years):
         raise ValueError("Some of your productions are from the same year!")
 
-    LHE = {p.LHE for p in productions}
+    LHE = {(p.LHE, p.GEN) for p in productions}
     if len(LHE) != 1:
         raise ValueError("Some of your productions are for LHE and some are not!")
-    LHE = LHE.pop()
+    LHE, GEN = LHE.pop()
 
     defaultfaiorder = tuple(sorted(analysis.fais, key=lambda x: x!=scanfai) + ["fa1"])
     if faiorder is None: faiorder = defaultfaiorder
@@ -554,8 +554,6 @@ def runcombine(analysis, foldername, **kwargs):
     if faiorder[0] != scanfai:
       raise ValueError("{} should be first in faiorder".format(scanfai))
 
-    if set(usecategories) != {Category("Untagged")} and analysis.isdecayonly:
-        raise ValueError("For decay only analysis have to specify categories=Untagged")
     if set(usechannels) != {Channel("2e2mu")} and LHE:
         raise ValueError("For LHE analysis have to specify channels=2e2mu")
 
@@ -616,6 +614,8 @@ def runcombine(analysis, foldername, **kwargs):
         usecategories = [c for c in usecategories if c != "Boosted"]
     if not analysis.usemorecategories:
         usecategories = [c for c in usecategories if c not in ("VBF1jtagged", "VHLepttagged")]
+    if analysis.isdecayonly:
+        usecategories = [c for c in usecategories if c == "Untagged"]
 
     if len(analysis.fais) > 1: assert not fixfai
 
@@ -700,6 +700,8 @@ def runcombine(analysis, foldername, **kwargs):
     repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo. .oO[linearsystematics]Oo."
     repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(["CMS_zz4l_fa1"] + ["CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai] + ["fa3_ggH", "fCP_Htt", "RV", "RF"])
     repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
+    if analysis.isdecayonly:
+        repmap["savemu"] = repmap["savemu"].replace(",fa3_ggH,fCP_Htt,RV", "")
 
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
     mkdir_p(folder)

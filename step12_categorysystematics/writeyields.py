@@ -28,7 +28,7 @@ from TemplateBuilder.TemplateBuilder.moremath import weightedaverage
 from helperstuff import config
 from helperstuff.categorization import MultiCategorization, NoCategorization, SingleCategorizationgm4l
 from helperstuff.combinehelpers import gettemplate
-from helperstuff.enums import AlternateWeight, analyses, categories, Category, Channel, channels, flavors, ProductionMode, PythiaSystematic, pythiasystematics
+from helperstuff.enums import AlternateWeight, analyses, categories, Category, Channel, channels, flavors, ProductionMode, productions, PythiaSystematic, pythiasystematics
 from helperstuff.samples import ReweightingSamplePlusWithFlavor as RSPWF, Sample
 from helperstuff.treewrapper import TreeWrapper
 from helperstuff.utilities import deprecate, MultiplyCounter, sgn
@@ -39,7 +39,7 @@ from categorysystematics import findsystematic
 SampleCount = namedtuple("SampleCount", "productionmode samples")
 
 def writeyields(productionmodelist=None, productionlist=None):
-  for production in sorted({_.productionforrate for _ in config.productionsforcombine if not _.LHE}):
+  for production in sorted({_.productionforrate for _ in productions if not _.LHE}):
     if productionlist and production not in productionlist: continue
     print "Finding yields and category systematics for", production
     year = production.year
@@ -49,14 +49,13 @@ def writeyields(productionmodelist=None, productionlist=None):
       SampleCount(ProductionMode("VH"), [[RSPWF("ZH", "0+", "POWHEG")], [RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
       SampleCount(ProductionMode("ZH"), [[RSPWF("ZH", "0+", "POWHEG")]]),
       SampleCount(ProductionMode("WH"), [[RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("ttH"), [[RSPWF("ttH", "0+", "Hff0+", "POWHEG")]]),
-      SampleCount(ProductionMode("bbH"), [[RSPWF("bbH", "0+")]]),
       SampleCount(ProductionMode("ggH"), [[RSPWF("ggH", "0+", "POWHEG")]]),
       SampleCount(ProductionMode("qqZZ"), [[RSPWF("qqZZ"), RSPWF("qqZZ", "ext")]]),
     ] + [
+      SampleCount(ProductionMode("ttH"), [[RSPWF("ttH", "0+", "Hff0+", "POWHEG")]]),
+      SampleCount(ProductionMode("bbH"), [[RSPWF("bbH", "0+")]]),
       SampleCount(ProductionMode("ggZZ"), [[RSPWF("ggZZ", flavor)] for flavor in flavors]),
-      SampleCount(ProductionMode("VBF bkg"), [[RSPWF("VBF bkg", flavor)] for flavor in ("2e2mu", "4e", "4mu")])
-    ][0:1] * (not production.GEN)
+    ] * (not production.GEN)
 
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[RSPWF("ZX")]]))
@@ -85,6 +84,7 @@ def writeyields(productionmodelist=None, productionlist=None):
           if year == 2018:
             del g[:]
             g += [RSPWF("qqZZ", "ext1"), RSPWF("qqZZ", "ext2")]
+            if production.GEN: del g[0]
 
       if productionmode in ("ZH", "WH") and (not productionmodelist or ProductionMode("VH") in productionmodelist): continue #it's already in the counter from VH
 
@@ -261,6 +261,7 @@ def writeyields(productionmodelist=None, productionlist=None):
                     (2018, "4mu"):   (1.240, 0.760),
                   }[year, str(channel)]
 
+          if production.GEN: continue
           #variations on category definition: JEC and btagging
           nominal = sum(result[productionmode, categorization, AlternateWeight("1"), cat] for cat in sumcategories)
           if productionmode == "ZX" or analysis.isdecayonly:
@@ -367,7 +368,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       YieldSystematicValue.writedict()
 
 def writeyields_LHE():
-  for production in sorted({_.productionforrate for _ in config.productionsforcombine if _.LHE}):
+  for production in sorted({_.productionforrate for _ in productions if _.LHE}):
     for analysis in analyses:
       if not analysis.isfL1fL1Zg: continue
       YieldValue("ggH", "2e2mu", "Untagged", analysis, production).value = 1.5258744890164022

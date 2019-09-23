@@ -219,6 +219,9 @@ class YieldSystematicValue(MultiEnum, JsonDict):
         return type(self)(*kwargs.itervalues())
 
 def count(fromsamples, tosamples, categorizations, alternateweights):
+    GEN = {_.production.GEN for _ in fromsamples}
+    assert len(GEN) == 1
+    GEN = GEN.pop()
     t = ROOT.TChain("candTree")
     for fromsample in fromsamples:
         t.Add(fromsample.withdiscriminantsfile())
@@ -234,7 +237,7 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
       t.SetBranchStatus("xsec", 1)
       t.SetBranchStatus("genxsec", 1)
       t.SetBranchStatus("genBR", 1)
-      t.SetBranchStatus("LHEweight_*", 1)
+      if not GEN: t.SetBranchStatus("LHEweight_*", 1)
     for _ in alternateweights:
       if _ in ("1", "EWcorrUp", "EWcorrDn", "PythiaScaleUp", "PythiaScaleDown"):
         pass
