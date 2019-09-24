@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+import argparse
+p = argparse.ArgumentParser()
+args = p.parse_args()
+
 from glob import glob
 import math
 import os
@@ -22,6 +26,7 @@ from limits import findwhereyequals, Point
 
 class Folder(object):
     def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None, secondcolumn=None, removepoints=None):
+        if removepoints is None: removepoints = []
         self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth, self.secondcolumn, self.removepoints = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth, secondcolumn, removepoints
         self.repmap = {
                        "analysis": str(self.analysis),
@@ -83,15 +88,21 @@ class Folder(object):
             legend.AddEntry(0, self.secondcolumn, "")
 
 def mergeplots(analysis, **kwargs):
-    drawlineskwargs = {}
+    analysis = Analysis(analysis)
+    drawlineskwargs = {"xpostext": 0.0025, "xmin": -0.005, "xmax": 0.005}
     logscale = False
     PRL = False
-    legendposition = (.2, .7, .6, .9)
-    ymax = None
-    xmin, xmax = -1, 1
+    legendposition = {
+      Analysis("fa3"): (.2, .5, .45, .65),
+      Analysis("fa2"): (.42, .75, .67, .9),
+      Analysis("fL1"): (.2, .75, .45, .9),
+      Analysis("fL1Zg"): (.4, .75, .65, .9),
+    }[analysis]
+    ymax = 40
+    xmin, xmax = -0.005, 0.005
     subdir = ""
     lumi = None
-    outdir = "fa3fa2fL1fL1Zg_yieldsystematics"
+    outdir = "fa3fa2fL1fL1Zg_morecategories_writeup"
     plotcopier = ROOT
     for kw, kwarg in kwargs.iteritems():
         if kw == "logscale":
@@ -127,12 +138,11 @@ def mergeplots(analysis, **kwargs):
         else:
             drawlineskwargs[kw] = kwarg
 
-    analysis = Analysis(analysis)
     repmap = {"analysis": str(analysis)}
-    plotname = "limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_compare.root"
+    plotname = "limit_lumi3000.00_scan.oO[analysis]Oo._compare.root"
     folders = [
-               Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
-               Folder("fa3fa2fL1fL1Zg_yieldsystematics/", "Fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_morecategories_writeup/", "MELA", 2, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_STXS_writeup/", "STXS stage 1", 4, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
               ]
 
     if logscale and config.minimainlegend:
@@ -183,7 +193,7 @@ def mergeplots(analysis, **kwargs):
 
     c = plotcopier.TCanvas("c1", "", 8, 30, 800, 800)
     mg.Draw("al")
-    mg.GetXaxis().SetTitle(folders[0].xtitle)
+    mg.GetXaxis().SetTitle(folders[0].xtitle.replace("a2", "g2").replace("a3", "g4"))
     mg.GetYaxis().SetTitle(folders[0].ytitle)
     mg.GetXaxis().SetRangeUser(xmin, xmax)
     mg.SetMinimum(0)
@@ -252,16 +262,6 @@ def mergeplots(analysis, **kwargs):
         pc.copy(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)))
 
 if __name__ == "__main__":
-    args = []
-    kwargs = {}
-    for arg in sys.argv[1:]:
-        if "=" in arg:
-            kwargs[arg.split("=")[0]] = arg.split("=", 1)[1]
-        else:
-            args.append(arg)
-    if args or kwargs:
-        with PlotCopier() as pc:
-            kwargs["plotcopier"] = pc
-            mergeplots(*args, **kwargs)
-    else:
-        raise TypeError("Need to give args or kwargs")
+    with PlotCopier() as pc:
+        for analysis in "fa3", "fa2", "fL1", "fL1Zg":
+            mergeplots(analysis, plotcopier=pc, **args.__dict__)
