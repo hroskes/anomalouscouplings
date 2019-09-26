@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-import argparse
-p = argparse.ArgumentParser()
-args = p.parse_args()
+if __name__ == "__main__":
+    import argparse
+    p = argparse.ArgumentParser()
+    args = p.parse_args()
 
 from glob import glob
 import math
