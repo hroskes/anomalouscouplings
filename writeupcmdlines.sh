@@ -10,14 +10,7 @@ cmd="sbatch --mem 4G --time 2:0:0 slurm.sh"; moreargs=""
 #cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1"
 
 for scanrange in 101,-1,1 101,-0.02,0.02; do
- if [ $scanrange == 101,-1,1 ]; then
-   whiches=decay
- elif [ $scanrange == 101,-0.02,0.02 ]; then
-   whiches="STXS morecategories"
- else
-   echo "Unknown scanrange $scanrange"
-   exit 1
- fi
+ whiches="decay STXS morecategories"
  for which in $whiches; do
   #default configuration
   $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_$which writeup productions=GEN_190908 scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa3 runobs=0 $moreargs

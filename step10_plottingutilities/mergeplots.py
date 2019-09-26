@@ -144,6 +144,7 @@ def mergeplots(analysis, **kwargs):
     folders = [
                Folder("fa3fa2fL1fL1Zg_morecategories_writeup/", "MELA", 2, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
                Folder("fa3fa2fL1fL1Zg_STXS_writeup/", "STXS stage 1", 4, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_decay_writeup/", "decay only", ROOT.kGreen+3, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
               ]
 
     if logscale and config.minimainlegend:
