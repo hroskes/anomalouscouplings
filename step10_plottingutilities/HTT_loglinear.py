@@ -1,4 +1,17 @@
 #!/usr/bin/env python
+if __name__ == "__main__":
+    import argparse
+
+    def f(x): result = x.split("="); assert len(result)==2, x; return result
+
+    p = argparse.ArgumentParser()
+    p.add_argument("kwargs", type=f, nargs="*")
+    p.add_argument("--analysis", choices="fa3 fa2 fL1 fL1Zg".split())
+    args = p.parse_args()
+
+    kwargs = {k: v for k, v in args.kwargs}
+    if "analysis" in kwargs: args.analysis = kwargs["analysis"]
+
 from array import array
 from glob import glob
 from itertools import izip
@@ -26,8 +39,8 @@ analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
 def getplotname(analysis, comparecategories):
     if comparecategories:
-        return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_categories_zoom.root".format(analysis)
-    return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
+        return "limit_lumi77.40_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_categories_zoom.root".format(analysis)
+    return "limit_lumi77.40_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
 
 def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
     assert len(mgs) == len(mglogs) == len(xdivides)+1
@@ -180,21 +193,23 @@ def PRL_loglinear(**kwargs):
 
         if comparecategories:
           folders = [
-            Folder("fa3fa2fL1fL1Zg_finalforthesis/", "Float others 3 categories", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-            Folder("fa3fa2fL1fL1Zg_finalforthesis/", "Fix others 3 categories", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
-#            Folder("fa3fa2fL1fL1Zg_boosted_finalforthesis/", "Float others w/ boosted", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-#            Folder("fa3fa2fL1fL1Zg_boosted_finalforthesis/", "Fix others w/ boosted", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
-#            Folder("fa3fa2fL1fL1Zg_STXS_finalforthesis/", "Float others STXS", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
-#            Folder("fa3fa2fL1fL1Zg_STXS_finalforthesis/", "Fix others STXS", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
-            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Float others 6 categories", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
-            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Fix others 6 categories", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_finalforthesis/", "Float others 3 categories", 2, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_finalforthesis/", "Fix others 3 categories", 4, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=7, linewidth=2),
+#            Folder("fa3fa2fL1fL1Zg_boosted_finalforthesis/", "Float others w/ boosted", 2, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+#            Folder("fa3fa2fL1fL1Zg_boosted_finalforthesis/", "Fix others w/ boosted", 4, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+#            Folder("fa3fa2fL1fL1Zg_STXS_finalforthesis/", "Float others STXS", 2, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
+#            Folder("fa3fa2fL1fL1Zg_STXS_finalforthesis/", "Fix others STXS", 4, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Float others 6 categories", 2, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Fix others 6 categories", 4, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
           ]
         else:
           folders = [
-            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Observed, fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2, removepoints=removepoints1),
-            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Expected, fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2, removepoints=removepoints2),
-            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Observed, float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2, removepoints=removepoints3),
-            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Expected, float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2, removepoints=removepoints4),
+            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Observed, fix others", 4, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2, removepoints=removepoints1),
+            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Expected, fix others", 4, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2, removepoints=removepoints2),
+#            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Observed, float others", 2, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2, removepoints=removepoints3),
+#            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Expected, float others", 2, analysis, subdir, plotname="limit_lumi77.40_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2, removepoints=removepoints4),
+            Folder(".oO[analysis]Oo._August17combination/", "Observed, 18-002", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2),
+            Folder(".oO[analysis]Oo._August17combination/", "Expected, 18-002", 1, analysis, subdir, plotname="limit_lumi77.45_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2),
           ]
 
         mg = ROOT.TMultiGraph("limit", "")
@@ -265,7 +280,7 @@ def PRL_loglinear(**kwargs):
         c.cd()
         style.applycanvasstyle(c)
         style.CMS("", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)"
-                      .format(sum(_.dataluminosity for _ in config.productionsforcombine)),
+                      .format(sum(_.dataluminosity for _ in config.productionsforcombine if _.year != 2018)),
                       x1=0.007, x2=1.01, #???
                       drawCMS=False, extratextsize=.039)
         style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
@@ -337,20 +352,9 @@ def yaxislabel(label, textsize=.06):
     return pt
 
 if __name__ == "__main__":
-    import argparse
-
-    def f(x): result = x.split("="); assert len(result)==2, x; return result
-
-    p = argparse.ArgumentParser()
-    p.add_argument("kwargs", type=f, nargs="*")
-    p.add_argument("--analysis", choices="fa3 fa2 fL1 fL1Zg".split())
-    args = p.parse_args()
-
-    kwargs = {k: v for k, v in args.kwargs}
-    if "analysis" in kwargs: args.analysis = kwargs["analysis"]
-
     function = PRL_loglinear
     with PlotCopier() as plotcopier:
         for kwargs["analysis"] in "fa3", "fa2", "fL1", "fL1Zg":
             if kwargs["analysis"] != args.analysis is not None: continue
             function(**kwargs)
+
