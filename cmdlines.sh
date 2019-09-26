@@ -4,28 +4,25 @@ set -euo pipefail
 
 cd $(dirname $0)
 
-#cmd="sbatch --mem 12G --time 2-0:0:0 slurm.sh"; moreargs=""
-cmd=python; moreargs=""
+cmd="sbatch --mem 12G --time 2-0:0:0 slurm.sh"; moreargs=""
 #export SLURM_JOBID=123456; cmd="python"; moreargs=""
 #cmd=python; moreargs=runobs=0
 #cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1"
 
-for scanrange in 101,-1,1:101,-0.02,0.02; do
-# for which in expectvalues= runobs=0; do
- for which in ""; do
+for scanrange in 101,-1,1 101,-0.02,0.02; do
+ for which in expectvalues= runobs=0 ""; do
+# for which in ""; do
   #default configuration
-#  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa3 $which $moreargs
-#  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa2 $which $moreargs
-#  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fL1 $which $moreargs
-#  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg $which $moreargs
+  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa3 $which $moreargs
+  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa2 $which $moreargs
+  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fL1 $which $moreargs
+  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg $which $moreargs
 
   #fix others
-  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis productions=190821_2016,190821_2017 scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa3 floatothers=0 $which $moreargs
-  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis productions=190821_2016,190821_2017 scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa2 floatothers=0 $which $moreargs
-  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis productions=190821_2016,190821_2017 scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fL1 floatothers=0 $which $moreargs
-  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis productions=190821_2016,190821_2017 scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg floatothers=0 $which $moreargs
-
-continue
+  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa3 floatothers=0 $which $moreargs
+  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai3,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fa2 floatothers=0 $which $moreargs
+  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai4,CMS_zz4l_fa1 scanfai=fL1 floatothers=0 $which $moreargs
+  $cmd ./step9_runcombine.py fa3fa2fL1fL1Zg_morecategories finalforthesis scanranges=$scanrange plotnuisances=CMS_zz4l_fai1,CMS_zz4l_fai2,CMS_zz4l_fai3,CMS_zz4l_fa1 scanfai=fL1Zg floatothers=0 $which $moreargs
 
   #change fai order
 
