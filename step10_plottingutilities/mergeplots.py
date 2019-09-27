@@ -26,9 +26,10 @@ from helperstuff.utilities import cache, PlotCopier, TFile
 from limits import findwhereyequals, Point
 
 class Folder(object):
-    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None, secondcolumn=None, removepoints=None):
+    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None, secondcolumn=None, removepoints=None, forcepoints=None):
         if removepoints is None: removepoints = []
-        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth, self.secondcolumn, self.removepoints = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth, secondcolumn, removepoints
+        if forcepoints is None: forcepoints = {}
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth, self.secondcolumn, self.removepoints, self.forcepoints = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth, secondcolumn, removepoints, forcepoints
         self.repmap = {
                        "analysis": str(self.analysis),
                       }
@@ -65,7 +66,12 @@ class Folder(object):
             n = g.GetN()
             x = np.array([g.GetX()[i] for i in xrange(n) if not any(np.isclose(g.GetX()[i], _) for _ in self.removepoints)])
             y = np.array([g.GetY()[i] for i in xrange(n) if not any(np.isclose(g.GetX()[i], _) for _ in self.removepoints)])
-            print self.removepoints, g.GetN(), len(x)
+            for forcex, forcey in self.forcepoints.iteritems():
+                forceindices = np.isclose(x, forcex)
+                assert sum(forceindices) == 1, forceindices
+                print y[forceindices], forcey
+                y[forceindices] = forcey
+                print y[forceindices]
             y -= min(y)
             newg = ROOT.TGraph(len(x), x, y)
             newg.SetLineColor(self.color)

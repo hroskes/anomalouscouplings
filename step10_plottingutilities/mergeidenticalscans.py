@@ -152,7 +152,7 @@ def mergeidenticalscans(outfile, *infiles, **kwargs):
   
     fmt = " ".join(["{:>10}"] * (2+len(newfais))) + " {}"
     print fmt.format("x", "y", *[k for k, v in sorted(newfais.iteritems())] + ["file indices"])
-    fmt = " ".join(["{:10.3g}"] * (2+len(newfais))) + " {}"
+    fmt = " ".join(["{:10.5g}"] * (2+len(newfais))) + " {}"
     for xyfaisindices in itertools.izip_longest(newxs, newys, *[v for k, v in sorted(newfais.iteritems())] + [(", ".join(str(idx) for idx in _) for _ in indices[-1])]): print fmt.format(*xyfaisindices)
   
     if 0 not in newxs:
