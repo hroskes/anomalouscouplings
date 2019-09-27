@@ -90,98 +90,60 @@ class Folder(object):
 
 def mergeplots(analysis, **kwargs):
     analysis = Analysis(analysis)
-    drawlineskwargs = {"xpostext": 0.0025, "xmin": -0.005, "xmax": 0.005}
-    logscale = False
-    PRL = False
-    legendposition = {
-      Analysis("fa3"): (.2, .5, .45, .65),
-      Analysis("fa2"): (.42, .75, .67, .9),
-      Analysis("fL1"): (.2, .75, .45, .9),
-      Analysis("fL1Zg"): (.4, .75, .65, .9),
-    }[analysis]
-    ymax = 40
-    xmin, xmax = -0.005, 0.005
-    subdir = ""
-    lumi = None
-    outdir = "fa3fa2fL1fL1Zg_morecategories_writeup"
-    plotcopier = ROOT
-    for kw, kwarg in kwargs.iteritems():
-        if kw == "logscale":
-            logscale = bool(int(kwarg))
-            drawlineskwargs[kw] = kwarg
-        elif kw == "PRL":
-            PRL = bool(int(kwarg))
-            drawlineskwargs[kw] = kwarg
-        elif kw == "CLtextposition":
-            drawlineskwargs["xpostext"] = kwarg
-        elif kw == "legendposition":
-            try:
-                legendposition = [float(a) for a in kwarg.split(",")]
-                if len(legendposition) != 4: raise ValueError
-            except ValueError:
-                raise ValueError("legendposition has to contain 4 floats separated by commas!")
-        elif kw == "ymax":
-            ymax = float(kwarg)
-        elif kw == "xmin":
-            xmin = float(kwarg)
-            drawlineskwargs[kw] = kwarg
-        elif kw == "xmax":
-            xmax = float(kwarg)
-            drawlineskwargs[kw] = kwarg
-        elif kw == "subdir":
-            subdir = kwarg
-        elif kw == "outdir":
-            outdir = kwarg
-        elif kw == "lumi":
-            lumi = float(kwarg)
-        elif kw == "plotcopier":
-            plotcopier = kwarg
-        else:
-            drawlineskwargs[kw] = kwarg
+    zoom = kwargs.pop("zoom", "zoom")
+    legendposition = kwargs.pop("legendposition", {
+      "zoom": {
+        Analysis("fa3"): (.2, .5, .45, .65),
+        Analysis("fa2"): (.42, .75, .67, .9),
+        Analysis("fL1"): (.2, .75, .45, .9),
+        Analysis("fL1Zg"): (.4, .75, .65, .9),
+      },
+      "": {
+        Analysis("fa3"): (.3, .75, .55, .9),
+        Analysis("fa2"): (.2, .75, .45, .9),
+        Analysis("fL1"): (.2, .75, .45, .9),
+        Analysis("fL1Zg"): (.2, .75, .45, .9),
+      },
+      "medium": {
+        Analysis("fa3"): (.2, .75, .45, .9),
+        Analysis("fa2"): (.2, .6, .45, .75),
+        Analysis("fL1"): (.2, .75, .45, .9),
+        Analysis("fL1Zg"): (.2, .75, .45, .9),
+      },
+    }[zoom][analysis])
+    ymax = kwargs.pop("ymax", 40 if zoom else 1000)
+    defaultxmax = {"zoom": 0.0055, "": 1, "medium": 0.1}[zoom]
+    xmin, xmax = kwargs.pop("xmin", -defaultxmax), kwargs.pop("xmax", defaultxmax)
+    drawlineskwargs = {"xpostext": kwargs.pop("CLtextposition", {"zoom": 0.003, "": 99, "medium": 0.03 if analysis != "fL1Zg" else -0.09}[zoom]), "xmin": xmin, "xmax": xmax}
+    subdir = kwargs.pop("subdir", "")
+    lumi = kwargs.pop("lumi", None)
+    outdir = kwargs.pop("outdir", "fa3fa2fL1fL1Zg_morecategories_writeup")
+    plotcopier = kwargs.pop("plotcopier", ROOT)
+    drawlineskwargs.update(kwargs)
 
     repmap = {"analysis": str(analysis)}
-    plotname = "limit_lumi3000.00_scan.oO[analysis]Oo._compare.root"
+    plotname = "limit_lumi3000.00_scan.oO[analysis]Oo._compare"+("_"+zoom if zoom else "")+".root"
+    if analysis == "fa3":
+        removepoints1 = [-0.6, 0.6]
+        removepoints2 = []
+        removepoints3 = []
+    if analysis == "fa2":
+        removepoints1 = [.22, .24, .3]
+        removepoints2 = []
+        removepoints3 = []
+    if analysis == "fL1":
+        removepoints1 = [-.32, -.3, -.18, .3, -.52, -.5]
+        removepoints2 = [-.1, -.06, .06, .08, .24, .66]
+        removepoints3 = []
+    if analysis == "fL1Zg":
+        removepoints1 = [-.68, -.66, -.64, -.6, -0.56, -0.54, -0.52]
+        removepoints2 = []
+        removepoints3 = []
     folders = [
-               Folder("fa3fa2fL1fL1Zg_morecategories_writeup/", "MELA", 2, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
-               Folder("fa3fa2fL1fL1Zg_STXS_writeup/", "STXS stage 1", 4, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
-               Folder("fa3fa2fL1fL1Zg_decay_writeup/", "decay only", ROOT.kGreen+3, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2),
+               Folder("fa3fa2fL1fL1Zg_morecategories_writeup/", "MELA", 2, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints1),
+               Folder("fa3fa2fL1fL1Zg_STXS_writeup/", "STXS stage 1", 4, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints2),
+               Folder("fa3fa2fL1fL1Zg_decay_writeup/", "decay only", ROOT.kGreen+3, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints3),
               ]
-
-    if logscale and config.minimainlegend:
-        for folder in folders:
-            graph = folder.graph
-            folder.title = folder.title.replace("Observed, 13 TeV", "Obs. 13 TeV")
-            folder.title = folder.title.replace("Expected, 13 TeV", "Exp. 13 TeV")
-            minimum = Point(float("nan"), float("inf"))
-            CLleft = CLright = None
-            for i, x, y in zip(xrange(graph.GetN()), graph.GetX(), graph.GetY()):
-                if y > 1:
-                    if CLright is None and i > 0:
-                        CLright = findwhereyequals(1, Point(lastx, lasty), Point(x, y))
-                        print "right", lastx, "    ", lasty, "    ", x, "    ", y
-                if y < 1:
-                    CLright = None
-                    if CLleft is None:
-                        CLleft = findwhereyequals(1, Point(lastx, lasty), Point(x, y))
-                        print "left ", lastx, "    ", lasty, "    ", x, "    ", y
-                if y < minimum.y:
-                    minimum = Point(x, y)
-
-                lasti, lastx, lasty = i, x, y
-
-            minimum = minimum.x
-            CLplus = CLright - minimum
-            CLminus = minimum - CLleft
-            if analysis == "fa3" and "Exp" in folder.title: CLplus = CLminus = (CLplus+CLminus)/2
-            ndigits = min(1 - math.floor(math.log10(max(CLplus, CLminus))), 3)
-            appendfmt = "{:.%df}^{{{:+.%df}}}_{{{:+.%df}}}" % (ndigits, ndigits, ndigits)
-            if float(("{:.%df}"%ndigits).format(minimum)) == 0:
-                minimum = 0 #to turn -0.00 --> 0.00
-            append = appendfmt.format(minimum, CLplus, -CLminus)
-            append = append.replace("+", "#plus").replace("-", "#minus")
-            folder.secondcolumn = append
-            print folder.secondcolumn
-
 
     mg = ROOT.TMultiGraph("limit", "")
     l = ROOT.TLegend(*legendposition)
@@ -197,31 +159,11 @@ def mergeplots(analysis, **kwargs):
     mg.Draw("al")
     mg.GetXaxis().SetTitle(folders[0].xtitle.replace("a2", "g2").replace("a3", "g4"))
     mg.GetYaxis().SetTitle(folders[0].ytitle)
-    mg.GetXaxis().SetRangeUser(xmin, xmax)
+    mg.GetXaxis().SetLimits(xmin, xmax)
     mg.SetMinimum(0)
 
-    if PRL:
-        mg.GetXaxis().CenterTitle()
-        mg.GetYaxis().CenterTitle()
-
     if ymax is not None:
-        if logscale: raise ValueError("can't set ymax and logscale!")
         mg.SetMaximum(ymax)
-
-    if logscale:
-        c.SetLogy()
-        mg.SetMinimum(0.1)
-        mg.SetMaximum(120)
-        plotname = plotname.replace(".root", "_log.root")
-        for folder in folders:
-            if config.arrowsatminima:
-                if "Observed" in folder.title:
-                    if analysis == "fa3" and folder.title == "Observed": continue
-                    if analysis in ("fa3", "fL1Zg"):
-                        abovexaxis = False
-                    else:
-                        abovexaxis = True
-                    arrowatminimum(folder.graph, abovexaxis=abovexaxis).Draw()
 
     l.Draw()
     style.applycanvasstyle(c)
@@ -243,7 +185,7 @@ def mergeplots(analysis, **kwargs):
     except OSError:
         pass
     assert ".root" in plotname
-    for ext in "png eps root pdf".split():
+    for ext in "png eps root pdf C".split():
         c.SaveAs(os.path.join(saveasdir, replaceByMap(plotname.replace("root", ext), repmap)))
     with open(os.path.join(saveasdir, replaceByMap(plotname.replace("root", "txt"), repmap)), "w") as f:
         f.write(" ".join(["python"]+[pipes.quote(_) for _ in sys.argv]))
@@ -266,4 +208,5 @@ def mergeplots(analysis, **kwargs):
 if __name__ == "__main__":
     with PlotCopier() as pc:
         for analysis in "fa3", "fa2", "fL1", "fL1Zg":
-            mergeplots(analysis, plotcopier=pc, **args.__dict__)
+            for zoom in "zoom", "", "medium":
+                mergeplots(analysis, plotcopier=pc, zoom=zoom, **args.__dict__)

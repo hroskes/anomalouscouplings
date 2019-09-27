@@ -323,17 +323,17 @@ def main(args, pc):
       folder = "fa3fa2fL1fL1Zg_decay_writeup"
       plotname = "limit_lumi3000.00_scan"+args.fai
       scanrange = ""
-      scanrangeformatch = ""
+      scanrangeformatch = "(_101,-0.02,0.02)?"
     if args.writeup_production:
       folder = "fa3fa2fL1fL1Zg_morecategories_writeup"
       plotname = "limit_lumi3000.00_scan"+args.fai
       scanrange = "_101,-0.02,0.02"
-      scanrangeformatch = "_101,-0.02,0.02"
+      scanrangeformatch = "(_101,-0.02,0.02)?"
     if args.writeup_STXS:
       folder = "fa3fa2fL1fL1Zg_STXS_writeup"
       plotname = "limit_lumi3000.00_scan"+args.fai
       scanrange = "_101,-0.02,0.02"
-      scanrangeformatch = "_101,-0.02,0.02"
+      scanrangeformatch = "(_101,-0.02,0.02)?"
     if scanrangeformatch is None: scanrangeformatch = scanrange
     if plotnameformatch is None: plotnameformatch = plotname
     if insertinmiddle is None: insertinmiddle = ""
