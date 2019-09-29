@@ -184,7 +184,7 @@ def mergeplots(analysis, **kwargs):
                 pass
         elif k in ("xmin", "xmax"):
             drawlineskwargs[k] = float(v)
-    drawlines(**drawlineskwargs)
+    if zoom != "": drawlines(**drawlineskwargs)
     saveasdir = replaceByMap(os.path.join(config.plotsbasedir, "limits", subdir, outdir), repmap)
     try:
         os.makedirs(saveasdir)

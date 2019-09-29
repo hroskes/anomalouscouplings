@@ -313,6 +313,8 @@ class Hypothesis(MyEnum):
         for _ in "0PM", "0PH", "0M", "0L1", "0L1Zg":
             if self == _:
                 return _
+        if "EFT" in str(self):
+            return type(self)(str(self).replace("EFT", "")).combinename
         assert False, self
 
     @property

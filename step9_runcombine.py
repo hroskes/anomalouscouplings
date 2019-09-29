@@ -703,6 +703,10 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.isdecayonly:
         repmap["savemu"] = repmap["savemu"].replace(",fa3_ggH,fCP_Htt,RV", "")
 
+    if analysis.isEFT:
+        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistogramsAi"
+        repmap["savemu"] = "--saveSpecifiedFunc=g1,g2,g4,g1prime2,a2gg,a3gg,kappa,kappa_tilde"
+
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
     mkdir_p(folder)
     with cd(folder):

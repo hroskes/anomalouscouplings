@@ -237,7 +237,7 @@ def PRL_loglinear(**kwargs):
         logpads[-1].SetRightMargin(rightmargin * 1 / (xboundaries[-1] - xboundaries[-2]))
         logpads[0].SetLeftMargin(leftmargin * 1 / (xboundaries[1] - xboundaries[0]))
         c.cd()
-        style.subfig(letter, textsize=.04, x1=.91, x2=.94, y1=.88, y2=.92)
+#        style.subfig(letter, textsize=.04, x1=.91, x2=.94, y1=.88, y2=.92)
 
         for i, (linearpad, mg) in enumerate(izip(linearpads, mgs)):
             linearpad.cd()
