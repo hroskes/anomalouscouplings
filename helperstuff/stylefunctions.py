@@ -186,8 +186,14 @@ def applyaxesstyle(h):
     h.GetYaxis().SetTitleOffset(1.1)
     h.GetYaxis().SetTitleFont(42)
 
+    h.GetZaxis().SetLabelFont(42)
+    h.GetZaxis().SetLabelSize(0.04)
+    h.GetZaxis().SetTitleSize(0.06)
+    h.GetZaxis().SetTitleFont(42)
+
     h.GetXaxis().CenterTitle()
     h.GetYaxis().CenterTitle()
+    h.GetZaxis().CenterTitle()
 
 @cache
 def makecuttext(text, x1=.71, y1=.84, x2=.92, y2=.92):
