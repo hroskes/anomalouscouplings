@@ -260,7 +260,7 @@ class _Datacard(MultiEnum):
                     for sign in "positive", "negative":
                         templatenamepart = (
                           t.templatename().replace("template", "").replace("Mirror", "").replace("Int", "").replace("Hff0MinusHVV", "")
-                                          .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21")
+                                          .replace("a1", "g11").replace("a3", "g41").replace("a2", "g21").replace("L1Zg", "ghzgs1prime21").replace("L1", "g1prime21").replace("ghz1prime2", "g1prime2").replace("ghz4", "g4").replace("ghz2", "g2")
                         )
                         if t.templatename().startswith("templateInt"): templatenamepart = "g11"+self.analysis.couplingname+"1"
 

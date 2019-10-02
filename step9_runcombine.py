@@ -95,7 +95,7 @@ def runscan(repmap, submitjobs, directory=None):
         "CMS_zz4l_fai4": "-1,1",
       }[repmap["POI"]],
       "scanrangeappend": ".oO[pointindex]Oo.",
-      "expectfai": "0.0",
+      "expectfai": "0.0" if POI != "g1" else "1.0",
       "pointindex": "_firststep",
       "selectpoints": "--firstPoint 1 --lastPoint 0",
       "saveorloadworkspace": "--saveWorkspace",
@@ -491,6 +491,7 @@ def runcombine(analysis, foldername, **kwargs):
             raise TypeError("Unknown kwarg: {}".format(kw))
 
     defaultPOI = "CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
+    if analysis.isEFT: defaultPOI = "g1"
     if POI is None: POI = defaultPOI
 
     if runobs and not config.unblindscans:
@@ -509,8 +510,10 @@ def runcombine(analysis, foldername, **kwargs):
       internalscanrange = list(scanrange) + [0] #0 is the offset
       internalscanranges.append(internalscanrange)
       assert not is2dscan
-      if POI in ("CMS_zz4l_fai1", "CMS_zz4l_fai2", "CMS_zz4l_fai3", "CMS_zz4l_fai4"):
+      if POI in ("CMS_zz4l_fai1", "CMS_zz4l_fai2", "CMS_zz4l_fai3", "CMS_zz4l_fai4", "g2", "g4", "g1prime2"):
         hastoinclude = 0
+      elif POI == "g1":
+        hastoinclude = 1
       else:
         assert False, POI
       assert scanrange[2] > scanrange[1], (scanrange[2], scanrange[1])
@@ -601,7 +604,10 @@ def runcombine(analysis, foldername, **kwargs):
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
     if scanfai != analysis:
-        workspacefileappend += "_scan{}".format(scanfai)
+        if analysis.isEFT:
+            workspacefileappend += "_scan" + POI
+        else:
+            workspacefileappend += "_scan{}".format(scanfai)
     for k, v in freeze.iteritems():
         if v is not None:
             moreappend += "_{}={}".format(k, v)
@@ -632,7 +638,6 @@ def runcombine(analysis, foldername, **kwargs):
         pass
 
     parameterranges = {
-      defaultPOI: "-1,1",
       POI: ".oO[internalscanrange]Oo.",  #which might overwrite "CMS_zz4l_fai1"
     }
 
@@ -647,7 +652,7 @@ def runcombine(analysis, foldername, **kwargs):
               "observedappend": "obs",
               "setparameters":
                 ",".join([
-                  "CMS_zz4l_fai{}=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1)
+                  ".oO[POI]Oo.=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1),
                 ] + [
                   "{}={}".format(k, v) for k, v in freeze.iteritems() if v is not None
                 ]),
@@ -697,7 +702,7 @@ def runcombine(analysis, foldername, **kwargs):
         
 
     repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
-    repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo. .oO[linearsystematics]Oo."
+    repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo. "
     repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(["CMS_zz4l_fa1"] + ["CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai] + ["fa3_ggH", "fCP_Htt", "RV", "RF"])
     repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
     if analysis.isdecayonly:
@@ -705,7 +710,11 @@ def runcombine(analysis, foldername, **kwargs):
 
     if analysis.isEFT:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistogramsAi"
-        repmap["savemu"] = "--saveSpecifiedFunc=g1,g2,g4,g1prime2,a2gg,a3gg,kappa,kappa_tilde"
+        repmap["savemu"] = "--saveSpecifiedFunc=g1,g2,g4,g1prime2,ghg2,ghg4,kappa,kappa_tilde"
+        repmap["physicsoptions"] = "--PO verbose --PO allowPMF .oO[fais]Oo. "
+        repmap["fais"] = re.sub(r"f(a2|a3|L1|a1|ai[0-9])asPOI(relative)?", r"\1asPOI", repmap["fais"])
+        repmap["setparameters"] = repmap["setparameters"].replace("CMS_zz4l_fai{}=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1), "").lstrip(",")
+        repmap["setPOI"] = "-P .oO[POI]Oo."
 
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
     mkdir_p(folder)
@@ -729,13 +738,6 @@ def runcombine(analysis, foldername, **kwargs):
                             os.remove(replaceByMap(".oO[combinecardsfile]Oo.", repmap))
                         except subprocess.CalledProcessError:
                             pass
-
-        with open(replaceByMap(".oO[combinecardsfile]Oo.", repmap)) as f:
-            for line in f:
-                if line.startswith("shapesystematics group = "):
-                    repmap["linearsystematics"] = "--PO linearsystematic:" + ",".join(line.split("=")[1].split())
-                if re.match("CMS_scale_j *param", line):
-                    repmap["parameterranges"] += ":CMS_scale_j=-1.0,1.0"
 
         with utilities.OneAtATime(replaceByMap(".oO[workspacefile]Oo..tmp", repmap), 5, task="running text2workspace"):
             if not os.path.exists(replaceByMap(".oO[workspacefile]Oo.", repmap)):

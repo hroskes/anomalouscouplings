@@ -42,6 +42,7 @@ def plottitle(nuisance, analysis=None):
     if nuisance == "RV": return "muV"
     if nuisance == "RF": return "muf"
     if nuisance == "CMS_scale_j_13TeV_2016": return nuisance
+    if nuisance in ("g2", "g4", "g1prime2"): return nuisance
     assert False, nuisance
 def xaxistitle(POI, analysis, faifor=None):
     POI = actualvariable(POI)
@@ -54,6 +55,10 @@ def xaxistitle(POI, analysis, faifor=None):
     if POI == "RV": return "#mu_{V}"
     if POI == "RF": return "#mu_{f}"
     if POI == "CMS_scale_j_13TeV_2016": return POI
+    if POI == "g1": return "g_{1}"
+    if POI == "g2": return "g_{2}"
+    if POI == "g4": return "g_{4}"
+    if POI == "g1prime2": return "g_{1}^{#prime#prime}"
     assert False
 def xaxisrange(POI):
     POI = actualvariable(POI)

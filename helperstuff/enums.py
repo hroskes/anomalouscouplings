@@ -802,7 +802,7 @@ class Analysis(MyEnum):
     def couplingnames(self):
         if self.isfL1fL1Zg: return "g1prime2", "ghzgs1prime2"
         if self.isfa3fa2fL1fL1Zg: return "g4", "g2", "g1prime2", "ghzgs1prime2"
-        if self.isEFT: return "ghz4", "ghz2", "ghz1prime2"
+        if self.isEFT: return "g4", "g2", "g1prime2"
         if self.dimensions == 1: return self.couplingname,
         assert False, self
     @property

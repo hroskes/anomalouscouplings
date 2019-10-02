@@ -1829,6 +1829,10 @@ class IntTemplate(TemplateBase, MultiEnum):
 
         if self.domirror:
             result += "Mirror"
+
+        if self.analysis.isEFT:
+            result = result.replace("g1prime2", "ghz1prime2").replace("g2", "ghz2").replace("g4", "ghz4")
+
         return result
 
     @property
