@@ -58,7 +58,7 @@ def xaxistitle(POI, analysis, faifor=None):
     if POI == "g1": return "g_{1}"
     if POI == "g2": return "g_{2}"
     if POI == "g4": return "g_{4}"
-    if POI == "g1prime2": return "g_{1}^{#prime#prime}"
+    if POI == "g1prime2": return "g_{1}^{''}"
     assert False
 def xaxisrange(POI):
     POI = actualvariable(POI)
@@ -417,7 +417,7 @@ class XPos(MyEnum):
             super(XPos, self).__init__("custom")
             self.custompos = value
     def __nonzero__(self):
-        return self == "right" or self == "left" or -1 <= self.custompos <= 1
+        return self == "right" or self == "left" or -1 <= self.custompos <= 1.5
     def TPaveText(self, ypos, logscale=False, yshift=.01, xsize=.1, ysize=.03):
         xsize = .1
         ysize = .03
