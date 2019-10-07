@@ -1783,13 +1783,14 @@ class SampleBasis(MultiEnum):
             else:
                 assert False, dimension
             assert len(self.analysis.couplingnames) == 3
+            assert self.analysis.isEFT
             return numpy.matrix(
                                 [
                                  [
                                   sample.g1**(maxpower-i-j-k)
-                                  * (getattr(sample, self.analysis.couplingnames[0]) * self.scaleby(0))**i
-                                  * (getattr(sample, self.analysis.couplingnames[1]) * self.scaleby(1))**j
-                                  * (getattr(sample, self.analysis.couplingnames[2]) * self.scaleby(2))**k
+                                  * (getattr(sample, self.analysis.couplingnames[0].replace("g", "ghz")) * self.scaleby(0))**i
+                                  * (getattr(sample, self.analysis.couplingnames[1].replace("g", "ghz")) * self.scaleby(1))**j
+                                  * (getattr(sample, self.analysis.couplingnames[2].replace("g", "ghz")) * self.scaleby(2))**k
                                      for k in range(maxpower+1)
                                      for j in range(maxpower+1-k)
                                      for i in range(maxpower+1-j-k)
