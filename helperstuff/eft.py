@@ -2,7 +2,7 @@ sW = 0.23119 ** 0.5
 cW = (1 - sW**2) ** 0.5
 Lambda1 = 10000
 mZ = 91.1876
-e = 0.8431872482432357
+e = 0.313328534329
 
 def ghw2(ghz1, ghz2, ghz4, ghz1prime2):
     return cW**2 * ghz2
