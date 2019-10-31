@@ -313,6 +313,14 @@ class _Datacard(MultiEnum):
             if yieldsystematic == "QCDscale_muR_VV":
                 result = " ".join(["lnN"] + ["1.1" if h=="bkg_qqzz" else "-" for h in productionmodes])
                 return result
+            if yieldsystematic == "QCDscale_muR_ggH":
+                muFuncertainty = str(1 + (0.051**2 + 0.053**2) ** 0.5)
+                result = " ".join(["lnN"] + [muFuncertainty if h in ("ggH", "ttH", "bbH") else "-" for h in productionmodes])
+                return result
+            if yieldsystematic == "QCDscale_muR_qqH":
+                muVuncertainty = str(1 + (0.071**2 + 0.048**2) ** 0.5)
+                result = " ".join(["lnN"] + [muVuncertainty if h in ("VBF", "VH", "ZH", "WH") else "-" for h in productionmodes])
+                return result
             else: return None
 
         lst = ["lnN"]

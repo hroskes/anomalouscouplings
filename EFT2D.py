@@ -77,9 +77,9 @@ def EFT2D(**kwargs):
 
       couplingfunctions = [{
         "g1": lambda t: eft.deltacz(ghz1=2*t.g1),
-        "g2": lambda t: eft.czz(ghz2=t.g2),
-        "g4": lambda t: eft.czztilde(ghz4=t.g4),
-        "g1prime2": lambda t: eft.czbox(ghz1prime2=t.g1prime2 * 1e4),
+        "g2": lambda t: eft.czz(ghz2=2*t.g2),
+        "g4": lambda t: eft.czztilde(ghz4=2*t.g4),
+        "g1prime2": lambda t: eft.czbox(ghz1prime2=2*t.g1prime2 * 1e4),
       }[_] for _ in couplings]
 
       for entry in t:

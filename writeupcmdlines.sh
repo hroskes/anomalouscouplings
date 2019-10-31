@@ -4,8 +4,8 @@ set -euo pipefail
 
 cd $(dirname $0)
 
-cmd="sbatch --mem 4G --time 2:0:0 slurm.sh"; moreargs=""
-#export SLURM_JOBID=123456; cmd="python"; moreargs=""
+#cmd="sbatch --mem 4G --time 2:0:0 slurm.sh"; moreargs=""
+export SLURM_JOBID=123456; cmd="python"; moreargs=""
 #cmd="srun --mem 4G --time 3:0:0 slurm.sh"; moreargs=""
 #cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1"
 
