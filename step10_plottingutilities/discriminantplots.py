@@ -461,55 +461,61 @@ class HypothesisLine(object):
         )
       else:
         s = ReweightingSample("ggH", self.hypothesis)
-        if   s.g2 == s.g1prime2 == s.ghzgs1prime2 == 0:
-          intletter = "i"
-          ACname = "g4"
-          AChypothesis = "0-"
-        elif s.g4 == s.g1prime2 == s.ghzgs1prime2 == 0:
-          intletter = "j"
-          ACname = "g2"
-          AChypothesis = "0h+"
-        elif s.g2 == s.g4       == s.ghzgs1prime2 == 0:
-          intletter = "k"
-          ACname = "g1prime2"
-          AChypothesis = "L1"
-
-        gi = getattr(s, ACname)
-        assert gi == getattr(ReweightingSample("VBF", self.hypothesis), ACname)
-        assert gi != 0
         g1 = s.g1
-        assert g1 == ReweightingSample("VBF", self.hypothesis).g1
-        assert g1 != 0
+        g2 = s.g2
+        g4 = s.g4
+        gL1 = s.g1prime2
+        gL1Zg = s.ghzgs1prime2
+
+        s = ReweightingSample("VBF", self.hypothesis)
+        assert g1 == s.g1
+        assert g2 == s.g2
+        assert g4 == s.g4
+        assert gL1 == s.g1prime2
+        assert gL1Zg == s.ghzgs1prime2
 
         if productionmode in ("ggH", "bbH", "ttH"):
-          inttype = "g11g{}1".format(intletter)
-          denominator = sum(
-            (
-                 Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+",         pm).gettemplate().Integral() * g1*g1
-            + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype,      pm).gettemplate().Integral() * g1*gi
-            +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi
-            ) * production.dataluminosity
-            for ca in categories
-            for ch in channels
-            for pm in productionmodes
-            for production in config.productionsforcombine
-          )
-
+          maxpower = 2
         elif productionmode in ("VBF", "VH", "ZH", "WH"):
-          def inttype(i): return "g1{}g{}{}".format(4-i, intletter, i)
-          denominator = sum(
-            (
-                 Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+",         pm).gettemplate().Integral() * g1*g1*g1*g1
-            + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(1),   pm).gettemplate().Integral() * g1*g1*g1*gi
-            + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(2),   pm).gettemplate().Integral() * g1*g1*gi*gi
-            + IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(3),   pm).gettemplate().Integral() * g1*gi*gi*gi
-            +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, AChypothesis, pm).gettemplate().Integral() * gi*gi*gi*gi
-            ) * production.dataluminosity
-            for ca in categories
-            for ch in channels
-            for pm in productionmodes
-            for production in config.productionsforcombine
+          maxpower = 4
+        def inttype(power1, poweri, powerj, powerk, powerl):
+          assert power1 + poweri + powerj + powerk + powerl == maxpower, (power1, poweri, powerj, powerk, powerl)
+          assert min(power1, poweri, powerj, powerk, powerl) >= 0, (power1, poweri, powerj, powerk, powerl)
+          result = ""
+          if power1: result += "g1{}".format(power1)
+          if poweri: result += "gi{}".format(poweri)
+          if powerj: result += "gj{}".format(powerj)
+          if powerk: result += "gk{}".format(powerk)
+          if powerl: result += "gl{}".format(powerl)
+          return result
+        denominator = sum(
+          (
+               Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+",         pm).gettemplate().Integral() * g1   **maxpower
+          +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0-",         pm).gettemplate().Integral() * g4   **maxpower
+          +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "a2",         pm).gettemplate().Integral() * g2   **maxpower
+          +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "L1",         pm).gettemplate().Integral() * gL1  **maxpower
+          +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "L1Zg",       pm).gettemplate().Integral() * gL1Zg**maxpower
+          + sum(
+            IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(power1, poweri, powerj, powerk, powerl), pm).gettemplate().Integral()
+            * g1**power1
+            * g4**poweri
+            * g2**powerj
+            * gL1**powerk
+            * gL1Zg**powerl
+            for power1 in range(maxpower+1)
+            for poweri in range(maxpower+1-power1)
+            for powerj in range(maxpower+1-power1-poweri)
+            for powerk in range(maxpower+1-power1-poweri-powerj)
+            for powerl in (maxpower-power1-poweri-powerj-powerk,)
+            if power1 != maxpower and poweri != maxpower and powerj != maxpower and powerk != maxpower and powerl != maxpower
           )
+          ) * production.dataluminosity
+          for ca in categories
+          for ch in channels
+          for pm in productionmodes
+          for production in config.productionsforcombine
+        )
+
       scalebys.append(numerator/denominator)
 
     otherargs = [tuple(args) + (self.hypothesis,) for args in otherargs]
