@@ -347,6 +347,13 @@ class HistogramRescaling(object):
     self.__denominator.makefinalhistogram()
     return self.__numerator.histogram.Integral() / self.__denominator.histogram.Integral()
 
+class MuRescaling(object):
+  def __init__(self, mu):
+    self.__mu = mu
+  @property
+  def scaleby(self):
+    return self.__mu
+
 @cache
 def makehistogramrescaling(**kwargs): return HistogramRescaling(**kwargs)
 
@@ -419,13 +426,17 @@ def getscaletos(*productionmodes, **kwargs):
   ]
 
 class HypothesisLine(object):
-  def __init__(self, hypothesis, ffHlinecolor, ffHlinestyle, VVHlinecolor, VVHlinestyle, legendname):
+  def __init__(self, hypothesis, ffHlinecolor, ffHlinestyle, VVHlinecolor, VVHlinestyle, legendname, muV=None, muf=None):
     self.hypothesis = hypothesis
     self.ffHlinecolor = ffHlinecolor
     self.ffHlinestyle = ffHlinestyle
     self.VVHlinecolor = VVHlinecolor
     self.VVHlinestyle = VVHlinestyle
     self.legendname = legendname
+    self.muV = muV
+    self.muf = muf
+    if not (muV is muf is None) and (muV is None or muf is None):
+      raise ValueError("Have to provide muV and muf, or neither")
 
   @property
   def ispure(self):
@@ -435,88 +446,105 @@ class HypothesisLine(object):
     scalebys = []
     for args in otherargs:
       productionmode = args[0]
-      productionmodes = {
-        "ggH": ("ggH", "bbH", "ttH"),
-        "bbH": ("ggH", "bbH", "ttH"),
-        "ttH": ("ggH", "bbH", "ttH"),
-        "VBF": ("VBF", "VH"),
-        "VH": ("VBF", "VH"),
-        "ZH": ("VBF", "VH"),
-        "ZH": ("VBF", "VH"),
-      }[productionmode]
-      numerator = sum(
-        Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+", pm).gettemplate().Integral() * production.dataluminosity
-        for ca in categories
-        for ch in channels
-        for pm in productionmodes
-        for production in config.productionsforcombine
-      )
-      if Hypothesis(self.hypothesis).ispure:
-        denominator = sum(
-          Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, self.hypothesis, pm).gettemplate().Integral() * production.dataluminosity
+      if self.muV is self.muf is None:
+        productionmodes = {
+          "ggH": ("ggH", "bbH", "ttH"),
+          "bbH": ("ggH", "bbH", "ttH"),
+          "ttH": ("ggH", "bbH", "ttH"),
+          "VBF": ("VBF", "VH"),
+          "VH": ("VBF", "VH"),
+          "ZH": ("VBF", "VH"),
+        }[productionmode]
+        numerator = sum(
+          Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+", pm).gettemplate().Integral() * production.dataluminosity
           for ca in categories
           for ch in channels
           for pm in productionmodes
           for production in config.productionsforcombine
         )
-      else:
-        s = ReweightingSample("ggH", self.hypothesis)
-        g1 = s.g1
-        g2 = s.g2
-        g4 = s.g4
-        gL1 = s.g1prime2
-        gL1Zg = s.ghzgs1prime2
-
-        s = ReweightingSample("VBF", self.hypothesis)
-        assert g1 == s.g1
-        assert g2 == s.g2
-        assert g4 == s.g4
-        assert gL1 == s.g1prime2
-        assert gL1Zg == s.ghzgs1prime2
-
-        if productionmode in ("ggH", "bbH", "ttH"):
-          maxpower = 2
-        elif productionmode in ("VBF", "VH", "ZH", "WH"):
-          maxpower = 4
-        def inttype(power1, poweri, powerj, powerk, powerl):
-          assert power1 + poweri + powerj + powerk + powerl == maxpower, (power1, poweri, powerj, powerk, powerl)
-          assert min(power1, poweri, powerj, powerk, powerl) >= 0, (power1, poweri, powerj, powerk, powerl)
-          result = ""
-          if power1: result += "g1{}".format(power1)
-          if poweri: result += "gi{}".format(poweri)
-          if powerj: result += "gj{}".format(powerj)
-          if powerk: result += "gk{}".format(powerk)
-          if powerl: result += "gl{}".format(powerl)
-          return result
-        denominator = sum(
-          (
-               Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+",         pm).gettemplate().Integral() * g1   **maxpower
-          +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0-",         pm).gettemplate().Integral() * g4   **maxpower
-          +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "a2",         pm).gettemplate().Integral() * g2   **maxpower
-          +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "L1",         pm).gettemplate().Integral() * gL1  **maxpower
-          +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "L1Zg",       pm).gettemplate().Integral() * gL1Zg**maxpower
-          + sum(
-            IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(power1, poweri, powerj, powerk, powerl), pm).gettemplate().Integral()
-            * g1**power1
-            * g4**poweri
-            * g2**powerj
-            * gL1**powerk
-            * gL1Zg**powerl
-            for power1 in range(maxpower+1)
-            for poweri in range(maxpower+1-power1)
-            for powerj in range(maxpower+1-power1-poweri)
-            for powerk in range(maxpower+1-power1-poweri-powerj)
-            for powerl in (maxpower-power1-poweri-powerj-powerk,)
-            if power1 != maxpower and poweri != maxpower and powerj != maxpower and powerk != maxpower and powerl != maxpower
+        if Hypothesis(self.hypothesis).ispure:
+          denominator = sum(
+            Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, self.hypothesis, pm).gettemplate().Integral() * production.dataluminosity
+            for ca in categories
+            for ch in channels
+            for pm in productionmodes
+            for production in config.productionsforcombine
           )
-          ) * production.dataluminosity
-          for ca in categories
-          for ch in channels
-          for pm in productionmodes
-          for production in config.productionsforcombine
-        )
+        else:
+          s = ReweightingSample("ggH", self.hypothesis)
+          g1 = s.g1
+          g2 = s.g2
+          g4 = s.g4
+          gL1 = s.g1prime2 / 1e4
+          gL1Zg = s.ghzgs1prime2 / 1e4
 
-      scalebys.append(numerator/denominator)
+          s = ReweightingSample("VBF", self.hypothesis)
+          assert g1 == s.g1
+          assert g2 == s.g2
+          assert g4 == s.g4
+          assert gL1 == s.g1prime2 / 1e4
+          assert gL1Zg == s.ghzgs1prime2 / 1e4
+
+          if productionmode in ("ggH", "bbH", "ttH"):
+            maxpower = 2
+          elif productionmode in ("VBF", "VH", "ZH", "WH"):
+            maxpower = 4
+          def inttype(power1, poweri, powerj, powerk, powerl):
+            assert power1 + poweri + powerj + powerk + powerl == maxpower, (power1, poweri, powerj, powerk, powerl)
+            assert min(power1, poweri, powerj, powerk, powerl) >= 0, (power1, poweri, powerj, powerk, powerl)
+            result = ""
+            if power1: result += "g1{}".format(power1)
+            if poweri: result += "gi{}".format(poweri)
+            if powerj: result += "gj{}".format(powerj)
+            if powerk: result += "gk{}".format(powerk)
+            if powerl: result += "gl{}".format(powerl)
+            return result
+          denominator = sum(
+            (
+                 Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+",         pm).gettemplate().Integral() * g1   **maxpower
+            +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0-",         pm).gettemplate().Integral() * g4   **maxpower
+            +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "a2",         pm).gettemplate().Integral() * g2   **maxpower
+            +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "L1",         pm).gettemplate().Integral() * gL1  **maxpower
+            +    Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "L1Zg",       pm).gettemplate().Integral() * gL1Zg**maxpower
+            + sum(
+              IntTemplate(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, inttype(power1, poweri, powerj, powerk, powerl), pm).gettemplate().Integral()
+              * g1**power1
+              * g4**poweri
+              * g2**powerj
+              * gL1**powerk
+              * gL1Zg**powerl
+              for power1 in range(maxpower+1)
+              for poweri in range(maxpower+1-power1)
+              for powerj in range(maxpower+1-power1-poweri)
+              for powerk in range(maxpower+1-power1-poweri-powerj)
+              for powerl in (maxpower-power1-poweri-powerj-powerk,)
+              if power1 != maxpower and poweri != maxpower and powerj != maxpower and powerk != maxpower and powerl != maxpower
+              and (
+                g1**power1
+              * g4**poweri
+              * g2**powerj
+              * gL1**powerk
+              * gL1Zg**powerl
+              )
+            )
+            ) * production.dataluminosity
+            for ca in categories
+            for ch in channels
+            for pm in productionmodes
+            for production in config.productionsforcombine
+          )
+
+        scalebys.append(numerator/denominator)
+
+      else:
+        assert self.muf is not None is not self.muV
+        scalebys.append({
+          "ggH": self.muf,
+          "ttH": self.muf,
+          "bbH": self.muf,
+          "VH": self.muV,
+          "VBF": self.muV,
+        }[productionmode])
 
     otherargs = [tuple(args) + (self.hypothesis,) for args in otherargs]
     assert len(otherargs) == len(scalebys)
@@ -598,9 +626,6 @@ class HypothesisLine(object):
 
 class Plot(object):
   def __init__(self, **kwargs):
-    preliminarykwargs = kwargs.copy()
-    workinprogresskwargs = kwargs.copy()
-
     name = kwargs.pop("name")
     xtitle = kwargs.pop("xtitle")
     ytitle = kwargs.pop("ytitle")
@@ -769,8 +794,12 @@ class Plot(object):
         scaletos=VVHscaletos(isL1Zg=isL1Zg),
       )
 
-      ffHrescaling = makehistogramrescaling(numerator=SMffHhistogramnormalization, denominator=ffHhistogramnormalization)
-      VVHrescaling = makehistogramrescaling(numerator=SMVVHhistogramnormalization, denominator=VVHhistogramnormalization)
+      if hypothesis.muV is hypothesis.muf is None:
+        ffHrescaling = makehistogramrescaling(numerator=SMffHhistogramnormalization, denominator=ffHhistogramnormalization)
+        VVHrescaling = makehistogramrescaling(numerator=SMVVHhistogramnormalization, denominator=VVHhistogramnormalization)
+      else:
+        assert hypothesis.muV is not None is not hypothesis.muf
+        ffHrescaling = VVHrescaling = None
 
       VVHkwargs = dict(
         name=name+"_VVH_"+str(hypothesis.hypothesis),
@@ -859,18 +888,6 @@ class Plot(object):
 
     self.__CMStext = CMStext
 
-    if self.__CMStext not in ("Preliminary", "Work in progress"):
-      preliminarykwargs["CMStext"] = "Preliminary"
-      preliminarykwargs["saveasdir"] = os.path.join(saveasdir, "preliminary")
-      preliminarykwargs["name"] += "_preliminary"
-      self.__preliminary = type(self)(**preliminarykwargs)
-
-      workinprogresskwargs["CMStext"] = "Work in progress"
-      workinprogresskwargs["saveasdir"] = os.path.join(saveasdir, "workinprogress")
-      workinprogresskwargs["name"] += "_workinprogress"
-      self.__workinprogress = type(self)(**workinprogresskwargs)
-
-
   def makeplot(self):
     c = self.__plotcopier.TCanvas("c_"+self.__name, "",  8, 30, 800, 800)
     style.applycanvasstyle(c)
@@ -935,10 +952,6 @@ class Plot(object):
     for ext in "png pdf root C".split():
       c.SaveAs(os.path.join(self.__saveasdir, self.__name+"."+ext))
 
-    if self.__CMStext not in ("Preliminary", "Work in progress"):
-      self.__preliminary.makeplot()
-      self.__workinprogress.makeplot()
-
 categoryname = "category_0P_or_0M_or_a2_or_L1_or_L1Zg"
 
 dijetcut = masscut + " && D_0minus_VBFdecay > -998"
@@ -975,6 +988,7 @@ a2mixVH = HypothesisLine("fa2VH0.5",   ROOT.kGreen-3, 1, ROOT.kGreen-3, 2, "f_{a
 
 L1mixdecay = HypothesisLine("fL10.5", ROOT.kMagenta-4, 1, ROOT.kMagenta-4, 2, "f_{#Lambda1}=0.5")
 
+BestFit19009 = HypothesisLine("BestFit19009", 1, 1, 1, 2, "Best fit", muV=1.05094e-10, muf=5.70223)
 
 def makeplots(filter):
   with PlotCopier() as pc:
@@ -1480,6 +1494,28 @@ def makeplots(filter):
         CMStext="Supplementary",
       ),
     ]
+
+    for kwargs in plotkwargses[:]:
+      withbestfitkwargs = kwargs.copy()
+      withbestfitkwargs["hypothesislines"] = kwargs["hypothesislines"] + [BestFit19009]
+      withbestfitkwargs["saveasdir"] = os.path.join(kwargs["saveasdir"], "withbestfit")
+      withbestfitkwargs["name"] += "_withbestfit"
+      plotkwargses.append(withbestfitkwargs)
+
+    for kwargs in plotkwargses[:]:
+      preliminarykwargs = kwargs.copy()
+      preliminarykwargs["CMStext"] = "Preliminary"
+      preliminarykwargs["saveasdir"] = os.path.join(kwargs["saveasdir"], "preliminary")
+      preliminarykwargs["name"] += "_preliminary"
+      plotkwargses.append(preliminarykwargs)
+
+      workinprogresskwargs = kwargs.copy()
+      workinprogresskwargs["CMStext"] = "Work in progress"
+      workinprogresskwargs["saveasdir"] = os.path.join(kwargs["saveasdir"], "workinprogress")
+      workinprogresskwargs["name"] += "_workinprogress"
+      plotkwargses.append(workinprogresskwargs)
+
+    for kwargs in plotkwargses: print kwargs["name"]
 
     plots = [
       Plot(**kwargs) for kwargs in plotkwargses if filter(kwargs)
