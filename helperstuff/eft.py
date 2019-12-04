@@ -17,13 +17,13 @@ def ghzgs1prime2(ghz1, ghz2, ghz4, ghz1prime2):
     return Lambda1**2 / (cW**2 - sW**2) * 2 * sW * cW * (ghz1prime2/Lambda1**2 - ghz2 / mZ**2)
 
 def deltacz(ghz1):
-    return 0.5 * ghz1 - 1
+    return 0.5 * 2*ghz1 - 1
 
 def czz(ghz2):
-    return -2 * sW**2 * cW**2 / e**2 * ghz2
+    return -2 * sW**2 * cW**2 / e**2 * 2*ghz2
 
 def czbox(ghz1prime2):
-    return mZ**2 * sW**2 / e**2 * ghz1prime2 / Lambda1**2
+    return mZ**2 * sW**2 / e**2 * 2*ghz1prime2 / Lambda1**2
 
 def czztilde(ghz4):
-    return -2 * sW**2 * cW**2 / e**2 * ghz4
+    return -2 * sW**2 * cW**2 / e**2 * 2*ghz4

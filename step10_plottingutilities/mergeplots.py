@@ -188,19 +188,19 @@ def mergeplots(analysis, **kwargs):
         if analysis == "g1":
             removepoints1 = []
             removepoints2 = [0.922]
-            transformx = lambda g1: eft.deltacz(ghz1=2*g1)
+            transformx = lambda g1: eft.deltacz(ghz1=g1)
         if analysis == "g2":
             removepoints1 = []
             removepoints2 = []
-            transformx = lambda g2: eft.czz(ghz2=2*g2)
+            transformx = lambda g2: eft.czz(ghz2=g2)
         if analysis == "g4":
             removepoints1 = []
             removepoints2 = []
-            transformx = lambda g4: eft.czztilde(ghz4=2*g4)
+            transformx = lambda g4: eft.czztilde(ghz4=g4)
         if analysis == "g1prime2":
             removepoints1 = []
             removepoints2 = []
-            transformx = lambda g1prime2over1e4: eft.czbox(ghz1prime2=2*g1prime2over1e4 * 1e4)
+            transformx = lambda g1prime2over1e4: eft.czbox(ghz1prime2=g1prime2over1e4 * 1e4)
         folders = [
             Folder("fa3fa2fL1_EFT_writeup/", "MELA", 2, "fa3fa2fL1_EFT", subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints1, transformx=transformx),
             Folder("fa3fa2fL1_EFT_STXS_writeup/", "STXS stage 1", 4, "fa3fa2fL1_EFT", subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints2, transformx=transformx),
