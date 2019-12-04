@@ -3,6 +3,7 @@
 if __name__ == "__main__":
   import argparse
   p = argparse.ArgumentParser()
+  p.add_argument("--scaletoCMS", action="store_true")
   args = p.parse_args()
 
 import itertools
@@ -15,7 +16,7 @@ import ROOT
 
 from helperstuff import eft, config, stylefunctions as style
 from helperstuff.extendedcounter import ExtendedCounter
-from helperstuff.utilities import cd, PlotCopier, TFile
+from helperstuff.utilities import cd, PlotCopier, TFile, mkdir_p
 
 combinecmd = [
   "combine",
@@ -106,6 +107,8 @@ def EFT2D(**kwargs):
     }[coupling] for coupling in couplings)
 
     h = g.GetHistogram()
+    scale = 137.1/3000 if args.scaletoCMS else 1
+    h.Scale(scale)
 
     h.GetXaxis().SetTitle(xtitle)
     #g.GetXaxis().SetRangeUser(*xrange)
@@ -113,7 +116,7 @@ def EFT2D(**kwargs):
     #g.GetYaxis().SetRangeUser(*yrange)
     h.GetZaxis().SetTitle("#minus2 #Deltaln L")
     h.GetZaxis().SetTitleOffset(1.4)
-    h.GetZaxis().SetRangeUser(0, 50)
+    h.GetZaxis().SetRangeUser(0, 50*scale)
 
     h2 = h.Clone()
     h2.SetContour(2)
@@ -131,7 +134,9 @@ def EFT2D(**kwargs):
     SM.SetMarkerSize(2)
     SM.Draw("P")
 
-    plotname = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup", "2D_{coupling1}_{coupling2}{append}.{ext}")
+    mkdir_p(os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup", "scaletoCMS"))
+
+    plotname = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup", "scaletoCMS" if args.scaletoCMS else "", "2D_{coupling1}_{coupling2}{append}.{ext}")
 
     for repmap["ext"] in "png root pdf C".split():
       c.SaveAs(plotname.format(append="_nolegend", **repmap))
@@ -157,7 +162,7 @@ def EFT2D(**kwargs):
     c = plotcopier.TCanvas()
     l.Draw()
     for ext in "png pdf root C".split():
-      c.SaveAs(os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup", "2D_legend."+ext))
+      c.SaveAs(os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup", "scaletoCMS" if args.scaletoCMS else "", "2D_legend."+ext))
 
 if __name__ == "__main__":
   with PlotCopier() as pc:
