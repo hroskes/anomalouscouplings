@@ -51,7 +51,12 @@ def EFT2D(**kwargs):
   couplings = sorted(set(kwargs.pop("couplings")), key="g1 g2 g1prime2 g4".index)
   npoints = kwargs.pop("npoints")
   plotcopier = kwargs.pop("plotcopier")
+  scaletoCMS = kwargs.pop("scaletoCMS")
   assert not kwargs, kwargs
+
+  scale = 137.1/3000 if scaletoCMS else 1
+  zmax = 50*scale
+
   repmap = {
     "coupling1": couplings[0],
     "coupling2": couplings[1],
@@ -87,6 +92,15 @@ def EFT2D(**kwargs):
         NLL[tuple(f(entry) for f in couplingfunctions)] = t.deltaNLL
     NLL.zero()
 
+    palettered = np.array([33., 28, 19, 54, 18, 225, 249])
+    palettegreen = np.array([51., 82, 101, 122, 185, 189, 249])
+    paletteblue = np.array([136., 204, 224, 225, 157, 79, 5])
+    paletteposition = np.array([0, 1. / zmax, 3.84 / zmax, .25, .5, .75, 1])
+#    palettered[0] = palettegreen[0] = paletteblue[0] = 0
+    palettered, palettegreen, paletteblue, paletteposition = palettered[[0, 3, 4, 5, 6]], palettegreen[[0, 3, 4, 5, 6]], paletteblue[[0, 3, 4, 5, 6]], paletteposition[[0, 3, 4, 5, 6]]
+    assert len(palettered) == len(palettegreen) == len(paletteblue) == len(paletteposition)
+    print ROOT.TColor.CreateGradientColorTable(len(palettered), paletteposition, palettered, palettegreen, paletteblue, 100); raw_input()
+
     g = NLL.TGraph2D()
 
     c = plotcopier.TCanvas("c", "", 8, 30, 800, 800)
@@ -107,7 +121,6 @@ def EFT2D(**kwargs):
     }[coupling] for coupling in couplings)
 
     h = g.GetHistogram()
-    scale = 137.1/3000 if args.scaletoCMS else 1
     h.Scale(scale)
 
     h.GetXaxis().SetTitle(xtitle)
@@ -116,7 +129,7 @@ def EFT2D(**kwargs):
     #g.GetYaxis().SetRangeUser(*yrange)
     h.GetZaxis().SetTitle("#minus2 #Deltaln L")
     h.GetZaxis().SetTitleOffset(1.4)
-    h.GetZaxis().SetRangeUser(0, 50*scale)
+    h.GetZaxis().SetRangeUser(0, zmax)
 
     h2 = h.Clone()
     h2.SetContour(2)

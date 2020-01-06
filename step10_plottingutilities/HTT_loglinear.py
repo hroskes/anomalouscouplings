@@ -24,19 +24,21 @@ from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
-def getplotname(analysis, comparecategories):
+def getplotname(analysis, comparecategories, writeup):
     if comparecategories:
         return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_categories_zoom.root".format(analysis)
+    if writeup:
+        return "limit_lumi3000.00_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
     return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
 
-def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
+def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide, writeup):
     assert len(mgs) == len(mglogs) == len(xdivides)+1
     for mg, mglog, xmin, xmax, fractionxmin, fractionxmax in izip(mgs, mglogs, [-setmax]+list(xdivides), list(xdivides)+[setmax], xboundaries[:-1], xboundaries[1:]):
         mglog.GetXaxis().SetLimits(xmin, xmax)
         mglog.GetXaxis().CenterTitle()
         mglog.GetYaxis().CenterTitle()
         mglog.SetMinimum(ydivide)
-        mglog.SetMaximum(250)
+        mglog.SetMaximum(250 if not writeup else 1000)
         style.applyaxesstyle(mglog)
         mglog.GetXaxis().SetLabelOffset(9999999)
         mglog.GetXaxis().SetTitleOffset(9999999)
@@ -59,7 +61,9 @@ def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide):
     mgs[0].GetXaxis().SetLabelOffset(0.007)
     mgs[-1].GetXaxis().SetLabelOffset(-0.012)
 
-    mgs[len(mgs)/2].GetXaxis().SetTitle(folders[0].xtitle)
+    xtitle = folders[0].xtitle
+    if writeup: xtitle = xtitle.replace("a2", "g2").replace("a3", "g4")
+    mgs[len(mgs)/2].GetXaxis().SetTitle(xtitle)
     for mg, mglog in izip(mgs[1:], mglogs[1:]):
         mglog.GetYaxis().SetLabelOffset(9999999)
         mglog.GetYaxis().SetTitleOffset(9999999)
@@ -77,17 +81,21 @@ def PRL_loglinear(**kwargs):
 
     markerposition = kwargs.pop("markerposition", None)
     onlyanalysis = kwargs.pop("analysis", None)
-    xdivides = sorted(float(_) for _ in kwargs.pop("xdivides", (-.03, .03)))
-    assert len(xdivides) == 2, xdivides
-    ydivide = float(kwargs.pop("ydivide", 11))
     saveas = kwargs.pop("saveas", None)
     comparecategories = bool(int(kwargs.pop("comparecategories", False)))
+    writeup = kwargs.pop("writeup", False)
+    assert not (comparecategories and writeup)
+    xdivides = sorted(float(_) for _ in kwargs.pop("xdivides", (-.03, .03) if not writeup else (-0.007, 0.007)))
+    assert len(xdivides) == 2, xdivides
+    ydivide = float(kwargs.pop("ydivide", 11 if not writeup else 75))
 
     commondrawlineskwargs.update(kwargs)
 
     saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_morecategories_finalforthesis")
     if comparecategories:
         saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_morecategories_yieldsystematics")
+    if writeup:
+        saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_morecategories_writeup")
 
     for k, v in commondrawlineskwargs.items():
         if k == "xpostext":
@@ -113,7 +121,7 @@ def PRL_loglinear(**kwargs):
 
         c = plotcopier.TCanvas("c{}".format(random.randint(1, 1000000)), "", 8, 30, 1600, 1600)
 
-        leftmargin = .1
+        leftmargin = .1 if not writeup else .15
         rightmargin = .02 #apply to the individual pads or 1 of the x axis gets cut off
         topmargin = .07
         bottommargin = .12
@@ -125,7 +133,10 @@ def PRL_loglinear(**kwargs):
         c.SetBottomMargin(0)
         xboundaries = [0, leftmargin+(1-leftmargin-rightmargin)/3, leftmargin+(1-leftmargin-rightmargin)*2/3, 1]
         yboundaries = [0, bottommargin+(1-bottommargin-topmargin)/2, 1]
-        if biglegend:
+        if writeup:
+            assert biglegend
+            legendposition = .4, .72, .7, .92
+        elif biglegend:
             if analysis == "fa2":
                 legendposition = .4, .57, .8, .87
             elif analysis == "fL1":
@@ -168,6 +179,28 @@ def PRL_loglinear(**kwargs):
             Folder("fa3fa2fL1fL1Zg_STXS_yieldsystematics/", "Fix others STXS", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=8, linewidth=2),
             Folder("fa3fa2fL1fL1Zg_morecategories_yieldsystematics/", "Float others 6 categories", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
             Folder("fa3fa2fL1fL1Zg_morecategories_yieldsystematics/", "Fix others 6 categories", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=3, linewidth=2),
+          ]
+        elif writeup:
+          if analysis == "fa3":
+            removepoints1 = [-0.6, 0.6]
+            removepoints2 = []
+            removepoints3 = []
+          if analysis == "fa2":
+            removepoints1 = [.22, .24, .3]
+            removepoints2 = []
+            removepoints3 = [-0.06]
+          if analysis == "fL1":
+            removepoints1 = [-.32, -.3, -.18, .3, -.52, -.5]
+            removepoints2 = [-.1, -.06, .06, .08, .24, .66]
+            removepoints3 = []
+          if analysis == "fL1Zg":
+            removepoints1 = [-.68, -.66, -.64, -.6, -0.56, -0.54, -0.52]
+            removepoints2 = []
+            removepoints3 = []
+          folders = [
+            Folder("fa3fa2fL1fL1Zg_morecategories_writeup/", "MELA", 2, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints1),
+            Folder("fa3fa2fL1fL1Zg_STXS_writeup/", "STXS stage 1", 4, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints2),
+            Folder("fa3fa2fL1fL1Zg_decay_writeup/", "decay only", ROOT.kGreen+3, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints3),
           ]
         else:
           assert "finalforthesis" in saveasdir
@@ -248,7 +281,7 @@ def PRL_loglinear(**kwargs):
         linearpads[-1].SetRightMargin(rightmargin * 1 / (xboundaries[-1] - xboundaries[-2]))
         linearpads[0].SetLeftMargin(leftmargin * 1 / (xboundaries[1] - xboundaries[0]))
 
-        applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide)
+        applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide, writeup)
 
         for i, (linearpad, mg) in enumerate(izip(linearpads, mgs)):
             linearpad.cd()
@@ -269,16 +302,17 @@ def PRL_loglinear(**kwargs):
         l.Draw()
         c.cd()
         style.applycanvasstyle(c)
-        style.CMS("", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)"
-                      .format(sum(_.dataluminosity for _ in config.productionsforcombine)),
-                      x1=0.007, x2=1.01, #???
-                      drawCMS=False, extratextsize=.039)
-        style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
+        if not writeup:
+            style.CMS("", lumi=None, lumitext="{:.1f} fb^{{-1}} (13 TeV)"
+                          .format(sum(_.dataluminosity for _ in config.productionsforcombine)),
+                          x1=0.007, x2=1.01, #???
+                          drawCMS=False, extratextsize=.039)
+            style.CMS("", x1=0.09, x2=1.025, y1=.86, y2=.94, CMStextsize=.06, extratextsize=.039)
         yaxislabel(folders[0].ytitle).Draw()
 
         mkdir_p(os.path.join(saveasdir, "preliminary"))
         mkdir_p(os.path.join(saveasdir, "workinprogress"))
-        plotname = getplotname(analysis, comparecategories)
+        plotname = getplotname(analysis, comparecategories, writeup)
         assert ".root" in plotname
 
         if saveas is not None:
