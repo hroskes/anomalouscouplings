@@ -325,6 +325,7 @@ def runcombine(analysis, foldername, **kwargs):
     floatothers = True
     setparametersforgrid = None
     onlyworkspace = False
+    usegs = analysis.isEFT
     for kw, kwarg in kwargs.iteritems():
         if kw == "channels":
             usechannels = [Channel(c) for c in kwarg.split(",")]
@@ -487,11 +488,13 @@ def runcombine(analysis, foldername, **kwargs):
             setparametersforgrid = kwarg.replace(":", "=")
         elif kw == "onlyworkspace":
             onlyworkspace = bool(int(kwarg))
+        elif kw == "usegs":
+            usegs = bool(int(kwarg))
         else:
             raise TypeError("Unknown kwarg: {}".format(kw))
 
     defaultPOI = "CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
-    if analysis.isEFT: defaultPOI = "g1"
+    if usegs: defaultPOI = "g1"
     if POI is None: POI = defaultPOI
 
     if runobs and not config.unblindscans:
@@ -518,14 +521,14 @@ def runcombine(analysis, foldername, **kwargs):
         assert False, POI
       assert scanrange[2] > scanrange[1], (scanrange[2], scanrange[1])
       while not internalscanrange[1] < hastoinclude:
+        assert submitjobs, (scanranges, internalscanrange, hastoinclude)
         internalscanrange[1] -= (internalscanrange[2] - internalscanrange[1])
         internalscanrange[3] += scanrange[0]-1
         internalscanrange[0] += scanrange[0]-1
-        assert submitjobs
       while not internalscanrange[2] > hastoinclude:
+        assert submitjobs, (scanranges, internalscanrange, hastoinclude)
         internalscanrange[2] += (internalscanrange[2] - internalscanrange[1])
         internalscanrange[0] += scanrange[0]-1
-        assert submitjobs
 
     if submitjobs:
         if not utilities.inscreen():
@@ -604,7 +607,7 @@ def runcombine(analysis, foldername, **kwargs):
         if sqrts is None:
             raise ValueError("Have to provide sqrts if you provide alsocombine!")
     if scanfai != analysis:
-        if analysis.isEFT:
+        if usegs:
             workspacefileappend += "_scan" + POI
         else:
             workspacefileappend += "_scan{}".format(scanfai)
@@ -708,7 +711,7 @@ def runcombine(analysis, foldername, **kwargs):
     if analysis.isdecayonly:
         repmap["savemu"] = repmap["savemu"].replace(",fa3_ggH,fCP_Htt,RV", "")
 
-    if analysis.isEFT:
+    if usegs:
         repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistogramsAi"
         repmap["savemu"] = "--saveSpecifiedFunc=g1,g2,g4,g1prime2,ghg2,ghg4,kappa,kappa_tilde"
         repmap["physicsoptions"] = "--PO verbose --PO allowPMF .oO[fais]Oo. "
