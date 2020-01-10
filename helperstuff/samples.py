@@ -58,7 +58,7 @@ class SumOfSamplesBase(object):
                       "("+
                       "+".join(
                                "({}*{})".format(weightname, couplingsq)
-                                   for weightname, couplingsq in factor
+                                   for weightname, couplingsq in sorted(factor)
                               )
                       +")" if factor else "0"
                       for factor in self.MC_weight_terms

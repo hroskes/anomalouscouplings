@@ -92,14 +92,14 @@ def EFT2D(**kwargs):
         NLL[tuple(f(entry) for f in couplingfunctions)] = t.deltaNLL
     NLL.zero()
 
-    palettered = np.array([33., 28, 19, 54, 18, 225, 249])
-    palettegreen = np.array([51., 82, 101, 122, 185, 189, 249])
-    paletteblue = np.array([136., 204, 224, 225, 157, 79, 5])
-    paletteposition = np.array([0, 1. / zmax, 3.84 / zmax, .25, .5, .75, 1])
-#    palettered[0] = palettegreen[0] = paletteblue[0] = 0
-    palettered, palettegreen, paletteblue, paletteposition = palettered[[0, 3, 4, 5, 6]], palettegreen[[0, 3, 4, 5, 6]], paletteblue[[0, 3, 4, 5, 6]], paletteposition[[0, 3, 4, 5, 6]]
+    palettered = np.array([25./256.,246./256.,1,0])
+    palettegreen = np.array([121./256.,198./256.,1,153./256.])
+    paletteblue = np.array([218./256.,108./256.,1,150./256.])
+    paletteposition = np.array([0.,2.3/zmax, 5.99/zmax, 1.0])
     assert len(palettered) == len(palettegreen) == len(paletteblue) == len(paletteposition)
-    print ROOT.TColor.CreateGradientColorTable(len(palettered), paletteposition, palettered, palettegreen, paletteblue, 100); raw_input()
+    ncont = 255
+    print ROOT.TColor.CreateGradientColorTable(len(palettered), paletteposition, palettered, palettegreen, paletteblue, ncont)
+    ROOT.gStyle.SetNumberContours(ncont)
 
     g = NLL.TGraph2D()
 
