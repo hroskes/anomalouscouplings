@@ -27,10 +27,10 @@ from helperstuff.utilities import cache, PlotCopier, TFile
 from limits import findwhereyequals, Point
 
 class Folder(object):
-    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None, secondcolumn=None, removepoints=None, forcepoints=None, transformx=lambda x: x):
+    def __init__(self, folder, title, color, analysis, subdir, plotname, graphnumber=None, repmap=None, linestyle=None, linewidth=None, secondcolumn=None, removepoints=None, forcepoints=None, transformx=lambda x: x, scale=1):
         if removepoints is None: removepoints = []
         if forcepoints is None: forcepoints = {}
-        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth, self.secondcolumn, self.removepoints, self.forcepoints, self.transformx = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth, secondcolumn, removepoints, forcepoints, transformx
+        self.__folder, self.__title, self.color, self.analysis, self.subdir, self.plotname, self.graphnumber, self.linestyle, self.linewidth, self.secondcolumn, self.removepoints, self.forcepoints, self.transformx, self.scale = folder, title, color, Analysis(analysis), subdir, plotname, graphnumber, linestyle, linewidth, secondcolumn, removepoints, forcepoints, transformx, scale
         self.repmap = {
                        "analysis": str(self.analysis),
                       }
@@ -75,6 +75,7 @@ class Folder(object):
                 print y[forceindices]
             x = np.array([self.transformx(_) for _ in x])
             y -= min(y)
+            y *= self.scale
             newg = ROOT.TGraph(len(x), x, y)
             newg.SetLineColor(self.color)
             if self.linestyle is not None:

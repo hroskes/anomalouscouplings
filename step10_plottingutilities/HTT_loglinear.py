@@ -24,11 +24,13 @@ from mergeplots import Folder
 
 analyses = "fa3", "fa2", "fL1", "fL1Zg"
 setmax = 1
-def getplotname(analysis, comparecategories, writeup):
+def getplotname(analysis, comparecategories, writeup, genreco):
     if comparecategories:
         return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_categories_zoom.root".format(analysis)
     if writeup:
         return "limit_lumi3000.00_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
+    if genreco:
+        return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_genreco_zoom.root".format(analysis)
     return "limit_lumi137.10_scan{}_101,-1.0,1.0_101,-0.02,0.02_compare_zoom.root".format(analysis)
 
 def applystyle(mgs, mglogs, folders, xboundaries, xdivides, ydivide, writeup):
@@ -83,8 +85,9 @@ def PRL_loglinear(**kwargs):
     onlyanalysis = kwargs.pop("analysis", None)
     saveas = kwargs.pop("saveas", None)
     comparecategories = bool(int(kwargs.pop("comparecategories", False)))
+    genreco = bool(int(kwargs.pop("genreco", False)))
     writeup = kwargs.pop("writeup", False)
-    assert not (comparecategories and writeup)
+    assert comparecategories + writeup + genreco <= 1
     xdivides = sorted(float(_) for _ in kwargs.pop("xdivides", (-.03, .03) if not writeup else (-0.007, 0.007)))
     assert len(xdivides) == 2, xdivides
     ydivide = float(kwargs.pop("ydivide", 11 if not writeup else 75))
@@ -95,6 +98,8 @@ def PRL_loglinear(**kwargs):
     if comparecategories:
         saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_morecategories_yieldsystematics")
     if writeup:
+        saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_morecategories_writeup")
+    if genreco:
         saveasdir = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1fL1Zg_morecategories_writeup")
 
     for k, v in commondrawlineskwargs.items():
@@ -201,6 +206,49 @@ def PRL_loglinear(**kwargs):
             Folder("fa3fa2fL1fL1Zg_morecategories_writeup/", "MELA", 2, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints1),
             Folder("fa3fa2fL1fL1Zg_STXS_writeup/", "STXS stage 1", 4, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints2),
             Folder("fa3fa2fL1fL1Zg_decay_writeup/", "decay only", ROOT.kGreen+3, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints3),
+          ]
+        elif genreco:
+          if analysis == "fa3":
+            removepointsgen1 = [-0.6, 0.6]
+            removepointsgen2 = []
+            removepoints1 = []
+            removepoints2 = [-0.28, 0.28]
+            removepoints3 = [-0.84, -0.82, -0.78, -0.6, -0.56, -0.5, -0.46, -0.42, 0.0008, 0.0012, 0.0016, 0.002, 0.0024, 0.0028, 0.004, 0.0044, 0.0052, 0.006, 0.0068, 0.0072, 0.0076, 0.0092, 0.0096, 0.0108, 0.0116, 0.014, 0.0148, 0.0152, 0.016, 0.0168, 0.0188, 0.0192]
+            removepoints4 = []
+            forcepoints3 = {0: (-2.193582599351042 - -2.2560191199747295) * 2}
+          if analysis == "fa2":
+            removepointsgen1 = [.22, .24, .3]
+            removepointsgen2 = []
+            removepoints1 = []
+            removepoints2 = [0.6, 0.66, 0.76]
+            removepoints3 = [-0.14, -0.08, -0.06]
+            removepoints4 = [-0.14, -0.12, -0.06, 0.08, 0.12, 0.14, 0.16, 0.2, 0.24, 0.26]
+            forcepoints3 = {0: (-2.193582599351042 - -2.2560191199747295) * 2}
+          if analysis == "fL1":
+            removepointsgen1 = [-.32, -.3, -.18, .3, -.52, -.5]
+            removepointsgen2 = []
+            removepoints1 = []
+            removepoints2 = []
+            removepoints3 = [-0.014, -0.0124, -0.0092, -0.0084, -0.0052, -0.0048, 0.018]
+            removepoints4 = [0.1, 0.12, 0.16, 0.18, 0.22, 0.26, 0.3]
+            forcepoints3 = {0: (-2.193582599351042 - -2.2560191199747295) * 2}
+          if analysis == "fL1Zg":
+            removepointsgen1 = [-.68, -.66, -.64, -.6, -0.56, -0.54, -0.52]
+            removepointsgen2 = []
+            removepoints1 = []
+            removepoints2 = []
+            removepoints3 = []
+            removepoints4 = [-0.76, -0.66, -0.56]
+            forcepoints3 = {0: (-2.193582599351042 - -2.2560191199747295) * 2}
+          folders = [
+#            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Observed, fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2, removepoints=removepoints1),
+            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Reco, fix others", 4, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2, removepoints=removepoints2),
+            Folder("fa3fa2fL1fL1Zg_morecategories_writeup/",        "Gen, fix others", 4, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepointsgen1, scale=137.1/3000),
+            Folder("fa3fa2fL1fL1Zg_morecategories_writeup/",        "Gen, fix others, * 0.5", 4, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._fixothers_101,-1.0,1.0_101,-0.02,0.02.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2, removepoints=removepointsgen1, scale=137.1/3000/2),
+#            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Observed, float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2, removepoints=removepoints3, forcepoints=forcepoints3),
+            Folder("fa3fa2fL1fL1Zg_morecategories_finalforthesis/", "Reco, float others", 2, analysis, subdir, plotname="limit_lumi137.10_scan.oO[analysis]Oo._101,-1.0,1.0_101,-0.02,0.02_merged.root", graphnumber=1, repmap=repmap, linestyle=7, linewidth=2, removepoints=removepoints4),
+            Folder("fa3fa2fL1fL1Zg_morecategories_writeup/",        "Gen, float others", 2, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepointsgen2, scale=137.1/3000),
+            Folder("fa3fa2fL1fL1Zg_morecategories_writeup/",        "Gen, float others, * 0.5", 2, analysis, subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._101,-0.02,0.02_merged.root", graphnumber=0, repmap=repmap, linestyle=1, linewidth=2, removepoints=removepointsgen2, scale=137.1/3000/2),
           ]
         else:
           assert "finalforthesis" in saveasdir
@@ -312,7 +360,7 @@ def PRL_loglinear(**kwargs):
 
         mkdir_p(os.path.join(saveasdir, "preliminary"))
         mkdir_p(os.path.join(saveasdir, "workinprogress"))
-        plotname = getplotname(analysis, comparecategories, writeup)
+        plotname = getplotname(analysis, comparecategories, writeup, genreco)
         assert ".root" in plotname
 
         if saveas is not None:
