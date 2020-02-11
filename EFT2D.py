@@ -16,7 +16,7 @@ import ROOT
 
 from helperstuff import eft, config, stylefunctions as style
 from helperstuff.extendedcounter import ExtendedCounter
-from helperstuff.utilities import cd, PlotCopier, TFile, mkdir_p
+from helperstuff.utilities import cd, KeepWhileOpenFile, mkdir_p, PlotCopier, TFile
 
 combinecmd = [
   "combine",
@@ -73,9 +73,11 @@ def EFT2D(**kwargs):
 
   outname = "higgsCombine{appendname}.MultiDimFit.mH125.root".format(**repmap)
 
-  with cd(os.path.join(config.repositorydir, "scans", "cards_fa3fa2fL1_EFT_writeup")):
-    if not os.path.exists(outname):
-      subprocess.check_call(cmd)
+  with cd(os.path.join(config.repositorydir, "scans", "cards_fa3fa2fL1_EFT_writeup_width")):
+    with KeepWhileOpenFile(outname+".tmp") as kwof:
+      if not kwof: return
+      if not os.path.exists(outname):
+        subprocess.check_call(cmd)
 
     with TFile(outname) as f:
       t = f.limit
@@ -147,9 +149,9 @@ def EFT2D(**kwargs):
     SM.SetMarkerSize(2)
     SM.Draw("P")
 
-    mkdir_p(os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup", "scaletoCMS"))
+    mkdir_p(os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup_width", "scaletoCMS"))
 
-    plotname = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup", "scaletoCMS" if args.scaletoCMS else "", "2D_{coupling1}_{coupling2}{append}.{ext}")
+    plotname = os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup_width", "scaletoCMS" if args.scaletoCMS else "", "2D_{coupling1}_{coupling2}{append}.{ext}")
 
     for repmap["ext"] in "png root pdf C".split():
       c.SaveAs(plotname.format(append="_nolegend", **repmap))
@@ -175,7 +177,7 @@ def EFT2D(**kwargs):
     c = plotcopier.TCanvas()
     l.Draw()
     for ext in "png pdf root C".split():
-      c.SaveAs(os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup", "scaletoCMS" if args.scaletoCMS else "", "2D_legend."+ext))
+      c.SaveAs(os.path.join(config.plotsbasedir, "limits", "fa3fa2fL1_EFT_writeup_width", "scaletoCMS" if args.scaletoCMS else "", "2D_legend."+ext))
 
 if __name__ == "__main__":
   with PlotCopier() as pc:

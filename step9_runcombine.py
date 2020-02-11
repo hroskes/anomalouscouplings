@@ -719,6 +719,8 @@ def runcombine(analysis, foldername, **kwargs):
         repmap["setparameters"] = repmap["setparameters"].replace("CMS_zz4l_fai{}=.oO[expectfai]Oo.".format(analysis.fais.index(scanfai)+1), "").lstrip(",")
         repmap["setPOI"] = "-P .oO[POI]Oo."
 
+    repmap["physicsoptions"] += " --PO " + ("EFT" if analysis.isEFT else "noEFT")
+
     folder = os.path.join(config.repositorydir, "scans", subdirectory, "cards_{}".format(fullfoldername))
     mkdir_p(folder)
     with cd(folder):

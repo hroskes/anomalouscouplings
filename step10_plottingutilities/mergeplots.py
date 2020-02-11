@@ -149,7 +149,7 @@ def mergeplots(analysis, **kwargs):
     }
     subdir = kwargs.pop("subdir", "")
     lumi = kwargs.pop("lumi", None)
-    outdir = kwargs.pop("outdir", "fa3fa2fL1fL1Zg_morecategories_writeup" if not EFT else "fa3fa2fL1_EFT_writeup")
+    outdir = kwargs.pop("outdir", "fa3fa2fL1fL1Zg_morecategories_writeup" if not EFT else "fa3fa2fL1_EFT_writeup_width")
     plotcopier = kwargs.pop("plotcopier", ROOT)
     drawlineskwargs.update(kwargs)
 
@@ -203,8 +203,8 @@ def mergeplots(analysis, **kwargs):
             removepoints2 = []
             transformx = lambda g1prime2over1e4: eft.czbox(ghz1prime2=g1prime2over1e4 * 1e4)
         folders = [
-            Folder("fa3fa2fL1_EFT_writeup/", "MELA", 2, "fa3fa2fL1_EFT", subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints1, transformx=transformx),
-            Folder("fa3fa2fL1_EFT_STXS_writeup/", "STXS stage 1", 4, "fa3fa2fL1_EFT", subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints2, transformx=transformx),
+            Folder("fa3fa2fL1_EFT_writeup_width/", "MELA", 2, "fa3fa2fL1_EFT", subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints1, transformx=transformx),
+            Folder("fa3fa2fL1_EFT_STXS_writeup_width/", "STXS stage 1", 4, "fa3fa2fL1_EFT", subdir, plotname="limit_lumi3000.00_scan.oO[analysis]Oo._.oO[scanrange]Oo..root", graphnumber=0, repmap=repmap, linestyle=2, linewidth=2, removepoints=removepoints2, transformx=transformx),
         ]
         drawlineskwargs["xmin"], drawlineskwargs["xmax"] = xmin, xmax = sorted((transformx(xmin), transformx(xmax)))
 

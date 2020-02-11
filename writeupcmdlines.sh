@@ -4,20 +4,20 @@ set -euo pipefail
 
 cd $(dirname $0)
 
-#cmd="sbatch --mem 4G --time 2:0:0 slurm.sh"; moreargs=""
-export SLURM_JOBID=123456; cmd="python"; moreargs=""
+cmd="sbatch --mem 4G --time 2:0:0 slurm.sh"; moreargs=""
+#export SLURM_JOBID=123456; cmd="python"; moreargs=""
 #cmd="srun --mem 4G --time 3:0:0 slurm.sh"; moreargs=""
 #cmd="sbatch --mem 12G slurm.sh"; moreargs="onlyworkspace=1"
 
-$cmd ./step9_runcombine.py fa3fa2fL1_EFT_STXS writeup productions=GEN_190908 scanranges=101,0.9,1.1 scanfai=fa3 runobs=0 expectvalues=1
-$cmd ./step9_runcombine.py fa3fa2fL1_EFT_STXS writeup productions=GEN_190908 scanranges=101,-0.02,0.02 scanfai=fa3 runobs=0 POI=g1prime2
-$cmd ./step9_runcombine.py fa3fa2fL1_EFT_STXS writeup productions=GEN_190908 scanranges=101,-0.05,0.05 scanfai=fa3 runobs=0 POI=g2
-$cmd ./step9_runcombine.py fa3fa2fL1_EFT_STXS writeup productions=GEN_190908 scanranges=101,-0.1,0.1 scanfai=fa3 runobs=0 POI=g4
+$cmd ./step9_runcombine.py fa3fa2fL1_EFT_STXS writeup_width productions=GEN_190908 scanranges=101,0.9,1.1 scanfai=fa3 runobs=0 expectvalues=1
+$cmd ./step9_runcombine.py fa3fa2fL1_EFT_STXS writeup_width productions=GEN_190908 scanranges=101,-0.02,0.02 scanfai=fa3 runobs=0 POI=g1prime2
+$cmd ./step9_runcombine.py fa3fa2fL1_EFT_STXS writeup_width productions=GEN_190908 scanranges=101,-0.05,0.05 scanfai=fa3 runobs=0 POI=g2
+$cmd ./step9_runcombine.py fa3fa2fL1_EFT_STXS writeup_width productions=GEN_190908 scanranges=101,-0.1,0.1 scanfai=fa3 runobs=0 POI=g4
 
-$cmd ./step9_runcombine.py fa3fa2fL1_EFT writeup productions=GEN_190908 scanranges=101,0.9,1.1 scanfai=fa3 runobs=0 expectvalues=1
-$cmd ./step9_runcombine.py fa3fa2fL1_EFT writeup productions=GEN_190908 scanranges=101,-0.02,0.02 scanfai=fa3 runobs=0 POI=g1prime2
-$cmd ./step9_runcombine.py fa3fa2fL1_EFT writeup productions=GEN_190908 scanranges=101,-0.05,0.05 scanfai=fa3 runobs=0 POI=g2
-$cmd ./step9_runcombine.py fa3fa2fL1_EFT writeup productions=GEN_190908 scanranges=101,-0.1,0.1 scanfai=fa3 runobs=0 POI=g4
+$cmd ./step9_runcombine.py fa3fa2fL1_EFT writeup_width productions=GEN_190908 scanranges=101,0.9,1.1 scanfai=fa3 runobs=0 expectvalues=1
+$cmd ./step9_runcombine.py fa3fa2fL1_EFT writeup_width productions=GEN_190908 scanranges=101,-0.02,0.02 scanfai=fa3 runobs=0 POI=g1prime2
+$cmd ./step9_runcombine.py fa3fa2fL1_EFT writeup_width productions=GEN_190908 scanranges=101,-0.05,0.05 scanfai=fa3 runobs=0 POI=g2
+$cmd ./step9_runcombine.py fa3fa2fL1_EFT writeup_width productions=GEN_190908 scanranges=101,-0.1,0.1 scanfai=fa3 runobs=0 POI=g4
 
 
 
