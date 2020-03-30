@@ -127,7 +127,7 @@ def mergeplots(analysis, **kwargs):
         defaultxmin = -defaultxmax
     else:
         defaultxmin, defaultxmax = {
-            "g1": (0.9, 1.1),
+            "g1": (.7, 1.1),
             "g2": (-0.05, 0.05),
             "g4": (-0.1, 0.1),
             "g1prime2": (-0.02, 0.02),
@@ -180,7 +180,7 @@ def mergeplots(analysis, **kwargs):
         ]
     else:
         repmap.update(scanrange={
-            "g1": "101,0.9,1.1",
+            "g1": "101,0.7,1.1",
             "g2": "scang2_101,-0.05,0.05",
             "g4": "scang4_101,-0.1,0.1",
             "g1prime2": "scang1prime2_101,-0.02,0.02",
@@ -188,7 +188,7 @@ def mergeplots(analysis, **kwargs):
         plotname = "limit_lumi3000.00_scan.oO[analysis]Oo._compare.root"
         if analysis == "g1":
             removepoints1 = []
-            removepoints2 = [0.922]
+            removepoints2 = [1-0.252]
             transformx = lambda g1: eft.deltacz(ghz1=g1)
         if analysis == "g2":
             removepoints1 = []

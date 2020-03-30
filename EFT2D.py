@@ -61,7 +61,7 @@ def EFT2D(**kwargs):
     "coupling1": couplings[0],
     "coupling2": couplings[1],
     "parameterranges": ":".join(coupling+"="+{
-      "g1": "0.85,1.1",
+      "g1": "0.7,1.1",
       "g2": "-0.05,0.05",
       "g4": "-0.1,0.1",
       "g1prime2": "-0.02,0.02",
@@ -72,6 +72,25 @@ def EFT2D(**kwargs):
   cmd = [_.format(**repmap) for _ in combinecmd]
 
   outname = "higgsCombine{appendname}.MultiDimFit.mH125.root".format(**repmap)
+
+  killpoints = {
+    ("g1", "g1prime2"): [],
+    ("g1", "g2"): [
+      (-0.3,0.07241827),
+      (-0.292,-0.08690193),
+      (-0.284,-0.07241827),
+      (-0.276,-0.1882875),
+      (-0.26,0.1448365),
+      (-0.26,0.1738039),
+      (-0.252,-0.1593202),
+      (-0.252,-0.07241827),
+      (-0.228,0.05793462),
+    ],
+    ("g1", "g4"): [],
+    ("g2", "g1prime2"): [],
+    ("g1prime2", "g4"): [],
+    ("g2", "g4"): [],
+  }[tuple(couplings)]
 
   with cd(os.path.join(config.repositorydir, "scans", "cards_fa3fa2fL1_EFT_writeup_width")):
     with KeepWhileOpenFile(outname+".tmp") as kwof:
@@ -91,7 +110,12 @@ def EFT2D(**kwargs):
       }[_] for _ in couplings]
 
       for entry in t:
-        NLL[tuple(f(entry) for f in couplingfunctions)] = t.deltaNLL
+        key = tuple(f(entry) for f in couplingfunctions)
+        if not any(
+          np.all(np.isclose(key, killpoint))
+          for killpoint in killpoints
+        ):
+          NLL[key] = t.deltaNLL
     NLL.zero()
 
     palettered = np.array([25./256.,246./256.,1,0])
@@ -100,7 +124,7 @@ def EFT2D(**kwargs):
     paletteposition = np.array([0.,2.3/zmax, 5.99/zmax, 1.0])
     assert len(palettered) == len(palettegreen) == len(paletteblue) == len(paletteposition)
     ncont = 255
-    print ROOT.TColor.CreateGradientColorTable(len(palettered), paletteposition, palettered, palettegreen, paletteblue, ncont)
+    ROOT.TColor.CreateGradientColorTable(len(palettered), paletteposition, palettered, palettegreen, paletteblue, ncont)
     ROOT.gStyle.SetNumberContours(ncont)
 
     g = NLL.TGraph2D()
