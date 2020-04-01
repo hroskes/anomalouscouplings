@@ -454,6 +454,7 @@ class HypothesisLine(object):
           "VBF": ("VBF", "VH"),
           "VH": ("VBF", "VH"),
           "ZH": ("VBF", "VH"),
+          "WH": ("VBF", "VH"),
         }[productionmode]
         numerator = sum(
           Template(production, "fa3fa2fL1fL1Zg_morecategories", ca, ch, "0+", pm).gettemplate().Integral() * production.dataluminosity

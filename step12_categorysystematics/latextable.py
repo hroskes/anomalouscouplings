@@ -24,7 +24,7 @@ from helperstuff.utilities import KeyDefaultDict, MultiplyCounter, tfiles
 
 from discriminantplots import getscaletos, gettrees, getweights, makehistogram, makehistogramnormalization, makehistogramrescaling, HypothesisLine, masscut
 
-categories = list(Category(_) for _ in ("VBFtagged", "VHHadrtagged", "VHLepttagged", "VBF1jtagged", "Boosted", "Untagged"))
+categories = list(Category(_) for _ in ("Untagged", "Boosted", "VBF1jtagged", "VBFtagged", "VHLepttagged", "VHHadrtagged"))
 channels = list(Channel(_) for _ in ("4e", "4mu", "2e2mu"))
 categorizationname = "category_0P_or_0M_or_a2_or_L1_or_L1Zg"
 
@@ -292,50 +292,58 @@ class Section(object):
 def maketable():
   sections = [
     Section("SM",
-      SlashRow(
-        Row("VBF", "0+", title="VBF signal"),
-        Row("VBF", "0-", title="VBF signal"),
-        Row("VBF", "a2", title="VBF signal"),
-        Row("VBF", "L1", title="VBF signal"),
-        Row("VBF", "L1Zg", title="VBF signal"),
-        title="VBF signal",
-      ),
-      SlashRow(
-        Row("VH", "0+", title=r"$\VH$ signal"),
-        Row("VH", "0-", title=r"$\VH$ signal"),
-        Row("VH", "a2", title=r"$\VH$ signal"),
-        Row("VH", "L1", title=r"$\VH$ signal"),
-        Row("VH", "L1Zg", title=r"$\VH$ signal"),
-        title=r"$\VH$ signal",
-      ),
 #      SlashRow(
-        Row("ggH", "0+", title=r"$\ggH$ signal"),
+        Row("ggH", "0+", title=r"$\ggH$ sig."),
 #        Row("ggH", "0-", title=r"$\ggH$ signal"),
 #        Row("ggH", "a2", title=r"$\ggH$ signal"),
 #        Row("ggH", "L1", title=r"$\ggH$ signal"),
 #        Row("ggH", "L1Zg", title=r"$\ggH$ signal"),
 #        title=r"$\ggH$ signal"
 #      ),
+      SlashRow(
+        Row("VBF", "0+", title="VBF sig."),
+        Row("VBF", "0-", title="VBF sig."),
+        Row("VBF", "a2", title="VBF sig."),
+        Row("VBF", "L1", title="VBF sig."),
+        Row("VBF", "L1Zg", title="VBF sig."),
+        title="VBF sig.",
+      ),
+      SlashRow(
+        Row("WH", "0+", title=r"$\WH$ sig."),
+        Row("WH", "0-", title=r"$\WH$ sig."),
+        Row("WH", "a2", title=r"$\WH$ sig."),
+        Row("WH", "L1", title=r"$\WH$ sig."),
+        Row("WH", "L1Zg", title=r"$\WH$ sig."),
+        title=r"$\WH$ sig.",
+      ),
+      SlashRow(
+        Row("ZH", "0+", title=r"$\ZH$ sig."),
+        Row("ZH", "0-", title=r"$\ZH$ sig."),
+        Row("ZH", "a2", title=r"$\ZH$ sig."),
+        Row("ZH", "L1", title=r"$\ZH$ sig."),
+        Row("ZH", "L1Zg", title=r"$\ZH$ sig."),
+        title=r"$\ZH$ sig.",
+      ),
 #      SlashRow(
-        Row("ttH", "0+", title=r"$\ttH$ signal"),
-#        Row("ttH", "0-", title=r"$\ttH$ signal"),
-#        Row("ttH", "a2", title=r"$\ttH$ signal"),
-#        Row("ttH", "L1", title=r"$\ttH$ signal"),
-#        Row("ttH", "L1Zg", title=r"$\ttH$ signal"),
-#        title=r"$\ttH$ signal"
+        Row("ttH", "0+", title=r"$\ttH$ sig."),
+#        Row("ttH", "0-", title=r"$\ttH$ sig."),
+#        Row("ttH", "a2", title=r"$\ttH$ sig."),
+#        Row("ttH", "L1", title=r"$\ttH$ sig."),
+#        Row("ttH", "L1Zg", title=r"$\ttH$ sig."),
+#        title=r"$\ttH$ sig."
 #      ),
 #      SlashRow(
-        Row("bbH", "0+", title=r"$\bbH$ signal"),
-#        Row("bbH", "0-", title=r"$\bbH$ signal"),
-#        Row("bbH", "a2", title=r"$\bbH$ signal"),
-#        Row("bbH", "L1", title=r"$\bbH$ signal"),
-#        Row("bbH", "L1Zg", title=r"$\bbH$ signal"),
-#        title=r"$\bbH$ signal"
+        Row("bbH", "0+", title=r"$\bbH$ sig."),
+#        Row("bbH", "0-", title=r"$\bbH$ sig."),
+#        Row("bbH", "a2", title=r"$\bbH$ sig."),
+#        Row("bbH", "L1", title=r"$\bbH$ sig."),
+#        Row("bbH", "L1Zg", title=r"$\bbH$ sig."),
+#        title=r"$\bbH$ sig."
 #      ),
     ),
     Section("bkg",
-      Row("ggZZ", title=r"\Pg\Pg\to4\ell bkg."),
       Row("qqZZ", title=r"$\qqbar\to4\ell$ bkg."),
+      Row("ggZZ", title=r"\Pg\Pg\to4\ell bkg."),
       Row("ZX", title=r"$\Z\!+\!\X$ bkg."),
     ),
   ]
