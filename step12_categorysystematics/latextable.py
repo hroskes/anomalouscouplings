@@ -290,56 +290,69 @@ class Section(object):
     return result.pop()
 
 def maketable():
+  signalrows = [
+#    SlashRow(
+      Row("ggH", "0+", title=r"$\ggH$ sig."),
+#      Row("ggH", "0-", title=r"$\ggH$ signal"),
+#      Row("ggH", "a2", title=r"$\ggH$ signal"),
+#      Row("ggH", "L1", title=r"$\ggH$ signal"),
+#      Row("ggH", "L1Zg", title=r"$\ggH$ signal"),
+#      title=r"$\ggH$ signal"
+#    ),
+    SlashRow(
+      Row("VBF", "0+", title="VBF sig."),
+      Row("VBF", "0-", title="VBF sig."),
+      Row("VBF", "a2", title="VBF sig."),
+      Row("VBF", "L1", title="VBF sig."),
+      Row("VBF", "L1Zg", title="VBF sig."),
+      title="VBF sig.",
+    ),
+    SlashRow(
+      Row("WH", "0+", title=r"$\WH$ sig."),
+      Row("WH", "0-", title=r"$\WH$ sig."),
+      Row("WH", "a2", title=r"$\WH$ sig."),
+      Row("WH", "L1", title=r"$\WH$ sig."),
+      Row("WH", "L1Zg", title=r"$\WH$ sig."),
+      title=r"$\WH$ sig.",
+    ),
+    SlashRow(
+      Row("ZH", "0+", title=r"$\ZH$ sig."),
+      Row("ZH", "0-", title=r"$\ZH$ sig."),
+      Row("ZH", "a2", title=r"$\ZH$ sig."),
+      Row("ZH", "L1", title=r"$\ZH$ sig."),
+      Row("ZH", "L1Zg", title=r"$\ZH$ sig."),
+      title=r"$\ZH$ sig.",
+    ),
+#    SlashRow(
+      Row("ttH", "0+", title=r"$\ttH$ sig."),
+#      Row("ttH", "0-", title=r"$\ttH$ sig."),
+#      Row("ttH", "a2", title=r"$\ttH$ sig."),
+#      Row("ttH", "L1", title=r"$\ttH$ sig."),
+#      Row("ttH", "L1Zg", title=r"$\ttH$ sig."),
+#      title=r"$\ttH$ sig."
+#    ),
+#    SlashRow(
+      Row("bbH", "0+", title=r"$\bbH$ sig."),
+#      Row("bbH", "0-", title=r"$\bbH$ sig."),
+#      Row("bbH", "a2", title=r"$\bbH$ sig."),
+#      Row("bbH", "L1", title=r"$\bbH$ sig."),
+#      Row("bbH", "L1Zg", title=r"$\bbH$ sig."),
+#      title=r"$\bbH$ sig."
+#    ),
+  ]
+  signalrows.append(
+    SlashRow(
+      TotalRow(*(_.rows[0] if isinstance(_, SlashRow) else _ for _ in signalrows), title="Signal expected"),
+      TotalRow(*(_.rows[1] if isinstance(_, SlashRow) else _ for _ in signalrows), title="Signal expected"),
+      TotalRow(*(_.rows[2] if isinstance(_, SlashRow) else _ for _ in signalrows), title="Signal expected"),
+      TotalRow(*(_.rows[3] if isinstance(_, SlashRow) else _ for _ in signalrows), title="Signal expected"),
+      TotalRow(*(_.rows[4] if isinstance(_, SlashRow) else _ for _ in signalrows), title="Signal expected"),
+      title="Signal expected",
+    )
+  )
   sections = [
     Section("SM",
-#      SlashRow(
-        Row("ggH", "0+", title=r"$\ggH$ sig."),
-#        Row("ggH", "0-", title=r"$\ggH$ signal"),
-#        Row("ggH", "a2", title=r"$\ggH$ signal"),
-#        Row("ggH", "L1", title=r"$\ggH$ signal"),
-#        Row("ggH", "L1Zg", title=r"$\ggH$ signal"),
-#        title=r"$\ggH$ signal"
-#      ),
-      SlashRow(
-        Row("VBF", "0+", title="VBF sig."),
-        Row("VBF", "0-", title="VBF sig."),
-        Row("VBF", "a2", title="VBF sig."),
-        Row("VBF", "L1", title="VBF sig."),
-        Row("VBF", "L1Zg", title="VBF sig."),
-        title="VBF sig.",
-      ),
-      SlashRow(
-        Row("WH", "0+", title=r"$\WH$ sig."),
-        Row("WH", "0-", title=r"$\WH$ sig."),
-        Row("WH", "a2", title=r"$\WH$ sig."),
-        Row("WH", "L1", title=r"$\WH$ sig."),
-        Row("WH", "L1Zg", title=r"$\WH$ sig."),
-        title=r"$\WH$ sig.",
-      ),
-      SlashRow(
-        Row("ZH", "0+", title=r"$\ZH$ sig."),
-        Row("ZH", "0-", title=r"$\ZH$ sig."),
-        Row("ZH", "a2", title=r"$\ZH$ sig."),
-        Row("ZH", "L1", title=r"$\ZH$ sig."),
-        Row("ZH", "L1Zg", title=r"$\ZH$ sig."),
-        title=r"$\ZH$ sig.",
-      ),
-#      SlashRow(
-        Row("ttH", "0+", title=r"$\ttH$ sig."),
-#        Row("ttH", "0-", title=r"$\ttH$ sig."),
-#        Row("ttH", "a2", title=r"$\ttH$ sig."),
-#        Row("ttH", "L1", title=r"$\ttH$ sig."),
-#        Row("ttH", "L1Zg", title=r"$\ttH$ sig."),
-#        title=r"$\ttH$ sig."
-#      ),
-#      SlashRow(
-        Row("bbH", "0+", title=r"$\bbH$ sig."),
-#        Row("bbH", "0-", title=r"$\bbH$ sig."),
-#        Row("bbH", "a2", title=r"$\bbH$ sig."),
-#        Row("bbH", "L1", title=r"$\bbH$ sig."),
-#        Row("bbH", "L1Zg", title=r"$\bbH$ sig."),
-#        title=r"$\bbH$ sig."
-#      ),
+      *signalrows
     ),
     Section("bkg",
       Row("qqZZ", title=r"$\qqbar\to4\ell$ bkg."),
