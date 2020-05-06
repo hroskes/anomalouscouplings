@@ -827,7 +827,7 @@ class Plot(object):
         linewidth=2,
         fillcolor=0,
         fillstyle=0,
-        legendname="VBF+VH "+hypothesis.legendname,
+        legendname="VBF+VH       "+hypothesis.legendname,
         legendlpf="f",
         addonbottom=[ZZhistogram],
         mirror=isDCP is not None and hypothesis.ispure,
@@ -849,7 +849,8 @@ class Plot(object):
         linewidth=2,
         fillcolor=0,
         fillstyle=0,
-        legendname="Total "+hypothesis.legendname,
+#        legendname="Total "+hypothesis.legendname,
+        legendname="Total",
         legendlpf="l",
         mirror=isDCP == "prod" or (isDCP == "dec" and hypothesis.ispure),
         rescalings=[ffHrescaling for _ in ffHtrees],
@@ -904,6 +905,7 @@ class Plot(object):
   def makeplot(self):
     c = self.__plotcopier.TCanvas("c_"+self.__name, "",  8, 30, 800, 800)
     style.applycanvasstyle(c)
+    c.SetBottomMargin(0.14)
 
     for h in self.histograms+self.graphs:
       print self, h
@@ -918,6 +920,24 @@ class Plot(object):
       hstack.Add(h.histogram)
       if not h.inmainlegend:
         h.addtolegend(l)
+
+    if self.__iscategorydiscriminant:
+      dummycolor = 1
+      solidstyle = 1
+      dummywidth = 2
+      dashedstyle = {h.histogram.GetLineStyle() for h in self.histograms if h.histogram.GetLineStyle() != 1}.pop()
+
+      dummysolid = ROOT.TH1F("dummy_"+self.__name+"solid", "", 1, 0, 1)
+      dummysolid.SetLineColor(dummycolor)
+      dummysolid.SetLineWidth(dummywidth)
+      dummysolid.SetLineStyle(solidstyle)
+      l.AddEntry(dummysolid, "Total", "l")
+
+      dummydashed = ROOT.TH1F("dummy_"+self.__name+"dashed", "", 1, 0, 1)
+      dummydashed.SetLineColor(dummycolor)
+      dummydashed.SetLineWidth(dummywidth)
+      dummydashed.SetLineStyle(dashedstyle)
+      l.AddEntry(dummydashed, self.__iscategorydiscriminant, "l")
 
     hstack.Draw("hist nostack")
     style.applyaxesstyle(hstack)
@@ -936,8 +956,18 @@ class Plot(object):
 
     style.CMS(self.__CMStext, lumi)
 
+    """
+    HVV4ltext = ROOT.TPaveText(.2, .87, .4, .92, "brNDC")
+    HVV4ltext.SetBorderSize(0)
+    HVV4ltext.SetTextAlign(12)
+    HVV4ltext.SetTextSize(0.045)
+    HVV4ltext.SetFillStyle(0)
+    HVV4ltext.SetTextFont(42)
+    HVV4ltext.AddText(0.01,0.01,"HVV")
+    HVV4ltext.Draw()
+
     if self.__categorylabel is not None:
-      categorytext = ROOT.TPaveText(.57, .5, .91, .6, "brNDC")
+      categorytext = ROOT.TPaveText(.4, .87, .65, .92, "brNDC")
       categorytext.SetBorderSize(0)
       categorytext.SetTextAlign(12)
       categorytext.SetTextSize(0.045)
@@ -947,7 +977,7 @@ class Plot(object):
       categorytext.Draw()
 
     if self.__Dbkglabel is not None:
-      Dbkgtext = ROOT.TPaveText(.57, .4, .91, .5, "brNDC")
+      Dbkgtext = ROOT.TPaveText(.65, .87, .9, .92, "brNDC")
       Dbkgtext.SetBorderSize(0)
       Dbkgtext.SetTextAlign(12)
       Dbkgtext.SetTextSize(0.045)
@@ -955,6 +985,22 @@ class Plot(object):
       Dbkgtext.SetTextFont(42)
       Dbkgtext.AddText(0.01,0.01,self.__Dbkglabel)
       Dbkgtext.Draw()
+    """
+
+    textparts = ["HVV", "H#rightarrow4l"]
+    if self.__categorylabel is not None:
+      textparts.append(self.__categorylabel)
+    if self.__Dbkglabel is not None:
+      textparts.append(self.__Dbkglabel)
+
+    labeltext = ROOT.TPaveText(.2, .87, .4, .92, "brNDC")
+    labeltext.SetBorderSize(0)
+    labeltext.SetTextAlign(12)
+    labeltext.SetTextSize(0.045)
+    labeltext.SetFillStyle(0)
+    labeltext.SetTextFont(42)
+    labeltext.AddText(0.01,0.01,", ".join(textparts))
+    labeltext.Draw()
 
     if self.__iscategorydiscriminant:
       line = ROOT.TLine(0.5, 0, 0.5, self.__ymax * .4)
@@ -1040,12 +1086,12 @@ def makeplots(filter):
         xformula="D_0minus_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([0, 1./3, 2./3, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Untagged",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=150,
+        ymax=130,
         plotcopier=pc,
         CMStext="",
       ),
@@ -1057,14 +1103,14 @@ def makeplots(filter):
         xformula="D_0hplus_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([0, .5, .7, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Untagged",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=150,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_L1_decay",
@@ -1074,14 +1120,14 @@ def makeplots(filter):
         xformula="D_L1_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([0, .55, .8, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Untagged",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=150,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_L1Zg_decay",
@@ -1091,14 +1137,14 @@ def makeplots(filter):
         xformula="D_L1Zg_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([0, .4, .55, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Untagged",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=150,
+        ymax=140,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_CP_decay",
@@ -1108,15 +1154,15 @@ def makeplots(filter):
         xformula="D_CP_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([-1, 0., 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Untagged",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=150,
+        ymax=120,
         plotcopier=pc,
         isDCP="dec",
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_int_decay",
@@ -1126,14 +1172,14 @@ def makeplots(filter):
         xformula="D_int_decay",
         cutformula=untaggedenrichcut,
         binning=np.array([-1, .8, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Untagged",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=200,
+        ymax=180,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_0minus_VBFdecay",
@@ -1143,12 +1189,12 @@ def makeplots(filter):
         xformula="D_0minus_VBFdecay",
         cutformula=VBFtaggedenrichcut,
         binning=np.array([0, .1, .9, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-2jet",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=15,
+        ymax=14,
         plotcopier=pc,
         CMStext="",
       ),
@@ -1160,12 +1206,12 @@ def makeplots(filter):
         xformula="D_0hplus_VBFdecay",
         cutformula=VBFtaggedenrichcut,
         binning=np.array([0, .1, .9, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-2jet",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=15,
+        ymax=14,
         plotcopier=pc,
         CMStext="",
       ),
@@ -1177,12 +1223,12 @@ def makeplots(filter):
         xformula="D_L1_VBFdecay",
         cutformula=VBFtaggedenrichcut,
         binning=np.array([0, .1, .9, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-2jet",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=15,
+        ymax=14,
         plotcopier=pc,
         CMStext="",
       ),
@@ -1194,14 +1240,14 @@ def makeplots(filter):
         xformula="D_L1Zg_VBFdecay",
         cutformula=VBFtaggedenrichcut,
         binning=np.array([0, .1, .8, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-2jet",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=15,
+        ymax=14,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_CP_VBF",
@@ -1211,12 +1257,12 @@ def makeplots(filter):
         xformula="D_CP_VBF",
         cutformula=VBFtaggedenrichcut,
         binning=np.array([-1, 0., 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-2jet",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=20,
+        ymax=17,
         plotcopier=pc,
         isDCP="prod",
         CMStext="",
@@ -1229,14 +1275,14 @@ def makeplots(filter):
         xformula="D_int_VBF",
         cutformula=VBFtaggedenrichcut,
         binning=np.array([-1., 0, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-2jet",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=20,
+        ymax=15,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_0minus_HadVHdecay",
@@ -1246,12 +1292,12 @@ def makeplots(filter):
         xformula="D_0minus_HadVHdecay",
         cutformula=HadVHtaggedenrichcut,
         binning=np.array([0, .2, .8, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-hadronic",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=10,
+        ymax=8,
         plotcopier=pc,
         CMStext="",
       ),
@@ -1263,14 +1309,14 @@ def makeplots(filter):
         xformula="D_0hplus_HadVHdecay",
         cutformula=HadVHtaggedenrichcut,
         binning=np.array([0, 1./3, 2./3, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-hadronic",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=10,
+        ymax=7,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_L1_HadVHdecay",
@@ -1280,14 +1326,14 @@ def makeplots(filter):
         xformula="D_L1_HadVHdecay",
         cutformula=HadVHtaggedenrichcut,
         binning=np.array([0, 1./3, 2./3, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-hadronic",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=10,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_L1Zg_HadVHdecay",
@@ -1297,14 +1343,14 @@ def makeplots(filter):
         xformula="D_L1Zg_HadVHdecay",
         cutformula=HadVHtaggedenrichcut,
         binning=np.array([0, .1, .9, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-hadronic",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=12,
+        ymax=10,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_CP_HadVH",
@@ -1314,15 +1360,15 @@ def makeplots(filter):
         xformula="D_CP_HadVH",
         cutformula=HadVHtaggedenrichcut,
         binning=np.array([-1, 0., 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-hadronic",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=10,
+        ymax=9,
         plotcopier=pc,
         isDCP="prod",
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_int_HadVH",
@@ -1332,14 +1378,14 @@ def makeplots(filter):
         xformula="D_int_HadVH",
         cutformula=HadVHtaggedenrichcut,
         binning=np.array([-1, -.6, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-hadronic",
         Dbkglabel="D_{bkg} > 0.2",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=14,
+        ymax=13,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
 
       dict(
@@ -1350,12 +1396,12 @@ def makeplots(filter):
         xformula="D_bkg",
         cutformula=untaggedcut,
         binning=np.array([0, .2, .7, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Untagged",
         Dbkglabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=300,
+        ymax=270,
         plotcopier=pc,
         CMStext="",
       ),
@@ -1367,12 +1413,12 @@ def makeplots(filter):
         xformula="D_bkg_VBFdecay",
         cutformula=VBFtaggedcut,
         binning=np.array([0, .2, .7, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-2jet",
         Dbkglabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=20,
+        ymax=16,
         plotcopier=pc,
         CMStext="",
       ),
@@ -1384,12 +1430,12 @@ def makeplots(filter):
         xformula="D_bkg_HadVHdecay",
         cutformula=HadVHtaggedcut,
         binning=np.array([0, .2, .8, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-hadronic",
         Dbkglabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=15,
+        ymax=12,
         plotcopier=pc,
         CMStext="",
       ),
@@ -1401,7 +1447,7 @@ def makeplots(filter):
         xformula="max(D_2jet_0plus, max(D_2jet_0minus, max(D_2jet_a2, max(D_2jet_L1, D_2jet_L1Zg))))",
         cutformula=dijetenrichcut,
         binning=np.arange(0, 1+1/8., 1/8.),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .6, .84),
         categorylabel="dijet events",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
@@ -1419,7 +1465,7 @@ def makeplots(filter):
         xformula="max(max(D_HadZH_0plus, max(D_HadZH_0minus, max(D_HadZH_a2, max(D_HadZH_L1, D_HadZH_L1Zg)))), max(D_HadWH_0plus, max(D_HadWH_0minus, max(D_HadWH_a2, max(D_HadWH_L1, D_HadWH_L1Zg)))))",
         cutformula=dijetenrichcut,
         binning=np.arange(0, 1+1/8., 1/8.),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .6, .84),
         categorylabel="dijet events",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
@@ -1438,7 +1484,7 @@ def makeplots(filter):
         xformula="min(ZZPt, 650)",
         cutformula=boostedenrichcut,
         binning = np.array([120, 200., 300, 400, 500, 600, 700]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Boosted",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
@@ -1455,14 +1501,14 @@ def makeplots(filter):
         xformula="min(ZZPt, 170)",
         cutformula=VBF1jenrichcut,
         binning = np.array([0., 60, 120., 180]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-1jet",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
         ymax=12,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="ZZPt_VHLep",
@@ -1472,14 +1518,14 @@ def makeplots(filter):
         xformula="min(ZZPt, 350)",
         cutformula=LepVHenrichcut,
         binning = np.array([0, 100, 200., 300, 400]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-leptonic",
         Dbkglabel="D_{bkg} > 0.7",
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=5,
+        ymax=4,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_bkg_boosted",
@@ -1489,14 +1535,14 @@ def makeplots(filter):
         xformula="D_bkg",
         cutformula=boostedcut,
         binning=np.array([0, .2, .7, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="Boosted",
         Dbkglabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=20,
+        ymax=17,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_bkg_VBF1j",
@@ -1506,14 +1552,14 @@ def makeplots(filter):
         xformula="D_bkg",
         cutformula=VBF1jcut,
         binning=np.array([0, .2, .7, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VBF-1jet",
         Dbkglabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=20,
+        ymax=19,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
       dict(
         name="D_bkg_VHLep",
@@ -1523,14 +1569,14 @@ def makeplots(filter):
         xformula="D_bkg",
         cutformula=LepVHcut,
         binning=np.array([0, .2, .7, 1]),
-        legendargs=(.2, .85, .9, .9),
+        legendargs=(.2, .79, .8, .84),
         categorylabel="VH-leptonic",
         Dbkglabel=None,
         legendcolumns=2,
         saveasdir=os.path.join(config.plotsbasedir, "templateprojections", "niceplots"),
-        ymax=12,
+        ymax=11,
         plotcopier=pc,
-        CMStext="Supplementary",
+        CMStext="",
       ),
     ]
 
