@@ -63,7 +63,7 @@ class TreeWrapperBase(Iterator):
         self.printevery = 10000
         if self.isZX:
             self.printevery = 1000
-            self.uselegacyobjects = treesample.production.uselegacyobjects
+            self.usenewobjects = treesample.production.usenewobjects
 
         self.cconstantforDbkg = self.cconstantforD2jet = self.cconstantforDHadWH = self.cconstantforDHadZH = None
 
@@ -145,7 +145,7 @@ class TreeWrapperBase(Iterator):
             assert self.overallEventWeight == 1, self.overallEventWeight
             if self.productionmode == "data": return 1
             LepPt, LepEta, LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
-            return ZX.normalizeZX(self.year, self.uselegacyobjects, self.tree.Z1Flav, self.tree.Z2Flav) * ZX.getfakerate(self.year, self.uselegacyobjects, LepPt[2], LepEta[2], LepLepId[2]) * ZX.getfakerate(self.year, self.uselegacyobjects, LepPt[3], LepEta[3], LepLepId[3])
+            return ZX.normalizeZX(self.year, self.usenewobjects, self.tree.Z1Flav, self.tree.Z2Flav) * ZX.getfakerate(self.year, self.usenewobjects, LepPt[2], LepEta[2], LepLepId[2]) * ZX.getfakerate(self.year, self.usenewobjects, LepPt[3], LepEta[3], LepLepId[3])
 
         pb_to_fb = 1000
         return self.overallEventWeight * self.genxsec * self.genBR * pb_to_fb * self.per_event_scale_factor() / self.nevents
@@ -1883,7 +1883,7 @@ class TreeWrapper(TreeWrapperBase):
             "xsec",
             "year",
         ]
-        if self.isZX: self.exceptions.append("uselegacyobjects")
+        if self.isZX: self.exceptions.append("usenewobjects")
         self.toaddtotree_float = []
         self.toaddtotree_int = [
             "D_4couplings_decay_raw",

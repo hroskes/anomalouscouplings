@@ -9,19 +9,19 @@ class FakeRates(ROOT.FakeRates):
   def __init__(self, arg):
     return super(FakeRates, self).__init__(
       {
-         (2016, False): os.path.join(CJLSTscriptsfolder, "FakeRate_SS_Moriond368.root"),
-         (2017, False): os.path.join(CJLSTscriptsfolder, "FakeRates_SS_Moriond18.root"),
-         (2018, False): os.path.join(CJLSTscriptsfolder, "FakeRates_SS_Moriond19.root"),
-         (2016, True): os.path.join(CJLSTscriptsfolder, "FakeRates_SS_2016_Legacy.root"),
-         (2017, True): os.path.join(CJLSTscriptsfolder, "FakeRates_SS_2017_Legacy.root"),
-         (2018, True): os.path.join(CJLSTscriptsfolder, "FakeRates_SS_2018_Legacy.root"),
+         (2016, False): os.path.join(CJLSTscriptsfolder, "FakeRates_SS_2016_Legacy.root"),
+         (2017, False): os.path.join(CJLSTscriptsfolder, "FakeRates_SS_2017_Legacy.root"),
+         (2018, False): os.path.join(CJLSTscriptsfolder, "FakeRates_SS_2018_Legacy.root"),
+         (2016, True): os.path.join(CJLSTscriptsfolder, "newData_FakeRates_SS_2016.root"),
+         (2017, True): os.path.join(CJLSTscriptsfolder, "newData_FakeRates_SS_2017.root"),
+         (2018, True): os.path.join(CJLSTscriptsfolder, "newData_FakeRates_SS_2018.root"),
       }[arg]
     )
 
 __fakerates = KeyDefaultDict(FakeRates)
 
-def getfakerate(year, uselegacyobjects, leppt, lepeta, leplepid):
-    return __fakerates[year, uselegacyobjects].GetFakeRate(leppt, lepeta, leplepid)
+def getfakerate(year, usenewobjects, leppt, lepeta, leplepid):
+    return __fakerates[year, usenewobjects].GetFakeRate(leppt, lepeta, leplepid)
 
 from ROOT import CRZLLss, test_bit
 
@@ -30,25 +30,6 @@ from ROOT import CRZLLss, test_bit
 class normalizeZX(object):
   el = 11**2
   mu = 13**2
-
-  cb_SS = {
-    (2016, -mu*mu): 0.9555,
-    (2016, -el*el): 1.082,
-    (2016, -el*mu): 1.0792,
-    (2017, -mu*mu): 1.009,
-    (2017, -el*el): 1.379,
-    (2017, -el*mu): 1.1087,
-    (2018, -mu*mu): 0.9807,
-    (2018, -el*el): 1.206,
-    (2018, -el*mu): 1.0677,
-  }
-
-  fs_ROS_SS = {
-    (-el, el): 1.00868,
-    (-mu, mu): 1.04015,
-    (-el, mu): 1.00823,
-    (-mu, el): 1.0049,
-  }
 
   @classmethod
   @cache
@@ -71,9 +52,9 @@ class normalizeZX(object):
         break
     return combination / SS
 
-  def __new__(cls, year, uselegacyobjects, Z1Flav, Z2Flav):
-    if uselegacyobjects: return cls.ratio_combination_over_SS_newobjects(year, Z1Flav*Z2Flav)
-    return cls.cb_SS[year, Z1Flav*Z2Flav] * cls.fs_ROS_SS[Z1Flav, Z2Flav]
+  def __new__(cls, year, usenewobjects, Z1Flav, Z2Flav):
+    if usenewobjects: assert False
+    return cls.ratio_combination_over_SS_newobjects(year, Z1Flav*Z2Flav)
 
   txtfile = """
 ******************************************************************************
