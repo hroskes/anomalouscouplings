@@ -63,7 +63,7 @@ class BaseSingleCategorization(BaseCategorization):
     @property
     def QGL_variable_name(self): return "jetQGLikelihood" + self.JEC.njetsappendname
     @property
-    def PFMET_variable_name(self): return "PFMET" + self.JEC.njetsappendname.replace("jec", "jes")
+    def PFMET_variable_name(self): return "PFMET_corrected" + self.JEC.njetsappendname.replace("jec", "jes")
 
     @abstractmethod
     def get_pHJJ_function(self): pass
@@ -408,6 +408,7 @@ class MultiCategorization(BaseCategorization):
     def __init__(self, name, *singles):
         self.name = name
         self.singles = frozenset(singles)
+        self.JEC, = {_.JEC for _ in singles}
     @property
     def issystematic(self):
         result = {_.issystematic for _ in self.singles}

@@ -679,8 +679,12 @@ class JECSystematic(MyEnum):
     enumname = "jecsystematic"
     enumitems = (
                  EnumItem("JECNominal", "Nominal"),
-                 EnumItem("JECUp", "Up"),
-                 EnumItem("JECDn", "Down", "JecDown"),
+                 EnumItem("JECUp"),
+                 EnumItem("JECDn"),
+                 EnumItem("JESUp"),
+                 EnumItem("JESDn"),
+                 EnumItem("JERUp"),
+                 EnumItem("JERDn"),
                 )
     @property
     def appendname(self):
@@ -688,7 +692,7 @@ class JECSystematic(MyEnum):
         return "_" + str(self)
     @property
     def njetsappendname(self):
-        return self.appendname.replace("JEC", "jec")
+        return self.appendname.replace("JEC", "jec").replace("JES", "jes").replace("JER", "jer")
 
 class BTagSystematic(MyEnum):
     enumname = "btagsystematic"

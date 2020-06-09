@@ -51,11 +51,17 @@ class MakeSystematics(object):
     def doreplacements(self, code):
         return code
 
-class MakeJECSystematics(MakeSystematics):
+class MakeJetSystematicsBase(MakeSystematics):
+    @abstractproperty
+    def JEX(self): pass
     @property
-    def upname(self): return self.name+"_JECUp"
+    def JEXlower(self): return self.JEX.lower()
     @property
-    def dnname(self): return self.name+"_JECDn"
+    def JEXlowerforMET(self): return self.JEXlower.replace("jec", "jes")
+    @property
+    def upname(self): return self.name+"_"+self.JEX+"Up"
+    @property
+    def dnname(self): return self.name+"_"+self.JEX+"Dn"
 
     def doreplacements(self, code):
         for thing in (
@@ -64,18 +70,18 @@ class MakeJECSystematics(MakeSystematics):
             r"(self[.]notdijet)\b",
             r"(self[.](?:binning_4couplings|D_bkg_kin)_(?:HadVH|VBF|)decay)\b",
         ):
-            code = re.sub(thing, r"\1_JEC{UpDn}", code)
+            code = re.sub(thing, r"\1_"+self.JEX+"{UpDn}", code)
         for thing in (
             r"(self[.](Hjj|Jet1)Pt)\b",
             r"(self[.]DiJet(Mass|DEta))\b",
             r"(self[.]nCleanedJetsPt30(BTagged_bTagSF)?)\b",
             r"(self[.]jet(QGLikelihood|Phi))\b",
         ):
-            code = re.sub(thing, r"\1_jec{UpDn}", code)
+            code = re.sub(thing, r"\1_"+self.JEXlower+"{UpDn}", code)
         for thing in (
-            r"(self[.]PFMET)",
+            r"(self[.]PFMET_corrected)\b",
         ):
-            code = re.sub(thing, r"\1_jes{UpDn}", code)
+            code = re.sub(thing, r"\1_"+self.JEXlowerforMET+"{UpDn}", code)
 
         result = re.findall("(self[.][\w]*)[^\w{]", code)
         for variable in result:
@@ -92,6 +98,19 @@ class MakeJECSystematics(MakeSystematics):
             raise ValueError("Unknown self.variable for '{}' in function '{}':\n\n{}\n{}".format(type(self).__name__, self.name, code, variable))
 
         return code
+
+class MakeJECSystematics(MakeJetSystematicsBase):
+  @property
+  def JEX(self): return "JEC"
+class MakeJESSystematics(MakeJetSystematicsBase):
+  @property
+  def JEX(self): return "JES"
+class MakeJERSystematics(MakeJetSystematicsBase):
+  @property
+  def JEX(self): return "JER"
+
+def MakeJetSystematics(function):
+  return MakeJECSystematics(MakeJESSystematics(MakeJERSystematics(function)))
 
 class MakeBtagSystematics(MakeSystematics):
     @property
@@ -111,7 +130,7 @@ class MakeBtagSystematics(MakeSystematics):
               "self[.]("
               "nCleanedJetsPt30|nExtra(Lep|Z)|jet(QGLikelihood|Phi)"
               "|p(Aux)?_(J+(QCD|VBF)|Had[ZW]H)_(SIG_gh[vzwg][12]_1_JHUGen|mavjj(_true)?)_JECNominal"
-              "|PFMET|ZZ(Mass|Pt)|DiJetMass|HjjPt"
+              "|PFMET_corrected|ZZ(Mass|Pt)|DiJetMass|HjjPt"
               ")$",
               variable
             ): continue
