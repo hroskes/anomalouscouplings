@@ -18,9 +18,9 @@ downloader.add("AnalysisStep/test/ZpXEstimation/src/FakeRates.cpp")
 for cconstant in "Dbkgkin_2e2mu", "Dbkgkin_4e", "Dbkgkin_4mu", "DjVBF", "DjjVBF", "DjjWH", "DjjZH", "DbkgjjEWQCD_4l_HadVHTagged_", "DbkgjjEWQCD_4l_JJVBFTagged_", "DbkgjjEWQCD_2l2l_HadVHTagged_", "DbkgjjEWQCD_2l2l_JJVBFTagged_":
     downloader.add("AnalysisStep/data/cconstants/SmoothKDConstant_m4l_{}13TeV.root".format(cconstant))
 for rootfile in "FakeRates_SS_2016_Legacy.root", "FakeRates_SS_2017_Legacy.root", "FakeRates_SS_2018_Legacy.root":
+    downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile), sha1="7f4ba82b5f36db82350d0f64ba48b85d56067709")
+for rootfile in "newData_FakeRates_SS_2016.root", "newData_FakeRates_SS_2017.root", "newData_FakeRates_SS_2018.root":
     downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile))
-for rootfile in "FakeRate_SS_Moriond368.root", "FakeRates_SS_Moriond18.root", "FakeRates_SS_Moriond19.root":
-    downloader.add(os.path.join("AnalysisStep/data/FakeRates", rootfile), sha1="e280b6b44d768d52602b7475f0bf724d3aca8531^")
 
 with utilities.cd(CJLSTscriptsfolder):
     downloader.download()
