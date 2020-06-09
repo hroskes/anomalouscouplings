@@ -30,7 +30,7 @@ from helperstuff.enums import Analysis, categories, channels, flavors, Productio
 from helperstuff.samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithFlavor, ReweightingSampleWithPdf, Sample
 from helperstuff.utilities import PlotCopier, TFile
 
-productions = {Production(p) for p in ("190703_2017",)}
+productions = {Production(p) for p in ("190821_2017",)}
 
 class HistAndNormalization(object):
   def __init__(self, h, hnormalization):

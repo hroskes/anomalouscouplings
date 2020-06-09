@@ -10,12 +10,12 @@ from helperstuff.samples import Sample
 from helperstuff.utilities import mkdir_p, PlotCopier, TFile
 
 def getsample(productionmode, hypothesis):
-  args = "190703_2017",
-  if productionmode == "VBF" and hypothesis == "0-": args = "190703_2017", "ext1"
-  if productionmode == "VBF" and hypothesis == "a2": args = "190703_2017", "ext1"
-  if productionmode == "VBF" and hypothesis == "L1": args = "190703_2018",
-  if productionmode == "VBF" and hypothesis == "L1Zg": args = "190703_2018",
-  if productionmode == "ZH" and hypothesis == "L1Zg": args = "190703_2018",
+  args = "190821_2017",
+  if productionmode == "VBF" and hypothesis == "0-": args = "190821_2017", "ext1"
+  if productionmode == "VBF" and hypothesis == "a2": args = "190821_2017", "ext1"
+  if productionmode == "VBF" and hypothesis == "L1": args = "190821_2018",
+  if productionmode == "VBF" and hypothesis == "L1Zg": args = "190821_2018",
+  if productionmode == "ZH" and hypothesis == "L1Zg": args = "190821_2018",
   return Sample(productionmode, hypothesis, *args)
 
 def plot(discnominal, discsystematic, productionmode, cutnominal, cutsystematic, plotname, plotcopier=ROOT):

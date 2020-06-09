@@ -87,7 +87,7 @@ if __name__ == "__main__":
   with PlotCopier() as pc:
     for analysis in "fa3fa2fL1fL1Zg_morecategories",:
       for category in "VBFtagged", "VHHadrtagged":
-        for disc in TemplatesFile("ggh", "2e2mu", analysis, category, "190703_2016").discriminants:
+        for disc in TemplatesFile("ggh", "2e2mu", analysis, category, "190821_2016").discriminants:
           for p in "ggH", "VBF", "ZH", "WH", "ttH", "qqZZ":
             for production in config.productionsforcombine:
               makeplot(p, analysis, category, production, disc.identifier)

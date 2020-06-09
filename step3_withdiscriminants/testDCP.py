@@ -65,7 +65,7 @@ with PlotCopier() as pc:
     category="VBFtagged",
     normalizeto1=True,
     analysis="fa3fa2fL1fL1Zg_morecategories",
-    production="190703_2017",
+    production="190821_2017",
     masscut=True,
   )
 
@@ -75,7 +75,7 @@ with PlotCopier() as pc:
     category="VBFtagged",
     normalizeto1=True,
     analysis="fa3fa2fL1fL1Zg_morecategories",
-    production="190703_2017",
+    production="190821_2017",
     masscut=True,
   )
 
@@ -85,7 +85,7 @@ with PlotCopier() as pc:
     category="VHHadrtagged",
     normalizeto1=True,
     analysis="fa3fa2fL1fL1Zg_morecategories",
-    production="190703_2017",
+    production="190821_2017",
     masscut=True,
   )
 
@@ -95,7 +95,7 @@ with PlotCopier() as pc:
     category="VHHadrtagged",
     normalizeto1=True,
     analysis="fa3fa2fL1fL1Zg_morecategories",
-    production="190703_2017",
+    production="190821_2017",
     masscut=True,
   )
 

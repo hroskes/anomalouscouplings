@@ -4,7 +4,7 @@ import json, itertools, numpy as np
 
 from helperstuff.templates import *
 
-tf = TemplatesFile("vh", "190703_2017", "4mu", "VBFtagged", "fa3fa2fL1fL1Zg")
+tf = TemplatesFile("vh", "190821_2017", "4mu", "VBFtagged", "fa3fa2fL1fL1Zg")
 with open(tf.jsonfile()) as f:
   templatenames = json.load(f)["constraints"][0]["templates"]
 

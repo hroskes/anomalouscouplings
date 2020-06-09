@@ -21,7 +21,7 @@ bins           = 3
 min            = 40
 max            = 280
 
-production     = "190703_2018"
+production     = "190821_2018"
 
 enrich         = False
 masscut        = True
@@ -113,9 +113,9 @@ with PlotCopier() as pc:
       color=color,
       hname=hname,
       cut=cut,
-      production=production if hypothesis != "0+" else "190703_2016",
+      production=production if hypothesis != "0+" else "190821_2016",
     )
-    assert production == "190703_2018", "^^^^^^^^^^^"
+    assert production == "190821_2018", "^^^^^^^^^^^"
     if not logscale: h.SetMinimum(0)
     if setminimum is not None: h.SetMinimum(setminimum)
 

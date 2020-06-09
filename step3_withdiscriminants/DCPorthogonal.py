@@ -31,7 +31,7 @@ def DCPorthogonal(VBForVH, ggHorttH, disc):
      "ggH": ("ggH", "MC@NLO"),
      "ttH": ("ttH",),
    }[ggHorttH]
-   with TFile(Sample("fCP0.5", "0+", "190703_2017", *args).withdiscriminantsfile()) as f:
+   with TFile(Sample("fCP0.5", "0+", "190821_2017", *args).withdiscriminantsfile()) as f:
      c = ROOT.TCanvas()
      t = f.candTree
      t.Draw(DCP+":"+discname+">>"+VBForVH+"("+axisrange+",2,-1,1)", "category_0P_or_0M_or_a2_or_L1_or_L1Zg == {} && 105 < ZZMass && ZZMass < 140".format(category))
