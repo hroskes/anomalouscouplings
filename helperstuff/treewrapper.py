@@ -40,7 +40,15 @@ class TreeWrapperBase(Iterator):
         self.year = treesample.production.year
         self.GEN = self.treesample.production.GEN
 
-        if self.treesample.production not in ("190821_2016", "190821_2017", "190821_2018") and not self.GEN: raise ValueError("Figure out about L1prefiringWeight and LepSIP!")
+        if self.GEN:
+          self.doSIP = self.doL1prefiringweight = False
+        elif self.treesample.production in ("190821_2016", "190821_2017", "190821_2018"):
+          self.doSIP = self.doL1prefiringweight = True
+        elif self.treesample.production in ("Moriond2020_2016", "Moriond2020_2017", "Moriond2020_2018"):
+          self.doSIP = False
+          self.doL1prefiringweight = True
+        else:
+          raise ValueError("Figure out about L1prefiringWeight and LepSIP!")
 
         if self.isdata:
             self.unblind = config.unblinddistributions
@@ -117,7 +125,7 @@ class TreeWrapperBase(Iterator):
 
     def per_event_scale_factor(self):
         result = 1
-        if not self.GEN:
+        if self.doL1prefiringweight:
             result *= self.L1prefiringWeight
         if self.productionmode == "ggH" and self.useNNLOPSweight: return result * self.ggH_NNLOPS_weight
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH"): return result
@@ -956,7 +964,7 @@ class TreeWrapper(TreeWrapperBase):
             else:
                 self.overallEventWeight = t.overallEventWeight
 
-            if not self.GEN and max(t.LepSIP) > 4: self.overallEventWeight = 0
+            if self.doSIP and max(t.LepSIP) > 4: self.overallEventWeight = 0
 
             self.flavor = abs(t.Z1Flav*t.Z2Flav)
 
@@ -1569,6 +1577,8 @@ class TreeWrapper(TreeWrapperBase):
             "counters",
             "cutoffs",
             "definitelyexists",
+            "doSIP",
+            "doL1prefiringweight",
             "exceptions",
             "f",
             "failedtree",
@@ -1685,7 +1695,7 @@ class TreeWrapper(TreeWrapperBase):
 
         self.kfactors = []
         if not self.GEN:
-            if not self.isdata and not self.isZX: self.kfactors.append("L1prefiringWeight")
+            if self.doL1prefiringweight and not self.isdata and not self.isZX: self.kfactors.append("L1prefiringWeight")
             if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
             if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
         if self.treesample.productionmode == "ggH" and self.useNNLOPSweight:

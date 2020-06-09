@@ -1005,13 +1005,13 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid_removeJER/MC_2018"
         if self == "Moriond2020_2016":
             if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/MC_2016"
+                return "/work-zfs/lhc/CJLSTtrees/200205CutBased/MC_2016_CorrectBTag"
         if self == "Moriond2020_2017":
             if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/MC_2017"
+                return "/work-zfs/lhc/CJLSTtrees/200205CutBased/MC_2017"
         if self == "Moriond2020_2018":
             if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/MC_2018"
+                return "/work-zfs/lhc/CJLSTtrees/200205CutBased/MC_2018"
         assert False, (self, config.host)
     def CJLSTdir_anomalous(self):
         if self == "190703_2016":
