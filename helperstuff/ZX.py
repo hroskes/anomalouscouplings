@@ -2,8 +2,8 @@ import os
 
 import ROOT
 
-from utilities import cache, KeyDefaultDict
 from CJLSTscripts import CJLSTscriptsfolder, convertTGraphstoTH1Fs
+from utilities import cache, KeyDefaultDict
 
 class FakeRates(ROOT.FakeRates):
   def __init__(self, arg):

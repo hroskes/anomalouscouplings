@@ -21,6 +21,7 @@ import STXS
 import xrd
 import ZX
 from gconstants import gconstant
+from leptonscalefactor import fixleptonscalefactor
 from makesystematics import MakeBtagSystematics, MakeJetSystematics, MakeSystematics
 from samples import ReweightingSample, ReweightingSamplePlus, Sample
 from utilities import cache_instancemethod, callclassinitfunctions, deprecate, Fake_LSF_creating, getmembernames, MultiplyCounter, product, TFile, tlvfromptetaphim
@@ -41,14 +42,15 @@ class TreeWrapperBase(Iterator):
         self.GEN = self.treesample.production.GEN
 
         if self.GEN:
-          self.doSIP = self.doL1prefiringweight = False
+          self.doSIP = self.doL1prefiringweight = self.doleptonSF = False
         elif self.treesample.production in ("190821_2016", "190821_2017", "190821_2018"):
           self.doSIP = self.doL1prefiringweight = True
           self.useJEC = True
-          self.useJER = self.useJES = False
+          self.useJER = self.useJES = self.doleptonSF = False
         elif self.treesample.production in ("Moriond2020_2016", "Moriond2020_2017", "Moriond2020_2018"):
           self.doSIP = False
           self.doL1prefiringweight = True
+          self.doleptonSF = not self.isdata and not self.isZX
           self.useJEC = False
           self.useJES = True
           self.useJER = False
@@ -132,6 +134,8 @@ class TreeWrapperBase(Iterator):
         result = 1
         if self.doL1prefiringweight:
             result *= self.L1prefiringWeight
+        if self.doleptonSF:
+            result *= fixleptonscalefactor(self.year, self.LepLepId, self.LepPt, self.LepEta, self.dataMCWeight)
         if self.productionmode == "ggH" and self.useNNLOPSweight: return result * self.ggH_NNLOPS_weight
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH"): return result
         if self.productionmode == "ggZZ": return result * self.KFactor_QCD_ggZZ_Nominal
@@ -144,7 +148,7 @@ class TreeWrapperBase(Iterator):
         if self.productionmode == "ZX" or self.productionmode == "data":
             assert self.overallEventWeight == 1, self.overallEventWeight
             if self.productionmode == "data": return 1
-            LepPt, LepEta, LepLepId = self.tree.LepPt, self.tree.LepEta, self.tree.LepLepId
+            LepPt, LepEta, LepLepId = self.LepPt, self.LepEta, self.LepLepId
             return ZX.normalizeZX(self.year, self.usenewobjects, self.tree.Z1Flav, self.tree.Z2Flav) * ZX.getfakerate(self.year, self.usenewobjects, LepPt[2], LepEta[2], LepLepId[2]) * ZX.getfakerate(self.year, self.usenewobjects, LepPt[3], LepEta[3], LepLepId[3])
 
         pb_to_fb = 1000
@@ -1844,8 +1848,9 @@ class TreeWrapper(TreeWrapperBase):
             "counters",
             "cutoffs",
             "definitelyexists",
-            "doSIP",
+            "doleptonSF",
             "doL1prefiringweight",
+            "doSIP",
             "exceptions",
             "f",
             "failedtree",
@@ -1971,6 +1976,10 @@ class TreeWrapper(TreeWrapperBase):
             if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
         if self.treesample.productionmode == "ggH" and self.useNNLOPSweight:
             self.kfactors.append("ggH_NNLOPS_weight")
+        if self.doleptonSF or self.isZX:
+            if self.doleptonSF:
+                self.kfactors.append("dataMCWeight")
+            self.kfactors += ["LepLepId", "LepPt", "LepEta"]
 
         if self.treesample.productionmode == "ttH" and getattr(self.treesample, "alternategenerator", None) == None:
             if self.treesample.hffhypothesis == "Hff0+":
