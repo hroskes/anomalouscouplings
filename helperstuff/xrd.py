@@ -42,7 +42,10 @@ def exists(filename):
         except IOError:
             return False
     else:
-        return os.path.exists(filename)
+        try:
+            with open(filename): return True
+        except IOError:
+            return False
 
 if __name__ == '__main__':
     print "\n".join(xrdls["lxcms03", "/data3/Higgs/160624/"])
