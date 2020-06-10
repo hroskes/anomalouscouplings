@@ -1031,13 +1031,13 @@ class Production(MyEnum):
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/Data_2018"
         if self == "200205_2016":
             if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/Data_2016"
+                return "/work-zfs/lhc/CJLSTtrees/DATA_200430_LegacyRun2/Data_2016"
         if self == "200205_2017":
             if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/Data_2017"
+                return "/work-zfs/lhc/CJLSTtrees/DATA_200430_LegacyRun2/Data_2017"
         if self == "200205_2018":
             if config.host == "MARCC":
-                return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/Data_2018"
+                return "/work-zfs/lhc/CJLSTtrees/DATA_200430_LegacyRun2/Data_2018"
         return self.CJLSTdir()
     def CJLSTdir_anomalous_VBF(self):
         return self.CJLSTdir_anomalous()
