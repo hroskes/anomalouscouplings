@@ -107,7 +107,7 @@ usedata = True
 showblinddistributions = True
 unblinddistributions = True
 unblindscans = True
-productionsforcombine = ["Moriond2020_2016", "Moriond2020_2017", "Moriond2020_2018"]
+productionsforcombine = ["200205_2016", "200205_2017", "200205_2018"]
 #productionsforcombine = ["GEN_190908"]
 separateZZWWVBFweights = True
 

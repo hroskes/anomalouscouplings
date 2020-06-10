@@ -961,9 +961,9 @@ class Production(MyEnum):
                  EnumItem("190821_2016"),
                  EnumItem("190821_2017"),
                  EnumItem("190821_2018"),
-                 EnumItem("Moriond2020_2016"),
-                 EnumItem("Moriond2020_2017"),
-                 EnumItem("Moriond2020_2018"),
+                 EnumItem("200205_2016"),
+                 EnumItem("200205_2017"),
+                 EnumItem("200205_2018"),
                  EnumItem("GEN_181119"),
                  EnumItem("GEN_190908"),
                 )
@@ -989,13 +989,13 @@ class Production(MyEnum):
         if self == "190821_2018":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid_removeJER/MC_2018"
-        if self == "Moriond2020_2016":
+        if self == "200205_2016":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/200205CutBased/MC_2016_CorrectBTag"
-        if self == "Moriond2020_2017":
+        if self == "200205_2017":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/200205CutBased/MC_2017"
-        if self == "Moriond2020_2018":
+        if self == "200205_2018":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/200205CutBased/MC_2018"
         assert False, (self, config.host)
@@ -1009,13 +1009,13 @@ class Production(MyEnum):
         if self == "190821_2018":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid_removeJER/MC_2018_anomalous"
-        if self == "Moriond2020_2016":
+        if self == "200205_2016":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/AC16"
-        if self == "Moriond2020_2017":
+        if self == "200205_2017":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/AC17"
-        if self == "Moriond2020_2018":
+        if self == "200205_2018":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/AC18"
         return self.CJLSTdir()
@@ -1029,13 +1029,13 @@ class Production(MyEnum):
         if self == "190821_2018":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/Data_2018"
-        if self == "Moriond2020_2016":
+        if self == "200205_2016":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/Data_2016"
-        if self == "Moriond2020_2017":
+        if self == "200205_2017":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/Data_2017"
-        if self == "Moriond2020_2018":
+        if self == "200205_2018":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/Cutbased_Moriond2020_ecdaf558/Data_2018"
         return self.CJLSTdir()
@@ -1053,9 +1053,9 @@ class Production(MyEnum):
         if self == "190821_2017": return 41.5
         if self == "190821_2018": return 59.7
 
-        if self == "Moriond2020_2016": return 35.9
-        if self == "Moriond2020_2017": return 41.5
-        if self == "Moriond2020_2018": return 59.7
+        if self == "200205_2016": return 35.9
+        if self == "200205_2017": return 41.5
+        if self == "200205_2018": return 59.7
 
         assert False
     def __int__(self):
@@ -1065,15 +1065,15 @@ class Production(MyEnum):
         if self == "190821_2016": return 2016
         if self == "190821_2017": return 2017
         if self == "190821_2018": return 2018
-        if self == "Moriond2020_2016": return 2016
-        if self == "Moriond2020_2017": return 2017
-        if self == "Moriond2020_2018": return 2018
+        if self == "200205_2016": return 2016
+        if self == "200205_2017": return 2017
+        if self == "200205_2018": return 2018
         if self == "GEN_190908": return 2018
         assert False, self
     @property
     def usenewobjects(self):
         if self in ("190821_2016", "190821_2017", "190821_2018"): return False
-        if self in ("Moriond2020_2016", "Moriond2020_2017", "Moriond2020_2018"): return True
+        if self in ("200205_2016", "200205_2017", "200205_2018"): return True
         assert False, self
     @property
     def productionforrate(self):

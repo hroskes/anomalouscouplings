@@ -47,7 +47,7 @@ class TreeWrapperBase(Iterator):
           self.doSIP = self.doL1prefiringweight = True
           self.useJEC = True
           self.useJER = self.useJES = self.doleptonSF = False
-        elif self.treesample.production in ("Moriond2020_2016", "Moriond2020_2017", "Moriond2020_2018"):
+        elif self.treesample.production in ("200205_2016", "200205_2017", "200205_2018"):
           self.doSIP = False
           self.doL1prefiringweight = True
           self.doleptonSF = not self.isdata and not self.isZX

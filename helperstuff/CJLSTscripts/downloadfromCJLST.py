@@ -59,6 +59,7 @@ class CJLSTScript_base(object):
 class CJLSTScript_Cpp(CJLSTScript_base):
     def filenameisvalid(self, filename):
         if filename == "cConstants.cc": return False
+        if filename == "LeptonSFHelper.cc": return False
         ext = os.path.splitext(filename)[1]
         return ext in [".cc", ".C", ".h", ".cpp"]
     def fixandmove(self, tmpfilename):
@@ -88,6 +89,16 @@ class CJLSTScript_cconstants(CJLSTScript_Cpp):
         shutil.move(self.filename, tmpfilename)
         with open(tmpfilename) as tmpf, open(self.filename, "w") as f:
             f.write(tmpf.read().replace("$CMSSW_BASE/src/ZZAnalysis/AnalysisStep/data/cconstants", CJLSTscriptsfolder))
+
+class CJLSTScript_leptonSFhelper(CJLSTScript_Cpp):
+    def filenameisvalid(self, filename):
+        return filename == "LeptonSFHelper.cc"
+
+    def fixandmove(self, tmpfilename):
+        super(CJLSTScript_leptonSFhelper, self).fixandmove(tmpfilename)
+        shutil.move(self.filename, tmpfilename)
+        with open(tmpfilename) as tmpf, open(self.filename, "w") as f:
+            f.write(tmpf.read().replace("$CMSSW_BASE/src/ZZAnalysis/AnalysisStep/data/LeptonEffScaleFactors", CJLSTscriptsfolder))
 
 class CJLSTScript_other(CJLSTScript_base):
     def filenameisvalid(self, filename):
