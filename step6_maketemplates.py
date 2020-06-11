@@ -148,6 +148,7 @@ def submitjobs(args):
   for templatesfile in templatesfiles:
     if templatesfile.copyfromothertemplatesfile is not None: continue
     if not args.filter(templatesfile): continue
+    mkdir_p(os.path.dirname(templatesfile.templatesfile()))
     if templatesfile.templatesfile() in remove:
       remove[templatesfile.templatesfile()] = True
       remove[templatesfile.templatesfile(firststep=True)] = True
