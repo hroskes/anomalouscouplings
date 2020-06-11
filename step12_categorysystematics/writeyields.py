@@ -87,9 +87,19 @@ def writeyields(productionmodelist=None, productionlist=None):
             for s in g
             for systematic in pythiasystematics
             if systematic.hassample(year)
+            and not (
+              (year == 2017 and s.productionmode in ("ZH", "ggH"))
+            )
           ]
           if year == 2017:
-            g += [RSPWF(s, "ext") for s in g if s.pythiasystematic is None]
+            g += [
+              RSPWF(s, "ext")
+              for s in g
+              if s.pythiasystematic is None
+              and not (
+                (s.productionmode in ("VBF", "WplusH", "ggH"))
+              )
+            ]
         if productionmode == "qqZZ":
           if year == 2018:
             del g[:]
@@ -277,8 +287,8 @@ def writeyields(productionmodelist=None, productionlist=None):
           if productionmode == "ZX" or analysis.isdecayonly:
             JECUp = JECDn = btSFUp = btSFDn = 1
           else:
-            JECUp = (sum(result[productionmode, findsystematic(categorizations, categorization, "JECUp", "Nominal"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
-            JECDn = (sum(result[productionmode, findsystematic(categorizations, categorization, "JECDn", "Nominal"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+            JECUp = (sum(result[productionmode, findsystematic(categorizations, categorization, "JESUp", "Nominal"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+            JECDn = (sum(result[productionmode, findsystematic(categorizations, categorization, "JESDn", "Nominal"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
             btSFUp = (sum(result[productionmode, findsystematic(categorizations, categorization, "Nominal", "bTagSFUp"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
             btSFDn = (sum(result[productionmode, findsystematic(categorizations, categorization, "Nominal", "bTagSFDn"), AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
 
@@ -336,21 +346,29 @@ def writeyields(productionmodelist=None, productionlist=None):
             if productionmode == "ggH" and production in ("190821_2016", "190821_2017", "200205_2016", "200205_2017"):
               scaleup = scaledn = 1
             elif year == 2016:
-              scaleup = (sum(result[productionmode, PythiaSystematic("ScaleUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
-              scaledn = (sum(result[productionmode, PythiaSystematic("ScaleDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
-              if productionmode == "ttH": scaleup = scaledn = deprecate(1, 2019, 9, 30)
+              if False:
+                scaleup = (sum(result[productionmode, PythiaSystematic("ScaleUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+                scaledn = (sum(result[productionmode, PythiaSystematic("ScaleDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+                if productionmode == "ttH": scaleup = scaledn = deprecate(1, 2019, 9, 30)
+              scaleup = scaledn = 1
             elif year == 2017 or year == 2018:
-              scaleup = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleUp"), cat] for cat in sumcategories) / nominal).nominal_value
-              scaledn = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleDn"), cat] for cat in sumcategories) / nominal).nominal_value
-            tuneup = (sum(result[productionmode, PythiaSystematic("TuneUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
-            try:
-              tunedn = (sum(result[productionmode, PythiaSystematic("TuneDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
-            except KeyError:
-              if nominal * production.dataluminosity < 0.5:
-                tunedn = (nominal**2 / tuneup).n
+              if productionmode in ("VBF",) and year == 2017:
+                scaleup = scaledn = deprecate(1, 2020, 6, 12)
               else:
-                print nominal
-                raise
+                scaleup = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleUp"), cat] for cat in sumcategories) / nominal).nominal_value
+                scaledn = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleDn"), cat] for cat in sumcategories) / nominal).nominal_value
+            if year == 2017 and productionmode in ("VH", "ZH", "ggH"):
+              tuneup = tunedn = deprecate(1, 2020, 6, 12)
+            else:
+              tuneup = (sum(result[productionmode, PythiaSystematic("TuneUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+              try:
+                tunedn = (sum(result[productionmode, PythiaSystematic("TuneDn"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
+              except KeyError:
+                if nominal * production.dataluminosity < 0.6:
+                  tunedn = (nominal**2 / tuneup).n
+                else:
+                  print nominal * production.dataluminosity
+                  raise
           else:
             scaleup = scaledn = tuneup = tunedn = 1
           for channel in channels:

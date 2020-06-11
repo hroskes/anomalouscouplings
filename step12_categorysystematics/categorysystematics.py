@@ -14,10 +14,10 @@ from helperstuff.utilities import MultiplyCounter
 from helperstuff.yields import count
 
 def findsystematic(categorizations, categorization, JEC, btag):
-    name = categorization.category_function_name.replace("_JECUp", "").replace("_JECDn", "").replace("_btagSFUp", "").replace("_btagSFDn", "")
+    name = categorization.category_function_name.replace("_JESUp", "").replace("_JESDn", "").replace("_JERUp", "").replace("_JERDn", "").replace("_JECUp", "").replace("_JECDn", "").replace("_btagSFUp", "").replace("_btagSFDn", "")
     name += BTagSystematic(btag).appendname + JECSystematic(JEC).appendname
     result = {_ for _ in categorizations if _.category_function_name == name}
-    assert len(result) == 1, result
+    assert len(result) == 1, (name, result)
     return result.pop()
 
 def maketable(analysis, production):
