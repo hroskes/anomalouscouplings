@@ -60,7 +60,17 @@ def writeyields(productionmodelist=None, productionlist=None):
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[RSPWF("ZX")]]))
 
-    categorizations = [_ for _ in TreeWrapper.categorizations if (isinstance(_, (MultiCategorization, NoCategorization)) or isinstance(_, SingleCategorizationgm4l) and _.hypothesis == "0+") and (not production.GEN or not _.issystematic)]
+    categorizations = [
+      _ for _ in TreeWrapper.categorizations
+      if (
+        isinstance(_, (MultiCategorization, NoCategorization))
+        or isinstance(_, SingleCategorizationgm4l) and _.hypothesis == "0+"
+      ) and (
+        not production.GEN or not _.issystematic
+      ) and (
+        not _.issystematic or _.JEC not in ("JECUp", "JECDn", "JERUp", "JERDn")
+      )
+    ]
 
     result = MultiplyCounter()
 
@@ -323,7 +333,7 @@ def writeyields(productionmodelist=None, productionlist=None):
 
           #pythia scale and tune
           if productionmode in ("ggH", "VBF", "ZH", "WH", "ttH"):
-            if productionmode == "ggH" and production in ("190821_2016", "190821_2017"):
+            if productionmode == "ggH" and production in ("190821_2016", "190821_2017", "200205_2016", "200205_2017"):
               scaleup = scaledn = 1
             elif year == 2016:
               scaleup = (sum(result[productionmode, PythiaSystematic("ScaleUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value

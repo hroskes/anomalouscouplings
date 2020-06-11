@@ -1177,6 +1177,7 @@ class PythiaSystematic(MyEnum):
         return "_" + str(self).lower().replace("dn", "down")
     def hassample(self, year):
         if self in ("TuneUp", "TuneDn") and year in (2016, 2017, 2018): return True
+        if self in ("ScaleUp", "ScaleDn") and year == 2016: return False
         if self in ("ScaleUp", "ScaleDn") and year == 2016: return True
         if self in ("ScaleUp", "ScaleDn") and year in (2017, 2018): return False
         assert False, (self, year)

@@ -208,7 +208,7 @@ class YieldSystematicValue(MultiEnum, JsonDict):
     @property
     def copyfromotheryieldsystematicvalue(self):
         kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in type(self).needenums}
-        elif self.production == "190821_2016" and self.yieldsystematic == "CMS_pythia_scale":
+        if self.production == "190821_2016" and self.yieldsystematic == "CMS_pythia_scale":
             kwargs["production"] = "190821_2017"
         elif self.yieldsystematic in ("JEC0PH", "JEC0M", "JEC0L1", "JEC0L1Zg"):
             kwargs["yieldsystematic"] = "JEC0PM"

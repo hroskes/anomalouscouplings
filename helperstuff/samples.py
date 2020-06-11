@@ -1615,6 +1615,11 @@ class Sample(ReweightingSamplePlusWithFlavor):
         if self.productionmode == "ggZZ" and self.production == "190821_2018" and self.flavor == "2mu2tau":
             otherproduction = "190821_2017"
 
+        if self.production == "200205_2016" and self.pythiasystematic in ("ScaleUp", "ScaleDown"):
+            del kwargs["pythiasystematic"]
+            kwargs["extension"] = "ext"
+            otherproduction = "200205_2017"
+
         if otherproduction is None: return None
 
         kwargs["production"] = otherproduction
