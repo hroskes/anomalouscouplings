@@ -363,11 +363,11 @@ def maketable():
   sections.append(
     Section("Total",
       SlashRow(
-        TotalRow(*chain((_.rows[0] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
-        TotalRow(*chain((_.rows[1] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
-        TotalRow(*chain((_.rows[2] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
-        TotalRow(*chain((_.rows[3] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
-        TotalRow(*chain((_.rows[4] if isinstance(_, SlashRow) else _ for _ in sections[0].rows), sections[1].rows), title="Total expected"),
+        TotalRow(signalrows[-1].rows[0], *sections[1].rows, title="Total expected"),
+        TotalRow(signalrows[-1].rows[1], *sections[1].rows, title="Total expected"),
+        TotalRow(signalrows[-1].rows[2], *sections[1].rows, title="Total expected"),
+        TotalRow(signalrows[-1].rows[3], *sections[1].rows, title="Total expected"),
+        TotalRow(signalrows[-1].rows[4], *sections[1].rows, title="Total expected"),
         title="Total expected",
       ),
       Row("data", title="Total observed"),
