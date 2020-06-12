@@ -366,7 +366,10 @@ class TemplatesFile(MultiEnum):
             name += "_10bins"
 
         if self.shapesystematic in ("JECUp", "JECDn") and ("VBF" in name or "HadVH" in name):
-            name += "_{}".format(self.shapesystematic)
+            JECappend = "_{}".format(self.shapesystematic)
+            if self.production in ("200205_2016", "200205_2017", "200205_2018"):
+                JECappend = JECappend.replace("JEC", "JES")
+            name += JECappend
 
         return discriminant(name)
 
@@ -378,6 +381,8 @@ class TemplatesFile(MultiEnum):
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
+            if self.production in ("200205_2016", "200205_2017", "200205_2018"):
+                JECappend = JECappend.replace("JEC", "JES")
         else:
             JECappend = ""
 
@@ -508,6 +513,8 @@ class TemplatesFile(MultiEnum):
 
         if self.shapesystematic in ("JECUp", "JECDn"):
             JECappend = "_{}".format(self.shapesystematic)
+            if self.production in ("200205_2016", "200205_2017", "200205_2018"):
+                JECappend = JECappend.replace("JEC", "JES")
         else:
             JECappend = ""
 
@@ -1392,7 +1399,11 @@ class Template(TemplateBase, MultiEnum):
     def categoryname(self):
         result = "category_"
         result += self.analysis.categoryname
-        if self.shapesystematic is not None: result += self.shapesystematic.categoryappendname
+        if self.shapesystematic is not None:
+            JECappend = self.shapesystematic.categoryappendname
+            if self.production in ("200205_2016", "200205_2017", "200205_2018"):
+                JECappend = JECappend.replace("JEC", "JES")
+            result += JECappend
 
         from treewrapper import TreeWrapper
         for categorization in TreeWrapper.categorizations:

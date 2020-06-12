@@ -233,7 +233,7 @@ discriminants = decaydiscriminants + jetdiscriminants + categorydiscriminants
 discriminants += list(
     Discriminant(name+"_"+JEC, rreplace(title, "}", ", "+JEC, 1), nbins, min, max, identifier+"_"+JEC, re.sub(r"(\b\w*\b)", r"\1"+"_"+JEC, formula))
         for name, title, nbins, min, max, identifier, formula in jetdiscriminants
-        for JEC in ("JECUp", "JECDn")
+        for JEC in ("JECUp", "JECDn", "JESUp", "JESDn")
 )
 if len(discriminants) != len({d.identifier for d in discriminants}):
     raise ValueError("Multiple discriminants have the same identifier")
