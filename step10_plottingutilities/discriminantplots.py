@@ -368,14 +368,14 @@ def gettree(*args, **kwargs):
   return Tree(*args, **kwargs)
 
 @cache_file(os.path.join(config.repositorydir, "data", "trees.pkl"))
-def getfilenames(*productionmodesandhypotheses):
+def getfilenames(productions, *productionmodesandhypotheses):
   print "Finding trees for", productionmodesandhypotheses
   return [
     [
       sample.withdiscriminantsfile()
       for sample in sorted(st, key=lambda x: x.withdiscriminantsfile())
     ]
-    for production in config.productionsforcombine
+    for production in productions
     for otherargs in productionmodesandhypotheses
     for st in Template(production, "2e2mu", "Untagged", "fa3fa2fL1fL1Zg_morecategories", *otherargs).reweightfrom()
   ]
@@ -387,7 +387,7 @@ def gettrees(*productionmodesandhypotheses, **kwargs):
         filename,
         "candTree",
       ) for filename in lst
-    ] for lst in getfilenames(*productionmodesandhypotheses, **kwargs)
+    ] for lst in getfilenames(tuple(config.productionsforcombine), *productionmodesandhypotheses, **kwargs)
   ]
   if debug: result = [[_[0]] for _ in result]
   return result
