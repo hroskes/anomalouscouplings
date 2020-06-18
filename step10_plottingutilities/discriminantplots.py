@@ -1592,13 +1592,13 @@ def makeplots(filter):
       preliminarykwargs["CMStext"] = "Preliminary"
       preliminarykwargs["saveasdir"] = os.path.join(kwargs["saveasdir"], "preliminary")
       preliminarykwargs["name"] += "_preliminary"
-      #plotkwargses.append(preliminarykwargs)
+      plotkwargses.append(preliminarykwargs)
 
       workinprogresskwargs = kwargs.copy()
       workinprogresskwargs["CMStext"] = "Work in progress"
       workinprogresskwargs["saveasdir"] = os.path.join(kwargs["saveasdir"], "workinprogress")
       workinprogresskwargs["name"] += "_workinprogress"
-      #plotkwargses.append(workinprogresskwargs)
+      plotkwargses.append(workinprogresskwargs)
 
     for kwargs in plotkwargses: print kwargs["name"]
 
