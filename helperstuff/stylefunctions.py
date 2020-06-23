@@ -255,7 +255,7 @@ def makelumi(lumi=None, lumitext=None, x1=0.15, y1=0.93, x2=0.99, y2=1, textsize
         raise ValueError("Can't provide both lumi and lumitext!")
 
     if lumitext is None:
-        lumitext = "{:.1f} fb^{{-1}} (13 TeV)".format(lumi)
+        lumitext = "{:.0f} fb^{{-1}} (13 TeV)".format(lumi)
 
     lumitext = "#font[42]{" + lumitext + "}"
 
