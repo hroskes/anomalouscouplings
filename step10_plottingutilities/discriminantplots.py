@@ -1441,7 +1441,7 @@ def makeplots(filter):
       ),
       dict(
         name="D_2jet_VBF",
-        xtitle="max#left(#vec{D}_{2jet}^{VBF}#right)",
+        xtitle="max#left(D_{2jet}^{VBF, i}#right)",
         ytitle="Events / bin",
         hypothesislines=purehypothesislines,
         xformula="max(D_2jet_0plus, max(D_2jet_0minus, max(D_2jet_a2, max(D_2jet_L1, D_2jet_L1Zg))))",
@@ -1459,7 +1459,7 @@ def makeplots(filter):
       ),
       dict(
         name="D_2jet_VH",
-        xtitle="max#left(#vec{D}_{2jet}^{WH}, #vec{D}_{2jet}^{ZH}#right)",
+        xtitle="max#left(D_{2jet}^{WH, i}, D_{2jet}^{ZH, i}#right)",
         ytitle="Events / bin",
         hypothesislines=purehypothesislines,
         xformula="max(max(D_HadZH_0plus, max(D_HadZH_0minus, max(D_HadZH_a2, max(D_HadZH_L1, D_HadZH_L1Zg)))), max(D_HadWH_0plus, max(D_HadWH_0minus, max(D_HadWH_a2, max(D_HadWH_L1, D_HadWH_L1Zg)))))",
