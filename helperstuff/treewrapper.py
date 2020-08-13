@@ -939,7 +939,14 @@ class TreeWrapper(TreeWrapperBase):
 
         self.tree.GetEntry(0)
         if not self.isdata and not self.isZX:
-            self.xsec = self.tree.xsec * 1000 #pb to fb
+            xsec = self.tree.xsec
+
+            assert self.treesample.production in ("200205_2016", "200205_2017", "200205_2018"), self.treesample.production
+            samplename = os.path.basename(os.path.dirname(s.CJLSTfile()))
+            xsec = CJLSTscripts.update_xsec(samplename)
+
+            self.xsec = xsec * 1000 #pb to fb
+
             self.genxsec = self.tree.genxsec
             self.genBR = self.tree.genBR
 

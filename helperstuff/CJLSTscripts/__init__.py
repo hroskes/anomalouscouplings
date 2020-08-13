@@ -8,7 +8,7 @@ CJLSTscriptsfolder = os.path.dirname(os.path.abspath(__file__))
 #have to be in order of who includes whose header file
 scripts = ["cConstants", "Discriminants", "Category", "bitops", "FinalStates", "LeptonSFHelper"]
 
-downloader = downloadfromCJLST.Downloader("577805cd18bd57fe042408f8572b308abb213c7e")
+downloader = downloadfromCJLST.Downloader("09326dd9a646711b576c26b07b592dbaf75200f1")
 for script in scripts:
     downloader.add("AnalysisStep/src/{}.cc".format(script))
     downloader.add("AnalysisStep/interface/{}.h".format(script))
@@ -38,3 +38,6 @@ from ROOT import getDVBF2jetsWP, getDVBF1jetWP, getDWHhWP, getDZHhWP
 from ROOT import getDVBF2jetsConstant_shiftWP, getDVBF1jetConstant_shiftWP, getDWHhConstant_shiftWP, getDZHhConstant_shiftWP
 
 from ROOT import D_bkg_VBFdec, D_bkg_VHdec, DVBF1j_ME
+
+utilities.LoadMacro(os.path.join(CJLSTscriptsfolder, "updated_xsec.cc+"))
+from ROOT import update_xsec
