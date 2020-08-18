@@ -5,6 +5,7 @@ from collections import Counter, Iterator
 import inspect
 from itertools import chain, izip, izip_longest
 from math import sqrt
+import os
 import resource
 import sys
 
@@ -942,12 +943,12 @@ class TreeWrapper(TreeWrapperBase):
             xsec = self.tree.xsec
 
             assert self.treesample.production in ("200205_2016", "200205_2017", "200205_2018"), self.treesample.production
-            samplename = os.path.basename(os.path.dirname(s.CJLSTfile()))
-            xsec = CJLSTscripts.update_xsec(samplename)
+            samplename = os.path.basename(os.path.dirname(self.treesample.CJLSTfile()))
+            xsec = CJLSTscripts.update_xsec(samplename, xsec)
 
             self.xsec = xsec * 1000 #pb to fb
 
-            self.genxsec = self.tree.genxsec
+            self.genxsec = self.tree.genxsec * xsec / self.tree.xsec
             self.genBR = self.tree.genBR
 
     @property
