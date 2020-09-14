@@ -66,6 +66,9 @@ class RowBase(RowBaseBase):
       result += " & "
       amount = self.categorydistribution[category]
       result += self.fmt.format(amount)
+    result += " & "
+    amount = sum(self.categorydistribution[c] for c in list(categories))
+    result += self.fmt.format(amount)
     return result
 
 class Row(RowBase, MultiEnum):
@@ -194,7 +197,7 @@ class Row(RowBase, MultiEnum):
     if self.productionmode == "data":
       return "{:d}"
     else:
-      return "{:.1f}"
+      return "{:.2f}"
 
   def getcategorydistribution(self):
     result = MultiplyCounter()
@@ -223,7 +226,7 @@ class TotalRow(RowBase):
     return sum((row.categorydistribution for row in self.rows), MultiplyCounter())
   @property
   def fmt(self):
-    return "{:.1f}"
+    return "{:.2f}"
 
 class SlashRow(RowBaseBase):
   def __init__(self, *rows, **kwargs):
@@ -239,7 +242,7 @@ class SlashRow(RowBaseBase):
     return self.__title
   @property
   def fmt(self):
-    return "{:.1f}"
+    return "{:.2f}"
 
   def getlatex(self):
     result = "{}".format(self.title)
@@ -252,6 +255,15 @@ class SlashRow(RowBaseBase):
         parts.append(self.fmt.format(total))
       assert len(parts) == 5
       result += "{} ({}/{}/{}/{})".format(*parts)
+    result += " & "
+    parts = []
+    for row in self.rows:
+      total = 0
+      total += sum(row.categorydistribution[c] for c in categories)
+      parts.append(self.fmt.format(total))
+    assert len(parts) == 5
+    result += "{} ({}/{}/{}/{})".format(*parts)
+      
     return result
 
   def getcategorydistribution(self):
@@ -377,7 +389,7 @@ def maketable():
   result = ""
   result += r"\begin{{tabular}}{{{}}}".format("l" + "".join("c"*len(categories)) + "") + "\n"
   result += r"\hline" + "\n"
-  result += " & " + " & ".join(list(r"{"+categoryname(_)+"}" for _ in categories)) + r" \\" + "\n"
+  result += " & " + " & ".join(list(r"{"+categoryname(_)+"}" for _ in categories)+["Total"]) + r" \\" + "\n"
   result += r"\hline" + "\n"
   joiner = r"\\"+"\n"+r"\hline"+"\n"
 
