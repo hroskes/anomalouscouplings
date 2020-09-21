@@ -57,42 +57,27 @@ class normalizeZX(object):
   def ratio_combination_over_SS_new(cls, year, flavor):
     lines = iter(cls.txtfilenew.split("\n"))
     for line in lines:
-      if line.startswith("# "+str(year)): break
-    for line in lines:
-      if line.startswith("201"): assert False
-      if line.startswith("M4l = [118, 130] GeV"): break
-    for line in lines:
-      if line.startswith("201"): assert False
-      if line.startswith("M4l"): assert False
-      if line.startswith({-cls.el*cls.el: "4e", -cls.mu*cls.mu: "4mu", -cls.el*cls.mu: "2e2emu_MERGED"}[flavor]):
-        SS = float(line.split()[1])
-        combined = float(line.split()[3])
+      if line.startswith("SS"):
+        idx = line.split().index(str(year))
         break
-    return combined / SS
-
-  @classmethod
-  @cache
-  def OS_SS_ratio_new(cls, year, Z1Flav, Z2Flav):
-    lines = iter(cls.txtfilenew.split("\n"))
     for line in lines:
-      if line.startswith("# "+str(year)): break
+      if line.startswith("OS"): assert False
+      if line.startswith({-cls.el*cls.el: "4e", -cls.mu*cls.mu: "4mu", -cls.el*cls.mu: "2e2mu"}[flavor]):
+        SS = float(line.split()[idx])
+        if line.startswith("2e2mu"):
+          SS += float(next(lines).split()[idx])
+        break
     for line in lines:
-      if line.startswith("201"): assert False
-      if line.startswith("SS/OS ratios"): break  #Matteo: this is a typo, the numbers really are OS/SS
+      if line.startswith("COMB"): break
     for line in lines:
-      if line.startswith("201"): assert False
-      if line.startswith({
-        (-cls.el, cls.el): "4e",
-        (-cls.el, cls.mu): "2e2mu",
-        (-cls.mu, cls.el): "2mu2e",
-        (-cls.mu, cls.mu): "4mu",
-      }[Z1Flav, Z2Flav]):
-        return float(line.split()[1])
-    assert False
+      if line.startswith({-cls.el*cls.el: "4e", -cls.mu*cls.mu: "4mu", -cls.el*cls.mu: "2e2mu"}[flavor]):
+        combination = float(line.split()[idx])
+        break
+    return combination / SS
 
   def __new__(cls, year, usenewobjects, Z1Flav, Z2Flav):
     if usenewobjects:
-      return cls.ratio_combination_over_SS_new(year, Z1Flav*Z2Flav) * cls.OS_SS_ratio_new(year, Z1Flav, Z2Flav)
+      return cls.ratio_combination_over_SS_new(year, Z1Flav*Z2Flav)
     else:
       return cls.ratio_combination_over_SS_old(year, Z1Flav*Z2Flav)
 
@@ -139,81 +124,23 @@ SS-OS Combination	Yield
   """
 
   txtfilenew = """
-########
-# 2016 #
-########
+SS	2016	2017	2018	Full Run 2
+4mu	9.48	10.94	16.87	37.29		
+4e	2.67	2.63	4.10	9.40
+2e2mu	8.26	8.18	13.26	29.70
+2mu2e	3.46	3.52	5.55	12.53
+TOT	23.87	25.27	39.78	88.92
 
-M4l > 70 GeV		SS	OS	COMBINATION
-4mu			29.66 	26.87	28.19
-4e			13.03	20.06	16.13	
-2e2emu_MERGED 		41.45	47.45	44.39
-2e2mu			24.79	25.18
-2mu2e			16.66	22.28
+OS	2016	2017	2018	Full Run 2
+4mu	8.37	8.58	14.11	31.06		
+4e	5.33	3.85	6.53	15.71
+2e2mu	7.68	7.59	11.05	26.32
+2mu2e	5.67	6.39	8.68	20.74
+TOT	27.05	26.41	40.37	93.83
 
-
-M4l = [118, 130] GeV	SS	OS	COMBINATION
-4mu		 	3.66 	3.22	3.48
-4e			1.04	1.70	1.24
-2e2emu_MERGED 		4.38	4.04	4.24
-2e2mu			3.07	2.52
-2mu2e			1.31	1.52
-
-
-SS/OS ratios
-4mu	1.00008 +/- 0.027524
-4e    	1.00229 +/- 0.011872
-2e2mu 	1.03601 +/- 0.030332
-2mu2e 	0.99873 +/- 0.010537
-
-########
-# 2017 #
-########
-
-M4l > 70 GeV		SS	OS	COMBINATION
-4mu			33.55 	32.72	33.13
-4e			10.91	16.15	12.95	
-2e2emu_MERGED 		40.96	45.29	43.05
-2e2mu			26.27	23.97
-2mu2e			14.69	21.32
-
-
-M4l = [118, 130] GeV	SS	OS	COMBINATION
-4mu		 	4.23 	3.54	3.92
-4e			1.02	1.54	1.18
-2e2emu_MERGED 		4.55	4.92	4.69
-2e2mu			3.20	3.03
-2mu2e			1.35	1.90
-
-
-SS/OS ratios
-4mu   1.03961 +/- 0.0267732
-4e    1.01168 +/- 0.0133765
-2e2mu 1.01307 +/- 0.0301085
-2mu2e 1.00266 +/- 0.0115351
-
-########
-# 2018 #
-########
-
-M4l > 70 GeV		SS	OS	COMBINATION
-4mu	 		52.17 	49.38	50.72
-4e			15.99	25.35	19.42	
-2e2emu_MERGED 		60.78	67.14	63.87
-2e2mu			37.53	34.18
-2mu2e			23.25	32.96
-
-
-M4l = [118, 130] GeV	SS	OS	COMBINATION
-4mu		 	6.54 	5.59	6.08
-4e			1.43	2.16	1.65
-2e2emu_MERGED 		6.93	6.77	6.86
-2e2mu			4.83	3.99
-2mu2e			2.10	2.78
-
-
-SS/OS ratios
-4mu	1.02763 +/- 0.021062
-4e    	1.00635 +/- 0.011001
-2e2mu 	1.03170 +/- 0.024905
-2mu2e 	1.00492 +/- 0.009098
+COMB	2016	2017	2018	Full Run 2
+4mu	8.94	9.66	15.37	33.97		
+4e	3.43	3.07	4.88	11.38
+2e2mu	12.43	12.63	19.25	44.31
+TOT	24.8	25.36	39.5	89.66
   """
