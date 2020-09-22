@@ -55,25 +55,23 @@ class normalizeZX(object):
   @classmethod
   @cache
   def ratio_combination_over_SS_new(cls, year, flavor):
-    lines = iter(cls.txtfilenew.split("\n"))
-    for line in lines:
-      if line.startswith("SS"):
-        idx = line.split().index(str(year))
-        break
-    for line in lines:
-      if line.startswith("OS"): assert False
-      if line.startswith({-cls.el*cls.el: "4e", -cls.mu*cls.mu: "4mu", -cls.el*cls.mu: "2e2mu"}[flavor]):
-        SS = float(line.split()[idx])
-        if line.startswith("2e2mu"):
-          SS += float(next(lines).split()[idx])
-        break
-    for line in lines:
-      if line.startswith("COMB"): break
-    for line in lines:
-      if line.startswith({-cls.el*cls.el: "4e", -cls.mu*cls.mu: "4mu", -cls.el*cls.mu: "2e2mu"}[flavor]):
-        combination = float(line.split()[idx])
-        break
-    return combination / SS
+    return {
+      2016: {
+        -cls.mu*cls.mu: 0.9504,
+        -cls.el*cls.el: 1.2379,
+        -cls.el*cls.mu: 1.0709,
+      },
+      2017: {
+        -cls.mu*cls.mu: 0.9875,
+        -cls.el*cls.el: 1.1870,
+        -cls.el*cls.mu: 1.0510,
+      },
+      2018: {
+        -cls.mu*cls.mu: 0.9722,
+        -cls.el*cls.el: 1.2145,
+        -cls.el*cls.mu: 1.05088,
+      },
+    }[year][flavor]
 
   def __new__(cls, year, usenewobjects, Z1Flav, Z2Flav):
     if usenewobjects:
