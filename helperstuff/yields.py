@@ -265,6 +265,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
             t.Draw(categorization.category_function_name+":abs(Z1Flav*Z2Flav)", "MC_weight_nominal*(ZZMass>{} && ZZMass<{})*{}".format(config.m4lmin, config.m4lmax, alternateweight.weightname), "LEGO")
             h = c.FindObject("htemp")
             t.GetEntry(0)
+            if not isinstance(h, ROOT.TH1):
+                if productionmode == "TTWW": continue
             if productionmode != "ZX":
                 h.Scale(t.xsec / (t.genxsec * t.genBR))
             for i in range(h.GetNbinsY()):

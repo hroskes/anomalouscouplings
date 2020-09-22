@@ -55,6 +55,7 @@ def writeyields(productionmodelist=None, productionlist=None):
       SampleCount(ProductionMode("ttH"), [[RSPWF("ttH", "0+", "Hff0+", "POWHEG")]]),
       SampleCount(ProductionMode("bbH"), [[RSPWF("bbH", "0+")]]),
       SampleCount(ProductionMode("ggZZ"), [[RSPWF("ggZZ", flavor)] for flavor in flavors]),
+      SampleCount(ProductionMode("EW"), [[RSPWF("VBFbkg")], [RSPWF("TTZToLL_M1to10_MLM")], [RSPWF("TTZToLLNuNu_M10", "ext1" if year == 2018 else None)], [RSPWF("TTZJets_M10_MLM", "ext1" if year == 2018 else None)], [RSPWF("TTZZ")], [RSPWF("TTWW")], [RSPWF("ZZZ")], [RSPWF("WWZ")], [RSPWF("WZZ")]]),
     ] * (not production.GEN)
 
     if config.usedata and not production.GEN:
@@ -79,7 +80,6 @@ def writeyields(productionmodelist=None, productionlist=None):
     print
     for productionmode, samplegroups in tosamples_foryields:
       if productionmodelist and productionmode not in productionmodelist: continue
-      print productionmode
       for g in samplegroups:
         if productionmode.issignal and productionmode != "bbH" and not production.GEN:
           g += [
