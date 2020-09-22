@@ -95,6 +95,12 @@ class Row(RowBase, MultiEnum):
         weightformulas=["1" for production in config.productionsforcombine],
         scaletos=None,
       )
+    elif self.productionmode == "EW":
+      kwargs.update(
+        trees=gettrees(("EW",)),
+        weightformulas=getweights(("EW",)),
+        scaletos=None,
+      )
     elif self.productionmode.isbkg:
       kwargs.update(
         trees=gettrees((str(self.productionmode),)),
@@ -368,7 +374,8 @@ def maketable():
     ),
     Section("bkg",
       Row("qqZZ", title=r"$\qqbar\to4\ell$ bkg."),
-      Row("ggZZ", title=r"\Pg\Pg\to4\ell bkg."),
+      Row("ggZZ", title=r"$\Pg\Pg\to4\ell$ bkg."),
+      Row("EW", title="EW bkg."),
       Row("ZX", title=r"$\Z\!+\!\X$ bkg."),
     ),
   ]

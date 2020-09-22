@@ -945,7 +945,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
                 raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-        elif self.productionmode in ("qqZZ", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
+        elif self.productionmode in ("qqZZ", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM", "EW"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:

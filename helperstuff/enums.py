@@ -345,7 +345,7 @@ class ProductionMode(MyEnum):
                  EnumItem("ttH"),
                  EnumItem("qqZZ", "bkg_qqzz"),
                  EnumItem("ggZZ", "bkg_ggzz"),
-                 EnumItem("VBFbkg", "VBF bkg", "bkg_vbf"),
+                 EnumItem("VBFbkg", "VBF bkg", "VBFToContinToZZ4l", "bkg_vbf"),
                  EnumItem("ZX", "bkg_zjets"),
                  EnumItem("data"),
                  EnumItem("WplusH"),

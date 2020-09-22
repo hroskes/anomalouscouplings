@@ -246,8 +246,7 @@ class TemplatesFile(MultiEnum):
             return [Template(self, sample) for sample in self.signalsamples()]
         elif self.templategroup == "bkg":
             if self.production.LHE or self.production.GEN: return [Template(self, "qqZZ")]
-            result = ["qqZZ", "ggZZ", "VBF bkg"]
-            result.remove("VBF bkg")
+            result = ["qqZZ", "ggZZ", "EW"]
             if config.usedata:
                 result.append("ZX")
 
@@ -1150,7 +1149,7 @@ class TemplateBase(object):
                 enumsdict[TemplateGroup] = "tth"
             elif enumsdict[ProductionMode] == "bbH":
                 enumsdict[TemplateGroup] = "bbh"
-            elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "VBF bkg", "ZX"):
+            elif enumsdict[ProductionMode] in ("qqZZ", "ggZZ", "VBF bkg", "EW", "ZX"):
                 enumsdict[TemplateGroup] = "bkg"
             elif enumsdict[ProductionMode] == "data":
                 enumsdict[TemplateGroup] = "DATA"
@@ -1230,7 +1229,7 @@ class Template(TemplateBase, MultiEnum):
             if self.templategroup != str(self.productionmode).lower():
                 raise ValueError("{} is not {}!\n{}".format(self.productionmode, self.templategroup, args))
 
-        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
+        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "EW", "ZX"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.templategroup != "bkg":
@@ -1341,7 +1340,7 @@ class Template(TemplateBase, MultiEnum):
                 )
         elif self.productionmode == "ZX" and not config.usedata:
             name = "templateqqZZ"
-        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
+        elif self.productionmode in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "EW"):
             name = "template{}".format(self.productionmode)
         elif self.productionmode == "data":
             name = "datatemplate"
@@ -1365,6 +1364,8 @@ class Template(TemplateBase, MultiEnum):
             return "Z+X"
         if self.productionmode == "VBF bkg":
             return "VBF bkg"
+        if self.productionmode == "EW":
+            return "EW"
         if self.productionmode == "data":
             return "data"
         assert False
@@ -1378,6 +1379,8 @@ class Template(TemplateBase, MultiEnum):
                 samples.append(ReweightingSample("WH", self.hypothesis))
         elif self.productionmode == "ggZZ":
             samples = [self.reweightingsampleplus]*6
+        elif self.productionmode == "EW":
+            samples = [ReweightingSamplePlus(p) for p in "TTZToLL_M1to10_MLM", "TTZToLLNuNu_M10", "TTZJets_M10_MLM", "TTZZ", "TTWW", "ZZZ", "WWZ", "WZZ", "VBF bkg"]
         else:
             samples = [self.reweightingsampleplus]
 
@@ -1472,8 +1475,8 @@ class Template(TemplateBase, MultiEnum):
             result = [{Sample(self.production, self.productionmode, ext) for ext in (None, "ext", "ext1", "ext2")}]
         if self.productionmode == "ggZZ":
             result = [{Sample(self.production, self.productionmode, flavor)} for flavor in flavors]
-        if self.productionmode == "VBF bkg":
-            result = [{Sample(self.production, self.productionmode, flavor)} for flavor in flavors if not flavor.hastaus]
+        if self.productionmode == "EW":
+            result = [{Sample(self.production, productionmode, ext) for ext in (None, "ext1")} for productionmode in ("TTZToLL_M1to10_MLM", "TTZToLLNuNu_M10", "TTZJets_M10_MLM", "TTZZ", "TTWW", "ZZZ", "WWZ", "WZZ", "VBFbkg")]
         if self.productionmode == "data":
             if self.production.GEN or self.production.LHE:
                 result = [{Sample("WH", self.production, "0+")}]
@@ -1537,7 +1540,7 @@ class Template(TemplateBase, MultiEnum):
 
         if self.hypothesis in ("fa3proddec0.25fa2proddec0.25fL1proddec0.25fL1Zgproddec0.25",): return False
 
-        if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX"): return True
+        if self.productionmode in ("qqZZ", "ggZZ", "VBF bkg", "ZX", "EW"): return True
 
         assert False, self
 
