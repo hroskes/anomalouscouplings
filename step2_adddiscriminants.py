@@ -11,6 +11,7 @@ if __name__ == "__main__":
   p = argparse.ArgumentParser()
   p.add_argument("--submitjobs", action="store_true")
   p.add_argument("--filter", type=stringandlambda, default=None)
+  p.add_argument("--skipxcheck", dest="doxcheck", action="store_false")
   args = p.parse_args()
 
 from array import array
@@ -105,9 +106,9 @@ def adddiscriminants(*args):
           except:
             pass
 
-def submitjobs(filter=None):
+def submitjobs(filter=None, doxcheck=True):
   njobs = 0
-  for sample in allsamples():
+  for sample in allsamples(doxcheck=doxcheck):
     if filter and not filter.function(sample): continue
     if not os.path.exists(sample.withdiscriminantsfile()) and KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid and not sample.copyfromothersample:
       njobs += 1
@@ -126,16 +127,16 @@ def submitjobs(filter=None):
 if __name__ == '__main__':
   cleanupscratchdir()
   if args.submitjobs:
-    submitjobs(filter=args.filter)
+    submitjobs(filter=args.filter, doxcheck=args.doxcheck)
   else:
     try:
-      for sample in allsamples():
+      for sample in allsamples(doxcheck=args.doxcheck):
         if sample.productionmode == "ggZZ" and sample.flavor == "4tau" and not sample.copyfromothersample:
           adddiscriminants(sample)
-      for sample in allsamples():
+      for sample in allsamples(doxcheck=args.doxcheck):
         if sample.copyfromothersample: continue
         if args.filter and not args.filter.function(sample): continue
         adddiscriminants(sample)
     finally:
-      if not any(KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid for sample in allsamples()):
+      if not any(KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid for sample in allsamples(doxcheck=args.doxcheck)):
         deletemelastuff()

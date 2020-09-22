@@ -355,6 +355,14 @@ class ProductionMode(MyEnum):
                  EnumItem("ffH"),
                  EnumItem("VVH"),
                  EnumItem("VH"),
+                 EnumItem("TTZZ"),
+                 EnumItem("ZZZ"),
+                 EnumItem("WZZ"),
+                 EnumItem("WWZ"),
+                 EnumItem("TTWW"),
+                 EnumItem("TTZJets_M10_MLM"),
+                 EnumItem("TTZToLLNuNu_M10"),
+                 EnumItem("TTZToLL_M1to10_MLM"),
                 )
     @property
     def combinename(self):
@@ -382,7 +390,7 @@ class ProductionMode(MyEnum):
     def isbkg(self):
         if self in ("ggH", "VBF", "ZH", "WH", "VH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "ffH", "VVH"):
             return False
-        elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX"):
+        elif self in ("ggZZ", "qqZZ", "VBF bkg", "ZX", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
             return True
         assert False, self
     @property

@@ -945,7 +945,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
                 raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-        elif self.productionmode == "qqZZ":
+        elif self.productionmode in ("qqZZ", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
@@ -966,21 +966,21 @@ class ReweightingSample(MultiEnum, SampleBase):
         return not self.isbkg
 
     def isZX(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
             return False
         elif self.productionmode == "ZX":
             return True
         raise self.ValueError("isZX")
 
     def isdata(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
             return False
         elif self.productionmode == "data":
             return True
         raise self.ValueError("isdata")
 
     def TDirectoryname(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH") or self.productionmode == "ZX" and not config.usedata:
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM") or self.productionmode == "ZX" and not config.usedata:
             return "ZZTree"
         if self.productionmode == "ZX":
             return "CRZLLTree"
@@ -1533,6 +1533,10 @@ class Sample(ReweightingSamplePlusWithFlavor):
             result = "ZZTo4l"
             if self.extension is not None: result += str(self.extension)
             return result
+        if self.productionmode in ("TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
+            result = str(self.productionmode)
+            if self.extension is not None: result += str(self.extension)
+            return result
         if self.productionmode == "ZX" or self.productionmode == "data":
             return "AllData"
         raise self.ValueError("CJLSTdirname")
@@ -1788,8 +1792,8 @@ class SampleBasis(MultiEnum):
         self.matrix.flags.writeable = False
         return invertnumpymatrix(self.matrix)
 
-def allsamples(__doxcheck=True):
-    if __doxcheck: __xcheck(*allsamples(__doxcheck=False))
+def allsamples(doxcheck=True):
+    if doxcheck: __xcheck(*allsamples(doxcheck=False))
 
     for production in productions:
         if production.GEN:
@@ -1861,6 +1865,11 @@ def allsamples(__doxcheck=True):
             yield Sample("qqZZ", "ext2", production)
         else:
             yield Sample("qqZZ", "ext", production)
+        for _ in "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZToLL_M1to10_MLM":
+            yield Sample(_, production)
+        for _ in "TTZJets_M10_MLM", "TTZToLLNuNu_M10":
+            yield Sample(_, production)
+            yield Sample(_, production, "ext1")
         yield Sample("ZX", production)
         yield Sample("data", production)
 
