@@ -1365,7 +1365,7 @@ class ReweightingSampleWithPdf(ReweightingSample):
 class ReweightingSampleWithFlavor(ReweightingSample):
     enums = [ReweightingSample, Flavor]
     def check(self, *args):
-        if self.productionmode in ("ggZZ", "VBF bkg"):
+        if self.productionmode in ("ggZZ",):
             if self.flavor is None:
                 raise ValueError("No flavor provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.productionmode == "VBF bkg" and self.flavor.hastaus:
@@ -1469,6 +1469,8 @@ class Sample(ReweightingSamplePlusWithFlavor):
           return self.production.CJLSTdir_data()
       if self.productionmode == "ggH" and self.alternategenerator == "MINLO" and self.pythiasystematic is None:
         return self.production.CJLSTdir_MINLO()
+      if self.productionmode == "VBF bkg":
+        return self.production.CJLSTdir_VBFbkg()
       return self.production.CJLSTdir()
 
     def CJLSTdirname(self):
@@ -1526,7 +1528,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
         if self.productionmode == "ggZZ":
             return "ggTo{}_Contin_MCFM701".format(self.flavor)
         if self.productionmode == "VBF bkg":
-            return "VBFTo{}JJ_Contin_phantom128".format(self.flavor)
+            return "{}_mc_VBFToContinToZZTo4l_ecdaf558".format(self.production.year)
         if self.productionmode == "qqZZ":
             result = "ZZTo4l"
             if self.extension is not None: result += str(self.extension)
@@ -1839,8 +1841,7 @@ def allsamples(__doxcheck=True):
         yield Sample("tqH", "0+", "Hff0+", production)
         for flavor in flavors:
             yield Sample("ggZZ", flavor, production)
-            if not flavor.hastaus:
-                yield Sample("VBF bkg", flavor, production)
+        yield Sample("VBF bkg", production)
         yield Sample("ggH", "0+", "NNLOPS", production)
         yield Sample("ggH", "0+", "MINLO", production)
         for productionmode in "ggH", "VBF", "ZH", "WplusH", "WminusH":

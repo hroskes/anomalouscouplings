@@ -1045,6 +1045,17 @@ class Production(MyEnum):
         return self.CJLSTdir_anomalous()
     def CJLSTdir_MINLO(self):
         return self.CJLSTdir()
+    def CJLSTdir_VBFbkg(self):
+        if self == "200205_2016":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/200205CutBased/VBFBckg/"
+        if self == "200205_2017":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/200205CutBased/VBFBckg/"
+        if self == "200205_2018":
+            if config.host == "MARCC":
+                return "/work-zfs/lhc/CJLSTtrees/200205CutBased/VBFBckg/"
+        return self.CJLSTdir()
     @property
     def dataluminosity(self):
         if self.LHE or self.GEN: return 3000

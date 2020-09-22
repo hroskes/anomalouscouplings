@@ -138,7 +138,7 @@ class TreeWrapperBase(Iterator):
         if self.doleptonSF:
             result *= fixleptonscalefactor(self.year, self.LepLepId, self.LepPt, self.LepEta, self.dataMCWeight)
         if self.productionmode == "ggH" and self.useNNLOPSweight: return result * self.ggH_NNLOPS_weight
-        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH"): return result
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH", "VBFbkg"): return result
         if self.productionmode == "ggZZ": return result * self.KFactor_QCD_ggZZ_Nominal
         if self.productionmode == "qqZZ":
             if self.GEN: return result
