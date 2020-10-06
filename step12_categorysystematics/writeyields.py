@@ -150,6 +150,7 @@ def writeyields(productionmodelist=None, productionlist=None):
           )
           for key in result.keys():
             if key[0] == sampleforkey:
+              if productionmode == "EW": result[key] /= 1000
               newkey = (
                 (productionmode,)
                 + tuple(
@@ -353,12 +354,12 @@ def writeyields(productionmodelist=None, productionlist=None):
               scaleup = scaledn = 1
             elif year == 2017 or year == 2018:
               if productionmode in ("VBF",) and year == 2017:
-                scaleup = scaledn = deprecate(1, 2020, 9, 12)
+                scaleup = scaledn = deprecate(1, 2020, 11, 12)
               else:
                 scaleup = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleUp"), cat] for cat in sumcategories) / nominal).nominal_value
                 scaledn = (sum(result[productionmode, categorization, AlternateWeight("PythiaScaleDn"), cat] for cat in sumcategories) / nominal).nominal_value
             if year == 2017 and productionmode in ("VH", "ZH", "ggH"):
-              tuneup = tunedn = deprecate(1, 2020, 9, 12)
+              tuneup = tunedn = deprecate(1, 2020, 11, 12)
             else:
               tuneup = (sum(result[productionmode, PythiaSystematic("TuneUp"), categorization, AlternateWeight("1"), cat] for cat in sumcategories) / nominal).nominal_value
               try:

@@ -941,6 +941,8 @@ class TreeWrapper(TreeWrapperBase):
         self.tree.GetEntry(0)
         if not self.isdata and not self.isZX:
             xsec = self.tree.xsec
+            if self.treesample.production in ("200205_2016", "200205_2017", "200205_2018") and self.treesample.productionmode == "VBF bkg":
+                xsec *= 1000
 
             assert self.treesample.production in ("200205_2016", "200205_2017", "200205_2018"), self.treesample.production
             samplename = os.path.basename(os.path.dirname(self.treesample.CJLSTfile()))
