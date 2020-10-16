@@ -677,6 +677,7 @@ class Plot(object):
     ZZtrees = gettrees(
       ("qqZZ",),
       ("ggZZ",),
+      ("EW",),
     )
     ffHtrees = gettrees(
       ("ggH", "0+"),
@@ -735,7 +736,7 @@ class Plot(object):
       name=name+"_ZZ",
       trees=ZZtrees,
       xformula=xformula,
-      weightformulas=getweights(("qqZZ",), ("ggZZ",), uselumi=True),
+      weightformulas=getweights(("qqZZ",), ("ggZZ",), ("EW",), uselumi=True),
       cutformula=cutformula,
       binning=binning,
       linecolor=1,
