@@ -95,12 +95,6 @@ class Row(RowBase, MultiEnum):
         weightformulas=["1" for production in config.productionsforcombine],
         scaletos=None,
       )
-    elif self.productionmode == "EW":
-      kwargs.update(
-        trees=gettrees(("EW",)),
-        weightformulas=getweights(("EW",)),
-        scaletos=None,
-      )
     elif self.productionmode.isbkg:
       kwargs.update(
         trees=gettrees((str(self.productionmode),)),
