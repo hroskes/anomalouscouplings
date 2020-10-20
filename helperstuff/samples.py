@@ -12,7 +12,7 @@ import ROOT
 import config
 import constants
 import eft
-from enums import AlternateGenerator, AlternateWeight, analyses, Analysis, Extension, Flavor, flavors, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
+from enums import AlternateGenerator, AlternateWeight, analyses, Analysis, Extension, Flavor, flavors, ggZZoffshellproductionmodes, purehypotheses, HffHypothesis, hffhypotheses, Hypothesis, MultiEnum, MultiEnumABCMeta, Production, ProductionMode, productions, PythiaSystematic, pythiasystematics
 from extendedcounter import ExtendedCounter
 from utilities import cache, cache_file, deprecate, generatortolist, product, TFile, tlvfromptetaphim, WriteOnceDict
 from weightshelper import WeightsHelper
@@ -945,7 +945,7 @@ class ReweightingSample(MultiEnum, SampleBase):
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
                 raise ValueError("Hff hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
-        elif self.productionmode in ("qqZZ", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM", "EW"):
+        elif self.productionmode in ("qqZZ", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM", "EW") + tuple(ggZZoffshellproductionmodes):
             if self.hypothesis is not None:
                 raise ValueError("Hypothesis provided for {} productionmode\n{}".format(self.productionmode, args))
             if self.hffhypothesis is not None:
@@ -966,21 +966,21 @@ class ReweightingSample(MultiEnum, SampleBase):
         return not self.isbkg
 
     def isZX(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM") + tuple(ggZZoffshellproductionmodes):
             return False
         elif self.productionmode == "ZX":
             return True
         raise self.ValueError("isZX")
 
     def isdata(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBF bkg", "ZX", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM") + tuple(ggZZoffshellproductionmodes):
             return False
         elif self.productionmode == "data":
             return True
         raise self.ValueError("isdata")
 
     def TDirectoryname(self):
-        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM") or self.productionmode == "ZX" and not config.usedata:
+        if self.productionmode in ("ggH", "ggZZ", "qqZZ", "VBFbkg", "data", "VBF", "ZH", "WH", "ttH", "WplusH", "WminusH", "bbH", "tqH", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM") + tuple(ggZZoffshellproductionmodes) or self.productionmode == "ZX" and not config.usedata:
             return "ZZTree"
         if self.productionmode == "ZX":
             return "CRZLLTree"
@@ -1471,6 +1471,8 @@ class Sample(ReweightingSamplePlusWithFlavor):
         return self.production.CJLSTdir_MINLO()
       if self.productionmode == "VBF bkg":
         return self.production.CJLSTdir_VBFbkg()
+      if self.productionmode in ggZZoffshellproductionmodes:
+        return self.production.CJLSTdir_ggZZoffshell()
       return self.production.CJLSTdir()
 
     def CJLSTdirname(self):
@@ -1533,7 +1535,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
             result = "ZZTo4l"
             if self.extension is not None: result += str(self.extension)
             return result
-        if self.productionmode in ("TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"):
+        if self.productionmode in ("TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM") + tuple(ggZZoffshellproductionmodes):
             result = str(self.productionmode)
             if self.extension is not None: result += str(self.extension)
             return result
@@ -1872,6 +1874,9 @@ def allsamples(doxcheck=True):
             yield Sample(_, production, "ext1")
         yield Sample("ZX", production)
         yield Sample("data", production)
+
+        for _ in ggZZoffshellproductionmodes:
+            yield Sample(_, production)
 
 @cache_file(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl"))
 def __xcheck(*samples):

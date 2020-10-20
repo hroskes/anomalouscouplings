@@ -21,6 +21,7 @@ import enums
 import STXS
 import xrd
 import ZX
+from enums import ggZZoffshellproductionmodes
 from gconstants import gconstant
 from leptonscalefactor import fixleptonscalefactor
 from makesystematics import MakeBtagSystematics, MakeJetSystematics, MakeSystematics
@@ -95,10 +96,10 @@ class TreeWrapperBase(Iterator):
     def isdata(self): return self.treesample.isdata()
     @property
     @cache_instancemethod
-    def isbkg(self): return not self.isdata and self.treesample.isbkg
+    def isZX(self): return self.treesample.isZX()
     @property
     @cache_instancemethod
-    def isZX(self): return self.treesample.isZX()
+    def isggZZoffshell(self): return self.treesample.productionmode in ggZZoffshellproductionmodes
     @property
     @cache_instancemethod
     def useNNLOPSweight(self): return self.productionmode == "ggH" and self.treesample.alternategenerator in (None, "POWHEG", "MINLO", "NNLOPS") and not self.GEN
@@ -139,11 +140,11 @@ class TreeWrapperBase(Iterator):
             result *= fixleptonscalefactor(self.year, self.LepLepId, self.LepPt, self.LepEta, self.dataMCWeight)
         if self.productionmode == "ggH" and self.useNNLOPSweight: return result * self.ggH_NNLOPS_weight
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "ttH", "bbH", "tqH", "WplusH", "WminusH", "VBFbkg", "TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM"): return result
-        if self.productionmode == "ggZZ": return result * self.KFactor_QCD_ggZZ_Nominal
+        if self.productionmode == "ggZZ" or self.isggZZoffshell: return result * self.KFactor_QCD_ggZZ_Nominal
         if self.productionmode == "qqZZ":
             if self.GEN: return result
             return result * self.KFactor_EW_qqZZ * self.KFactor_QCD_qqZZ_M
-        assert False, self
+        assert False, self.treesample
 
     def MC_weight_nominal(self):
         if self.productionmode == "ZX" or self.productionmode == "data":
@@ -950,8 +951,12 @@ class TreeWrapper(TreeWrapperBase):
 
             self.xsec = xsec * 1000 #pb to fb
 
-            self.genxsec = self.tree.genxsec * xsec / self.tree.xsec
-            self.genBR = self.tree.genBR
+            if self.productionmode in ("TTZZ", "ZZZ", "WZZ", "WWZ", "TTWW", "TTZJets_M10_MLM", "TTZToLLNuNu_M10", "TTZToLL_M1to10_MLM", "VBFbkg"):
+              self.genxsec = xsec
+              self.genBR = 1
+            else:
+              self.genxsec = self.tree.genxsec * xsec / self.tree.xsec
+              self.genBR = self.tree.genBR
 
     @property
     @cache_instancemethod
@@ -1870,9 +1875,9 @@ class TreeWrapper(TreeWrapperBase):
             "initcategoryfunctions",
             "initlists",
             "initsystematics",
-            "isbkg",
             "isdata",
             "isdummy",
+            "isggZZoffshell",
             "isZX",
             "kfactors",
             "maxevent",
@@ -1983,7 +1988,7 @@ class TreeWrapper(TreeWrapperBase):
         if not self.GEN:
             if self.doL1prefiringweight and not self.isdata and not self.isZX: self.kfactors.append("L1prefiringWeight")
             if self.treesample.productionmode == "qqZZ": self.kfactors += ["KFactor_EW_qqZZ", "KFactor_QCD_qqZZ_M"]
-            if self.treesample.productionmode == "ggZZ": self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
+            if self.treesample.productionmode == "ggZZ" or self.isggZZoffshell: self.kfactors += ["KFactor_QCD_ggZZ_Nominal"]
         if self.treesample.productionmode == "ggH" and self.useNNLOPSweight:
             self.kfactors.append("ggH_NNLOPS_weight")
         if self.doleptonSF or self.isZX:
