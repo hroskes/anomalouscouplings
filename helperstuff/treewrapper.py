@@ -910,7 +910,12 @@ class TreeWrapper(TreeWrapperBase):
         filename = treesample.CJLSTfile()
         if xrd.exists(filename):
             filename = LSF.basename(treesample.CJLSTfile())
-            self.f = TFile(filename, contextmanager=False)
+            try:
+                self.f = TFile(filename, contextmanager=False)
+            except Exception as e:
+                self.f = None
+                if filename+" is a null pointer, see above for details." not in str(e):
+                    raise
 
         self.filename = filename
 
@@ -962,6 +967,8 @@ class TreeWrapper(TreeWrapperBase):
     @cache_instancemethod
     def isdummy(self):
         if not xrd.exists(self.filename):
+            return True
+        elif self.f is None:
             return True
         else:
             if not self.f.Get("{}/candTree".format(self.treesample.TDirectoryname())):
