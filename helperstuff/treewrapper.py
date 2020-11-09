@@ -54,7 +54,7 @@ class TreeWrapperBase(Iterator):
           self.doL1prefiringweight = True
           self.doleptonSF = not self.isdata and not self.isZX
           self.useJEC = False
-          self.useJES = True
+          self.useJES = not (self.isdata and treesample.alternategenerator == "shift_pm4l")
           self.useJER = False
         else:
           raise ValueError("Figure out about L1prefiringWeight and LepSIP!")

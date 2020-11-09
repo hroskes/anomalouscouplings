@@ -1320,6 +1320,7 @@ class AlternateGenerator(MyEnum):
                  EnumItem("NNLOPS"),
                  EnumItem("MCatNLO", "MC@NLO"),
                  EnumItem("JHUGen"),
+                 EnumItem("shift_pm4l"),
                 )
 
 class Extension(MyEnum):
