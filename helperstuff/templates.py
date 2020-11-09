@@ -1481,7 +1481,10 @@ class Template(TemplateBase, MultiEnum):
             if self.production.GEN or self.production.LHE:
                 result = [{Sample("WH", self.production, "0+")}]
             elif config.showblinddistributions:
-                result = [{Sample(self.production, self.productionmode)}]
+                if self.shapesystematic == "shift_pm4l":
+                    result = [{Sample(self.production, self.productionmode, "shift_pm4l")}]
+                else:
+                    result = [{Sample(self.production, self.productionmode)}]
             else:
                 result = [{Sample("ggZZ", self.production, "4tau")}]
 
@@ -1622,7 +1625,7 @@ class Template(TemplateBase, MultiEnum):
         if self.hypothesis is not None and not self.hypothesis.ispure: return []
         if self.shapesystematic == "":
             pass
-        elif self.shapesystematic in ("JECUp", "JECDn"):
+        elif self.shapesystematic in ("JECUp", "JECDn", "shift_pm4l"):
             pass
         elif self.shapesystematic in ("ScaleUp", "ScaleDn", "ResUp", "ResDn") or self.shapesystematic.isTHUggH:
             if self.hypothesis != "0+" or None is not self.hffhypothesis != "Hff0+": return []

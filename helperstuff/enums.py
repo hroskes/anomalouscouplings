@@ -760,6 +760,7 @@ class ShapeSystematic(MyEnum):
                  EnumItem("THU_ggH_PT1200PMDn", "THU_ggH_PT1200PMDown"),
                  EnumItem("THU_ggH_qmtop0PMUp"),
                  EnumItem("THU_ggH_qmtop0PMDn", "THU_ggH_qmtop0PMDown"),
+                 EnumItem("shift_pm4l"),
                 )
     @property
     def isTHUggH(self):
@@ -796,7 +797,7 @@ class ShapeSystematic(MyEnum):
         for _ in ("JECUp", "JECDn"):
             if self == _:
                 return "_" + _
-        if self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "MINLO_SM", "ZXUp", "ZXDn") or self.isTHUggH:
+        if self in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "MINLO_SM", "ZXUp", "ZXDn", "shift_pm4l") or self.isTHUggH:
             return ""
         assert False, self
     def appliesto(self, templategroup):
@@ -812,6 +813,8 @@ class ShapeSystematic(MyEnum):
             return templategroup == "ggh"
         if self in ("THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn", "THU_ggH_Mu0PMUp", "THU_ggH_Res0PMUp", "THU_ggH_Mig010PMUp", "THU_ggH_Mig120PMUp", "THU_ggH_VBF2j0PMUp", "THU_ggH_VBF3j0PMUp", "THU_ggH_PT600PMUp", "THU_ggH_PT1200PMUp", "THU_ggH_qmtop0PMUp", "THU_ggH_Mu0PMDn", "THU_ggH_Res0PMDn", "THU_ggH_Mig010PMDn", "THU_ggH_Mig120PMDn", "THU_ggH_VBF2j0PMDn", "THU_ggH_VBF3j0PMDn", "THU_ggH_PT600PMDn", "THU_ggH_PT1200PMDn", "THU_ggH_qmtop0PMDn"):
             return templategroup == "ggh"
+        if self == "shift_pm4l":
+            return templategroup == "DATA"
         assert False, self
     @property
     def hypothesesforratio(self):
@@ -1454,8 +1457,9 @@ if config.applyMINLOsystematics:
     _ += ["MINLO_SM", "MINLOUp", "MINLODn"]
 if config.applySTXSsystematics:
     _ += ["THU_ggH_Mu0PMUp", "THU_ggH_Res0PMUp", "THU_ggH_Mig010PMUp", "THU_ggH_Mig120PMUp", "THU_ggH_VBF2j0PMUp", "THU_ggH_VBF3j0PMUp", "THU_ggH_PT600PMUp", "THU_ggH_PT1200PMUp", "THU_ggH_qmtop0PMUp", "THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_Mu0PMDn", "THU_ggH_Res0PMDn", "THU_ggH_Mig010PMDn", "THU_ggH_Mig120PMDn", "THU_ggH_VBF2j0PMDn", "THU_ggH_VBF3j0PMDn", "THU_ggH_PT600PMDn", "THU_ggH_PT1200PMDn", "THU_ggH_qmtop0PMDn", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn"]
+_ += ["shift_pm4l"]
 shapesystematics = ShapeSystematic.items(lambda x: x in _)
-treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown", "MINLO_SM", "ZXUp", "ZXDown", "THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn"))
+treeshapesystematics = ShapeSystematic.items(lambda x: x in _ and x in ("", "ResUp", "ResDown", "ScaleUp", "ScaleDown", "JECUp", "JECDown", "MINLO_SM", "ZXUp", "ZXDown", "THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn", "shift_pm4l"))
 del _
 
 class MetaclassForMultiEnums(type):
