@@ -1549,8 +1549,11 @@ class Sample(ReweightingSamplePlusWithFlavor):
     def CJLSTfile(self):
         if self.production.LHE: raise ValueError("Can't get the CJLST file when in LHE mode!")
         if self.productionmode == "data" and self.alternategenerator == "shift_pm4l":
-            assert "190821_fixjetid" in self.CJLSTmaindir(), self.CJLSTmaindir()
-            return "/work-zfs/lhc/CJLSTtrees/200205CutBased/mass_shift_data/AllData_pm4l_shift{}.root".format(self.production.year)
+            if "190821_fixjetid" in self.CJLSTmaindir():
+                return "/work-zfs/lhc/CJLSTtrees/200205CutBased/mass_shift_data/AllData_pm4l_shift{}.root".format(self.production.year)
+            elif "DATA_200430_LegacyRun2" in self.CJLSTmaindir():
+                return "/work-zfs/lhc/CJLSTtrees/200205CutBased/FinalPaperMassshiftData/AllData_pm4l_shift{}_paper.root".format(self.production.year)
+            assert False, self.CJLSTmaindir()
         return os.path.join(self.CJLSTmaindir(), self.CJLSTdirname(), "ZZ4lAnalysis.root")
 
     @property
