@@ -14,7 +14,7 @@ import numpy
 import ROOT
 
 import config
-from enums import AlternateWeight, Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, hffhypotheses, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
+from enums import AlternateGenerator, AlternateWeight, Analysis, analyses, Channel, channels, Category, categories, EnumItem, flavors, hffhypotheses, HffHypothesis, Hypothesis, MultiEnum, MultiEnumABCMeta, MyEnum, Production, ProductionMode, productions, ShapeSystematic, shapesystematics, TemplateGroup, templategroups, treeshapesystematics
 from samples import ReweightingSample, ReweightingSamplePlus, ReweightingSampleWithPdf, Sample, SampleBasis, SumOfSamples
 from utilities import cache, deprecate, is_almost_integer, JsonDict, jsonloads, TFile, withdiscriminantsfileisvalid
 
@@ -1206,6 +1206,10 @@ class TemplateBase(object):
     def getjson(self):
         pass
 
+    @property
+    def nominal(self):
+        return type(self)(*(getattr(self, enum.enumname) for enum in self.enums if enum != ShapeSystematic))
+
 class Template(TemplateBase, MultiEnum):
     __metaclass__ = MultiEnumABCMeta
     enums = [TemplatesFile, ReweightingSamplePlus]
@@ -2066,10 +2070,10 @@ class IntTemplate(TemplateBase, MultiEnum):
         return result.pop()
 
 class DataTree(MultiEnum):
-    enums = [Channel, Production, Category, Analysis]
+    enums = [Channel, Production, Category, Analysis, AlternateGenerator]
     enumname = "datatree"
     def check(self, *args):
-        super(DataTree, self).check(*args)
+        super(DataTree, self).check(*args, dontcheck=[AlternateGenerator])
         if self.analysis.isdecayonly:
             if self.category != "Untagged":
                 raise ValueError("decayonly analysis is only done for untagged!\n{}".format(args))
@@ -2085,10 +2089,10 @@ class DataTree(MultiEnum):
 
     @property
     def originaltreefile(self):
-        return Sample("data", self.production).withdiscriminantsfile()
+        return Sample("data", self.production, self.alternategenerator).withdiscriminantsfile()
     @property
     def treefile(self):
-        return os.path.join(config.repositorydir, "step7_templates", str(self.production), "data_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis))
+        return os.path.join(config.repositorydir, "step7_templates", str(self.production), "data_{}_{}_{}_{}_{}.root".format(self.production, self.channel, self.category, self.analysis, self.alternategenerator).replace("_None", ""))
     def passescut(self, t):
         return (
           abs(t.Z1Flav * t.Z2Flav) == self.channel.ZZFlav
@@ -2122,6 +2126,7 @@ def datatrees():
                     if category == "Boosted" and not analysis.useboosted: continue
                     if category in ("VBF1jtagged", "VHLepttagged") and not analysis.usemorecategories: continue
                     yield DataTree(channel, production, category, analysis)
+                    yield DataTree(channel, production, category, analysis, "shift_pm4l")
 
 
 

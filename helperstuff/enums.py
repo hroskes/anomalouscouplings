@@ -1442,7 +1442,7 @@ analyses = Analysis.items(lambda x: x.doanalysis)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine or x == "GEN_190908")
+productions = Production.items(lambda x: x in config.productionsforcombine or x == "GEN_190908" and False)
 categories = Category.items()
 templategroups = TemplateGroup.items(lambda x: x not in ("zh", "wh"))
 

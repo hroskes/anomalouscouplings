@@ -1549,7 +1549,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
     def CJLSTfile(self):
         if self.production.LHE: raise ValueError("Can't get the CJLST file when in LHE mode!")
         if self.productionmode == "data" and self.alternategenerator == "shift_pm4l":
-            assert "DATA_200430_LegacyRun2" in self.CJLSTmaindir(), self.CJLSTmaindir()
+            assert "190821_fixjetid" in self.CJLSTmaindir(), self.CJLSTmaindir()
             return "/work-zfs/lhc/CJLSTtrees/200205CutBased/mass_shift_data/AllData_pm4l_shift{}.root".format(self.production.year)
         return os.path.join(self.CJLSTmaindir(), self.CJLSTdirname(), "ZZ4lAnalysis.root")
 
@@ -1882,8 +1882,8 @@ def allsamples(doxcheck=True):
         yield Sample("data", production)
         yield Sample("data", production, "shift_pm4l")
 
-        for _ in ggZZoffshellproductionmodes:
-            yield Sample(_, production)
+#        for _ in ggZZoffshellproductionmodes:
+#            yield Sample(_, production)
 
 @cache_file(os.path.join(config.repositorydir, "data", "samples_xcheck.pkl"))
 def __xcheck(*samples):
