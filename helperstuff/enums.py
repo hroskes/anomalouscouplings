@@ -814,7 +814,7 @@ class ShapeSystematic(MyEnum):
         if self in ("THU_ggH_MuUp", "THU_ggH_ResUp", "THU_ggH_Mig01Up", "THU_ggH_Mig12Up", "THU_ggH_VBF2jUp", "THU_ggH_VBF3jUp", "THU_ggH_PT60Up", "THU_ggH_PT120Up", "THU_ggH_qmtopUp", "THU_ggH_MuDn", "THU_ggH_ResDn", "THU_ggH_Mig01Dn", "THU_ggH_Mig12Dn", "THU_ggH_VBF2jDn", "THU_ggH_VBF3jDn", "THU_ggH_PT60Dn", "THU_ggH_PT120Dn", "THU_ggH_qmtopDn", "THU_ggH_Mu0PMUp", "THU_ggH_Res0PMUp", "THU_ggH_Mig010PMUp", "THU_ggH_Mig120PMUp", "THU_ggH_VBF2j0PMUp", "THU_ggH_VBF3j0PMUp", "THU_ggH_PT600PMUp", "THU_ggH_PT1200PMUp", "THU_ggH_qmtop0PMUp", "THU_ggH_Mu0PMDn", "THU_ggH_Res0PMDn", "THU_ggH_Mig010PMDn", "THU_ggH_Mig120PMDn", "THU_ggH_VBF2j0PMDn", "THU_ggH_VBF3j0PMDn", "THU_ggH_PT600PMDn", "THU_ggH_PT1200PMDn", "THU_ggH_qmtop0PMDn"):
             return templategroup == "ggh"
         if self == "shift_pm4l":
-            return templategroup == "DATA"
+            return templategroup == "DATA" or templategroup == "background"
         assert False, self
     @property
     def hypothesesforratio(self):

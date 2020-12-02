@@ -213,5 +213,5 @@ if __name__ == "__main__":
       with cd(config.repositorydir):
         buildtemplates(templatesfile, morebuildtemplatesargs=morebuildtemplatesargs)
       #and copy data
-    for datatree in datatrees:
-      copydata(datatree)
+    #for datatree in datatrees:
+    #  copydata(datatree)

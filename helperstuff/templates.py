@@ -252,7 +252,7 @@ class TemplatesFile(MultiEnum):
 
             if self.shapesystematic == "":
                 pass
-            elif self.shapesystematic in ("ZXUp", "ZXDown"):
+            elif self.shapesystematic in ("ZXUp", "ZXDown", "shift_pm4l"):
                 result = [_ for _ in result if _ == "ZX"]
             elif self.shapesystematic in ("JECUp", "JECDown"):
                 result = [_ for _ in result if _ != "ZX"]
@@ -1396,7 +1396,7 @@ class Template(TemplateBase, MultiEnum):
 
     @property
     def multiplyweight(self):
-        if self.shapesystematic in ("", "JECUp", "JECDn", "ScaleUp", "ScaleDn", "ResUp", "ResDn"):
+        if self.shapesystematic in ("", "JECUp", "JECDn", "ScaleUp", "ScaleDn", "ResUp", "ResDn", "shift_pm4l"):
             return None
         if self.shapesystematic.isTHUggH:
             return AlternateWeight(str(self.shapesystematic)).weightname
@@ -1474,7 +1474,10 @@ class Template(TemplateBase, MultiEnum):
                     Sample(self.production, self.productionmode, "0+", self.hffhypothesis, "ext1"),
                    }]
         if self.productionmode == "ZX":
-            result = [{Sample(self.production, self.productionmode)}]
+            if self.shapesystematic == "shift_pm4l":
+                result = [{Sample(self.production, self.productionmode, "shift_pm4l")}]
+            else:
+                result = [{Sample(self.production, self.productionmode)}]
         if self.productionmode == "qqZZ":
             result = [{Sample(self.production, self.productionmode, ext) for ext in (None, "ext", "ext1", "ext2")}]
         if self.productionmode == "ggZZ":
