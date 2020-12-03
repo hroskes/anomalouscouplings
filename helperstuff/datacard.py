@@ -492,6 +492,9 @@ class _Datacard(MultiEnum):
                 if systematic: name += "_"+shapesystematic.combinename(self.channel)+direction
                 if p == "data": name = "data_obs"
 
+                if systematic is None and p in ("data", "ZX"):
+                    systematic = ShapeSystematic("shift_pm4l")
+
                 if p == "data":
                     scaleby = 1 if config.unblindscans else 0
                 else:
@@ -545,7 +548,7 @@ class _Datacard(MultiEnum):
                 cache[t.GetName()] = t
 
                 assert t.Integral() == t3D.Integral(), (t.Integral(), t3D.Integral())
-                if systematic is None: self.histogramintegrals[name] = t.Integral()
+                if systematic is None or systematic == "shift_pm4l": self.histogramintegrals[name] = t.Integral()
 
                 if systematic is None and config.usebinbybin and p != "data" and p.isbkg:
                     for i in xrange(1, t.GetNbinsX()+1):
