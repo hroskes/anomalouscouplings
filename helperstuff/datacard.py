@@ -218,7 +218,7 @@ class _Datacard(MultiEnum):
 
     @property
     def observation(self):
-        return getnobserved(self.channel, self.production, self.category, self.analysis)
+        return getnobserved(self.channel, self.production, self.category, self.analysis, "shift_pm4l")
 
     section3 = Section("bin", "observation")
 
