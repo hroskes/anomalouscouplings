@@ -91,11 +91,11 @@ class Row(RowBase, MultiEnum):
     )
     if self.productionmode == "data":
       kwargs.update(
-        trees=gettrees(("data",)),
+        trees=gettrees(("data", "shift_pm4l")),
         weightformulas=["1" for production in config.productionsforcombine],
         scaletos=None,
       )
-    elif self.productionmode.isbkg:
+    elif self.productionmode.isbkg or self.productionmode == "tqH":
       kwargs.update(
         trees=gettrees((str(self.productionmode),)),
         weightformulas=getweights((self.productionmode,), uselumi=self.productionmode != "ZX"),

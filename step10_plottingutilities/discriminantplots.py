@@ -669,7 +669,7 @@ class Plot(object):
     assert iscategorydiscriminant in (None, "VBF", "VH")
 
     datatrees = gettrees(
-      ("data",),
+      ("data", "shift_pm4l"),
     )
     ZXtrees = gettrees(
       ("ZX",),
