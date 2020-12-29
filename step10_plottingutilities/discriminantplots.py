@@ -672,7 +672,7 @@ class Plot(object):
       ("data", "shift_pm4l"),
     )
     ZXtrees = gettrees(
-      ("ZX",),
+      ("ZX", "shift_pm4l"),
     )
     ZZtrees = gettrees(
       ("qqZZ",),

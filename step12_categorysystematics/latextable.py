@@ -95,6 +95,12 @@ class Row(RowBase, MultiEnum):
         weightformulas=["1" for production in config.productionsforcombine],
         scaletos=None,
       )
+    elif self.productionmode == "ZX":
+      kwargs.update(
+        trees=gettrees((str(self.productionmode), "shift_pm4l")),
+        weightformulas=getweights((self.productionmode,), uselumi=self.productionmode != "ZX"),
+        scaletos=None,
+      )
     elif self.productionmode.isbkg or self.productionmode == "tqH":
       kwargs.update(
         trees=gettrees((str(self.productionmode),)),
