@@ -1004,7 +1004,7 @@ class Plot(object):
     labeltext.Draw()
 
     if self.__iscategorydiscriminant:
-      line = ROOT.TLine(0.5, 0, 0.5, self.__ymax * .4)
+      line = ROOT.TLine(0.5, 0, 0.5, self.__ymax * .74)
       line.SetLineWidth(4)
       line.SetLineColor(ROOT.kViolet-1)
       line.SetLineStyle(9)
