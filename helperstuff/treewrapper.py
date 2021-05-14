@@ -453,6 +453,22 @@ class TreeWrapperBase(Iterator):
         return self.M2g1prime2ghzgs1prime2_decay*self.g1prime2HZZ_m4l*self.ghzgs1prime2HZZ_m4l / (self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
     def D_L1L1Zgint_decay_new(self):
         return self.M2g1prime2ghzgs1prime2_decay*self.g1prime2HZZ_m4l*self.ghzgs1prime2HZZ_m4l / (2 * sqrt(self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 * self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2))
+    def D_0minus_Zg_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2g4Zg_decay*self.g4HZg_m4l**2)
+    def D_CP_Zg_decay_new(self):
+        return self.M2g1g4Zg_decay*self.g4HZg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4Zg_decay*self.g4HZg_m4l**2))
+    def D_0hplus_Zg_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2g2Zg_decay*self.g2HZg_m4l**2)
+    def D_int_Zg_decay_new(self):
+        return self.M2g1g2Zg_decay*self.g2HZg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2Zg_decay*self.g2HZg_m4l**2))
+    def D_0minus_gg_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2g4gg_decay*self.g4Hgg_m4l**2)
+    def D_CP_gg_decay_new(self):
+        return self.M2g1g4gg_decay*self.g4Hgg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4gg_decay*self.g4Hgg_m4l**2))
+    def D_0hplus_gg_decay(self):
+        return self.M2g1_decay / (self.M2g1_decay + self.M2g2gg_decay*self.g2Hgg_m4l**2)
+    def D_int_gg_decay_new(self):
+        return self.M2g1g2gg_decay*self.g2Hgg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2gg_decay*self.g2Hgg_m4l**2))
 
 ############################
 #contact term discriminants#
@@ -1812,6 +1828,14 @@ class TreeWrapper(TreeWrapperBase):
             "D_L1L1Zg_decay",
             "D_L1L1Zgint_decay",
             "D_L1L1Zgint_decay_new",
+            "D_0minus_Zg_decay",
+            "D_CP_decay_Zg_new",
+            "D_0hplus_Zg_decay",
+            "D_int_decay_Zg_new",
+            "D_0minus_gg_decay",
+            "D_CP_decay_gg_new",
+            "D_0hplus_gg_decay",
+            "D_int_decay_gg_new",
         ]
 
         self.exceptions = [
