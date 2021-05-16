@@ -16,6 +16,7 @@ def __init():
 
   thingstodownload = []
   for gconstant in gconstants():
+    if gconstant.filename is None: continue
     thingstodownload.append([gconstant.url, gconstant.filename])
   thingstodownload.sort()
 

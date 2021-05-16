@@ -409,6 +409,7 @@ class MultiCategorization(BaseCategorization):
         self.name = name
         self.singles = frozenset(singles)
         self.JEC, = {_.JEC for _ in singles}
+        self.btag, = {_.btag for _ in singles}
     @property
     def issystematic(self):
         result = {_.issystematic for _ in self.singles}

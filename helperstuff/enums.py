@@ -294,6 +294,10 @@ class Hypothesis(MyEnum):
                  EnumItem("fa3VH0.5", "fa3VH+0.5"),
                  EnumItem("fL1VH0.5", "fL1VH+0.5"),
                  EnumItem("BestFit19009"),
+                 EnumItem("g2Zg", "g2Zgs"),
+                 EnumItem("g4Zg", "g4Zgs"),
+                 EnumItem("g2gg", "g2gsgs"),
+                 EnumItem("g4gg", "g4gsgs"),
                 )
     enumitems = enumitems + mixturepermutations_4d(enumitems) + mixturepermutationsEFT(enumitems)
 
@@ -1114,6 +1118,7 @@ class Production(MyEnum):
                  EnumItem("200205_2018"),
                  EnumItem("GEN_181119"),
                  EnumItem("GEN_190908"),
+                 EnumItem("GEN_210514"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -1128,6 +1133,11 @@ class Production(MyEnum):
                 assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/GENtrees/190908_2018MC"
+        if self == "GEN_210514":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/GENtrees/210514_2018MC_photons"
         if self == "190821_2016":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2016"
@@ -1239,6 +1249,7 @@ class Production(MyEnum):
         if self == "200205_2017": return 2017
         if self == "200205_2018": return 2018
         if self == "GEN_190908": return 2018
+        if self == "GEN_210514": return 2018
         assert False, self
     @property
     def usenewobjects(self):
@@ -1442,7 +1453,7 @@ analyses = Analysis.items(lambda x: x.doanalysis)
 config.productionsforcombine = type(config.productionsforcombine)(Production(production) for production in config.productionsforcombine)
 if len(config.productionsforcombine) == 1:
     config.productionforcombine = Production(config.productionforcombine)
-productions = Production.items(lambda x: x in config.productionsforcombine or x == "GEN_190908" and False)
+productions = Production.items(lambda x: x in config.productionsforcombine)
 categories = Category.items()
 templategroups = TemplateGroup.items(lambda x: x not in ("zh", "wh"))
 

@@ -44,7 +44,7 @@ class TreeWrapperBase(Iterator):
         self.GEN = self.treesample.production.GEN
 
         if self.GEN:
-          self.doSIP = self.doL1prefiringweight = self.doleptonSF = False
+          self.doSIP = self.doL1prefiringweight = self.doleptonSF = self.useJEC = self.useJES = self.useJER = False
         elif self.treesample.production in ("190821_2016", "190821_2017", "190821_2018"):
           self.doSIP = self.doL1prefiringweight = True
           self.useJEC = True
@@ -966,9 +966,12 @@ class TreeWrapper(TreeWrapperBase):
             if self.treesample.production in ("200205_2016", "200205_2017", "200205_2018") and self.treesample.productionmode == "VBF bkg":
                 xsec /= 1000
 
-            assert self.treesample.production in ("200205_2016", "200205_2017", "200205_2018"), self.treesample.production
-            samplename = os.path.basename(os.path.dirname(self.treesample.CJLSTfile()))
-            xsec = CJLSTscripts.update_xsec(samplename, xsec)
+            if self.GEN:
+                xsec = self.tree.xsec
+            else:
+                assert self.treesample.production in ("200205_2016", "200205_2017", "200205_2018"), self.treesample.production
+                samplename = os.path.basename(os.path.dirname(self.treesample.CJLSTfile()))
+                xsec = CJLSTscripts.update_xsec(samplename, xsec)
 
             self.xsec = xsec * 1000 #pb to fb
 
@@ -1059,6 +1062,14 @@ class TreeWrapper(TreeWrapperBase):
         self.M2g1g1prime2_decay           = t.p_GG_SIG_ghg2_1_ghz1_1_ghz1prime2_1E4_JHUGen / 1e4
         self.M2ghzgs1prime2_decay         = t.p_GG_SIG_ghg2_1_ghza1prime2_1E4_JHUGen / 1e4**2
         self.M2g1ghzgs1prime2_decay       = t.p_GG_SIG_ghg2_1_ghz1_1_ghza1prime2_1E4_JHUGen / 1e4
+        self.M2g2Zg_decay                 = t.p_GG_SIG_ghg2_1_ghza2_1_JHUGen
+        self.M2g1g2Zg_decay               = t.p_GG_SIG_ghg2_1_ghz1_1_ghza2_1_JHUGen
+        self.M2g4Zg_decay                 = t.p_GG_SIG_ghg2_1_ghza4_1_JHUGen
+        self.M2g1g4Zg_decay               = t.p_GG_SIG_ghg2_1_ghz1_1_ghza4_1_JHUGen
+        self.M2g2gg_decay                 = t.p_GG_SIG_ghg2_1_gha2_1_JHUGen
+        self.M2g1g2gg_decay               = t.p_GG_SIG_ghg2_1_ghz1_1_gha2_1_JHUGen
+        self.M2g4gg_decay                 = t.p_GG_SIG_ghg2_1_gha4_1_JHUGen
+        self.M2g1g4gg_decay               = t.p_GG_SIG_ghg2_1_ghz1_1_gha4_1_JHUGen
         self.M2g1prime2ghzgs1prime2_decay = t.p_GG_SIG_ghg2_1_ghz1prime2_1E4_ghza1prime2_1E4_JHUGen / 1e4**2
 
         self.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal               = self.M2g1_VBF                     = t.p_JJVBF_SIG_ghv1_1_JHUGen_JECNominal
@@ -1151,6 +1162,10 @@ class TreeWrapper(TreeWrapperBase):
         self.g4HZZ_m4l           = gconstant("HZZ2e2mu", "g4", self.ZZMass)
         self.g1prime2HZZ_m4l     = gconstant("HZZ2e2mu", "L1", self.ZZMass)
         self.ghzgs1prime2HZZ_m4l = gconstant("HZZ2e2mu", "L1Zg", self.ZZMass)
+        self.g2HZg_m4l           = gconstant("HZZ2e2mu", "g2Zg", self.ZZMass)
+        self.g4HZg_m4l           = gconstant("HZZ2e2mu", "g4Zg", self.ZZMass)
+        self.g2Hgg_m4l           = gconstant("HZZ2e2mu", "g2gg", self.ZZMass)
+        self.g4Hgg_m4l           = gconstant("HZZ2e2mu", "g4gg", self.ZZMass)
 
         self.g2VBF_m4l           = gconstant("VBF",      "g2", self.ZZMass)
         self.g4VBF_m4l           = gconstant("VBF",      "g4", self.ZZMass)
@@ -1179,7 +1194,7 @@ class TreeWrapper(TreeWrapperBase):
         #category variables
         self.nExtraLep = t.nExtraLep
         self.nExtraZ = t.nExtraZ
-        self.PFMET_corrected = t.PFMET_corrected
+        self.PFMET_corrected = t.PFMET_corrected if not self.GEN else t.PFMET
 
         nCleanedJets = t.nCleanedJets
 
@@ -1829,13 +1844,13 @@ class TreeWrapper(TreeWrapperBase):
             "D_L1L1Zgint_decay",
             "D_L1L1Zgint_decay_new",
             "D_0minus_Zg_decay",
-            "D_CP_decay_Zg_new",
+            "D_CP_Zg_decay_new",
             "D_0hplus_Zg_decay",
-            "D_int_decay_Zg_new",
+            "D_int_Zg_decay_new",
             "D_0minus_gg_decay",
-            "D_CP_decay_gg_new",
+            "D_CP_gg_decay_new",
             "D_0hplus_gg_decay",
-            "D_int_decay_gg_new",
+            "D_int_gg_decay_new",
         ]
 
         self.exceptions = [
@@ -1986,7 +2001,13 @@ class TreeWrapper(TreeWrapperBase):
             lstint += [_+JEC for _ in STXSdiscriminants if not (JEC and "bTagSF" in _)]
 
         for _ in self.categorizations:
-            if isinstance(_, categorization.NoCategorization) or _.JEC == "Nominal" or _.JEC in ("JECUp", "JECDn") and self.useJEC or _.JEC in ("JESUp", "JESDn") and self.useJES or _.JEC in ("JERUp", "JERDn") and self.useJER:
+            if isinstance(_, categorization.NoCategorization) or (
+              (
+                _.JEC == "Nominal" or _.JEC in ("JECUp", "JECDn") and self.useJEC or _.JEC in ("JESUp", "JESDn") and self.useJES or _.JEC in ("JERUp", "JERDn") and self.useJER
+              ) and (
+                _.btag == "Nominal" or not self.GEN
+              )
+            ):
                 self.toaddtotree_int.append(_.category_function_name)
             else:
                 self.exceptions.append(_.category_function_name)

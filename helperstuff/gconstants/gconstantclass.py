@@ -24,6 +24,7 @@ class Process(MyEnum):
   def validhypotheses(self):
     if self == "WH": result = "a3", "a2", "L1"
     else: result = "a3", "a2", "L1", "L1Zg"
+    if self == "HZZ2e2mu": result += ("g2Zg", "g4Zg", "g2gg", "g4gg")
     return [Hypothesis(_) for _ in result]
 
 
@@ -39,11 +40,12 @@ class GConstant(MultiEnum):
 
   @property
   def filename(self):
+    if self.hypothesis in ("g2Zg", "g4Zg", "g2gg", "g4gg"): return None
     return "{}_{}.root".format(self.process, self.hypothesis)
 
   @property
   def coupling(self):
-    for _ in "g2", "g4", "L1", "L1Zgs":
+    for _ in "g2", "g4", "L1", "L1Zgs", "g2Zgs", "g4Zgs", "g2gsgs", "g4gsgs":
       if self.hypothesis == _:
         return _
     assert False, self
@@ -74,6 +76,18 @@ class GConstant(MultiEnum):
       return result
 
   def getvalue(self, m4l):
+    if self.hypothesis == "g2Zg":
+      if self.process == "HZZ2e2mu": return 2.24e-3 ** 0.5  #table 1 in 14-018
+      assert False, self.process
+    if self.hypothesis == "g4Zg":
+      if self.process == "HZZ2e2mu": return 2.72e-3 ** 0.5  #table 1 in 14-018
+      assert False, self.process
+    if self.hypothesis == "g2gg":
+      if self.process == "HZZ2e2mu": return 2.82e-3 ** 0.5  #table 1 in 14-018
+      assert False, self.process
+    if self.hypothesis == "g4gg":
+      if self.process == "HZZ2e2mu": return 2.88e-3 ** 0.5  #table 1 in 14-018
+      assert False, self.process
     return self.spline.Eval(m4l)
 
 def gconstants():
