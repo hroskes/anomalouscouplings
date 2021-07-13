@@ -254,6 +254,82 @@ def mixturepermutationsEFT(enumitemsalreadythere):
   assert allofthem == len(list(combinations(range(7), 4))), (allofthem, len(list(combinations(range(7), 4))))
   return tuple(result)
 
+def mixturepermutationsphotons(enumitemsalreadythere):
+  def inner():
+    pures = "a3Zg", "a2Zg", "a3gg", "a2gg"
+
+    #pure hypotheses
+    yield "0+",
+    for _ in pures:
+      yield _,
+
+    for proddec in "dec", "prod", "proddec":
+      kwargs = {"proddec": proddec, "sign": "-" if proddec == "proddec" else ""}
+      #mixtures with SM
+      for kwargs["ai"] in pures:
+        yield "f{ai}{proddec}{sign}0.5".format(**kwargs),
+      #mixtures with each other
+      for kwargs["ai"], kwargs["aj"] in combinations(pures, 2):
+        yield (
+          "f{ai}{proddec}0.5f{aj}{proddec}{sign}0.5".format(**kwargs),
+          "f{aj}{proddec}{sign}0.5f{ai}{proddec}0.5".format(**kwargs),
+        )
+
+      if proddec == "dec": yield None, "decay is done"
+
+      #to get the terms with 3 unique couplings:
+      #  there are 3 different new terms for each set of 3 couplings,
+      #  since exactly one of the couplings is squared
+      #  so we need 3 more mixtures
+      #  prod, dec, proddec (with a minus sign somewhere for variety) will work
+      for kwargs["ai"], kwargs["aj"] in combinations(pures, 2):
+        yield (
+          "f{ai}{proddec}0.33f{aj}{proddec}{sign}0.33".format(**kwargs),
+          "f{aj}{proddec}{sign}0.33f{ai}{proddec}0.33".format(**kwargs),
+        )
+
+      for kwargs["ai"], kwargs["aj"], kwargs["ak"] in combinations(pures, 3):
+        yield tuple(
+          "".join(permutation).format(**kwargs)
+            for permutation
+            in permutations(("f{ai}{proddec}0.33", "f{aj}{proddec}0.33", "f{ak}{proddec}{sign}0.33"))
+        )
+
+    #for each set of 4 couplings, there's only one possible new term
+    #proddec is the way to go, since it includes both
+    #I'll keep it general using combinations, just in case that ever becomes necessary
+    #it's not clear that a minus sign would help, so I'll leave it out
+    kwargs = {}
+    for kwargs["ai"], kwargs["aj"], kwargs["ak"] in combinations(pures, 3):
+      yield tuple(
+        "".join(permutation).format(**kwargs)
+          for permutation
+          in permutations(("f{ai}proddec0.25", "f{aj}proddec0.25", "f{ak}proddec0.25"))
+      )
+    for kwargs["ai"], kwargs["aj"], kwargs["ak"], kwargs["al"] in combinations(pures, 4):
+      yield tuple(
+        "".join(permutation).format(**kwargs)
+          for permutation
+          in permutations(("f{ai}proddec0.25", "f{aj}proddec0.25", "f{ak}proddec0.25", "f{al}proddec0.25"))
+      )
+
+  result = []
+  allofthem = 0
+  for enumitemnames in inner():
+    if enumitemnames == (None, "decay is done"):
+      assert allofthem == len(list(combinations(range(6), 2))), (allofthem, len(list(combinations(range(6), 2))))
+      continue
+
+    allofthem += 1
+    enumitemnames_modified = [_ for _ in enumitemnames]
+    enumitemnames_modified += [re.sub("(?<!prod)dec", "", _) for _ in enumitemnames_modified]
+    if any(_ in enumitemsalreadythere for _ in enumitemnames_modified):
+      continue
+    result.append(EnumItem(*enumitemnames_modified))
+
+  assert allofthem == len(list(combinations(range(8), 4))), (allofthem, len(list(combinations(range(8), 4))))
+  return tuple(result)
+
 class Hypothesis(MyEnum):
     enumname = "hypothesis"
     enumitems = (
@@ -303,7 +379,7 @@ class Hypothesis(MyEnum):
                  EnumItem("fg2gg0.5", "fa2gg0.5", "fg2ggdec0.5", "fa2ggdec0.5"),
                  EnumItem("fg4gg0.5", "fa3gg0.5", "fg4ggdec0.5", "fa3ggdec0.5"),
                 )
-    enumitems = enumitems + mixturepermutations_4d(enumitems) + mixturepermutationsEFT(enumitems)
+    enumitems = enumitems + mixturepermutations_4d(enumitems) + mixturepermutationsEFT(enumitems) + mixturepermutationsphotons(enumitems)
 
     @property
     def ispure(self):
@@ -907,6 +983,12 @@ class Analysis(MyEnum):
                  EnumItem("fa3fa2fL1fL1Zg_morecategories"),
                  EnumItem("fa3fa2fL1_EFT"),
                  EnumItem("fa3fa2fL1_EFT_STXS"),
+                 EnumItem("fa2Zg"),
+                 EnumItem("fa3Zg"),
+                 EnumItem("fa2gg"),
+                 EnumItem("fa3gg"),
+                 EnumItem("PhotonCouplings"),
+                 EnumItem("PhotonCouplings_decay"),
                 )
     def title(self, latex=False, superscript=None):
         if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -957,12 +1039,17 @@ class Analysis(MyEnum):
         if self == "fa2": return "g2"
         if self == "fL1": return "g1prime2"
         if self == "fL1Zg": return "ghzgs1prime2"
+        if self == "fa3Zg": return "ghzgs4"
+        if self == "fa2Zg": return "ghzgs2"
+        if self == "fa3gg": return "ghgsgs4"
+        if self == "fa2gg": return "ghgsgs2"
         assert False, self
     @property
     def couplingnames(self):
         if self.isfL1fL1Zg: return "g1prime2", "ghzgs1prime2"
         if self.isfa3fa2fL1fL1Zg: return "g4", "g2", "g1prime2", "ghzgs1prime2"
         if self.isEFT: return "g4", "g2", "g1prime2"
+        if self.isphotoncouplings: return "ghzgs4", "ghzgs2", "ghgsgs4", "ghgsgs2"
         if self.dimensions == 1: return self.couplingname,
         assert False, self
     @property
@@ -998,6 +1085,8 @@ class Analysis(MyEnum):
             return Hypothesis("0+"), Hypothesis("a3"), Hypothesis("a2"), Hypothesis("L1"), Hypothesis("L1Zg")
         if self.isEFT:
             return Hypothesis("0+"), Hypothesis("a3EFT"), Hypothesis("a2EFT"), Hypothesis("L1EFT")
+        if self.isphotoncouplings:
+            return Hypothesis("ghzgs2"), Hypothesis("ghzgs4"), Hypothesis("ghgsgs2"), Hypothesis("ghgsgs4")
         assert False, self
     @property
     def mixdecayhypothesis(self):
@@ -1029,10 +1118,14 @@ class Analysis(MyEnum):
         if self == "fa3fa2fL1_EFT_STXS": return True
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return False
         if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"): return False
+        if self in ("PhotonCouplings", "PhotonCouplings_decay"): return False
         assert False, self
     @property
     def isEFT(self):
         return "EFT" in str(self)
+    @property
+    def isphotoncouplings(self):
+        return self in ("PhotonCouplings", "PhotonCouplings_decay")
     @property
     def categoryname(self):
         if self.isdecayonly: return "nocategorization"
@@ -1042,6 +1135,7 @@ class Analysis(MyEnum):
         if self == "fL1": return "0P_or_L1"
         if self == "fL1Zg": return "0P_or_L1Zg"
         if self.isfa3fa2fL1fL1Zg or self.isEFT: return "0P_or_0M_or_a2_or_L1_or_L1Zg"
+        if self.isphotoncouplings: assert False, self
         assert False, self
     @property
     def dimensions(self):
@@ -1050,6 +1144,7 @@ class Analysis(MyEnum):
     def isdecayonly(self):
         if self.isfL1fL1Zg: return True
         if self == "fa3fa2fL1fL1Zg_decay": return True
+        if self == "PhotonCouplings_decay": return True
         return False
     @property
     def useboosted(self):
@@ -1060,6 +1155,7 @@ class Analysis(MyEnum):
     def usemorecategories(self):
         if self == "fa3fa2fL1fL1Zg_morecategories": return True
         if self == "fa3fa2fL1_EFT": return True
+        if self == "PhotonCouplings": return True
         return False
     @property
     def doanalysis(self):
@@ -1073,14 +1169,17 @@ class Analysis(MyEnum):
             if self in ("fa2", "fa3", "fL1", "fL1Zg"): return False
             if self.isfL1fL1Zg: return False
             if self == "fa3fa2fL1fL1Zg": return False
-            if self == "fa3fa2fL1fL1Zg_decay": return True
+            if self == "fa3fa2fL1fL1Zg_decay": return False
             if self == "fa3fa2fL1fL1Zg_only6bins": return False
-            if self == "fa3fa2fL1fL1Zg_STXS": return True
+            if self == "fa3fa2fL1fL1Zg_STXS": return False
             if self == "fa3fa2fL1fL1Zg_boosted": return False
-            if self == "fa3fa2fL1fL1Zg_morecategories": return True
-            if self == "fa3fa2fL1_EFT": return True
-            if self == "fa3fa2fL1_EFT_STXS": return True
-        if config.name ==  "savvas" : 
+            if self == "fa3fa2fL1fL1Zg_morecategories": return False
+            if self == "fa3fa2fL1_EFT": return False
+            if self == "fa3fa2fL1_EFT_STXS": return False
+            if self in ("fa2Zg", "fa3Zg", "fa2gg", "fa3gg"): return False
+            if self == "PhotonCouplings": return False
+            if self == "PhotonCouplings_decay": return True
+        if config.name ==  "savvas":
             if self == "fa3_multiparameter": return True
             if self == "fa3_multiparameter_nodbkg": return False
             if self == "fa3_only6bins": return False
@@ -1103,6 +1202,7 @@ class Analysis(MyEnum):
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
         if self.isfa3fa2fL1fL1Zg: return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
         if self.isEFT: return Analysis("fa3"), Analysis("fa2"), Analysis("fL1")
+        if self.isphotoncouplings: return Analysis("fa3Zg"), Analysis("fa2Zg"), Analysis("fa3gg"), Analysis("fa2gg")
         assert False, self
     @property
     def isfL1fL1Zg(self):

@@ -118,15 +118,15 @@ class TemplatesFile(MultiEnum):
                 args = commonargs + tuple(otherargs)
                 if self.analysis.fais == ("fa3",):
                     reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("0-", *args), ReweightingSample("fa30.5", *args)]
-                if self.analysis == "fa2":
+                elif self.analysis == "fa2":
                     reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("a2", *args), ReweightingSample("fa2-0.5", *args)]
-                if self.analysis == "fL1":
+                elif self.analysis == "fL1":
                     reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("fL10.5", *args)]
-                if self.analysis == "fL1Zg":
+                elif self.analysis == "fL1Zg":
                     reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL1Zg-0.5", *args)]
-                if self.analysis.isfL1fL1Zg:
+                elif self.analysis.isfL1fL1Zg:
                     reweightingsamples += [ReweightingSample("0+", *args), ReweightingSample("L1", *args), ReweightingSample("L1Zg", *args), ReweightingSample("fL10.5", *args), ReweightingSample("fL1Zg0.5", *args), ReweightingSample("fL10.5fL1Zg0.5", *args)]
-                if self.analysis.isfa3fa2fL1fL1Zg:
+                elif self.analysis.isfa3fa2fL1fL1Zg:
                     hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
                                   "fa30.5", "fa2-0.5", "fL10.5", "fL1Zg-0.5",
                                   "fa30.5fa20.5", "fa30.5fL10.5", "fa30.5fL1Zg0.5",
@@ -136,7 +136,7 @@ class TemplatesFile(MultiEnum):
                     reweightingsamples += [
                       ReweightingSamplePlus(h, *args) for h in hypotheses
                     ]
-                if self.analysis.isEFT:
+                elif self.analysis.isEFT:
                     hypotheses = ["0+", "a3EFT", "a2EFT", "L1EFT",
                                   "fa3EFT0.5", "fa2EFT0.5", "fL1EFT0.5",
                                   "fa3EFT0.5fa2EFT0.5", "fa3EFT0.5fL1EFT0.5",
@@ -145,18 +145,30 @@ class TemplatesFile(MultiEnum):
                     reweightingsamples += [
                       ReweightingSamplePlus(h, *args) for h in hypotheses
                     ]
+                elif self.analysis.isphotoncouplings:
+                    hypotheses = ["0+", "a3Zg", "a2Zg", "a3gg", "a2gg",
+                                  "fa3Zg0.5", "fa2Zg0.5", "fa3gg0.5", "fa2gg0.5",
+                                  "fa3Zg0.5fa2Zg0.5", "fa3Zg0.5fa3gg0.5", "fa3Zg0.5fa2gg0.5",
+                                                      "fa2Zg0.5fa3gg0.5", "fa2Zg0.5fa2gg0.5",
+                                                                          "fa3gg0.5fa2gg0.5",
+                                 ]
+                    reweightingsamples += [
+                      ReweightingSamplePlus(h, *args) for h in hypotheses
+                    ]
+                else:
+                    assert False, self.analysis
 
         elif self.templategroup in ("vbf", "zh", "wh", "vh"):
             p = str(self.templategroup).upper()
             if self.analysis.fais == ("fa3",):
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "0-"), ReweightingSample(p, "fa3prod0.5"), ReweightingSample(p, "fa3dec0.5"), ReweightingSample(p, "fa3proddec-0.5")]
-            if self.analysis == "fa2":
+            elif self.analysis == "fa2":
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "a2"), ReweightingSample(p, "fa2prod0.5"), ReweightingSample(p, "fa2dec-0.5"), ReweightingSample(p, "fa2proddec-0.5")]
-            if self.analysis == "fL1":
+            elif self.analysis == "fL1":
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1"), ReweightingSample(p, "fL1prod0.5"), ReweightingSample(p, "fL1dec0.5"), ReweightingSample(p, "fL1proddec-0.5")]
-            if self.analysis == "fL1Zg":
+            elif self.analysis == "fL1Zg":
                 reweightingsamples = [ReweightingSample(p, "0+"), ReweightingSample(p, "L1Zg"), ReweightingSample(p, "fL1Zgprod0.5"), ReweightingSample(p, "fL1Zgdec0.5"), ReweightingSample(p, "fL1Zgproddec-0.5")]
-            if self.analysis.isfa3fa2fL1fL1Zg:
+            elif self.analysis.isfa3fa2fL1fL1Zg:
                 hypotheses = ["0+", "0-", "a2", "L1", "L1Zg",
                               "fa30.5",         "fa2-0.5",        "fL10.5",         "fL1Zg-0.5",
                               "fa3prod0.5",     "fa2prod0.5",     "fL1prod0.5",     "fL1Zgprod0.5",
@@ -197,7 +209,7 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [
                   ReweightingSamplePlus(h, p) for h in hypotheses
                 ]
-            if self.analysis.isEFT:
+            elif self.analysis.isEFT:
                 hypotheses = ["0+", "a3EFT", "a2EFT", "L1EFT",
                               "fa3EFT0.5",         "fa2EFT0.5",        "fL1EFT0.5",
                               "fa3EFTprod0.5",     "fa2EFTprod0.5",     "fL1EFTprod0.5",
@@ -238,6 +250,8 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [
                   ReweightingSamplePlus(h, p) for h in hypotheses
                 ]
+            else:
+                assert False, self.analysis
 
         return reweightingsamples
 
