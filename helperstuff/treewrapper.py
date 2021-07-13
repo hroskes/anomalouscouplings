@@ -464,11 +464,17 @@ class TreeWrapperBase(Iterator):
     def D_0minus_gg_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g4gg_decay*self.g4Hgg_m4l**2)
     def D_CP_gg_decay_new(self):
-        return self.M2g1g4gg_decay*self.g4Hgg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4gg_decay*self.g4Hgg_m4l**2))
+        try:
+          return self.M2g1g4gg_decay*self.g4Hgg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4gg_decay*self.g4Hgg_m4l**2))
+        except ZeroDivisionError:
+          return 0
     def D_0hplus_gg_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g2gg_decay*self.g2Hgg_m4l**2)
     def D_int_gg_decay_new(self):
-        return self.M2g1g2gg_decay*self.g2Hgg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2gg_decay*self.g2Hgg_m4l**2))
+        try:
+          return self.M2g1g2gg_decay*self.g2Hgg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2gg_decay*self.g2Hgg_m4l**2))
+        except ZeroDivisionError:
+          return 0
 
 ############################
 #contact term discriminants#

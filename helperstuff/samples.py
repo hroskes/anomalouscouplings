@@ -1516,10 +1516,19 @@ class Sample(ReweightingSamplePlusWithFlavor):
             if self.hypothesis == "0-": result = "{}0M_M125".format(s)
             if self.hypothesis == "L1": result = "{}0L1_M125".format(s)
             if self.hypothesis == "L1Zg": result = "{}0L1Zg_M125".format(s)
+            if self.hypothesis == "a2Zg": result = "{}0PHZg_M125".format(s)
+            if self.hypothesis == "a3Zg": result = "{}0MZg_M125".format(s)
+            if self.hypothesis == "a2gg": result = "{}0PHgg_M125".format(s)
+            if self.hypothesis == "a3gg": result = "{}0Mgg_M125".format(s)
             if self.hypothesis in ("fa20.5", "fa2prod0.5"): result = "{}0PHf05ph0_M125".format(s)
             if self.hypothesis in ("fa30.5", "fa3prod0.5"): result = "{}0Mf05ph0_M125".format(s)
             if self.hypothesis in ("fL10.5", "fL1prod0.5"): result = "{}0L1f05ph0_M125".format(s)
             if self.hypothesis in ("fL1Zg0.5", "fL1Zgprod0.5"): result = "{}0L1Zgf05ph0_M125".format(s)
+            if self.productionmode == "ggH":
+                if self.hypothesis == "fa3Zg0.5": result = "{}0MZgf05ph0_M125".format(s)
+                if self.hypothesis == "fa3gg0.5": result = "{}0Mggf05ph0_M125".format(s)
+                if self.hypothesis == "fa2Zg0.5": result = "{}0PHZgf05ph0_M125".format(s)
+                if self.hypothesis == "fa2gg0.5": result = "{}0PHggf05ph0_M125".format(s)
             if self.extension is not None: result += "_" + str(self.extension)
             return result
         if self.productionmode == "ttH":
@@ -1824,6 +1833,10 @@ def allsamples(doxcheck=True):
             yield Sample("qqZZ", production)
             yield Sample("qqZZ", production, "ext2")
             yield Sample("data", production)  #(not real data, just an empty dummy file)
+            if production.fakeGEN:
+                for productionmode in "ggH",:
+                    for hypothesis in "g4Zg", "g2Zg", "g4gg", "g2gg", "fa2gg0.5", "fa3gg0.5", "fa2Zg0.5", "fa3Zg0.5":
+                        yield Sample(productionmode, hypothesis, production)
             continue
 
         if production.LHE:

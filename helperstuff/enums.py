@@ -294,10 +294,14 @@ class Hypothesis(MyEnum):
                  EnumItem("fa3VH0.5", "fa3VH+0.5"),
                  EnumItem("fL1VH0.5", "fL1VH+0.5"),
                  EnumItem("BestFit19009"),
-                 EnumItem("g2Zg", "g2Zgs"),
-                 EnumItem("g4Zg", "g4Zgs"),
-                 EnumItem("g2gg", "g2gsgs"),
-                 EnumItem("g4gg", "g4gsgs"),
+                 EnumItem("g2Zg", "g2Zgs", "a2Zg"),
+                 EnumItem("g4Zg", "g4Zgs", "a3Zg"),
+                 EnumItem("g2gg", "g2gsgs", "a2gg"),
+                 EnumItem("g4gg", "g4gsgs", "a3gg"),
+                 EnumItem("fg2Zg0.5", "fa2Zg0.5", "fg2Zgdec0.5", "fa2Zgdec0.5"),
+                 EnumItem("fg4Zg0.5", "fa3Zg0.5", "fg4Zgdec0.5", "fa3Zgdec0.5"),
+                 EnumItem("fg2gg0.5", "fa2gg0.5", "fg2ggdec0.5", "fa2ggdec0.5"),
+                 EnumItem("fg4gg0.5", "fa3gg0.5", "fg4ggdec0.5", "fa3ggdec0.5"),
                 )
     enumitems = enumitems + mixturepermutations_4d(enumitems) + mixturepermutationsEFT(enumitems)
 
@@ -558,7 +562,7 @@ class ProductionMode(MyEnum):
     def generatedhypotheses(self, production):
         if not production.LHE:
             if self == "ggH":
-                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5") or production.year >= 2017 and x in ("L1Zg", "fL1Zg0.5"))
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5") or production.year >= 2017 and x in ("L1Zg", "fL1Zg0.5") or production.fakeGEN and x in ("a2Zg", "a3Zg", "a2gg", "a3gg", "fa2Zg0.5", "fa3Zg0.5", "fa2gg0.5", "fa3gg0.5"))
             if self in ("VBF", "ZH", "WH"):
                 return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5") or production.year >= 2017 and self != "WH" and x in ("L1Zg", "fL1Zgprod0.5"))
             if self in ("WplusH", "WminusH", "ttH", "bbH", "tqH"):
@@ -1120,6 +1124,7 @@ class Production(MyEnum):
                  EnumItem("GEN_190908"),
                  EnumItem("GEN_210514"),
                  EnumItem("GEN_210601"),
+                 EnumItem("GEN_210702"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -1144,6 +1149,11 @@ class Production(MyEnum):
                 assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/GENtrees/210601_2018MC_photons"
+        if self == "GEN_210702":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/GENtrees/210702_LHEs_photons"
         if self == "190821_2016":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2016"
@@ -1257,6 +1267,7 @@ class Production(MyEnum):
         if self == "GEN_190908": return 2018
         if self == "GEN_210514": return 2018
         if self == "GEN_210601": return 2018
+        if self == "GEN_210702": return 2018
         assert False, self
     @property
     def usenewobjects(self):
@@ -1272,6 +1283,9 @@ class Production(MyEnum):
     @property
     def GEN(self):
         return "GEN" in str(self)
+    @property
+    def fakeGEN(self):
+        return self.GEN and self == "GEN_210702"
     @property
     def pdf(self):
       if self.year == 2016: return "NNPDF30_lo_as_0130"
