@@ -51,6 +51,8 @@ decaydiscriminants = [
     Discriminant("D_4couplings_decay", "D_{4}^{dec}", 162-50, 0, 162-50),
     Discriminant("D_CP_decay", "D_{CP}^{dec}", 2, -1, 1, identifier="D_CP_decay_2bins"),
 
+    Discriminant("D_4couplings_photons_decay_raw", "D_{4#gamma}^{dec,raw}", 1296, 0, 1296),
+
     Discriminant("D_bkg", "D_{bkg}", 3, -0.3, 1.2, identifier="D_bkg_3bins"),   #set min and max to have boundaries at 0.2 and 0.7
     Discriminant("D_bkg_ResUp", "D_{bkg}^{ResUp}", 3, -0.3, 1.2, identifier="D_bkg_ResUp_3bins"),
     Discriminant("D_bkg_ResDown", "D_{bkg}^{ResDown}", 3, -0.3, 1.2, identifier="D_bkg_ResDown_3bins"),

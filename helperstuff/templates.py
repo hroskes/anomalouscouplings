@@ -358,7 +358,7 @@ class TemplatesFile(MultiEnum):
     def bkgdiscriminant(self):
         from discriminants import discriminant
 
-        if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP"): return discriminant("phistarZ2")
+        if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP", "PhotonCouplings_decay", "PhotonCouplings"): return discriminant("phistarZ2")
 
         name = "D_bkg"
         if self.category == "Untagged": pass
@@ -435,6 +435,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0minus_decay_3bins")
             if self.analysis == "fa3_onlyDCP":
                 return discriminant("phistarZ1")
+            if self.analysis in ("PhotonCouplings", "PhotonCouplings_decay"):
+                return discriminant("D_4couplings_photons_decay_raw")
 
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
@@ -519,7 +521,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("Phi")
             if self.analysis == "fL1fL1Zg_m2_phi":
                 return discriminant("Phi")
-            if self.analysis.isSTXS:
+            if self.analysis.isSTXS or self.analysis.isphotoncouplings:
                 return discriminant("phistarZ2")
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_CP_decay_2bins")
@@ -540,7 +542,7 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_VBFdecay"+binsappend+JECappend)
-            if self.analysis.isSTXS:
+            if self.analysis.isSTXS or self.analysis.isphotoncouplings:
                 return discriminant("phistarZ2")
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_CP_VBF_2bins"+JECappend)
@@ -554,21 +556,21 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
             if self.analysis == "fL1Zg":
                 return discriminant("D_0hplus_HadVHdecay"+binsappend+JECappend)
-            if self.analysis.isSTXS:
+            if self.analysis.isSTXS or self.analysis.isphotoncouplings:
                 return discriminant("phistarZ2")
             if self.analysis in ("fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3_multiparameter", "fa3fa2fL1_EFT"):
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
 
         if self.category == "Boosted":
-            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
                 return discriminant("phistarZ2")
 
         if self.category == "VBF1jtagged":
-            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
                 return discriminant("phistarZ2")
 
         if self.category == "VHLepttagged":
-            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
                 return discriminant("phistarZ2")
 
         assert False, self
