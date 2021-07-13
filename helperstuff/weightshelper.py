@@ -52,12 +52,12 @@ class WeightsHelper(MultiEnum):
     def allcouplings(self, prodordec):
       if not self.useproddec(prodordec): return None
       if prodordec == "dec" or prodordec == "prod" and self.productionmode == "ZH":
-        return "ghz1", "ghz1prime2", "ghz2", "ghz4", "ghza1prime2"
+        return "ghz1", "ghz1prime2", "ghz2", "ghz4", "ghza1prime2", "ghza2", "ghza4", "gha2", "gha4"
       if prodordec == "prod" and self.productionmode == "VBF":
         if config.separateZZWWVBFweights:
-          return "ghv1", "ghz1prime2", "ghw1prime2", "ghz2", "ghw2", "ghz4", "ghw4", "ghza1prime2"
+          return "ghv1", "ghz1prime2", "ghw1prime2", "ghz2", "ghw2", "ghz4", "ghw4", "ghza1prime2", "ghza2", "ghza4", "gha2", "gha4"
         else:
-          return "ghv1", "ghv1prime2", "ghv2", "ghv4", "ghza1prime2"
+          return "ghv1", "ghv1prime2", "ghv2", "ghv4", "ghza1prime2", "ghza2", "ghza4", "gha2", "gha4"
       if prodordec == "prod" and self.productionmode == "WH":
         return "ghw1", "ghw1prime2", "ghw2", "ghw4"
       if prodordec == "prod" and self.productionmode == "ttH":
@@ -69,6 +69,10 @@ class WeightsHelper(MultiEnum):
     @staticmethod
     def couplingname(coupling):
       if coupling == "ghza1prime2": return "ghzgs1prime2"
+      if coupling == "ghza2": return "ghzgs2"
+      if coupling == "ghza4": return "ghzgs4"
+      if coupling == "gha2": return "ghgsgs2"
+      if coupling == "gha4": return "ghgsgs4"
       return coupling.replace("ghv", "g")
 
     @staticmethod
@@ -124,4 +128,4 @@ class WeightsHelper(MultiEnum):
 if __name__ == "__main__":
     from helperstuff.samples import ArbitraryCouplingsSample, ReweightingSample
     from pprint import pprint
-    print ArbitraryCouplingsSample("ttH", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, kappa=0, kappa_tilde=1.6).MC_weight_terms
+    pprint(ArbitraryCouplingsSample("VBF", g1=1, g2=0, g4=0, g1prime2=0, ghzgs1prime2=0, ghzgs2=1, ghzgs4=0, ghgsgs2=0, ghgsgs4=1).MC_weight_terms)

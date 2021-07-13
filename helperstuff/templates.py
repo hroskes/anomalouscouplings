@@ -894,8 +894,8 @@ class TemplatesFile(MultiEnum):
                     constrainttype = "threeparameterVVHVV_nog4int"
         elif self.analysis.dimensions == 4:
             if self.templategroup in ("ggh", "tth", "bbh"):
-                assert self.analysis.isfa3fa2fL1fL1Zg
-                if self.category == "Untagged" and not self.analysis.isSTXS:
+                assert self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isphotoncouplings
+                if self.category == "Untagged" and not self.analysis.isSTXS or self.analysis.isphotoncouplings:
                     constrainttype = "fourparameterHVV"
                     templates = [
                         Template(self, productionmode, self.analysis.purehypotheses[0]),
@@ -1031,12 +1031,13 @@ class TemplatesFile(MultiEnum):
                     IntTemplate(self, productionmode, "gk1gl3"),
                     Template(self, productionmode, self.analysis.purehypotheses[4]),
                 ]
-                if self.analysis.isSTXS or self.category in ("Boosted", "VBF1jtagged", "VHLepttagged"):
+                if (self.analysis.isSTXS or self.category in ("Boosted", "VBF1jtagged", "VHLepttagged")) and not self.analysis.isphotoncouplings:
                     for i, _ in reversed(list(enumerate(templates[:]))):
                         if isinstance(_, IntTemplate) and _.interferencetype.couplingpowers["i"] in (1, 3):
                             del templates[i]
                     constrainttype = "fourparameterVVHVV_nog4int"
             if self.templategroup == ("wh"):
+                assert not self.analysis.isphotoncouplings
                 constrainttype = "fourparameterWWHVV"
                 templates = [
                     Template(self, productionmode, self.analysis.purehypotheses[0]),
@@ -1138,6 +1139,7 @@ def templatesfiles():
                     for templategroup in templategroups:
                         if analysis.isdecayonly and templategroup not in ("bkg", "ggh", "DATA"): continue
                         if production.GEN and templategroup in ("tth", "bbh"): continue
+                        if production.fakeGEN and templategroup in ("bkg", "DATA"): continue
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
                             if (production.LHE or production.GEN) and shapesystematic != "": continue
@@ -1287,6 +1289,14 @@ class Template(TemplateBase, MultiEnum):
                 name = "template0L1"
             elif self.hypothesis == "L1Zg":
                 name = "template0L1Zg"
+            elif self.hypothesis == "g2Zg":
+               name = "template0HPlusZg"
+            elif self.hypothesis == "g4Zg":
+               name = "template0MinusZg"
+            elif self.hypothesis == "g2gg":
+               name = "template0HPlusgg"
+            elif self.hypothesis == "g4gg":
+               name = "template0Minusgg"
             elif match1:
                 name = "templateMixa1{}{}".format(match1.group(1), "Pi" if match1.group(2) else "")
             elif match2:
@@ -1313,6 +1323,14 @@ class Template(TemplateBase, MultiEnum):
                 name = "template0L1"
             elif self.hypothesis == "L1Zg":
                 name = "template0L1Zg"
+            elif self.hypothesis == "g2Zg":
+               name = "template0HPlusZg"
+            elif self.hypothesis == "g4Zg":
+               name = "template0MinusZg"
+            elif self.hypothesis == "g2gg":
+               name = "template0HPlusgg"
+            elif self.hypothesis == "g4gg":
+               name = "template0Minusgg"
             elif match1:
                 name = "templateMixa1{}{}{}".format(
                     match1.group("ai"),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os, tempfile
+import os, re, tempfile
 from abc import ABCMeta, abstractproperty
 from collections import Counter
 from itertools import combinations, permutations, product as cartesianproduct
@@ -103,7 +103,20 @@ class SampleBase(SumOfSamplesBase):
         pass
 
     @abstractproperty
+    def ghzgs2(self):
+        pass
+    @abstractproperty
+    def ghzgs4(self):
+        pass
+    @abstractproperty
     def ghzgs1prime2(self):
+        pass
+
+    @abstractproperty
+    def ghgsgs2(self):
+        pass
+    @abstractproperty
+    def ghgsgs4(self):
         pass
 
     @property
@@ -145,15 +158,15 @@ class SampleBase(SumOfSamplesBase):
     @property
     def nominalJHUxsec(self):
         result = constants.JHUXSHZZ2e2mua1.nominal_value
-        if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+        if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
             result *= self.g1**2
-        elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+        elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
             result *= self.g2**2 / constants.g2HZZ**2
-        elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
+        elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
             result *= self.g4**2 / constants.g4HZZ**2
-        elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
+        elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
             result *= self.g1prime2**2 / constants.g1prime2HZZ**2
-        elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
+        elif self.g1 == self.g2 == self.g4 == self.g1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
             result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2HZZ**2
         else:
             raise ValueError("Nominal xsec is only defined for samples with no interference")
@@ -169,43 +182,43 @@ class SampleBase(SumOfSamplesBase):
             pass
         elif self.productionmode == "VBF":
             result *= constants.NNPDF30_lo_as_0130.JHUXSVBFa1.nominal_value
-            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g1**2
-            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g2**2 / constants.g2VBF**2
-            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g4**2 / constants.g4VBF**2
-            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g1prime2**2 / constants.g1prime2VBF**2
-            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
+            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2VBF**2
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "ZH":
             result *= constants.NNPDF30_lo_as_0130.JHUXSZHa1.nominal_value
-            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g1**2
-            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g2**2 / constants.g2ZH**2
-            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g4**2 / constants.g4ZH**2
-            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g1prime2**2 / constants.g1prime2ZH**2
-            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
+            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.ghzgs1prime2**2 / constants.ghzgs1prime2ZH**2
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
         elif self.productionmode == "WH":
             result *= constants.NNPDF30_lo_as_0130.JHUXSWHa1.nominal_value
-            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            if self.g2 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g1**2
-            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g2**2 / constants.g2WH**2
-            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g2 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g4**2 / constants.g4WH**2
-            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == 0:
+            elif self.g1 == self.g2 == self.g4 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= self.g1prime2**2 / constants.g1prime2WH**2
-            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == 0:
+            elif self.g1 == self.g2 == self.g4 == self.g1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0:
                 result *= 0
             else:
                 raise ValueError("Nominal xsec is only defined for samples with no interference")
@@ -258,6 +271,7 @@ class SampleBase(SumOfSamplesBase):
                               JHUXSttHkappa, JHUXSttHkappatilde, JHUXSttHkappakappatilde
             """
 
+        assert self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0
         if self.productionmode == "bbH" or self.productionmode == "ggH" and self.ghg2 == 1 and self.ghg4 == 0:
             return (
                       JHUXSHZZ2e2mua1*self.g1**2
@@ -518,6 +532,10 @@ class SampleBase(SumOfSamplesBase):
                    self.g4 == other.g4,
                    self.g1prime2 == other.g1prime2,
                    self.ghzgs1prime2 == other.ghzgs1prime2,
+                   self.ghzgs2 == other.ghzgs2,
+                   self.ghzgs4 == other.ghzgs4,
+                   self.ghgsgs2 == other.ghgsgs2,
+                   self.ghgsgs4 == other.ghgsgs4,
                )) and (
                    self.productionmode != "ggH" or all((
                        self.ghg2 == other.ghg2,
@@ -536,10 +554,10 @@ class SampleBase(SumOfSamplesBase):
 
     def linearcombinationofreweightingsamples(self, hypotheses):
         g1 = self.g1
-        if   self.g2 == self.g1prime2 == self.ghzgs1prime2 == 0: analysis = Analysis("fa3");   gi = self.g4
-        elif self.g4 == self.g1prime2 == self.ghzgs1prime2 == 0: analysis = Analysis("fa2");   gi = self.g2
-        elif self.g2 == self.g4       == self.ghzgs1prime2 == 0: analysis = Analysis("fL1");   gi = self.g1prime2
-        elif self.g2 == self.g4       == self.g1prime2     == 0: analysis = Analysis("fL1Zg"); gi = self.ghzgs1prime2
+        if   self.g2 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0: analysis = Analysis("fa3");   gi = self.g4
+        elif self.g4 == self.g1prime2 == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0: analysis = Analysis("fa2");   gi = self.g2
+        elif self.g2 == self.g4       == self.ghzgs1prime2 == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0: analysis = Analysis("fL1");   gi = self.g1prime2
+        elif self.g2 == self.g4       == self.g1prime2     == self.ghzgs2 == self.ghzgs4 == self.ghgsgs2 == self.ghgsgs4 == 0: analysis = Analysis("fL1Zg"); gi = self.ghzgs1prime2
         else: assert False
 
         if hypotheses == "templates":
@@ -686,6 +704,11 @@ class ArbitraryCouplingsSample(SampleBase):
         ghw1prime2 = kwargs.pop("ghw1prime2", None)
 
         ghzgs1prime2 = kwargs.pop("ghzgs1prime2", None)
+        ghzgs2 = kwargs.pop("ghzgs2", None)
+        ghzgs4 = kwargs.pop("ghzgs4", None)
+
+        ghgsgs2 = kwargs.pop("ghgsgs2", None)
+        ghgsgs4 = kwargs.pop("ghgsgs4", None)
 
         ghg2 = kwargs.pop("ghg2", None)
         ghg4 = kwargs.pop("ghg4", None)
@@ -742,6 +765,10 @@ class ArbitraryCouplingsSample(SampleBase):
         self.__ghw1prime2 = ghw1prime2
 
         self.__ghzgs1prime2 = ghzgs1prime2
+        self.__ghzgs2 = ghzgs2
+        self.__ghzgs4 = ghzgs4
+        self.__ghgsgs2 = ghgsgs2
+        self.__ghgsgs4 = ghgsgs4
 
         if self.productionmode == "ggH":
             if ghg2 is ghg4 is None:
@@ -802,6 +829,18 @@ class ArbitraryCouplingsSample(SampleBase):
     def ghzgs1prime2(self):
         return self.__ghzgs1prime2
     @property
+    def ghzgs2(self):
+        return self.__ghzgs2
+    @property
+    def ghzgs4(self):
+        return self.__ghzgs4
+    @property
+    def ghgsgs2(self):
+        return self.__ghgsgs2
+    @property
+    def ghgsgs4(self):
+        return self.__ghgsgs4
+    @property
     def ghg2(self):
         if self.__ghg2 is None: raise ValueError("{} doesn't have ghg2!".format(self))
         return self.__ghg2
@@ -824,7 +863,7 @@ class ArbitraryCouplingsSample(SampleBase):
         if self.productionmode == "ggH": kwargs += ("ghg2", "ghg4")
         if self.productionmode == "ttH": kwargs += ("kappa", "kappa_tilde")
         if self.pdf is not None: kwargs += ("pdf",)
-        kwargs += ("ghz1", "ghz2", "ghz4", "ghz1prime2", "ghzgs1prime2")
+        kwargs += ("ghz1", "ghz2", "ghz4", "ghz1prime2", "ghzgs1prime2", "ghzgs2", "ghzgs4", "ghgsgs2", "ghgsgs4")
         if self.productionmode in ("VBF", "WH"):
             kwargs += ("ghw1", "ghw2", "ghw4", "ghw1prime2")
         return "{}({}, {})".format(
@@ -861,7 +900,7 @@ def samplewithfai(productionmode, analysis, fai, withdecay=False, productionmode
     else:
         productionmodeforfai = ProductionMode(productionmodeforfai)
 
-    kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2", "ghzgs1prime2")}
+    kwargs = {coupling: 0 for coupling in ("g1", "g2", "g4", "g1prime2", "ghzgs1prime2", "ghzgs2", "ghzgs4", "ghgsgs2", "ghgsgs4")}
     power = (.25 if productionmodeforfai != "ggH" and withdecay else .5)
     kwargs["g1"] = (1-abs(fai))**power
     xsecratio = sigmaioversigma1(analysis, productionmodeforfai)
@@ -992,7 +1031,8 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH", "tqH"):
             if self.hypothesis == "0+": return 1
             if self.hypothesis in ("0-", "a2", "L1", "L1Zg", "a3EFT", "a2EFT", "L1EFT"): return 0
-            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg")), ("EFT", ("fa3", "fa2", "fL1")):
+            if self.hypothesis in ("g2Zg", "g4Zg", "g2gg", "g4gg"): return 0
+            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg")), ("EFT", ("fa3", "fa2", "fL1")):
                 for proddec in "prod", "dec", "proddec":
                     minus = "-" if proddec == "proddec" else ""
                     doplushalf = (not EFT) or proddec != "proddec"
@@ -1035,6 +1075,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis in ("a2", "a2EFT"): return 1
             if self.hypothesis in ("0+", "0-", "L1", "L1Zg", "a3EFT", "L1EFT"): return 0
+            if self.hypothesis in ("g2Zg", "g4Zg", "g2gg", "g4gg"): return 0
 
             ghz2 = {"dec": constants.g2HZZ}
             if self.productionmode == "VBF": ghz2["prod"] = constants.g2VBF
@@ -1043,7 +1084,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             else: ghz2["prod"] = None
             ghz2["proddec"] = None if ghz2["prod"] is None else sqrt(ghz2["prod"]*ghz2["dec"])
 
-            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg")), ("EFT", ("fa3", "fa2", "fL1")):
+            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg")), ("EFT", ("fa3", "fa2", "fL1")):
                 for proddec in "prod", "dec", "proddec":
                     doplushalf = (not EFT) or proddec != "proddec"
                     dominushalf = (not EFT) or proddec == "proddec"
@@ -1101,6 +1142,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis in ("0-", "a3EFT"): return 1
             if self.hypothesis in ("0+", "a2", "L1", "L1Zg", "a2EFT", "L1EFT"): return 0
+            if self.hypothesis in ("g2Zg", "g4Zg", "g2gg", "g4gg"): return 0
 
             ghz4 = {"dec": constants.g4HZZ}
             if self.productionmode == "VBF": ghz4["prod"] = constants.g4VBF
@@ -1109,7 +1151,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             else: ghz4["prod"] = None
             ghz4["proddec"] = None if ghz4["prod"] is None else sqrt(ghz4["prod"]*ghz4["dec"])
 
-            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg")), ("EFT", ("fa3", "fa2", "fL1")):
+            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg")), ("EFT", ("fa3", "fa2", "fL1")):
                 for proddec in "prod", "dec", "proddec":
                     doplushalf = (not EFT) or proddec != "proddec"
                     dominushalf = (not EFT) or proddec == "proddec"
@@ -1168,6 +1210,7 @@ class ReweightingSample(MultiEnum, SampleBase):
         if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
             if self.hypothesis in ("L1", "L1EFT"): return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1Zg", "a2EFT", "a3EFT"): return 0
+            if self.hypothesis in ("g2Zg", "g4Zg", "g2gg", "g4gg"): return 0
 
             ghz1prime2 = {"dec": constants.g1prime2HZZ}
             if self.productionmode == "VBF": ghz1prime2["prod"] = constants.g1prime2VBF
@@ -1176,7 +1219,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             else: ghz1prime2["prod"] = None
             ghz1prime2["proddec"] = None if ghz1prime2["prod"] is None else -sqrt(ghz1prime2["prod"]*ghz1prime2["dec"])
 
-            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg")), ("EFT", ("fa3", "fa2", "fL1")):
+            for EFT, couplings in ("", ("fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg")), ("EFT", ("fa3", "fa2", "fL1")):
                 for proddec in "prod", "dec", "proddec":
                     doplushalf = (not EFT) or proddec != "proddec"
                     dominushalf = (not EFT) or proddec == "proddec"
@@ -1251,6 +1294,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis.isEFT: return eft.ghzgs1prime2(ghz1=self.ghz1, ghz2=self.ghz2, ghz4=self.ghz4, ghz1prime2=self.ghz1prime2)
             if self.hypothesis == "L1Zg": return 1e4
             if self.hypothesis in ("0+", "a2", "0-", "L1"): return 0
+            if self.hypothesis in ("g2Zg", "g4Zg", "g2gg", "g4gg"): return 0
 
             ghzgs1prime2 = {"dec": constants.ghzgs1prime2HZZ}
             if self.productionmode == "VBF": ghzgs1prime2["prod"] = constants.ghzgs1prime2VBF
@@ -1259,7 +1303,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             else: ghzgs1prime2["prod"] = None
             ghzgs1prime2["proddec"] = None if ghzgs1prime2["prod"] is None else -sqrt(ghzgs1prime2["prod"]*ghzgs1prime2["dec"])
 
-            couplings = "fa3", "fa2", "fL1", "fL1Zg"
+            couplings = "fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg"
             for proddec in "prod", "dec", "proddec":
                 for a in couplings:
                     if self.hypothesis == a+proddec+"0.5":
@@ -1309,6 +1353,271 @@ class ReweightingSample(MultiEnum, SampleBase):
             if self.hypothesis == "BestFit19009": return constants.ghzgs1prime2HZZ * -0.0622403**0.5
 
         raise self.ValueError("ghzgs1prime2")
+
+    @property
+    @cache
+    def ghzgs2(self):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
+            if self.hypothesis.isEFT: assert False
+            if self.hypothesis == "g2Zg": return 1
+            if self.hypothesis in ("0+", "a2", "0-", "L1", "L1Zg", "g4Zg", "g2gg", "g4gg"): return 0
+
+            ghzgs2 = {"dec": constants.ghzgs2HZZ}
+            if self.productionmode == "VBF": ghzgs2["prod"] = constants.ghzgs2VBF
+            elif self.productionmode == "ZH":  ghzgs2["prod"] = constants.ghzgs2ZH
+            elif self.productionmode == "WH":  ghzgs2["prod"] = -1000  #dummy value, should remove this entirely
+            else: ghzgs2["prod"] = None
+            ghzgs2["proddec"] = None if ghzgs2["prod"] is None else sqrt(ghzgs2["prod"]*ghzgs2["dec"])
+
+            couplings = "fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg"
+            for proddec in "prod", "dec", "proddec":
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        if a == "fa2Zg":
+                            return ghzgs2[proddec]
+                        return 0
+                    if self.hypothesis == a+proddec+"-0.5":
+                        if a == "fa2Zg":
+                            return -ghzgs2[proddec]
+                        return 0
+
+                minus = "-" if proddec == "proddec" else ""
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
+                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
+                        if a == "fa2Zg":
+                            return ghzgs2[proddec]
+                        if b == "fa2Zg":
+                            return float(minus+"1") * ghzgs2[proddec]
+                        return 0
+                for a, b, c in combinations(couplings, 3):
+                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
+                          or proddec=="proddec"
+                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
+                    ):
+                        if a == "fa2Zg" or b == "fa2Zg" or "0.25" in str(self.hypothesis) and c == "fa2Zg":
+                            return ghzgs2[proddec]
+                        if c == "fa2Zg":
+                            return float(minus+"1") * ghzgs2[proddec]
+                        return 0
+
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        if a == "fa2Zg" or b == "fa2Zg" or c == "fa2Zg" or d == "fa2Zg":
+                            return ghzgs2[proddec]
+                        return 0
+
+            if self.hypothesis == "fa2dec-0.9": return 0
+
+            if self.hypothesis == "fa3VBF0.5": return 0
+            if self.hypothesis == "fa3VH0.5": return 0
+            if self.hypothesis == "fa2VBF0.5": return 0
+            if self.hypothesis == "fa2VH0.5": return 0
+            if self.hypothesis == "fL1VBF0.5": return 0
+            if self.hypothesis == "fL1VH0.5": return 0
+            if self.hypothesis == "BestFit19009": return 0
+
+        raise self.ValueError("ghzgs2")
+
+    @property
+    @cache
+    def ghzgs4(self):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
+            if self.hypothesis.isEFT: assert False
+            if self.hypothesis == "g4Zg": return 1
+            if self.hypothesis in ("0+", "a2", "0-", "L1", "L1Zg", "g2Zg", "g2gg", "g4gg"): return 0
+
+            ghzgs4 = {"dec": constants.ghzgs4HZZ}
+            if self.productionmode == "VBF": ghzgs4["prod"] = constants.ghzgs4VBF
+            elif self.productionmode == "ZH":  ghzgs4["prod"] = constants.ghzgs4ZH
+            elif self.productionmode == "WH":  ghzgs4["prod"] = -1000  #dummy value, should remove this entirely
+            else: ghzgs4["prod"] = None
+            ghzgs4["proddec"] = None if ghzgs4["prod"] is None else sqrt(ghzgs4["prod"]*ghzgs4["dec"])
+
+            couplings = "fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg"
+            for proddec in "prod", "dec", "proddec":
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        if a == "fa3Zg":
+                            return ghzgs4[proddec]
+                        return 0
+                    if self.hypothesis == a+proddec+"-0.5":
+                        if a == "fa3Zg":
+                            return -ghzgs4[proddec]
+                        return 0
+
+                minus = "-" if proddec == "proddec" else ""
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
+                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
+                        if a == "fa3Zg":
+                            return ghzgs4[proddec]
+                        if b == "fa3Zg":
+                            return float(minus+"1") * ghzgs4[proddec]
+                        return 0
+                for a, b, c in combinations(couplings, 3):
+                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
+                          or proddec=="proddec"
+                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
+                    ):
+                        if a == "fa3Zg" or b == "fa3Zg" or "0.25" in str(self.hypothesis) and c == "fa3Zg":
+                            return ghzgs4[proddec]
+                        if c == "fa3Zg":
+                            return float(minus+"1") * ghzgs4[proddec]
+                        return 0
+
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        if a == "fa3Zg" or b == "fa3Zg" or c == "fa3Zg" or d == "fa3Zg":
+                            return ghzgs4[proddec]
+                        return 0
+
+            if self.hypothesis == "fa2dec-0.9": return 0
+
+            if self.hypothesis == "fa3VBF0.5": return 0
+            if self.hypothesis == "fa3VH0.5": return 0
+            if self.hypothesis == "fa2VBF0.5": return 0
+            if self.hypothesis == "fa2VH0.5": return 0
+            if self.hypothesis == "fL1VBF0.5": return 0
+            if self.hypothesis == "fL1VH0.5": return 0
+            if self.hypothesis == "BestFit19009": return 0
+
+        raise self.ValueError("ghzgs4")
+
+
+    @property
+    @cache
+    def ghgsgs2(self):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
+            if self.hypothesis.isEFT: assert False
+            if self.hypothesis == "g2gg": return 1
+            if self.hypothesis in ("0+", "a2", "0-", "L1", "L1Zg", "g2Zg", "g4Zg", "g4gg"): return 0
+
+            ghgsgs2 = {"dec": constants.ghgsgs2HZZ}
+            if self.productionmode == "VBF": ghgsgs2["prod"] = constants.ghgsgs2VBF
+            elif self.productionmode == "ZH":  ghgsgs2["prod"] = constants.ghgsgs2ZH
+            elif self.productionmode == "WH":  ghgsgs2["prod"] = -1000  #dummy value, should remove this entirely
+            else: ghgsgs2["prod"] = None
+            ghgsgs2["proddec"] = None if ghgsgs2["prod"] is None else sqrt(ghgsgs2["prod"]*ghgsgs2["dec"])
+
+            couplings = "fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg"
+            for proddec in "prod", "dec", "proddec":
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        if a == "fa2gg":
+                            return ghgsgs2[proddec]
+                        return 0
+                    if self.hypothesis == a+proddec+"-0.5":
+                        if a == "fa2gg":
+                            return -ghgsgs2[proddec]
+                        return 0
+
+                minus = "-" if proddec == "proddec" else ""
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
+                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
+                        if a == "fa2gg":
+                            return ghgsgs2[proddec]
+                        if b == "fa2gg":
+                            return float(minus+"1") * ghgsgs2[proddec]
+                        return 0
+                for a, b, c in combinations(couplings, 3):
+                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
+                          or proddec=="proddec"
+                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
+                    ):
+                        if a == "fa2gg" or b == "fa2gg" or "0.25" in str(self.hypothesis) and c == "fa2gg":
+                            return ghgsgs2[proddec]
+                        if c == "fa2gg":
+                            return float(minus+"1") * ghgsgs2[proddec]
+                        return 0
+
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        if a == "fa2gg" or b == "fa2gg" or c == "fa2gg" or d == "fa2gg":
+                            return ghgsgs2[proddec]
+                        return 0
+
+            if self.hypothesis == "fa2dec-0.9": return 0
+
+            if self.hypothesis == "fa3VBF0.5": return 0
+            if self.hypothesis == "fa3VH0.5": return 0
+            if self.hypothesis == "fa2VBF0.5": return 0
+            if self.hypothesis == "fa2VH0.5": return 0
+            if self.hypothesis == "fL1VBF0.5": return 0
+            if self.hypothesis == "fL1VH0.5": return 0
+            if self.hypothesis == "BestFit19009": return 0
+
+        raise self.ValueError("ghgsgs2")
+
+    @property
+    @cache
+    def ghgsgs4(self):
+        if self.productionmode in ("ggH", "VBF", "ZH", "WH", "WplusH", "WminusH", "ttH", "bbH"):
+            if self.hypothesis.isEFT: assert False
+            if self.hypothesis == "g4gg": return 1
+            if self.hypothesis in ("0+", "a2", "0-", "L1", "L1Zg", "g2Zg", "g4Zg", "g2gg"): return 0
+
+            ghgsgs4 = {"dec": constants.ghgsgs4HZZ}
+            if self.productionmode == "VBF": ghgsgs4["prod"] = constants.ghgsgs4VBF
+            elif self.productionmode == "ZH":  ghgsgs4["prod"] = constants.ghgsgs4ZH
+            elif self.productionmode == "WH":  ghgsgs4["prod"] = -1000  #dummy value, should remove this entirely
+            else: ghgsgs4["prod"] = None
+            ghgsgs4["proddec"] = None if ghgsgs4["prod"] is None else sqrt(ghgsgs4["prod"]*ghgsgs4["dec"])
+
+            couplings = "fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg"
+            for proddec in "prod", "dec", "proddec":
+                for a in couplings:
+                    if self.hypothesis == a+proddec+"0.5":
+                        if a == "fa3gg":
+                            return ghgsgs4[proddec]
+                        return 0
+                    if self.hypothesis == a+proddec+"-0.5":
+                        if a == "fa3gg":
+                            return -ghgsgs4[proddec]
+                        return 0
+
+                minus = "-" if proddec == "proddec" else ""
+                for a, b in combinations(couplings, 2):
+                    if self.hypothesis in (a+proddec+"0.5"+b+proddec+minus+"0.5",
+                                           a+proddec+"0.33"+b+proddec+minus+"0.33"):
+                        if a == "fa3gg":
+                            return ghgsgs4[proddec]
+                        if b == "fa3gg":
+                            return float(minus+"1") * ghgsgs4[proddec]
+                        return 0
+                for a, b, c in combinations(couplings, 3):
+                    if (self.hypothesis == a+proddec+"0.33"+b+proddec+"0.33"+c+proddec+minus+"0.33"
+                          or proddec=="proddec"
+                          and self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"
+                    ):
+                        if a == "fa3gg" or b == "fa3gg" or "0.25" in str(self.hypothesis) and c == "fa3gg":
+                            return ghgsgs4[proddec]
+                        if c == "fa3gg":
+                            return float(minus+"1") * ghgsgs4[proddec]
+                        return 0
+
+                if proddec != "proddec": continue
+                for a, b, c, d in combinations(couplings, 4):
+                    if self.hypothesis == a+proddec+"0.25"+b+proddec+"0.25"+c+proddec+"0.25"+d+proddec+"0.25":
+                        if a == "fa3gg" or b == "fa3gg" or c == "fa3gg" or d == "fa3gg":
+                            return ghgsgs4[proddec]
+                        return 0
+
+            if self.hypothesis == "fa2dec-0.9": return 0
+
+            if self.hypothesis == "fa3VBF0.5": return 0
+            if self.hypothesis == "fa3VH0.5": return 0
+            if self.hypothesis == "fa2VBF0.5": return 0
+            if self.hypothesis == "fa2VH0.5": return 0
+            if self.hypothesis == "fL1VBF0.5": return 0
+            if self.hypothesis == "fL1VH0.5": return 0
+            if self.hypothesis == "BestFit19009": return 0
+
+        raise self.ValueError("ghgsgs4")
 
     @property
     def ghg2(self):
@@ -1721,6 +2030,10 @@ class SampleBasis(MultiEnum):
                 Analysis("fa2"): 1,
                 Analysis("fL1"): 1e-4,
                 Analysis("fL1Zg"): 1e-4,
+                Analysis("fa3Zg"): 1,
+                Analysis("fa2Zg"): 1,
+                Analysis("fa3gg"): 1,
+                Analysis("fa2gg"): 1,
             }[self.analysis.fais[i]]
         assert False
 
