@@ -446,13 +446,19 @@ class TreeWrapperBase(Iterator):
     def D_L1Zgint_decay(self):
         return self.M2g1ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l / (self.M2g1_decay + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
     def D_L1Zgint_decay_new(self):
-        return self.M2g1ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2))
+        try:
+          return self.M2g1ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2))
+        except ZeroDivisionError:
+          return 0
     def D_L1L1Zg_decay(self):
         return self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 / (self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
     def D_L1L1Zgint_decay(self):
         return self.M2g1prime2ghzgs1prime2_decay*self.g1prime2HZZ_m4l*self.ghzgs1prime2HZZ_m4l / (self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
     def D_L1L1Zgint_decay_new(self):
-        return self.M2g1prime2ghzgs1prime2_decay*self.g1prime2HZZ_m4l*self.ghzgs1prime2HZZ_m4l / (2 * sqrt(self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 * self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2))
+        try:
+          return self.M2g1prime2ghzgs1prime2_decay*self.g1prime2HZZ_m4l*self.ghzgs1prime2HZZ_m4l / (2 * sqrt(self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 * self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2))
+        except ZeroDivisionError:
+          return 0
     def D_0minus_Zg_decay(self):
         return self.M2g1_decay / (self.M2g1_decay + self.M2g4Zg_decay*self.g4HZg_m4l**2)
     def D_CP_Zg_decay_new(self):
