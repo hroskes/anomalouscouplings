@@ -80,11 +80,13 @@ class GConstant(MultiEnum):
       #if self.process == "HZZ2e2mu": return 2.24e-3 ** 0.5  #table 1 in 14-018
       if self.process == "HZZ2e2mu": return 0.005226666666666666 ** 0.5  #from Savvas
       if self.process in ("VH", "ZH", "WH"): return 0.014778325123152709 ** 0.5 #from Savvas
+      if self.process == "VBF": return 0.05263157894736842
       assert False, self.process
     if self.hypothesis == "g4Zg":
       #if self.process == "HZZ2e2mu": return 2.72e-3 ** 0.5  #table 1 in 14-018
       if self.process == "HZZ2e2mu": return 0.01088 ** 0.5  #from Savvas
       if self.process in ("VH", "ZH", "WH"): return 0.017857142857142856 ** .5 #from Savvas
+      if self.process == "VBF": return 0.05263157894736842
       assert False, self.process
     if self.hypothesis == "g2gg":
       #if self.process == "HZZ2e2mu": return 2.82e-3 ** 0.5  #table 1 in 14-018
