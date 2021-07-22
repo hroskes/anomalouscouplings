@@ -1838,6 +1838,16 @@ class Sample(ReweightingSamplePlusWithFlavor):
                 if self.hypothesis == "fa3gg0.5": result = "{}0Mggf05ph0_M125".format(s)
                 if self.hypothesis == "fa2Zg0.5": result = "{}0PHZgf05ph0_M125".format(s)
                 if self.hypothesis == "fa2gg0.5": result = "{}0PHggf05ph0_M125".format(s)
+            elif self.productionmode in ("VBF", "ZH", "WH"):
+                if self.hypothesis == "fa3Zgdec0.5": result = "{}0MZgfdec05ph0_M125".format(s)
+                if self.hypothesis == "fa3ggdec0.5": result = "{}0Mggfdec05ph0_M125".format(s)
+                if self.hypothesis == "fa2Zgdec0.5": result = "{}0PHZgfdec05ph0_M125".format(s)
+                if self.hypothesis == "fa2ggdec0.5": result = "{}0PHggfdec05ph0_M125".format(s)
+                if self.productionmode in ("VBF", "ZH"):
+                    if self.hypothesis == "fa3Zgprod0.5": result = "{}0MZgfprod05ph0_M125".format(s)
+                    if self.hypothesis == "fa3ggprod0.5": result = "{}0Mggfprod05ph0_M125".format(s)
+                    if self.hypothesis == "fa2Zgprod0.5": result = "{}0PHZgfprod05ph0_M125".format(s)
+                    if self.hypothesis == "fa2ggprod0.5": result = "{}0PHggfprod05ph0_M125".format(s)
             if self.extension is not None: result += "_" + str(self.extension)
             return result
         if self.productionmode == "ttH":
@@ -2149,6 +2159,12 @@ def allsamples(doxcheck=True):
             if production.fakeGEN:
                 for productionmode in "ggH",:
                     for hypothesis in "g4Zg", "g2Zg", "g4gg", "g2gg", "fa2gg0.5", "fa3gg0.5", "fa2Zg0.5", "fa3Zg0.5":
+                        yield Sample(productionmode, hypothesis, production)
+                for productionmode in "VBF", "ZH", "WH":
+                    for hypothesis in "fa2gg0.5", "fa3gg0.5", "fa2Zg0.5", "fa3Zg0.5":
+                        yield Sample(productionmode, hypothesis, production)
+                for productionmode in "VBF", "ZH":
+                    for hypothesis in "fa2ggprod0.5", "fa3ggprod0.5", "fa2Zgprod0.5", "fa3Zgprod0.5":
                         yield Sample(productionmode, hypothesis, production)
             continue
 

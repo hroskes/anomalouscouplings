@@ -125,10 +125,10 @@ class TreeWrapperBase(Iterator):
         for key, occurences in Counter(toaddtotree + self.exceptions).iteritems():
             if occurences >= 2 and key not in inboth or occurences >= 3: multipletimes.append(key)
         error = ""
-        if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(notanywhere) + "\n"
-        if inboth: error += "the following items are in both toaddtotree and exceptions! " + ", ".join(inboth) + "\n"
-        if nonexistent: error += "the following items are in toaddtotree or exceptions, but don't exist! " + ", ".join(nonexistent) + "\n"
-        if multipletimes: error += "the following items appear multiple times in toaddtotree or exceptions! " + ", ".join(multipletimes) + "\n"
+        if notanywhere: error += "the following items are not in toaddtotree or exceptions! " + ", ".join(sorted(notanywhere)) + "\n"
+        if inboth: error += "the following items are in both toaddtotree and exceptions! " + ", ".join(sorted(inboth)) + "\n"
+        if nonexistent: error += "the following items are in toaddtotree or exceptions, but don't exist! " + ", ".join(sorted(nonexistent)) + "\n"
+        if multipletimes: error += "the following items appear multiple times in toaddtotree or exceptions! " + ", ".join(sorted(multipletimes)) + "\n"
         if error:
             raise SyntaxError(error)
 
@@ -557,6 +557,38 @@ class TreeWrapperBase(Iterator):
     def D_L1Zgint_VBF_new(self):
         if self.notdijet: return -999
         return self.M2g1ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l**2))
+    @MakeJetSystematics
+    def D_0minus_Zg_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4Zg_VBF*self.g4ZgVBF_m4l**2)
+    @MakeJetSystematics
+    def D_CP_Zg_VBF_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g4Zg_VBF*self.g4ZgVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g4Zg_VBF*self.g4ZgVBF_m4l**2))
+    @MakeJetSystematics
+    def D_0hplus_Zg_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2Zg_VBF*self.g2ZgVBF_m4l**2)
+    @MakeJetSystematics
+    def D_int_Zg_VBF_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g2Zg_VBF*self.g2ZgVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g2Zg_VBF*self.g2ZgVBF_m4l**2))
+    @MakeJetSystematics
+    def D_0minus_gg_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4gg_VBF*self.g4ggVBF_m4l**2)
+    @MakeJetSystematics
+    def D_CP_gg_VBF_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g4gg_VBF*self.g4ggVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g4gg_VBF*self.g4ggVBF_m4l**2))
+    @MakeJetSystematics
+    def D_0hplus_gg_VBF(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2gg_VBF*self.g2ggVBF_m4l**2)
+    @MakeJetSystematics
+    def D_int_gg_VBF_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g2gg_VBF*self.g2ggVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g2gg_VBF*self.g2ggVBF_m4l**2))
 
 ###############################################
 #VH hadronic anomalous couplings discriminants#
@@ -694,6 +726,74 @@ class TreeWrapperBase(Iterator):
                      self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2ghzgs1prime2_HadZH))
                     )
         """
+    @MakeJetSystematics
+    def D_0minus_Zg_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g4Zg_HadWH + self.M2g4Zg_HadZH)
+                          * self.g4ZgVH_m4l**2
+                 )
+               )
+    @MakeJetSystematics
+    def D_CP_Zg_HadVH_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g4Zg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g4Zg_HadZH))
+    @MakeJetSystematics
+    def D_0hplus_Zg_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g2Zg_HadWH + self.M2g2Zg_HadZH)
+                          * self.g2ZgVH_m4l**2
+                 )
+               )
+    @MakeJetSystematics
+    def D_int_Zg_HadVH_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g2Zg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g2Zg_HadZH))
+    @MakeJetSystematics
+    def D_0minus_gg_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g4gg_HadWH + self.M2g4gg_HadZH)
+                          * self.g4ggVH_m4l**2
+                 )
+               )
+    @MakeJetSystematics
+    def D_CP_gg_HadVH_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g4gg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g4gg_HadZH))
+    @MakeJetSystematics
+    def D_0hplus_gg_HadVH(self):
+        if self.notdijet: return -999
+        return (
+                 (self.M2g1_HadWH + self.M2g1_HadZH)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                 +
+                   (self.M2g2gg_HadWH + self.M2g2gg_HadZH)
+                          * self.g2ggVH_m4l**2
+                 )
+               )
+    @MakeJetSystematics
+    def D_int_gg_HadVH_new(self):
+        if self.notdijet: return -999
+        return self.M2g1g2gg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g2gg_HadZH))
 
 ############################################
 #VBFdecay anomalous couplings discriminants#
@@ -715,6 +815,22 @@ class TreeWrapperBase(Iterator):
     def D_L1Zg_VBFdecay(self):
         if self.notdijet: return -999
         return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2ghzgs1prime2_VBF*self.M2ghzgs1prime2_decay * (self.ghzgs1prime2VBF_m4l*self.ghzgs1prime2HZZ_m4l)**2)
+    @MakeJetSystematics
+    def D_0minus_Zg_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4Zg_VBF*self.M2g4Zg_decay * (self.g4ZgVBF_m4l*self.g4HZg_m4l)**2)
+    @MakeJetSystematics
+    def D_0hplus_Zg_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2Zg_VBF*self.M2g2Zg_decay * (self.g2ZgVBF_m4l*self.g2HZg_m4l)**2)
+    @MakeJetSystematics
+    def D_0minus_gg_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4gg_VBF*self.M2g4gg_decay * (self.g4ggVBF_m4l*self.g4Hgg_m4l)**2)
+    @MakeJetSystematics
+    def D_0hplus_gg_VBFdecay(self):
+        if self.notdijet: return -999
+        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2gg_VBF*self.M2g2gg_decay * (self.g2ggVBF_m4l*self.g2Hgg_m4l)**2)
 
 ####################################################
 #VHdecay hadronic anomalous couplings discriminants#
@@ -771,6 +887,62 @@ class TreeWrapperBase(Iterator):
                         *self.M2g1_decay
                  + (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*self.ghzgs1prime2VH_m4l**2
                         *self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2
+                 )
+               )
+    @MakeJetSystematics
+    def D_0minus_Zg_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_HadWH + self.M2g1_HadZH)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                        *self.M2g1_decay
+                 + (self.M2g4Zg_HadWH + self.M2g4Zg_HadZH)*self.g4ZgVH_m4l**2
+                        *self.M2g4Zg_decay*self.g4HZg_m4l**2
+                 )
+               )
+    @MakeJetSystematics
+    def D_0hplus_Zg_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_HadWH + self.M2g1_HadZH)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                        *self.M2g1_decay
+                 + (self.M2g2Zg_HadWH + self.M2g2Zg_HadZH)*self.g2ZgVH_m4l**2
+                        *self.M2g2Zg_decay*self.g2HZg_m4l**2
+                 )
+               )
+    @MakeJetSystematics
+    def D_0minus_gg_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_HadWH + self.M2g1_HadZH)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                        *self.M2g1_decay
+                 + (self.M2g4gg_HadWH + self.M2g4gg_HadZH)*self.g4ggVH_m4l**2
+                        *self.M2g4gg_decay*self.g4Hgg_m4l**2
+                 )
+               )
+    @MakeJetSystematics
+    def D_0hplus_gg_HadVHdecay(self):
+        if self.notdijet: return -999
+        return (
+                 ((self.M2g1_HadWH + self.M2g1_HadZH)
+                    *self.M2g1_decay)
+               /
+                 (
+                   (self.M2g1_HadWH + self.M2g1_HadZH)
+                        *self.M2g1_decay
+                 + (self.M2g2gg_HadWH + self.M2g2gg_HadZH)*self.g2ggVH_m4l**2
+                        *self.M2g2gg_decay*self.g2Hgg_m4l**2
                  )
                )
 
@@ -946,10 +1118,10 @@ class TreeWrapperBase(Iterator):
       ("D_CP_Zg_HadVH_new", [0.]),
       ("D_0hplus_Zg_HadVHdecay", [.333, .667]),
       ("D_int_Zg_HadVH_new", [0.]),
-      ("D_0minus_gg_HadVHdecay", [.333, .667]),
-      ("D_CP_gg_HadVH_new", [0.]),
-      ("D_0hplus_gg_HadVHdecay", [.333, .667]),
-      ("D_int_gg_HadVH_new", [0.]),
+      #("D_0minus_gg_HadVHdecay", [.333, .667]),
+      #("D_CP_gg_HadVH_new", [0.]),
+      #("D_0hplus_gg_HadVHdecay", [.333, .667]),
+      #("D_int_gg_HadVH_new", [0.]),
     )
     binning_4couplings_photons_HadVHdecay_JECUp = tuple((name+"_JECUp", bins) for name, bins in binning_4couplings_photons_HadVHdecay)
     binning_4couplings_photons_HadVHdecay_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_photons_HadVHdecay)
@@ -1149,6 +1321,14 @@ class TreeWrapper(TreeWrapperBase):
         self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECNominal  = self.M2g1g1prime2_VBF             = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECNominal / 1e4
         self.p_JJVBF_SIG_ghza1prime2_1_JHUGen_JECNominal        = self.M2ghzgs1prime2_VBF           = t.p_JJVBF_SIG_ghza1prime2_1E4_JHUGen_JECNominal / 1e4**2
         self.p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_VBF         = t.p_JJVBF_SIG_ghv1_1_ghza1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_JJVBF_SIG_ghza4_1_JHUGen_JECNominal              = self.M2g4Zg_VBF                   = t.p_JJVBF_SIG_ghza4_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv1_1_ghza4_1_JHUGen_JECNominal       = self.M2g1g4Zg_VBF                 = t.p_JJVBF_SIG_ghv1_1_ghza4_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghza2_1_JHUGen_JECNominal              = self.M2g2Zg_VBF                   = t.p_JJVBF_SIG_ghza2_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv1_1_ghza2_1_JHUGen_JECNominal       = self.M2g1g2Zg_VBF                 = t.p_JJVBF_SIG_ghv1_1_ghza2_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_gha4_1_JHUGen_JECNominal               = self.M2g4gg_VBF                   = t.p_JJVBF_SIG_gha4_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv1_1_gha4_1_JHUGen_JECNominal        = self.M2g1g4gg_VBF                 = t.p_JJVBF_SIG_ghv1_1_gha4_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_gha2_1_JHUGen_JECNominal               = self.M2g2gg_VBF                   = t.p_JJVBF_SIG_gha2_1_JHUGen_JECNominal
+        self.p_JJVBF_SIG_ghv1_1_gha2_1_JHUGen_JECNominal        = self.M2g1g2gg_VBF                 = t.p_JJVBF_SIG_ghv1_1_gha2_1_JHUGen_JECNominal
 
         self.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal               = self.M2g2_HJJ                     = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECNominal
         self.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal                                                   = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECNominal
@@ -1163,6 +1343,14 @@ class TreeWrapper(TreeWrapperBase):
         self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECNominal  = self.M2g1g1prime2_HadZH           = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECNominal / 1e4
         self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECNominal        = self.M2ghzgs1prime2_HadZH         = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECNominal / 1e4**2
         self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_HadZH       = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECNominal / 1e4
+        self.p_HadZH_SIG_ghza4_1_JHUGen_JECNominal              = self.M2g4Zg_HadZH                 = t.p_HadZH_SIG_ghza4_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz1_1_ghza4_1_JHUGen_JECNominal       = self.M2g1g4Zg_HadZH               = t.p_HadZH_SIG_ghz1_1_ghza4_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghza2_1_JHUGen_JECNominal              = self.M2g2Zg_HadZH                 = t.p_HadZH_SIG_ghza2_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz1_1_ghza2_1_JHUGen_JECNominal       = self.M2g1g2Zg_HadZH               = t.p_HadZH_SIG_ghz1_1_ghza2_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_gha4_1_JHUGen_JECNominal               = self.M2g4gg_HadZH                 = t.p_HadZH_SIG_gha4_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz1_1_gha4_1_JHUGen_JECNominal        = self.M2g1g4gg_HadZH               = t.p_HadZH_SIG_ghz1_1_gha4_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_gha2_1_JHUGen_JECNominal               = self.M2g2gg_HadZH                 = t.p_HadZH_SIG_gha2_1_JHUGen_JECNominal
+        self.p_HadZH_SIG_ghz1_1_gha2_1_JHUGen_JECNominal        = self.M2g1g2gg_HadZH               = t.p_HadZH_SIG_ghz1_1_gha2_1_JHUGen_JECNominal
 
         self.p_HadZH_mavjj_JECNominal                                                               = t.p_HadZH_mavjj_JECNominal
         self.p_HadZH_mavjj_true_JECNominal                                                          = t.p_HadZH_mavjj_true_JECNominal
@@ -1177,6 +1365,14 @@ class TreeWrapper(TreeWrapperBase):
         self.M2g1g1prime2_HadZH           *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
         self.M2ghzgs1prime2_HadZH         *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
         self.M2g1ghzgs1prime2_HadZH       *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g4Zg_HadZH                 *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g1g4Zg_HadZH               *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g2Zg_HadZH                 *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g1g2Zg_HadZH               *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g4gg_HadZH                 *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g1g4gg_HadZH               *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g2gg_HadZH                 *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
+        self.M2g1g2gg_HadZH               *= self.p_HadZH_mavjj_JECNominal / self.p_HadZH_mavjj_true_JECNominal / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECNominal
 
         self.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal               = self.M2g1_HadWH                   = t.p_HadWH_SIG_ghw1_1_JHUGen_JECNominal
         self.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal               = self.M2g4_HadWH                   = t.p_HadWH_SIG_ghw4_1_JHUGen_JECNominal
@@ -1186,7 +1382,15 @@ class TreeWrapper(TreeWrapperBase):
         self.p_HadWH_SIG_ghw1prime2_1_JHUGen_JECNominal         = self.M2g1prime2_HadWH             = t.p_HadWH_SIG_ghw1prime2_1E4_JHUGen_JECNominal / 1e4**2
         self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECNominal  = self.M2g1g1prime2_HadWH           = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECNominal / 1e4
         self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECNominal        = self.M2ghzgs1prime2_HadWH         = 0
-        self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_HadWH       = 0
+        self.p_HadWH_SIG_ghw1_1_ghza1prime2_1_JHUGen_JECNominal = self.M2g1ghzgs1prime2_HadWH       = 0
+        self.p_HadWH_SIG_ghza4_1_JHUGen_JECNominal              = self.M2g4Zg_HadWH                 = 0
+        self.p_HadWH_SIG_ghw1_1_ghza4_1_JHUGen_JECNominal       = self.M2g1g4Zg_HadWH               = 0
+        self.p_HadWH_SIG_ghza2_1_JHUGen_JECNominal              = self.M2g2Zg_HadWH                 = 0
+        self.p_HadWH_SIG_ghw1_1_ghza2_1_JHUGen_JECNominal       = self.M2g1g2Zg_HadWH               = 0
+        self.p_HadWH_SIG_gha4_1_JHUGen_JECNominal               = self.M2g4gg_HadWH                 = 0
+        self.p_HadWH_SIG_ghw1_1_gha4_1_JHUGen_JECNominal        = self.M2g1g4gg_HadWH               = 0
+        self.p_HadWH_SIG_gha2_1_JHUGen_JECNominal               = self.M2g2gg_HadWH                 = 0
+        self.p_HadWH_SIG_ghw1_1_gha2_1_JHUGen_JECNominal        = self.M2g1g2gg_HadWH               = 0
 
         self.p_HadWH_mavjj_JECNominal                                                               = t.p_HadWH_mavjj_JECNominal
         self.p_HadWH_mavjj_true_JECNominal                                                          = t.p_HadWH_mavjj_true_JECNominal
@@ -1239,11 +1443,19 @@ class TreeWrapper(TreeWrapperBase):
         self.g4VBF_m4l           = gconstant("VBF",      "g4", self.ZZMass)
         self.g1prime2VBF_m4l     = gconstant("VBF",      "L1", self.ZZMass)
         self.ghzgs1prime2VBF_m4l = gconstant("VBF",      "L1Zg", self.ZZMass)
+        self.g2ZgVBF_m4l         = gconstant("VBF",      "g2Zg", self.ZZMass)
+        self.g4ZgVBF_m4l         = gconstant("VBF",      "g4Zg", self.ZZMass)
+        self.g2ggVBF_m4l         = gconstant("VBF",      "g2gg", self.ZZMass)
+        self.g4ggVBF_m4l         = gconstant("VBF",      "g4gg", self.ZZMass)
 
         self.g2VH_m4l            = gconstant("VH",       "g2", self.ZZMass)
         self.g4VH_m4l            = gconstant("VH",       "g4", self.ZZMass)
         self.g1prime2VH_m4l      = gconstant("VH",       "L1", self.ZZMass)
         self.ghzgs1prime2VH_m4l  = gconstant("VH",       "L1Zg", self.ZZMass)
+        self.g2ZgVH_m4l          = gconstant("VH",       "g2Zg", self.ZZMass)
+        self.g4ZgVH_m4l          = gconstant("VH",       "g4Zg", self.ZZMass)
+        self.g2ggVH_m4l          = gconstant("VH",       "g2gg", self.ZZMass)
+        self.g4ggVH_m4l          = gconstant("VH",       "g4gg", self.ZZMass)
 
         self.g2ZH_m4l            = gconstant("ZH",       "g2", self.ZZMass)
         self.g4ZH_m4l            = gconstant("ZH",       "g4", self.ZZMass)
@@ -1321,6 +1533,14 @@ class TreeWrapper(TreeWrapperBase):
             self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECUp       = self.M2g1g1prime2_VBF_JECUp       = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECUp / 1e4
             self.p_JJVBF_SIG_ghza1prime2_1_JHUGen_JECUp             = self.M2ghzgs1prime2_VBF_JECUp     = t.p_JJVBF_SIG_ghza1prime2_1E4_JHUGen_JECUp / 1e4**2
             self.p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_JECUp      = self.M2g1ghzgs1prime2_VBF_JECUp   = t.p_JJVBF_SIG_ghv1_1_ghza1prime2_1E4_JHUGen_JECUp / 1e4
+            self.p_JJVBF_SIG_ghza4_1_JHUGen_JECUp                   = self.M2g4Zg_VBF_JECUp             = t.p_JJVBF_SIG_ghza4_1_JHUGen_JECUp
+            self.p_JJVBF_SIG_ghv1_1_ghza4_1_JHUGen_JECUp            = self.M2g1g4Zg_VBF_JECUp           = t.p_JJVBF_SIG_ghv1_1_ghza4_1_JHUGen_JECUp
+            self.p_JJVBF_SIG_ghza2_1_JHUGen_JECUp                   = self.M2g2Zg_VBF_JECUp             = t.p_JJVBF_SIG_ghza2_1_JHUGen_JECUp
+            self.p_JJVBF_SIG_ghv1_1_ghza2_1_JHUGen_JECUp            = self.M2g1g2Zg_VBF_JECUp           = t.p_JJVBF_SIG_ghv1_1_ghza2_1_JHUGen_JECUp
+            self.p_JJVBF_SIG_gha4_1_JHUGen_JECUp                    = self.M2g4gg_VBF_JECUp             = t.p_JJVBF_SIG_gha4_1_JHUGen_JECUp
+            self.p_JJVBF_SIG_ghv1_1_gha4_1_JHUGen_JECUp             = self.M2g1g4gg_VBF_JECUp           = t.p_JJVBF_SIG_ghv1_1_gha4_1_JHUGen_JECUp
+            self.p_JJVBF_SIG_gha2_1_JHUGen_JECUp                    = self.M2g2gg_VBF_JECUp             = t.p_JJVBF_SIG_gha2_1_JHUGen_JECUp
+            self.p_JJVBF_SIG_ghv1_1_gha2_1_JHUGen_JECUp             = self.M2g1g2gg_VBF_JECUp           = t.p_JJVBF_SIG_ghv1_1_gha2_1_JHUGen_JECUp
 
             self.p_JJQCD_SIG_ghg2_1_JHUGen_JECUp                    = self.M2g2_HJJ_JECUp               = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECUp
             self.p_JJQCD_SIG_ghg4_1_JHUGen_JECUp                                                        = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECUp
@@ -1335,6 +1555,14 @@ class TreeWrapper(TreeWrapperBase):
             self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECUp       = self.M2g1g1prime2_HadZH_JECUp     = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECUp / 1e4
             self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECUp             = self.M2ghzgs1prime2_HadZH_JECUp   = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECUp / 1e4**2
             self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECUp      = self.M2g1ghzgs1prime2_HadZH_JECUp = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECUp / 1e4
+            self.p_HadZH_SIG_ghza4_1_JHUGen_JECUp                   = self.M2g4Zg_HadZH_JECUp           = t.p_HadZH_SIG_ghza4_1_JHUGen_JECUp
+            self.p_HadZH_SIG_ghz1_1_ghza4_1_JHUGen_JECUp            = self.M2g1g4Zg_HadZH_JECUp         = t.p_HadZH_SIG_ghz1_1_ghza4_1_JHUGen_JECUp
+            self.p_HadZH_SIG_ghza2_1_JHUGen_JECUp                   = self.M2g2Zg_HadZH_JECUp           = t.p_HadZH_SIG_ghza2_1_JHUGen_JECUp
+            self.p_HadZH_SIG_ghz1_1_ghza2_1_JHUGen_JECUp            = self.M2g1g2Zg_HadZH_JECUp         = t.p_HadZH_SIG_ghz1_1_ghza2_1_JHUGen_JECUp
+            self.p_HadZH_SIG_gha4_1_JHUGen_JECUp                    = self.M2g4gg_HadZH_JECUp           = t.p_HadZH_SIG_gha4_1_JHUGen_JECUp
+            self.p_HadZH_SIG_ghz1_1_gha4_1_JHUGen_JECUp             = self.M2g1g4gg_HadZH_JECUp         = t.p_HadZH_SIG_ghz1_1_gha4_1_JHUGen_JECUp
+            self.p_HadZH_SIG_gha2_1_JHUGen_JECUp                    = self.M2g2gg_HadZH_JECUp           = t.p_HadZH_SIG_gha2_1_JHUGen_JECUp
+            self.p_HadZH_SIG_ghz1_1_gha2_1_JHUGen_JECUp             = self.M2g1g2gg_HadZH_JECUp         = t.p_HadZH_SIG_ghz1_1_gha2_1_JHUGen_JECUp
 
             self.p_HadZH_mavjj_JECUp                                                                    = t.p_HadZH_mavjj_JECUp
             self.p_HadZH_mavjj_true_JECUp                                                               = t.p_HadZH_mavjj_true_JECUp
@@ -1349,6 +1577,14 @@ class TreeWrapper(TreeWrapperBase):
             self.M2g1g1prime2_HadZH_JECUp     *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
             self.M2ghzgs1prime2_HadZH_JECUp   *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
             self.M2g1ghzgs1prime2_HadZH_JECUp *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
+            self.M2g4Zg_HadZH_JECUp           *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
+            self.M2g1g4Zg_HadZH_JECUp         *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
+            self.M2g2Zg_HadZH_JECUp           *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
+            self.M2g1g2Zg_HadZH_JECUp         *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
+            self.M2g4gg_HadZH_JECUp           *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
+            self.M2g1g4gg_HadZH_JECUp         *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
+            self.M2g2gg_HadZH_JECUp           *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
+            self.M2g1g2gg_HadZH_JECUp         *= self.p_HadZH_mavjj_JECUp / self.p_HadZH_mavjj_true_JECUp / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECUp
 
             self.p_HadWH_SIG_ghw1_1_JHUGen_JECUp                    = self.M2g1_HadWH_JECUp             = t.p_HadWH_SIG_ghw1_1_JHUGen_JECUp
             self.p_HadWH_SIG_ghw4_1_JHUGen_JECUp                    = self.M2g4_HadWH_JECUp             = t.p_HadWH_SIG_ghw4_1_JHUGen_JECUp
@@ -1359,6 +1595,16 @@ class TreeWrapper(TreeWrapperBase):
             self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECUp       = self.M2g1g1prime2_HadWH_JECUp     = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECUp / 1e4
             self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECUp             = self.M2ghzgs1prime2_HadWH_JECUp   = 0
             self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECUp      = self.M2g1ghzgs1prime2_HadWH_JECUp = 0
+            self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECUp             = self.M2ghzgs1prime2_HadWH_JECUp   = 0
+            self.p_HadWH_SIG_ghw1_1_ghza1prime2_1_JHUGen_JECUp      = self.M2g1ghzgs1prime2_HadWH_JECUp = 0
+            self.p_HadWH_SIG_ghza4_1_JHUGen_JECUp                   = self.M2g4Zg_HadWH_JECUp           = 0
+            self.p_HadWH_SIG_ghw1_1_ghza4_1_JHUGen_JECUp            = self.M2g1g4Zg_HadWH_JECUp         = 0
+            self.p_HadWH_SIG_ghza2_1_JHUGen_JECUp                   = self.M2g2Zg_HadWH_JECUp           = 0
+            self.p_HadWH_SIG_ghw1_1_ghza2_1_JHUGen_JECUp            = self.M2g1g2Zg_HadWH_JECUp         = 0
+            self.p_HadWH_SIG_gha4_1_JHUGen_JECUp                    = self.M2g4gg_HadWH_JECUp           = 0
+            self.p_HadWH_SIG_ghw1_1_gha4_1_JHUGen_JECUp             = self.M2g1g4gg_HadWH_JECUp         = 0
+            self.p_HadWH_SIG_gha2_1_JHUGen_JECUp                    = self.M2g2gg_HadWH_JECUp           = 0
+            self.p_HadWH_SIG_ghw1_1_gha2_1_JHUGen_JECUp             = self.M2g1g2gg_HadWH_JECUp         = 0
 
             self.p_HadWH_mavjj_JECUp                                                               = t.p_HadWH_mavjj_JECUp
             self.p_HadWH_mavjj_true_JECUp                                                          = t.p_HadWH_mavjj_true_JECUp
@@ -1439,6 +1685,14 @@ class TreeWrapper(TreeWrapperBase):
             self.p_JJVBF_SIG_ghv1_1_ghv1prime2_1_JHUGen_JECDn       = self.M2g1g1prime2_VBF_JECDn       = t.p_JJVBF_SIG_ghv1_1_ghv1prime2_1E4_JHUGen_JECDn / 1e4
             self.p_JJVBF_SIG_ghza1prime2_1_JHUGen_JECDn             = self.M2ghzgs1prime2_VBF_JECDn     = t.p_JJVBF_SIG_ghza1prime2_1E4_JHUGen_JECDn / 1e4**2
             self.p_JJVBF_SIG_ghv1_1_ghza1prime2_1_JHUGen_JECDn      = self.M2g1ghzgs1prime2_VBF_JECDn   = t.p_JJVBF_SIG_ghv1_1_ghza1prime2_1E4_JHUGen_JECDn / 1e4
+            self.p_JJVBF_SIG_ghza4_1_JHUGen_JECDn                   = self.M2g4Zg_VBF_JECDn             = t.p_JJVBF_SIG_ghza4_1_JHUGen_JECDn
+            self.p_JJVBF_SIG_ghv1_1_ghza4_1_JHUGen_JECDn            = self.M2g1g4Zg_VBF_JECDn           = t.p_JJVBF_SIG_ghv1_1_ghza4_1_JHUGen_JECDn
+            self.p_JJVBF_SIG_ghza2_1_JHUGen_JECDn                   = self.M2g2Zg_VBF_JECDn             = t.p_JJVBF_SIG_ghza2_1_JHUGen_JECDn
+            self.p_JJVBF_SIG_ghv1_1_ghza2_1_JHUGen_JECDn            = self.M2g1g2Zg_VBF_JECDn           = t.p_JJVBF_SIG_ghv1_1_ghza2_1_JHUGen_JECDn
+            self.p_JJVBF_SIG_gha4_1_JHUGen_JECDn                    = self.M2g4gg_VBF_JECDn             = t.p_JJVBF_SIG_gha4_1_JHUGen_JECDn
+            self.p_JJVBF_SIG_ghv1_1_gha4_1_JHUGen_JECDn             = self.M2g1g4gg_VBF_JECDn           = t.p_JJVBF_SIG_ghv1_1_gha4_1_JHUGen_JECDn
+            self.p_JJVBF_SIG_gha2_1_JHUGen_JECDn                    = self.M2g2gg_VBF_JECDn             = t.p_JJVBF_SIG_gha2_1_JHUGen_JECDn
+            self.p_JJVBF_SIG_ghv1_1_gha2_1_JHUGen_JECDn             = self.M2g1g2gg_VBF_JECDn           = t.p_JJVBF_SIG_ghv1_1_gha2_1_JHUGen_JECDn
 
             self.p_JJQCD_SIG_ghg2_1_JHUGen_JECDn                    = self.M2g2_HJJ_JECDn               = t.p_JJQCD_SIG_ghg2_1_JHUGen_JECDn
             self.p_JJQCD_SIG_ghg4_1_JHUGen_JECDn                                                        = t.p_JJQCD_SIG_ghg4_1_JHUGen_JECDn
@@ -1453,6 +1707,14 @@ class TreeWrapper(TreeWrapperBase):
             self.p_HadZH_SIG_ghz1_1_ghz1prime2_1_JHUGen_JECDn       = self.M2g1g1prime2_HadZH_JECDn     = t.p_HadZH_SIG_ghz1_1_ghz1prime2_1E4_JHUGen_JECDn / 1e4
             self.p_HadZH_SIG_ghza1prime2_1_JHUGen_JECDn             = self.M2ghzgs1prime2_HadZH_JECDn   = t.p_HadZH_SIG_ghza1prime2_1E4_JHUGen_JECDn / 1e4**2
             self.p_HadZH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn      = self.M2g1ghzgs1prime2_HadZH_JECDn = t.p_HadZH_SIG_ghz1_1_ghza1prime2_1E4_JHUGen_JECDn / 1e4
+            self.p_HadZH_SIG_ghza4_1_JHUGen_JECDn                   = self.M2g4Zg_HadZH_JECDn           = t.p_HadZH_SIG_ghza4_1_JHUGen_JECDn
+            self.p_HadZH_SIG_ghz1_1_ghza4_1_JHUGen_JECDn            = self.M2g1g4Zg_HadZH_JECDn         = t.p_HadZH_SIG_ghz1_1_ghza4_1_JHUGen_JECDn
+            self.p_HadZH_SIG_ghza2_1_JHUGen_JECDn                   = self.M2g2Zg_HadZH_JECDn           = t.p_HadZH_SIG_ghza2_1_JHUGen_JECDn
+            self.p_HadZH_SIG_ghz1_1_ghza2_1_JHUGen_JECDn            = self.M2g1g2Zg_HadZH_JECDn         = t.p_HadZH_SIG_ghz1_1_ghza2_1_JHUGen_JECDn
+            self.p_HadZH_SIG_gha4_1_JHUGen_JECDn                    = self.M2g4gg_HadZH_JECDn           = t.p_HadZH_SIG_gha4_1_JHUGen_JECDn
+            self.p_HadZH_SIG_ghz1_1_gha4_1_JHUGen_JECDn             = self.M2g1g4gg_HadZH_JECDn         = t.p_HadZH_SIG_ghz1_1_gha4_1_JHUGen_JECDn
+            self.p_HadZH_SIG_gha2_1_JHUGen_JECDn                    = self.M2g2gg_HadZH_JECDn           = t.p_HadZH_SIG_gha2_1_JHUGen_JECDn
+            self.p_HadZH_SIG_ghz1_1_gha2_1_JHUGen_JECDn             = self.M2g1g2gg_HadZH_JECDn         = t.p_HadZH_SIG_ghz1_1_gha2_1_JHUGen_JECDn
 
             self.p_HadZH_mavjj_JECDn                                                                    = t.p_HadZH_mavjj_JECDn
             self.p_HadZH_mavjj_true_JECDn                                                               = t.p_HadZH_mavjj_true_JECDn
@@ -1467,6 +1729,13 @@ class TreeWrapper(TreeWrapperBase):
             self.M2g1g1prime2_HadZH_JECDn     *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
             self.M2ghzgs1prime2_HadZH_JECDn   *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
             self.M2g1ghzgs1prime2_HadZH_JECDn *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
+            self.M2g1g4Zg_HadZH_JECDn         *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
+            self.M2g2Zg_HadZH_JECDn           *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
+            self.M2g1g2Zg_HadZH_JECDn         *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
+            self.M2g4gg_HadZH_JECDn           *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
+            self.M2g1g4gg_HadZH_JECDn         *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
+            self.M2g2gg_HadZH_JECDn           *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
+            self.M2g1g2gg_HadZH_JECDn         *= self.p_HadZH_mavjj_JECDn / self.p_HadZH_mavjj_true_JECDn / self.pConst_HadZH_SIG_ghz1_1_JHUGen_JECDn
 
             self.p_HadWH_SIG_ghw1_1_JHUGen_JECDn                    = self.M2g1_HadWH_JECDn             = t.p_HadWH_SIG_ghw1_1_JHUGen_JECDn
             self.p_HadWH_SIG_ghw4_1_JHUGen_JECDn                    = self.M2g4_HadWH_JECDn             = t.p_HadWH_SIG_ghw4_1_JHUGen_JECDn
@@ -1477,6 +1746,18 @@ class TreeWrapper(TreeWrapperBase):
             self.p_HadWH_SIG_ghw1_1_ghw1prime2_1_JHUGen_JECDn       = self.M2g1g1prime2_HadWH_JECDn     = t.p_HadWH_SIG_ghw1_1_ghw1prime2_1E4_JHUGen_JECDn / 1e4
             self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECDn             = self.M2ghzgs1prime2_HadWH_JECDn   = 0
             self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn      = self.M2g1ghzgs1prime2_HadWH_JECDn = 0
+            self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECDn             = self.M2ghzgs1prime2_HadWH_JECDn   = 0
+            self.p_HadWH_SIG_ghz1_1_ghza1prime2_1_JHUGen_JECDn      = self.M2g1ghzgs1prime2_HadWH_JECDn = 0
+            self.p_HadWH_SIG_ghza1prime2_1_JHUGen_JECDn             = self.M2ghzgs1prime2_HadWH_JECDn   = 0
+            self.p_HadWH_SIG_ghw1_1_ghza1prime2_1_JHUGen_JECDn      = self.M2g1ghzgs1prime2_HadWH_JECDn = 0
+            self.p_HadWH_SIG_ghza4_1_JHUGen_JECDn                   = self.M2g4Zg_HadWH_JECDn           = 0
+            self.p_HadWH_SIG_ghw1_1_ghza4_1_JHUGen_JECDn            = self.M2g1g4Zg_HadWH_JECDn         = 0
+            self.p_HadWH_SIG_ghza2_1_JHUGen_JECDn                   = self.M2g2Zg_HadWH_JECDn           = 0
+            self.p_HadWH_SIG_ghw1_1_ghza2_1_JHUGen_JECDn            = self.M2g1g2Zg_HadWH_JECDn         = 0
+            self.p_HadWH_SIG_gha4_1_JHUGen_JECDn                    = self.M2g4gg_HadWH_JECDn           = 0
+            self.p_HadWH_SIG_ghw1_1_gha4_1_JHUGen_JECDn             = self.M2g1g4gg_HadWH_JECDn         = 0
+            self.p_HadWH_SIG_gha2_1_JHUGen_JECDn                    = self.M2g2gg_HadWH_JECDn           = 0
+            self.p_HadWH_SIG_ghw1_1_gha2_1_JHUGen_JECDn             = self.M2g1g2gg_HadWH_JECDn         = 0
 
             self.p_HadWH_mavjj_JECDn                                                                    = t.p_HadWH_mavjj_JECDn
             self.p_HadWH_mavjj_true_JECDn                                                               = t.p_HadWH_mavjj_true_JECDn
@@ -2058,6 +2339,18 @@ class TreeWrapper(TreeWrapperBase):
             "D_0hplus_{prod}decay",
             "D_L1_{prod}decay",
             "D_L1Zg_{prod}decay",
+            "D_0minus_Zg_{prod}",
+            "D_CP_Zg_{prod}_new",
+            "D_0hplus_Zg_{prod}",
+            "D_int_Zg_{prod}_new",
+            "D_0minus_gg_{prod}",
+            "D_CP_gg_{prod}_new",
+            "D_0hplus_gg_{prod}",
+            "D_int_gg_{prod}_new",
+            "D_0minus_Zg_{prod}decay",
+            "D_0hplus_Zg_{prod}decay",
+            "D_0minus_gg_{prod}decay",
+            "D_0hplus_gg_{prod}decay",
         ]
         STXSdiscriminants = [
             "D_STXS_stage1p1",

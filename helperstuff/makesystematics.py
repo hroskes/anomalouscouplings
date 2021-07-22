@@ -66,7 +66,7 @@ class MakeJetSystematicsBase(MakeSystematics):
     def doreplacements(self, code):
         for thing in (
             r"(self[.][\w]*)_JECNominal\b",
-            r"(self[.]M2(?:(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_(?:VBF|HadZH|HadWH))|qqZZJJ)\b",
+            r"(self[.]M2(?:(?:g1)?(?:g(?:|hzgs|hgsgs)(?:2|4|1prime2))?(?:Zg|gg)?_(?:VBF|HadZH|HadWH))|qqZZJJ)\b",
             r"(self[.]notdijet)\b",
             r"(self[.](?:binning_4couplings(?:_photons)?|D_bkg_kin)_(?:HadVH|VBF|)decay)\b",
         ):
@@ -87,10 +87,10 @@ class MakeJetSystematicsBase(MakeSystematics):
         for variable in result:
             if re.match(
               "self[.]("
-                "M2(?:g1)?(?:g2|g4|g1prime2|ghzgs1prime2)?_decay"
+                "M2(?:g1)?(?:g(?:|hzgs|hgsgs)(?:2|4|1prime2))?(?:Zg|gg)?_decay"
                 "|ZZ(?:Eta|Pt|Mass)|D_4couplings_general(?:_raw|)|foldbins_4couplings_(?:VBF|HadVH)decay"
                 "|p_m4l_(?:SIG|BKG)|cconstantforDbkg(?:kin)?|flavor"
-                "|g(?:2|4|1prime2|hzgs1prime2)(?:HZZ|VBF|VH|ZH|WH)_m4l"
+                "|g(?:(?:|hzgs|hgsgs)(?:2|4|1prime2))(?:Zg|gg)?(?:HZZ|VBF|VH|ZH|WH|HZg|Hgg)_m4l"
                 "|nExtra(?:Lep|Z)"
               ")$",
               variable

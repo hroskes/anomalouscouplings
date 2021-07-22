@@ -23,8 +23,7 @@ class Process(MyEnum):
   @property
   def validhypotheses(self):
     if self == "WH": result = "a3", "a2", "L1"
-    else: result = "a3", "a2", "L1", "L1Zg"
-    if self == "HZZ2e2mu": result += ("g2Zg", "g4Zg", "g2gg", "g4gg")
+    else: result = "a3", "a2", "L1", "L1Zg", "g2Zg", "g4Zg", "g2gg", "g4gg"
     return [Hypothesis(_) for _ in result]
 
 
@@ -91,10 +90,14 @@ class GConstant(MultiEnum):
     if self.hypothesis == "g2gg":
       #if self.process == "HZZ2e2mu": return 2.82e-3 ** 0.5  #table 1 in 14-018
       if self.process == "HZZ2e2mu": return 0.005474117647058824 ** 0.5  #from Savvas
+      if self.process in ("VH", "ZH", "WH"): return 1
+      if self.process == "VBF": return 1
       assert False, self.process
     if self.hypothesis == "g4gg":
       #if self.process == "HZZ2e2mu": return 2.88e-3 ** 0.5  #table 1 in 14-018
       if self.process == "HZZ2e2mu": return 0.005590588235294118 ** 0.5  #from Savvas
+      if self.process in ("VH", "ZH", "WH"): return 1
+      if self.process == "VBF": return 1
       assert False, self.process
     return self.spline.Eval(m4l)
 
