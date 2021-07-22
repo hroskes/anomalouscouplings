@@ -1139,7 +1139,6 @@ def templatesfiles():
                     for templategroup in templategroups:
                         if analysis.isdecayonly and templategroup not in ("bkg", "ggh", "DATA"): continue
                         if production.GEN and templategroup in ("tth", "bbh"): continue
-                        if production.fakeGEN and templategroup in ("bkg", "DATA"): continue
                         nominal = TemplatesFile(channel, templategroup, analysis, production, category)
                         for shapesystematic in nominal.treeshapesystematics:
                             if (production.LHE or production.GEN) and shapesystematic != "": continue

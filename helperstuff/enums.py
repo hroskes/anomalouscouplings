@@ -294,10 +294,10 @@ class Hypothesis(MyEnum):
                  EnumItem("fa3VH0.5", "fa3VH+0.5"),
                  EnumItem("fL1VH0.5", "fL1VH+0.5"),
                  EnumItem("BestFit19009"),
-                 EnumItem("g2Zg", "g2Zgs", "a2Zg", "ghzgs2"),
-                 EnumItem("g4Zg", "g4Zgs", "a3Zg", "ghzgs4"),
-                 EnumItem("g2gg", "g2gsgs", "a2gg", "ghgsgs2"),
-                 EnumItem("g4gg", "g4gsgs", "a3gg", "ghgsgs4"),
+                 EnumItem("g2Zg", "g2Zgs", "a2Zg", "ghzgs2", "0PHZg"),
+                 EnumItem("g4Zg", "g4Zgs", "a3Zg", "ghzgs4", "0MZg"),
+                 EnumItem("g2gg", "g2gsgs", "a2gg", "ghgsgs2", "0PHgg"),
+                 EnumItem("g4gg", "g4gsgs", "a3gg", "ghgsgs4", "0Mgg"),
                  EnumItem("fg2Zg0.5", "fa2Zg0.5", "fg2Zgdec0.5", "fa2Zgdec0.5"),
                  EnumItem("fg4Zg0.5", "fa3Zg0.5", "fg4Zgdec0.5", "fa3Zgdec0.5"),
                  EnumItem("fg2gg0.5", "fa2gg0.5", "fg2ggdec0.5", "fa2ggdec0.5"),
@@ -338,7 +338,7 @@ class Hypothesis(MyEnum):
         assert False, self
     @property
     def combinename(self):
-        for _ in "0PM", "0PH", "0M", "0L1", "0L1Zg":
+        for _ in "0PM", "0PH", "0M", "0L1", "0L1Zg", "0MZg", "0PHZg", "0Mgg", "0PHgg":
             if self == _:
                 return _
         if "EFT" in str(self):
@@ -584,7 +584,7 @@ class ProductionMode(MyEnum):
             if self == "ggH":
                 return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5") or production.year >= 2017 and x in ("L1Zg", "fL1Zg0.5") or production.fakeGEN and x in ("a2Zg", "a3Zg", "a2gg", "a3gg", "fa2Zg0.5", "fa3Zg0.5", "fa2gg0.5", "fa3gg0.5"))
             if self in ("VBF", "ZH", "WH"):
-                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5") or production.year >= 2017 and self != "WH" and x in ("L1Zg", "fL1Zgprod0.5"))
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5") or production.year >= 2017 and self != "WH" and x in ("L1Zg", "fL1Zgprod0.5")or production.fakeGEN and x in ("fa2Zg0.5", "fa3Zg0.5", "fa2gg0.5", "fa3gg0.5") or production.fakeGEN and self != "WH" and x in ("fa2Zgprod0.5", "fa3Zgprod0.5", "fa2ggprod0.5", "fa3ggprod0.5"))
             if self in ("WplusH", "WminusH", "ttH", "bbH", "tqH"):
                 return Hypothesis.items(lambda x: x == "0+")
         else:
@@ -1142,7 +1142,7 @@ class Analysis(MyEnum):
     @property
     def fais(self):
         if self in ("fa3_STXS", "fa3_onlyDbkg", "fa3_multiparameter", "fa3_multiparameter_nodbkg", "fa3_only6bins", "fa3_onlyDCP"): return "fa3",
-        if self in ("fa3", "fa2", "fL1", "fL1Zg"): return self,
+        if self in ("fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg"): return self,
         if self.isfL1fL1Zg: return Analysis("fL1"), Analysis("fL1Zg")
         if self.isfa3fa2fL1fL1Zg: return Analysis("fa3"), Analysis("fa2"), Analysis("fL1"), Analysis("fL1Zg")
         if self.isEFT: return Analysis("fa3"), Analysis("fa2"), Analysis("fL1")

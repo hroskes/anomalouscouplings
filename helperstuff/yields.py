@@ -295,6 +295,8 @@ def count(fromsamples, tosamples, categorizations, alternateweights):
             scaleto = (.3 + .7 + 2.1) * 8.400E-01 / (8.400E-01 + 5.328E-01)  #ratio from YR4
         elif productionmode == "WminusH":
             scaleto = (.3 + .7 + 2.1) * 5.328E-01 / (8.400E-01 + 5.328E-01)  #ratio from YR4
+        elif productionmode == "WH":
+            scaleto = .3 + .7 + 2.1
         elif productionmode == "ZH":
             scaleto = .2 + .5 + 1.5
         elif productionmode == "ggH":

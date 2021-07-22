@@ -1965,6 +1965,9 @@ class Sample(ReweightingSamplePlusWithFlavor):
             kwargs["extension"] = "ext"
             otherproduction = "200205_2017"
 
+        if self.production == "GEN_210702" and self.productionmode == "qqZZ":
+            otherproduction = "GEN_210601"
+
         if otherproduction is None: return None
 
         kwargs["production"] = otherproduction

@@ -424,58 +424,115 @@ class TreeWrapperBase(Iterator):
 ###################################
 
     def D_0minus_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g4_decay*self.g4HZZ_m4l**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2g4_decay*self.g4HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_CP_decay(self):
-        return self.M2g1g4_decay*self.g4HZZ_m4l / (self.M2g1_decay + self.M2g4_decay*self.g4HZZ_m4l**2)
+        try:
+          return self.M2g1g4_decay*self.g4HZZ_m4l / (self.M2g1_decay + self.M2g4_decay*self.g4HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_CP_decay_new(self):
-        return self.M2g1g4_decay*self.g4HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4_decay*self.g4HZZ_m4l**2))
+        try:
+          return self.M2g1g4_decay*self.g4HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4_decay*self.g4HZZ_m4l**2))
+        except ZeroDivisionError:
+          return 0
     def D_0hplus_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g2_decay*self.g2HZZ_m4l**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2g2_decay*self.g2HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_int_decay(self):
-        return self.M2g1g2_decay*self.g2HZZ_m4l / (self.M2g1_decay + self.M2g2_decay*self.g2HZZ_m4l**2)
+        try:
+          return self.M2g1g2_decay*self.g2HZZ_m4l / (self.M2g1_decay + self.M2g2_decay*self.g2HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_int_decay_new(self):
-        return self.M2g1g2_decay*self.g2HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2_decay*self.g2HZZ_m4l**2))
+        try:
+          return self.M2g1g2_decay*self.g2HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2_decay*self.g2HZZ_m4l**2))
+        except ZeroDivisionError:
+          return 0
     def D_L1_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_L1int_decay(self):
-        return self.M2g1g1prime2_decay*self.g1prime2HZZ_m4l / (self.M2g1_decay + self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2)
+        try:
+          return self.M2g1g1prime2_decay*self.g1prime2HZZ_m4l / (self.M2g1_decay + self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_L1int_decay_new(self):
-        return self.M2g1g1prime2_decay*self.g1prime2HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2))
+        try:
+          return self.M2g1g1prime2_decay*self.g1prime2HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2))
+        except ZeroDivisionError:
+          return 0
     def D_L1Zg_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_L1Zgint_decay(self):
-        return self.M2g1ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l / (self.M2g1_decay + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
+        try:
+          return self.M2g1ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l / (self.M2g1_decay + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_L1Zgint_decay_new(self):
         try:
           return self.M2g1ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l / (2 * sqrt(self.M2g1_decay * self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2))
         except ZeroDivisionError:
           return 0
     def D_L1L1Zg_decay(self):
-        return self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 / (self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
+        try:
+          return self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 / (self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_L1L1Zgint_decay(self):
-        return self.M2g1prime2ghzgs1prime2_decay*self.g1prime2HZZ_m4l*self.ghzgs1prime2HZZ_m4l / (self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
+        try:
+          return self.M2g1prime2ghzgs1prime2_decay*self.g1prime2HZZ_m4l*self.ghzgs1prime2HZZ_m4l / (self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 + self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_L1L1Zgint_decay_new(self):
         try:
           return self.M2g1prime2ghzgs1prime2_decay*self.g1prime2HZZ_m4l*self.ghzgs1prime2HZZ_m4l / (2 * sqrt(self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2 * self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2))
         except ZeroDivisionError:
           return 0
     def D_0minus_Zg_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g4Zg_decay*self.g4HZg_m4l**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2g4Zg_decay*self.g4HZg_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_CP_Zg_decay_new(self):
-        return self.M2g1g4Zg_decay*self.g4HZg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4Zg_decay*self.g4HZg_m4l**2))
+        try:
+          return self.M2g1g4Zg_decay*self.g4HZg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4Zg_decay*self.g4HZg_m4l**2))
+        except ZeroDivisionError:
+          return 0
     def D_0hplus_Zg_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g2Zg_decay*self.g2HZg_m4l**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2g2Zg_decay*self.g2HZg_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_int_Zg_decay_new(self):
-        return self.M2g1g2Zg_decay*self.g2HZg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2Zg_decay*self.g2HZg_m4l**2))
+        try:
+          return self.M2g1g2Zg_decay*self.g2HZg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2Zg_decay*self.g2HZg_m4l**2))
+        except ZeroDivisionError:
+          return 0
     def D_0minus_gg_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g4gg_decay*self.g4Hgg_m4l**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2g4gg_decay*self.g4Hgg_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_CP_gg_decay_new(self):
         try:
           return self.M2g1g4gg_decay*self.g4Hgg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g4gg_decay*self.g4Hgg_m4l**2))
         except ZeroDivisionError:
           return 0
     def D_0hplus_gg_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2g2gg_decay*self.g2Hgg_m4l**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2g2gg_decay*self.g2Hgg_m4l**2)
+        except ZeroDivisionError:
+          return 0
     def D_int_gg_decay_new(self):
         try:
           return self.M2g1g2gg_decay*self.g2Hgg_m4l / (2 * sqrt(self.M2g1_decay * self.M2g2gg_decay*self.g2Hgg_m4l**2))
@@ -487,23 +544,50 @@ class TreeWrapperBase(Iterator):
 ############################
 
     def D_eL_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2eL_decay*constants.eLHZZ**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2eL_decay*constants.eLHZZ**2)
+        except ZeroDivisionError:
+          return 0
     def D_eLint_decay(self):
-        return self.M2g1eL_decay*constants.eLHZZ / (self.M2g1_decay + self.M2eL_decay*constants.eLHZZ**2)
+        try:
+          return self.M2g1eL_decay*constants.eLHZZ / (self.M2g1_decay + self.M2eL_decay*constants.eLHZZ**2)
+        except ZeroDivisionError:
+          return 0
     def D_eLint_decay_new(self):
-        return self.M2g1eL_decay*constants.eLHZZ / (2 * sqrt(self.M2g1_decay * self.M2eL_decay*constants.eLHZZ**2))
+        try:
+          return self.M2g1eL_decay*constants.eLHZZ / (2 * sqrt(self.M2g1_decay * self.M2eL_decay*constants.eLHZZ**2))
+        except ZeroDivisionError:
+          return 0
     def D_eR_decay(self):
-        return self.M2g1_decay / (self.M2g1_decay + self.M2eR_decay*constants.eRHZZ**2)
+        try:
+          return self.M2g1_decay / (self.M2g1_decay + self.M2eR_decay*constants.eRHZZ**2)
+        except ZeroDivisionError:
+          return 0
     def D_eRint_decay(self):
-        return self.M2g1eR_decay*constants.eRHZZ / (self.M2g1_decay + self.M2eR_decay*constants.eRHZZ**2)
+        try:
+          return self.M2g1eR_decay*constants.eRHZZ / (self.M2g1_decay + self.M2eR_decay*constants.eRHZZ**2)
+        except ZeroDivisionError:
+          return 0
     def D_eRint_decay_new(self):
-        return self.M2g1eR_decay*constants.eRHZZ / (2 * sqrt(self.M2g1_decay * self.M2eR_decay*constants.eRHZZ**2))
+        try:
+          return self.M2g1eR_decay*constants.eRHZZ / (2 * sqrt(self.M2g1_decay * self.M2eR_decay*constants.eRHZZ**2))
+        except ZeroDivisionError:
+          return 0
     def D_eLeR_decay(self):
-        return self.M2eL_decay*constants.eLHZZ**2 / (self.M2eR_decay*constants.eRHZZ**2 + self.M2eL_decay*constants.eLHZZ**2)
+        try:
+          return self.M2eL_decay*constants.eLHZZ**2 / (self.M2eR_decay*constants.eRHZZ**2 + self.M2eL_decay*constants.eLHZZ**2)
+        except ZeroDivisionError:
+          return 0
     def D_eLeRint_decay(self):
-        return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (self.M2eR_decay*constants.eRHZZ**2 + self.M2eL_decay*constants.eLHZZ**2)
+        try:
+          return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (self.M2eR_decay*constants.eRHZZ**2 + self.M2eL_decay*constants.eLHZZ**2)
+        except ZeroDivisionError:
+          return 0
     def D_eLeRint_decay_new(self):
-        return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (2 * sqrt(self.M2eR_decay*constants.eRHZZ**2 * self.M2eL_decay*constants.eLHZZ**2))
+        try:
+          return self.M2eLeR_decay*constants.eLHZZ*constants.eRHZZ / (2 * sqrt(self.M2eR_decay*constants.eRHZZ**2 * self.M2eL_decay*constants.eLHZZ**2))
+        except ZeroDivisionError:
+          return 0
 
 #######################################
 #VBF anomalous couplings discriminants#
@@ -512,83 +596,143 @@ class TreeWrapperBase(Iterator):
     @MakeJetSystematics
     def D_0minus_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4_VBF*self.g4VBF_m4l**2)
+        try:
+          return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4_VBF*self.g4VBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_CP_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1g4_VBF*self.g4VBF_m4l / (self.M2g1_VBF + self.M2g4_VBF*self.g4VBF_m4l**2)
+        try:
+          return self.M2g1g4_VBF*self.g4VBF_m4l / (self.M2g1_VBF + self.M2g4_VBF*self.g4VBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_CP_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g4_VBF*self.g4VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g4_VBF*self.g4VBF_m4l**2))
+        try:
+          return self.M2g1g4_VBF*self.g4VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g4_VBF*self.g4VBF_m4l**2))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_VBF*self.g2VBF_m4l**2)
+        try:
+          return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2_VBF*self.g2VBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_int_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1g2_VBF*self.g2VBF_m4l / (self.M2g1_VBF + self.M2g2_VBF*self.g2VBF_m4l**2)
+        try:
+          return self.M2g1g2_VBF*self.g2VBF_m4l / (self.M2g1_VBF + self.M2g2_VBF*self.g2VBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_int_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g2_VBF*self.g2VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g2_VBF*self.g2VBF_m4l**2))
+        try:
+          return self.M2g1g2_VBF*self.g2VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g2_VBF*self.g2VBF_m4l**2))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g1prime2_VBF*self.g1prime2VBF_m4l**2)
+        try:
+          return self.M2g1_VBF / (self.M2g1_VBF + self.M2g1prime2_VBF*self.g1prime2VBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1int_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1g1prime2_VBF*self.g1prime2VBF_m4l / (self.M2g1_VBF + self.M2g1prime2_VBF*self.g1prime2VBF_m4l**2)
+        try:
+          return self.M2g1g1prime2_VBF*self.g1prime2VBF_m4l / (self.M2g1_VBF + self.M2g1prime2_VBF*self.g1prime2VBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1int_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g1prime2_VBF*self.g1prime2VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g1prime2_VBF*self.g1prime2VBF_m4l**2))
+        try:
+          return self.M2g1g1prime2_VBF*self.g1prime2VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g1prime2_VBF*self.g1prime2VBF_m4l**2))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1Zg_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l**2)
+        try:
+          return self.M2g1_VBF / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1Zgint_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l**2)
+        try:
+          return self.M2g1ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l / (self.M2g1_VBF + self.M2ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1Zgint_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l**2))
+        try:
+          return self.M2g1ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2ghzgs1prime2_VBF*self.ghzgs1prime2VBF_m4l**2))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0minus_Zg_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4Zg_VBF*self.g4ZgVBF_m4l**2)
+        try:
+          return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4Zg_VBF*self.g4ZgVBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_CP_Zg_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g4Zg_VBF*self.g4ZgVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g4Zg_VBF*self.g4ZgVBF_m4l**2))
+        try:
+          return self.M2g1g4Zg_VBF*self.g4ZgVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g4Zg_VBF*self.g4ZgVBF_m4l**2))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_Zg_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2Zg_VBF*self.g2ZgVBF_m4l**2)
+        try:
+          return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2Zg_VBF*self.g2ZgVBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_int_Zg_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g2Zg_VBF*self.g2ZgVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g2Zg_VBF*self.g2ZgVBF_m4l**2))
+        try:
+          return self.M2g1g2Zg_VBF*self.g2ZgVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g2Zg_VBF*self.g2ZgVBF_m4l**2))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0minus_gg_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4gg_VBF*self.g4ggVBF_m4l**2)
+        try:
+          return self.M2g1_VBF / (self.M2g1_VBF + self.M2g4gg_VBF*self.g4ggVBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_CP_gg_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g4gg_VBF*self.g4ggVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g4gg_VBF*self.g4ggVBF_m4l**2))
+        try:
+          return self.M2g1g4gg_VBF*self.g4ggVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g4gg_VBF*self.g4ggVBF_m4l**2))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_gg_VBF(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2gg_VBF*self.g2ggVBF_m4l**2)
+        try:
+          return self.M2g1_VBF / (self.M2g1_VBF + self.M2g2gg_VBF*self.g2ggVBF_m4l**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_int_gg_VBF_new(self):
         if self.notdijet: return -999
-        return self.M2g1g2gg_VBF*self.g2ggVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g2gg_VBF*self.g2ggVBF_m4l**2))
+        try:
+          return self.M2g1g2gg_VBF*self.g2ggVBF_m4l / (2 * sqrt(self.M2g1_VBF * self.M2g2gg_VBF*self.g2ggVBF_m4l**2))
+        except ZeroDivisionError:
+          return 0
 
 ###############################################
 #VH hadronic anomalous couplings discriminants#
@@ -597,7 +741,8 @@ class TreeWrapperBase(Iterator):
     @MakeJetSystematics
     def D_0minus_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
@@ -606,10 +751,13 @@ class TreeWrapperBase(Iterator):
                    (self.M2g4_HadWH + self.M2g4_HadZH)*self.g4VH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_CP_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1g4_HadWH + self.M2g1g4_HadZH)*self.g4VH_m4l
                /
                  (
@@ -618,18 +766,24 @@ class TreeWrapperBase(Iterator):
                    (self.M2g4_HadWH + self.M2g4_HadZH)*self.g4VH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_CP_HadVH_new(self):
         if self.notdijet: return -999
-        return .5 * (
+        try:
+          return .5 * (
                      self.M2g1g4_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2g4_HadWH))
                     +
                      self.M2g1g4_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g4_HadZH))
                     )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
@@ -638,10 +792,13 @@ class TreeWrapperBase(Iterator):
                    (self.M2g2_HadWH + self.M2g2_HadZH)*self.g2VH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_int_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1g2_HadWH + self.M2g1g2_HadZH)*self.g2VH_m4l
                /
                  (
@@ -650,18 +807,24 @@ class TreeWrapperBase(Iterator):
                    (self.M2g2_HadWH + self.M2g2_HadZH)*self.g2VH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_int_HadVH_new(self):
         if self.notdijet: return -999
-        return .5 * (
+        try:
+          return .5 * (
                      self.M2g1g2_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2g2_HadWH))
                     +
                      self.M2g1g2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g2_HadZH))
                     )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
@@ -670,10 +833,13 @@ class TreeWrapperBase(Iterator):
                    (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*self.g1prime2VH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1int_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1g1prime2_HadWH + self.M2g1g1prime2_HadZH)*self.g1prime2VH_m4l
                /
                  (
@@ -682,18 +848,24 @@ class TreeWrapperBase(Iterator):
                    (self.M2g1prime2_HadWH + self.M2g1prime2_HadZH)*self.g1prime2VH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1int_HadVH_new(self):
         if self.notdijet: return -999
-        return .5 * (
+        try:
+          return .5 * (
                      self.M2g1g1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2g1prime2_HadWH))
                     +
                      self.M2g1g1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g1prime2_HadZH))
                     )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1Zg_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
@@ -703,10 +875,13 @@ class TreeWrapperBase(Iterator):
                           * self.ghzgs1prime2VH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1Zgint_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1ghzgs1prime2_HadWH + self.M2g1ghzgs1prime2_HadZH)*self.ghzgs1prime2VH_m4l
                /
                  (
@@ -715,21 +890,27 @@ class TreeWrapperBase(Iterator):
                    (self.M2ghzgs1prime2_HadWH + self.M2ghzgs1prime2_HadZH)*self.ghzgs1prime2VH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1Zgint_HadVH_new(self):
         if self.notdijet: return -999
-        return self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2ghzgs1prime2_HadZH))
-        """
-        return .5 * (
+        try:
+          return self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2ghzgs1prime2_HadZH))
+          """
+          return .5 * (
                      self.M2g1ghzgs1prime2_HadWH / (2 * sqrt(self.M2g1_HadWH * self.M2ghzgs1prime2_HadWH))
                     +
                      self.M2g1ghzgs1prime2_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2ghzgs1prime2_HadZH))
                     )
-        """
+          """
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0minus_Zg_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
@@ -739,14 +920,20 @@ class TreeWrapperBase(Iterator):
                           * self.g4ZgVH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_CP_Zg_HadVH_new(self):
         if self.notdijet: return -999
-        return self.M2g1g4Zg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g4Zg_HadZH))
+        try:
+          return self.M2g1g4Zg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g4Zg_HadZH))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_Zg_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
@@ -756,14 +943,20 @@ class TreeWrapperBase(Iterator):
                           * self.g2ZgVH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_int_Zg_HadVH_new(self):
         if self.notdijet: return -999
-        return self.M2g1g2Zg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g2Zg_HadZH))
+        try:
+          return self.M2g1g2Zg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g2Zg_HadZH))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0minus_gg_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
@@ -773,14 +966,20 @@ class TreeWrapperBase(Iterator):
                           * self.g4ggVH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_CP_gg_HadVH_new(self):
         if self.notdijet: return -999
-        return self.M2g1g4gg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g4gg_HadZH))
+        try:
+          return self.M2g1g4gg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g4gg_HadZH))
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_gg_HadVH(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)
                /
                  (
@@ -790,10 +989,15 @@ class TreeWrapperBase(Iterator):
                           * self.g2ggVH_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_int_gg_HadVH_new(self):
         if self.notdijet: return -999
-        return self.M2g1g2gg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g2gg_HadZH))
+        try:
+          return self.M2g1g2gg_HadZH / (2 * sqrt(self.M2g1_HadZH * self.M2g2gg_HadZH))
+        except ZeroDivisionError:
+          return 0
 
 ############################################
 #VBFdecay anomalous couplings discriminants#
@@ -802,35 +1006,59 @@ class TreeWrapperBase(Iterator):
     @MakeJetSystematics
     def D_0minus_VBFdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4_VBF*self.M2g4_decay*(self.g4VBF_m4l*self.g4HZZ_m4l)**2)
+        try:
+          return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4_VBF*self.M2g4_decay*(self.g4VBF_m4l*self.g4HZZ_m4l)**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_VBFdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2_VBF*self.M2g2_decay * (self.g2VBF_m4l*self.g2HZZ_m4l)**2)
+        try:
+          return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2_VBF*self.M2g2_decay * (self.g2VBF_m4l*self.g2HZZ_m4l)**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1_VBFdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g1prime2_VBF*self.M2g1prime2_decay * (self.g1prime2VBF_m4l*self.g1prime2HZZ_m4l)**2)
+        try:
+          return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g1prime2_VBF*self.M2g1prime2_decay * (self.g1prime2VBF_m4l*self.g1prime2HZZ_m4l)**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1Zg_VBFdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2ghzgs1prime2_VBF*self.M2ghzgs1prime2_decay * (self.ghzgs1prime2VBF_m4l*self.ghzgs1prime2HZZ_m4l)**2)
+        try:
+          return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2ghzgs1prime2_VBF*self.M2ghzgs1prime2_decay * (self.ghzgs1prime2VBF_m4l*self.ghzgs1prime2HZZ_m4l)**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0minus_Zg_VBFdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4Zg_VBF*self.M2g4Zg_decay * (self.g4ZgVBF_m4l*self.g4HZg_m4l)**2)
+        try:
+          return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4Zg_VBF*self.M2g4Zg_decay * (self.g4ZgVBF_m4l*self.g4HZg_m4l)**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_Zg_VBFdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2Zg_VBF*self.M2g2Zg_decay * (self.g2ZgVBF_m4l*self.g2HZg_m4l)**2)
+        try:
+          return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2Zg_VBF*self.M2g2Zg_decay * (self.g2ZgVBF_m4l*self.g2HZg_m4l)**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0minus_gg_VBFdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4gg_VBF*self.M2g4gg_decay * (self.g4ggVBF_m4l*self.g4Hgg_m4l)**2)
+        try:
+          return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g4gg_VBF*self.M2g4gg_decay * (self.g4ggVBF_m4l*self.g4Hgg_m4l)**2)
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_gg_VBFdecay(self):
         if self.notdijet: return -999
-        return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2gg_VBF*self.M2g2gg_decay * (self.g2ggVBF_m4l*self.g2Hgg_m4l)**2)
+        try:
+          return self.M2g1_VBF*self.M2g1_decay / (self.M2g1_VBF*self.M2g1_decay + self.M2g2gg_VBF*self.M2g2gg_decay * (self.g2ggVBF_m4l*self.g2Hgg_m4l)**2)
+        except ZeroDivisionError:
+          return 0
 
 ####################################################
 #VHdecay hadronic anomalous couplings discriminants#
@@ -839,7 +1067,8 @@ class TreeWrapperBase(Iterator):
     @MakeJetSystematics
     def D_0minus_HadVHdecay(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
                /
                  (
@@ -849,10 +1078,13 @@ class TreeWrapperBase(Iterator):
                         *self.M2g4_decay*self.g4HZZ_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_HadVHdecay(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
                /
                  (
@@ -862,10 +1094,13 @@ class TreeWrapperBase(Iterator):
                         *self.M2g2_decay*self.g2HZZ_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1_HadVHdecay(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  (self.M2g1_HadWH + self.M2g1_HadZH)*self.M2g1_decay
                /
                  (
@@ -875,10 +1110,13 @@ class TreeWrapperBase(Iterator):
                         *self.M2g1prime2_decay*self.g1prime2HZZ_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_L1Zg_HadVHdecay(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  ((self.M2g1_HadWH + self.M2g1_HadZH)
                     *self.M2g1_decay)
                /
@@ -889,10 +1127,13 @@ class TreeWrapperBase(Iterator):
                         *self.M2ghzgs1prime2_decay*self.ghzgs1prime2HZZ_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0minus_Zg_HadVHdecay(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  ((self.M2g1_HadWH + self.M2g1_HadZH)
                     *self.M2g1_decay)
                /
@@ -903,10 +1144,13 @@ class TreeWrapperBase(Iterator):
                         *self.M2g4Zg_decay*self.g4HZg_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_Zg_HadVHdecay(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  ((self.M2g1_HadWH + self.M2g1_HadZH)
                     *self.M2g1_decay)
                /
@@ -917,10 +1161,13 @@ class TreeWrapperBase(Iterator):
                         *self.M2g2Zg_decay*self.g2HZg_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0minus_gg_HadVHdecay(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  ((self.M2g1_HadWH + self.M2g1_HadZH)
                     *self.M2g1_decay)
                /
@@ -931,10 +1178,13 @@ class TreeWrapperBase(Iterator):
                         *self.M2g4gg_decay*self.g4Hgg_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
     @MakeJetSystematics
     def D_0hplus_gg_HadVHdecay(self):
         if self.notdijet: return -999
-        return (
+        try:
+          return (
                  ((self.M2g1_HadWH + self.M2g1_HadZH)
                     *self.M2g1_decay)
                /
@@ -945,6 +1195,8 @@ class TreeWrapperBase(Iterator):
                         *self.M2g2gg_decay*self.g2Hgg_m4l**2
                  )
                )
+        except ZeroDivisionError:
+          return 0
 
 ######
 #STXS#

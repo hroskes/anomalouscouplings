@@ -44,19 +44,29 @@ def writeyields(productionmodelist=None, productionlist=None):
     print "Finding yields and category systematics for", production
     year = production.year
 
-    tosamples_foryields = [
-      SampleCount(ProductionMode("VBF"), [[RSPWF("VBF", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("VH"), [[RSPWF("ZH", "0+", "POWHEG")], [RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("ZH"), [[RSPWF("ZH", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("WH"), [[RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("ggH"), [[RSPWF("ggH", "0+", "POWHEG")]]),
-      SampleCount(ProductionMode("qqZZ"), [[RSPWF("qqZZ"), RSPWF("qqZZ", "ext")]]),
-    ] + [
-      SampleCount(ProductionMode("ttH"), [[RSPWF("ttH", "0+", "Hff0+", "POWHEG")]]),
-      SampleCount(ProductionMode("bbH"), [[RSPWF("bbH", "0+")]]),
-      SampleCount(ProductionMode("ggZZ"), [[RSPWF("ggZZ", flavor)] for flavor in flavors]),
-      SampleCount(ProductionMode("EW"), [[RSPWF("VBFbkg")], [RSPWF("TTZToLL_M1to10_MLM")], [RSPWF("TTZToLLNuNu_M10", "ext1" if year == 2018 else None)], [RSPWF("TTZJets_M10_MLM", "ext1" if year == 2018 else None)], [RSPWF("TTZZ")], [RSPWF("TTWW")], [RSPWF("ZZZ")], [RSPWF("WWZ")], [RSPWF("WZZ")]]),
-    ] * (not production.GEN)
+    if production.fakeGEN:
+      tosamples_foryields = [
+        SampleCount(ProductionMode("VBF"), [[RSPWF("VBF", "0+")]]),
+        SampleCount(ProductionMode("VH"), [[RSPWF("ZH", "0+")], [RSPWF("WH", "0+")]]),
+        SampleCount(ProductionMode("ZH"), [[RSPWF("ZH", "0+")]]),
+        SampleCount(ProductionMode("WH"), [[RSPWF("WH", "0+")]]),
+        SampleCount(ProductionMode("ggH"), [[RSPWF("ggH", "0+")]]),
+        SampleCount(ProductionMode("qqZZ"), [[RSPWF("qqZZ"), RSPWF("qqZZ", "ext")]]),
+      ]
+    else:
+      tosamples_foryields = [
+        SampleCount(ProductionMode("VBF"), [[RSPWF("VBF", "0+", "POWHEG")]]),
+        SampleCount(ProductionMode("VH"), [[RSPWF("ZH", "0+", "POWHEG")], [RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
+        SampleCount(ProductionMode("ZH"), [[RSPWF("ZH", "0+", "POWHEG")]]),
+        SampleCount(ProductionMode("WH"), [[RSPWF("WplusH", "0+", "POWHEG")], [RSPWF("WminusH", "0+", "POWHEG")]]),
+        SampleCount(ProductionMode("ggH"), [[RSPWF("ggH", "0+", "POWHEG")]]),
+        SampleCount(ProductionMode("qqZZ"), [[RSPWF("qqZZ"), RSPWF("qqZZ", "ext")]]),
+      ] + [
+        SampleCount(ProductionMode("ttH"), [[RSPWF("ttH", "0+", "Hff0+", "POWHEG")]]),
+        SampleCount(ProductionMode("bbH"), [[RSPWF("bbH", "0+")]]),
+        SampleCount(ProductionMode("ggZZ"), [[RSPWF("ggZZ", flavor)] for flavor in flavors]),
+        SampleCount(ProductionMode("EW"), [[RSPWF("VBFbkg")], [RSPWF("TTZToLL_M1to10_MLM")], [RSPWF("TTZToLLNuNu_M10", "ext1" if year == 2018 else None)], [RSPWF("TTZJets_M10_MLM", "ext1" if year == 2018 else None)], [RSPWF("TTZZ")], [RSPWF("TTWW")], [RSPWF("ZZZ")], [RSPWF("WWZ")], [RSPWF("WZZ")]]),
+      ] * (not production.GEN)
 
     if config.usedata and not production.GEN:
       tosamples_foryields.append(SampleCount(ProductionMode("ZX"), [[RSPWF("ZX")]]))

@@ -110,7 +110,7 @@ def submitjobs(filter=None, doxcheck=True):
   njobs = 0
   for sample in allsamples(doxcheck=doxcheck):
     if filter and not filter.function(sample): continue
-    if not os.path.exists(sample.withdiscriminantsfile()) and KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid and not sample.copyfromothersample:
+    if not os.path.exists(sample.withdiscriminantsfile()) and KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid:
       njobs += 1
   for i in range(njobs):
     submitjobkwargs = {"jobname": str(i), "jobtime": "1-0:0:0"}
@@ -134,8 +134,9 @@ if __name__ == '__main__':
         if sample.productionmode == "ggZZ" and sample.flavor == "4tau" and not sample.copyfromothersample:
           adddiscriminants(sample)
       for sample in allsamples(doxcheck=args.doxcheck):
-        if sample.copyfromothersample: continue
         if args.filter and not args.filter.function(sample): continue
+        while sample.copyfromothersample:
+          sample = sample.copyfromothersample
         adddiscriminants(sample)
     finally:
       if not any(KeepWhileOpenFile(sample.withdiscriminantsfile()+".tmp").wouldbevalid for sample in allsamples(doxcheck=args.doxcheck)):
