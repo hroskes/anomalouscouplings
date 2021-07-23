@@ -704,7 +704,7 @@ def runcombine(analysis, foldername, **kwargs):
         })
         
 
-    repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistograms"
+    repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructureAC:hzzAnomalousCouplingsFromHistograms"
     repmap["physicsoptions"] = "--PO sqrts=.oO[sqrts]Oo. --PO verbose --PO allowPMF .oO[fais]Oo. "
     repmap["savemu"] = "--saveSpecifiedFunc=" + ",".join(["CMS_zz4l_fa1"] + ["CMS_zz4l_fai"+str(i) for i, fai in enumerate(analysis.fais, start=1) if fai != scanfai] + ["fa3_ggH", "fCP_Htt", "RV", "RF"])
     repmap["setPOI"] = "-P CMS_zz4l_fai{}".format(analysis.fais.index(scanfai)+1)
@@ -712,7 +712,7 @@ def runcombine(analysis, foldername, **kwargs):
         repmap["savemu"] = repmap["savemu"].replace(",fa3_ggH,fCP_Htt,RV", "")
 
     if usegs:
-        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructure:hzzAnomalousCouplingsFromHistogramsAi"
+        repmap["physicsmodel"] = "HiggsAnalysis.CombinedLimit.SpinZeroStructureAC:hzzAnomalousCouplingsFromHistogramsAi"
         repmap["savemu"] = "--saveSpecifiedFunc=g1,g2,g4,g1prime2,ghg2,ghg4,kappa,kappa_tilde"
         repmap["physicsoptions"] = "--PO verbose --PO allowPMF .oO[fais]Oo. "
         repmap["fais"] = re.sub(r"f(a2|a3|L1|a1|ai[0-9])asPOI(relative)?", r"\1asPOI", repmap["fais"])
