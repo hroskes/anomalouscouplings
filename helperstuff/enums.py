@@ -584,7 +584,7 @@ class ProductionMode(MyEnum):
             if self == "ggH":
                 return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5") or production.year >= 2017 and x in ("L1Zg", "fL1Zg0.5") or production.fakeGEN and x in ("a2Zg", "a3Zg", "a2gg", "a3gg", "fa2Zg0.5", "fa3Zg0.5", "fa2gg0.5", "fa3gg0.5"))
             if self in ("VBF", "ZH", "WH"):
-                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5") or production.year >= 2017 and self != "WH" and x in ("L1Zg", "fL1Zgprod0.5")or production.fakeGEN and x in ("fa2Zg0.5", "fa3Zg0.5", "fa2gg0.5", "fa3gg0.5") or production.fakeGEN and self != "WH" and x in ("fa2Zgprod0.5", "fa3Zgprod0.5", "fa2ggprod0.5", "fa3ggprod0.5"))
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5") or production.year >= 2017 and self != "WH" and x in ("L1Zg", "fL1Zgprod0.5") or production.fakeGEN and x in ("fa2Zg0.5", "fa3Zg0.5", "fa2gg0.5", "fa3gg0.5") or production.fakeGEN and self != "WH" and x in ("fa2Zgprod0.5", "fa3Zgprod0.5", "fa2ggprod0.5", "fa3ggprod0.5"))
             if self in ("WplusH", "WminusH", "ttH", "bbH", "tqH"):
                 return Hypothesis.items(lambda x: x == "0+")
         else:
@@ -1079,7 +1079,7 @@ class Analysis(MyEnum):
         if self == "fL1": return "0P_or_L1"
         if self == "fL1Zg": return "0P_or_L1Zg"
         if self.isfa3fa2fL1fL1Zg or self.isEFT: return "0P_or_0M_or_a2_or_L1_or_L1Zg"
-        if self.isphotoncouplings: assert False, self
+        if self.isphotoncouplings: return "0P_or_0M_or_a2_or_L1_or_L1Zg"
         assert False, self
     @property
     def dimensions(self):

@@ -1757,7 +1757,9 @@ class Sample(ReweightingSamplePlusWithFlavor):
              or self.productionmode != "ggH"
            ),
            "JHUGen": (
-             self.hypothesis != "0+"
+             self.hypothesis != "0+" and not (
+               self.production.fakeGEN and self.hypothesis in ("g4Zg", "g2Zg", "fg4Zg0.5", "fg2Zg0.5", "g4gg", "g2gg", "fg4gg0.5", "fg2gg0.5")
+             )
              or self.productionmode != "ggH"
            ),
            "None": (
@@ -1809,9 +1811,23 @@ class Sample(ReweightingSamplePlusWithFlavor):
                 return result
             raise self.ValueError("CJLSTdirname")
         if self.alternategenerator in ("JHUGen", "MCatNLO") and self.productionmode == "ggH":
-            if self.hffhypothesis == "Hff0+": result = "HJJ0PM_M125"
-            if self.hffhypothesis == "Hff0-": result = "HJJ0M_M125"
-            if self.hffhypothesis == "fCP0.5": result = "HJJ0Mf05ph0_M125"
+            if self.hypothesis != "0+":
+              assert self.hffhypothesis == "Hff0+"
+              result = "HJJ0PM"
+              if self.hypothesis == "g2Zg": result += "0PHZg"
+              elif self.hypothesis == "g4Zg": result += "0MZg"
+              elif self.hypothesis == "fg2Zg0.5": result += "0PHZgf05ph0"
+              elif self.hypothesis == "fg4Zg0.5": result += "0MZgf05ph0"
+              elif self.hypothesis == "g2gg": result += "0PHgg"
+              elif self.hypothesis == "g4gg": result += "0Mgg"
+              elif self.hypothesis == "fg2gg0.5": result += "0PHggf05ph0"
+              elif self.hypothesis == "fg4gg0.5": result += "0Mggf05ph0"
+              else: assert False, self.hypothesis
+              result += "_M125"
+            elif self.hffhypothesis == "Hff0+": result = "HJJ0PM_M125"
+            elif self.hffhypothesis == "Hff0-": result = "HJJ0M_M125"
+            elif self.hffhypothesis == "fCP0.5": result = "HJJ0Mf05ph0_M125"
+
             if self.alternategenerator == "MCatNLO":
                 result += "_mcanlo"
                 result = result.replace("ph0", "")
@@ -2162,13 +2178,14 @@ def allsamples(doxcheck=True):
             if production.fakeGEN:
                 for productionmode in "ggH",:
                     for hypothesis in "g4Zg", "g2Zg", "g4gg", "g2gg", "fa2gg0.5", "fa3gg0.5", "fa2Zg0.5", "fa3Zg0.5":
-                        yield Sample(productionmode, hypothesis, production)
-                for productionmode in "VBF", "ZH", "WH":
-                    for hypothesis in "fa2gg0.5", "fa3gg0.5", "fa2Zg0.5", "fa3Zg0.5":
-                        yield Sample(productionmode, hypothesis, production)
-                for productionmode in "VBF", "ZH":
-                    for hypothesis in "fa2ggprod0.5", "fa3ggprod0.5", "fa2Zgprod0.5", "fa3Zgprod0.5":
-                        yield Sample(productionmode, hypothesis, production)
+                        #yield Sample(productionmode, hypothesis, production)
+                        yield Sample(productionmode, hypothesis, production, "JHUGen")
+                #for productionmode in "VBF", "ZH", "WH":
+                #    for hypothesis in "fa2gg0.5", "fa3gg0.5", "fa2Zg0.5", "fa3Zg0.5":
+                #        yield Sample(productionmode, hypothesis, production)
+                #for productionmode in "VBF", "ZH":
+                #    for hypothesis in "fa2ggprod0.5", "fa3ggprod0.5", "fa2Zgprod0.5", "fa3Zgprod0.5":
+                #        yield Sample(productionmode, hypothesis, production)
             continue
 
         if production.LHE:

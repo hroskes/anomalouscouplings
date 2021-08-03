@@ -755,6 +755,8 @@ def cleanupscratchdir():
             print "failed to remove it, see if it's still there"
     except IOError:
       print "please check on {}, it has no JOBID file".format(folder)
+    except subprocess.CalledProcessError:
+      print "squeue failed, can't check if job {} is still running".format(jobid)
 
 def getmembernames(*args, **kwargs):
     return [_[0] for _ in inspect.getmembers(*args, **kwargs)]
