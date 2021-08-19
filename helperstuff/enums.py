@@ -1121,7 +1121,7 @@ class Analysis(MyEnum):
             if self == "fa3fa2fL1_EFT": return False
             if self == "fa3fa2fL1_EFT_STXS": return False
             if self in ("fa2Zg", "fa3Zg", "fa2gg", "fa3gg"): return False
-            if self == "PhotonCouplings": return False
+            if self == "PhotonCouplings": return True
             if self == "PhotonCouplings_decay": return True
         if config.name ==  "savvas":
             if self == "fa3_multiparameter": return True

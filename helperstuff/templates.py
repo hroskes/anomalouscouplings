@@ -250,6 +250,47 @@ class TemplatesFile(MultiEnum):
                 reweightingsamples = [
                   ReweightingSamplePlus(h, p) for h in hypotheses
                 ]
+            elif self.analysis.isphotoncouplings:
+                hypotheses = ["0+", "g4Zg", "g2Zg", "g4gg", "g2gg",
+                              "fa3Zg0.5",         "fa2Zg-0.5",        "fa3gg0.5",         "fa2gg-0.5",
+                              "fa3Zgprod0.5",     "fa2Zgprod0.5",     "fa3ggprod0.5",     "fa2ggprod0.5",
+                              "fa3Zgproddec-0.5", "fa2Zgproddec-0.5", "fa3ggproddec-0.5", "fa2ggproddec-0.5",
+
+                              "fa3Zg0.5fa2Zg0.5",                  "fa3Zg0.5fa3gg0.5",                  "fa3Zg0.5fa2gg0.5",
+                                                               "fa2Zg0.5fa3gg0.5",                  "fa2Zg0.5fa2gg0.5",
+                                                                                                "fa3gg0.5fa2gg0.5",
+                              "fa3Zgprod0.5fa2Zgprod0.5",          "fa3Zgprod0.5fa3ggprod0.5",          "fa3Zgprod0.5fa2ggprod0.5",
+                                                               "fa2Zgprod0.5fa3ggprod0.5",          "fa2Zgprod0.5fa2ggprod0.5",
+                                                                                                "fa3ggprod0.5fa2ggprod0.5",
+                              "fa3Zgproddec0.5fa2Zgproddec-0.5",   "fa3Zgproddec0.5fa3ggproddec-0.5",   "fa3Zgproddec0.5fa2ggproddec-0.5",
+                                                               "fa2Zgproddec0.5fa3ggproddec-0.5",   "fa2Zgproddec0.5fa2ggproddec-0.5",
+                                                                                                "fa3ggproddec0.5fa2ggproddec-0.5",
+
+                              "fa3Zg0.33fa2Zg0.33",                "fa3Zg0.33fa3gg0.33",                "fa3Zg0.33fa2gg0.33",
+                                                               "fa2Zg0.33fa3gg0.33",                "fa2Zg0.33fa2gg0.33",
+                                                                                                "fa3gg0.33fa2gg0.33",
+                              "fa3Zgprod0.33fa2Zgprod0.33",        "fa3Zgprod0.33fa3ggprod0.33",        "fa3Zgprod0.33fa2ggprod0.33",
+                                                               "fa2Zgprod0.33fa3ggprod0.33",        "fa2Zgprod0.33fa2ggprod0.33",
+                                                                                                "fa3ggprod0.33fa2ggprod0.33",
+                              "fa3Zgproddec0.33fa2Zgproddec-0.33", "fa3Zgproddec0.33fa3ggproddec-0.33", "fa3Zgproddec0.33fa2ggproddec-0.33",
+                                                               "fa2Zgproddec0.33fa3ggproddec-0.33", "fa2Zgproddec0.33fa2ggproddec-0.33",
+                                                                                                "fa3ggproddec0.33fa2ggproddec-0.33",
+
+                              "fa3Zg0.33fa2Zg0.33fa3gg0.33",                         "fa3Zg0.33fa2Zg0.33fa2gg0.33",
+                              "fa3Zg0.33fa3gg0.33fa2gg0.33",                       "fa2Zg0.33fa3gg0.33fa2gg0.33",
+                              "fa3Zgprod0.33fa2Zgprod0.33fa3ggprod0.33",             "fa3Zgprod0.33fa2Zgprod0.33fa2ggprod0.33",
+                              "fa3Zgprod0.33fa3ggprod0.33fa2ggprod0.33",           "fa2Zgprod0.33fa3ggprod0.33fa2ggprod0.33",
+                              "fa3Zgproddec0.33fa2Zgproddec0.33fa3ggproddec-0.33",   "fa3Zgproddec0.33fa2Zgproddec0.33fa2ggproddec-0.33",
+                              "fa3Zgproddec0.33fa3ggproddec0.33fa2ggproddec-0.33", "fa2Zgproddec0.33fa3ggproddec0.33fa2ggproddec-0.33",
+
+                              "fa3Zgproddec0.25fa2Zgproddec0.25fa3ggproddec0.25",   "fa3Zgproddec0.25fa2Zgproddec0.25fa2ggproddec0.25",
+                              "fa3Zgproddec0.25fa3ggproddec0.25fa2ggproddec0.25", "fa2Zgproddec0.25fa3ggproddec0.25fa2ggproddec0.25",
+
+                              "fa3Zgproddec0.25fa2Zgproddec0.25fa3ggproddec0.25fa2ggproddec0.25",
+                             ]
+                reweightingsamples = [
+                  ReweightingSamplePlus(h, p) for h in hypotheses
+                ]
             else:
                 assert False, self.analysis
 
@@ -321,7 +362,11 @@ class TemplatesFile(MultiEnum):
                 ] + [
                     "g{}1g{}1g{}1g{}1".format(*indices)
                         for indices in combinations("1ijkl", 4)
-                ] if not ("gl3" in _ and self.templategroup == "wh")]
+                ] if not (
+                    "gl3" in _ and self.templategroup == "wh" and self.analysis.isfa3fa2fL1fL1Zg
+                ) and not (
+                    "g12" not in _ and "g13" not in _ and "g14" not in _ and self.templategroup == "wh" and self.analysis.isphotoncouplings
+                )]
             elif self.analysis.dimensions == 3:
                 return [IntTemplate(self, h, _) for _ in [
                     "g{}3g{}1".format(*indices)
@@ -2067,8 +2112,12 @@ class IntTemplate(TemplateBase, MultiEnum):
             ZHtemplate = type(self)(*kwargs.itervalues())
             result.append(sum((t.reweightingsampleplus*factor for t, factor in ZHtemplate.templatesandfactors), SumOfSamples()))
             
-            if not self.analysis.isfa3fa2fL1fL1Zg and not self.analysis.isEFT: assert False
-            if self.analysis.isEFT or self.interferencetype.couplingpowers["l"] < 3:
+            if not self.analysis.isfa3fa2fL1fL1Zg and not self.analysis.isEFT and not self.analysis.isphotoncouplings: assert False
+            if not (
+                self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["l"] >= 3
+            ) and not (
+                self.analysis.isphotoncouplings and self.interferencetype.couplingpowers["1"] <= 1
+            ):
                 kwargs["productionmode"] = "WH"
                 kwargs["templategroup"] = "wh"
                 WHtemplate = type(self)(*kwargs.itervalues())
@@ -2082,11 +2131,13 @@ class IntTemplate(TemplateBase, MultiEnum):
     @cache
     def reweightfrom(self):
         if self.productionmode == "VH":
-            if not self.analysis.isfa3fa2fL1fL1Zg and not self.analysis.isEFT: assert False
+            if not self.analysis.isfa3fa2fL1fL1Zg and not self.analysis.isEFT and not self.analysis.isphotoncouplings: assert False
             kwargs = {enum.enumname: getattr(self, enum.enumname) for enum in self.enums}
             del kwargs["interferencetype"]; kwargs["hypothesis"] = "0+"
             result = Template(*kwargs.itervalues()).reweightfrom()[:]
-            if not self.analysis.isEFT and self.interferencetype.couplingpowers["l"] >= 3:
+            if self.analysis.isfa3fa2fL1fL1Zg and self.interferencetype.couplingpowers["l"] >= 3:
+                del result[1]
+            if self.analysis.isphotoncouplings and self.interferencetype.couplingpowers["1"] < 2:
                 del result[1]
         else:
             others = [t.reweightfrom() for t, factor in self.templatesandfactors]
