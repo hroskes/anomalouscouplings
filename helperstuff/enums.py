@@ -582,9 +582,9 @@ class ProductionMode(MyEnum):
     def generatedhypotheses(self, production):
         if not production.LHE:
             if self == "ggH":
-                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5") or production.year >= 2017 and x in ("L1Zg", "fL1Zg0.5") or production.fakeGEN and x in ("a2Zg", "a3Zg", "a2gg", "a3gg", "fa2Zg0.5", "fa3Zg0.5", "fa2gg0.5", "fa3gg0.5"))
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa30.5", "fa20.5", "fL10.5") or production.year >= 2017 and x in ("L1Zg", "fL1Zg0.5") or production.fakeGEN and x in ("a2Zg", "a3Zg", "a2gg", "a3gg", "fa2Zg-0.5", "fa3Zg-0.5", "fa2gg0.5", "fa3gg0.5"))
             if self in ("VBF", "ZH", "WH"):
-                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5") or production.year >= 2017 and self != "WH" and x in ("L1Zg", "fL1Zgprod0.5") or production.fakeGEN and x in ("fa2Zg0.5", "fa3Zg0.5", "fa2gg0.5", "fa3gg0.5") or production.fakeGEN and self != "WH" and x in ("fa2Zgprod0.5", "fa3Zgprod0.5", "fa2ggprod0.5", "fa3ggprod0.5"))
+                return Hypothesis.items(lambda x: x in ("0+", "0-", "a2", "L1", "fa3prod0.5", "fa2prod0.5", "fL1prod0.5") or production.year >= 2017 and self != "WH" and x in ("L1Zg", "fL1Zgprod0.5") or production.fakeGEN and x in ("fa2Zg-0.5", "fa3Zg-0.5", "fa2gg0.5", "fa3gg0.5") or production.fakeGEN and self != "WH" and x in ("fa2Zgprod-0.5", "fa3Zgprod-0.5", "fa2ggprod0.5", "fa3ggprod0.5"))
             if self in ("WplusH", "WminusH", "ttH", "bbH", "tqH"):
                 return Hypothesis.items(lambda x: x == "0+")
         else:

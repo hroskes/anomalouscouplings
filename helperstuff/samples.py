@@ -1365,9 +1365,9 @@ class ReweightingSample(MultiEnum, SampleBase):
             ghzgs2 = {"dec": constants.ghzgs2HZZ}
             if self.productionmode == "VBF": ghzgs2["prod"] = constants.ghzgs2VBF
             elif self.productionmode == "ZH":  ghzgs2["prod"] = constants.ghzgs2ZH
-            elif self.productionmode == "WH":  ghzgs2["prod"] = 1  #dummy value, should remove this entirely
+            elif self.productionmode == "WH":  ghzgs2["prod"] = -1  #dummy value, should remove this entirely
             else: ghzgs2["prod"] = None
-            ghzgs2["proddec"] = None if ghzgs2["prod"] is None else sqrt(ghzgs2["prod"]*ghzgs2["dec"])
+            ghzgs2["proddec"] = None if ghzgs2["prod"] is None else -sqrt(ghzgs2["prod"]*ghzgs2["dec"])
 
             couplings = "fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg"
             for proddec in "prod", "dec", "proddec":
@@ -1431,9 +1431,9 @@ class ReweightingSample(MultiEnum, SampleBase):
             ghzgs4 = {"dec": constants.ghzgs4HZZ}
             if self.productionmode == "VBF": ghzgs4["prod"] = constants.ghzgs4VBF
             elif self.productionmode == "ZH":  ghzgs4["prod"] = constants.ghzgs4ZH
-            elif self.productionmode == "WH":  ghzgs4["prod"] = 1  #dummy value, should remove this entirely
+            elif self.productionmode == "WH":  ghzgs4["prod"] = -1  #dummy value, should remove this entirely
             else: ghzgs4["prod"] = None
-            ghzgs4["proddec"] = None if ghzgs4["prod"] is None else sqrt(ghzgs4["prod"]*ghzgs4["dec"])
+            ghzgs4["proddec"] = None if ghzgs4["prod"] is None else -sqrt(ghzgs4["prod"]*ghzgs4["dec"])
 
             couplings = "fa3", "fa2", "fL1", "fL1Zg", "fa3Zg", "fa2Zg", "fa3gg", "fa2gg"
             for proddec in "prod", "dec", "proddec":
@@ -1758,7 +1758,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
            ),
            "JHUGen": (
              self.hypothesis != "0+" and not (
-               self.production.fakeGEN and self.hypothesis in ("g4Zg", "g2Zg", "fg4Zg0.5", "fg2Zg0.5", "g4gg", "g2gg", "fg4gg0.5", "fg2gg0.5")
+               self.production.fakeGEN and self.hypothesis in ("g4Zg", "g2Zg", "fg4Zg-0.5", "fg2Zg-0.5", "g4gg", "g2gg", "fg4gg0.5", "fg2gg0.5")
              )
              or self.productionmode != "ggH"
            ),
@@ -1816,8 +1816,8 @@ class Sample(ReweightingSamplePlusWithFlavor):
               result = "HJJ0PM"
               if self.hypothesis == "g2Zg": result += "0PHZg"
               elif self.hypothesis == "g4Zg": result += "0MZg"
-              elif self.hypothesis == "fg2Zg0.5": result += "0PHZgf05ph0"
-              elif self.hypothesis == "fg4Zg0.5": result += "0MZgf05ph0"
+              elif self.hypothesis == "fg2Zg-0.5": result += "0PHZgf05ph0"
+              elif self.hypothesis == "fg4Zg-0.5": result += "0MZgf05ph0"
               elif self.hypothesis == "g2gg": result += "0PHgg"
               elif self.hypothesis == "g4gg": result += "0Mgg"
               elif self.hypothesis == "fg2gg0.5": result += "0PHggf05ph0"
@@ -1850,19 +1850,19 @@ class Sample(ReweightingSamplePlusWithFlavor):
             if self.hypothesis in ("fL10.5", "fL1prod0.5"): result = "{}0L1f05ph0_M125".format(s)
             if self.hypothesis in ("fL1Zg0.5", "fL1Zgprod0.5"): result = "{}0L1Zgf05ph0_M125".format(s)
             if self.productionmode == "ggH":
-                if self.hypothesis == "fa3Zg0.5": result = "{}0MZgf05ph0_M125".format(s)
+                if self.hypothesis == "fa3Zg-0.5": result = "{}0MZgf05ph0_M125".format(s)
                 if self.hypothesis == "fa3gg0.5": result = "{}0Mggf05ph0_M125".format(s)
-                if self.hypothesis == "fa2Zg0.5": result = "{}0PHZgf05ph0_M125".format(s)
+                if self.hypothesis == "fa2Zg-0.5": result = "{}0PHZgf05ph0_M125".format(s)
                 if self.hypothesis == "fa2gg0.5": result = "{}0PHggf05ph0_M125".format(s)
             elif self.productionmode in ("VBF", "ZH", "WH"):
-                if self.hypothesis == "fa3Zgdec0.5": result = "{}0MZgfdec05ph0_M125".format(s)
+                if self.hypothesis == "fa3Zgdec-0.5": result = "{}0MZgfdec05ph0_M125".format(s)
                 if self.hypothesis == "fa3ggdec0.5": result = "{}0Mggfdec05ph0_M125".format(s)
-                if self.hypothesis == "fa2Zgdec0.5": result = "{}0PHZgfdec05ph0_M125".format(s)
+                if self.hypothesis == "fa2Zgdec-0.5": result = "{}0PHZgfdec05ph0_M125".format(s)
                 if self.hypothesis == "fa2ggdec0.5": result = "{}0PHggfdec05ph0_M125".format(s)
                 if self.productionmode in ("VBF", "ZH"):
-                    if self.hypothesis == "fa3Zgprod0.5": result = "{}0MZgfprod05ph0_M125".format(s)
+                    if self.hypothesis == "fa3Zgprod-0.5": result = "{}0MZgfprod05ph0_M125".format(s)
                     if self.hypothesis == "fa3ggprod0.5": result = "{}0Mggfprod05ph0_M125".format(s)
-                    if self.hypothesis == "fa2Zgprod0.5": result = "{}0PHZgfprod05ph0_M125".format(s)
+                    if self.hypothesis == "fa2Zgprod-0.5": result = "{}0PHZgfprod05ph0_M125".format(s)
                     if self.hypothesis == "fa2ggprod0.5": result = "{}0PHggfprod05ph0_M125".format(s)
             if self.extension is not None: result += "_" + str(self.extension)
             return result
@@ -2177,7 +2177,7 @@ def allsamples(doxcheck=True):
             yield Sample("data", production)  #(not real data, just an empty dummy file)
             if production.fakeGEN:
                 for productionmode in "ggH",:
-                    for hypothesis in "g4Zg", "g2Zg", "g4gg", "g2gg", "fa2gg0.5", "fa3gg0.5", "fa2Zg0.5", "fa3Zg0.5":
+                    for hypothesis in "g4Zg", "g2Zg", "g4gg", "g2gg", "fa2gg0.5", "fa3gg0.5", "fa2Zg-0.5", "fa3Zg-0.5":
                         #yield Sample(productionmode, hypothesis, production)
                         yield Sample(productionmode, hypothesis, production, "JHUGen")
                 #for productionmode in "VBF", "ZH", "WH":
