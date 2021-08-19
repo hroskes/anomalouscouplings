@@ -365,7 +365,7 @@ class TemplatesFile(MultiEnum):
                 ] if not (
                     "gl3" in _ and self.templategroup == "wh" and self.analysis.isfa3fa2fL1fL1Zg
                 ) and not (
-                    "g12" not in _ and "g13" not in _ and "g14" not in _ and self.templategroup == "wh" and self.analysis.isphotoncouplings
+                    "g12" not in _ and "g13" not in _ and self.templategroup == "wh" and self.analysis.isphotoncouplings
                 )]
             elif self.analysis.dimensions == 3:
                 return [IntTemplate(self, h, _) for _ in [
@@ -663,9 +663,9 @@ class TemplatesFile(MultiEnum):
                         divideby = 1
                         for i, matrixmultiplies in enumerate(self.signalsamples()):
                             multiplyby = 1
-                            threshold = 1e-10 * multiplyby / divideby
+                            threshold = 2e-10 * multiplyby / divideby
                             if abs(invertedmatrix[j,i]) < threshold: invertedmatrix[j,i] = 0
-                            if abs(invertedmatrix[j,i] - 1) < 1e-10: invertedmatrix[j,i] = 1
+                            if abs(invertedmatrix[j,i] - 1) < threshold: invertedmatrix[j,i] = 1
 
                     assert invertedmatrix[0, 0] == 1 and all(invertedmatrix[0, i] == 0 for i in             range(1, 70))
                     assert invertedmatrix[4, 1] == 1 and all(invertedmatrix[4, i] == 0 for i in range(0, 1)+range(2, 70))

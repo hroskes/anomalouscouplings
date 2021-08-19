@@ -1365,7 +1365,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             ghzgs2 = {"dec": constants.ghzgs2HZZ}
             if self.productionmode == "VBF": ghzgs2["prod"] = constants.ghzgs2VBF
             elif self.productionmode == "ZH":  ghzgs2["prod"] = constants.ghzgs2ZH
-            elif self.productionmode == "WH":  ghzgs2["prod"] = -1000  #dummy value, should remove this entirely
+            elif self.productionmode == "WH":  ghzgs2["prod"] = 1  #dummy value, should remove this entirely
             else: ghzgs2["prod"] = None
             ghzgs2["proddec"] = None if ghzgs2["prod"] is None else sqrt(ghzgs2["prod"]*ghzgs2["dec"])
 
@@ -1431,7 +1431,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             ghzgs4 = {"dec": constants.ghzgs4HZZ}
             if self.productionmode == "VBF": ghzgs4["prod"] = constants.ghzgs4VBF
             elif self.productionmode == "ZH":  ghzgs4["prod"] = constants.ghzgs4ZH
-            elif self.productionmode == "WH":  ghzgs4["prod"] = -1000  #dummy value, should remove this entirely
+            elif self.productionmode == "WH":  ghzgs4["prod"] = 1  #dummy value, should remove this entirely
             else: ghzgs4["prod"] = None
             ghzgs4["proddec"] = None if ghzgs4["prod"] is None else sqrt(ghzgs4["prod"]*ghzgs4["dec"])
 
@@ -1498,7 +1498,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             ghgsgs2 = {"dec": constants.ghgsgs2HZZ}
             if self.productionmode == "VBF": ghgsgs2["prod"] = constants.ghgsgs2VBF
             elif self.productionmode == "ZH":  ghgsgs2["prod"] = constants.ghgsgs2ZH
-            elif self.productionmode == "WH":  ghgsgs2["prod"] = -1000  #dummy value, should remove this entirely
+            elif self.productionmode == "WH":  ghgsgs2["prod"] = 1  #dummy value, should remove this entirely
             else: ghgsgs2["prod"] = None
             ghgsgs2["proddec"] = None if ghgsgs2["prod"] is None else sqrt(ghgsgs2["prod"]*ghgsgs2["dec"])
 
@@ -1564,7 +1564,7 @@ class ReweightingSample(MultiEnum, SampleBase):
             ghgsgs4 = {"dec": constants.ghgsgs4HZZ}
             if self.productionmode == "VBF": ghgsgs4["prod"] = constants.ghgsgs4VBF
             elif self.productionmode == "ZH":  ghgsgs4["prod"] = constants.ghgsgs4ZH
-            elif self.productionmode == "WH":  ghgsgs4["prod"] = -1000  #dummy value, should remove this entirely
+            elif self.productionmode == "WH":  ghgsgs4["prod"] = 1  #dummy value, should remove this entirely
             else: ghgsgs4["prod"] = None
             ghgsgs4["proddec"] = None if ghgsgs4["prod"] is None else sqrt(ghgsgs4["prod"]*ghgsgs4["dec"])
 
