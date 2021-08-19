@@ -119,6 +119,8 @@ jetdiscriminants = [
 
     Discriminant("D_CP_VBF", "D_{CP}^{dec}", 2, -1, 1, identifier="D_CP_VBF_2bins"),
 
+    Discriminant("D_4couplings_photons_VBFdecay_raw", "D_{4#gamma}^{VBF+dec,raw}", 1296, 0, 1296),
+
     Discriminant("D_bkg_VBFdecay", "D_{bkg}", 10, 0, 1, identifier="D_bkg_VBFdecay_10bins"),
     Discriminant("D_bkg_VBFdecay_ResUp", "D_{bkg}^{ResUp}", 10, 0, 1, identifier="D_bkg_VBFdecay_ResUp_10bins"),
     Discriminant("D_bkg_VBFdecay_ResDown", "D_{bkg}^{ResDown}", 10, 0, 1, identifier="D_bkg_VBFdecay_ResDown_10bins"),
@@ -172,6 +174,8 @@ jetdiscriminants = [
     Discriminant("D_4couplings_HadVHdecay", "D_{4}^{VH+dec}", 162-73, 0, 162-73),
 
     Discriminant("D_CP_HadVH", "D_{CP}^{dec}", 2, -1, 1, identifier="D_CP_HadVH_2bins"),
+
+    Discriminant("D_4couplings_photons_HadVHdecay_raw", "D_{4#gamma}^{VH+dec,raw}", 1296, 0, 1296),
 
     Discriminant("D_bkg_HadVHdecay", "D_{bkg}", 10, 0, 1, identifier="D_bkg_HadVHdecay_10bins"),
     Discriminant("D_bkg_HadVHdecay_ResUp", "D_{bkg}^{ResUp}", 10, 0, 1, identifier="D_bkg_HadVHdecay_ResUp_10bins"),

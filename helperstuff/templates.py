@@ -500,6 +500,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0minus_VBFdecay_3bins")
             if self.analysis == "fa3_onlyDCP":
                 return discriminant("phistarZ1")
+            if self.analysis == "PhotonCouplings":
+                return discriminant("D_4couplings_photons_VBFdecay_raw")
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -518,17 +520,19 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_0minus_HadVHdecay_3bins")
             if self.analysis == "fa3_onlyDCP":
                 return discriminant("phistarZ1")
+            if self.analysis == "PhotonCouplings":
+                return discriminant("D_4couplings_photons_HadVHdecay_raw")
 
         if self.category == "Boosted":
-            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
                 return discriminant("ZZPt_boosted")
 
         if self.category == "VBF1jtagged":
-            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
                 return discriminant("ZZPt_VBF1jtagged")
 
         if self.category == "VHLepttagged":
-            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
                 return discriminant("ZZPt_VHLepttagged")
 
         assert False
@@ -1513,7 +1517,11 @@ class Template(TemplateBase, MultiEnum):
                             for hffhypothesis in hffhypotheses
                             for ext in (None, "ext1")
                             for generator in generators
-                            if (hypothesis == "0+" or generator == None)
+                            if (
+                                generator == None
+                                or hypothesis == "0+"
+                                or generator == "JHUGen" and self.production.fakeGEN and hypothesis in ("g2Zg", "g4Zg", "g2gg", "g4gg", "fg2Zg-0.5", "fg4Zg-0.5", "fg2gg0.5", "fg4gg0.5")
+                            )
                             and (hffhypothesis == "Hff0+" or generator == "JHUGen")
                        }]
         if self.productionmode in ["VBF", "ZH"]:
