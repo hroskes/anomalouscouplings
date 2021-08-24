@@ -946,23 +946,33 @@ class TemplatesFile(MultiEnum):
                 assert self.analysis.isfa3fa2fL1fL1Zg or self.analysis.isphotoncouplings
                 if self.category == "Untagged" and not self.analysis.isSTXS or self.analysis.isphotoncouplings:
                     constrainttype = "fourparameterHVV"
-                    templates = [
-                        Template(self, productionmode, self.analysis.purehypotheses[0]),
-                        IntTemplate(self, productionmode, "g11gi1"),
-                        IntTemplate(self, productionmode, "g11gj1"),
-                        IntTemplate(self, productionmode, "g11gk1"),
-                        IntTemplate(self, productionmode, "g11gl1"),
-                        Template(self, productionmode, self.analysis.purehypotheses[1]),
-                        IntTemplate(self, productionmode, "gi1gj1"),
-                        IntTemplate(self, productionmode, "gi1gk1"),
-                        IntTemplate(self, productionmode, "gi1gl1"),
-                        Template(self, productionmode, self.analysis.purehypotheses[2]),
-                        IntTemplate(self, productionmode, "gj1gk1"),
-                        IntTemplate(self, productionmode, "gj1gl1"),
-                        Template(self, productionmode, self.analysis.purehypotheses[3]),
-                        IntTemplate(self, productionmode, "gk1gl1"),
-                        Template(self, productionmode, self.analysis.purehypotheses[4]),
-                    ]
+                    generator = None
+                    Hffs = None,
+                    if self.templategroup == "ggh" and self.category in ("VBFtagged", "VHHadrtagged"):
+                        generator = "JHUGen"
+                        Hffs = "Hff0+", "Hff0-"
+                    print generator, Hffs
+                    templates = [[
+                        Template(self, productionmode, self.analysis.purehypotheses[0], Hff, generator),
+                        IntTemplate(self, productionmode, "g11gi1", Hff),
+                        IntTemplate(self, productionmode, "g11gj1", Hff),
+                        IntTemplate(self, productionmode, "g11gk1", Hff),
+                        IntTemplate(self, productionmode, "g11gl1", Hff),
+                        Template(self, productionmode, self.analysis.purehypotheses[1], Hff, generator),
+                        IntTemplate(self, productionmode, "gi1gj1", Hff),
+                        IntTemplate(self, productionmode, "gi1gk1", Hff),
+                        IntTemplate(self, productionmode, "gi1gl1", Hff),
+                        Template(self, productionmode, self.analysis.purehypotheses[2], Hff, generator),
+                        IntTemplate(self, productionmode, "gj1gk1", Hff),
+                        IntTemplate(self, productionmode, "gj1gl1", Hff),
+                        Template(self, productionmode, self.analysis.purehypotheses[3], Hff, generator),
+                        IntTemplate(self, productionmode, "gk1gl1", Hff),
+                        Template(self, productionmode, self.analysis.purehypotheses[4], Hff, generator),
+                    ] for Hff in Hffs]
+                    if len(Hffs) == 2:
+                        templates, templates2 = templates
+                    else:
+                        templates, = templates
                 elif self.category in ("VBFtagged", "VHHadrtagged", "Boosted", "VBF1jtagged", "VHLepttagged") or self.analysis.isSTXS:
                     #leave out fa3, because those interferences are 0
                     constrainttype = "threeparameterHVV"
