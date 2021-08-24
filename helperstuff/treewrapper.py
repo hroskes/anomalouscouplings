@@ -42,17 +42,24 @@ class TreeWrapperBase(Iterator):
 
         self.year = treesample.production.year
         self.GEN = self.treesample.production.GEN
+        self.fakeGEN = self.treesample.production.fakeGEN
 
         if self.GEN:
           self.doSIP = self.doL1prefiringweight = self.doleptonSF = self.useJEC = self.useJES = self.useJER = False
+          if self.fakeGEN:
+            self.doZ2Mass = True
+          else:
+            self.doZ2Mass = False
         elif self.treesample.production in ("190821_2016", "190821_2017", "190821_2018"):
           self.doSIP = self.doL1prefiringweight = True
+          self.doZ2Mass = False
           self.useJEC = True
           self.useJER = self.useJES = self.doleptonSF = False
         elif self.treesample.production in ("200205_2016", "200205_2017", "200205_2018"):
           self.doSIP = False
           self.doL1prefiringweight = True
           self.doleptonSF = not self.isdata and not self.isZX
+          self.doZ2Mass = False
           self.useJEC = False
           self.useJES = True
           self.useJER = False
@@ -1515,6 +1522,7 @@ class TreeWrapper(TreeWrapperBase):
                 self.overallEventWeight = t.overallEventWeight
 
             if self.doSIP and max(t.LepSIP) > 4: self.overallEventWeight = 0
+            if self.doZ2Mass and t.Z2Mass < 12: self.overallEventWeight = 0
 
             self.flavor = abs(t.Z1Flav*t.Z2Flav)
 
@@ -2528,9 +2536,11 @@ class TreeWrapper(TreeWrapperBase):
             "doleptonSF",
             "doL1prefiringweight",
             "doSIP",
+            "doZ2Mass",
             "exceptions",
             "f",
             "failedtree",
+            "fakeGEN",
             "filename",
             "GEN",
             "hypothesis",
