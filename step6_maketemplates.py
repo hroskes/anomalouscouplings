@@ -7,6 +7,7 @@ if __name__ == "__main__":
   p.add_argument("--jsontoo", type=int)
   p.add_argument("--removefiles", nargs="*", default=())
   p.add_argument("--waitids", nargs="*", type=int, default=())
+  p.add_argument("--extrajobs", type=int, default=0)
   p.add_argument("--filter", type=eval, default=lambda template: True)
   p.add_argument("--start-with-bin", type=int, nargs=3)
   p.add_argument("--nthreads", type=int, default=8)
@@ -16,12 +17,15 @@ if __name__ == "__main__":
     args.jsontoo = None
     args.removefiles = args.waitids = ()
     args.submitjobs = False
+    args.extrajobs = 0
   if args.jsontoo and not args.submitjobs:
     raise ValueError("--jsontoo doesn't make sense without --submitjobs")
   if args.removefiles and not args.submitjobs:
     raise ValueError("--removefiles doesn't make sense without --submitjobs")
   if args.waitids and not args.submitjobs:
     raise ValueError("--waitids doesn't make sense without --submitjobs")
+  if args.extrajobs and not args.submitjobs:
+    raise ValueError("--extrajobs doesn't make sense without --submitjobs")
 
 from array import array
 import os
@@ -180,7 +184,7 @@ def submitjobs(args):
     elif tf.shapesystematic != "":
       torun.remove(tf)
       torun.add((tf.templategroup, tf.production, "systematic"))
-  njobs = len(torun)
+  njobs = len(torun) + args.extrajobs
 
   if not njobs: return
   for filename, found in remove.iteritems():
