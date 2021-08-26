@@ -403,7 +403,7 @@ class TemplatesFile(MultiEnum):
     def bkgdiscriminant(self):
         from discriminants import discriminant
 
-        if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP", "PhotonCouplings_decay", "PhotonCouplings"): return discriminant("phistarZ2")
+        if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP", "PhotonCouplings_decay", "PhotonCouplings", "PhotonCouplings_STXS"): return discriminant("phistarZ2")
 
         name = "D_bkg"
         if self.category == "Untagged": pass
