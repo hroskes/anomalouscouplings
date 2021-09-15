@@ -68,7 +68,7 @@ class MakeJetSystematicsBase(MakeSystematics):
             r"(self[.][\w]*)_JECNominal\b",
             r"(self[.]M2(?:(?:g1)?(?:g(?:|hzgs|hgsgs)(?:2|4|1prime2))?(?:Zg|gg)?_(?:VBF|HadZH|HadWH))|qqZZJJ)\b",
             r"(self[.]notdijet)\b",
-            r"(self[.](?:binning_4couplings(?:_photons)?|D_bkg_kin)_(?:HadVH|VBF|)decay)\b",
+            r"(self[.](?:binning_4couplings(?:_photons)?|D_bkg_kin)_(?:HadVH|VBF|)(?:decay)?)\b",
         ):
             code = re.sub(thing, r"\1_"+self.JEX+"{UpDn}", code)
         for thing in (

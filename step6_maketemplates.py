@@ -12,6 +12,7 @@ if __name__ == "__main__":
   p.add_argument("--start-with-bin", type=int, nargs=3)
   p.add_argument("--nthreads", type=int, default=8)
   p.add_argument("--on-queue", action="store_true", help=argparse.SUPPRESS)
+  p.add_argument("--queue")
   args = p.parse_args()
   if args.on_queue:
     args.jsontoo = None
@@ -203,7 +204,7 @@ def submitjobs(args):
       waitids = []
     waitids += list(args.waitids)
     for i in range(njobs):
-      submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py")+" --on-queue " + " ".join(pipes.quote(_) for _ in sys.argv[1:]), jobname=str(i), jobtime="2-0:0:0", docd=True, waitids=waitids, memory="{}M".format(args.nthreads*6000), nthreads=args.nthreads)
+      submitjob("unbuffer "+os.path.join(config.repositorydir, "step6_maketemplates.py")+" --on-queue " + " ".join(pipes.quote(_) for _ in sys.argv[1:]), jobname=str(i), jobtime="2-0:0:0", docd=True, waitids=waitids, memory="{}M".format(args.nthreads*6000), nthreads=args.nthreads, queue=args.queue)
 
 if __name__ == "__main__":
   if args.submitjobs:

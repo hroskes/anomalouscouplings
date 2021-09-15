@@ -403,7 +403,7 @@ class TemplatesFile(MultiEnum):
     def bkgdiscriminant(self):
         from discriminants import discriminant
 
-        if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP", "PhotonCouplings_decay", "PhotonCouplings", "PhotonCouplings_STXS"): return discriminant("phistarZ2")
+        if self.analysis in ("fa3_only6bins", "fa3fa2fL1fL1Zg_only6bins", "fa3_onlyDCP", "PhotonCouplings_decay", "PhotonCouplings", "PhotonCouplings_STXS", "PhotonCouplings_prodonly"): return discriminant("phistarZ2")
 
         name = "D_bkg"
         if self.category == "Untagged": pass
@@ -482,6 +482,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("phistarZ1")
             if self.analysis in ("PhotonCouplings", "PhotonCouplings_decay"):
                 return discriminant("D_4couplings_photons_decay_raw")
+            if self.analysis == "PhotonCouplings_prodonly":
+                return discriminant("phistarZ2")
 
         if self.category == "VBFtagged":
             if self.analysis == "fa3":
@@ -502,6 +504,8 @@ class TemplatesFile(MultiEnum):
                 return discriminant("phistarZ1")
             if self.analysis == "PhotonCouplings":
                 return discriminant("D_4couplings_photons_VBFdecay_raw")
+            if self.analysis == "PhotonCouplings_prodonly":
+                return discriminant("D_4couplings_photons_VBF_raw")
 
         if self.category == "VHHadrtagged":
             if self.analysis == "fa3":
@@ -522,17 +526,19 @@ class TemplatesFile(MultiEnum):
                 return discriminant("phistarZ1")
             if self.analysis == "PhotonCouplings":
                 return discriminant("D_4couplings_photons_HadVHdecay_raw")
+            if self.analysis == "PhotonCouplings_prodonly":
+                return discriminant("D_4couplings_photons_HadVH_raw")
 
         if self.category == "Boosted":
-            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings", "PhotonCouplings_prodonly"):
                 return discriminant("ZZPt_boosted")
 
         if self.category == "VBF1jtagged":
-            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings", "PhotonCouplings_prodonly"):
                 return discriminant("ZZPt_VBF1jtagged")
 
         if self.category == "VHLepttagged":
-            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings", "PhotonCouplings_prodonly"):
                 return discriminant("ZZPt_VHLepttagged")
 
         assert False
@@ -611,15 +617,15 @@ class TemplatesFile(MultiEnum):
                 return discriminant("D_CP_HadVH_2bins"+JECappend)
 
         if self.category == "Boosted":
-            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings", "PhotonCouplings_prodonly"):
                 return discriminant("phistarZ2")
 
         if self.category == "VBF1jtagged":
-            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings", "PhotonCouplings_prodonly"):
                 return discriminant("phistarZ2")
 
         if self.category == "VHLepttagged":
-            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings"):
+            if self.analysis in ("fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT", "PhotonCouplings", "PhotonCouplings_prodonly"):
                 return discriminant("phistarZ2")
 
         assert False, self

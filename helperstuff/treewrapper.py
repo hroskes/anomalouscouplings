@@ -1355,6 +1355,23 @@ class TreeWrapperBase(Iterator):
       ("D_int_gg_decay_new", [0.]),
     )
 
+    binning_4couplings_photons_VBF = (
+      ("D_0minus_Zg_VBF", [.333, .667]),
+      ("D_CP_Zg_VBF_new", [0.]),
+      ("D_0hplus_Zg_VBF", [.333, .667]),
+      ("D_int_Zg_VBF_new", [0.]),
+      ("D_0minus_gg_VBF", [.333, .667]),
+      ("D_CP_gg_VBF_new", [0.]),
+      ("D_0hplus_gg_VBF", [.333, .667]),
+      ("D_int_gg_VBF_new", [0.]),
+    )
+    binning_4couplings_photons_VBF_JECUp = tuple((name+"_JECUp", bins) for name, bins in binning_4couplings_photons_VBF)
+    binning_4couplings_photons_VBF_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_photons_VBF)
+    binning_4couplings_photons_VBF_JESUp = tuple((name+"_JESUp", bins) for name, bins in binning_4couplings_photons_VBF)
+    binning_4couplings_photons_VBF_JESDn = tuple((name+"_JESDn", bins) for name, bins in binning_4couplings_photons_VBF)
+    binning_4couplings_photons_VBF_JERUp = tuple((name+"_JERUp", bins) for name, bins in binning_4couplings_photons_VBF)
+    binning_4couplings_photons_VBF_JERDn = tuple((name+"_JERDn", bins) for name, bins in binning_4couplings_photons_VBF)
+
     binning_4couplings_photons_VBFdecay = (
       ("D_0minus_Zg_VBFdecay", [.333, .667]),
       ("D_CP_Zg_VBF_new", [0.]),
@@ -1371,6 +1388,23 @@ class TreeWrapperBase(Iterator):
     binning_4couplings_photons_VBFdecay_JESDn = tuple((name+"_JESDn", bins) for name, bins in binning_4couplings_photons_VBFdecay)
     binning_4couplings_photons_VBFdecay_JERUp = tuple((name+"_JERUp", bins) for name, bins in binning_4couplings_photons_VBFdecay)
     binning_4couplings_photons_VBFdecay_JERDn = tuple((name+"_JERDn", bins) for name, bins in binning_4couplings_photons_VBFdecay)
+
+    binning_4couplings_photons_HadVH = (
+      ("D_0minus_Zg_HadVH", [.333, .667]),
+      ("D_CP_Zg_HadVH_new", [0.]),
+      ("D_0hplus_Zg_HadVH", [.333, .667]),
+      ("D_int_Zg_HadVH_new", [0.]),
+      #("D_0minus_gg_HadVH", [.333, .667]),
+      #("D_CP_gg_HadVH_new", [0.]),
+      #("D_0hplus_gg_HadVH", [.333, .667]),
+      #("D_int_gg_HadVH_new", [0.]),
+    )
+    binning_4couplings_photons_HadVH_JECUp = tuple((name+"_JECUp", bins) for name, bins in binning_4couplings_photons_HadVH)
+    binning_4couplings_photons_HadVH_JECDn = tuple((name+"_JECDn", bins) for name, bins in binning_4couplings_photons_HadVH)
+    binning_4couplings_photons_HadVH_JESUp = tuple((name+"_JESUp", bins) for name, bins in binning_4couplings_photons_HadVH)
+    binning_4couplings_photons_HadVH_JESDn = tuple((name+"_JESDn", bins) for name, bins in binning_4couplings_photons_HadVH)
+    binning_4couplings_photons_HadVH_JERUp = tuple((name+"_JERUp", bins) for name, bins in binning_4couplings_photons_HadVH)
+    binning_4couplings_photons_HadVH_JERDn = tuple((name+"_JERDn", bins) for name, bins in binning_4couplings_photons_HadVH)
 
     binning_4couplings_photons_HadVHdecay = (
       ("D_0minus_Zg_HadVHdecay", [.333, .667]),
@@ -1392,9 +1426,17 @@ class TreeWrapperBase(Iterator):
     def D_4couplings_photons_decay_raw(self):
       return self.D_4couplings_general_raw(*self.binning_4couplings_photons_decay)
     @MakeJetSystematics
+    def D_4couplings_photons_VBF_raw(self):
+      if self.notdijet: return -999
+      return self.D_4couplings_general_raw(*self.binning_4couplings_photons_VBF)
+    @MakeJetSystematics
     def D_4couplings_photons_VBFdecay_raw(self):
       if self.notdijet: return -999
       return self.D_4couplings_general_raw(*self.binning_4couplings_photons_VBFdecay)
+    @MakeJetSystematics
+    def D_4couplings_photons_HadVH_raw(self):
+      if self.notdijet: return -999
+      return self.D_4couplings_general_raw(*self.binning_4couplings_photons_HadVH)
     @MakeJetSystematics
     def D_4couplings_photons_HadVHdecay_raw(self):
       if self.notdijet: return -999
@@ -2491,6 +2533,13 @@ class TreeWrapper(TreeWrapperBase):
             "binning_4couplings_HadVHdecay_JERUp",
             "binning_4couplings_HadVHdecay_JERDn",
             "binning_4couplings_photons_decay",
+            "binning_4couplings_photons_VBF",
+            "binning_4couplings_photons_VBF_JECUp",
+            "binning_4couplings_photons_VBF_JECDn",
+            "binning_4couplings_photons_VBF_JESUp",
+            "binning_4couplings_photons_VBF_JESDn",
+            "binning_4couplings_photons_VBF_JERUp",
+            "binning_4couplings_photons_VBF_JERDn",
             "binning_4couplings_photons_VBFdecay",
             "binning_4couplings_photons_VBFdecay_JECUp",
             "binning_4couplings_photons_VBFdecay_JECDn",
@@ -2498,6 +2547,13 @@ class TreeWrapper(TreeWrapperBase):
             "binning_4couplings_photons_VBFdecay_JESDn",
             "binning_4couplings_photons_VBFdecay_JERUp",
             "binning_4couplings_photons_VBFdecay_JERDn",
+            "binning_4couplings_photons_HadVH",
+            "binning_4couplings_photons_HadVH_JECUp",
+            "binning_4couplings_photons_HadVH_JECDn",
+            "binning_4couplings_photons_HadVH_JESUp",
+            "binning_4couplings_photons_HadVH_JESDn",
+            "binning_4couplings_photons_HadVH_JERUp",
+            "binning_4couplings_photons_HadVH_JERDn",
             "binning_4couplings_photons_HadVHdecay",
             "binning_4couplings_photons_HadVHdecay_JECUp",
             "binning_4couplings_photons_HadVHdecay_JECDn",
@@ -2620,8 +2676,12 @@ class TreeWrapper(TreeWrapperBase):
             "D_4couplings_VBFdecay",
             "D_4couplings_HadVHdecay_raw",
             "D_4couplings_HadVHdecay",
+            "D_4couplings_photons_VBF_raw",
+            #"D_4couplings_photons_VBF",
             "D_4couplings_photons_VBFdecay_raw",
             #"D_4couplings_photons_VBFdecay",
+            "D_4couplings_photons_HadVH_raw",
+            #"D_4couplings_photons_HadVH",
             "D_4couplings_photons_HadVHdecay_raw",
             #"D_4couplings_photons_HadVHdecay",
         ]

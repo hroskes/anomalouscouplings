@@ -934,6 +934,7 @@ class Analysis(MyEnum):
                  EnumItem("PhotonCouplings"),
                  EnumItem("PhotonCouplings_decay"),
                  EnumItem("PhotonCouplings_STXS"),
+                 EnumItem("PhotonCouplings_prodonly"),
                 )
     def title(self, latex=False, superscript=None):
         if self.dimensions > 1: return self.fais[0].title(latex=latex, superscript=superscript)
@@ -1063,7 +1064,7 @@ class Analysis(MyEnum):
         if self == "fa3fa2fL1_EFT_STXS": return True
         if self in ("fa3", "fa2", "fL1", "fL1Zg"): return False
         if self in ("fa3_multiparameter", "fa3fa2fL1fL1Zg", "fa3fa2fL1fL1Zg_decay", "fa3fa2fL1fL1Zg_boosted", "fa3fa2fL1fL1Zg_morecategories", "fa3fa2fL1_EFT"): return False
-        if self in ("PhotonCouplings", "PhotonCouplings_decay"): return False
+        if self in ("PhotonCouplings", "PhotonCouplings_decay", "PhotonCouplings_prodonly"): return False
         if self == "PhotonCouplings_STXS": return True
         assert False, self
     @property
@@ -1071,7 +1072,7 @@ class Analysis(MyEnum):
         return "EFT" in str(self)
     @property
     def isphotoncouplings(self):
-        return self in ("PhotonCouplings", "PhotonCouplings_decay", "PhotonCouplings_STXS")
+        return self in ("PhotonCouplings", "PhotonCouplings_decay", "PhotonCouplings_STXS", "PhotonCouplings_prodonly")
     @property
     def categoryname(self):
         if self.isdecayonly: return "nocategorization"
@@ -1102,6 +1103,7 @@ class Analysis(MyEnum):
         if self == "fa3fa2fL1fL1Zg_morecategories": return True
         if self == "fa3fa2fL1_EFT": return True
         if self == "PhotonCouplings": return True
+        if self == "PhotonCouplings_prodonly": return True
         return False
     @property
     def doanalysis(self):
@@ -1126,6 +1128,7 @@ class Analysis(MyEnum):
             if self == "PhotonCouplings": return True
             if self == "PhotonCouplings_decay": return True
             if self == "PhotonCouplings_STXS": return True
+            if self == "PhotonCouplings_prodonly": return True
         if config.name ==  "savvas":
             if self == "fa3_multiparameter": return True
             if self == "fa3_multiparameter_nodbkg": return False
