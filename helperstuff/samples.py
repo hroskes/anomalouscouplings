@@ -1982,7 +1982,7 @@ class Sample(ReweightingSamplePlusWithFlavor):
             otherproduction = "200205_2017"
 
         if self.production == "GEN_210702" and self.productionmode == "qqZZ":
-            otherproduction = "GEN_210601"
+            otherproduction = "GEN_211011"
 
         if otherproduction is None: return None
 

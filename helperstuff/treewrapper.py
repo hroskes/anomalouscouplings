@@ -1564,7 +1564,7 @@ class TreeWrapper(TreeWrapperBase):
                 self.overallEventWeight = t.overallEventWeight
 
             if self.doSIP and max(t.LepSIP) > 4: self.overallEventWeight = 0
-            if self.doZ2Mass and t.Z2Mass < 12: self.overallEventWeight = 0
+            if self.doZ2Mass and t.Z2Mass < 4: self.overallEventWeight = 0
 
             self.flavor = abs(t.Z1Flav*t.Z2Flav)
 

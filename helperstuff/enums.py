@@ -1175,6 +1175,7 @@ class Production(MyEnum):
                  EnumItem("GEN_210514"),
                  EnumItem("GEN_210601"),
                  EnumItem("GEN_210702"),
+                 EnumItem("GEN_211011"),
                 )
     def __cmp__(self, other):
         return cmp(str(self), str(type(self)(other)))
@@ -1204,6 +1205,11 @@ class Production(MyEnum):
                 assert False
             elif config.host == "MARCC":
                 return "/work-zfs/lhc/GENtrees/210702_LHEs_photons"
+        if self == "GEN_211011":
+            if config.host == "lxplus":
+                assert False
+            elif config.host == "MARCC":
+                return "/work-zfs/lhc/GENtrees/211011_photons"
         if self == "190821_2016":
             if config.host == "MARCC":
                 return "/work-zfs/lhc/CJLSTtrees/190821_fixjetid/MC_2016"
@@ -1318,6 +1324,7 @@ class Production(MyEnum):
         if self == "GEN_210514": return 2018
         if self == "GEN_210601": return 2018
         if self == "GEN_210702": return 2018
+        if self == "GEN_211011": return 2018
         assert False, self
     @property
     def usenewobjects(self):
